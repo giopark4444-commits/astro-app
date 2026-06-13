@@ -499,8 +499,17 @@ prioriza así:
   llega después. Así el profesional tiene su lámina aunque la prosa evolutiva aún no esté completa.
 - La **traducción ES↔EN** se gestiona como par desde el inicio (no se escribe el doble a ciegas).
 
-Decisión de método de autoría (a confirmar): ver pregunta abierta sobre cómo se redacta este corpus
-(100% a mano vs. borrador asistido + edición humana) — afecta el tiempo de Fase 1.
+**Método de autoría del corpus (decidido 2026-06-13): borrador IA + edición humana.** Se genera
+cada pieza con IA a partir de los datos astrológicos/numerológicos y de esta guía de voz, y luego
+**una persona la edita y aprueba** antes de guardarla como **plantilla fija** ES/EN. Matices:
+- **No es la IA en vivo de Fase 4.** Aquí la IA es una **herramienta de autoría offline**; el
+  usuario final nunca ve texto generado al vuelo en Fase 1 — ve plantillas ya curadas. (La lectura
+  IA personalizada por usuario sigue siendo Fase 4.)
+- **Control de calidad editorial (porque "la voz es el producto"):** rúbrica de voz + revisión
+  humana de cada pieza para que **no suene genérica** y respete el ADN intenso-yóguico. Sin este
+  paso, el diferenciador se pierde.
+- **Anti-plagio:** las referencias de Gio (Astrodienst) son de terceros; el borrador IA parte de
+  la guía de voz y los datos, **no** del texto de referencia. La edición verifica originalidad.
 
 ### Mapeo a fases
 
