@@ -73,7 +73,10 @@ Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase
    También se marca el estado dignidad/debilidad (domicilio, exilio, exaltación, caída).
 4. **Sección Carta Astral:** rueda interactiva + tabla de posiciones + balance de elementos +
    interpretaciones por planeta/casa/aspecto, escritas en la **voz de la casa** (ver sección 9):
-   estructura "Energía fluida / Energía no fluida / Tips" (plantillas propias ES/EN).
+   estructura "Energía fluida / Energía no fluida / Tips" (plantillas propias ES/EN). La sección
+   incluye un **selector de tipo de carta** (ver "Cartas derivadas" en sección 9): en Fase 1 la
+   **Natal**; las revoluciones y técnicas predictivas se suman en fase posterior reusando la
+   misma rueda y motor.
 5. **Motor de numerología:** camino de vida, destino/expresión, alma, personalidad,
    año personal, números maestros (11, 22, 33).
 6. **Sección Numerología:** números clave con sus interpretaciones (plantillas propias ES/EN).
@@ -398,8 +401,7 @@ objetivo por sistema:
 
 - **Carta natal:** 14+ puntos (10 planetas + Quirón, Nodos, Lilith, MC/IC) con signo, casa,
   grado y dignidad; tabla de aspectos con orbes; triple balance (elementos, modalidades,
-  polaridad) + hemisferios; planeta/configuración dominante. Más adelante: progresiones y
-  tránsitos.
+  polaridad) + hemisferios; planeta/configuración dominante.
 - **Numerología:** núcleo (Camino de Vida, Destino, Alma, Personalidad, Día) + Pináculos por
   etapas + Desafíos + Año/Mes/Día personal + Madurez + Equilibrio + lecciones y deudas kármicas.
 - **Ba Zi (Fase 5):** Cuatro Pilares con tronco 干, rama 支, Diez Dioses 十神, troncos ocultos
@@ -407,6 +409,22 @@ objetivo por sistema:
   balance 五行, Pilares de Suerte 大運.
 - **Saju (Fase 5):** Cuatro Columnas con 천간/지지, 십신, 지장간, 신강·신약 + 용신, balance 오행,
   distribución de Diez Dioses, ciclos 대운; tradición interpretativa coreana.
+
+**Cartas derivadas y técnicas predictivas (la Carta no es solo la natal):**
+La sección Carta Astral tiene un **selector de tipo de carta**. Todas usan la misma rueda
+interactiva y el mismo motor de efemérides (solo cambia el momento/método de cálculo):
+
+- **Natal** — la foto de nacimiento (Fase 1, base de todo).
+- **Revolución Solar** — carta del año, recalculada cada cumpleaños (Sol vuelve a su grado natal).
+- **Revolución Lunar** — carta del mes (Luna vuelve a su grado natal); más detallada y de corto plazo.
+- **Retornos planetarios** — Retorno de Saturno (~29 años), de Júpiter (~12), etc.: hitos vitales.
+- **Progresiones secundarias** — evolución simbólica "un día = un año".
+- **Tránsitos** — dónde está el cielo hoy sobre la carta natal (base del horóscopo de Fase 2).
+- **Sinastría / carta compuesta** — para compatibilidad (Fase 3).
+
+Fase 1 construye la **Natal**. El resto se añade en fase posterior (las interpretaciones largas
+de la Revolución Solar ya están mapeadas a Fase 4); el motor de Fase 1 se diseña para poder
+calcular estas cartas derivadas sin rehacerlo.
 
 La consistencia visual es por **identidad cultural**: occidental/numerología siguen el tema
 (Aurora/Observatorio); el Ba Zi usa paleta roja/dorada china; el Saju, jade/verde coreana.
