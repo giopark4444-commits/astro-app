@@ -111,6 +111,14 @@ Control aparte en Ajustes con dos modos:
 - **🎨 Según el tema:** la rueda se viste con el tema activo (clara con Aurora, neón con
   Cósmico, dorada con Observatorio).
 
+### Onboarding (estilo elegido: Ceremonial)
+
+La captura de datos de nacimiento es **paso a paso** (una pregunta por pantalla), y cada paso
+lleva una **cabecera nocturna estrellada** (un "ritual") con el campo abajo en claro — combina la
+magia del lienzo nocturno con la claridad de un formulario. Pasos: nombre → fecha → hora → lugar
+(con autocompletado + lat/long + zona horaria detectada) → género. Indicador de progreso por
+puntos. Si no se conoce la hora, paso para marcar "hora desconocida".
+
 ### Navegación
 
 Barra inferior de 5 secciones. En la Fase 1 están activas: **Carta**, **Números**, **Ajustes/Perfil**.
@@ -287,6 +295,9 @@ siga este mismo ADN. Imágenes de referencia: `~/Downloads/IMG_7517…7528.jpg` 
 - **Astrología evolutiva:** el mapa se lee como guía de crecimiento y **propósito del alma**, no
   como predicción de eventos ("los aprendizajes que el alma eligió experimentar").
 - Tono **compasivo, cálido, espiritual y empoderador**; habla de tú al usuario.
+- **Registro: voz intensa/espiritual** (decisión de Gio). Se usa lenguaje místico-yóguico pleno
+  ("tu alma vino a…", ego vs alma, sánscrito como *santosha*/*svadhyaya*), no la versión
+  simplificada. Es la voz de tus referencias, sin diluir.
 - **Mezcla yóguica** (sello distintivo): referencias a Yoga Sutras, sánscrito (svadhyaya,
   santosha, aparigraha), meditación y prácticas conscientes en los consejos.
 - Enmarca siempre como **autoconocimiento**, no como verdad literal ni consejo médico/financiero.
