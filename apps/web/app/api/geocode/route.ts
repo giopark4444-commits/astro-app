@@ -3,7 +3,7 @@ import { parseOpenMeteo } from "@/lib/geocode";
 
 export async function GET(request: NextRequest) {
   const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
-  if (q.length < 2) return NextResponse.json({ results: [] });
+  if (q.length < 2 || q.length > 200) return NextResponse.json({ results: [] });
   const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=es&format=json`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });

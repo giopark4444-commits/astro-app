@@ -21,5 +21,6 @@ describe("parseOpenMeteo", () => {
   it("devuelve [] si no hay resultados o falta tz", () => {
     expect(parseOpenMeteo({})).toEqual([]);
     expect(parseOpenMeteo({ results: [{ name: "X", latitude: 1, longitude: 2 }] })).toEqual([]);
+    expect(parseOpenMeteo({ results: [{ name: 42, latitude: 1, longitude: 2, timezone: "UTC" }] })).toEqual([]);
   });
 });
