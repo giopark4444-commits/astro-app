@@ -3,6 +3,10 @@ import type { ReductionTrace } from "./types";
 export const MASTER_NUMBERS: readonly number[] = [11, 22, 33];
 export const KARMIC_DEBTS: readonly number[] = [13, 14, 16, 19];
 
+export function isMaster(n: number): boolean {
+  return MASTER_NUMBERS.includes(n);
+}
+
 export function digitsSum(n: number): number {
   return Math.abs(Math.trunc(n))
     .toString()
@@ -40,7 +44,7 @@ export function reduceWithTrace(n: number, opts: ReduceOptions = {}): ReductionT
   return {
     steps,
     value: current,
-    isMaster: MASTER_NUMBERS.includes(current),
+    isMaster: isMaster(current),
     ...(karmicDebt ? { karmicDebt } : {}),
   };
 }

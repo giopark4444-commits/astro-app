@@ -1,5 +1,5 @@
 import type { BirthDate, PersonalCycles, Pinnacle, Challenge } from "./types";
-import { reduce, reduceWithTrace } from "./reduction";
+import { reduce, reduceWithTrace, isMaster } from "./reduction";
 import { lifePath } from "./core-numbers";
 
 const single = (n: number) => reduce(n, { preserveMasters: false });
@@ -31,7 +31,7 @@ export function pinnacles(birth: BirthDate): Pinnacle[] {
   const firstEnd = 36 - single(lifePath(birth).value);
   const make = (value: number, startAge: number, endAge: number | null): Pinnacle => ({
     value,
-    isMaster: [11, 22, 33].includes(value),
+    isMaster: isMaster(value),
     startAge,
     endAge,
   });

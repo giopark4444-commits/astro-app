@@ -9,7 +9,7 @@ export {
 } from "./numerology/core-numbers";
 export { personalCycles, pinnacles, challenges } from "./numerology/cycles";
 export { inclusionTable, karmicLessons, hiddenPassion } from "./numerology/karmic";
-export { reduce, reduceWithTrace, digitsSum } from "./numerology/reduction";
+export { reduce, reduceWithTrace, digitsSum, isMaster } from "./numerology/reduction";
 
 // Constantes de astrología (para los planes 2+)
 export * from "./constants/astrology";

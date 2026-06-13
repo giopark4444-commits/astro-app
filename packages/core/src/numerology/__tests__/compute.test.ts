@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { computeNumerology } from "../compute";
 
+
 describe("computeNumerology (fixture Gio)", () => {
   const result = computeNumerology({
     fullName: "Giovanni Andres Park",
@@ -31,5 +32,24 @@ describe("computeNumerology (fixture Gio)", () => {
 
   it("calcula el año personal 2026", () => {
     expect(result.cycles.personalYear.value).toBe(8);
+  });
+});
+
+describe("computeNumerology validación de entrada", () => {
+  const base = { fullName: "John Doe", birthDate: { year: 1990, month: 6, day: 15 } };
+  it("rechaza un mes fuera de rango", () => {
+    expect(() => computeNumerology({ ...base, birthDate: { year: 1990, month: 13, day: 15 } })).toThrow();
+  });
+  it("rechaza un día fuera de rango", () => {
+    expect(() => computeNumerology({ ...base, birthDate: { year: 1990, month: 6, day: 40 } })).toThrow();
+  });
+  it("rechaza un año no positivo", () => {
+    expect(() => computeNumerology({ ...base, birthDate: { year: 0, month: 6, day: 15 } })).toThrow();
+  });
+  it("rechaza un nombre sin letras", () => {
+    expect(() => computeNumerology({ ...base, fullName: "   123!!  " })).toThrow();
+  });
+  it("acepta una entrada válida (no lanza)", () => {
+    expect(() => computeNumerology(base)).not.toThrow();
   });
 });

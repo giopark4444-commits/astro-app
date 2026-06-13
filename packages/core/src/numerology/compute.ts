@@ -2,8 +2,26 @@ import type { NumerologyInput, NumerologyResult } from "./types";
 import { lifePath, expression, soulUrge, personality, birthday, maturity } from "./core-numbers";
 import { personalCycles, pinnacles, challenges } from "./cycles";
 import { inclusionTable, karmicLessons, hiddenPassion } from "./karmic";
+import { nameLetters } from "./name";
+
+function assertValidInput(input: NumerologyInput): void {
+  const { year, month, day } = input.birthDate;
+  if (!Number.isInteger(month) || month < 1 || month > 12) {
+    throw new RangeError(`Mes inválido: ${month} (debe ser 1-12)`);
+  }
+  if (!Number.isInteger(day) || day < 1 || day > 31) {
+    throw new RangeError(`Día inválido: ${day} (debe ser 1-31)`);
+  }
+  if (!Number.isInteger(year) || year < 1) {
+    throw new RangeError(`Año inválido: ${year}`);
+  }
+  if (nameLetters(input.fullName).length === 0) {
+    throw new Error("El nombre debe contener al menos una letra.");
+  }
+}
 
 export function computeNumerology(input: NumerologyInput): NumerologyResult {
+  assertValidInput(input);
   const { fullName, birthDate } = input;
   const asOf = input.asOf ?? todayCivil();
 
