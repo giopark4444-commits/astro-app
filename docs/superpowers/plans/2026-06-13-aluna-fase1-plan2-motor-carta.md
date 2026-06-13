@@ -6,6 +6,8 @@
 
 **Architecture:** Dos capas. (1) **Dominio puro** en `@aluna/core` (`astrology/`): funciones isomórficas, sin dependencias nativas, que operan sobre longitudes ya calculadas — signos/grados, dignidades, aspectos, distribución, patrones, casas. Totalmente TDD con datos sintéticos. (2) **`@aluna/ephemeris`** (paquete Node): envuelve **Swiss Ephemeris** vía `sweph` + zona horaria histórica vía `luxon`, calcula las posiciones/casas crudas y **ensambla** la carta usando las funciones puras de `@aluna/core`. Validado contra la carta de Gio.
 
+> **Compatibilidad móvil (App Store / Play Store):** esta división NO es casual — `@aluna/core` es RN-safe (se usa en la app Expo), y `@aluna/ephemeris` (addon nativo) corre **solo en el servidor**; el móvil obtiene la carta por API. Ver "REGLA ARQUITECTÓNICA" en la sección 4 del spec. En este plan: `@aluna/core` no puede importar `node:*` ni nada nativo; `@aluna/ephemeris` sí (es servidor).
+
 **Tech Stack:** TypeScript strict, Vitest, `sweph` (Swiss Ephemeris 2.10 binding), `luxon` (IANA tz histórica), archivos de efemérides `.se1` (DE431, rango 1800–2400).
 
 ---

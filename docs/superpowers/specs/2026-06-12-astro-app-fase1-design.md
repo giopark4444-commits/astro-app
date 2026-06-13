@@ -263,6 +263,19 @@ carta y encuentra todo esto correcto y configurable, la app gana su confianza.
 **Principio:** toda la lógica de cálculo vive en el backend (una sola implementación,
 resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan resultados.
 
+**Compatibilidad móvil (App Store / Play Store) — REGLA ARQUITECTÓNICA (Gio, 2026-06-13):** Aluna
+irá a las tiendas como app Expo/React Native, así que el código se separa por **dónde puede correr**:
+- **`@aluna/core`** (numerología + dominio puro de la carta: signos, dignidades, aspectos,
+  distribución, patrones, render de la rueda) es **TypeScript isomórfico, SIN dependencias nativas
+  ni de Node** → se importa **tal cual en la app móvil** y en web. Debe permanecer RN-safe siempre
+  (nada de `node:*`, addons nativos, ni APIs solo-Node).
+- **`@aluna/ephemeris`** (Swiss Ephemeris vía `sweph`, addon nativo de Node) corre **SOLO en el
+  servidor** (un addon nativo no funciona en iOS/Android). El móvil **nunca lo empaqueta**: pide la
+  carta calculada al backend por API y la pinta con `@aluna/core`.
+- Regla para todos los planes: cualquier dependencia nativa/solo-servidor va en paquetes de
+  servidor, jamás en algo que importe la app móvil. (Metro/Expo transpila los paquetes de workspace;
+  se configura en el plan del cliente móvil.)
+
 ### Componentes y responsabilidades
 
 | Componente | Qué hace | Depende de |
