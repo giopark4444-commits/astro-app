@@ -150,6 +150,50 @@ líneas de aspectos (duros en rojo/rosa, armónicos en azul/verde). Interactiva:
 abre su interpretación. Tabs Planetas / Casas / Aspectos. Balance de elementos
 (fuego/tierra/aire/agua) en barras.
 
+### Lámina técnica / "vista profesional" (decisión clave: la app debe servir a astrólogos)
+
+Posicionamiento estratégico (definido por Gio con sus referencias de Astrodienst): la herramienta
+debe ser **útil para quien YA sabe leer una carta**, no solo para principiantes que consumen textos.
+El plan de difusión es promocionarla en redes con astrólogos y gente que ya practica. Por eso la
+**versión extendida/detallada** de la Carta Astral expone, junto a la rueda, los mismos datos
+crudos que un astrólogo profesional usa (estilo Astrodienst), además de las interpretaciones. Son
+tres láminas/tablas, todas tocables para abrir profundidad:
+
+1. **Tabla de posiciones:** cada cuerpo (☉→♇ + Quirón, Nodos, Lilith) con **signo, grado, minuto
+   y segundo**, casa, movimiento retrógrado, y **dignidad** escrita (domicilio/exilio/exaltación/
+   caída). Incluye **AC/DC, MC/IC y las cúspides de las 12 casas** con sus grados exactos.
+2. **Cuadro de distribución (modalidad × elemento):** rejilla Cardinal/Fijo/Mutable × Fuego/Tierra/
+   Aire/Agua con cada planeta en su celda, más **polaridad** (yin/yang), **hemisferios** (N/S, E/O)
+   y **cuadrantes**, y el **planeta/configuración dominante**. Da el temperamento de un vistazo.
+3. **Aspectario (rejilla triangular):** matriz que cruza cada planeta con cada otro mostrando el
+   **aspecto exacto, el orbe y si es aplicativo/separativo (A/S)**. Es la herramienta central de
+   lectura profesional. Configurable: tipos de aspecto activos y orbes (mayores/menores).
+
+Estas láminas viven en el **nivel "Detallado"** (la vista "Resumen" las oculta para no abrumar al
+principiante); ver "Resumen ⇄ Detallado" en sección 8. Mismas láminas para todas las cartas
+derivadas (Natal, Revolución Solar, etc.), porque comparten motor y rueda.
+
+**Credibilidad ante profesionales (requisito no negociable):** como se promociona con astrólogos
+que sí saben leer, la carta extendida no puede tener datos incorrectos ni faltantes — un error
+expone a Gio. Por eso: (a) precisión de grado/minuto vía Swiss Ephemeris (efemérides JPL),
+zona horaria histórica y casas correctas; (b) la lámina técnica debe estar **completa**: nada de
+"casi". Lista mínima de lo que un astrólogo espera encontrar y poder configurar:
+
+- Los **10 planetas + Quirón, Nodo Norte/Sur, Lilith (Luna Negra)**; opción de Parte de la
+  Fortuna, Vértex y asteroides principales (Ceres/Palas/Juno/Vesta) en avanzado.
+- **Sistema de casas configurable** (Placidus por defecto; Koch, Casas Iguales, Whole Sign,
+  Regiomontanus, Porfirio) — los astrólogos discuten por esto, debe poder cambiarse.
+- **Posiciones exactas** con retrogradación, velocidad, y **dignidades esenciales**
+  (domicilio/exilio/exaltación/caída); declinaciones y **paralelos/contraparalelos** en avanzado.
+- **Aspectos configurables:** mayores (☌☍△□⚹) y menores (quincuncio, semisextil, sesquicuadratura,
+  semicuadratura, quintil), con **orbes ajustables por aspecto** y aplicativo/separativo.
+- **Triple balance** (elemento/modalidad/polaridad), hemisferios, cuadrantes, planeta dominante,
+  y **configuraciones/patrones** (stellium, T-cuadrada, gran trígono, yod, cometa…).
+- Datos de cabecera verificables: fecha/hora local, **Tiempo Universal, Tiempo Sideral**, lat/long.
+
+Esta lista es la vara para que la herramienta "no haga pasar vergüenza": si un profesional abre la
+carta y encuentra todo esto correcto y configurable, la app gana su confianza.
+
 ---
 
 ## 4. Arquitectura
