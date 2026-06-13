@@ -203,7 +203,7 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
   lat, long, zona horaria, ¿hora desconocida?, **género gramatical (fem/masc, obligatorio)**.
 - `charts` — carta calculada cacheada (FK a birth_profile + sistema de casas + JSON resultado).
 - `settings` — preferencias por cuenta: tema, estilo de carta, idioma, sistema de casas,
-  **estilo de lectura** (por defecto: evolutivo-yóguico).
+  **estilo de lectura** (por defecto: evolutivo-yóguico), **nivel de detalle** (resumen/detallado).
 - `interpretations` — biblioteca de textos, indexada por `(posición, estilo, idioma, género)`.
 - **RLS:** cada usuario solo accede a sus propios perfiles, cartas y ajustes.
 
@@ -355,6 +355,21 @@ Cada perfil **elige género gramatical al crearse (femenino / masculino)** — c
 Las interpretaciones tienen variante por género. (Se podría añadir "neutro" más adelante sin
 romper el modelo.) Clave de un texto de interpretación:
 `(posición, estilo, idioma, género)`.
+
+### Información progresiva (principio transversal de toda la app)
+
+Patrón de UX para todas las secciones (carta, numerología, Ba Zi, Saju…):
+
+- **Resumen por defecto:** vista limpia, fácil de leer de un vistazo.
+- **Interruptor "Detallado":** añade una línea de contexto a cada tarjeta/fila sin abrir nada.
+  Su estado se recuerda por usuario (preferencia en `settings`).
+- **Tap-to-expand (deep dive):** tocar cualquier elemento (un número, un planeta, un pilar,
+  un aspecto) abre una **hoja inferior** con su lectura profunda completa, estructurada:
+  *Tu cálculo* (cómo se derivó con los datos del usuario) → *El arquetipo* → *Energía fluida*
+  → *Energía no fluida* → *Tu práctica* (en la voz intensa).
+
+Esto reconcilia "la más completa" con "no abrumar": el principiante ve un resumen; quien quiere
+todo, toca y profundiza sin límite.
 
 ### Nivel de profundidad (decisión de Gio: máximo detalle)
 
