@@ -3,6 +3,7 @@ import sweph from "sweph";
 import { initEphemeris } from "./init";
 import { normalizeAngle } from "@aluna/core";
 import type { HouseSystem, HousesResult } from "@aluna/core";
+import { applySiderealMode } from "./sidereal";
 
 const HSYS: Record<HouseSystem, string> = {
   placidus: "P",
@@ -20,8 +21,12 @@ export function computeHouses(
   longitude: number,
   system: HouseSystem,
   sidereal: boolean,
+  ayanamsha?: string,
 ): HousesResult {
   initEphemeris();
+  if (sidereal) {
+    applySiderealMode(ayanamsha);
+  }
   const flags = sidereal ? sweph.constants.SEFLG_SIDEREAL : 0;
   const res = sweph.houses_ex2(julianDayUt, flags, latitude, longitude, HSYS[system]);
   if (res.flag !== sweph.constants.OK) {

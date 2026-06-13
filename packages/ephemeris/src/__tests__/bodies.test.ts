@@ -10,6 +10,23 @@ function lonOf(bodies: ReturnType<typeof computeBodies>, key: string): number {
   return bodies.find((b) => b.body === key)!.longitude;
 }
 
+describe("computeBodies sideral (Lahiri)", () => {
+  it("desplaza el Sol por el ayanamsha (~23.6° en 1984 -> Capricornio)", () => {
+    const sid = computeBodies(GIO_JD.julianDayEt, { sidereal: true });
+    const sunSid = sid.find((b) => b.body === "sun")!.longitude;
+    // tropical 315.96 - ayanamsha Lahiri (~23.6° en 1984) ≈ 292.3° (Capricornio)
+    expect(sunSid).toBeGreaterThan(291);
+    expect(sunSid).toBeLessThan(294);
+  });
+  it("un ayanamsha distinto da un resultado distinto", () => {
+    const lahiri = computeBodies(GIO_JD.julianDayEt, { sidereal: true, ayanamsha: "lahiri" })
+      .find((b) => b.body === "sun")!.longitude;
+    const fagan = computeBodies(GIO_JD.julianDayEt, { sidereal: true, ayanamsha: "fagan_bradley" })
+      .find((b) => b.body === "sun")!.longitude;
+    expect(Math.abs(lahiri - fagan)).toBeGreaterThan(0.3); // difieren por ~0.9°
+  });
+});
+
 describe("computeBodies (carta de Gio, tropical)", () => {
   const bodies = computeBodies(GIO_JD.julianDayEt, { nodeType: "true", lilithType: "mean" });
 

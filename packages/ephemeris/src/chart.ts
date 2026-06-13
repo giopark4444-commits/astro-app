@@ -22,8 +22,16 @@ export function computeChart(input: ChartInput): ChartResult {
     nodeType: input.nodeType ?? "true",
     lilithType: input.lilithType ?? "mean",
     sidereal,
+    ...(input.ayanamsha !== undefined && { ayanamsha: input.ayanamsha }),
   });
-  const houses = computeHouses(jd.julianDayUt, input.latitude, input.longitude, system, sidereal);
+  const houses = computeHouses(
+    jd.julianDayUt,
+    input.latitude,
+    input.longitude,
+    system,
+    sidereal,
+    input.ayanamsha,
+  );
 
   const bodies: BodyPosition[] = raw.map((b) => {
     const sp = signOfLongitude(b.longitude);
@@ -47,7 +55,10 @@ export function computeChart(input: ChartInput): ChartResult {
     { key: "ascendant", longitude: houses.ascendant },
     { key: "midheaven", longitude: houses.midheaven },
   ];
-  const aspects = detectAspects(aspectPoints);
+  const ANGLE_KEYS = new Set(["ascendant", "midheaven"]);
+  const aspects = detectAspects(aspectPoints).filter(
+    (a) => !(ANGLE_KEYS.has(a.a) && ANGLE_KEYS.has(a.b)),
+  );
 
   const planetSubset = bodies
     .filter((b) => DISTRIBUTION_BODIES.has(b.body))

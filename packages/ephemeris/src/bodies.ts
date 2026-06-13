@@ -2,11 +2,13 @@
 import sweph from "sweph";
 import { initEphemeris } from "./init";
 import { normalizeAngle } from "@aluna/core";
+import { applySiderealMode } from "./sidereal";
 
 export interface BodiesOptions {
   nodeType?: "true" | "mean"; // por defecto true
   lilithType?: "mean" | "oscu"; // por defecto mean
   sidereal?: boolean; // por defecto false (tropical)
+  ayanamsha?: string; // por defecto "lahiri" cuando sidereal=true
 }
 
 export interface RawBody {
@@ -27,7 +29,7 @@ export function computeBodies(julianDayEt: number, opts: BodiesOptions = {}): Ra
   initEphemeris();
   const sidereal = opts.sidereal ?? false;
   if (sidereal) {
-    sweph.set_sid_mode(sweph.constants.SE_SIDM_LAHIRI, 0, 0);
+    applySiderealMode(opts.ayanamsha);
   }
   let flags = sweph.constants.SEFLG_SWIEPH | sweph.constants.SEFLG_SPEED;
   if (sidereal) flags |= sweph.constants.SEFLG_SIDEREAL;
