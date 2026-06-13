@@ -448,9 +448,10 @@ Navegación (decisión de Gio, modelo Ⓑ de barra fija):
      palanca. Son el **mismo sistema** (Cuatro Pilares) en dos tradiciones de interpretación.
 - **Perfil:** avatar arriba a la derecha que abre un menú (bottom sheet) con lo **complementario
   y transversal**: cambiar de persona, **Compatibilidad** (persona A + B → sinastría + numerología
-  comparada, Fase 3), ver cualquier sección por día/semana/mes/año, **preguntar algo específico**
-  ("¿cómo va mi amor esta semana?"), Brújula/guía, Diario & Manifestación, Calendario lunar, y
-  Ajustes.
+  comparada, Fase 3), **Las Tradiciones** (sección educativa que presenta cada sistema con su
+  nombre correcto, origen, historia y especialidad — ver sección 10), ver cualquier sección por
+  día/semana/mes/año, **preguntar algo específico** ("¿cómo va mi amor esta semana?"), Brújula/guía,
+  Diario & Manifestación, Calendario lunar, y Ajustes.
 - Las **sub-secciones de cada mundo** van como tabs/palancas **arriba** (contextuales), no en la
   barra inferior (que permanece estable).
 
@@ -563,12 +564,13 @@ Implicación: las interpretaciones se guardan **indexadas por `estilo`** (ademá
 género), para poder sumar estilos sin rehacer nada. La biblioteca de textos se diseña con esa
 clave compuesta desde el día uno.
 
-### Género
+### Género y perspectiva
 
-Cada perfil **elige género gramatical al crearse (femenino / masculino)** — campo obligatorio.
-Las interpretaciones tienen variante por género. (Se podría añadir "neutro" más adelante sin
-romper el modelo.) Clave de un texto de interpretación:
-`(posición, estilo, idioma, género)`.
+Cada perfil **elige género gramatical al crearse (femenino / masculino / neutro)** — campo
+obligatorio, neutro disponible desde el inicio. Además, el texto distingue **perspectiva** (2ª
+persona si el perfil es "yo"; 3ª persona si es otra persona — ver "Adaptación obligatoria"). Género
+y perspectiva **no son filas separadas**: la plantilla lleva variables gramaticales y se resuelven
+al renderizar. La clave de una plantilla es `(tipo, clave, estilo, idioma)`.
 
 ### Principio rector: una app para "jugar y explorar"
 
@@ -678,3 +680,49 @@ La consistencia visual es por **identidad cultural**: occidental/numerología si
 
 La calidad y personalidad de estos textos **es** el producto. La meta es que un informe de la app
 se sienta tan rico y humano como las referencias de Gio — esa es la vara de medir.
+
+---
+
+## 10. "Las Tradiciones" — sección educativa del Perfil (idea de Gio)
+
+En el menú de Perfil va una sección **"Las Tradiciones"** que presenta cada sistema con su **nombre
+correcto**, **origen e historia**, **en qué se basa** y **en qué se especializa** — con un tono que
+**engancha** (no enciclopédico). Da prestigio, educa y convierte al curioso en creyente. Cada sistema
+es una **tarjeta** que se abre. Copy semilla (a pulir con la voz; la versión final también ES/EN):
+
+**🌌 Carta Astral · Astrología Occidental (tropical helenística).** Hace más de 4.000 años, en las
+llanuras de **Babilonia**, los sacerdotes anotaban dónde estaban los planetas al nacer un rey. La
+**Grecia** de Ptolomeo (*Tetrabiblos*, s. II) lo convirtió en arte. Tu carta es la **fotografía
+exacta del cielo en el instante de tu primer respiro**: Sol, Luna y planetas congelados sobre 12
+signos y 12 casas. No predice tu futuro — dibuja el **mapa de tu alma**: tus dones, tus sombras,
+tu propósito. Se especializa en el autoconocimiento profundo: *por qué eres como eres*.
+
+**🔢 Numerología · Pitagórica.** «Todo es número», dijo **Pitágoras** hace 2.500 años: para él el
+universo vibraba en matemática sagrada (con raíces aún más antiguas, caldeas y hebreas). Toma tu
+**nombre y tu fecha de nacimiento** y los reduce a cifras vivas —del 1 al 9, más los maestros 11,
+22 y 33—, cada una una frecuencia. Se especializa en tu **propósito y tus ciclos**: qué viniste a
+hacer y en qué momento de tu vida estás.
+
+**☀️ Horóscopo Zodiacal · por signo solar.** El más famoso del mundo: tu signo. Se popularizó en
+las columnas de periódico del **siglo XX**, pero bebe de la astrología milenaria. Mira **dónde
+está el cielo hoy** respecto a tu signo y te da una guía rápida. Es la **brújula ligera** del día.
+
+**🐉 Horóscopo Chino · Shēngxiào (生肖), el zodiaco de los animales.** En **China**, hace más de
+2.000 años, nació una rueda de **12 animales** (Rata, Buey, Tigre…) cruzada con los **5 elementos**
+(madera, fuego, tierra, metal, agua) en un ciclo de 60 años. Tu animal, según tu año, revela tu
+**naturaleza** y la fortuna de cada año. La pizca popular de un sistema mucho más hondo: el Ba Zi.
+
+**☯️ Ba Zi · Cuatro Pilares del Destino (八字 / 四柱).** Si el horóscopo chino es la pizca, el Ba Zi
+es el océano. Sistematizado en la dinastía **Song** (Xu Ziping), es la **carta natal china**:
+cuatro "pilares" —año, mes, día y hora—, cada uno un **tronco celeste 天干** y una **rama terrestre
+地支**, tejidos con los cinco elementos. Tu **Maestro del Día** revela tu esencia. Se especializa en
+leer tu **destino completo**: tu fuerza, tu equilibrio y los grandes ciclos de suerte de tu vida.
+
+**🌿 Saju · 사주 (四柱), los Cuatro Pilares coreanos.** *Saju Myeongri* (사주명리) es la lectura
+**coreana** de los mismos Cuatro Pilares — el mismo cielo, leído con alma coreana. Tan arraigado
+que en **Corea** aún se consulta antes de un matrimonio o un negocio. Parte de tus cuatro pilares
+(천간 troncos, 지지 ramas) para revelar tu **temperamento y tu camino**, con tradición propia.
+
+Nota: estas tarjetas pueden estar **desde Fase 1** (es solo contenido), aunque el sistema que
+describen llegue en su fase — así el usuario conoce el universo completo desde el principio y se
+"engancha" con lo que vendrá.
