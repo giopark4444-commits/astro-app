@@ -1,0 +1,29 @@
+.wrap { position: relative; padding: 24px 20px 96px; }
+.sky { position: absolute; inset: 0 0 auto; height: 280px; pointer-events: none; z-index: 0; }
+
+.greet { position: relative; z-index: 1; margin-bottom: 26px; }
+.hello { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 4px; }
+.name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+
+.section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 12px; }
+.lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+.tile {
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 116px;
+  padding: 15px;
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface);
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
+.tileIcon { color: var(--acc); display: inline-flex; }
+.tileName { margin-top: auto; font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+.soon { opacity: 0.55; }
+.badge {
+  position: absolute; top: 13px; right: 13px;
+  font-size: 8.5px; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--soft); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px;
+}

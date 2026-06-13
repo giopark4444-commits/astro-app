@@ -7,7 +7,7 @@ import styles from "./bottom-nav.module.css";
 
 const ITEMS = [
   { href: "/carta", icon: "wheel", key: "carta", soon: true },
-  { href: "/numeros", icon: "grid3", key: "numeros", soon: true },
+  { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
   { href: "/hoy", icon: "sun", key: "hoy", soon: false },
   { href: "/pilares", icon: "pillars", key: "pilares", soon: true },
 ] as const;
