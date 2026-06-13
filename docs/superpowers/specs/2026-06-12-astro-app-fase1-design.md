@@ -39,6 +39,8 @@ usable de verdad:
   hoy/semana/mes/año. El horóscopo occidental ofrece **dos modos con una palanca**: (1)
   **personalizado por tránsitos** sobre la carta completa del usuario (modo principal,
   recomendado) y (2) **clásico por signo solar** ("Acuario hoy…", vista rápida/compartible).
+  La sección Horóscopo incluye además el **horóscopo chino por animal del año** (capa ligera);
+  el Ba Zi profundo vive en la sección "Cuatro Pilares Orientales" junto al Saju.
   Nota conceptual: el horóscopo NO es la carta natal — la carta es la foto fija de nacimiento
   (quién eres); el horóscopo es el cielo actual sobre tu carta (qué pasa ahora).
 - **Fase 3 — Lo viral:** Compatibilidad (sinastría astrológica + numerológica) con barras
@@ -322,8 +324,10 @@ Navegación (decisión de Gio, modelo Ⓑ de barra fija):
 - **Barra inferior fija = 4 secciones:**
   1. **Carta Astral** (natal + revoluciones + tránsitos, como sub-tabs arriba).
   2. **Numerología** (núcleo, ciclos, kármicos).
-  3. **Horóscopo** = Occidental (zodiacal) + Chino, con palanca; más periodos hoy/semana/mes/año.
-  4. **Saju · Tarot**, con palanca.
+  3. **Horóscopo** = la capa "ligera / de fortuna": **occidental por signo** + **chino por animal
+     del año**, con palanca; más periodos hoy/semana/mes/año.
+  4. **Cuatro Pilares Orientales** = la capa profunda: **Ba Zi (chino) + Saju (coreano)**, con
+     palanca. Son el **mismo sistema** (Cuatro Pilares) en dos tradiciones de interpretación.
 - **Perfil:** avatar arriba a la derecha que abre un menú (bottom sheet) con lo **complementario
   y transversal**: cambiar de persona, ver cualquier sección por día/semana/mes/año, **preguntar
   algo específico** ("¿cómo va mi amor esta semana?"), Brújula/guía, Diario & Manifestación,
@@ -331,10 +335,10 @@ Navegación (decisión de Gio, modelo Ⓑ de barra fija):
 - Las **sub-secciones de cada mundo** van como tabs/palancas **arriba** (contextuales), no en la
   barra inferior (que permanece estable).
 
-Pendientes de confirmar con Gio: (a) **"Tarot"** como cuarto pilar de la sección 4 (Gio escribió
-"tor"; interpretado como Tarot — sería un sistema nuevo además de astrología/numerología/Ba Zi/
-Saju); (b) si el **Ba Zi** va en "Horóscopo" (junto al occidental) o junto al Saju (ambos son
-cartas de Cuatro Pilares), dejando solo el **animal chino** en Horóscopo.
+Nota: **se descartó el Tarot** (venía de un typo "tor"; un tarot digital sin cartas físicas no
+convence a Gio). Aclaración clave: el **Ba Zi chino** NO es el horóscopo chino de los animales —
+el animal del año es solo una pizca; el Ba Zi son los Cuatro Pilares completos, equivalente a la
+carta natal, e idéntico en cálculo al Saju coreano.
 
 ## 9. Voz y enfoque del contenido (definido con referencias de Gio)
 
