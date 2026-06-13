@@ -118,6 +118,15 @@ Control aparte en Ajustes con dos modos:
 - **🎨 Según el tema:** la rueda se viste con el tema activo (clara con Aurora, neón con
   Cósmico, dorada con Observatorio).
 
+### Identidad / marca
+
+- **Logo:** "Luna en Enso" — un círculo zen (enso) abierto con una luna creciente y su estrella,
+  de **un solo trazo** y un color.
+- **Sistema de iconos:** todos de **línea fina (≈1.5px), un solo color (currentColor del tema),
+  mismo viewBox (24), mismo tamaño**, estética mántrica/geometría sacra. Mismo lenguaje que el logo.
+- **Menú inferior:** un único color por tema; pestaña activa a opacidad plena, el resto tenue.
+  Labels al mismo tamaño, iconos centrados y alineados.
+
 ### Onboarding (estilo elegido: Ceremonial)
 
 La captura de datos de nacimiento es **paso a paso** (una pregunta por pantalla), y cada paso
@@ -414,17 +423,27 @@ objetivo por sistema:
 La sección Carta Astral tiene un **selector de tipo de carta**. Todas usan la misma rueda
 interactiva y el mismo motor de efemérides (solo cambia el momento/método de cálculo):
 
+Se incluyen **todas** estas técnicas (decisión de Gio):
+
 - **Natal** — la foto de nacimiento (Fase 1, base de todo).
 - **Revolución Solar** — carta del año, recalculada cada cumpleaños (Sol vuelve a su grado natal).
-- **Revolución Lunar** — carta del mes (Luna vuelve a su grado natal); más detallada y de corto plazo.
-- **Retornos planetarios** — Retorno de Saturno (~29 años), de Júpiter (~12), etc.: hitos vitales.
+- **Revolución Lunar** — carta del mes (Luna vuelve a su grado natal); corto plazo, más detallada.
+- **Retornos planetarios** — Saturno (~29 años), Júpiter (~12), Lunar nodal, etc.: hitos vitales.
 - **Progresiones secundarias** — evolución simbólica "un día = un año".
-- **Tránsitos** — dónde está el cielo hoy sobre la carta natal (base del horóscopo de Fase 2).
-- **Sinastría / carta compuesta** — para compatibilidad (Fase 3).
+- **Direcciones** — arco solar y primarias.
+- **Tránsitos** — el cielo de hoy sobre la natal (base del horóscopo de Fase 2).
+- **Sinastría** — superposición de dos cartas (compatibilidad, Fase 3).
+- **Carta compuesta** y **Davison** — la "carta de la relación".
+- **Carta dracónica** — nivel del alma / propósito profundo.
+- **Astrología horaria** — responder una pregunta por el cielo del momento.
+- **Carta electiva** — elegir el mejor momento para algo.
+- **Relocación / astrocartografía** — cómo cambia tu carta según el lugar del mundo.
 
-Fase 1 construye la **Natal**. El resto se añade en fase posterior (las interpretaciones largas
-de la Revolución Solar ya están mapeadas a Fase 4); el motor de Fase 1 se diseña para poder
-calcular estas cartas derivadas sin rehacerlo.
+Todas usan la misma rueda y el mismo motor de efemérides; lo que cambia es el momento/método de
+cálculo. **Fase 1 construye la Natal.** El resto se añade en fases posteriores (las interpretaciones
+largas de la Revolución Solar ya están mapeadas a Fase 4); el motor de Fase 1 se diseña para poder
+calcular estas cartas derivadas sin rehacerlo. Por su tamaño, las técnicas predictivas/relacionales
+probablemente formen su **propia fase** (p. ej. una "Fase 6 — Astrología avanzada").
 
 La consistencia visual es por **identidad cultural**: occidental/numerología siguen el tema
 (Aurora/Observatorio); el Ba Zi usa paleta roja/dorada china; el Saju, jade/verde coreana.
