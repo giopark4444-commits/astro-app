@@ -1,8 +1,9 @@
-// Minimal stub — full i18n wiring is done in Task 4 (next-intl ES/EN).
-// next-intl/plugin requires this file to exist at build time.
 import { getRequestConfig } from "next-intl/server";
+import { cookies } from "next/headers";
+import { resolveLocale, LOCALE_COOKIE } from "./locale";
 
-export default getRequestConfig(async () => ({
-  locale: "es",
-  messages: {},
-}));
+export default getRequestConfig(async () => {
+  const store = await cookies();
+  const locale = resolveLocale(store.get(LOCALE_COOKIE)?.value);
+  return { locale, messages: (await import(`../messages/${locale}.json`)).default };
+});

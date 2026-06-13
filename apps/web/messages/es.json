@@ -1,0 +1,7 @@
+{
+  "app": { "name": "Aluna", "tagline": "Tu mapa de autoconocimiento" },
+  "nav": { "carta": "Carta", "numeros": "Números", "hoy": "Hoy", "pilares": "Pilares", "perfil": "Perfil" },
+  "auth": { "login": "Entrar", "signup": "Crear cuenta", "email": "Correo", "password": "Contraseña", "logout": "Salir", "noAccount": "¿No tienes cuenta?", "haveAccount": "¿Ya tienes cuenta?" },
+  "settings": { "title": "Ajustes", "lightMode": "Modo de luz", "light": "Claro", "dark": "Oscuro", "auto": "Auto", "theme": "Tema", "language": "Idioma", "observatory": "Observatorio", "aurora": "Aurora", "cosmic": "Cósmico" },
+  "hoy": { "greeting": "Hola", "lenses": "Tus lentes", "soon": "Próximamente" }
+}

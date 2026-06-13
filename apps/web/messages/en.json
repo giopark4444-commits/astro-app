@@ -1,0 +1,7 @@
+{
+  "app": { "name": "Aluna", "tagline": "Your map of self-knowledge" },
+  "nav": { "carta": "Chart", "numeros": "Numbers", "hoy": "Today", "pilares": "Pillars", "perfil": "Profile" },
+  "auth": { "login": "Log in", "signup": "Sign up", "email": "Email", "password": "Password", "logout": "Log out", "noAccount": "No account yet?", "haveAccount": "Already have an account?" },
+  "settings": { "title": "Settings", "lightMode": "Light mode", "light": "Light", "dark": "Dark", "auto": "Auto", "theme": "Theme", "language": "Language", "observatory": "Observatory", "aurora": "Aurora", "cosmic": "Cosmic" },
+  "hoy": { "greeting": "Hi", "lenses": "Your lenses", "soon": "Coming soon" }
+}
