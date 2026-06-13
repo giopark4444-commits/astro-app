@@ -870,15 +870,16 @@ Expected: pnpm resuelve y escribe las versiones correctas; `sweph` puede compila
 
 - [ ] **Step 5: Descargar los archivos de efemérides (libre distribución) a `packages/ephemeris/ephe/`**
 
-Run:
+Run (fuente verificada: mirror oficial en GitHub `aloistr/swisseph`; la antigua URL de astro.com da 404):
 ```bash
 mkdir -p packages/ephemeris/ephe
-curl -fsSL -o packages/ephemeris/ephe/sepl_18.se1 https://www.astro.com/ftp/swisseph/ephe/sepl_18.se1
-curl -fsSL -o packages/ephemeris/ephe/semo_18.se1 https://www.astro.com/ftp/swisseph/ephe/semo_18.se1
-curl -fsSL -o packages/ephemeris/ephe/seas_18.se1 https://www.astro.com/ftp/swisseph/ephe/seas_18.se1
+BASE=https://raw.githubusercontent.com/aloistr/swisseph/master/ephe
+curl -fsSL -o packages/ephemeris/ephe/sepl_18.se1 $BASE/sepl_18.se1
+curl -fsSL -o packages/ephemeris/ephe/semo_18.se1 $BASE/semo_18.se1
+curl -fsSL -o packages/ephemeris/ephe/seas_18.se1 $BASE/seas_18.se1
 ls -la packages/ephemeris/ephe/
 ```
-Expected: 3 archivos `.se1` (planetas ~480KB, Luna ~1.3MB, asteroides ~220KB). Si la URL cambió, busca en `https://github.com/aloistr/swisseph/tree/master/ephe` como espejo.
+Expected (tamaños verificados): `sepl_18.se1` ≈ 484 KB, `semo_18.se1` ≈ 1.30 MB, `seas_18.se1` ≈ 223 KB. Si alguno baja vacío o como HTML, la descarga falló — repórtalo, no continúes.
 
 - [ ] **Step 6: Crear `packages/ephemeris/src/init.ts`** (configura la ruta de efemérides una sola vez)
 
