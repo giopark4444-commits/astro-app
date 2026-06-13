@@ -1,0 +1,71 @@
+/* Tokens de Aluna. El tema se fija con data-theme + data-mode en <html>.
+   Acento por sección: sobreescribir --acc en el contenedor (oro por defecto). */
+:root {
+  --font-ui: var(--font-quicksand), system-ui, sans-serif;
+  --font-display: var(--font-cormorant), Georgia, serif;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --acc: #e7c986;
+}
+
+/* ---------------- OBSERVATORY (noche dorada) ---------------- */
+[data-theme="observatory"] {
+  --bg: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+  --surface: rgba(150, 150, 190, 0.07);
+  --ink: #ece7f6;
+  --soft: rgba(233, 228, 245, 0.6);
+  --line: rgba(231, 201, 134, 0.2);
+  --acc: #e7c986;
+  --stars: 0.5;
+}
+[data-theme="observatory"][data-mode="light"] {
+  --bg: radial-gradient(125% 85% at 50% -8%, #fdf3ec 0%, #f4eefb 55%, #efe7f8 100%);
+  --surface: rgba(255, 255, 255, 0.6);
+  --ink: #3d3650;
+  --soft: rgba(61, 54, 80, 0.62);
+  --line: rgba(142, 124, 195, 0.25);
+  --acc: #caa85f;
+  --stars: 0;
+}
+
+/* ---------------- AURORA (claro pastel) ----------------
+   Nota: en Aurora el DEFAULT es CLARO; [data-mode="dark"] es el override
+   (al revés que Observatory/Cosmic, cuyo default es oscuro). */
+[data-theme="aurora"] {
+  --bg: linear-gradient(170deg, #f6f2fb 0%, #fdf3ec 100%);
+  --surface: rgba(255, 255, 255, 0.6);
+  --ink: #4a4458;
+  --soft: rgba(74, 68, 88, 0.6);
+  --line: rgba(155, 143, 192, 0.25);
+  --acc: #9b8fc0;
+  --stars: 0;
+}
+[data-theme="aurora"][data-mode="dark"] {
+  --bg: linear-gradient(170deg, #211c33 0%, #2a2140 100%);
+  --surface: rgba(180, 170, 210, 0.08);
+  --ink: #ece7f6;
+  --soft: rgba(236, 231, 246, 0.6);
+  --line: rgba(180, 160, 230, 0.22);
+  --acc: #c9b8f2;
+  --stars: 0.25;
+}
+
+/* ---------------- COSMIC (neón oscuro) ---------------- */
+[data-theme="cosmic"] {
+  --bg: linear-gradient(165deg, #1c0529 0%, #3d0b54 70%, #6d1a6b 100%);
+  --surface: rgba(255, 255, 255, 0.07);
+  --ink: #f3eaff;
+  --soft: rgba(243, 234, 255, 0.62);
+  --line: rgba(255, 138, 224, 0.28);
+  --acc: #ff8ae0;
+  --stars: 0.4;
+}
+[data-theme="cosmic"][data-mode="light"] {
+  --bg: linear-gradient(165deg, #f7eefc 0%, #fbeaf6 100%);
+  --surface: rgba(255, 255, 255, 0.7);
+  --ink: #3a2342;
+  --soft: rgba(58, 35, 66, 0.6);
+  --line: rgba(154, 107, 255, 0.25);
+  --acc: #b86bff;
+  --stars: 0;
+}
