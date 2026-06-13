@@ -58,6 +58,7 @@ export type Database = {
           time_zone?: string;
           user_id?: string;
         };
+        Relationships: [];
       };
       charts: {
         Row: {
@@ -93,6 +94,7 @@ export type Database = {
           user_id?: string;
           zodiac?: string;
         };
+        Relationships: [];
       };
       profiles_user: {
         Row: {
@@ -113,6 +115,7 @@ export type Database = {
           id?: string;
           locale?: string;
         };
+        Relationships: [];
       };
       settings: {
         Row: {
@@ -151,6 +154,7 @@ export type Database = {
           user_id?: string;
           zodiac?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
