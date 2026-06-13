@@ -248,17 +248,22 @@ carta y encuentra todo esto correcto y configurable, la app gana su confianza.
 ┌──────────────┐     ┌──────────────┐
 │  Web (Next)  │     │ Móvil (Expo) │   ← clientes "delgados", solo UI
 └──────┬───────┘     └──────┬───────┘
-       │   HTTPS / SDK      │
-       └─────────┬──────────┘
-                 ▼
-        ┌──────────────────┐
-        │     Supabase     │
-        │ ─ Postgres + RLS │  ← cuentas, perfiles, cartas calculadas (cache)
-        │ ─ Auth           │
-        │ ─ Edge Function: │  ← Swiss Ephemeris + numerología (cálculo pesado)
-        │   "compute-chart"│
-        └──────────────────┘
+       │  Supabase SDK (auth/datos) + API de cómputo
+       ├───────────────────┬─────────────────────┐
+       ▼                   ▼                     ▼
+┌──────────────────┐   ┌──────────────────────────────┐
+│     Supabase     │   │  Servicio de cómputo (Node)  │
+│ ─ Postgres + RLS │◄──│  @aluna/ephemeris (sweph)    │  ← calcula la carta y
+│ ─ Auth           │   │  @aluna/core (numerología)   │     cachea el result en `charts`
+└──────────────────┘   └──────────────────────────────┘
+  cuentas, perfiles,      NO es Edge Function: Deno no corre el
+  cartas cacheadas        addon nativo `sweph` → corre en Node.
 ```
+
+> **Decisión de arquitectura (cerrada al construir, 2026-06-13):** el cómputo de cartas **NO** vive
+> en una Supabase Edge Function (Deno no ejecuta el addon nativo `sweph`). Vive en **Node**
+> (`@aluna/ephemeris`), expuesto por un servicio/ruta API de Node que cachea en la tabla `charts`.
+> Supabase = **datos + auth + RLS**. (Proyecto real: `aluna`, ref `xcilrdpcanielalpfvld`.)
 
 **Principio:** toda la lógica de cálculo vive en el backend (una sola implementación,
 resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan resultados.
@@ -280,7 +285,7 @@ irá a las tiendas como app Expo/React Native, así que el código se separa por
 
 | Componente | Qué hace | Depende de |
 |------------|----------|------------|
-| `compute-chart` (Edge Function) | Recibe fecha/hora/lat/long/zona horaria + sistema de casas; devuelve posiciones, casas, aspectos. | Swiss Ephemeris |
+| `@aluna/ephemeris` + API de cómputo (Node) | Recibe fecha/hora/lat/long/zona horaria + opciones; devuelve la carta (posiciones, casas, aspectos, dignidades, distribución, patrones) y la cachea. **Node, no Edge** (sweph es nativo). | Swiss Ephemeris (`sweph`), `@aluna/core` |
 | `compute-numerology` (lib server) | Recibe nombre completo + fecha; devuelve la **hoja pitagórica completa** (núcleo + pináculos/desafíos con edades + ciclos personales + tabla de inclusión/intensidad + lecciones y deudas kármicas + planos de expresión + letras de tránsito/esencia), con la reducción paso a paso. Cálculo puro, sin deps. | — |
 | `interpretations` (biblioteca de textos) | Mapea cada posición/número a su texto ES/EN. | — |
 | `geocode` (servicio/dataset) | Lugar de nacimiento → lat/long + zona horaria histórica. | Dataset ciudades + tz |
