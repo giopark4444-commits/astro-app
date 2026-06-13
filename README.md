@@ -16,7 +16,12 @@ packages/core         @aluna/core — TypeScript ISOMÓRFICO (RN-safe, va en web
 packages/ephemeris    @aluna/ephemeris — SOLO SERVIDOR (addon nativo)
                       · Swiss Ephemeris (sweph) + zona horaria histórica (luxon)
                       · computeChart(): carta natal precisa (validada al arcominuto)
-supabase/             Esquema + RLS + tipos del backend (proyecto "aluna")
+packages/supabase     @aluna/supabase — SDK tipado + tipos del esquema
+                      · createBrowserSupabaseClient (público/anon, RN-safe, respeta RLS)
+                      · createServiceSupabaseClient (service-role, SOLO SERVIDOR, "./server")
+packages/compute      @aluna/compute — SOLO SERVIDOR — servicio de cómputo de carta
+                      · cacheKey() determinista + getOrComputeChart() (lee-o-calcula y cachea)
+supabase/             Esquema + RLS + migraciones del backend (proyecto "aluna")
 docs/superpowers/     Spec de diseño (specs/) y planes de implementación (plans/)
 ```
 
@@ -30,7 +35,7 @@ lo consume por API. El cálculo **no** corre en Supabase Edge (Deno no ejecuta e
 |---|---|---|
 | 1 | Monorepo + motor de **Numerología** | ✅ en `main` |
 | 2 | Motor de **Carta Astral** (Swiss Ephemeris) | ✅ en `main` |
-| 3 | Backend **Supabase** (esquema + RLS + auth) | 🟡 capa de datos lista; falta API de cómputo |
+| 3 | Backend **Supabase** (esquema + RLS + auth) + **API de cómputo** | ✅ en `main` |
 | 4 | Cliente **web** (Next.js PWA) | ⏳ |
 | 5 | Cliente **móvil** (Expo) | ⏳ |
 | 6 | **Interpretaciones** (ES/EN) | ⏳ |
