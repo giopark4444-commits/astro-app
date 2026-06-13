@@ -1,4 +1,4 @@
-# Astro App — Diseño de la Fase 1 (El Núcleo)
+# Aluna — Diseño de la Fase 1 (El Núcleo)
 
 **Fecha:** 2026-06-12
 **Estado:** Aprobado para planificación
@@ -151,6 +151,12 @@ Control aparte en Ajustes con dos modos:
 
 ### Identidad / marca
 
+- **Nombre: Aluna** (decidido por Gio, 2026-06-13). Doble raíz: contiene **"luna"** (conecta con el
+  logo) y es el concepto **kogi** (Sierra Nevada de Santa Marta, Colombia) del **mundo del espíritu
+  y el pensamiento, la consciencia originaria desde donde todo se manifiesta** antes de existir en
+  lo material. Encaja perfecto con el ADN de autoconocimiento + manifestación. Funciona en ES/EN,
+  corto y memorable. Nota de respeto: honrar el origen kogi del término (no banalizarlo). Pendiente
+  operativo: verificar dominio (aluna.app / aluna.com), nombre en App Store/Play y marca registrada.
 - **Logo:** "Luna en Enso" — un círculo zen (enso) abierto con una luna creciente y su estrella,
   de **un solo trazo** y un color.
 - **Sistema de iconos:** todos de **línea fina (≈1.5px), un solo color (currentColor del tema),
