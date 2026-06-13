@@ -1,0 +1,25 @@
+{
+  "name": "@aluna/compute",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aluna/core": "workspace:*",
+    "@aluna/ephemeris": "workspace:*",
+    "@aluna/supabase": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

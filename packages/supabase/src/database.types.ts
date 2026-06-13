@@ -1,6 +1,7 @@
 // Aluna · tipos del esquema Supabase (GENERADO — no editar a mano).
-// Regenerar tras cambios de esquema: vía MCP generate_typescript_types o
-// `supabase gen types typescript --project-id xcilrdpcanielalpfvld`.
+// Hogar: packages/supabase/src/database.types.ts (consumido por @aluna/supabase).
+// Regenerar tras cambios de esquema:
+//   supabase gen types typescript --project-id xcilrdpcanielalpfvld > packages/supabase/src/database.types.ts
 // Es solo-tipos (sin runtime) → seguro de importar en cualquier lado.
 
 export type Json =
@@ -57,6 +58,7 @@ export type Database = {
           time_zone?: string;
           user_id?: string;
         };
+        Relationships: [];
       };
       charts: {
         Row: {
@@ -92,6 +94,7 @@ export type Database = {
           user_id?: string;
           zodiac?: string;
         };
+        Relationships: [];
       };
       profiles_user: {
         Row: {
@@ -112,6 +115,7 @@ export type Database = {
           id?: string;
           locale?: string;
         };
+        Relationships: [];
       };
       settings: {
         Row: {
@@ -150,6 +154,7 @@ export type Database = {
           user_id?: string;
           zodiac?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

@@ -39,11 +39,25 @@ Para aplicarlas a otro entorno: Supabase CLI (`supabase db push`) o el panel SQL
 
 ## Tipos
 
-`database.types.ts` (generado del esquema). Regenerar tras cambios de esquema.
+Los tipos generados viven ahora en **`packages/supabase/src/database.types.ts`** (hogar del
+paquete `@aluna/supabase`). Regenerar tras cambios de esquema:
+
+    supabase gen types typescript --project-id xcilrdpcanielalpfvld > packages/supabase/src/database.types.ts
+
+> Nota: cada tabla debe llevar `Relationships: [...]` (el CLI lo emite). Si se regenera con una
+> herramienta que lo omita, `Database` deja de satisfacer `GenericSchema` y `SupabaseClient<Database>`
+> colapsa a `never`; re-añadir `Relationships` (vacío `[]` si la tabla no declara FKs) lo arregla.
 
 ## Arquitectura de cómputo (decisión)
 
 Supabase = **datos + auth + RLS**. El **cálculo de cartas NO corre en Edge Functions** (Deno no
 ejecuta el addon nativo `sweph`): vive en Node (`@aluna/ephemeris`), expuesto por un servicio/ruta
-API de Node que cachea el resultado en `charts`. Pendiente: servicio de cómputo + cache-key + SDK
-de cliente Supabase (siguiente tramo del Plan 3 / Plan 4 web).
+API de Node que cachea el resultado en `charts`.
+
+**Implementado (Plan 3, cierre):** el SDK tipado vive en `@aluna/supabase`
+(`createBrowserSupabaseClient` público/RN-safe y `createServiceSupabaseClient` solo-servidor). El
+servicio de cómputo vive en `@aluna/compute`: `cacheKey()` (clave determinista) +
+`getOrComputeChart()` (lee de `charts` o calcula con `@aluna/ephemeris` y cachea, vía un puerto
+`ChartStore` testeable sin red). La **numerología no pasa por aquí**: es pura e isomórfica
+(`computeNumerology` en `@aluna/core`) y corre en el cliente. Falta solo conectar todo desde la
+ruta API del cliente web (Plan 4).
