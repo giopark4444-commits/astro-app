@@ -31,6 +31,9 @@ usable de verdad:
 - **Fase 3 — Lo viral:** Compatibilidad (sinastría astrológica + numerológica) con barras
   compartibles (amor, sexo, comunicación, confianza, familia…).
 - **Fase 4 — Monetización:** suscripción + informes PDF + lecturas profundas con IA (Claude).
+  Aquí entran los **informes largos estilo Gio**: Carta Astral evolutiva completa (planeta por
+  planeta, casa por casa) y **Revolución Solar** (lectura del año, cumpleaños a cumpleaños, con
+  "temas a trabajar" + mantra personalizado). Ver sección 9 para la voz.
 
 Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase 1.**
 
@@ -44,10 +47,13 @@ Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase
    amigos). Cada perfil guarda sus datos de nacimiento.
 2. **Onboarding / captura de datos de nacimiento:** nombre, fecha, hora y lugar de nacimiento,
    con geocodificación (lat/long) y zona horaria histórica correcta.
-3. **Motor de astrología (Swiss Ephemeris):** cálculo de posiciones planetarias, signos,
-   casas, ascendente/medio cielo y aspectos para una fecha/hora/lugar dados.
+3. **Motor de astrología (Swiss Ephemeris):** cálculo de posiciones para una fecha/hora/lugar
+   dados de: los 10 planetas (Sol→Plutón), signos, casas, ascendente/medio cielo, aspectos, y
+   además **Quirón, Nodo Norte/Sur y Lilith** (los usa el estilo de interpretación de Gio).
+   También se marca el estado dignidad/debilidad (domicilio, exilio, exaltación, caída).
 4. **Sección Carta Astral:** rueda interactiva + tabla de posiciones + balance de elementos +
-   interpretaciones por planeta/casa/aspecto (plantillas propias ES/EN).
+   interpretaciones por planeta/casa/aspecto, escritas en la **voz de la casa** (ver sección 9):
+   estructura "Energía fluida / Energía no fluida / Tips" (plantillas propias ES/EN).
 5. **Motor de numerología:** camino de vida, destino/expresión, alma, personalidad,
    año personal, números maestros (11, 22, 33).
 6. **Sección Numerología:** números clave con sus interpretaciones (plantillas propias ES/EN).
@@ -242,3 +248,60 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 - **Biblioteca de interpretaciones (ES/EN)** es mucho texto; en Fase 1 se cubren las posiciones
   esenciales y se amplía luego. La calidad de estos textos define la percepción de la app.
 - Mantener `@astro/core` como única fuente de verdad para que web y móvil nunca diverjan.
+
+---
+
+## 9. Voz y enfoque del contenido (definido con referencias de Gio)
+
+Gio aportó informes de referencia (carta astral + revolución solar hechos con Astrodienst, con
+interpretación escrita) que **definen la voz, profundidad y estructura** que la app debe producir.
+No se copia ese texto (es de terceros / con derechos); se escribe contenido **original** que
+siga este mismo ADN. Imágenes de referencia: `~/Downloads/IMG_7517…7528.jpg` (junio 2026).
+
+### Escuela y tono
+
+- **Astrología evolutiva:** el mapa se lee como guía de crecimiento y **propósito del alma**, no
+  como predicción de eventos ("los aprendizajes que el alma eligió experimentar").
+- Tono **compasivo, cálido, espiritual y empoderador**; habla de tú al usuario.
+- **Mezcla yóguica** (sello distintivo): referencias a Yoga Sutras, sánscrito (svadhyaya,
+  santosha, aparigraha), meditación y prácticas conscientes en los consejos.
+- Enmarca siempre como **autoconocimiento**, no como verdad literal ni consejo médico/financiero.
+
+### Estructura por posición (plantilla base de cada interpretación)
+
+Para cada planeta/punto en signo + casa:
+
+1. **Título** con emoji e identificación (ej. "☀️ Sol en Acuario en casa 11").
+2. **Energía fluida:** el don, la luz, el potencial de esa posición.
+3. **Energía no fluida:** la sombra, el reto, el riesgo a integrar.
+4. **Tips** (cuando aplique): prácticas concretas, a menudo con tinte yóguico/espiritual.
+
+Las **casas** se interpretan agrupando lo que contienen (ej. "🏠 Casa 8: Marte, Saturno y Plutón
+en Escorpio") con su propio bloque + Tips.
+
+### Adaptación obligatoria (lo que NO debe copiarse tal cual)
+
+- **Género:** las referencias están en femenino ("estás llamada"); la app debe adaptar el género
+  (masculino/femenino/neutro) según el perfil, o usar lenguaje neutro por defecto.
+- **Idioma:** todo en ES y EN.
+- **Personalización:** los textos deben combinarse según la carta real de cada persona, no ser
+  un bloque fijo.
+
+### Mapeo a fases
+
+- **Fase 1:** interpretaciones natales por posición (planeta/casa/aspecto) en esta voz y
+  estructura "fluida/no fluida/tips". Plantillas propias.
+- **Fase 4:** informes largos generados con IA (Claude) — Carta Astral evolutiva completa y
+  **Revolución Solar** (lectura del año con "temas a trabajar" de ~10 puntos + **mantra
+  personalizado** de cierre). La IA recibe los datos calculados + esta guía de voz como sistema.
+
+### Puntos del mapa requeridos por esta voz
+
+Además de los 10 planetas: **Quirón** (herida/sanación), **Nodo Norte y Sur** (camino evolutivo
+/ karma), **Lilith** (sombra), y **dignidades** (domicilio, exilio, exaltación, caída). El motor
+de cálculo (sección 4) ya los incluye.
+
+### Norte del contenido
+
+La calidad y personalidad de estos textos **es** el producto. La meta es que un informe de la app
+se sienta tan rico y humano como las referencias de Gio — esa es la vara de medir.
