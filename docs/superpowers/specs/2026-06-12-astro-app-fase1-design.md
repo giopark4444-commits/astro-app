@@ -245,8 +245,15 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 - **Sistema de casas por defecto: Placidus** (configurable en Ajustes: Placidus, Koch,
   Casas Iguales, Whole Sign, Regiomontano, Porfirio — los astrólogos discuten por esto, debe
   poder cambiarse y recalcular en vivo).
-- **Zodiaco:** **tropical** por defecto (estándar occidental). Soporte sideral + ayanamsha queda
-  como opción avanzada a evaluar (ver sección 8, decisión abierta).
+- **Zodiaco:** **tropical** por defecto (estándar occidental) + **sideral** configurable con
+  **selector de ayanamsha** (Lahiri por defecto; Fagan-Bradley, Krishnamurti…). El motor (Swiss
+  Ephemeris) calcula ambos sin coste extra: es desplazar por el ayanamsha. **Matiz importante (no
+  prometer a medias):** ofrecer el *zodiaco* sideral ≠ ofrecer **astrología védica (Jyotish)
+  completa**. Un astrólogo védico espera **Nakshatras, Dashas y cartas divisionales (Vargas)** —
+  eso es una tradición propia, equivalente en peso al Ba Zi/Saju, y sería **su propio "lente"/fase
+  futura**, no Fase 1. En Fase 1: el toggle tropical/sideral aplica a la carta occidental (mismos
+  puntos y técnicas, grados desplazados). Así un sideral-occidental (escuela Fagan) queda servido,
+  y al védico se le es honesto: "Jyotish completo viene después".
 - **Nodo y Lilith configurables:** Nodo **verdadero/medio** (true/mean) y Lilith **media/
   osculatriz** — distinción que un profesional espera poder elegir.
 - El resultado de una carta se **cachea** en la tabla `charts` (clave: datos de nacimiento +
@@ -362,16 +369,17 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
   esenciales y se amplía luego. La calidad de estos textos define la percepción de la app.
 - Mantener `@astro/core` como única fuente de verdad para que web y móvil nunca diverjan.
 
-**Decisiones abiertas (a cerrar antes del plan):**
-- **Zodiaco sideral + ayanamsha:** ¿la app es solo tropical (estándar occidental, sirve a la
-  inmensa mayoría) o también ofrece sideral/védico? Añadir sideral amplía público pero suma
-  complejidad (elección de ayanamsha, doble juego de interpretaciones).
-- **Hogar de la Compatibilidad/Sinastría (Fase 3):** en el modelo de 4 mundos ya no hay pestaña
-  "Pareja". Candidatos: (a) herramienta transversal en el menú de Perfil; (b) un "tipo de carta"
-  dentro de Carta Astral (sinastría/compuesta ya están en cartas derivadas) + modo paralelo en
-  Numerología. Recomendación: (a) como entrada principal, reusando (b) por dentro.
-- **Aspectos a los ángulos (AC/MC):** el aspectario pro debería incluir aspectos a AC/MC y entre
-  planetas; confirmar alcance de orbes a ángulos.
+**Decisiones cerradas (2026-06-13):**
+- **Zodiaco:** tropical + sideral con selector de ayanamsha (resuelto, ver sección 4). Jyotish
+  completo (Nakshatras/Dashas/Vargas) = lente/fase futura, no Fase 1.
+- **Compatibilidad/Sinastría:** vive como **herramienta transversal en el menú de Perfil**
+  (entrada principal: elegir persona A + B → sinastría de carta + comparación numerológica +
+  barras compartibles), reusando por dentro el "tipo de carta" sinastría/compuesta. No ocupa
+  pestaña de la barra fija. (Fase 3.)
+
+**Decisión abierta menor (a cerrar en el plan):**
+- **Aspectos a los ángulos (AC/MC):** el aspectario pro debería incluir aspectos a AC/MC además
+  de entre planetas; confirmar orbes a ángulos al detallar el motor.
 
 ---
 
@@ -403,9 +411,10 @@ Navegación (decisión de Gio, modelo Ⓑ de barra fija):
   4. **Cuatro Pilares Orientales** = la capa profunda: **Ba Zi (chino) + Saju (coreano)**, con
      palanca. Son el **mismo sistema** (Cuatro Pilares) en dos tradiciones de interpretación.
 - **Perfil:** avatar arriba a la derecha que abre un menú (bottom sheet) con lo **complementario
-  y transversal**: cambiar de persona, ver cualquier sección por día/semana/mes/año, **preguntar
-  algo específico** ("¿cómo va mi amor esta semana?"), Brújula/guía, Diario & Manifestación,
-  Calendario lunar, y Ajustes.
+  y transversal**: cambiar de persona, **Compatibilidad** (persona A + B → sinastría + numerología
+  comparada, Fase 3), ver cualquier sección por día/semana/mes/año, **preguntar algo específico**
+  ("¿cómo va mi amor esta semana?"), Brújula/guía, Diario & Manifestación, Calendario lunar, y
+  Ajustes.
 - Las **sub-secciones de cada mundo** van como tabs/palancas **arriba** (contextuales), no en la
   barra inferior (que permanece estable).
 
