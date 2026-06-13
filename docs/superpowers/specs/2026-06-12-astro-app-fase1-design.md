@@ -49,6 +49,14 @@ usable de verdad:
   Aquí entran los **informes largos estilo Gio**: Carta Astral evolutiva completa (planeta por
   planeta, casa por casa) y **Revolución Solar** (lectura del año, cumpleaños a cumpleaños, con
   "temas a trabajar" + mantra personalizado). Ver sección 9 para la voz.
+  - **Frontera gratis vs premium (boceto, decisión Gio: que el gratis sea generoso):** el nivel
+    **gratis no es mínimo**, da buena extensión — carta + numerología con interpretación de
+    **planeta-en-signo Y planeta-en-casa** (núcleo "fluida/no fluida/tips"), balance, y un perfil.
+    También el **Modo Pro / lámina técnica es gratis** (es dato calculado; sirve para enganchar a
+    los astrólogos y que recomienden la app). **Premium** desbloquea: informes largos evolutivos +
+    Revolución Solar, **lecturas con IA**, PDFs, perfiles ilimitados y secciones de fortuna
+    avanzadas. Principio: regalar *amplitud y datos*, cobrar *profundidad narrativa e IA*. (Detalle
+    fino se cierra en el spec de Fase 4.)
 - **Fase 5 — Sistemas orientales:** **astrología china** (animal + elemento, y **Ba Zi /
   Cuatro Pilares completos**) y **Saju coreano** (Cuatro Pilares, tradición coreana), con
   interpretación a fondo al nivel de la carta occidental. Reusa el motor de efemérides ya
