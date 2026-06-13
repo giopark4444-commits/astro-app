@@ -478,8 +478,10 @@ TODAS las secciones (presentes y futuras):
 Patrón de UX para todas las secciones (carta, numerología, Ba Zi, Saju…):
 
 - **Resumen por defecto:** vista limpia, fácil de leer de un vistazo.
-- **Interruptor "Detallado":** añade una línea de contexto a cada tarjeta/fila sin abrir nada.
-  Su estado se recuerda por usuario (preferencia en `settings`).
+- **Interruptor "Detallado" / "Modo Pro":** dos pasos. *Detallado* añade una línea de contexto a
+  cada tarjeta/fila; *Modo Pro* (el escalón pleno) despliega la **lámina técnica** del pilar —
+  las hojas de trabajo profesionales descritas en la sección 9 ("Modo Pro en los 4 pilares").
+  Su estado se recuerda por usuario (preferencia en `settings`), global y ajustable por sección.
 - **Tap-to-expand (deep dive):** tocar cualquier elemento (un número, un planeta, un pilar,
   un aspecto) abre una **hoja inferior** con su lectura profunda completa, estructurada:
   *Tu cálculo* (cómo se derivó con los datos del usuario) → *El arquetipo* → *Energía fluida*
@@ -488,21 +490,47 @@ Patrón de UX para todas las secciones (carta, numerología, Ba Zi, Saju…):
 Esto reconcilia "la más completa" con "no abrumar": el principiante ve un resumen; quien quiere
 todo, toca y profundiza sin límite.
 
-### Nivel de profundidad (decisión de Gio: máximo detalle)
+### Modo Pro: nivel de profundidad profesional en los 4 pilares (decisión central de Gio)
 
-Cada sistema muestra información **rica y extensa**, no resumida. Referencias de profundidad
-objetivo por sistema:
+El "Modo Pro" es el nombre y la ambición del nivel **Detallado**: un único interruptor global (y
+por sección) que, al activarse, despliega en **cada uno de los 4 pilares** la **hoja de trabajo
+técnica** que usa un practicante *de esa tradición concreta*. La meta declarada por Gio: que un
+experto lo active y diga **"dios… esto es todo lo que necesitaba"**. No es genérico — cada pilar
+expone los datos crudos y configurables que su disciplina exige, con la misma exactitud que las
+herramientas de referencia del gremio (Astrodienst para astrología, etc.). El requisito de
+credibilidad de la sección 3 ("no negociable: nada incorrecto ni faltante") aplica a los CUATRO.
 
-- **Carta natal:** 14+ puntos (10 planetas + Quirón, Nodos, Lilith, MC/IC) con signo, casa,
-  grado y dignidad; tabla de aspectos con orbes; triple balance (elementos, modalidades,
-  polaridad) + hemisferios; planeta/configuración dominante.
-- **Numerología:** núcleo (Camino de Vida, Destino, Alma, Personalidad, Día) + Pináculos por
-  etapas + Desafíos + Año/Mes/Día personal + Madurez + Equilibrio + lecciones y deudas kármicas.
-- **Ba Zi (Fase 5):** Cuatro Pilares con tronco 干, rama 支, Diez Dioses 十神, troncos ocultos
-  藏干, Na Yin 納音, fuerza del Maestro del Día + elementos favorables 喜用神/desfavorables,
-  balance 五行, Pilares de Suerte 大運.
-- **Saju (Fase 5):** Cuatro Columnas con 천간/지지, 십신, 지장간, 신강·신약 + 용신, balance 오행,
-  distribución de Diez Dioses, ciclos 대운; tradición interpretativa coreana.
+**1. Carta Astral — lámina técnica occidental** (detallada en sección 3 "Lámina técnica"):
+posiciones con grado/min/seg + dignidades + casas/cúspides; cuadro modalidad×elemento + polaridad/
+hemisferios/cuadrantes/dominante; aspectario triangular con orbes y aplicativo/separativo; casas y
+orbes configurables; patrones (stellium, T-cuadrada, yod…); 14+ puntos (10 planetas + Quirón,
+Nodos, Lilith, MC/IC, +Fortuna/Vértex/asteroides en avanzado). Vale para todas las cartas derivadas.
+
+**2. Numerología — hoja de cálculo pitagórica completa.** Un numerólogo serio espera ver no solo
+los números, sino **cómo se calculan** y la malla completa:
+- **Núcleo:** Camino de Vida, Destino/Expresión, Alma/Anhelo, Personalidad, Día de nacimiento —
+  con la **reducción mostrada** (la suma paso a paso, no solo el resultado).
+- **Números maestros 11/22/33** (y 44) y **deudas kármicas 13/14/16/19** señaladas donde aparezcan.
+- **Lecciones kármicas** (números ausentes en el nombre) + **tabla de intensidad/inclusión**
+  (cuántas veces aparece cada número) + **pasión oculta** + **yo subconsciente**.
+- **Cuadrícula del nombre** (letra→número pitagórico), **piedra angular/clave** (primera/última
+  letra), **primera vocal**, **planos de expresión** (físico/mental/emocional/intuitivo).
+- **Ciclos:** Pináculos y Desafíos **con sus edades exactas**, Ciclos de vida, Año/Mes/Día
+  personal, **letras de tránsito y esencia**, Madurez, Equilibrio, números puente.
+
+**3. Horóscopo (Fase 2) — hoja de tránsitos.** En Modo Pro, más allá del texto del día: **tabla
+de tránsitos** (planetas actuales y sus aspectos a la natal, con **orbe y fecha exacta** en que
+perfeccionan), lunaciones/eclipses, retrógrados e ingresos, progresiones secundarias del periodo;
+en la capa china, **pilar del año/mes/día** (tronco+rama) y elemento regente, no solo el animal.
+
+**4. Cuatro Pilares Orientales (Fase 5) — láminas Ba Zi y Saju.**
+- **Ba Zi:** los Cuatro Pilares (año/mes/día/hora) con tronco 干 + rama 支, **troncos ocultos**
+  藏干, **Diez Dioses** 十神 por posición, Na Yin 納音, **fuerza del Maestro del Día** 身強/身弱 +
+  elementos favorables/desfavorables 喜用神/忌神, balance 五行, **Pilares de Suerte** 大運 y
+  **años de flujo** 流年 con edades, 12 etapas 十二長生, combinaciones/choques/castigos 刑沖合害,
+  vacíos 空亡 y estrellas simbólicas 神煞.
+- **Saju:** las Cuatro Columnas con 천간/지지, 지장간, 십신, 신강·신약 + 용신, balance 오행,
+  distribución de Diez Dioses, ciclos 대운/세운, 신살; en tradición interpretativa coreana.
 
 **Cartas derivadas y técnicas predictivas (la Carta no es solo la natal):**
 La sección Carta Astral tiene un **selector de tipo de carta**. Todas usan la misma rueda
