@@ -299,6 +299,30 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 
 ---
 
+## 8-bis. Backlog de funciones dinámicas (candidatas, fases 2+)
+
+Ideas para que la app se sienta viva y se vuelva un hábito diario. Viven en su mayoría en un
+**menú desplegable (☰)** o en el hub de Inicio, para no saturar la barra inferior (4 mundos +
+Perfil). No son Fase 1; se priorizan al planear las fases siguientes.
+
+- **Brújula / Guía por periodos** (idea de Gio): consejo del día/semana/mes/año derivado de
+  tránsitos + Año Personal numerológico; cada uno con su práctica yóguica. **Fase 2.**
+- **Mantra y ritual del día:** afirmación + práctica corta (respiración/meditación/intención). Fase 2.
+- **Diario & Manifestación** (idea de Gio): notas libres + prompts de journaling personalizados al
+  cielo del día; **manifestar en Luna Nueva** y soltar en Luna Llena, con recordatorios. Fase 2/3.
+- **Registro de ánimo** cruzado con tránsitos → patrones e insights personales. Fase 3.
+- **Calendario lunar / cósmico:** fases lunares + próximos tránsitos importantes. Fase 2.
+- **"Pregúntale a tu carta":** oráculo conversacional con IA usando la carta del usuario
+  (astrología horaria asistida). **Fase 4** (requiere IA).
+- **Notificaciones inteligentes por tránsito** + widget de pantalla de bloqueo. Fase 2.
+- **Rachas y logros suaves** (gamificación zen por explorar y escribir en el diario). Fase 3.
+
+Navegación (decisión de diseño asociada): barra inferior **fija** con los 4 mundos
+(Carta · Numerología · Horóscopo Occidental · Horóscopo Oriental) + Perfil; las secciones
+complementarias de cada mundo van como **tabs superiores contextuales** dentro del mundo; lo
+transversal (Guía, Diario, Calendario lunar, Ajustes) en el **menú desplegable ☰**.
+(Modelo "Ⓑ", pendiente de confirmación de Gio frente al modelo "Ⓐ" de barra inferior contextual.)
+
 ## 9. Voz y enfoque del contenido (definido con referencias de Gio)
 
 Gio aportó informes de referencia (carta astral + revolución solar hechos con Astrodienst, con
