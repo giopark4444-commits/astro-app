@@ -356,6 +356,26 @@ Las interpretaciones tienen variante por género. (Se podría añadir "neutro" m
 romper el modelo.) Clave de un texto de interpretación:
 `(posición, estilo, idioma, género)`.
 
+### Nivel de profundidad (decisión de Gio: máximo detalle)
+
+Cada sistema muestra información **rica y extensa**, no resumida. Referencias de profundidad
+objetivo por sistema:
+
+- **Carta natal:** 14+ puntos (10 planetas + Quirón, Nodos, Lilith, MC/IC) con signo, casa,
+  grado y dignidad; tabla de aspectos con orbes; triple balance (elementos, modalidades,
+  polaridad) + hemisferios; planeta/configuración dominante. Más adelante: progresiones y
+  tránsitos.
+- **Numerología:** núcleo (Camino de Vida, Destino, Alma, Personalidad, Día) + Pináculos por
+  etapas + Desafíos + Año/Mes/Día personal + Madurez + Equilibrio + lecciones y deudas kármicas.
+- **Ba Zi (Fase 5):** Cuatro Pilares con tronco 干, rama 支, Diez Dioses 十神, troncos ocultos
+  藏干, Na Yin 納音, fuerza del Maestro del Día + elementos favorables 喜用神/desfavorables,
+  balance 五行, Pilares de Suerte 大運.
+- **Saju (Fase 5):** Cuatro Columnas con 천간/지지, 십신, 지장간, 신강·신약 + 용신, balance 오행,
+  distribución de Diez Dioses, ciclos 대운; tradición interpretativa coreana.
+
+La consistencia visual es por **identidad cultural**: occidental/numerología siguen el tema
+(Aurora/Observatorio); el Ba Zi usa paleta roja/dorada china; el Saju, jade/verde coreana.
+
 ### Norte del contenido
 
 La calidad y personalidad de estos textos **es** el producto. La meta es que un informe de la app
