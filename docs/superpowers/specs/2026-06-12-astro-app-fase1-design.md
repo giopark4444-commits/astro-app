@@ -8,10 +8,19 @@
 
 ## 1. Visión del producto (contexto general)
 
-App de **astrología, carta astral y numerología** "la más completa posible", bonita y precisa.
+Plataforma **multi-sistema de autoconocimiento** "la más completa posible", bonita y precisa.
+Combina varios "lentes" sobre la misma persona: **astrología occidental** (carta natal),
+**numerología**, **astrología china** (animal + Ba Zi / Cuatro Pilares) y **Saju coreano**
+(Cuatro Pilares, tradición coreana).
 Modelo **híbrido**: gratis para el público con lo básico, monetizable más adelante con
 suscripción + informes premium. Arranca como herramienta personal (Gio, familia, amigos) y,
 si funciona, se vuelve producto.
+
+**Sinergia técnica clave:** los Cuatro Pilares chinos (Ba Zi) y el Saju coreano comparten el
+mismo motor de cálculo (ciclo sexagenario + términos solares), que se deriva de la **posición
+solar exacta** que ya calcula Swiss Ephemeris. Por eso NO son motores separados: es **un motor
+de efemérides + varias capas de interpretación** (occidental, china, coreana). Ba Zi y Saju son
+el mismo cálculo con tradiciones interpretativas distintas.
 
 **Plataformas:** web (Next.js PWA) + móvil (Expo/React Native), compartiendo un backend único.
 
@@ -34,6 +43,13 @@ usable de verdad:
   Aquí entran los **informes largos estilo Gio**: Carta Astral evolutiva completa (planeta por
   planeta, casa por casa) y **Revolución Solar** (lectura del año, cumpleaños a cumpleaños, con
   "temas a trabajar" + mantra personalizado). Ver sección 9 para la voz.
+- **Fase 5 — Sistemas orientales:** **astrología china** (animal + elemento, y **Ba Zi /
+  Cuatro Pilares completos**) y **Saju coreano** (Cuatro Pilares, tradición coreana), con
+  interpretación a fondo al nivel de la carta occidental. Reusa el motor de efemérides ya
+  construido (ver sinergia en sección 1). Cada sistema es su propia sección/"lente".
+
+> Nota: el orden de las Fases 2–5 es flexible y se prioriza según interés; lo único fijo es que
+> la Fase 1 (núcleo occidental) va primero porque construye el motor que las demás reusan.
 
 Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase 1.**
 
@@ -67,6 +83,7 @@ Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase
 - Horóscopo diario, tránsitos y barras de puntuación → Fase 2.
 - Compatibilidad / sinastría → Fase 3.
 - Pagos, suscripción, informes PDF, lecturas con IA → Fase 4.
+- Astrología china (Ba Zi) y Saju coreano (Cuatro Pilares) → Fase 5 (reusan este motor).
 - Notificaciones push, login social, modo offline avanzado → según fase.
 
 ---
@@ -153,6 +170,10 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
   Casas Iguales, Whole Sign).
 - El resultado de una carta se **cachea** en la tabla `charts` (clave: datos de nacimiento +
   sistema de casas), porque para datos fijos el resultado nunca cambia.
+- **Pensar a futuro (Fase 5):** este mismo motor expondrá la **longitud solar** y la fecha/hora
+  precisas que necesitan los **términos solares (節氣/절기)** para calcular los Cuatro Pilares
+  (Ba Zi / Saju). Diseñar `compute-chart` de forma que esos datos crudos queden reutilizables,
+  no enterrados solo en la lógica occidental.
 
 ### Geocodificación y zona horaria
 
