@@ -6,6 +6,12 @@ import type { ChartStore } from "./chart-store";
 
 export interface GetOrComputeArgs {
   store: ChartStore;
+  /**
+   * Dueño de la carta. DEBE venir de la sesión verificada (Supabase Auth), nunca del
+   * cuerpo de la petición: el adaptador service-role omite RLS, así que un `userId`
+   * equivocado o falsificado etiquetaría mal la fila en `charts` y la filtraría a otro
+   * usuario al leer. La ruta API del Plan 4 lo toma del token, no del request body.
+   */
   userId: string;
   birthProfileId: string;
   input: ChartInput;
