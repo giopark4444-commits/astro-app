@@ -62,6 +62,20 @@
     "glossBirthday": "your innate gift",
     "glossMaturity": "where your life matures",
     "archetype": "The archetype",
-    "proseSoon": "The full evolutionary reading of this number is coming soon."
+    "proseSoon": "The full evolutionary reading of this number is coming soon.",
+    "reading": {
+      "tierEssence": "Essence",
+      "tierDeep": "Deep",
+      "tierComplete": "Complete",
+      "tierEssenceHint": "The essence, in a few lines.",
+      "tierDeepHint": "A deeper reading, with body and nuance.",
+      "tierCompleteHint": "No limit: everything Aluna sees in you.",
+      "flowH": "✦ Flowing energy",
+      "shadowH": "◐ Blocked energy",
+      "practiceH": "☾ Your practice",
+      "loading": "Aluna is reading you…",
+      "gated": "The longer readings awaken when Aluna finds her inner voice. For now, her essence already speaks to you:",
+      "error": "Something clouded the reading. Try again in a moment. Meanwhile, her essence:"
+    }
   }
 }

@@ -62,6 +62,20 @@
     "glossBirthday": "tu regalo innato",
     "glossMaturity": "hacia dónde madura tu vida",
     "archetype": "El arquetipo",
-    "proseSoon": "La lectura evolutiva completa de este número llega pronto."
+    "proseSoon": "La lectura evolutiva completa de este número llega pronto.",
+    "reading": {
+      "tierEssence": "Esencia",
+      "tierDeep": "Profunda",
+      "tierComplete": "Completa",
+      "tierEssenceHint": "Lo esencial, en pocas líneas.",
+      "tierDeepHint": "Una lectura honda, con cuerpo y matices.",
+      "tierCompleteHint": "Sin límite: todo lo que Aluna ve en ti.",
+      "flowH": "✦ Energía fluida",
+      "shadowH": "◐ Energía no fluida",
+      "practiceH": "☾ Tu práctica",
+      "loading": "Aluna está leyéndote…",
+      "gated": "Las lecturas más extensas se encienden cuando Aluna despierte su voz interior. Por ahora, su esencia ya te habla:",
+      "error": "Algo se nubló al leerte. Vuelve a intentarlo en un momento. Mientras, su esencia:"
+    }
   }
 }

@@ -121,3 +121,34 @@
 .blockH { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 13px; }
 .practiceBlock p { color: var(--soft); }
+
+/* ---- Selector de profundidad (Esencia · Profunda · Completa) ---- */
+.readingWrap { display: flex; flex-direction: column; gap: 14px; }
+.tierRow { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+.tier {
+  flex: 1; padding: 7px 6px; border: 0; border-radius: 10px; background: transparent;
+  font-family: inherit; font-size: 11px; letter-spacing: 0.3px; font-weight: 600;
+  color: var(--soft); cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.tier:hover { color: var(--ink); }
+.tierOn { color: #1a1305; background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); box-shadow: var(--glow-soft); }
+.tierHint { margin: -5px 0 0; text-align: center; font-size: 11px; font-style: italic; line-height: 1.5; color: var(--soft); }
+
+.readingLoading { display: flex; flex-direction: column; gap: 9px; padding: 4px 0 2px; }
+.shimmer {
+  height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%; animation: nm-shimmer 1.3s var(--ease) infinite;
+}
+.shimmer:nth-child(2) { width: 88%; }
+.shimmer:nth-child(3) { width: 68%; }
+.loadingNote { margin: 6px 0 0; text-align: center; font-size: 12px; font-style: italic; color: var(--acc); }
+@keyframes nm-shimmer { to { background-position: -200% 0; } }
+
+.gated { display: flex; flex-direction: column; gap: 12px; }
+.gatedGlyph { align-self: center; font-size: 24px; color: var(--acc); opacity: 0.85; }
+.gatedNote {
+  margin: 0; text-align: center; font-size: 12.5px; font-style: italic; line-height: 1.6; color: var(--soft);
+  padding: 12px 14px; border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 14px; background: var(--surface-2);
+}

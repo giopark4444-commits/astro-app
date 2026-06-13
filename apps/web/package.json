@@ -15,6 +15,7 @@
   "dependencies": {
     "@aluna/core": "workspace:*",
     "@aluna/supabase": "workspace:*",
+    "@anthropic-ai/sdk": "^0.104.1",
     "@supabase/ssr": "^0.5.2",
     "next": "^15.1.0",
     "next-intl": "^3.26.0",

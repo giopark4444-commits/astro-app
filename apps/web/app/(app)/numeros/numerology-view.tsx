@@ -5,6 +5,8 @@ import { computeNumerology, type NumerologyResult, type ReductionTrace } from "@
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { profileToNumerologyInput, formatReduction } from "@/lib/numerology";
 import { NUMBER_MEANINGS_ES, POSITION_LENS_ES } from "@/lib/content/numerology-es";
+import { NUMBER_MEANINGS_EN, POSITION_LENS_EN } from "@/lib/content/numerology-en";
+import { NumberReading } from "./number-reading";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -153,8 +155,8 @@ export function NumerologyView() {
             <div className={styles.sheetN}>{sheet.trace.value}</div>
             <div className={styles.calcMini}><span className={styles.calcLabel}>{t("yourCalc")}:</span> {formatReduction(sheet.trace)}</div>
             {(() => {
-              const meaning = locale === "es" ? NUMBER_MEANINGS_ES[sheet.trace.value] : undefined;
-              const lens = locale === "es" ? POSITION_LENS_ES[sheet.labelKey] : undefined;
+              const meaning = (locale === "en" ? NUMBER_MEANINGS_EN : NUMBER_MEANINGS_ES)[sheet.trace.value];
+              const lens = (locale === "en" ? POSITION_LENS_EN : POSITION_LENS_ES)[sheet.labelKey];
               if (!meaning) {
                 return (
                   <>
@@ -165,13 +167,14 @@ export function NumerologyView() {
                 );
               }
               return (
-                <div className={styles.reading}>
-                  {lens && <p className={styles.lens}>{lens}</p>}
-                  <p className={styles.essence}>{meaning.essence}</p>
-                  <div className={styles.block}><span className={styles.blockH}>✦ Energía fluida</span><p>{meaning.flow}</p></div>
-                  <div className={styles.block}><span className={styles.blockH}>◐ Energía no fluida</span><p>{meaning.shadow}</p></div>
-                  <div className={`${styles.block} ${styles.practiceBlock}`}><span className={styles.blockH}>☾ Tu práctica</span><p>{meaning.practice}</p></div>
-                </div>
+                <NumberReading
+                  value={sheet.trace.value}
+                  position={sheet.labelKey}
+                  calc={formatReduction(sheet.trace)}
+                  profileName={active.name}
+                  meaning={meaning}
+                  lens={lens}
+                />
               );
             })()}
           </div>
