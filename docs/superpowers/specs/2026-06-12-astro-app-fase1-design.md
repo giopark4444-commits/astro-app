@@ -34,9 +34,14 @@ usable de verdad:
 - **Fase 1 (este documento) — El Núcleo:** cuentas + perfiles múltiples, onboarding con
   datos de nacimiento (Swiss Ephemeris), **Carta Astral** completa, **Numerología** completa,
   los **3 temas** visuales y ajustes. Todo desbloqueado, sin pagos.
-- **Fase 2 — Lo que engancha:** pantalla "Hoy" con horóscopo diario / tránsitos reales y las
-  barras de puntuación (amor, finanzas, trabajo, salud, bienestar, suerte…) en periodos
-  hoy/semana/mes/año. El horóscopo occidental ofrece **dos modos con una palanca**: (1)
+- **Fase 2 — Lo que engancha:** pantalla "Hoy" con horóscopo diario / tránsitos reales y
+  **"Tu Clima"** — el pronóstico de tus áreas de vida (amor, finanzas, trabajo, salud, bienestar,
+  suerte, sexo, familia…) en periodos hoy/semana/mes/año. (Nombre interno antiguo: "barras de
+  puntuación"; **no se llama "barras" en la UI** — es "Tu Clima"/pronóstico.) Cada área es
+  **tocable**: al pulsarla abre una **hoja inferior con una lectura larga y explicativa** de por
+  qué hoy va así, basada en los tránsitos. El indicador de cada área **degrada de color según el
+  valor** (tormenta/rojo en lo bajo → despejado/dorado en lo alto). El horóscopo occidental ofrece
+  **dos modos con una palanca**: (1)
   **personalizado por tránsitos** sobre la carta completa del usuario (modo principal,
   recomendado) y (2) **clásico por signo solar** ("Acuario hoy…", vista rápida/compartible).
   La sección Horóscopo incluye además el **horóscopo chino por animal del año** (capa ligera);
@@ -478,6 +483,11 @@ siga este mismo ADN. Imágenes de referencia: `~/Downloads/IMG_7517…7528.jpg` 
 - **Mezcla yóguica** (sello distintivo): referencias a Yoga Sutras, sánscrito (svadhyaya,
   santosha, aparigraha), meditación y prácticas conscientes en los consejos.
 - Enmarca siempre como **autoconocimiento**, no como verdad literal ni consejo médico/financiero.
+- **Realismo, no "todo color de rosa" (decisión de Gio):** el contenido es **honesto y equilibrado**,
+  nombra también lo difícil — el riesgo, la sombra, la advertencia, el día flojo. Compasivo no es
+  complaciente: un día "amor 38/Tu Clima tormentoso" se dice tal cual, con su porqué y su práctica,
+  no se maquilla. La estructura "Energía fluida / Energía no fluida / Tips" ya obliga a esto; se
+  refuerza como **principio transversal**: la credibilidad emocional nace de ser real, no halagador.
 
 ### Estructura por posición (plantilla base de cada interpretación)
 
