@@ -59,7 +59,8 @@ Cada fase tendrá su propio documento de diseño. **Este spec cubre solo la Fase
 6. **Sección Numerología:** números clave con sus interpretaciones (plantillas propias ES/EN).
 7. **Sistema de 3 temas** (Aurora Suave, Cósmico Vibrante, Observatorio) + modo Auto,
    y control "Estilo de la carta astral" (siempre nocturna / según el tema).
-8. **Sección Ajustes:** tema, estilo de carta, idioma, sistema de casas, gestión de perfiles.
+8. **Sección Ajustes:** tema, estilo de carta, **estilo de lectura**, idioma, sistema de casas,
+   gestión de perfiles.
 
 ### Fuera de alcance (fases posteriores)
 
@@ -170,9 +171,11 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 
 - `profiles_user` — cuenta (1:1 con auth.users).
 - `birth_profiles` — perfiles de personas (N por cuenta): nombre, fecha, hora, lugar,
-  lat, long, zona horaria, ¿hora desconocida?.
+  lat, long, zona horaria, ¿hora desconocida?, **género gramatical (fem/masc, obligatorio)**.
 - `charts` — carta calculada cacheada (FK a birth_profile + sistema de casas + JSON resultado).
-- `settings` — preferencias por cuenta: tema, estilo de carta, idioma, sistema de casas.
+- `settings` — preferencias por cuenta: tema, estilo de carta, idioma, sistema de casas,
+  **estilo de lectura** (por defecto: evolutivo-yóguico).
+- `interpretations` — biblioteca de textos, indexada por `(posición, estilo, idioma, género)`.
 - **RLS:** cada usuario solo accede a sus propios perfiles, cartas y ajustes.
 
 ---
@@ -182,7 +185,7 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 ### Alta y primer perfil
 
 1. Usuario se registra (email + contraseña vía Supabase Auth).
-2. Onboarding: crea su primer **perfil de nacimiento** (nombre, fecha, hora, lugar).
+2. Onboarding: crea su primer **perfil de nacimiento** (nombre, fecha, hora, lugar, género).
 3. El lugar se geocodifica (lat/long + zona horaria). Si no sabe la hora, marca "hora
    desconocida" (se calcula carta sin casas/ascendente y se avisa).
 4. Backend calcula carta + numerología; se cachea.
@@ -300,6 +303,26 @@ en Escorpio") con su propio bloque + Tips.
 Además de los 10 planetas: **Quirón** (herida/sanación), **Nodo Norte y Sur** (camino evolutivo
 / karma), **Lilith** (sombra), y **dignidades** (domicilio, exilio, exaltación, caída). El motor
 de cálculo (sección 4) ya los incluye.
+
+### Estilos de lectura (seleccionables)
+
+La app soporta **varios estilos de lectura** que el usuario elige (en Ajustes, y/o por informe):
+
+- **Evolutivo-yóguico (insignia, por defecto):** el descrito arriba. Es el único que se escribe
+  **completo en la Fase 1**.
+- Otros estilos previstos (se añaden después, posiblemente como premium): tradicional,
+  psicológico, y directo/moderno (tipo Co-Star).
+
+Implicación: las interpretaciones se guardan **indexadas por `estilo`** (además de idioma y
+género), para poder sumar estilos sin rehacer nada. La biblioteca de textos se diseña con esa
+clave compuesta desde el día uno.
+
+### Género
+
+Cada perfil **elige género gramatical al crearse (femenino / masculino)** — campo obligatorio.
+Las interpretaciones tienen variante por género. (Se podría añadir "neutro" más adelante sin
+romper el modelo.) Clave de un texto de interpretación:
+`(posición, estilo, idioma, género)`.
 
 ### Norte del contenido
 
