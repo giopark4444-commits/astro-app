@@ -317,11 +317,24 @@ Perfil). No son Fase 1; se priorizan al planear las fases siguientes.
 - **Notificaciones inteligentes por tránsito** + widget de pantalla de bloqueo. Fase 2.
 - **Rachas y logros suaves** (gamificación zen por explorar y escribir en el diario). Fase 3.
 
-Navegación (decisión de diseño asociada): barra inferior **fija** con los 4 mundos
-(Carta · Numerología · Horóscopo Occidental · Horóscopo Oriental) + Perfil; las secciones
-complementarias de cada mundo van como **tabs superiores contextuales** dentro del mundo; lo
-transversal (Guía, Diario, Calendario lunar, Ajustes) en el **menú desplegable ☰**.
-(Modelo "Ⓑ", pendiente de confirmación de Gio frente al modelo "Ⓐ" de barra inferior contextual.)
+Navegación (decisión de Gio, modelo Ⓑ de barra fija):
+
+- **Barra inferior fija = 4 secciones:**
+  1. **Carta Astral** (natal + revoluciones + tránsitos, como sub-tabs arriba).
+  2. **Numerología** (núcleo, ciclos, kármicos).
+  3. **Horóscopo** = Occidental (zodiacal) + Chino, con palanca; más periodos hoy/semana/mes/año.
+  4. **Saju · Tarot**, con palanca.
+- **Perfil:** avatar arriba a la derecha que abre un menú (bottom sheet) con lo **complementario
+  y transversal**: cambiar de persona, ver cualquier sección por día/semana/mes/año, **preguntar
+  algo específico** ("¿cómo va mi amor esta semana?"), Brújula/guía, Diario & Manifestación,
+  Calendario lunar, y Ajustes.
+- Las **sub-secciones de cada mundo** van como tabs/palancas **arriba** (contextuales), no en la
+  barra inferior (que permanece estable).
+
+Pendientes de confirmar con Gio: (a) **"Tarot"** como cuarto pilar de la sección 4 (Gio escribió
+"tor"; interpretado como Tarot — sería un sistema nuevo además de astrología/numerología/Ba Zi/
+Saju); (b) si el **Ba Zi** va en "Horóscopo" (junto al occidental) o junto al Saju (ambos son
+cartas de Cuatro Pilares), dejando solo el **animal chino** en Horóscopo.
 
 ## 9. Voz y enfoque del contenido (definido con referencias de Gio)
 
