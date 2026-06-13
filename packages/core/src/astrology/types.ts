@@ -6,6 +6,9 @@ export type Zodiac = "tropical" | "sidereal";
 export type NodeType = "true" | "mean";
 export type LilithType = "mean" | "oscu";
 
+/** Tipo de carta. Fase 1 solo calcula la natal; se extiende al sumar cartas derivadas. */
+export type ChartKind = "natal"; // extender luego: | "solar_return" | "lunar_return" | "transit"
+
 export interface ChartInput {
   /** fecha y hora CIVIL local de nacimiento */
   year: number;
