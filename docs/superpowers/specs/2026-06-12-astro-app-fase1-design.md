@@ -356,7 +356,23 @@ Las interpretaciones tienen variante por género. (Se podría añadir "neutro" m
 romper el modelo.) Clave de un texto de interpretación:
 `(posición, estilo, idioma, género)`.
 
-### Información progresiva (principio transversal de toda la app)
+### Principio rector: una app para "jugar y explorar"
+
+Decisión central de Gio: la app no es un documento que se lee, es un espacio que se **explora con
+el dedo**. Toda pantalla invita a tocar, cambiar y descubrir. Reglas de diseño que se aplican en
+TODAS las secciones (presentes y futuras):
+
+- **Todo lo que muestra un dato es tocable** y abre más profundidad (planeta, número, pilar,
+  barra, aspecto, casa).
+- **Cambios en vivo, sin recargar:** cambiar de persona, de pareja (en compatibilidad), de tema
+  o de periodo reconfigura la pantalla al instante con transición suave.
+- **Hub de inicio:** la pantalla principal reúne los sistemas (Carta, Numerología, Ba Zi, Saju)
+  como tarjetas de entrada + la síntesis del día.
+- **Hojas inferiores (bottom sheets)** para las lecturas profundas, en vez de navegar a otra
+  pantalla: mantiene al usuario en contexto y anima a seguir explorando.
+- **Microinteracciones** (escala al tocar, glow, transiciones) para que se sienta vivo.
+
+### Información progresiva (parte del principio anterior)
 
 Patrón de UX para todas las secciones (carta, numerología, Ba Zi, Saju…):
 
