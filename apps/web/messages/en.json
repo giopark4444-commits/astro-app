@@ -3,5 +3,30 @@
   "nav": { "carta": "Chart", "numeros": "Numbers", "hoy": "Today", "pilares": "Pillars", "perfil": "Profile" },
   "auth": { "login": "Log in", "signup": "Sign up", "email": "Email", "password": "Password", "logout": "Log out", "noAccount": "No account yet?", "haveAccount": "Already have an account?", "errEmail": "Invalid email", "errPassword": "Password must be at least 8 characters", "errAuth": "Incorrect email or password", "confirmEmail": "Check your email to confirm your account" },
   "settings": { "title": "Settings", "lightMode": "Light mode", "light": "Light", "dark": "Dark", "auto": "Auto", "theme": "Theme", "language": "Language", "observatory": "Observatory", "aurora": "Aurora", "cosmic": "Cosmic" },
-  "hoy": { "greeting": "Hi", "lenses": "Your lenses", "soon": "Coming soon" }
+  "hoy": { "greeting": "Hi", "lenses": "Your lenses", "soon": "Coming soon" },
+  "onboarding": {
+    "progress": "Step {n} of {total}",
+    "back": "Back",
+    "next": "Continue",
+    "create": "Weave my map",
+    "creating": "Weaving your map…",
+    "nameEyebrow": "Let's begin",
+    "nameTitle": "What's your name?",
+    "namePlaceholder": "Your full name",
+    "dateEyebrow": "Your arrival",
+    "dateTitle": "What day were you born?",
+    "timeEyebrow": "The moment",
+    "timeTitle": "What time were you born?",
+    "timeUnknown": "I don't know my time",
+    "timeHint": "The time sharpens your chart; you can leave it for later.",
+    "placeEyebrow": "The sky that day",
+    "placeTitle": "Where were you born?",
+    "placePlaceholder": "Your city of birth",
+    "genderEyebrow": "So we speak to you well",
+    "genderTitle": "How shall we address you?",
+    "genderFeminine": "Feminine",
+    "genderMasculine": "Masculine",
+    "genderNeutral": "Neutral",
+    "genderHint": "Sets the grammatical gender your readings use."
+  }
 }

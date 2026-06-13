@@ -3,5 +3,30 @@
   "nav": { "carta": "Carta", "numeros": "Números", "hoy": "Hoy", "pilares": "Pilares", "perfil": "Perfil" },
   "auth": { "login": "Entrar", "signup": "Crear cuenta", "email": "Correo", "password": "Contraseña", "logout": "Salir", "noAccount": "¿No tienes cuenta?", "haveAccount": "¿Ya tienes cuenta?", "errEmail": "Correo inválido", "errPassword": "La contraseña debe tener al menos 8 caracteres", "errAuth": "Correo o contraseña incorrectos", "confirmEmail": "Revisa tu correo para confirmar tu cuenta" },
   "settings": { "title": "Ajustes", "lightMode": "Modo de luz", "light": "Claro", "dark": "Oscuro", "auto": "Auto", "theme": "Tema", "language": "Idioma", "observatory": "Observatorio", "aurora": "Aurora", "cosmic": "Cósmico" },
-  "hoy": { "greeting": "Hola", "lenses": "Tus lentes", "soon": "Próximamente" }
+  "hoy": { "greeting": "Hola", "lenses": "Tus lentes", "soon": "Próximamente" },
+  "onboarding": {
+    "progress": "Paso {n} de {total}",
+    "back": "Atrás",
+    "next": "Continuar",
+    "create": "Tejer mi mapa",
+    "creating": "Tejiendo tu mapa…",
+    "nameEyebrow": "Empecemos",
+    "nameTitle": "¿Cómo te llamas?",
+    "namePlaceholder": "Tu nombre completo",
+    "dateEyebrow": "Tu llegada",
+    "dateTitle": "¿Qué día naciste?",
+    "timeEyebrow": "El instante",
+    "timeTitle": "¿A qué hora naciste?",
+    "timeUnknown": "No sé mi hora",
+    "timeHint": "La hora afina tu carta; puedes dejarla para después.",
+    "placeEyebrow": "El cielo de ese día",
+    "placeTitle": "¿Dónde naciste?",
+    "placePlaceholder": "Tu ciudad de nacimiento",
+    "genderEyebrow": "Para hablarte bien",
+    "genderTitle": "¿Cómo te nombramos?",
+    "genderFeminine": "Femenino",
+    "genderMasculine": "Masculino",
+    "genderNeutral": "Neutro",
+    "genderHint": "Define el género con que te hablan tus lecturas."
+  }
 }

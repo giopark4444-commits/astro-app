@@ -1,71 +1,99 @@
 /* Tokens de Aluna. El tema se fija con data-theme + data-mode en <html>.
-   Acento por sección: sobreescribir --acc en el contenedor (oro por defecto). */
+   Acento por sección: sobreescribir --acc (y --acc-rgb) en el contenedor. */
 :root {
   --font-ui: var(--font-quicksand), system-ui, sans-serif;
   --font-display: var(--font-cormorant), Georgia, serif;
   --radius: 16px;
   --radius-lg: 22px;
   --acc: #e7c986;
+  --acc-rgb: 231, 201, 134;
+
+  /* Movimiento (curvas suaves, místicas) */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur: 0.55s;
+  --dur-fast: 0.22s;
+
+  /* Resplandor y elevación, derivados del acento del tema */
+  --glow: 0 0 24px rgba(var(--acc-rgb), 0.42);
+  --glow-soft: 0 0 14px rgba(var(--acc-rgb), 0.28);
+  --elev: 0 18px 50px rgba(6, 8, 24, 0.45);
 }
 
 /* ---------------- OBSERVATORY (noche dorada) ---------------- */
 [data-theme="observatory"] {
   --bg: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
   --surface: rgba(150, 150, 190, 0.07);
+  --surface-2: rgba(231, 201, 134, 0.06);
   --ink: #ece7f6;
   --soft: rgba(233, 228, 245, 0.6);
   --line: rgba(231, 201, 134, 0.2);
   --acc: #e7c986;
+  --acc-rgb: 231, 201, 134;
   --stars: 0.5;
 }
 [data-theme="observatory"][data-mode="light"] {
   --bg: radial-gradient(125% 85% at 50% -8%, #fdf3ec 0%, #f4eefb 55%, #efe7f8 100%);
   --surface: rgba(255, 255, 255, 0.6);
+  --surface-2: rgba(202, 168, 95, 0.08);
   --ink: #3d3650;
   --soft: rgba(61, 54, 80, 0.62);
   --line: rgba(142, 124, 195, 0.25);
   --acc: #caa85f;
+  --acc-rgb: 202, 168, 95;
   --stars: 0;
+  --elev: 0 18px 44px rgba(120, 100, 160, 0.18);
 }
 
 /* ---------------- AURORA (claro pastel) ----------------
-   Nota: en Aurora el DEFAULT es CLARO; [data-mode="dark"] es el override
-   (al revés que Observatory/Cosmic, cuyo default es oscuro). */
+   Nota: en Aurora el DEFAULT es CLARO; [data-mode="dark"] es el override. */
 [data-theme="aurora"] {
   --bg: linear-gradient(170deg, #f6f2fb 0%, #fdf3ec 100%);
   --surface: rgba(255, 255, 255, 0.6);
+  --surface-2: rgba(155, 143, 192, 0.08);
   --ink: #4a4458;
   --soft: rgba(74, 68, 88, 0.6);
   --line: rgba(155, 143, 192, 0.25);
   --acc: #9b8fc0;
+  --acc-rgb: 155, 143, 192;
   --stars: 0;
+  --elev: 0 18px 44px rgba(160, 130, 220, 0.2);
 }
 [data-theme="aurora"][data-mode="dark"] {
   --bg: linear-gradient(170deg, #211c33 0%, #2a2140 100%);
   --surface: rgba(180, 170, 210, 0.08);
+  --surface-2: rgba(201, 184, 242, 0.07);
   --ink: #ece7f6;
   --soft: rgba(236, 231, 246, 0.6);
   --line: rgba(180, 160, 230, 0.22);
   --acc: #c9b8f2;
+  --acc-rgb: 201, 184, 242;
   --stars: 0.25;
+  --elev: 0 18px 50px rgba(6, 8, 24, 0.45);
 }
 
 /* ---------------- COSMIC (neón oscuro) ---------------- */
 [data-theme="cosmic"] {
   --bg: linear-gradient(165deg, #1c0529 0%, #3d0b54 70%, #6d1a6b 100%);
   --surface: rgba(255, 255, 255, 0.07);
+  --surface-2: rgba(255, 138, 224, 0.07);
   --ink: #f3eaff;
   --soft: rgba(243, 234, 255, 0.62);
   --line: rgba(255, 138, 224, 0.28);
   --acc: #ff8ae0;
+  --acc-rgb: 255, 138, 224;
   --stars: 0.4;
 }
 [data-theme="cosmic"][data-mode="light"] {
   --bg: linear-gradient(165deg, #f7eefc 0%, #fbeaf6 100%);
   --surface: rgba(255, 255, 255, 0.7);
+  --surface-2: rgba(184, 107, 255, 0.07);
   --ink: #3a2342;
   --soft: rgba(58, 35, 66, 0.6);
   --line: rgba(154, 107, 255, 0.25);
   --acc: #b86bff;
+  --acc-rgb: 184, 107, 255;
   --stars: 0;
+  --elev: 0 18px 44px rgba(154, 107, 255, 0.2);
 }
