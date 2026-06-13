@@ -36,7 +36,11 @@ usable de verdad:
   los **3 temas** visuales y ajustes. Todo desbloqueado, sin pagos.
 - **Fase 2 — Lo que engancha:** pantalla "Hoy" con horóscopo diario / tránsitos reales y las
   barras de puntuación (amor, finanzas, trabajo, salud, bienestar, suerte…) en periodos
-  hoy/semana/mes/año.
+  hoy/semana/mes/año. El horóscopo occidental ofrece **dos modos con una palanca**: (1)
+  **personalizado por tránsitos** sobre la carta completa del usuario (modo principal,
+  recomendado) y (2) **clásico por signo solar** ("Acuario hoy…", vista rápida/compartible).
+  Nota conceptual: el horóscopo NO es la carta natal — la carta es la foto fija de nacimiento
+  (quién eres); el horóscopo es el cielo actual sobre tu carta (qué pasa ahora).
 - **Fase 3 — Lo viral:** Compatibilidad (sinastría astrológica + numerológica) con barras
   compartibles (amor, sexo, comunicación, confianza, familia…).
 - **Fase 4 — Monetización:** suscripción + informes PDF + lecturas profundas con IA (Claude).
