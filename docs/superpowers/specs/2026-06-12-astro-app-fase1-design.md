@@ -54,6 +54,9 @@ usable de verdad:
   Aquí entran los **informes largos estilo Gio**: Carta Astral evolutiva completa (planeta por
   planeta, casa por casa) y **Revolución Solar** (lectura del año, cumpleaños a cumpleaños, con
   "temas a trabajar" + mantra personalizado). Ver sección 9 para la voz.
+  - **Precios (boceto, decisión Gio 2026-06-13): Aluna Plus = $4.99/mes o $39.99/año** (~$3.33/mes,
+    "4 meses gratis", ~33% de descuento; pensado accesible para LATAM, con precio regional aún más
+    suave a evaluar). Informe PDF suelto sin suscripción: ~$9–14. Números afinables en Fase 4.
   - **Frontera gratis vs premium (boceto, decisión Gio: que el gratis sea generoso):** el nivel
     **gratis no es mínimo**, da buena extensión — carta + numerología con interpretación de
     **planeta-en-signo Y planeta-en-casa** (núcleo "fluida/no fluida/tips"), balance, y un perfil.
