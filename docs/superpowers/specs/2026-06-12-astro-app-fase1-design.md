@@ -112,6 +112,22 @@ Implementación: **tokens de tema** (paleta, tipografías, radios, sombras) en u
 de verdad compartida; cada tema es un conjunto de tokens. Cambiar el tema reasigna tokens, no
 re-maqueta pantallas.
 
+### Modelo de temas en Ajustes (decisión Gio, 2026-06-13) — dos ejes
+
+El usuario controla la apariencia con **dos palancas independientes** que se combinan:
+
+1. **Modo de luz (interruptor maestro, global): Claro / Oscuro / Auto.** Cambia **toda la app**
+   de un golpe a clara u oscura (Auto sigue el reloj del sistema). Es lo primero y más simple.
+2. **Tema / personalidad visual:** Aurora, Cósmico, Observatorio (los 3 ya validados) — define
+   tipografías, formas y el carácter de la paleta. Cada tema declara su variante clara y oscura,
+   así que respeta el interruptor maestro.
+
+Sobre esto se mantiene la **identidad por sección (acento cultural):** astrología occidental y
+numerología siguen el tema/acento elegido; **Ba Zi** usa acento rojo/dorado chino; **Saju**, jade/
+verde coreano. Ese acento por sección **convive** con el modo de luz: p. ej. el Ba Zi se ve
+rojo-dorado tanto en claro como en oscuro. Resumen: **modo de luz = global; tema = personalidad;
+acento = identidad de cada sección.** Todo en `settings`, recordado por usuario.
+
 ### Estilo de la carta astral
 
 Control aparte en Ajustes con dos modos:
