@@ -139,9 +139,15 @@ puntos. Si no se conoce la hora, paso para marcar "hora desconocida".
 
 ### Navegación
 
-Barra inferior de 5 secciones. En la Fase 1 están activas: **Carta**, **Números**, **Ajustes/Perfil**.
-Los slots **Hoy** y **Pareja** se muestran como "próximamente" (placeholders) para no romper la
-estructura que tendrá la app completa.
+Modelo decidido (ver detalle en sección 8-bis): **barra inferior fija de 4 mundos** — Carta Astral,
+Numerología, Horóscopo, Cuatro Pilares Orientales — + **avatar de Perfil arriba** (abre menú con
+lo transversal: cambiar de persona, Ajustes, Brújula, Diario, Compatibilidad, etc.). Las
+sub-secciones de cada mundo van como tabs/palancas **arriba**, no abajo.
+
+En la **Fase 1** están activos **Carta Astral** y **Numerología**; **Horóscopo** (Fase 2) y
+**Cuatro Pilares Orientales** (Fase 5) se muestran como "próximamente" para no romper la estructura
+final. **Ajustes vive dentro del menú de Perfil** (no es un mundo de la barra). La síntesis del día
+("Hoy") es la pantalla **hub de inicio**, no una pestaña.
 
 ### Rueda de la carta (referencia visual ya diseñada)
 
@@ -224,7 +230,7 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 | Componente | Qué hace | Depende de |
 |------------|----------|------------|
 | `compute-chart` (Edge Function) | Recibe fecha/hora/lat/long/zona horaria + sistema de casas; devuelve posiciones, casas, aspectos. | Swiss Ephemeris |
-| `compute-numerology` (lib server) | Recibe nombre completo + fecha; devuelve números (vida, destino, alma, personalidad, año personal). | — |
+| `compute-numerology` (lib server) | Recibe nombre completo + fecha; devuelve la **hoja pitagórica completa** (núcleo + pináculos/desafíos con edades + ciclos personales + tabla de inclusión/intensidad + lecciones y deudas kármicas + planos de expresión + letras de tránsito/esencia), con la reducción paso a paso. Cálculo puro, sin deps. | — |
 | `interpretations` (biblioteca de textos) | Mapea cada posición/número a su texto ES/EN. | — |
 | `geocode` (servicio/dataset) | Lugar de nacimiento → lat/long + zona horaria histórica. | Dataset ciudades + tz |
 | Base de datos | Cuentas, perfiles, cartas cacheadas. | Supabase Postgres + RLS |
@@ -237,7 +243,12 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 - Estándar de oro en precisión.
 - Se ejecuta **en el servidor** (Edge Function) para no cargar binarios pesados en el cliente.
 - **Sistema de casas por defecto: Placidus** (configurable en Ajustes: Placidus, Koch,
-  Casas Iguales, Whole Sign).
+  Casas Iguales, Whole Sign, Regiomontano, Porfirio — los astrólogos discuten por esto, debe
+  poder cambiarse y recalcular en vivo).
+- **Zodiaco:** **tropical** por defecto (estándar occidental). Soporte sideral + ayanamsha queda
+  como opción avanzada a evaluar (ver sección 8, decisión abierta).
+- **Nodo y Lilith configurables:** Nodo **verdadero/medio** (true/mean) y Lilith **media/
+  osculatriz** — distinción que un profesional espera poder elegir.
 - El resultado de una carta se **cachea** en la tabla `charts` (clave: datos de nacimiento +
   sistema de casas), porque para datos fijos el resultado nunca cambia.
 - **Pensar a futuro (Fase 5):** este mismo motor expondrá la **longitud solar** y la fecha/hora
@@ -262,7 +273,8 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 
 - `profiles_user` — cuenta (1:1 con auth.users).
 - `birth_profiles` — perfiles de personas (N por cuenta): nombre, fecha, hora, lugar,
-  lat, long, zona horaria, ¿hora desconocida?, **género gramatical (fem/masc, obligatorio)**.
+  lat, long, zona horaria, ¿hora desconocida?, **género gramatical para la voz del texto
+  (femenino / masculino / neutro; obligatorio elegir, neutro disponible)**.
 - `charts` — carta calculada cacheada (FK a birth_profile + sistema de casas + JSON resultado).
 - `settings` — preferencias por cuenta: tema, estilo de carta, idioma, sistema de casas,
   **estilo de lectura** (por defecto: evolutivo-yóguico), **nivel de detalle** (resumen/detallado).
@@ -313,7 +325,11 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 
 - **Motor de astrología:** casos conocidos contra valores de referencia de Swiss Ephemeris
   (cartas de fechas/lugares con resultados publicados) — tolerancia de minutos de arco.
-- **Numerología:** casos con resultados calculados a mano (incluyendo números maestros).
+- **Numerología:** casos con resultados calculados a mano (incluyendo números maestros, **deudas
+  kármicas, lecciones kármicas y tabla de inclusión**, no solo el núcleo).
+- **Lámina técnica de la carta (credibilidad pro):** aspectario (aspectos y **orbes** correctos,
+  aplicativo/separativo), **dignidades**, distribución elemento/modalidad/polaridad y detección de
+  **patrones** (stellium, T-cuadrada, yod) contra cartas de referencia conocidas.
 - **Geocodificación + zona horaria:** casos con cambios históricos de huso/horario de verano.
 - **RLS:** un usuario no puede leer perfiles/cartas de otro.
 - **Render de la rueda:** snapshot de posiciones (planetas en el grado correcto del SVG).
@@ -329,7 +345,10 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
   control de estilo de carta funcionando.
 - Funciona en **web (PWA)** y en **móvil (Expo)** sobre el **mismo backend**.
 - Todo en **español e inglés**.
-- La estructura deja "huecos" claros (Hoy, Pareja) listos para las fases 2 y 3.
+- La estructura deja "huecos" claros (**Horóscopo**, **Cuatro Pilares Orientales**) en la barra,
+  listos para las fases 2 y 5; los transversales (Hoy/hub, Compatibilidad) ya tienen su lugar.
+- **Modo Pro de la Carta y de la Numerología** (ambos pilares de Fase 1) muestran su lámina
+  técnica completa y correcta, validada contra herramientas de referencia.
 
 ---
 
@@ -342,6 +361,17 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 - **Biblioteca de interpretaciones (ES/EN)** es mucho texto; en Fase 1 se cubren las posiciones
   esenciales y se amplía luego. La calidad de estos textos define la percepción de la app.
 - Mantener `@astro/core` como única fuente de verdad para que web y móvil nunca diverjan.
+
+**Decisiones abiertas (a cerrar antes del plan):**
+- **Zodiaco sideral + ayanamsha:** ¿la app es solo tropical (estándar occidental, sirve a la
+  inmensa mayoría) o también ofrece sideral/védico? Añadir sideral amplía público pero suma
+  complejidad (elección de ayanamsha, doble juego de interpretaciones).
+- **Hogar de la Compatibilidad/Sinastría (Fase 3):** en el modelo de 4 mundos ya no hay pestaña
+  "Pareja". Candidatos: (a) herramienta transversal en el menú de Perfil; (b) un "tipo de carta"
+  dentro de Carta Astral (sinastría/compuesta ya están en cartas derivadas) + modo paralelo en
+  Numerología. Recomendación: (a) como entrada principal, reusando (b) por dentro.
+- **Aspectos a los ángulos (AC/MC):** el aspectario pro debería incluir aspectos a AC/MC y entre
+  planetas; confirmar alcance de orbes a ángulos.
 
 ---
 
