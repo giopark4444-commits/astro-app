@@ -28,5 +28,6 @@
     "genderMasculine": "Masculino",
     "genderNeutral": "Neutro",
     "genderHint": "Define el género con que te hablan tus lecturas."
-  }
+  },
+  "profile": { "title": "Perfiles", "new": "Nuevo perfil" }
 }

@@ -28,5 +28,6 @@
     "genderMasculine": "Masculine",
     "genderNeutral": "Neutral",
     "genderHint": "Sets the grammatical gender your readings use."
-  }
+  },
+  "profile": { "title": "Profiles", "new": "New profile" }
 }
