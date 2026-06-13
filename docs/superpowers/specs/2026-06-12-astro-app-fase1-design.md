@@ -241,7 +241,15 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 ### Astrología — Swiss Ephemeris
 
 - Estándar de oro en precisión.
-- Se ejecuta **en el servidor** (Edge Function) para no cargar binarios pesados en el cliente.
+- Se ejecuta **en el servidor** para no cargar binarios pesados en el cliente.
+- **Tensión a resolver en el plan (precisión vs entorno):** la precisión grado/segundo de calidad
+  JPL requiere los **archivos de efemérides** (`.se1`, pesados). La variante que corre sin archivos
+  (aproximación **Moshier**) es buena (~arcosegundos) pero no es grado-JPL pleno. Como la
+  credibilidad es no negociable, la recomendación es **un servicio de cálculo dedicado** (contenedor
+  con Swiss Ephemeris + archivos, p. ej. `sweph` nativo) en vez de depender solo de un Edge
+  Function con WASM/Moshier. El Edge sigue valiendo como capa fina que llama a ese servicio y
+  cachea. Decisión final (Edge+WASM vs micro-servicio) se cierra en el plan, pero **la precisión
+  manda sobre la comodidad de despliegue**.
 - **Sistema de casas por defecto: Placidus** (configurable en Ajustes: Placidus, Koch,
   Casas Iguales, Whole Sign, Regiomontano, Porfirio — los astrólogos discuten por esto, debe
   poder cambiarse y recalcular en vivo).
@@ -285,7 +293,11 @@ resultado idéntico en web y móvil). Los clientes solo capturan datos y pintan 
 - `charts` — carta calculada cacheada (FK a birth_profile + sistema de casas + JSON resultado).
 - `settings` — preferencias por cuenta: tema, estilo de carta, idioma, sistema de casas,
   **estilo de lectura** (por defecto: evolutivo-yóguico), **nivel de detalle** (resumen/detallado).
-- `interpretations` — biblioteca de textos, indexada por `(posición, estilo, idioma, género)`.
+- `interpretations` — biblioteca de plantillas, indexada por `(tipo, clave, estilo, idioma)`,
+  donde `tipo` ∈ {posición-en-signo, posición-en-casa, aspecto, configuración, número} y `clave`
+  es la combinación correspondiente (p. ej. `sol·acuario`, `marte□saturno`, `camino-vida·11`).
+  **Género y perspectiva (1ª/3ª persona) NO se almacenan como filas aparte**: la plantilla lleva
+  variables gramaticales y se resuelven al renderizar (ver "Adaptación obligatoria", sección 9).
 - **RLS:** cada usuario solo accede a sus propios perfiles, cartas y ajustes.
 
 ---
@@ -456,16 +468,45 @@ en Escorpio") con su propio bloque + Tips.
 
 ### Adaptación obligatoria (lo que NO debe copiarse tal cual)
 
-- **Género:** las referencias están en femenino ("estás llamada"); la app debe adaptar el género
-  (masculino/femenino/neutro) según el perfil, o usar lenguaje neutro por defecto.
+- **Género:** las referencias están en femenino ("estás llamada"); la app adapta el género
+  (masculino/femenino/neutro) según el perfil.
+- **Perspectiva (1ª vs 3ª persona):** la carta puede ser la del propio usuario **o la de otra
+  persona** (pareja, hija, amigo). El texto debe poder hablar en **segunda persona** ("tu alma
+  vino a…") cuando el perfil es "yo", y en **tercera** ("el alma de [Nombre] vino a…", "ella/él
+  está llamada/o a…") cuando es otro. Es una dimensión que cruza TODO el corpus: hay que diseñar
+  las plantillas con variables de persona/nombre/pronombre desde el día 1, no reescribir luego.
 - **Idioma:** todo en ES y EN.
 - **Personalización:** los textos deben combinarse según la carta real de cada persona, no ser
   un bloque fijo.
 
+> **Implicación de diseño:** para no multiplicar el corpus a mano por (género × perspectiva ×
+> idioma), las plantillas se escriben con **variables gramaticales** (pronombre, terminaciones de
+> género, nombre, persona) y un motor de plantillas las resuelve. Se escribe **una** plantilla por
+> posición y voz; las variantes se generan, no se redactan a mano.
+
+### Volumen de contenido y alcance interpretativo de Fase 1 (realista)
+
+El corpus completo (planeta-en-signo ~168 + planeta-en-casa ~168 + aspectos ~450 + numerología
+~150 ≈ **900+ piezas** en la voz cuidada) es el verdadero trabajo del producto — "la voz es el
+producto". Para que Fase 1 sea **usable y honesta** sin esperar a tener 900 textos perfectos, se
+prioriza así:
+
+- **Imprescindible Fase 1 (escrito a mano, calidad insignia):** planeta-en-signo (168) +
+  planeta-en-casa (168) + núcleo numerológico (~30). Es lo que el usuario ve primero al tocar.
+- **Diferible dentro de Fase 1 / a Fase 1.5:** el corpus de **aspectos** (~450) y los kármicos/
+  ciclos numerológicos largos. Mientras tanto, el Modo Pro **ya muestra el dato** (el aspecto, su
+  orbe, aplicativo/separativo) con una **glosa breve** del significado del aspecto; la prosa larga
+  llega después. Así el profesional tiene su lámina aunque la prosa evolutiva aún no esté completa.
+- La **traducción ES↔EN** se gestiona como par desde el inicio (no se escribe el doble a ciegas).
+
+Decisión de método de autoría (a confirmar): ver pregunta abierta sobre cómo se redacta este corpus
+(100% a mano vs. borrador asistido + edición humana) — afecta el tiempo de Fase 1.
+
 ### Mapeo a fases
 
-- **Fase 1:** interpretaciones natales por posición (planeta/casa/aspecto) en esta voz y
-  estructura "fluida/no fluida/tips". Plantillas propias.
+- **Fase 1:** interpretaciones natales **núcleo** (planeta-en-signo, planeta-en-casa, núcleo
+  numerológico) en esta voz y estructura "fluida/no fluida/tips". Plantillas propias con variables
+  gramaticales. Aspectos y kármicos: dato en Modo Pro + glosa breve; prosa larga progresiva.
 - **Fase 4:** informes largos generados con IA (Claude) — Carta Astral evolutiva completa y
   **Revolución Solar** (lectura del año con "temas a trabajar" de ~10 puntos + **mantra
   personalizado** de cierre). La IA recibe los datos calculados + esta guía de voz como sistema.
