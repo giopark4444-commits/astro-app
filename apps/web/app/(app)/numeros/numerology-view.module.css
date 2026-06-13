@@ -110,3 +110,14 @@
 .sheetBody { display: flex; flex-direction: column; }
 .sheetN { font-family: var(--font-display); font-weight: 600; font-size: 56px; color: var(--acc); text-align: center; line-height: 1; text-shadow: 0 0 24px rgba(var(--acc-rgb), 0.4); }
 .soon { font-style: italic; font-size: 12px; color: var(--soft); margin: 10px 0 0; }
+
+/* Lectura rica del número (Plan 6 draft) */
+.calcMini { font-size: 12px; color: var(--soft); margin: 8px 0 16px; text-align: center; }
+.reading { display: flex; flex-direction: column; gap: 14px; }
+.lens { margin: 0 0 2px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 12.5px; font-style: italic; line-height: 1.55; color: var(--soft); text-align: center; }
+.essence { margin: 0; font-family: var(--font-display); font-size: 18px; line-height: 1.5; color: var(--ink); }
+.block { display: flex; flex-direction: column; gap: 5px; }
+.block p { margin: 0; font-size: 13.5px; line-height: 1.62; color: var(--ink); }
+.blockH { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 13px; }
+.practiceBlock p { color: var(--soft); }

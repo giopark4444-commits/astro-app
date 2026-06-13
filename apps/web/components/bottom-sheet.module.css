@@ -34,3 +34,15 @@
   color: var(--acc);
   margin: 0 0 14px;
 }
+
+/* Variante centrada (modal) — para reveals enfocados como el detalle de un número. */
+.centered { align-items: center; padding: 24px; }
+.modal {
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 20px 20px 22px;
+  max-height: 82dvh;
+  animation: aluna-rise-in var(--dur) var(--ease) both;
+}

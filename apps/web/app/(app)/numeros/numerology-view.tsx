@@ -1,9 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { computeNumerology, type NumerologyResult, type ReductionTrace } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { profileToNumerologyInput, formatReduction } from "@/lib/numerology";
+import { NUMBER_MEANINGS_ES, POSITION_LENS_ES } from "@/lib/content/numerology-es";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -15,6 +16,7 @@ const ageLabel = (from: number, to: number | null) => (to === null ? `${from}+` 
 
 export function NumerologyView() {
   const t = useTranslations("numerology");
+  const locale = useLocale();
   const { active } = useProfiles();
   const [pro, setPro] = useState(false);
   const [sheet, setSheet] = useState<{ labelKey: string; glossKey: string; trace: ReductionTrace } | null>(null);
@@ -145,14 +147,33 @@ export function NumerologyView() {
 
       <p className={styles.tapHint}>{t("tapHint")}</p>
 
-      <BottomSheet open={!!sheet} onClose={() => setSheet(null)} title={sheet ? t(sheet.labelKey) : ""}>
+      <BottomSheet open={!!sheet} onClose={() => setSheet(null)} center title={sheet ? t(sheet.labelKey) : ""}>
         {sheet && (
           <div className={styles.sheetBody}>
             <div className={styles.sheetN}>{sheet.trace.value}</div>
-            <div className={styles.calc}><span className={styles.calcLabel}>{t("yourCalc")}</span><br />{formatReduction(sheet.trace)}</div>
-            <h4 className={styles.cardSub}>{t("archetype")}</h4>
-            <p className={styles.muted}>{t(sheet.glossKey)}</p>
-            <p className={styles.soon}>{t("proseSoon")}</p>
+            <div className={styles.calcMini}><span className={styles.calcLabel}>{t("yourCalc")}:</span> {formatReduction(sheet.trace)}</div>
+            {(() => {
+              const meaning = locale === "es" ? NUMBER_MEANINGS_ES[sheet.trace.value] : undefined;
+              const lens = locale === "es" ? POSITION_LENS_ES[sheet.labelKey] : undefined;
+              if (!meaning) {
+                return (
+                  <>
+                    <h4 className={styles.cardSub}>{t("archetype")}</h4>
+                    <p className={styles.muted}>{t(sheet.glossKey)}</p>
+                    <p className={styles.soon}>{t("proseSoon")}</p>
+                  </>
+                );
+              }
+              return (
+                <div className={styles.reading}>
+                  {lens && <p className={styles.lens}>{lens}</p>}
+                  <p className={styles.essence}>{meaning.essence}</p>
+                  <div className={styles.block}><span className={styles.blockH}>✦ Energía fluida</span><p>{meaning.flow}</p></div>
+                  <div className={styles.block}><span className={styles.blockH}>◐ Energía no fluida</span><p>{meaning.shadow}</p></div>
+                  <div className={`${styles.block} ${styles.practiceBlock}`}><span className={styles.blockH}>☾ Tu práctica</span><p>{meaning.practice}</p></div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </BottomSheet>
