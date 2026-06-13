@@ -20,7 +20,7 @@ export function ThemeProvider({
 }: {
   initialTheme: Theme; initialMode: Mode;
   /** Persiste el cambio (fire-and-forget; en producción es una server action async). */
-  persist: (patch: PersistPatch) => void;
+  persist: (patch: PersistPatch) => void | Promise<void>;
   children: React.ReactNode;
 }) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
@@ -40,8 +40,8 @@ export function ThemeProvider({
     }
   }, [mode]);
 
-  const setTheme = useCallback((t: Theme) => { setThemeState(t); persist({ theme: t }); }, [persist]);
-  const setMode = useCallback((m: Mode) => { setModeState(m); persist({ light_mode: m }); }, [persist]);
+  const setTheme = useCallback((t: Theme) => { setThemeState(t); Promise.resolve(persist({ theme: t })).catch(console.error); }, [persist]);
+  const setMode = useCallback((m: Mode) => { setModeState(m); Promise.resolve(persist({ light_mode: m })).catch(console.error); }, [persist]);
 
   return <ThemeCtx.Provider value={{ theme, mode, setTheme, setMode }}>{children}</ThemeCtx.Provider>;
 }
