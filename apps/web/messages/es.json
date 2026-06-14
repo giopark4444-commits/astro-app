@@ -125,5 +125,15 @@
     "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años.",
     "weatherTitle": "Tu clima de hoy",
     "yourPossessive": "tu"
+  },
+  "chat": {
+    "title": "Pregúntale a Aluna",
+    "greeting": "Pregúntame lo que quieras sobre tu carta, tus números o tu camino. Te respondo desde tu cielo.",
+    "placeholder": "Escribe tu pregunta…",
+    "send": "Enviar",
+    "thinking": "Aluna está sintiendo tu pregunta…",
+    "error": "Algo se nubló. Inténtalo de nuevo.",
+    "dormantTitle": "El oráculo aún duerme",
+    "dormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu carta y tus números ya te hablan en sus secciones."
   }
 }

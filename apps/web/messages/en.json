@@ -125,5 +125,15 @@
     "kindProgressedHint": "Your advanced chart: how your sky matures over the years.",
     "weatherTitle": "Today's weather",
     "yourPossessive": "your"
+  },
+  "chat": {
+    "title": "Ask Aluna",
+    "greeting": "Ask me anything about your chart, your numbers, or your path. I answer from your sky.",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "thinking": "Aluna is feeling your question…",
+    "error": "Something clouded over. Try again.",
+    "dormantTitle": "The oracle still sleeps",
+    "dormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your chart and numbers already speak to you in their sections."
   }
 }

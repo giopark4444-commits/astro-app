@@ -31,6 +31,9 @@ export function ProfileMenu() {
           ))}
         </div>
         <div className={styles.actions}>
+          <Link href="/preguntar" className={styles.action} onClick={() => setOpen(false)}>
+            <span className={styles.plus} aria-hidden>☾</span> {t("chat.title")}
+          </Link>
           <Link href="/onboarding" className={styles.action} onClick={() => setOpen(false)}>
             <span className={styles.plus}>+</span> {t("profile.new")}
           </Link>
