@@ -6,7 +6,7 @@ import { Icon } from "./icon";
 import styles from "./bottom-nav.module.css";
 
 const ITEMS = [
-  { href: "/carta", icon: "wheel", key: "carta", soon: true },
+  { href: "/carta", icon: "wheel", key: "carta", soon: false },
   { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
   { href: "/hoy", icon: "sun", key: "hoy", soon: false },
   { href: "/pilares", icon: "pillars", key: "pilares", soon: true },

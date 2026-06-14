@@ -77,5 +77,41 @@
       "gated": "The longer readings awaken when Aluna finds her inner voice. For now, her essence already speaks to you:",
       "error": "Something clouded the reading. Try again in a moment. Meanwhile, her essence:"
     }
+  },
+  "carta": {
+    "title": "Birth Chart",
+    "subtitle": "Your birth sky",
+    "ascendant": "Ascendant",
+    "midheaven": "Midheaven",
+    "house": "House",
+    "balance": "Balance",
+    "elements": "Elements",
+    "modalities": "Modalities",
+    "dominant": "Dominant",
+    "pro": "Pro Mode",
+    "positions": "Positions",
+    "distribution": "Distribution",
+    "aspectsTitle": "Aspects",
+    "patterns": "Patterns",
+    "noPatterns": "No major patterns",
+    "solarNotice": "No birth time: solar chart. Houses and Ascendant are approximate.",
+    "houseSystem": "Houses",
+    "zodiac": "Zodiac",
+    "tropical": "Tropical",
+    "sidereal": "Sidereal",
+    "houseSystems": {
+      "placidus": "Placidus", "koch": "Koch", "equal": "Equal",
+      "whole": "Whole sign", "regiomontanus": "Regiomontanus", "porphyry": "Porphyry"
+    },
+    "tapHint": "Tap a planet to see its detail",
+    "retrograde": "Retrograde",
+    "applying": "Applying",
+    "separating": "Separating",
+    "orb": "Orb",
+    "speed": "Speed",
+    "ut": "UT",
+    "julianDay": "Julian day",
+    "loadingChart": "Charting your sky…",
+    "errorChart": "Couldn't chart it. Please try again."
   }
 }

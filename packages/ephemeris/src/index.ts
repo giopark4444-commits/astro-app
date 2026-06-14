@@ -1,5 +1,5 @@
 // packages/ephemeris/src/index.ts
-export { initEphemeris } from "./init";
+export { initEphemeris, setEphePath } from "./init";
 export { localToJulianDay } from "./time";
 export { computeBodies } from "./bodies";
 export { computeHouses } from "./houses";

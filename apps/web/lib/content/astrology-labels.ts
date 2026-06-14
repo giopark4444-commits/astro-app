@@ -1,0 +1,74 @@
+// Etiquetas de la carta astral (nombres por clave, ES+EN) + glifos de aspecto.
+// Los glifos de signos/planetas viven en @aluna/core (ZODIAC_SIGNS/PLANETS);
+// los de aspecto se añaden aquí (no están en el dominio).
+
+export interface AstroLabelMaps {
+  signs: Record<string, string>;
+  bodies: Record<string, string>;
+  aspects: Record<string, string>;
+  dignities: Record<string, string>;
+  elements: Record<string, string>;
+  modalities: Record<string, string>;
+  patterns: Record<string, string>;
+}
+
+export const ASPECT_GLYPHS: Record<string, string> = {
+  conjunction: "☌",
+  sextile: "⚹",
+  square: "□",
+  trine: "△",
+  opposition: "☍",
+  semisextile: "⚺",
+  semisquare: "∠",
+  sesquisquare: "⚼",
+  quincunx: "⚻",
+  quintile: "Q",
+};
+
+const ES: AstroLabelMaps = {
+  signs: {
+    aries: "Aries", taurus: "Tauro", gemini: "Géminis", cancer: "Cáncer",
+    leo: "Leo", virgo: "Virgo", libra: "Libra", scorpio: "Escorpio",
+    sagittarius: "Sagitario", capricorn: "Capricornio", aquarius: "Acuario", pisces: "Piscis",
+  },
+  bodies: {
+    sun: "Sol", moon: "Luna", mercury: "Mercurio", venus: "Venus", mars: "Marte",
+    jupiter: "Júpiter", saturn: "Saturno", uranus: "Urano", neptune: "Neptuno", pluto: "Plutón",
+    chiron: "Quirón", north_node: "Nodo Norte", south_node: "Nodo Sur", lilith: "Lilith",
+  },
+  aspects: {
+    conjunction: "Conjunción", sextile: "Sextil", square: "Cuadratura", trine: "Trígono",
+    opposition: "Oposición", semisextile: "Semisextil", semisquare: "Semicuadratura",
+    sesquisquare: "Sesquicuadratura", quincunx: "Quincuncio", quintile: "Quintil",
+  },
+  dignities: { domicile: "Domicilio", exaltation: "Exaltación", exile: "Exilio", fall: "Caída" },
+  elements: { fire: "Fuego", earth: "Tierra", air: "Aire", water: "Agua" },
+  modalities: { cardinal: "Cardinal", fixed: "Fijo", mutable: "Mutable" },
+  patterns: { stellium: "Stellium", grand_trine: "Gran Trígono", t_square: "T-Cuadrada" },
+};
+
+const EN: AstroLabelMaps = {
+  signs: {
+    aries: "Aries", taurus: "Taurus", gemini: "Gemini", cancer: "Cancer",
+    leo: "Leo", virgo: "Virgo", libra: "Libra", scorpio: "Scorpio",
+    sagittarius: "Sagittarius", capricorn: "Capricorn", aquarius: "Aquarius", pisces: "Pisces",
+  },
+  bodies: {
+    sun: "Sun", moon: "Moon", mercury: "Mercury", venus: "Venus", mars: "Mars",
+    jupiter: "Jupiter", saturn: "Saturn", uranus: "Uranus", neptune: "Neptune", pluto: "Pluto",
+    chiron: "Chiron", north_node: "North Node", south_node: "South Node", lilith: "Lilith",
+  },
+  aspects: {
+    conjunction: "Conjunction", sextile: "Sextile", square: "Square", trine: "Trine",
+    opposition: "Opposition", semisextile: "Semisextile", semisquare: "Semisquare",
+    sesquisquare: "Sesquiquadrate", quincunx: "Quincunx", quintile: "Quintile",
+  },
+  dignities: { domicile: "Domicile", exaltation: "Exaltation", exile: "Detriment", fall: "Fall" },
+  elements: { fire: "Fire", earth: "Earth", air: "Air", water: "Water" },
+  modalities: { cardinal: "Cardinal", fixed: "Fixed", mutable: "Mutable" },
+  patterns: { stellium: "Stellium", grand_trine: "Grand Trine", t_square: "T-Square" },
+};
+
+export function astroLabels(locale: string): AstroLabelMaps {
+  return locale === "en" ? EN : ES;
+}

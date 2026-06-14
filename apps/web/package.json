@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@aluna/core": "workspace:*",
+    "@aluna/ephemeris": "workspace:^",
     "@aluna/supabase": "workspace:*",
     "@anthropic-ai/sdk": "^0.104.1",
     "@supabase/ssr": "^0.5.2",

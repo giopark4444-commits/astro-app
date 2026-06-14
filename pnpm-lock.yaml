@@ -35,6 +35,9 @@ importers:
       '@aluna/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@aluna/ephemeris':
+        specifier: workspace:^
+        version: link:../../packages/ephemeris
       '@aluna/supabase':
         specifier: workspace:*
         version: link:../../packages/supabase

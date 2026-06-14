@@ -77,5 +77,41 @@
       "gated": "Las lecturas más extensas se encienden cuando Aluna despierte su voz interior. Por ahora, su esencia ya te habla:",
       "error": "Algo se nubló al leerte. Vuelve a intentarlo en un momento. Mientras, su esencia:"
     }
+  },
+  "carta": {
+    "title": "Carta Astral",
+    "subtitle": "Tu cielo de nacimiento",
+    "ascendant": "Ascendente",
+    "midheaven": "Medio Cielo",
+    "house": "Casa",
+    "balance": "Balance",
+    "elements": "Elementos",
+    "modalities": "Modalidades",
+    "dominant": "Dominante",
+    "pro": "Modo Pro",
+    "positions": "Posiciones",
+    "distribution": "Distribución",
+    "aspectsTitle": "Aspectos",
+    "patterns": "Patrones",
+    "noPatterns": "Sin patrones mayores",
+    "solarNotice": "Sin hora de nacimiento: carta solar. Casas y Ascendente son aproximados.",
+    "houseSystem": "Casas",
+    "zodiac": "Zodiaco",
+    "tropical": "Tropical",
+    "sidereal": "Sideral",
+    "houseSystems": {
+      "placidus": "Placidus", "koch": "Koch", "equal": "Iguales",
+      "whole": "Signo entero", "regiomontanus": "Regiomontano", "porphyry": "Porfirio"
+    },
+    "tapHint": "Toca un planeta para ver su detalle",
+    "retrograde": "Retrógrado",
+    "applying": "Aplicativo",
+    "separating": "Separativo",
+    "orb": "Orbe",
+    "speed": "Velocidad",
+    "ut": "TU",
+    "julianDay": "Día juliano",
+    "loadingChart": "Trazando tu cielo…",
+    "errorChart": "No se pudo trazar la carta. Inténtalo de nuevo."
   }
 }
