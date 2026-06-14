@@ -27,3 +27,20 @@ a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 
   color: var(--soft); background: var(--surface-2);
   border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px;
 }
+
+/* Tu clima de hoy (tránsitos al abrir) */
+.weatherCard {
+  position: relative; z-index: 1; display: flex; flex-direction: column; gap: 9px;
+  padding: 16px; margin-bottom: 24px;
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
+  transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.weatherCard:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
+.weatherH { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.weatherList { display: flex; flex-direction: column; gap: 7px; }
+.weatherRow { display: flex; align-items: baseline; gap: 9px; }
+.weatherGlyphs { font-size: 15px; color: var(--ink); flex-shrink: 0; }
+.weatherAsp { color: var(--acc); }
+.weatherText { color: var(--soft); font-size: 12.5px; line-height: 1.4; }
+.harm_hard .weatherAsp { color: #e0795a; }
+.harm_soft .weatherAsp { color: #7aaae0; }
