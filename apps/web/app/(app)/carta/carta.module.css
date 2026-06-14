@@ -117,3 +117,4 @@
 .brBlock { display: flex; flex-direction: column; gap: 4px; }
 .brBlock p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--soft); }
 .brH { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.tierHint { margin: -4px 0 2px; text-align: center; font-size: 11px; font-style: italic; line-height: 1.5; color: var(--soft); }

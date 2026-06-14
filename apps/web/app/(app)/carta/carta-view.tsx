@@ -10,6 +10,7 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeBodyReading as composeReadingEs } from "@/lib/content/astrology-readings-es";
 import { composeBodyReading as composeReadingEn } from "@/lib/content/astrology-readings-en";
 import { ChartWheel } from "./chart-wheel";
+import { BodyReadingView } from "./body-reading";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
@@ -250,17 +251,14 @@ export function CartaView() {
                 const r = compose(sheet.body, sheet.sign, sheet.house, sheet.dignity);
                 if (!r) return null;
                 return (
-                  <div className={styles.bodyReading}>
-                    <p className={styles.brEssence}>{r.essence}</p>
-                    <div className={styles.brBlock}>
-                      <span className={styles.brH}>{t("flowH")}</span>
-                      <p>{r.flow}</p>
-                    </div>
-                    <div className={styles.brBlock}>
-                      <span className={styles.brH}>{t("shadowH")}</span>
-                      <p>{r.shadow}</p>
-                    </div>
-                  </div>
+                  <BodyReadingView
+                    base={r}
+                    body={sheet.body}
+                    sign={sheet.sign}
+                    house={sheet.house}
+                    dignity={sheet.dignity}
+                    profileName={active.name}
+                  />
                 );
               })()}
           </div>
