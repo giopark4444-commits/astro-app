@@ -122,6 +122,8 @@
     "kindNatalHint": "Tu cielo de nacimiento.",
     "kindTransitsHint": "El cielo de hoy sobre ti — tu clima del alma.",
     "kindSolarReturnHint": "Tu carta del año, desde tu último cumpleaños.",
-    "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años."
+    "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años.",
+    "weatherTitle": "Tu clima de hoy",
+    "yourPossessive": "tu"
   }
 }

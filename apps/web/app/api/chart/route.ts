@@ -1,7 +1,7 @@
 import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { computeChart, computeDerivedChart, setEphePath, type DerivedKind } from "@aluna/ephemeris";
-import type { HouseSystem, Zodiac } from "@aluna/core";
+import { detectAspectsBetween, type Aspect, type HouseSystem, type Zodiac } from "@aluna/core";
 import { createClient } from "@/lib/supabase/server";
 import { profileToChartInput, isSolarChart, type ChartInputOptions } from "@/lib/chart";
 
@@ -26,6 +26,15 @@ const HOUSE_SYSTEMS: readonly HouseSystem[] = [
   "porphyry",
 ];
 const ZODIACS: readonly Zodiac[] = ["tropical", "sidereal"];
+
+// "Tu Clima": planetas considerados + orbes ajustados (más estrechos que los
+// natales, para que solo aparezcan los tránsitos activos hoy).
+const WEATHER_BODIES = new Set([
+  "sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto",
+]);
+const TRANSIT_ORBS: Record<string, number> = {
+  conjunction: 3, opposition: 3, trine: 3, square: 3, sextile: 2,
+};
 
 export async function POST(request: NextRequest) {
   let raw: unknown;
@@ -72,7 +81,20 @@ export async function POST(request: NextRequest) {
     // Sol) → casas fiables aunque no se sepa la hora de nacimiento. Natal y
     // progresada sí dependen de la hora natal.
     const solar = kind === "transits" || kind === "solar_return" ? false : isSolarChart(profile);
-    return NextResponse.json({ chart, solar });
+
+    // Tu Clima: aspectos de los planetas en tránsito (en movimiento) a los natales (fijos).
+    let transitAspects: Aspect[] | undefined;
+    if (kind === "transits") {
+      const natal = computeChart(input);
+      const moving = chart.bodies
+        .filter((b) => WEATHER_BODIES.has(b.body))
+        .map((b) => ({ key: b.body, longitude: b.longitude, speed: b.speed }));
+      const fixed = natal.bodies
+        .filter((b) => WEATHER_BODIES.has(b.body))
+        .map((b) => ({ key: b.body, longitude: b.longitude, speed: 0 }));
+      transitAspects = detectAspectsBetween(moving, fixed, { orbs: TRANSIT_ORBS }).sort((a, b) => a.orb - b.orb);
+    }
+    return NextResponse.json({ chart, solar, transitAspects });
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }

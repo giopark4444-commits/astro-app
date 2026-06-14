@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectAspects } from "../aspects";
+import { detectAspects, detectAspectsBetween } from "../aspects";
 
 describe("detectAspects", () => {
   it("detecta un trígono exacto (120°) dentro de orbe", () => {
@@ -36,6 +36,31 @@ describe("detectAspects", () => {
       { key: "moon", longitude: 118, speed: 13 },
     ];
     const asp = detectAspects(points);
+    expect(asp[0]!.applying).toBe(true);
+  });
+});
+
+describe("detectAspectsBetween", () => {
+  it("solo cruza el primer conjunto con el segundo (no within-set)", () => {
+    const transit = [
+      { key: "tSat", longitude: 0, speed: 0.03 },
+      { key: "tJup", longitude: 120, speed: 0.08 },
+    ];
+    const natal = [
+      { key: "nSun", longitude: 90, speed: 0 },
+      { key: "nMoon", longitude: 0, speed: 0 },
+    ];
+    const asp = detectAspectsBetween(transit, natal);
+    expect(asp).toHaveLength(3); // tSat□nSun, tSat☌nMoon, tJup△nMoon
+    expect(asp.every((a) => a.a.startsWith("t") && a.b.startsWith("n"))).toBe(true);
+  });
+
+  it("aplicativo según el movimiento del primero (el natal es fijo)", () => {
+    const transit = [{ key: "t", longitude: 88, speed: 1 }];
+    const natal = [{ key: "n", longitude: 90, speed: 0 }];
+    const asp = detectAspectsBetween(transit, natal);
+    expect(asp).toHaveLength(1);
+    expect(asp[0]).toMatchObject({ a: "t", b: "n", aspect: "conjunction" });
     expect(asp[0]!.applying).toBe(true);
   });
 });

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
-  type ChartResult, type BodyPosition, type HouseSystem, type Zodiac,
+  type ChartResult, type BodyPosition, type HouseSystem, type Zodiac, type Aspect,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
@@ -34,7 +34,7 @@ const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second
 type State =
   | { s: "loading" }
   | { s: "error" }
-  | { s: "ready"; chart: ChartResult; solar: boolean };
+  | { s: "ready"; chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined };
 
 export function CartaView() {
   const t = useTranslations("carta");
@@ -48,7 +48,9 @@ export function CartaView() {
   const [pro, setPro] = useState(false);
   const [sheet, setSheet] = useState<BodyPosition | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
-  const cache = useRef<Map<string, { chart: ChartResult; solar: boolean }>>(new Map());
+  const cache = useRef<Map<string, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
+    new Map(),
+  );
 
   useEffect(() => {
     if (!active) return;
@@ -67,14 +69,19 @@ export function CartaView() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ profileId: active.id, houseSystem, zodiac, kind }),
         });
-        const data = (await res.json()) as { chart?: ChartResult; solar?: boolean };
+        const data = (await res.json()) as {
+          chart?: ChartResult;
+          solar?: boolean;
+          transitAspects?: Aspect[];
+        };
         if (!alive) return;
         if (!res.ok || !data.chart) {
           setState({ s: "error" });
           return;
         }
-        cache.current.set(key, { chart: data.chart, solar: !!data.solar });
-        setState({ s: "ready", chart: data.chart, solar: !!data.solar });
+        const entry = { chart: data.chart, solar: !!data.solar, transitAspects: data.transitAspects };
+        cache.current.set(key, entry);
+        setState({ s: "ready", ...entry });
       } catch {
         if (alive) setState({ s: "error" });
       }
@@ -176,6 +183,29 @@ export function CartaView() {
             dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
           <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
             dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+
+          {/* Tu Clima: aspectos tránsito-a-natal */}
+          {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
+            <section className={`${styles.card} fade-in`}>
+              <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
+              <div className={styles.aspList}>
+                {ready.transitAspects.map((a, i) => (
+                  <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
+                    <span className={styles.aspPair}>
+                      {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
+                      {PLANET_GLYPH[a.b]}
+                    </span>
+                    <span className={styles.aspName}>
+                      {L.bodies[a.a]} {L.aspects[a.aspect]} {t("yourPossessive")} {L.bodies[a.b]}
+                    </span>
+                    <span className={styles.aspOrb}>
+                      {a.orb.toFixed(1)}° · {a.applying ? t("applying") : t("separating")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Modo Pro */}
           <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>

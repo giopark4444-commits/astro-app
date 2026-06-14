@@ -19,7 +19,7 @@ export * from "./astrology/types";
 export { normalizeAngle, signOfLongitude, angularSeparation } from "./astrology/signs";
 export { houseOfLongitude } from "./astrology/houses";
 export { dignityOf } from "./astrology/dignity";
-export { detectAspects } from "./astrology/aspects";
+export { detectAspects, detectAspectsBetween } from "./astrology/aspects";
 export type { AspectPoint, AspectOptions } from "./astrology/aspects";
 export { computeDistribution, quadrantOfHouse } from "./astrology/distribution";
 export { detectPatterns } from "./astrology/patterns";
