@@ -112,6 +112,8 @@
     "ut": "UT",
     "julianDay": "Julian day",
     "loadingChart": "Charting your sky…",
-    "errorChart": "Couldn't chart it. Please try again."
+    "errorChart": "Couldn't chart it. Please try again.",
+    "flowH": "✦ Its gift",
+    "shadowH": "◐ Its shadow"
   }
 }

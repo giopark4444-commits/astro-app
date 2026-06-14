@@ -112,6 +112,8 @@
     "ut": "TU",
     "julianDay": "Día juliano",
     "loadingChart": "Trazando tu cielo…",
-    "errorChart": "No se pudo trazar la carta. Inténtalo de nuevo."
+    "errorChart": "No se pudo trazar la carta. Inténtalo de nuevo.",
+    "flowH": "✦ Su don",
+    "shadowH": "◐ Su sombra"
   }
 }
