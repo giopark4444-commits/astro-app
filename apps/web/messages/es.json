@@ -114,6 +114,12 @@
     "loadingChart": "Trazando tu cielo…",
     "errorChart": "No se pudo trazar la carta. Inténtalo de nuevo.",
     "flowH": "✦ Su don",
-    "shadowH": "◐ Su sombra"
+    "shadowH": "◐ Su sombra",
+    "kindNatal": "Natal",
+    "kindTransits": "Tu Clima",
+    "kindProgressed": "Progresiones",
+    "kindNatalHint": "Tu cielo de nacimiento.",
+    "kindTransitsHint": "El cielo de hoy sobre ti — tu clima del alma.",
+    "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años."
   }
 }

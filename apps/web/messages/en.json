@@ -114,6 +114,12 @@
     "loadingChart": "Charting your sky…",
     "errorChart": "Couldn't chart it. Please try again.",
     "flowH": "✦ Its gift",
-    "shadowH": "◐ Its shadow"
+    "shadowH": "◐ Its shadow",
+    "kindNatal": "Natal",
+    "kindTransits": "Your Weather",
+    "kindProgressed": "Progressions",
+    "kindNatalHint": "Your birth sky.",
+    "kindTransitsHint": "Today's sky over you — your soul's weather.",
+    "kindProgressedHint": "Your advanced chart: how your sky matures over the years."
   }
 }

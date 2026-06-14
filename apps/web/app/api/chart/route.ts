@@ -1,6 +1,6 @@
 import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
-import { computeChart, setEphePath } from "@aluna/ephemeris";
+import { computeChart, computeDerivedChart, setEphePath, type DerivedKind } from "@aluna/ephemeris";
 import type { HouseSystem, Zodiac } from "@aluna/core";
 import { createClient } from "@/lib/supabase/server";
 import { profileToChartInput, isSolarChart, type ChartInputOptions } from "@/lib/chart";
@@ -61,10 +61,17 @@ export async function POST(request: NextRequest) {
   }
   if (typeof body.ayanamsha === "string") opts.ayanamsha = body.ayanamsha;
 
+  const kind = String(body.kind ?? "natal");
   try {
     const input = profileToChartInput(profile, opts);
-    const chart = computeChart(input);
-    return NextResponse.json({ chart, solar: isSolarChart(profile) });
+    const chart =
+      kind === "transits" || kind === "progressed"
+        ? computeDerivedChart(input, kind as DerivedKind)
+        : computeChart(input);
+    // Tránsitos usan la hora de AHORA (conocida) → casas fiables aunque no se
+    // sepa la hora de nacimiento. Natal/progresada dependen de la hora natal.
+    const solar = kind === "transits" ? false : isSolarChart(profile);
+    return NextResponse.json({ chart, solar });
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }

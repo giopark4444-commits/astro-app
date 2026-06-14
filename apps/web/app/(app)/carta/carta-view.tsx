@@ -20,6 +20,9 @@ const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifo
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
 const HOUSE_SYSTEMS: HouseSystem[] = ["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"];
+type ChartKind = "natal" | "transits" | "progressed";
+const CHART_KINDS: ChartKind[] = ["natal", "transits", "progressed"];
+const KIND_KEY: Record<ChartKind, string> = { natal: "Natal", transits: "Transits", progressed: "Progressed" };
 const pad = (n: number) => String(n).padStart(2, "0");
 const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
 
@@ -36,6 +39,7 @@ export function CartaView() {
 
   const [houseSystem, setHouseSystem] = useState<HouseSystem>("placidus");
   const [zodiac, setZodiac] = useState<Zodiac>("tropical");
+  const [kind, setKind] = useState<ChartKind>("natal");
   const [pro, setPro] = useState(false);
   const [sheet, setSheet] = useState<BodyPosition | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
@@ -43,7 +47,7 @@ export function CartaView() {
 
   useEffect(() => {
     if (!active) return;
-    const key = `${active.id}:${houseSystem}:${zodiac}`;
+    const key = `${active.id}:${houseSystem}:${zodiac}:${kind}`;
     const hit = cache.current.get(key);
     if (hit) {
       setState({ s: "ready", ...hit });
@@ -56,7 +60,7 @@ export function CartaView() {
         const res = await fetch("/api/chart", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ profileId: active.id, houseSystem, zodiac }),
+          body: JSON.stringify({ profileId: active.id, houseSystem, zodiac, kind }),
         });
         const data = (await res.json()) as { chart?: ChartResult; solar?: boolean };
         if (!alive) return;
@@ -73,7 +77,7 @@ export function CartaView() {
     return () => {
       alive = false;
     };
-  }, [active, houseSystem, zodiac]);
+  }, [active, houseSystem, zodiac, kind]);
 
   const ready = state.s === "ready" ? state : null;
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
@@ -96,6 +100,23 @@ export function CartaView() {
         <span className={styles.enso} aria-hidden><Icon name="enso" size={22} /></span>
       </div>
       <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
+
+      {/* tipo de carta */}
+      <div className={styles.kindRow} role="tablist" aria-label={t("title")}>
+        {CHART_KINDS.map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={kind === k}
+            className={`${styles.kindBtn} ${kind === k ? styles.kindOn : ""}`}
+            onClick={() => setKind(k)}
+          >
+            {t(`kind${KIND_KEY[k]}`)}
+          </button>
+        ))}
+      </div>
+      <p className={styles.kindHint}>{t(`kind${KIND_KEY[kind]}Hint`)}</p>
 
       {/* controles */}
       <div className={styles.controls}>
