@@ -112,7 +112,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false });
   }
 
-  const cacheKey = `${locale}:${position}:${value}:${length}`;
+  // El nombre y el cálculo del perfil entran en el prompt (Aluna nombra a la
+  // persona), así que DEBEN entrar en la clave: si no, una lectura tejida para
+  // un usuario —con su nombre dentro— se serviría a OTRO usuario desde esta
+  // caché compartida en memoria (fuga de datos entre cuentas).
+  const cacheKey = `${locale}:${position}:${value}:${length}:${profileName}:${calc}`;
   const cached = cache.get(cacheKey);
   if (cached) return NextResponse.json({ available: true, meaning: cached });
 

@@ -84,7 +84,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false });
   }
 
-  const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}`;
+  // profileName entra en el prompt (Aluna nombra a la persona) → debe entrar en
+  // la clave: sin él, una lectura tejida para un usuario —con su nombre dentro—
+  // se serviría a OTRO usuario desde esta caché compartida (fuga entre cuentas).
+  const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}:${profileName}`;
   const cached = cache.get(cacheKey);
   if (cached) return NextResponse.json({ available: true, meaning: cached });
 
