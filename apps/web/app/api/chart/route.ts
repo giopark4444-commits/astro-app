@@ -65,12 +65,13 @@ export async function POST(request: NextRequest) {
   try {
     const input = profileToChartInput(profile, opts);
     const chart =
-      kind === "transits" || kind === "progressed"
+      kind === "transits" || kind === "progressed" || kind === "solar_return"
         ? computeDerivedChart(input, kind as DerivedKind)
         : computeChart(input);
-    // Tránsitos usan la hora de AHORA (conocida) → casas fiables aunque no se
-    // sepa la hora de nacimiento. Natal/progresada dependen de la hora natal.
-    const solar = kind === "transits" ? false : isSolarChart(profile);
+    // Tránsitos y revolución solar usan una hora conocida (ahora / el regreso del
+    // Sol) → casas fiables aunque no se sepa la hora de nacimiento. Natal y
+    // progresada sí dependen de la hora natal.
+    const solar = kind === "transits" || kind === "solar_return" ? false : isSolarChart(profile);
     return NextResponse.json({ chart, solar });
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });

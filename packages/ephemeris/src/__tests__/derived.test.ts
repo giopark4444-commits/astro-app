@@ -37,4 +37,11 @@ describe("computeDerivedChart", () => {
     expect(diff).toBeGreaterThan(30);
     expect(diff).toBeLessThan(40);
   });
+
+  it("revolución solar: el Sol regresa a su longitud natal", () => {
+    const natalSun = sunLon(computeChart(natal));
+    const srSun = sunLon(computeDerivedChart(natal, "solar_return", REF));
+    const diff = Math.abs(((srSun - natalSun + 540) % 360) - 180);
+    expect(diff).toBeLessThan(0.05);
+  });
 });

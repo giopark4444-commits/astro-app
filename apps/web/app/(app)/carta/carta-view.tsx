@@ -20,9 +20,14 @@ const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifo
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
 const HOUSE_SYSTEMS: HouseSystem[] = ["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"];
-type ChartKind = "natal" | "transits" | "progressed";
-const CHART_KINDS: ChartKind[] = ["natal", "transits", "progressed"];
-const KIND_KEY: Record<ChartKind, string> = { natal: "Natal", transits: "Transits", progressed: "Progressed" };
+type ChartKind = "natal" | "transits" | "solar_return" | "progressed";
+const CHART_KINDS: ChartKind[] = ["natal", "transits", "solar_return", "progressed"];
+const KIND_KEY: Record<ChartKind, string> = {
+  natal: "Natal",
+  transits: "Transits",
+  solar_return: "SolarReturn",
+  progressed: "Progressed",
+};
 const pad = (n: number) => String(n).padStart(2, "0");
 const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
 
