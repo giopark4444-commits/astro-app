@@ -7,7 +7,8 @@ import {
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
-import { composeBodyReading } from "@/lib/content/astrology-readings-es";
+import { composeBodyReading as composeReadingEs } from "@/lib/content/astrology-readings-es";
+import { composeBodyReading as composeReadingEn } from "@/lib/content/astrology-readings-en";
 import { ChartWheel } from "./chart-wheel";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
@@ -244,9 +245,9 @@ export function CartaView() {
               {sheet.retrograde && <span className={`${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
               <span className={styles.tag}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
             </div>
-            {locale === "es" &&
-              (() => {
-                const r = composeBodyReading(sheet.body, sheet.sign, sheet.house, sheet.dignity);
+            {(() => {
+                const compose = locale === "en" ? composeReadingEn : composeReadingEs;
+                const r = compose(sheet.body, sheet.sign, sheet.house, sheet.dignity);
                 if (!r) return null;
                 return (
                   <div className={styles.bodyReading}>
