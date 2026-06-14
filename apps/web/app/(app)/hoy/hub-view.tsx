@@ -9,7 +9,7 @@ import styles from "./hub.module.css";
 type IconName = "grid3" | "wheel" | "pillars" | "sun";
 const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }> = [
   { key: "numeros", icon: "grid3", href: "/numeros", soon: false },
-  { key: "carta", icon: "wheel", href: "/carta", soon: true },
+  { key: "carta", icon: "wheel", href: "/carta", soon: false },
   { key: "pilares", icon: "pillars", href: "/pilares", soon: true },
 ];
 
