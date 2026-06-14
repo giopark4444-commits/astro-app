@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { resolveReadingProvider } from "@/lib/reading/provider";
 import { POSITION_LENS_ES, type NumberMeaning } from "@/lib/content/numerology-es";
 import { POSITION_LENS_EN } from "@/lib/content/numerology-en";
 
@@ -106,9 +106,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    // Latente: aún no hay llave. El cliente mostrará la esencia escrita a mano.
+  const resolved = resolveReadingProvider();
+  if (!resolved.available) {
+    // Latente: ningún proveedor tiene llave. El cliente muestra la esencia escrita a mano.
     return NextResponse.json({ available: false });
   }
 
@@ -135,24 +135,17 @@ export async function POST(request: NextRequest) {
         `con exactamente estas claves de texto: "essence", "flow", "shadow", "practice".`;
 
   try {
-    const client = new Anthropic({ apiKey });
-    const res = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 6000,
-      thinking: { type: "disabled" },
-      system: SYSTEM[locale],
-      messages: [{ role: "user", content: userPrompt }],
-    });
-    const text = res.content.map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+    const text = (
+      await resolved.provider.complete({ system: SYSTEM[locale], prompt: userPrompt, maxTokens: 6000 })
+    ).trim();
     const meaning = parseMeaning(text);
     if (!meaning) {
       return NextResponse.json({ available: true, error: "parse" }, { status: 502 });
     }
     cache.set(cacheKey, meaning);
     return NextResponse.json({ available: true, meaning });
-  } catch (err) {
-    const status = err instanceof Anthropic.APIError ? err.status ?? 502 : 502;
-    return NextResponse.json({ available: false, error: "upstream" }, { status });
+  } catch {
+    return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
 }
 
