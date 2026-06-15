@@ -1,0 +1,64 @@
+.wrap { position: relative; padding: 24px 20px 96px; }
+.sky { position: absolute; inset: 0 0 auto; height: 240px; pointer-events: none; z-index: 0; }
+
+.head { position: relative; z-index: 1; margin-bottom: 24px; }
+.eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 5px; }
+.title { font-family: var(--font-display); font-size: clamp(28px, 8vw, 38px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+
+.note { position: relative; z-index: 1; color: var(--soft); font-size: 13.5px; line-height: 1.5; margin: 4px 0 18px; }
+
+/* Rejilla de los 4 pilares */
+.grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px;
+}
+.col {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 14px 6px 16px;
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
+  position: relative;
+}
+.dayCol { border-color: rgba(var(--acc-rgb), 0.5); box-shadow: var(--glow-soft); }
+.colLabel {
+  font-family: var(--font-ui); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--soft); font-weight: 700;
+}
+.char { font-size: 30px; line-height: 1.1; font-weight: 600; }
+.animal { font-size: 11px; color: var(--soft); margin-top: 2px; }
+.empty { font-size: 26px; color: var(--soft); opacity: 0.5; }
+.dayTag {
+  margin-top: 4px; font-size: 8.5px; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--acc); border: 1px solid rgba(var(--acc-rgb), 0.4); border-radius: 6px; padding: 2px 5px;
+  text-align: center;
+}
+
+.section {
+  position: relative; z-index: 1; margin: 26px 0 12px;
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--soft); font-weight: 700;
+}
+
+/* Balance de elementos */
+.balance { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 9px; }
+.elRow { display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: 10px; }
+.elName { font-size: 13px; color: var(--ink); }
+.elTrack { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.elBar { display: block; height: 100%; border-radius: 999px; transition: width var(--dur) var(--ease-spring); }
+.elCount { font-size: 12px; color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
+
+.proSoon {
+  position: relative; z-index: 1; margin-top: 22px; font-size: 12.5px; font-style: italic;
+  color: var(--soft); line-height: 1.5;
+}
+
+/* Colores de los cinco elementos (Wu Xing) */
+.el_wood { color: #7fb069; }
+.el_fire { color: #e0795a; }
+.el_earth { color: #d4a85f; }
+.el_metal { color: #b8b6c8; }
+.el_water { color: #7aaae0; }
+.elBg_wood { background: #7fb069; }
+.elBg_fire { background: #e0795a; }
+.elBg_earth { background: #d4a85f; }
+.elBg_metal { background: #b8b6c8; }
+.elBg_water { background: #7aaae0; }

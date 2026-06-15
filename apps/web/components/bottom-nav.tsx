@@ -9,7 +9,7 @@ const ITEMS = [
   { href: "/carta", icon: "wheel", key: "carta", soon: false },
   { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
   { href: "/hoy", icon: "sun", key: "hoy", soon: false },
-  { href: "/pilares", icon: "pillars", key: "pilares", soon: true },
+  { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
 ] as const;
 
 export function BottomNav() {
