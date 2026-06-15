@@ -21,9 +21,9 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter        # 'free' duerme tras inactividad (cold starts); 'starter' lo evita.
+    plan: free           # gratis (duerme tras inactividad); sube a 'starter' para evitar cold starts.
     region: oregon       # ajusta a la región más cercana a tus usuarios.
-    autoDeploy: true
+    autoDeployTrigger: commit  # redepliega al hacer push a main (campo actual; antes era autoDeploy).
     healthCheckPath: /    # la home responde sin sesión; sirve de health check.
     envVars:
       # --- Públicas (seguras para el navegador). Necesarias SIEMPRE. ---
