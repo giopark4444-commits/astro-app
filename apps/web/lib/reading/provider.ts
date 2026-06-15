@@ -37,6 +37,12 @@ export interface ReadingProvider {
   complete(opts: CompleteOptions): Promise<string>;
   /** Conversación multi-turno (chat "Pregúntale a Aluna"). */
   chat(opts: ChatOptions): Promise<string>;
+  /**
+   * Igual que `chat`, pero emite el texto por trozos a medida que llega (efecto
+   * de tecleo en "Pregúntale a Aluna"). Si un proveedor no soporta streaming,
+   * cae a entregar el resultado de `chat()` de una sola vez.
+   */
+  chatStream(opts: ChatOptions): AsyncIterable<string>;
 }
 
 export type ResolvedProvider =
@@ -100,6 +106,21 @@ function anthropicProvider(apiKey: string): ReadingProvider {
       });
       return res.content.map((b) => (b.type === "text" ? b.text : "")).join("");
     },
+    async *chatStream({ system, messages, maxTokens }) {
+      const client = new Anthropic({ apiKey });
+      const stream = client.messages.stream({
+        model,
+        max_tokens: maxTokens,
+        thinking: { type: "disabled" },
+        system,
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      });
+      for await (const event of stream) {
+        if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+          yield event.delta.text;
+        }
+      }
+    },
   };
 }
 
@@ -141,6 +162,31 @@ function openaiProvider(apiKey: string): ReadingProvider {
       if (!res.ok) throw new Error(`openai ${res.status}`);
       const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
       return json.choices?.[0]?.message?.content ?? "";
+    },
+    async *chatStream({ system, messages, maxTokens }) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          model,
+          max_completion_tokens: maxTokens,
+          stream: true,
+          messages: [{ role: "system", content: system }, ...messages],
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!res.ok || !res.body) throw new Error(`openai ${res.status}`);
+      // SSE: líneas "data: {json}" con choices[0].delta.content, fin con "data: [DONE]".
+      for await (const data of sseData(res.body)) {
+        if (data === "[DONE]") return;
+        try {
+          const json = JSON.parse(data) as { choices?: Array<{ delta?: { content?: string } }> };
+          const piece = json.choices?.[0]?.delta?.content;
+          if (piece) yield piece;
+        } catch {
+          /* trozo SSE no-JSON (p.ej. comentario keep-alive): ignorar */
+        }
+      }
     },
   };
 }
@@ -189,5 +235,63 @@ function geminiProvider(apiKey: string): ReadingProvider {
       };
       return json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
     },
+    async *chatStream({ system, messages, maxTokens }) {
+      // streamGenerateContent con alt=sse: líneas "data: {json}", cada una con
+      // candidates[0].content.parts[].text.
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: messages.map((m) => ({
+            role: m.role === "assistant" ? "model" : "user",
+            parts: [{ text: m.content }],
+          })),
+          generationConfig: { maxOutputTokens: maxTokens },
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!res.ok || !res.body) throw new Error(`gemini ${res.status}`);
+      for await (const data of sseData(res.body)) {
+        try {
+          const json = JSON.parse(data) as {
+            candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+          };
+          const piece = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("");
+          if (piece) yield piece;
+        } catch {
+          /* trozo SSE no-JSON: ignorar */
+        }
+      }
+    },
   };
+}
+
+/**
+ * Lee un cuerpo de respuesta SSE (text/event-stream) y emite el contenido de cada
+ * campo `data:`. Junta los chunks de red, parte por líneas y maneja trozos partidos.
+ * Compartido por los caminos de streaming de OpenAI y Gemini.
+ */
+async function* sseData(body: ReadableStream<Uint8Array>): AsyncIterable<string> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let nl: number;
+      while ((nl = buffer.indexOf("\n")) !== -1) {
+        const line = buffer.slice(0, nl).replace(/\r$/, "");
+        buffer = buffer.slice(nl + 1);
+        if (line.startsWith("data:")) yield line.slice(5).trim();
+      }
+    }
+    const last = buffer.replace(/\r$/, "");
+    if (last.startsWith("data:")) yield last.slice(5).trim();
+  } finally {
+    reader.releaseLock();
+  }
 }

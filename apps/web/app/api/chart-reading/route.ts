@@ -1,4 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  inMemoryReadingCacheStore,
+  supabaseReadingCacheStore,
+  type ReadingCacheStore,
+} from "@aluna/compute";
+import { createServiceSupabaseClient } from "@aluna/supabase/server";
+import type { Json } from "@aluna/supabase";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import type { BodyReading } from "@/lib/content/astrology-readings-es";
@@ -54,7 +61,23 @@ You read one specific placement (a planet, in a sign, in a house, with its digni
 You write for a single person, by their name when it flows. You honor the requested length.`,
 };
 
-const cache = new Map<string, BodyReading>();
+// Caché durable de lecturas de carta (en `public.reading_cache` vía @aluna/compute).
+// La lectura no depende del individuo (solo de la composición planeta-signo-casa-
+// dignidad-longitud-idioma), así que la clave es global y se comparte entre todos.
+// Se persiste en Supabase con la llave service-role; si esa llave no está, cae a un
+// caché en memoria (mejor un caché de proceso que ninguno). Se resuelve una sola vez
+// por módulo (lazy). Mismo patrón que /api/reading.
+let readingCache: ReadingCacheStore | undefined;
+function getReadingCache(): ReadingCacheStore {
+  if (readingCache) return readingCache;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  readingCache =
+    url && serviceKey
+      ? supabaseReadingCacheStore(createServiceSupabaseClient(url, serviceKey))
+      : inMemoryReadingCacheStore();
+  return readingCache;
+}
 
 export async function POST(request: NextRequest) {
   let raw: unknown;
@@ -85,8 +108,14 @@ export async function POST(request: NextRequest) {
   }
 
   const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}`;
-  const cached = cache.get(cacheKey);
-  if (cached) return NextResponse.json({ available: true, meaning: cached });
+  const cache = getReadingCache();
+  // Lectura best-effort: si el caché falla (red), seguimos y generamos.
+  try {
+    const hit = await cache.get(cacheKey);
+    if (hit) return NextResponse.json({ available: true, meaning: hit as unknown as BodyReading });
+  } catch {
+    /* miss silencioso → generamos */
+  }
 
   const dignityName = dignity ? L.dignities[dignity] : null;
   const placement =
@@ -102,7 +131,18 @@ export async function POST(request: NextRequest) {
     const text = (await resolved.provider.complete({ system: SYSTEM[locale], prompt: userPrompt, maxTokens: 4000 })).trim();
     const meaning = parseReading(text);
     if (!meaning) return NextResponse.json({ available: true, error: "parse" }, { status: 502 });
-    cache.set(cacheKey, meaning);
+    // Persistir best-effort: si el guardado falla, igual devolvemos la lectura.
+    try {
+      await cache.set({
+        key: cacheKey,
+        kind: "chart",
+        locale,
+        model: resolved.provider.model,
+        payload: meaning as unknown as Json,
+      });
+    } catch {
+      /* el guardado es best-effort; no rompe la respuesta */
+    }
     return NextResponse.json({ available: true, meaning });
   } catch {
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
