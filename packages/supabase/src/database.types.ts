@@ -117,6 +117,35 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0004_reading_cache.sql
+      // (regenerar desde la BD viva cuando se aplique la migración).
+      reading_cache: {
+        Row: {
+          cache_key: string;
+          created_at: string;
+          kind: string;
+          locale: string;
+          model: string | null;
+          payload: Json;
+        };
+        Insert: {
+          cache_key: string;
+          created_at?: string;
+          kind: string;
+          locale: string;
+          model?: string | null;
+          payload: Json;
+        };
+        Update: {
+          cache_key?: string;
+          created_at?: string;
+          kind?: string;
+          locale?: string;
+          model?: string | null;
+          payload?: Json;
+        };
+        Relationships: [];
+      };
       settings: {
         Row: {
           card_style: string;
