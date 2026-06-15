@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aluna/compute": "workspace:*",
     "@aluna/core": "workspace:*",
     "@aluna/ephemeris": "workspace:^",
     "@aluna/supabase": "workspace:*",

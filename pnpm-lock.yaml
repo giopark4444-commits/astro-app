@@ -57,6 +57,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@aluna/compute':
+        specifier: workspace:*
+        version: link:../../packages/compute
       '@aluna/core':
         specifier: workspace:*
         version: link:../../packages/core
