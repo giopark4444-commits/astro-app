@@ -23,3 +23,5 @@ export { detectAspects, detectAspectsBetween } from "./astrology/aspects";
 export type { AspectPoint, AspectOptions } from "./astrology/aspects";
 export { computeDistribution, quadrantOfHouse } from "./astrology/distribution";
 export { detectPatterns } from "./astrology/patterns";
+export { scoreLifeAreas, LIFE_AREAS } from "./astrology/life-areas";
+export type { LifeArea, LifeAreaScore, ScoreTone, AreaDriver } from "./astrology/life-areas";
