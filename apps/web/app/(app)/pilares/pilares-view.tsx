@@ -1,7 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { HEAVENLY_STEMS, EARTHLY_BRANCHES, type Pillar } from "@aluna/core";
+import {
+  HEAVENLY_STEMS,
+  EARTHLY_BRANCHES,
+  hiddenStems,
+  tenGod,
+  type Pillar,
+  type TenGod,
+} from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import styles from "./pilares.module.css";
@@ -23,6 +30,19 @@ const ELEMENT_KEY: Record<string, string> = {
   metal: "elMetal",
   water: "elWater",
 };
+/** Clave i18n del nombre de cada Dios (十神) en la sección `pilares`. */
+const GOD_KEY: Record<TenGod, string> = {
+  peer: "godPeer",
+  rob: "godRob",
+  eating: "godEating",
+  hurting: "godHurting",
+  wealth_indirect: "godWealthIndirect",
+  wealth_direct: "godWealthDirect",
+  power_indirect: "godPowerIndirect",
+  power_direct: "godPowerDirect",
+  resource_indirect: "godResourceIndirect",
+  resource_direct: "godResourceDirect",
+};
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Lente Cuatro Pilares (Ba Zi / Saju). Pide /api/bazi (server, efemérides) y dibuja
@@ -32,6 +52,7 @@ export function PilaresView() {
   const { active } = useProfiles();
   const [data, setData] = useState<BaZiData | null>(null);
   const [error, setError] = useState(false);
+  const [pro, setPro] = useState(false);
 
   useEffect(() => {
     if (!active) return;
@@ -106,6 +127,9 @@ export function PilaresView() {
               const stem = HEAVENLY_STEMS[pillar.stem]!;
               const branch = EARTHLY_BRANCHES[pillar.branch]!;
               const isDay = key === "day";
+              // El tronco del pilar de DÍA es el Maestro del Día (日主): referencia de
+              // todos los Diez Dioses. Él mismo no tiene Dios (sería 比肩 trivial).
+              const dayMaster = data.day.stem;
               return (
                 <div
                   key={key}
@@ -113,6 +137,13 @@ export function PilaresView() {
                   style={{ ["--i" as string]: i }}
                 >
                   <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
+                  {pro && (
+                    <span className={`${styles.god} ${isDay ? styles.godSelf : ""}`}>
+                      {isDay
+                        ? t("pilares.dayMasterHanzi")
+                        : t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
+                    </span>
+                  )}
                   <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
                     {stem.hanzi}
                   </span>
@@ -121,10 +152,41 @@ export function PilaresView() {
                   </span>
                   <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
                   {isDay && <span className={styles.dayTag}>{t("pilares.dayMaster")}</span>}
+                  {pro && (
+                    <div className={styles.hidden}>
+                      <span className={styles.hiddenLabel}>{t("pilares.hiddenStems")}</span>
+                      {hiddenStems(pillar.branch).map((hs, j) => {
+                        const hidden = HEAVENLY_STEMS[hs]!;
+                        return (
+                          <span key={j} className={styles.hiddenRow}>
+                            <span
+                              className={`${styles.hiddenChar} ${styles[`el_${hidden.element}`] ?? ""}`}
+                            >
+                              {hidden.hanzi}
+                            </span>
+                            <span className={styles.hiddenGod}>
+                              {t(`pilares.${GOD_KEY[tenGod(dayMaster, hs)]}`)}
+                            </span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
+
+          <button
+            type="button"
+            className={styles.proToggle}
+            onClick={() => setPro((v) => !v)}
+            aria-pressed={pro}
+          >
+            <span className={styles.proDot} data-on={pro || undefined} />
+            {t("pilares.modePro")}
+          </button>
+          {pro && <p className={styles.proHint}>{t("pilares.modeProHint")}</p>}
 
           {!data.timeKnown && <p className={styles.note}>{t("pilares.noTime")}</p>}
 
@@ -144,7 +206,7 @@ export function PilaresView() {
             ))}
           </div>
 
-          <p className={styles.proSoon}>{t("pilares.proSoon")}</p>
+          {pro && <p className={styles.proSoon}>{t("pilares.proSoon")}</p>}
         </>
       )}
     </main>

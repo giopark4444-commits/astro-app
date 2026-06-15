@@ -51,6 +51,53 @@
   color: var(--soft); line-height: 1.5;
 }
 
+/* ---- Modo Pro: interruptor (consistente con la carta) ---- */
+.proToggle {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 9px; margin: 18px 0 0; padding: 9px 15px;
+  font-family: var(--font-ui);
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+  color: var(--acc); background: transparent; border: 1px solid var(--line); border-radius: 20px; cursor: pointer;
+}
+.proDot { width: 26px; height: 15px; border-radius: 8px; background: var(--line); position: relative; transition: background var(--dur) var(--ease); }
+.proDot::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--soft); transition: transform var(--dur) var(--ease-spring), background var(--dur) var(--ease); }
+.proDot[data-on] { background: rgba(var(--acc-rgb), 0.4); }
+.proDot[data-on]::after { transform: translateX(11px); background: var(--acc); }
+.proHint {
+  position: relative; z-index: 1; margin: 9px 0 0; font-size: 12px; font-style: italic;
+  color: var(--soft); line-height: 1.45;
+}
+
+/* ---- Modo Pro: Diez Dioses por pilar ---- */
+/* El Dios del tronco, sobre el carácter. El del Maestro del Día es su propio anclaje. */
+.god {
+  font-family: var(--font-ui); font-size: 8.5px; line-height: 1.25; font-weight: 700;
+  letter-spacing: 0.3px; text-align: center; text-transform: uppercase;
+  color: var(--acc);
+  border: 1px solid rgba(var(--acc-rgb), 0.3); border-radius: 6px;
+  padding: 2px 4px; min-height: 24px; display: flex; align-items: center; justify-content: center;
+}
+.godSelf { border-color: transparent; background: rgba(var(--acc-rgb), 0.12); font-size: 11px; }
+
+/* ---- Modo Pro: troncos ocultos (藏干) por rama ---- */
+.hidden {
+  width: 100%; margin-top: 4px; padding-top: 8px;
+  border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.hiddenLabel {
+  font-family: var(--font-ui); font-size: 7.5px; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--soft); font-weight: 700; text-align: center; opacity: 0.85;
+}
+.hiddenRow {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.hiddenChar { font-size: 15px; line-height: 1.1; font-weight: 600; }
+.hiddenGod {
+  font-family: var(--font-ui); font-size: 8px; line-height: 1.2; letter-spacing: 0.2px;
+  color: var(--soft); text-align: center;
+}
+
 /* Colores de los cinco elementos (Wu Xing) */
 .el_wood { color: #7fb069; }
 .el_fire { color: #e0795a; }
