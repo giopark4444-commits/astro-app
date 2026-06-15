@@ -93,7 +93,9 @@ function valence(asp: Aspect): number {
   return 0.3;
 }
 
-function toneOf(score: number): ScoreTone {
+/** Cubeta de tono por score (única fuente de los umbrales; la usa el motor y la API
+ *  al promediar periodos). */
+export function scoreTone(score: number): ScoreTone {
   if (score >= 60) return "high";
   if (score <= 40) return "low";
   return "mixed";
@@ -142,6 +144,7 @@ export function scoreLifeAreas(aspects: Aspect[]): LifeAreaScore[] {
 
   return LIFE_AREAS.map((area) => {
     const score = Math.round(Math.min(100, Math.max(0, raw[area])));
+    const tone = scoreTone(score);
     const drivers: AreaDriver[] = contribs[area]
       .slice()
       .sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta))
@@ -152,6 +155,6 @@ export function scoreLifeAreas(aspects: Aspect[]): LifeAreaScore[] {
         aspect: c.asp.aspect,
         favorable: c.delta > 0,
       }));
-    return { area, score, tone: toneOf(score), drivers };
+    return { area, score, tone, drivers };
   });
 }
