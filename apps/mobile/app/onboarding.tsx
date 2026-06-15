@@ -19,37 +19,21 @@ import { Enso } from "../components/Enso";
 import { PlaceAutocomplete } from "../components/PlaceAutocomplete";
 import { type Gender, EMPTY_PROFILE, type Profile, isProfileComplete } from "../lib/profile";
 import { useProfile } from "../lib/profile-context";
-import { colors, fonts, radius, space } from "../theme/tokens";
+import { useTheme } from "../lib/theme-context";
+import { useT, type Locale } from "../lib/i18n-context";
+import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
 
 type Step = "name" | "date" | "time" | "place" | "gender";
 const STEPS: Step[] = ["name", "date", "time", "place", "gender"];
-
-const EYEBROW: Record<Step, string> = {
-  name: "Empecemos",
-  date: "Tu llegada",
-  time: "El instante",
-  place: "El cielo de ese día",
-  gender: "Para hablarte bien",
-};
-const TITLE: Record<Step, string> = {
-  name: "¿Cómo te llamas?",
-  date: "¿Qué día naciste?",
-  time: "¿A qué hora naciste?",
-  place: "¿Dónde naciste?",
-  gender: "¿Cómo te nombramos?",
-};
-const GENDERS: Array<{ id: Gender; label: string }> = [
-  { id: "feminine", label: "Femenino" },
-  { id: "masculine", label: "Masculino" },
-  { id: "neutral", label: "Neutro" },
-];
+const GENDER_IDS: Gender[] = ["feminine", "masculine", "neutral"];
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-const prettyDate = (iso: string) => {
+const prettyDate = (iso: string, locale: Locale) => {
   const [y, m, d] = iso.split("-").map(Number);
-  const MES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-  return `${d} de ${MES[(m ?? 1) - 1]} de ${y}`;
+  const MES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  const MON_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return locale === "en" ? `${MON_EN[(m ?? 1) - 1]} ${d}, ${y}` : `${d} de ${MES_ES[(m ?? 1) - 1]} de ${y}`;
 };
 
 function stepComplete(step: Step, a: Profile): boolean {
@@ -71,6 +55,9 @@ export default function Onboarding() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { setProfile } = useProfile();
+  const { t: tk } = useTheme();
+  const { t, locale } = useT();
+  const styles = useMemo(() => makeStyles(tk), [tk]);
   const [a, setA] = useState<Profile>(EMPTY_PROFILE);
   const [i, setI] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -82,13 +69,31 @@ export default function Onboarding() {
   const last = i === STEPS.length - 1;
   const canNext = stepComplete(step, a);
 
+  const EYEBROW: Record<Step, string> = {
+    name: t("onboarding.nameEyebrow"),
+    date: t("onboarding.dateEyebrow"),
+    time: t("onboarding.timeEyebrow"),
+    place: t("onboarding.placeEyebrow"),
+    gender: t("onboarding.genderEyebrow"),
+  };
+  const TITLE: Record<Step, string> = {
+    name: t("onboarding.nameTitle"),
+    date: t("onboarding.dateTitle"),
+    time: t("onboarding.timeTitle"),
+    place: t("onboarding.placeTitle"),
+    gender: t("onboarding.genderTitle"),
+  };
+
   // Reanima el revelado al cambiar de paso.
   useEffect(() => {
     reveal.setValue(0);
     Animated.timing(reveal, { toValue: 1, duration: 520, delay: 60, useNativeDriver: true }).start();
   }, [i, reveal]);
 
-  const dateValue = useMemo(() => (a.birthDate ? new Date(a.birthDate + "T12:00:00") : new Date(1995, 0, 1, 12)), [a.birthDate]);
+  const dateValue = useMemo(
+    () => (a.birthDate ? new Date(a.birthDate + "T12:00:00") : new Date(1995, 0, 1, 12)),
+    [a.birthDate],
+  );
   const timeValue = useMemo(() => {
     const [h, mm] = (a.birthTime || "12:00").split(":").map(Number);
     return new Date(1995, 0, 1, h ?? 12, mm ?? 0);
@@ -115,7 +120,10 @@ export default function Onboarding() {
     router.replace("/(tabs)");
   }
 
-  const fade = { opacity: reveal, transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] };
+  const fade = {
+    opacity: reveal,
+    transform: [{ translateY: reveal.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+  };
 
   return (
     <View style={styles.root}>
@@ -143,8 +151,8 @@ export default function Onboarding() {
                   style={styles.input}
                   value={a.name}
                   onChangeText={(v) => setA({ ...a, name: v })}
-                  placeholder="Tu nombre completo"
-                  placeholderTextColor={colors.textFaint}
+                  placeholder={t("onboarding.namePlaceholder")}
+                  placeholderTextColor={tk.textFaint}
                   autoCapitalize="words"
                   autoCorrect={false}
                   autoFocus
@@ -156,7 +164,7 @@ export default function Onboarding() {
                   {Platform.OS === "android" && (
                     <Pressable style={styles.input} onPress={() => setShowDate(true)}>
                       <Text style={[styles.inputText, !a.birthDate && styles.placeholder]}>
-                        {a.birthDate ? prettyDate(a.birthDate) : "Elige tu fecha"}
+                        {a.birthDate ? prettyDate(a.birthDate, locale) : t("onboarding.datePick")}
                       </Text>
                     </Pressable>
                   )}
@@ -168,8 +176,8 @@ export default function Onboarding() {
                       maximumDate={new Date()}
                       minimumDate={new Date(1900, 0, 1)}
                       onChange={onDate}
-                      themeVariant="dark"
-                      accentColor={colors.gold}
+                      themeVariant={tk.isLight ? "light" : "dark"}
+                      accentColor={tk.acc}
                     />
                   )}
                 </View>
@@ -180,7 +188,7 @@ export default function Onboarding() {
                   {Platform.OS === "android" && a.timeKnown && (
                     <Pressable style={styles.input} onPress={() => setShowTime(true)}>
                       <Text style={[styles.inputText, !a.birthTime && styles.placeholder]}>
-                        {a.birthTime || "Elige la hora"}
+                        {a.birthTime || t("onboarding.timePick")}
                       </Text>
                     </Pressable>
                   )}
@@ -190,44 +198,48 @@ export default function Onboarding() {
                       mode="time"
                       display={Platform.OS === "ios" ? "spinner" : "default"}
                       onChange={onTime}
-                      themeVariant="dark"
-                      accentColor={colors.gold}
+                      themeVariant={tk.isLight ? "light" : "dark"}
+                      accentColor={tk.acc}
                     />
                   )}
                   <Pressable style={styles.toggleRow} onPress={() => setA({ ...a, timeKnown: !a.timeKnown })}>
                     <Switch
                       value={!a.timeKnown}
                       onValueChange={(v) => setA({ ...a, timeKnown: !v })}
-                      trackColor={{ false: colors.goldHair, true: colors.goldSoft }}
-                      thumbColor={colors.gold}
+                      trackColor={{ false: tk.accHair, true: tk.accSoft }}
+                      thumbColor={tk.acc}
                     />
-                    <Text style={styles.toggleLabel}>No sé mi hora</Text>
+                    <Text style={styles.toggleLabel}>{t("onboarding.timeUnknown")}</Text>
                   </Pressable>
-                  <Text style={styles.hint}>La hora afina tu carta; puedes dejarla para después.</Text>
+                  <Text style={styles.hint}>{t("onboarding.timeHint")}</Text>
                 </View>
               )}
 
               {step === "place" && (
-                <PlaceAutocomplete picked={a.place} onPick={(p) => setA({ ...a, place: p })} placeholder="Tu ciudad de nacimiento" />
+                <PlaceAutocomplete
+                  picked={a.place}
+                  onPick={(p) => setA({ ...a, place: p })}
+                  placeholder={t("onboarding.placePlaceholder")}
+                />
               )}
 
               {step === "gender" && (
                 <View style={styles.center}>
                   <View style={styles.genders}>
-                    {GENDERS.map((g) => {
-                      const on = a.gender === g.id;
+                    {GENDER_IDS.map((id) => {
+                      const on = a.gender === id;
                       return (
                         <Pressable
-                          key={g.id}
+                          key={id}
                           style={[styles.gender, on && styles.genderOn]}
-                          onPress={() => setA({ ...a, gender: g.id })}
+                          onPress={() => setA({ ...a, gender: id })}
                         >
-                          <Text style={[styles.genderText, on && styles.genderTextOn]}>{g.label}</Text>
+                          <Text style={[styles.genderText, on && styles.genderTextOn]}>{t(`gender.${id}`)}</Text>
                         </Pressable>
                       );
                     })}
                   </View>
-                  <Text style={styles.hint}>Define el género con que te hablan tus lecturas.</Text>
+                  <Text style={styles.hint}>{t("onboarding.genderHint")}</Text>
                 </View>
               )}
             </View>
@@ -245,13 +257,15 @@ export default function Onboarding() {
         <View style={styles.actions}>
           {i > 0 ? (
             <Pressable style={styles.back} onPress={() => setI(i - 1)} disabled={busy}>
-              <Text style={styles.backText}>Atrás</Text>
+              <Text style={styles.backText}>{t("onboarding.back")}</Text>
             </Pressable>
           ) : (
             <View style={styles.backSpacer} />
           )}
           <Pressable style={[styles.cta, !canNext && styles.ctaOff]} onPress={next} disabled={!canNext || busy}>
-            <Text style={styles.ctaText}>{busy ? "Tejiendo tu mapa…" : last ? "Tejer mi mapa" : "Continuar"}</Text>
+            <Text style={styles.ctaText}>
+              {busy ? t("onboarding.creating") : last ? t("onboarding.create") : t("onboarding.next")}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -259,89 +273,91 @@ export default function Onboarding() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.night },
-  flex: { flex: 1 },
-  aura: { position: "absolute", top: 0, left: 0, right: 0, overflow: "hidden" },
-  glyph: { position: "absolute", alignSelf: "center" },
-  scroll: { paddingHorizontal: space.xl, alignItems: "center" },
-  stage: { width: "100%", maxWidth: 460, alignItems: "center" },
-  eyebrow: {
-    color: colors.gold,
-    fontSize: 12,
-    letterSpacing: 3,
-    textTransform: "uppercase",
-    fontFamily: fonts.sans,
-    marginBottom: space.md,
-  },
-  question: {
-    color: colors.text,
-    fontSize: 30,
-    lineHeight: 38,
-    fontFamily: fonts.serif,
-    fontStyle: "italic",
-    textAlign: "center",
-    marginBottom: space.xxl,
-  },
-  field: { width: "100%" },
-  center: { width: "100%", alignItems: "center" },
-  input: {
-    width: "100%",
-    backgroundColor: colors.panelSoft,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.md,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md + 4,
-    color: colors.text,
-    fontSize: 19,
-    fontFamily: fonts.sans,
-    textAlign: "center",
-  },
-  inputText: { color: colors.text, fontSize: 19, textAlign: "center", fontFamily: fonts.sans },
-  placeholder: { color: colors.textFaint },
-  toggleRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl },
-  toggleLabel: { color: colors.text, fontSize: 16, fontFamily: fonts.sans },
-  hint: { color: colors.textDim, fontSize: 14, textAlign: "center", marginTop: space.lg, lineHeight: 20, fontFamily: fonts.sans },
-  genders: { width: "100%", gap: space.md },
-  gender: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.md,
-    paddingVertical: space.lg,
-    alignItems: "center",
-    backgroundColor: colors.panelSoft,
-  },
-  genderOn: { borderColor: colors.gold, backgroundColor: colors.goldFaint },
-  genderText: { color: colors.textDim, fontSize: 17, fontFamily: fonts.sans },
-  genderTextOn: { color: colors.gold },
-  foot: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: space.xl,
-    paddingTop: space.lg,
-    backgroundColor: colors.night,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.goldHair,
-  },
-  dots: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginBottom: space.lg },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.goldHair },
-  dotOn: { backgroundColor: colors.gold, width: 22 },
-  dotPast: { backgroundColor: colors.goldSoft },
-  actions: { flexDirection: "row", alignItems: "center", gap: space.md },
-  back: { paddingHorizontal: space.lg, paddingVertical: space.md },
-  backSpacer: { width: 1 },
-  backText: { color: colors.textDim, fontSize: 16, fontFamily: fonts.sans },
-  cta: {
-    flex: 1,
-    backgroundColor: colors.gold,
-    borderRadius: radius.pill,
-    paddingVertical: space.lg,
-    alignItems: "center",
-  },
-  ctaOff: { opacity: 0.4 },
-  ctaText: { color: colors.nightDeep, fontSize: 17, fontWeight: "600", fontFamily: fonts.sans },
-});
+function makeStyles(t: ThemeTokens) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: t.bg },
+    flex: { flex: 1 },
+    aura: { position: "absolute", top: 0, left: 0, right: 0, overflow: "hidden" },
+    glyph: { position: "absolute", alignSelf: "center" },
+    scroll: { paddingHorizontal: space.xl, alignItems: "center" },
+    stage: { width: "100%", maxWidth: 460, alignItems: "center" },
+    eyebrow: {
+      color: t.acc,
+      fontSize: 12,
+      letterSpacing: 3,
+      textTransform: "uppercase",
+      fontFamily: fonts.sans,
+      marginBottom: space.md,
+    },
+    question: {
+      color: t.text,
+      fontSize: 30,
+      lineHeight: 38,
+      fontFamily: fonts.serif,
+      fontStyle: "italic",
+      textAlign: "center",
+      marginBottom: space.xxl,
+    },
+    field: { width: "100%" },
+    center: { width: "100%", alignItems: "center" },
+    input: {
+      width: "100%",
+      backgroundColor: t.panelSoft,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.md,
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md + 4,
+      color: t.text,
+      fontSize: 19,
+      fontFamily: fonts.sans,
+      textAlign: "center",
+    },
+    inputText: { color: t.text, fontSize: 19, textAlign: "center", fontFamily: fonts.sans },
+    placeholder: { color: t.textFaint },
+    toggleRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl },
+    toggleLabel: { color: t.text, fontSize: 16, fontFamily: fonts.sans },
+    hint: { color: t.textDim, fontSize: 14, textAlign: "center", marginTop: space.lg, lineHeight: 20, fontFamily: fonts.sans },
+    genders: { width: "100%", gap: space.md },
+    gender: {
+      width: "100%",
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.md,
+      paddingVertical: space.lg,
+      alignItems: "center",
+      backgroundColor: t.panelSoft,
+    },
+    genderOn: { borderColor: t.acc, backgroundColor: t.accFaint },
+    genderText: { color: t.textDim, fontSize: 17, fontFamily: fonts.sans },
+    genderTextOn: { color: t.acc },
+    foot: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      paddingHorizontal: space.xl,
+      paddingTop: space.lg,
+      backgroundColor: t.bg,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: t.accHair,
+    },
+    dots: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginBottom: space.lg },
+    dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: t.accHair },
+    dotOn: { backgroundColor: t.acc, width: 22 },
+    dotPast: { backgroundColor: t.accSoft },
+    actions: { flexDirection: "row", alignItems: "center", gap: space.md },
+    back: { paddingHorizontal: space.lg, paddingVertical: space.md },
+    backSpacer: { width: 1 },
+    backText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
+    cta: {
+      flex: 1,
+      backgroundColor: t.acc,
+      borderRadius: radius.pill,
+      paddingVertical: space.lg,
+      alignItems: "center",
+    },
+    ctaOff: { opacity: 0.4 },
+    ctaText: { color: t.onAcc, fontSize: 17, fontWeight: "600", fontFamily: fonts.sans },
+  });
+}
