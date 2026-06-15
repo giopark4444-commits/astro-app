@@ -35,6 +35,14 @@ export interface ReadingProvider {
   readonly model: string;
   /** Una respuesta one-shot (lecturas: system + prompt → texto). */
   complete(opts: CompleteOptions): Promise<string>;
+  /**
+   * Igual que `complete`, pero emite el texto por trozos a medida que se genera
+   * (efecto de "escritura" en las lecturas profundas). El texto sigue siendo el
+   * mismo objeto JSON {essence, flow, shadow, practice} que `complete`: la ruta
+   * lo reenvía crudo y, al cerrar, lo parsea y lo cachea. Si un proveedor no
+   * soporta streaming, cae a entregar el resultado de `complete()` de una vez.
+   */
+  completeStream(opts: CompleteOptions): AsyncIterable<string>;
   /** Conversación multi-turno (chat "Pregúntale a Aluna"). */
   chat(opts: ChatOptions): Promise<string>;
   /**
@@ -95,6 +103,21 @@ function anthropicProvider(apiKey: string): ReadingProvider {
       });
       return res.content.map((b) => (b.type === "text" ? b.text : "")).join("");
     },
+    async *completeStream({ system, prompt, maxTokens }) {
+      const client = new Anthropic({ apiKey });
+      const stream = client.messages.stream({
+        model,
+        max_tokens: maxTokens,
+        thinking: { type: "disabled" },
+        system,
+        messages: [{ role: "user", content: prompt }],
+      });
+      for await (const event of stream) {
+        if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+          yield event.delta.text;
+        }
+      }
+    },
     async chat({ system, messages, maxTokens }) {
       const client = new Anthropic({ apiKey });
       const res = await client.messages.create({
@@ -147,6 +170,36 @@ function openaiProvider(apiKey: string): ReadingProvider {
       if (!res.ok) throw new Error(`openai ${res.status}`);
       const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
       return json.choices?.[0]?.message?.content ?? "";
+    },
+    async *completeStream({ system, prompt, maxTokens }) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          model,
+          max_completion_tokens: maxTokens,
+          // Mismo modo JSON que complete(): el texto que sale es el objeto
+          // {essence, flow, shadow, practice}, solo que troceado.
+          response_format: { type: "json_object" },
+          stream: true,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!res.ok || !res.body) throw new Error(`openai ${res.status}`);
+      for await (const data of sseData(res.body)) {
+        if (data === "[DONE]") return;
+        try {
+          const json = JSON.parse(data) as { choices?: Array<{ delta?: { content?: string } }> };
+          const piece = json.choices?.[0]?.delta?.content;
+          if (piece) yield piece;
+        } catch {
+          /* trozo SSE no-JSON (p.ej. comentario keep-alive): ignorar */
+        }
+      }
     },
     async chat({ system, messages, maxTokens }) {
       const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -213,6 +266,32 @@ function geminiProvider(apiKey: string): ReadingProvider {
         candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       };
       return json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+    },
+    async *completeStream({ system, prompt, maxTokens }) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          // Mismo modo JSON que complete(): el texto troceado es el objeto JSON.
+          generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json" },
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+      if (!res.ok || !res.body) throw new Error(`gemini ${res.status}`);
+      for await (const data of sseData(res.body)) {
+        try {
+          const json = JSON.parse(data) as {
+            candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+          };
+          const piece = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("");
+          if (piece) yield piece;
+        } catch {
+          /* trozo SSE no-JSON: ignorar */
+        }
+      }
     },
     async chat({ system, messages, maxTokens }) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;

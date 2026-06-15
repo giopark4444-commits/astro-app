@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
 
   const cacheKey = `${locale}:${position}:${value}:${length}`;
   const cache = getReadingCache();
+  // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
   // Lectura best-effort: si el caché falla (red), seguimos y generamos.
   try {
     const hit = await cache.get(cacheKey);
@@ -159,30 +160,64 @@ export async function POST(request: NextRequest) {
         `Responde ÚNICAMENTE con un objeto JSON válido, sin ningún texto alrededor y sin markdown, ` +
         `con exactamente estas claves de texto: "essence", "flow", "shadow", "practice".`;
 
-  try {
-    const text = (
-      await resolved.provider.complete({ system: SYSTEM[locale], prompt: userPrompt, maxTokens: 6000 })
-    ).trim();
-    const meaning = parseMeaning(text);
-    if (!meaning) {
-      return NextResponse.json({ available: true, error: "parse" }, { status: 502 });
-    }
-    // Persistir best-effort: si el guardado falla, igual devolvemos la lectura.
-    try {
-      await cache.set({
-        key: cacheKey,
-        kind: "numerology",
-        locale,
-        model: resolved.provider.model,
-        payload: meaning as unknown as Json,
-      });
-    } catch {
-      /* el guardado es best-effort; no rompe la respuesta */
-    }
-    return NextResponse.json({ available: true, meaning });
-  } catch {
-    return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
-  }
+  // MISS con llave → STREAM. Reenviamos el texto crudo del modelo (que es el
+  // objeto JSON {essence,flow,shadow,practice}) como text/plain a medida que se
+  // genera, para el efecto de "escritura". El cliente parsea los campos sobre la
+  // marcha; al cerrar, parseamos el texto acumulado, validamos los cuatro campos
+  // y lo guardamos en el caché durable con la MISMA forma estructurada de siempre.
+  // Si el proveedor no entrega nada por stream (o corta antes del primer byte),
+  // caemos a complete() una vez para no quedarnos sin lectura.
+  const provider = resolved.provider;
+  const opts = { system: SYSTEM[locale], prompt: userPrompt, maxTokens: 6000 };
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let acc = "";
+      try {
+        for await (const chunk of provider.completeStream(opts)) {
+          if (!chunk) continue;
+          acc += chunk;
+          controller.enqueue(encoder.encode(chunk));
+        }
+        if (!acc.trim()) {
+          // Fallback: el stream no produjo nada → una sola llamada bloqueante.
+          const full = (await provider.complete(opts)).trim();
+          if (full) {
+            acc = full;
+            controller.enqueue(encoder.encode(full));
+          }
+        }
+      } catch {
+        /* corte de upstream a mitad: cerramos con lo que haya llegado */
+      }
+      controller.close();
+      // Persistir best-effort tras cerrar el stream: parseamos el texto completo
+      // a {essence,flow,shadow,practice} y lo cacheamos. Si no parsea, no cacheamos
+      // (el cliente igual intenta su propio parseo final del mismo texto).
+      const meaning = parseMeaning(acc.trim());
+      if (meaning) {
+        cache
+          .set({
+            key: cacheKey,
+            kind: "numerology",
+            locale,
+            model: provider.model,
+            payload: meaning as unknown as Json,
+          })
+          .catch(() => {
+            /* el guardado es best-effort; no rompe nada */
+          });
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store, no-transform",
+      "x-accel-buffering": "no",
+    },
+  });
 }
 
 /** Extrae el objeto JSON de la respuesta y valida los cuatro campos. */
