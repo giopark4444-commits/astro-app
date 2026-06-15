@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { type GeocodeResult, formatPlace, searchPlaces } from "../lib/geocode";
-import { colors, fonts, radius, space } from "../theme/tokens";
+import { useTheme } from "../lib/theme-context";
+import { useT } from "../lib/i18n-context";
+import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
 
 /**
  * Autocompletado de lugar con Open-Meteo (sin API key), equivalente del de la web.
@@ -16,6 +18,9 @@ export function PlaceAutocomplete({
   onPick: (p: GeocodeResult) => void;
   placeholder: string;
 }) {
+  const { t } = useTheme();
+  const { locale } = useT();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [q, setQ] = useState(picked ? formatPlace(picked) : "");
   const [opts, setOpts] = useState<GeocodeResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,7 +40,7 @@ export function PlaceAutocomplete({
     timer.current = setTimeout(() => {
       ctrl.current?.abort();
       ctrl.current = new AbortController();
-      searchPlaces(q, ctrl.current.signal).then((res) => {
+      searchPlaces(q, ctrl.current.signal, locale).then((res) => {
         setOpts(res);
         setLoading(false);
       });
@@ -43,7 +48,7 @@ export function PlaceAutocomplete({
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [q, touched]);
+  }, [q, touched, locale]);
 
   function choose(o: GeocodeResult) {
     onPick(o);
@@ -62,12 +67,12 @@ export function PlaceAutocomplete({
             setQ(v);
           }}
           placeholder={placeholder}
-          placeholderTextColor={colors.textFaint}
+          placeholderTextColor={t.textFaint}
           autoCorrect={false}
           autoCapitalize="words"
           returnKeyType="search"
         />
-        {loading && <ActivityIndicator size="small" color={colors.gold} style={styles.spin} />}
+        {loading && <ActivityIndicator size="small" color={t.acc} style={styles.spin} />}
       </View>
 
       {opts.length > 0 && (
@@ -88,33 +93,35 @@ export function PlaceAutocomplete({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { width: "100%" },
-  inputRow: { justifyContent: "center" },
-  input: {
-    backgroundColor: colors.panelSoft,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.md,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md + 2,
-    color: colors.text,
-    fontSize: 18,
-    fontFamily: fonts.sans,
-    textAlign: "center",
-  },
-  spin: { position: "absolute", right: space.md },
-  options: {
-    marginTop: space.sm,
-    backgroundColor: colors.panel,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.md,
-    overflow: "hidden",
-  },
-  option: { paddingHorizontal: space.lg, paddingVertical: space.md },
-  optionOn: { backgroundColor: colors.goldFaint },
-  optionDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.goldHair },
-  optName: { color: colors.text, fontSize: 16, fontFamily: fonts.sans },
-  optMeta: { color: colors.textDim, fontSize: 13, marginTop: 2, fontFamily: fonts.sans },
-});
+function makeStyles(t: ThemeTokens) {
+  return StyleSheet.create({
+    wrap: { width: "100%" },
+    inputRow: { justifyContent: "center" },
+    input: {
+      backgroundColor: t.panelSoft,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.md,
+      paddingHorizontal: space.lg,
+      paddingVertical: space.md + 2,
+      color: t.text,
+      fontSize: 18,
+      fontFamily: fonts.sans,
+      textAlign: "center",
+    },
+    spin: { position: "absolute", right: space.md },
+    options: {
+      marginTop: space.sm,
+      backgroundColor: t.panel,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.md,
+      overflow: "hidden",
+    },
+    option: { paddingHorizontal: space.lg, paddingVertical: space.md },
+    optionOn: { backgroundColor: t.accFaint },
+    optionDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.accHair },
+    optName: { color: t.text, fontSize: 16, fontFamily: fonts.sans },
+    optMeta: { color: t.textDim, fontSize: 13, marginTop: 2, fontFamily: fonts.sans },
+  });
+}

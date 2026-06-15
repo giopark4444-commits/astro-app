@@ -1,22 +1,27 @@
 import { Text, type ColorValue } from "react-native";
 import { Tabs } from "expo-router";
-import { colors, fonts } from "../../theme/tokens";
+import { useTheme } from "../../lib/theme-context";
+import { useT } from "../../lib/i18n-context";
+import { fonts } from "../../theme/tokens";
 
-/** Glifo de pestaña: símbolo simple (sin librería de iconos) en oro/lavanda. */
+/** Glifo de pestaña: símbolo simple (sin librería de iconos) en el acento/tenue. */
 function TabGlyph({ glyph, color }: { glyph: string; color: ColorValue }) {
   return <Text style={{ fontSize: 18, color, fontFamily: fonts.serif }}>{glyph}</Text>;
 }
 
 export default function TabsLayout() {
+  const { t: tk } = useTheme();
+  const { t } = useT();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.gold,
-        tabBarInactiveTintColor: colors.textFaint,
+        tabBarActiveTintColor: tk.acc,
+        tabBarInactiveTintColor: tk.textFaint,
         tabBarStyle: {
-          backgroundColor: colors.nightDeep,
-          borderTopColor: colors.goldHair,
+          backgroundColor: tk.bgDeep,
+          borderTopColor: tk.accHair,
           borderTopWidth: 1,
           height: 84,
           paddingTop: 8,
@@ -27,21 +32,21 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Hoy",
+          title: t("nav.hoy"),
           tabBarIcon: ({ color }) => <TabGlyph glyph="☾" color={color} />,
         }}
       />
       <Tabs.Screen
         name="numeros"
         options={{
-          title: "Números",
+          title: t("nav.numeros"),
           tabBarIcon: ({ color }) => <TabGlyph glyph="✦" color={color} />,
         }}
       />
       <Tabs.Screen
         name="ajustes"
         options={{
-          title: "Ajustes",
+          title: t("nav.ajustes"),
           tabBarIcon: ({ color }) => <TabGlyph glyph="◷" color={color} />,
         }}
       />

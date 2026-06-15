@@ -7,12 +7,14 @@ import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { NumberReading } from "../../components/NumberReading";
 import { useProfile } from "../../lib/profile-context";
+import { useTheme } from "../../lib/theme-context";
+import { useT } from "../../lib/i18n-context";
 import { profileToNumerologyInput } from "../../lib/profile";
-import { GLOSS, LABELS } from "../../content/numerology-es";
-import { colors, fonts, radius, space } from "../../theme/tokens";
+import { numerologyContent } from "../../content/numerology";
+import { fonts, radius, space, type ThemeTokens } from "../../theme/tokens";
 
 type CoreKey = "expression" | "soulUrge" | "personality" | "birthday" | "maturity";
-const formatReduction = (t: Pick<ReductionTrace, "steps">) => t.steps.join("  →  ");
+const formatReduction = (tr: Pick<ReductionTrace, "steps">) => tr.steps.join("  →  ");
 const ageLabel = (from: number, to: number | null) => (to === null ? `${from}+` : `${from}–${to}`);
 
 interface SheetState {
@@ -23,6 +25,11 @@ interface SheetState {
 export default function NumerosScreen() {
   const insets = useSafeAreaInsets();
   const { profile } = useProfile();
+  const { t: tk } = useTheme();
+  const { t, locale } = useT();
+  const styles = useMemo(() => makeStyles(tk), [tk]);
+  const labels = numerologyContent(locale).labels;
+  const gloss = numerologyContent(locale).gloss;
   const [pro, setPro] = useState(false);
   const [sheet, setSheet] = useState<SheetState | null>(null);
 
@@ -40,7 +47,7 @@ export default function NumerosScreen() {
       <View style={styles.root}>
         <View style={styles.emptyWrap}>
           <Enso size={48} />
-          <Text style={styles.emptyText}>Aún no hay un mapa que leer.</Text>
+          <Text style={styles.emptyText}>{t("numerology.emptyMap")}</Text>
         </View>
       </View>
     );
@@ -63,14 +70,17 @@ export default function NumerosScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
+        contentContainerStyle={[
+          styles.scroll,
+          { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.head}>
-          <Text style={styles.eyebrow}>Numerología</Text>
+          <Text style={styles.eyebrow}>{t("numerology.title")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>Tu mapa numérico</Text>
+        <Text style={styles.h1}>{t("numerology.subtitle")}</Text>
         <Text style={styles.who}>{profile.name}</Text>
 
         {/* HERO — Camino de Vida */}
@@ -83,9 +93,9 @@ export default function NumerosScreen() {
               <Text style={styles.heroN}>{core.lifePath.value}</Text>
             </View>
           </View>
-          {core.lifePath.isMaster && <Text style={styles.pill}>★ Número maestro</Text>}
-          <Text style={styles.heroLabel}>{LABELS.lifePath}</Text>
-          <Text style={styles.heroGloss}>{GLOSS.lifePath}</Text>
+          {core.lifePath.isMaster && <Text style={styles.pill}>{t("numerology.master")}</Text>}
+          <Text style={styles.heroLabel}>{labels.lifePath}</Text>
+          <Text style={styles.heroGloss}>{gloss.lifePath}</Text>
           <Text style={styles.calc}>{formatReduction(core.lifePath)}</Text>
         </Pressable>
 
@@ -98,8 +108,8 @@ export default function NumerosScreen() {
               onPress={() => setSheet({ positionKey: it.key, trace: it.trace })}
             >
               <Text style={styles.cellN}>{it.trace.value}</Text>
-              <Text style={styles.cellL}>{LABELS[it.key]}</Text>
-              <Text style={styles.cellSub}>{GLOSS[it.key]}</Text>
+              <Text style={styles.cellL}>{labels[it.key]}</Text>
+              <Text style={styles.cellSub}>{gloss[it.key]}</Text>
             </Pressable>
           ))}
         </View>
@@ -107,13 +117,13 @@ export default function NumerosScreen() {
         {/* Toggle Modo Pro */}
         <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
           <View style={[styles.proDot, pro && styles.proDotOn]} />
-          <Text style={styles.proText}>Modo Pro</Text>
+          <Text style={styles.proText}>{t("numerology.pro")}</Text>
         </Pressable>
 
         {pro && (
           <View style={styles.proBody}>
             {/* Lecciones y deudas kármicas */}
-            <Card title="Lecciones kármicas">
+            <Card styles={styles} title={t("numerology.karmicLessons")}>
               <View style={styles.chips}>
                 {karmic.lessons.length ? (
                   karmic.lessons.map((n) => (
@@ -122,12 +132,12 @@ export default function NumerosScreen() {
                     </View>
                   ))
                 ) : (
-                  <Text style={styles.muted}>Ninguna</Text>
+                  <Text style={styles.muted}>{t("numerology.none")}</Text>
                 )}
               </View>
               {karmic.debts.length > 0 && (
                 <>
-                  <Text style={styles.cardSub}>Deudas kármicas</Text>
+                  <Text style={styles.cardSub}>{t("numerology.debts")}</Text>
                   <View style={styles.chips}>
                     {karmic.debts.map((n) => (
                       <View key={n} style={[styles.chip, styles.chipWarn]}>
@@ -140,7 +150,7 @@ export default function NumerosScreen() {
             </Card>
 
             {/* Tabla de inclusión */}
-            <Card title="Tabla de inclusión">
+            <Card styles={styles} title={t("numerology.inclusion")}>
               <View style={styles.incl}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => {
                   const c = karmic.inclusion[d] ?? 0;
@@ -155,35 +165,37 @@ export default function NumerosScreen() {
                 })}
               </View>
               {karmic.hiddenPassion.length > 0 && (
-                <Text style={styles.muted}>Pasión oculta: {karmic.hiddenPassion.join(", ")}</Text>
+                <Text style={styles.muted}>
+                  {t("numerology.hiddenPassion")}: {karmic.hiddenPassion.join(", ")}
+                </Text>
               )}
             </Card>
 
             {/* Pináculos y desafíos */}
-            <Card title="Pináculos">
-              <Timeline items={pinnacles.map((p) => ({ value: p.value, age: ageLabel(p.startAge, p.endAge) }))} />
-              <Text style={styles.cardSub}>Desafíos</Text>
-              <Timeline items={challenges.map((c) => ({ value: c.value, age: ageLabel(c.startAge, c.endAge) }))} />
+            <Card styles={styles} title={t("numerology.pinnacles")}>
+              <Timeline styles={styles} items={pinnacles.map((p) => ({ value: p.value, age: ageLabel(p.startAge, p.endAge) }))} />
+              <Text style={styles.cardSub}>{t("numerology.challenges")}</Text>
+              <Timeline styles={styles} items={challenges.map((c) => ({ value: c.value, age: ageLabel(c.startAge, c.endAge) }))} />
             </Card>
 
             {/* Ciclos del momento */}
-            <Card title="Ciclos del momento">
+            <Card styles={styles} title={t("numerology.cycles")}>
               <View style={styles.cycles}>
-                <Cyc value={cycles.personalYear.value} label="Año personal" />
-                <Cyc value={cycles.personalMonth.value} label="Mes personal" />
-                <Cyc value={cycles.personalDay.value} label="Día personal" />
+                <Cyc styles={styles} value={cycles.personalYear.value} label={t("numerology.personalYear")} />
+                <Cyc styles={styles} value={cycles.personalMonth.value} label={t("numerology.personalMonth")} />
+                <Cyc styles={styles} value={cycles.personalDay.value} label={t("numerology.personalDay")} />
               </View>
             </Card>
           </View>
         )}
 
-        <Text style={styles.tapHint}>Toca un número para ver su esencia y cómo se calcula.</Text>
+        <Text style={styles.tapHint}>{t("numerology.tapHint")}</Text>
       </ScrollView>
 
       <BottomSheet
         open={!!sheet}
         onClose={() => setSheet(null)}
-        title={sheet ? (LABELS[sheet.positionKey as keyof typeof LABELS] ?? "") : ""}
+        title={sheet ? (labels[sheet.positionKey] ?? "") : ""}
       >
         {sheet && <NumberReading positionKey={sheet.positionKey} trace={sheet.trace} />}
       </BottomSheet>
@@ -191,7 +203,15 @@ export default function NumerosScreen() {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({
+  styles,
+  title,
+  children,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.card}>
       <Text style={styles.cardH}>{title}</Text>
@@ -200,7 +220,13 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Timeline({ items }: { items: Array<{ value: number; age: string }> }) {
+function Timeline({
+  styles,
+  items,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  items: Array<{ value: number; age: string }>;
+}) {
   return (
     <View style={styles.timeline}>
       {items.map((it, k) => (
@@ -213,7 +239,15 @@ function Timeline({ items }: { items: Array<{ value: number; age: string }> }) {
   );
 }
 
-function Cyc({ value, label }: { value: number; label: string }) {
+function Cyc({
+  styles,
+  value,
+  label,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  value: number;
+  label: string;
+}) {
   return (
     <View style={styles.cyc}>
       <Text style={styles.cycN}>{value}</Text>
@@ -222,148 +256,172 @@ function Cyc({ value, label }: { value: number; label: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.night },
-  sky: { position: "absolute", top: 0, left: 0, right: 0, height: 420 },
-  scroll: { paddingHorizontal: space.xl, alignItems: "center" },
-  emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
-  emptyText: { color: colors.textDim, fontSize: 16, fontFamily: fonts.sans },
+function makeStyles(t: ThemeTokens) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: t.bg },
+    sky: { position: "absolute", top: 0, left: 0, right: 0, height: 420 },
+    scroll: { paddingHorizontal: space.xl, alignItems: "center" },
+    emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
+    emptyText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
 
-  head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-  eyebrow: { color: colors.gold, fontSize: 12, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sans },
-  h1: { color: colors.text, fontSize: 30, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center" },
-  who: { color: colors.textDim, fontSize: 15, marginTop: space.xs, marginBottom: space.xxl, fontFamily: fonts.serif, fontStyle: "italic" },
+    head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
+    eyebrow: { color: t.acc, fontSize: 12, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sans },
+    h1: { color: t.text, fontSize: 30, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center" },
+    who: {
+      color: t.textDim,
+      fontSize: 15,
+      marginTop: space.xs,
+      marginBottom: space.xxl,
+      fontFamily: fonts.serif,
+      fontStyle: "italic",
+    },
 
-  hero: { alignItems: "center", marginBottom: space.xxl },
-  ringOuter: {
-    width: 188,
-    height: 188,
-    borderRadius: 94,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.goldFaint,
-  },
-  ring: {
-    width: 156,
-    height: 156,
-    borderRadius: 78,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: colors.goldSoft,
-    backgroundColor: colors.panelSoft,
-  },
-  heroN: { color: colors.gold, fontSize: 76, fontFamily: fonts.serif, lineHeight: 84 },
-  pill: {
-    marginTop: space.lg,
-    color: colors.gold,
-    fontSize: 11,
-    letterSpacing: 1.5,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.pill,
-    paddingHorizontal: space.md,
-    paddingVertical: 3,
-    overflow: "hidden",
-    fontFamily: fonts.sans,
-  },
-  heroLabel: { color: colors.text, fontSize: 19, marginTop: space.lg, fontFamily: fonts.serif, fontStyle: "italic" },
-  heroGloss: { color: colors.textDim, fontSize: 13, marginTop: space.xs, fontFamily: fonts.sans },
-  calc: { color: colors.textFaint, fontSize: 13, marginTop: space.sm, fontFamily: fonts.serif, fontStyle: "italic" },
+    hero: { alignItems: "center", marginBottom: space.xxl },
+    ringOuter: {
+      width: 188,
+      height: 188,
+      borderRadius: 94,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: t.accFaint,
+    },
+    ring: {
+      width: 156,
+      height: 156,
+      borderRadius: 78,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1.5,
+      borderColor: t.accSoft,
+      backgroundColor: t.panelSoft,
+    },
+    heroN: { color: t.acc, fontSize: 76, fontFamily: fonts.serif, lineHeight: 84 },
+    pill: {
+      marginTop: space.lg,
+      color: t.acc,
+      fontSize: 11,
+      letterSpacing: 1.5,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.pill,
+      paddingHorizontal: space.md,
+      paddingVertical: 3,
+      overflow: "hidden",
+      fontFamily: fonts.sans,
+    },
+    heroLabel: { color: t.text, fontSize: 19, marginTop: space.lg, fontFamily: fonts.serif, fontStyle: "italic" },
+    heroGloss: { color: t.textDim, fontSize: 13, marginTop: space.xs, fontFamily: fonts.sans },
+    calc: { color: t.textFaint, fontSize: 13, marginTop: space.sm, fontFamily: fonts.serif, fontStyle: "italic" },
 
-  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%" },
-  cell: {
-    width: "47%",
-    minWidth: 150,
-    paddingVertical: space.lg,
-    paddingHorizontal: space.md,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.md,
-    backgroundColor: colors.panelSoft,
-  },
-  cellN: { color: colors.gold, fontSize: 34, fontFamily: fonts.serif },
-  cellL: { color: colors.text, fontSize: 15, marginTop: space.xs, fontFamily: fonts.sans },
-  cellSub: { color: colors.textFaint, fontSize: 11, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
+    grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%" },
+    cell: {
+      width: "47%",
+      minWidth: 150,
+      paddingVertical: space.lg,
+      paddingHorizontal: space.md,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.md,
+      backgroundColor: t.panelSoft,
+    },
+    cellN: { color: t.acc, fontSize: 34, fontFamily: fonts.serif },
+    cellL: { color: t.text, fontSize: 15, marginTop: space.xs, fontFamily: fonts.sans },
+    cellSub: { color: t.textFaint, fontSize: 11, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
 
-  proToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    marginTop: space.xxl,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.pill,
-    paddingHorizontal: space.xl,
-    paddingVertical: space.md,
-  },
-  proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.goldHair },
-  proDotOn: { backgroundColor: colors.gold },
-  proText: { color: colors.text, fontSize: 15, letterSpacing: 1, fontFamily: fonts.sans },
+    proToggle: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space.md,
+      marginTop: space.xxl,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.pill,
+      paddingHorizontal: space.xl,
+      paddingVertical: space.md,
+    },
+    proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
+    proDotOn: { backgroundColor: t.acc },
+    proText: { color: t.text, fontSize: 15, letterSpacing: 1, fontFamily: fonts.sans },
 
-  proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
-  card: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.lg,
-    backgroundColor: colors.panelSoft,
-    padding: space.xl,
-  },
-  cardH: { color: colors.gold, fontSize: 13, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.lg, fontFamily: fonts.sans },
-  cardSub: { color: colors.textDim, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", marginTop: space.lg, marginBottom: space.md, fontFamily: fonts.sans },
-  muted: { color: colors.textFaint, fontSize: 14, fontFamily: fonts.sans },
+    proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
+    card: {
+      width: "100%",
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.lg,
+      backgroundColor: t.panelSoft,
+      padding: space.xl,
+    },
+    cardH: {
+      color: t.acc,
+      fontSize: 13,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      marginBottom: space.lg,
+      fontFamily: fonts.sans,
+    },
+    cardSub: {
+      color: t.textDim,
+      fontSize: 12,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      marginTop: space.lg,
+      marginBottom: space.md,
+      fontFamily: fonts.sans,
+    },
+    muted: { color: t.textFaint, fontSize: 14, fontFamily: fonts.sans },
 
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  chip: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.goldSoft,
-    backgroundColor: colors.goldFaint,
-  },
-  chipText: { color: colors.gold, fontSize: 16, fontFamily: fonts.serif },
-  chipWarn: { borderColor: colors.warn, backgroundColor: colors.warnSoft },
-  chipWarnText: { color: colors.warn },
+    chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+    chip: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: t.accSoft,
+      backgroundColor: t.accFaint,
+    },
+    chipText: { color: t.acc, fontSize: 16, fontFamily: fonts.serif },
+    chipWarn: { borderColor: t.warn, backgroundColor: t.warnSoft },
+    chipWarnText: { color: t.warn },
 
-  incl: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, justifyContent: "space-between" },
-  inclCell: {
-    width: "30%",
-    paddingVertical: space.md,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.sm,
-    backgroundColor: colors.panel,
-  },
-  inclHot: { borderColor: colors.gold, backgroundColor: colors.goldFaint },
-  inclMiss: { opacity: 0.45 },
-  inclD: { color: colors.text, fontSize: 18, fontFamily: fonts.serif },
-  inclDHot: { color: colors.gold },
-  inclC: { color: colors.textDim, fontSize: 12, marginTop: 2, fontFamily: fonts.sans },
+    incl: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, justifyContent: "space-between" },
+    inclCell: {
+      width: "30%",
+      paddingVertical: space.md,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.sm,
+      backgroundColor: t.panel,
+    },
+    inclHot: { borderColor: t.acc, backgroundColor: t.accFaint },
+    inclMiss: { opacity: 0.45 },
+    inclD: { color: t.text, fontSize: 18, fontFamily: fonts.serif },
+    inclDHot: { color: t.acc },
+    inclC: { color: t.textDim, fontSize: 12, marginTop: 2, fontFamily: fonts.sans },
 
-  timeline: { flexDirection: "row", justifyContent: "space-between", gap: space.sm },
-  tcell: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: space.md,
-    borderWidth: 1,
-    borderColor: colors.goldHair,
-    borderRadius: radius.sm,
-    backgroundColor: colors.panel,
-  },
-  tN: { color: colors.gold, fontSize: 22, fontFamily: fonts.serif },
-  tAge: { color: colors.textFaint, fontSize: 11, marginTop: 2, fontFamily: fonts.sans },
+    timeline: { flexDirection: "row", justifyContent: "space-between", gap: space.sm },
+    tcell: {
+      flex: 1,
+      alignItems: "center",
+      paddingVertical: space.md,
+      borderWidth: 1,
+      borderColor: t.accHair,
+      borderRadius: radius.sm,
+      backgroundColor: t.panel,
+    },
+    tN: { color: t.acc, fontSize: 22, fontFamily: fonts.serif },
+    tAge: { color: t.textFaint, fontSize: 11, marginTop: 2, fontFamily: fonts.sans },
 
-  cycles: { flexDirection: "row", justifyContent: "space-between", gap: space.md },
-  cyc: { flex: 1, alignItems: "center" },
-  cycN: { color: colors.gold, fontSize: 30, fontFamily: fonts.serif },
-  cycL: { color: colors.textDim, fontSize: 12, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
+    cycles: { flexDirection: "row", justifyContent: "space-between", gap: space.md },
+    cyc: { flex: 1, alignItems: "center" },
+    cycN: { color: t.acc, fontSize: 30, fontFamily: fonts.serif },
+    cycL: { color: t.textDim, fontSize: 12, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
 
-  tapHint: { color: colors.textFaint, fontSize: 13, marginTop: space.xxl, textAlign: "center", fontFamily: fonts.sans },
-});
+    tapHint: { color: t.textFaint, fontSize: 13, marginTop: space.xxl, textAlign: "center", fontFamily: fonts.sans },
+  });
+}

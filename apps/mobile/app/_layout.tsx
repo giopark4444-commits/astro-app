@@ -4,31 +4,35 @@ import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ProfileProvider, useProfile } from "../lib/profile-context";
-import { colors } from "../theme/tokens";
+import { ThemeProvider, useTheme } from "../lib/theme-context";
+import { I18nProvider } from "../lib/i18n-context";
 
 /**
- * Layout raíz: provee SafeArea + perfil, fija la barra de estado clara sobre la
- * noche de Aluna y enruta entre el onboarding ceremonial y las pestañas según
- * exista (o no) un perfil activo guardado.
+ * Layout raíz: provee SafeArea + tema + idioma + perfil. Fija la barra de estado
+ * según el modo de luz del tema activo y enruta entre el onboarding ceremonial y
+ * las pestañas según exista (o no) un perfil activo guardado.
  */
 function RootGate() {
-  const { ready, profile } = useProfile();
+  const { ready: profileReady, profile } = useProfile();
+  const { ready: themeReady, t } = useTheme();
   const segments = useSegments();
   const router = useRouter();
 
+  const booted = profileReady && themeReady;
+
   useEffect(() => {
-    if (!ready) return;
+    if (!booted) return;
     const inOnboarding = segments[0] === "onboarding";
     if (!profile && !inOnboarding) {
       router.replace("/onboarding");
     } else if (profile && inOnboarding) {
       router.replace("/(tabs)");
     }
-  }, [ready, profile, segments, router]);
+  }, [booted, profile, segments, router]);
 
   return (
-    <View style={styles.root}>
-      <StatusBar style="light" />
+    <View style={[styles.root, { backgroundColor: t.bg }]}>
+      <StatusBar style={t.isLight ? "dark" : "light"} />
       <Slot />
     </View>
   );
@@ -37,13 +41,17 @@ function RootGate() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ProfileProvider>
-        <RootGate />
-      </ProfileProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <ProfileProvider>
+            <RootGate />
+          </ProfileProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.night },
+  root: { flex: 1 },
 });

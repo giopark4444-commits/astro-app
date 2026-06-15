@@ -44,12 +44,16 @@ export function parseOpenMeteo(json: OpenMeteoRaw): GeocodeResult[] {
 }
 
 /** Busca lugares por nombre. Devuelve [] ante cualquier error o consulta corta. */
-export async function searchPlaces(query: string, signal?: AbortSignal): Promise<GeocodeResult[]> {
+export async function searchPlaces(
+  query: string,
+  signal?: AbortSignal,
+  language: "es" | "en" = "es",
+): Promise<GeocodeResult[]> {
   const q = query.trim();
   if (q.length < 2 || q.length > 200) return [];
   const url =
     `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}` +
-    `&count=6&language=es&format=json`;
+    `&count=6&language=${language}&format=json`;
   try {
     const res = await fetch(url, signal ? { signal } : undefined);
     if (!res.ok) return [];

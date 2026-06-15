@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Animated, Easing, StyleSheet, View, useWindowDimensions } from "react-native";
-import { colors } from "../theme/tokens";
+import { useTheme } from "../lib/theme-context";
 
 /**
  * Cielo estrellado sutil, equivalente nativo del <Starfield/> de la web.
@@ -20,6 +20,7 @@ function mulberry32(seed: number) {
 }
 
 export function Starfield({ count = 48, height }: { count?: number; height?: number }) {
+  const { t } = useTheme();
   const dims = useWindowDimensions();
   const w = dims.width;
   const h = height ?? dims.height;
@@ -48,6 +49,10 @@ export function Starfield({ count = 48, height }: { count?: number; height?: num
 
   const dim = twinkle.interpolate({ inputRange: [0, 1], outputRange: [1, 0.55] });
 
+  // En modos claros el cielo se apaga (como --stars: 0 en la web): el fondo
+  // pastel no lleería bien con estrellas. Devolvemos null para no pintar nada.
+  if (t.isLight) return null;
+
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none" aria-hidden>
       {stars.map((s, i) => (
@@ -60,7 +65,7 @@ export function Starfield({ count = 48, height }: { count?: number; height?: num
             width: s.r * 2,
             height: s.r * 2,
             borderRadius: s.r,
-            backgroundColor: colors.text,
+            backgroundColor: t.star,
             opacity: i % 3 === 0 ? Animated.multiply(dim, s.o) : s.o,
           }}
         />
