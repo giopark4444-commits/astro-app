@@ -33,3 +33,16 @@ export type {
   SynastryTone,
   SynastryDriver,
 } from "./astrology/synastry";
+
+// Cuatro Pilares (八字 Ba Zi / 사주 Saju) — sistema sexagenario, RN-safe
+export {
+  computeBaZi,
+  yearPillar,
+  monthPillar,
+  dayPillar,
+  hourPillar,
+  gregorianToJDN,
+  HEAVENLY_STEMS,
+  EARTHLY_BRANCHES,
+} from "./bazi/bazi";
+export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef } from "./bazi/bazi";
