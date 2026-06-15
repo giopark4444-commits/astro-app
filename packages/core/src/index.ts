@@ -42,7 +42,10 @@ export {
   dayPillar,
   hourPillar,
   gregorianToJDN,
+  hiddenStems,
+  tenGod,
+  TEN_GODS,
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
 } from "./bazi/bazi";
-export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef } from "./bazi/bazi";
+export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef } from "./bazi/bazi";

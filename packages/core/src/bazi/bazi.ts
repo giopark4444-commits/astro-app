@@ -152,3 +152,96 @@ export function computeBaZi(input: BaZiInput): BaZiResult {
   const hour = hourPillar(day.stem, input.hour);
   return { year, month, day, hour };
 }
+
+// ───────────────────────── Modo Pro: 藏干 + 十神 ─────────────────────────
+
+/**
+ * Troncos ocultos (藏干, "hidden stems"): cada rama terrestre esconde de 1 a 3 troncos
+ * celestes (su elemento principal + residual + tumbal), índices en HEAVENLY_STEMS.
+ * Tabla estándar; el primero es siempre el tronco principal (本气). Por índice de rama:
+ *   子[壬·癸? no]… (ver constante). Validar contra fuente Ba Zi autorizada.
+ */
+const HIDDEN_STEMS: readonly (readonly number[])[] = [
+  [9], // 子 zi  → 癸
+  [5, 9, 7], // 丑 chou → 己 癸 辛
+  [0, 2, 4], // 寅 yin  → 甲 丙 戊
+  [1], // 卯 mao  → 乙
+  [4, 1, 9], // 辰 chen → 戊 乙 癸
+  [2, 4, 6], // 巳 si   → 丙 戊 庚
+  [3, 5], // 午 wu   → 丁 己
+  [5, 3, 1], // 未 wei  → 己 丁 乙
+  [6, 8, 4], // 申 shen → 庚 壬 戊
+  [7], // 酉 you  → 辛
+  [4, 7, 3], // 戌 xu   → 戊 辛 丁
+  [8, 0], // 亥 hai  → 壬 甲
+] as const;
+
+/** Troncos ocultos de una rama (índices en HEAVENLY_STEMS); el primero es el principal. */
+export function hiddenStems(branch: number): number[] {
+  return [...(HIDDEN_STEMS[mod(branch, 12)] ?? [])];
+}
+
+/** Las 10 relaciones del sistema de los Diez Dioses (十神), relativas al Maestro del Día. */
+export type TenGod =
+  | "peer" // 比肩 bǐ jiān — mismo elemento, misma polaridad
+  | "rob" // 劫財 jié cái — mismo elemento, distinta polaridad
+  | "eating" // 食神 shí shén — el DM lo genera, misma polaridad
+  | "hurting" // 傷官 shāng guān — el DM lo genera, distinta polaridad
+  | "wealth_indirect" // 偏財 piān cái — el DM lo controla, misma polaridad
+  | "wealth_direct" // 正財 zhèng cái — el DM lo controla, distinta polaridad
+  | "power_indirect" // 七殺 qī shā — lo controla al DM, misma polaridad
+  | "power_direct" // 正官 zhèng guān — lo controla al DM, distinta polaridad
+  | "resource_indirect" // 偏印 piān yìn — lo genera al DM, misma polaridad
+  | "resource_direct"; // 正印 zhèng yìn — lo genera al DM, distinta polaridad
+
+export interface TenGodDef {
+  key: TenGod;
+  hanzi: string;
+}
+/** Los Diez Dioses con su hanzi canónico, en orden por pares (par/impar de la regla). */
+export const TEN_GODS: readonly TenGodDef[] = [
+  { key: "peer", hanzi: "比肩" },
+  { key: "rob", hanzi: "劫財" },
+  { key: "eating", hanzi: "食神" },
+  { key: "hurting", hanzi: "傷官" },
+  { key: "wealth_indirect", hanzi: "偏財" },
+  { key: "wealth_direct", hanzi: "正財" },
+  { key: "power_indirect", hanzi: "七殺" },
+  { key: "power_direct", hanzi: "正官" },
+  { key: "resource_indirect", hanzi: "偏印" },
+  { key: "resource_direct", hanzi: "正印" },
+] as const;
+
+/** Índice del elemento en el ciclo generador (生): 0 madera → 1 fuego → 2 tierra → 3 metal → 4 agua → madera. */
+const GEN_ORDER: Record<StemDef["element"], number> = {
+  wood: 0,
+  fire: 1,
+  earth: 2,
+  metal: 3,
+  water: 4,
+};
+
+/**
+ * Diez Dioses (十神): relación de un tronco `other` respecto al Maestro del Día `dayMaster`
+ * (ambos índices en HEAVENLY_STEMS). Combina la fase Wu Xing (en el ciclo generador:
+ * generar = +1, controlar = +2, ser generado = +4, ser controlado = +3) con la polaridad
+ * (yin/yang) de cada tronco — igual o distinta.
+ */
+export function tenGod(dayMaster: number, other: number): TenGod {
+  const dm = HEAVENLY_STEMS[mod(dayMaster, 10)]!;
+  const s = HEAVENLY_STEMS[mod(other, 10)]!;
+  const phase = mod(GEN_ORDER[s.element] - GEN_ORDER[dm.element], 5); // 0=mismo,1=DM genera,2=DM controla,3=controla al DM,4=genera al DM
+  const same = dm.yin === s.yin;
+  switch (phase) {
+    case 0:
+      return same ? "peer" : "rob";
+    case 1:
+      return same ? "eating" : "hurting";
+    case 2:
+      return same ? "wealth_indirect" : "wealth_direct";
+    case 3:
+      return same ? "power_indirect" : "power_direct";
+    default: // 4
+      return same ? "resource_indirect" : "resource_direct";
+  }
+}
