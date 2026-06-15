@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -83,7 +83,7 @@ export default function Onboarding() {
   const canNext = stepComplete(step, a);
 
   // Reanima el revelado al cambiar de paso.
-  useMemo(() => {
+  useEffect(() => {
     reveal.setValue(0);
     Animated.timing(reveal, { toValue: 1, duration: 520, delay: 60, useNativeDriver: true }).start();
   }, [i, reveal]);
