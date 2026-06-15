@@ -8,6 +8,7 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { Icon } from "@/components/icon";
 import { Starfield } from "@/components/starfield";
 import { EnergyPanel } from "./energy-panel";
+import { DayNumberCard } from "./day-number-card";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
@@ -76,6 +77,8 @@ export function HubView() {
           </span>
         </Link>
       )}
+
+      {active && <DayNumberCard birthDate={active.birth_date} />}
 
       {active && <EnergyPanel profileId={active.id} />}
 
