@@ -34,6 +34,9 @@ export function ProfileMenu() {
           <Link href="/preguntar" className={styles.action} onClick={() => setOpen(false)}>
             <span className={styles.plus} aria-hidden>☾</span> {t("chat.title")}
           </Link>
+          <Link href="/compatibilidad" className={styles.action} onClick={() => setOpen(false)}>
+            <span className={styles.plus} aria-hidden>☍</span> {t("synastry.menu")}
+          </Link>
           <Link href="/onboarding" className={styles.action} onClick={() => setOpen(false)}>
             <span className={styles.plus}>+</span> {t("profile.new")}
           </Link>
