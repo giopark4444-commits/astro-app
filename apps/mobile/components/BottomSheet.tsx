@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
   Easing,
@@ -11,7 +11,8 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, fonts, radius, space } from "../theme/tokens";
+import { useTheme } from "../lib/theme-context";
+import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
 
 /**
  * Hoja inferior, equivalente nativo del <BottomSheet/> de la web. Sube desde
@@ -31,6 +32,8 @@ export function BottomSheet({
 }) {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const { t } = useTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const slide = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -73,36 +76,38 @@ export function BottomSheet({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(4,6,18,0.72)",
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: colors.panel,
-    borderTopLeftRadius: radius.lg + 6,
-    borderTopRightRadius: radius.lg + 6,
-    borderTopWidth: 1,
-    borderColor: colors.goldHair,
-    paddingHorizontal: space.xl,
-    paddingTop: space.md,
-  },
-  handle: {
-    alignSelf: "center",
-    width: 44,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.goldSoft,
-    marginBottom: space.lg,
-  },
-  title: {
-    color: colors.gold,
-    fontFamily: fonts.serif,
-    fontSize: 22,
-    fontStyle: "italic",
-    textAlign: "center",
-    marginBottom: space.sm,
-  },
-  body: { paddingTop: space.sm },
-});
+function makeStyles(t: ThemeTokens) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: t.scrim,
+      justifyContent: "flex-end",
+    },
+    sheet: {
+      backgroundColor: t.panel,
+      borderTopLeftRadius: radius.lg + 6,
+      borderTopRightRadius: radius.lg + 6,
+      borderTopWidth: 1,
+      borderColor: t.accHair,
+      paddingHorizontal: space.xl,
+      paddingTop: space.md,
+    },
+    handle: {
+      alignSelf: "center",
+      width: 44,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: t.accSoft,
+      marginBottom: space.lg,
+    },
+    title: {
+      color: t.acc,
+      fontFamily: fonts.serif,
+      fontSize: 22,
+      fontStyle: "italic",
+      textAlign: "center",
+      marginBottom: space.sm,
+    },
+    body: { paddingTop: space.sm },
+  });
+}
