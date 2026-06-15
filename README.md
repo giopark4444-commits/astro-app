@@ -29,18 +29,28 @@ docs/superpowers/     Spec de diseño (specs/) y planes de implementación (plan
 cual en la app móvil; todo lo nativo/servidor (Swiss Ephemeris) vive en `@aluna/ephemeris` y el móvil
 lo consume por API. El cálculo **no** corre en Supabase Edge (Deno no ejecuta el addon nativo).
 
-## Estado de construcción (Fase 1)
+## Estado actual
 
-| Plan | Qué | Estado |
-|---|---|---|
-| 1 | Monorepo + motor de **Numerología** | ✅ en `main` |
-| 2 | Motor de **Carta Astral** (Swiss Ephemeris) | ✅ en `main` |
-| 3 | Backend **Supabase** (esquema + RLS + auth) + **API de cómputo** | ✅ en `main` |
-| 4 | Cliente **web** (Next.js PWA) | ⏳ |
-| 5 | Cliente **móvil** (Expo) | ⏳ |
-| 6 | **Interpretaciones** (ES/EN) | ⏳ |
+**Los 5 lentes funcionan en la web** (bilingüe ES/EN, 3 temas × claro/oscuro):
 
-Validado contra una carta real de Astrodienst al arcominuto (Sol 15°57′ Acuario, Asc 26°06′ Piscis…).
+| Lente / Función | Estado |
+|---|---|
+| **Carta Astral** + Modo Pro técnico (posiciones, aspectario, dignidades, patrones) | ✅ |
+| **Numerología** + Modo Pro (kármicos, pináculos, inclusión…) + selector de profundidad | ✅ |
+| **Hoy: "Tu energía"** (barras por área × periodo) + **numerología del día** (Fase 2) | ✅ |
+| **Compatibilidad / Sinastría** (inter-aspectos + temas) (Fase 3) | ✅ |
+| **Cuatro Pilares** (Ba Zi 八字 / Saju 사주) + Modo Pro (Diez Dioses, troncos ocultos) | ✅ |
+| **Chat "Pregúntale a Aluna"** (anclado a tu carta, con streaming) | ✅ latente\* |
+| **Móvil** (Expo): tabs + onboarding ceremonial + Numerología Modo Pro + 3 temas + EN | ✅ |
+
+\* La capa de **IA** (lecturas largas + chat) está **cableada pero latente**: se enciende al pegar UNA
+llave (Anthropic/OpenAI/Gemini). Sin llave, muestra la "Esencia" escrita a mano. Proveedor intercambiable.
+
+Carta validada contra Astrodienst al arcominuto (Sol 15°57′ Acuario, Asc 26°06′ Piscis…).
+Los pilares Ba Zi se validan contra una referencia documentada (día 2000-01-07 = 甲子).
+
+**Pendiente:** desplegar (en curso, ver abajo), encender IA con una llave, Fase 4 (monetización),
+horóscopo ligero, pilares de suerte (大運), validar Ba Zi/móvil con Gio.
 
 ## Desarrollo
 
@@ -58,15 +68,16 @@ Las variables de entorno van en `.env.local` (ver `.env.example`).
 
 ## Deploy
 
-La web (`apps/web`) se despliega como **servidor Node de larga vida** (no serverless puro): las rutas
-API de cómputo usan el addon **nativo `sweph`** + los archivos de datos `.se1`, que un target
-serverless empaqueta de forma frágil. El repo trae un **`Dockerfile`** (multi-stage pnpm/Turborepo,
-arranca `next start` desde `apps/web` conservando el layout del monorepo) y un **`render.yaml`**.
+La web (`apps/web`) corre como **servidor Node de larga vida** (no serverless): las rutas de cómputo
+usan el addon **nativo `sweph`** + los datos `.se1`, frágiles en serverless. El repo trae **`Dockerfile`**
+(multi-stage; `next start` desde `apps/web`) + **`render.yaml`**.
 
-- **Runbook completo:** [`docs/deploy.md`](docs/deploy.md) — prerrequisitos, tabla de variables de
-  entorno (dónde obtenerlas / requeridas vs opcionales), aplicar migraciones de Supabase, comandos de
-  build/run, la nota de los `.se1`, la alternativa Vercel (con sus *caveats*), y una **checklist de
-  verificación post-deploy**.
+**Camino elegido: Hetzner (un VPS) + Coolify** — un solo servidor barato (~€8/mes) con panel tipo
+Render/Vercel autohospedado, que reúne todas las apps de músculo (Aluna y, luego, Vendalo, etc.).
+
+- 👉 **Guía paso a paso (para principiantes):** [`docs/deploy-hetzner-coolify.md`](docs/deploy-hetzner-coolify.md)
+- Alternativa gestionada: **Render** (`render.yaml`) — más fácil, pero cobra por app.
+- Runbook técnico general (Docker / Vercel / checklist): [`docs/deploy.md`](docs/deploy.md)
 
 ```bash
 docker build -t aluna-web .
@@ -74,7 +85,14 @@ docker run --rm -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=... -e NEXT_PUBLIC_SUPABASE_ANON_KEY=... aluna-web
 ```
 
-> El app arranca **sin** llaves de IA (lecturas largas → "Esencia" escrita a mano, latente).
+> Las `NEXT_PUBLIC_*` deben estar en **build time** (en Coolify, marcarlas como *Build Variable*). El app
+> arranca **sin** llaves de IA (lecturas largas → "Esencia", latente).
+
+### Estado del deploy (dónde vamos) 🧭
+- **Supabase** del proyecto `aluna`: las **4 migraciones aplicadas** en vivo (incl. `reading_cache`).
+- **En curso:** desplegar Aluna en **Hetzner + Coolify** siguiendo la guía de arriba (desde el Paso 1).
+- **Al terminar:** verificar `/carta` en vivo → encender IA (una llave) + `SUPABASE_SERVICE_ROLE_KEY`
+  como variables de **runtime** → luego mover Vendalo al mismo servidor.
 
 ## Licencia / notas
 
