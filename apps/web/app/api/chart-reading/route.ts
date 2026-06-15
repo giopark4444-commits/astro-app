@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
 
   const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}`;
   const cache = getReadingCache();
+  // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
   // Lectura best-effort: si el caché falla (red), seguimos y generamos.
   try {
     const hit = await cache.get(cacheKey);
@@ -127,26 +128,58 @@ export async function POST(request: NextRequest) {
       ? `Person: ${profileName}\nPlacement: ${placement}\n\n${LENGTH_GUIDE.en[length]}\n\nRespond ONLY with a valid JSON object, no surrounding text and no markdown, with exactly these text keys: "essence", "flow", "shadow".`
       : `Persona: ${profileName}\nPosición: ${placement}\n\n${LENGTH_GUIDE.es[length]}\n\nResponde ÚNICAMENTE con un objeto JSON válido, sin texto alrededor y sin markdown, con exactamente estas claves de texto: "essence", "flow", "shadow".`;
 
-  try {
-    const text = (await resolved.provider.complete({ system: SYSTEM[locale], prompt: userPrompt, maxTokens: 4000 })).trim();
-    const meaning = parseReading(text);
-    if (!meaning) return NextResponse.json({ available: true, error: "parse" }, { status: 502 });
-    // Persistir best-effort: si el guardado falla, igual devolvemos la lectura.
-    try {
-      await cache.set({
-        key: cacheKey,
-        kind: "chart",
-        locale,
-        model: resolved.provider.model,
-        payload: meaning as unknown as Json,
-      });
-    } catch {
-      /* el guardado es best-effort; no rompe la respuesta */
-    }
-    return NextResponse.json({ available: true, meaning });
-  } catch {
-    return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
-  }
+  // MISS con llave → STREAM. Reenviamos el texto crudo del modelo (que es el objeto
+  // JSON {essence,flow,shadow}) como text/plain a medida que se genera. El cliente
+  // parsea los campos sobre la marcha; al cerrar, parseamos el texto acumulado,
+  // validamos los tres campos y lo guardamos en el caché durable con la misma forma
+  // estructurada de siempre. Si el stream no entrega nada, caemos a complete() una vez.
+  const provider = resolved.provider;
+  const opts = { system: SYSTEM[locale], prompt: userPrompt, maxTokens: 4000 };
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let acc = "";
+      try {
+        for await (const chunk of provider.completeStream(opts)) {
+          if (!chunk) continue;
+          acc += chunk;
+          controller.enqueue(encoder.encode(chunk));
+        }
+        if (!acc.trim()) {
+          const full = (await provider.complete(opts)).trim();
+          if (full) {
+            acc = full;
+            controller.enqueue(encoder.encode(full));
+          }
+        }
+      } catch {
+        /* corte de upstream a mitad: cerramos con lo que haya llegado */
+      }
+      controller.close();
+      const meaning = parseReading(acc.trim());
+      if (meaning) {
+        cache
+          .set({
+            key: cacheKey,
+            kind: "chart",
+            locale,
+            model: provider.model,
+            payload: meaning as unknown as Json,
+          })
+          .catch(() => {
+            /* el guardado es best-effort; no rompe nada */
+          });
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store, no-transform",
+      "x-accel-buffering": "no",
+    },
+  });
 }
 
 /** Extrae el objeto JSON y valida los tres campos. */
