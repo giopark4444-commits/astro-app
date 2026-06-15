@@ -38,17 +38,44 @@ export function ChatView() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ profileId: activeId, locale, messages: next }),
       });
-      const data = (await res.json()) as { available?: boolean; reply?: string };
-      if (data.available === false) {
-        setSt("dormant");
+
+      // Latente (sin llave) o error de validación → JSON { available:false }. Sin
+      // stream que consumir: mostramos el estado dormido / de error.
+      const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
+      if (!isStream) {
+        const data = (await res.json().catch(() => ({}))) as { available?: boolean };
+        setSt(data.available === false ? "dormant" : "error");
         return;
       }
-      if (!res.ok || !data.reply) {
+      if (!res.ok) {
         setSt("error");
         return;
       }
-      setMessages([...next, { role: "assistant", content: data.reply }]);
-      setSt("idle");
+
+      // Stream de texto: añadimos la burbuja de Aluna vacía y le pegamos los tokens
+      // a medida que llegan (efecto de tecleo).
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+      let started = false;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const piece = decoder.decode(value, { stream: true });
+        if (!piece) continue;
+        acc += piece;
+        if (!started) {
+          started = true;
+          setSt("idle");
+          setMessages([...next, { role: "assistant", content: acc }]);
+        } else {
+          setMessages([...next, { role: "assistant", content: acc }]);
+        }
+      }
+      if (!started) {
+        // El stream no entregó nada (upstream cortó antes del primer byte).
+        setSt("error");
+      }
     } catch {
       setSt("error");
     }

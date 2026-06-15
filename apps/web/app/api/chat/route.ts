@@ -100,14 +100,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false });
   }
 
+  let system: string;
   try {
     const chart = computeChart(profileToChartInput(profile));
     const numerology = computeNumerology(profileToNumerologyInput(profile));
-    const system = `${SYSTEM_INTRO[locale]}\n\n${buildContext(profile, chart, numerology, locale)}`;
-    const reply = (await resolved.provider.chat({ system, messages, maxTokens: 1500 })).trim();
-    if (!reply) return NextResponse.json({ available: true, error: "empty" }, { status: 502 });
-    return NextResponse.json({ available: true, reply });
+    system = `${SYSTEM_INTRO[locale]}\n\n${buildContext(profile, chart, numerology, locale)}`;
   } catch {
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
+
+  // Streaming token a token (efecto de tecleo). El proveedor emite trozos de texto;
+  // los reenviamos como text/plain en streaming. Si el proveedor no soporta streaming,
+  // su chatStream cae a entregar el resultado de chat() de una vez. Cualquier error
+  // antes del primer byte se traduce a 502; una vez empezado el stream, se corta limpio.
+  const provider = resolved.provider;
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        for await (const chunk of provider.chatStream({ system, messages, maxTokens: 1500 })) {
+          if (chunk) controller.enqueue(encoder.encode(chunk));
+        }
+      } catch {
+        /* corte de upstream a mitad: cerramos con lo que haya llegado */
+      }
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store, no-transform",
+      "x-accel-buffering": "no",
+    },
+  });
 }
