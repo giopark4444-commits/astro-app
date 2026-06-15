@@ -56,9 +56,30 @@ toolchain de C/C++ (en macOS, Xcode Command Line Tools).
 
 Las variables de entorno van en `.env.local` (ver `.env.example`).
 
+## Deploy
+
+La web (`apps/web`) se despliega como **servidor Node de larga vida** (no serverless puro): las rutas
+API de cómputo usan el addon **nativo `sweph`** + los archivos de datos `.se1`, que un target
+serverless empaqueta de forma frágil. El repo trae un **`Dockerfile`** (multi-stage pnpm/Turborepo,
+arranca `next start` desde `apps/web` conservando el layout del monorepo) y un **`render.yaml`**.
+
+- **Runbook completo:** [`docs/deploy.md`](docs/deploy.md) — prerrequisitos, tabla de variables de
+  entorno (dónde obtenerlas / requeridas vs opcionales), aplicar migraciones de Supabase, comandos de
+  build/run, la nota de los `.se1`, la alternativa Vercel (con sus *caveats*), y una **checklist de
+  verificación post-deploy**.
+
+```bash
+docker build -t aluna-web .
+docker run --rm -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL=... -e NEXT_PUBLIC_SUPABASE_ANON_KEY=... aluna-web
+```
+
+> El app arranca **sin** llaves de IA (lecturas largas → "Esencia" escrita a mano, latente).
+
 ## Licencia / notas
 
-- **Swiss Ephemeris** es dual-licencia (AGPL o profesional). Para uso comercial cerrado se debe
-  adquirir la licencia profesional antes del lanzamiento público. Los archivos de datos `.se1` son
-  de libre distribución.
+- **Swiss Ephemeris** es dual-licencia (AGPL o profesional). **Para uso comercial cerrado se debe
+  adquirir la licencia profesional (Astrodienst) antes del lanzamiento público.** Los archivos de
+  datos `.se1` son de libre distribución, pero el uso de la librería en un producto cerrado no lo es
+  bajo AGPL.
 - Proyecto privado. © Gio.
