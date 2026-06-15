@@ -1,0 +1,33 @@
+# Contexto de build mínimo. node_modules y artefactos se regeneran dentro de la imagen
+# (los prebuilds nativos de sweph deben instalarse para LINUX dentro del contenedor,
+# no copiarse desde el host macOS/Windows).
+node_modules
+**/node_modules
+.next
+**/.next
+.turbo
+**/.turbo
+dist
+**/dist
+coverage
+**/coverage
+*.tsbuildinfo
+
+# Secretos / entorno — NUNCA dentro de la imagen. Las llaves van por variables de
+# entorno de la plataforma en runtime.
+.env
+.env.*
+!.env.example
+
+# Git / herramientas / móvil (no participa en la imagen web).
+.git
+.gitignore
+.claude
+.superpowers
+apps/mobile
+**/.DS_Store
+
+# Docs y meta — no necesarios en runtime.
+docs
+*.md
+!README.md

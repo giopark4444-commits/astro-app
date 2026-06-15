@@ -1,0 +1,56 @@
+# Aluna web en Render — Blueprint (Infrastructure as Code).
+# https://render.com/docs/blueprint-spec
+#
+# Usa la imagen Docker del repo (runtime: docker → construye con ./Dockerfile). Es el
+# camino robusto para el addon nativo `sweph` + los .se1: el contenedor lleva
+# node_modules completo (con el prebuild linux de sweph) y conserva el layout del
+# monorepo, así que process.cwd()/../../packages/ephemeris/ephe resuelve en runtime.
+#
+# Alternativa SIN Docker (runtime: node): ver docs/deploy.md → requiere
+#   buildFilter/rootDir del monorepo y buildCommand = "corepack enable && pnpm install
+#   --frozen-lockfile && pnpm --filter @aluna/web build", startCommand desde apps/web.
+#   El Docker de este blueprint es preferible porque fija Node 20 + glibc y el cwd.
+#
+# Tras crear el servicio, define los SECRETOS en el dashboard (sync:false abajo): NO se
+# versionan aquí. Sin llaves de IA, los niveles largos caen a la "Esencia" escrita a
+# mano (cableado-pero-latente); sin service-role, el caché de lecturas es en memoria.
+
+services:
+  - type: web
+    name: aluna-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter        # 'free' duerme tras inactividad (cold starts); 'starter' lo evita.
+    region: oregon       # ajusta a la región más cercana a tus usuarios.
+    autoDeploy: true
+    healthCheckPath: /    # la home responde sin sesión; sirve de health check.
+    envVars:
+      # --- Públicas (seguras para el navegador). Necesarias SIEMPRE. ---
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+
+      # --- Secretos (solo servidor). Opcionales: el app arranca sin ellos. ---
+      # Caché durable de lecturas IA (si falta, cae a caché en memoria por proceso).
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Lecturas IA (Profunda/Completa). Pon UNA. Sin ninguna → niveles largos en
+      # "Esencia" (latente). READING_PROVIDER es opcional (orden por defecto:
+      # anthropic > openai > gemini).
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # - key: OPENAI_API_KEY
+      #   sync: false
+      # - key: GEMINI_API_KEY
+      #   sync: false
+      # - key: READING_PROVIDER
+      #   value: anthropic
+
+      # Runtime.
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Render inyecta PORT automáticamente; Next (`next start`) lo respeta.
