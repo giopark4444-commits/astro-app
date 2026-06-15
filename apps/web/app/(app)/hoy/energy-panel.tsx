@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  LIFE_AREAS,
   PLANETS,
   type LifeArea,
   type ScoreTone,
