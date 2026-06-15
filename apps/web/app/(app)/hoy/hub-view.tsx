@@ -7,6 +7,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { Icon } from "@/components/icon";
 import { Starfield } from "@/components/starfield";
+import { EnergyPanel } from "./energy-panel";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
@@ -75,6 +76,8 @@ export function HubView() {
           </span>
         </Link>
       )}
+
+      {active && <EnergyPanel profileId={active.id} />}
 
       <h2 className={styles.section}>{t("hoy.lenses")}</h2>
       <div className={styles.lenses}>
