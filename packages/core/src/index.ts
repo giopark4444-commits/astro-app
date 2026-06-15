@@ -25,3 +25,11 @@ export { computeDistribution, quadrantOfHouse } from "./astrology/distribution";
 export { detectPatterns } from "./astrology/patterns";
 export { scoreLifeAreas, scoreTone, LIFE_AREAS } from "./astrology/life-areas";
 export type { LifeArea, LifeAreaScore, ScoreTone, AreaDriver } from "./astrology/life-areas";
+export { synastryReport, SYNASTRY_THEMES } from "./astrology/synastry";
+export type {
+  SynastryReport,
+  SynastryTheme,
+  SynastryThemeScore,
+  SynastryTone,
+  SynastryDriver,
+} from "./astrology/synastry";
