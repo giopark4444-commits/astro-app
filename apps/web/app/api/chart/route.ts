@@ -2,7 +2,7 @@ import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { computeChart, computeDerivedChart, setEphePath, type DerivedKind } from "@aluna/ephemeris";
 import { detectAspectsBetween, type Aspect, type HouseSystem, type Zodiac } from "@aluna/core";
-import { createClient } from "@/lib/supabase/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput, isSolarChart, type ChartInputOptions } from "@/lib/chart";
 
 // Cómputo de la carta natal del perfil activo. Server-only (motor nativo sweph),
@@ -47,10 +47,7 @@ export async function POST(request: NextRequest) {
   const profileId = String(body.profileId ?? "");
   if (!profileId) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   // RLS limita el SELECT al dueño: si vuelve fila, el perfil es de este usuario.

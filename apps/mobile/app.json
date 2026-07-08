@@ -23,6 +23,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "supabaseUrl": "https://xcilrdpcanielalpfvld.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaWxyZHBjYW5pZWxhbHBmdmxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzMTc5MDMsImV4cCI6MjA5Njg5MzkwM30.pPZLz3yFMyOW9GiJV2jy9ys9zScquWl1--vYmuWdXx8",
+      "apiUrl": "http://192.168.0.103:3002"
     }
   }
 }

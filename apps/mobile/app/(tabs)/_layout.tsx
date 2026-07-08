@@ -37,6 +37,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="carta"
+        options={{
+          title: t("nav.carta"),
+          tabBarIcon: ({ color }) => <TabGlyph glyph="☉" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="numeros"
         options={{
           title: t("nav.numeros"),

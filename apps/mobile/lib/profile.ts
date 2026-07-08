@@ -5,6 +5,8 @@ export type Gender = "feminine" | "masculine" | "neutral";
 
 /** Perfil activo guardado localmente. Alimenta la numerología (nombre + fecha civil). */
 export interface Profile {
+  /** id de la fila en Supabase birth_profiles; null hasta que se sincroniza (Carta la necesita). */
+  id: string | null;
   name: string;
   birthDate: string; // YYYY-MM-DD
   birthTime: string; // HH:MM ("" si desconocida)
@@ -14,6 +16,7 @@ export interface Profile {
 }
 
 export const EMPTY_PROFILE: Profile = {
+  id: null,
   name: "",
   birthDate: "",
   birthTime: "",

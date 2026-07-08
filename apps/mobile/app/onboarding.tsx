@@ -19,6 +19,9 @@ import { Enso } from "../components/Enso";
 import { PlaceAutocomplete } from "../components/PlaceAutocomplete";
 import { type Gender, EMPTY_PROFILE, type Profile, isProfileComplete } from "../lib/profile";
 import { useProfile } from "../lib/profile-context";
+import { useAuth } from "../lib/auth-context";
+import { getSupabase } from "../lib/supabase";
+import { insertRemoteProfile } from "../lib/profile-sync";
 import { useTheme } from "../lib/theme-context";
 import { useT, type Locale } from "../lib/i18n-context";
 import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
@@ -55,12 +58,14 @@ export default function Onboarding() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { setProfile } = useProfile();
+  const { session } = useAuth();
   const { t: tk } = useTheme();
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const [a, setA] = useState<Profile>(EMPTY_PROFILE);
   const [i, setI] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showDate, setShowDate] = useState(Platform.OS === "ios");
   const [showTime, setShowTime] = useState(Platform.OS === "ios");
 
@@ -114,10 +119,17 @@ export default function Onboarding() {
       setI(i + 1);
       return;
     }
-    if (!isProfileComplete(a)) return;
+    if (!isProfileComplete(a) || !session) return;
     setBusy(true);
-    await setProfile(a);
-    router.replace("/(tabs)");
+    setError(null);
+    try {
+      const withId = await insertRemoteProfile(getSupabase(), a, session.user.id);
+      await setProfile(withId);
+      router.replace("/(tabs)");
+    } catch {
+      setBusy(false);
+      setError(t("onboarding.createError"));
+    }
   }
 
   const fade = {
@@ -249,6 +261,7 @@ export default function Onboarding() {
 
       {/* Pie fijo: progreso + acciones */}
       <View style={[styles.foot, { paddingBottom: insets.bottom + space.lg }]}>
+        {error && <Text style={styles.errorText}>{error}</Text>}
         <View style={styles.dots}>
           {STEPS.map((_, k) => (
             <View key={k} style={[styles.dot, k === i && styles.dotOn, k < i && styles.dotPast]} />
@@ -342,6 +355,7 @@ function makeStyles(t: ThemeTokens) {
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: t.accHair,
     },
+    errorText: { color: t.warn, fontSize: 13, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.md },
     dots: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginBottom: space.lg },
     dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: t.accHair },
     dotOn: { backgroundColor: t.acc, width: 22 },

@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Database } from "@aluna/supabase";
+import { createBrowserSupabaseClient, type Database } from "@aluna/supabase";
+import { parseBearerToken } from "./bearer";
 
 // Rutas públicas (accesibles sin sesión). NOTA para tasks siguientes:
 //  - "/" NO está aquí a propósito → queda protegida (redirige a /login).
@@ -32,7 +33,25 @@ export async function updateSession(request: NextRequest) {
   );
 
   // No correr código entre createServerClient y getUser().
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user: cookieUser } } = await supabase.auth.getUser();
+
+  // Sin cookie (típico del móvil, que manda su sesión como Authorization:
+  // Bearer en vez de cookies) → valida ese token antes de dar por no-autenticado.
+  // Las rutas /api/* igual hacen su propia verificación (route-auth.ts); esto
+  // solo evita que el middleware las intercepte con un 307 a /login antes de
+  // que el fetch del móvil llegue a la ruta.
+  let bearerUser = null;
+  const bearer = !cookieUser ? parseBearerToken(request.headers.get("authorization")) : null;
+  if (bearer) {
+    const bearerClient = createBrowserSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } },
+    );
+    const { data } = await bearerClient.auth.getUser(bearer);
+    bearerUser = data.user;
+  }
+  const user = cookieUser ?? bearerUser;
 
   const path = request.nextUrl.pathname;
   const isPublic = isPublicPath(path);

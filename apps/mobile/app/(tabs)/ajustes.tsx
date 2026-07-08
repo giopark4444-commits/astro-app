@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Enso } from "../../components/Enso";
 import { SoonBadge } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
+import { useAuth } from "../../lib/auth-context";
 import { useTheme, type ModePref } from "../../lib/theme-context";
 import { useT, type Locale } from "../../lib/i18n-context";
 import { formatPlace } from "../../lib/geocode";
@@ -22,9 +23,24 @@ export default function AjustesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { profile, reset } = useProfile();
+  const { signOut } = useAuth();
   const { t: tk, theme, modePref, setTheme, setModePref } = useTheme();
   const { t, locale, setLocale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
+
+  function confirmLogout() {
+    Alert.alert(t("settings.logoutConfirmTitle"), t("settings.logoutConfirmBody"), [
+      { text: t("settings.resetCancel"), style: "cancel" },
+      {
+        text: t("auth.logout"),
+        style: "destructive",
+        onPress: async () => {
+          await reset();
+          await signOut();
+        },
+      },
+    ]);
+  }
 
   const genderLabel = (g: string) => {
     if (g === "feminine") return t("gender.feminine");
@@ -132,13 +148,17 @@ export default function AjustesScreen() {
         <View style={styles.card}>
           <Text style={styles.cardEyebrow}>{t("settings.systems")}</Text>
           <SystemRow styles={styles} name={t("settings.sysNumerology")} status={t("settings.available")} on />
-          <SystemRow styles={styles} name={t("settings.sysCarta")} status={t("settings.soon")} />
+          <SystemRow styles={styles} name={t("settings.sysCarta")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysBazi")} status={t("settings.soon")} />
           <SystemRow styles={styles} name={t("settings.sysReadings")} status={t("settings.soon")} last />
         </View>
 
         <Pressable style={styles.reset} onPress={confirmReset}>
           <Text style={styles.resetText}>{t("settings.reset")}</Text>
+        </Pressable>
+
+        <Pressable style={[styles.reset, styles.logout]} onPress={confirmLogout}>
+          <Text style={[styles.resetText, styles.logoutText]}>{t("auth.logout")}</Text>
         </Pressable>
 
         <Text style={styles.footNote}>{t("settings.footNote")}</Text>
@@ -317,6 +337,8 @@ function makeStyles(t: ThemeTokens) {
       marginTop: space.md,
     },
     resetText: { color: t.acc, fontSize: 15, letterSpacing: 0.5, fontFamily: fonts.sans },
+    logout: { marginTop: space.md, borderColor: t.warnSoft },
+    logoutText: { color: t.warn },
 
     footNote: { color: t.textDim, fontSize: 13, textAlign: "center", marginTop: space.xxl, fontFamily: fonts.serif, fontStyle: "italic" },
     version: { color: t.textFaint, fontSize: 12, textAlign: "center", marginTop: space.sm, lineHeight: 18, fontFamily: fonts.sans },
