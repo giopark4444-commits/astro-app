@@ -51,3 +51,7 @@ export {
 export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef } from "./bazi/bazi";
 export { sexagenaryIndex, nayin, NAYIN, type NayinDef } from "./bazi/nayin";
 export { lifeStage, TWELVE_STAGES, type StageKey, type StageDef } from "./bazi/stages";
+export {
+  detectInteractions, branchPairInteractions, TRINES,
+  type Interaction, type InteractionType, type PillarPos, type PillarSet,
+} from "./bazi/interactions";
