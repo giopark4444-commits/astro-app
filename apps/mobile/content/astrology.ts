@@ -12,6 +12,7 @@ export interface AstroLabelMaps {
   elements: Record<string, string>;
   modalities: Record<string, string>;
   patterns: Record<string, string>;
+  houses: Record<string, string>;
 }
 
 export const ASPECT_GLYPHS: Record<string, string> = {
@@ -47,6 +48,10 @@ const ES: AstroLabelMaps = {
   elements: { fire: "Fuego", earth: "Tierra", air: "Aire", water: "Agua" },
   modalities: { cardinal: "Cardinal", fixed: "Fijo", mutable: "Mutable" },
   patterns: { stellium: "Stellium", grand_trine: "Gran Trígono", t_square: "T-Cuadrada" },
+  houses: {
+    placidus: "Placidus", koch: "Koch", equal: "Iguales", whole: "Signo entero",
+    regiomontanus: "Regiomontano", porphyry: "Porfirio",
+  },
 };
 
 const EN: AstroLabelMaps = {
@@ -69,6 +74,10 @@ const EN: AstroLabelMaps = {
   elements: { fire: "Fire", earth: "Earth", air: "Air", water: "Water" },
   modalities: { cardinal: "Cardinal", fixed: "Fixed", mutable: "Mutable" },
   patterns: { stellium: "Stellium", grand_trine: "Grand Trine", t_square: "T-Square" },
+  houses: {
+    placidus: "Placidus", koch: "Koch", equal: "Equal", whole: "Whole sign",
+    regiomontanus: "Regiomontanus", porphyry: "Porphyry",
+  },
 };
 
 export function astroLabels(locale: Locale): AstroLabelMaps {

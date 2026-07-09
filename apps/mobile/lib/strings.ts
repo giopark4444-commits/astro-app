@@ -114,6 +114,9 @@ export const STRINGS = {
       readingWeaving: "Aluna está tejiendo tu lectura…",
       readingGated: "Las lecturas más extensas las teje Aluna cuando despierte su voz interior.",
       readingError: "No se pudo tejer la lectura. Inténtalo de nuevo.",
+      houses: "Casas",
+      zodiacT: "Tropical",
+      zodiacS: "Sideral",
     },
     pilares: {
       title: "Cuatro Pilares",
@@ -338,6 +341,9 @@ export const STRINGS = {
       readingWeaving: "Aluna is weaving your reading…",
       readingGated: "The longer readings are woven by Aluna when she finds her inner voice.",
       readingError: "Couldn't weave the reading. Please try again.",
+      houses: "Houses",
+      zodiacT: "Tropical",
+      zodiacS: "Sidereal",
     },
     pilares: {
       title: "Four Pillars",
