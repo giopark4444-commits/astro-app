@@ -1,11 +1,15 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDodoClient } from "@/lib/billing/dodo-client";
 
 // Abre el portal de Dodo (cancelar/cambiar de plan/actualizar tarjeta) para
 // el dodo_customer_id de la fila propia. RLS ya limita el select a la fila
-// del usuario — si no tiene fila (nunca se suscribió), 404.
-export async function POST(_request: NextRequest) {
+// del usuario — si no tiene fila (nunca se suscribió), 404. Sin parámetro:
+// esta ruta no lee el request (a diferencia de checkout); declararlo sin usar
+// rompe el build (`@typescript-eslint/no-unused-vars` sin `argsIgnorePattern`
+// para "_"), bug preexistente de Task 6 que `next build` es el primer gate en
+// atrapar (Task 6 solo corrió tsc+vitest).
+export async function POST() {
   const supabase = await createClient();
   const {
     data: { user },
