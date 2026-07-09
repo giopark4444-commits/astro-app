@@ -40,14 +40,22 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  const { data: userId } = await supabase.rpc("user_id_by_email", { lookup_email: email });
+  const { data: userId, error: rpcError } = await supabase.rpc("user_id_by_email", { lookup_email: email });
+  if (rpcError) {
+    console.error("[webhook dodo] user_id_by_email falló:", rpcError.message);
+    return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // fallo real, no "no encontrado" — que Dodo reintente
+  }
   if (!userId) return NextResponse.json({ received: true }); // sin cuenta Aluna con ese email
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("subscriptions")
     .select("plan")
     .eq("user_id", userId)
     .maybeSingle();
+  if (existingError) {
+    console.error("[webhook dodo] lectura de subscriptions falló:", existingError.message);
+    return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // no confundir con "sin fila" — puede disparar el downgrade fantasma yearly→monthly
+  }
 
   const row = mapDodoEventToRow(
     event,
@@ -56,6 +64,13 @@ export async function POST(request: NextRequest) {
   );
   if (!row) return NextResponse.json({ received: true }); // evento no mapeado o payload incompleto
 
-  await supabase.from("subscriptions").upsert({ user_id: userId, ...row }, { onConflict: "user_id" });
+  const { error: upsertError } = await supabase
+    .from("subscriptions")
+    .upsert({ user_id: userId, ...row }, { onConflict: "user_id" });
+  if (upsertError) {
+    console.error("[webhook dodo] upsert de subscriptions falló:", upsertError.message);
+    return NextResponse.json({ error: "write_failed" }, { status: 500 }); // 2xx acá dejaría a Dodo y Aluna divergiendo en silencio
+  }
+
   return NextResponse.json({ received: true });
 }
