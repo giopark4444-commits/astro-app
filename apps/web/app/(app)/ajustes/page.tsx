@@ -5,9 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import type { SubscriptionStatus } from "@aluna/core";
 import styles from "./settings.module.css";
 
-export default async function AjustesPage() {
+export default async function AjustesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string }>;
+}) {
   const t = await getTranslations("settings");
   const locale = await getLocale();
+  const { checkout } = await searchParams;
 
   const supabase = await createClient();
   const {
@@ -29,7 +34,7 @@ export default async function AjustesPage() {
   return (
     <main className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
-      <PlanCard row={planRow} />
+      <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
       <SettingsControls currentLocale={locale} />
     </main>
   );

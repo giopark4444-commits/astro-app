@@ -276,6 +276,7 @@
     "pastDueNote": "Your last payment failed. Update your payment method to keep Plus.",
     "manage": "Manage subscription",
     "loading": "One moment…",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "checkoutProcessing": "Payment received, activating your account…"
   }
 }

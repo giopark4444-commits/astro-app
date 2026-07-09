@@ -22,6 +22,23 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
+  // Guarda contra doble-suscripción: sin esto, alguien que ya es cliente
+  // (trialing/active/past_due) podría abrir otra sesión de checkout y Dodo le
+  // daría OTRA prueba gratis de 14 días. RLS ya limita el select a la fila
+  // propia del usuario.
+  const { data: existingSubscription } = await supabase
+    .from("subscriptions")
+    .select("status")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  // Cast necesario: mismo bug de inferencia de @supabase/ssr que colapsa el
+  // tipo de fila a `never` (workaround ya usado en ajustes/page.tsx y
+  // billing/portal/route.ts).
+  const sub = existingSubscription as { status: string } | null;
+  if (sub && (sub.status === "trialing" || sub.status === "active" || sub.status === "past_due")) {
+    return NextResponse.json({ error: "already_subscribed" }, { status: 409 });
+  }
+
   try {
     const session = await getDodoClient().checkoutSessions.create({
       product_cart: [{ product_id: dodoProductId(plan), quantity: 1 }],

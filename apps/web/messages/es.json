@@ -276,6 +276,7 @@
     "pastDueNote": "Tu último pago falló. Actualiza tu método de pago para seguir con Plus.",
     "manage": "Gestionar suscripción",
     "loading": "Un momento…",
-    "error": "Algo salió mal. Inténtalo de nuevo."
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "checkoutProcessing": "Pago recibido, activando tu cuenta…"
   }
 }

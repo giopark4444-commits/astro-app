@@ -16,7 +16,7 @@ const STATUS_KEY: Record<SubscriptionStatus, string> = {
   cancelled: "planActive", // no debería mostrarse (ver render abajo), fallback inerte
 };
 
-export function PlanCard({ row }: { row: Row | null }) {
+export function PlanCard({ row, checkoutSuccess = false }: { row: Row | null; checkoutSuccess?: boolean }) {
   const t = useTranslations("billing");
   const [busy, setBusy] = useState<"monthly" | "yearly" | "portal" | null>(null);
   const [error, setError] = useState(false);
@@ -26,6 +26,13 @@ export function PlanCard({ row }: { row: Row | null }) {
   // (eso es lo que responde isPlusActive, que no aplica aquí: un past_due
   // debe ver "Gestionar suscripción", no los botones de checkout).
   const hasManagedSubscription = row !== null && row.status !== "cancelled";
+
+  // El usuario vuelve de un checkout exitoso (?checkout=success en la
+  // return_url) pero el webhook de Dodo todavía puede no haber procesado el
+  // evento — sin esto vería fugazmente los botones de "hazte Plus" después
+  // de haber pagado. Estado transitorio: en cuanto la fila refleje la
+  // suscripción (hasManagedSubscription true), esta rama deja de aplicar.
+  const showCheckoutProcessing = checkoutSuccess && !hasManagedSubscription;
 
   async function startCheckout(plan: "monthly" | "yearly") {
     setBusy(plan);
@@ -66,7 +73,9 @@ export function PlanCard({ row }: { row: Row | null }) {
   return (
     <section className={styles.section}>
       <h3 className={styles.label}>{t("title")}</h3>
-      {!hasManagedSubscription ? (
+      {showCheckoutProcessing ? (
+        <p>{t("checkoutProcessing")}</p>
+      ) : !hasManagedSubscription ? (
         <>
           <p>{t("freeBody")}</p>
           <div className={styles.seg} role="group" aria-label={t("title")}>
