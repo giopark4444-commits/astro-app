@@ -222,7 +222,15 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
+    // función security definer que el webhook de Dodo usa para resolver el
+    // user_id de Aluna a partir del email que manda el evento.
+    Functions: {
+      user_id_by_email: {
+        Args: { lookup_email: string };
+        Returns: string;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
