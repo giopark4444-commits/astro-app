@@ -49,3 +49,4 @@ export {
   EARTHLY_BRANCHES,
 } from "./bazi/bazi";
 export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef } from "./bazi/bazi";
+export { sexagenaryIndex, nayin, NAYIN, type NayinDef } from "./bazi/nayin";
