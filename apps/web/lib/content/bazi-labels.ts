@@ -39,7 +39,7 @@ const ES: BaziLabelMaps = {
     half_trine: "Medio trino", clash: "Choque", punishment: "Castigo", self_punishment: "Auto-castigo", harm: "Daño",
   },
   seasonStates: { wang: "Pleno", xiang: "Apoyado", xiu: "En reposo", qiu: "Contenido", si: "Sin apoyo" },
-  verdicts: { strong: "Fuerte", weak: "Suave", balanced: "Equilibrado" },
+  verdicts: { strong: "Fuerte", weak: "Débil", balanced: "Equilibrado" },
   drivers: {
     season: "Mando del mes (estación)", root_principal: "Raíz principal", root_residual: "Raíz residual",
     visible_support: "Apoyo visible",
@@ -73,7 +73,7 @@ const EN: BaziLabelMaps = {
     half_trine: "Half trine", clash: "Clash", punishment: "Punishment", self_punishment: "Self-punishment", harm: "Harm",
   },
   seasonStates: { wang: "In command", xiang: "Supported", xiu: "Resting", qiu: "Restrained", si: "Unsupported" },
-  verdicts: { strong: "Strong", weak: "Gentle", balanced: "Balanced" },
+  verdicts: { strong: "Strong", weak: "Weak", balanced: "Balanced" },
   drivers: {
     season: "Month command (season)", root_principal: "Principal root", root_residual: "Residual root",
     visible_support: "Visible support",
