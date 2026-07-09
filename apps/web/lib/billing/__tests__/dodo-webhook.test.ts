@@ -61,4 +61,14 @@ describe("verifyDodoSignature (Standard Webhooks spec)", () => {
       verifyDodoSignature({ rawBody, signatureHeader, timestampHeader, secret: SECRET, now: Date.now() }),
     ).toBe(false);
   });
+  it("false si el timestamp está más de 5 minutos en el futuro (anti-replay bidireccional)", () => {
+    const rawBody = "{}";
+    const nowSec = Math.floor(Date.now() / 1000);
+    const futureSec = nowSec + 600; // 10 minutos en el futuro
+    const timestampHeader = String(futureSec);
+    const signatureHeader = sign(rawBody, timestampHeader, SECRET);
+    expect(
+      verifyDodoSignature({ rawBody, signatureHeader, timestampHeader, secret: SECRET, now: nowSec * 1000 }),
+    ).toBe(false);
+  });
 });
