@@ -558,11 +558,15 @@ export async function POST(_request: NextRequest) {
   if (!sub) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   try {
-    const portal = await getDodoClient().customers.createPortalSession({
-      customer_id: sub.dodo_customer_id,
+    // Confirmado contra los tipos reales del SDK instalado en Task 4
+    // (dodopayments@2.42.2): NO existe `customers.createPortalSession(...)`.
+    // El método real es el sub-recurso anidado `customerPortal.create`, que
+    // recibe el customerId como primer argumento posicional (no dentro del
+    // objeto) y devuelve `{ link }`, no `{ url }`.
+    const portal = await getDodoClient().customers.customerPortal.create(sub.dodo_customer_id, {
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes`,
     });
-    return NextResponse.json({ portalUrl: portal.url });
+    return NextResponse.json({ portalUrl: portal.link });
   } catch {
     return NextResponse.json({ error: "portal_failed" }, { status: 500 });
   }
@@ -572,8 +576,10 @@ export async function POST(_request: NextRequest) {
 - [ ] **Step 2: Verificar + commit**
 
 Run: `cd apps/web && npx tsc --noEmit`
-Expected: 0 errores. Si `customer_id`/`return_url`/`.url` no coinciden con los tipos reales del
-SDK (verificados en Task 4 Step 2), ajusta aquí también.
+Expected: 0 errores. El código de arriba ya refleja la forma real confirmada por Task 4
+(`customerPortal.create(customerId, { return_url })` → `{ link }`) — si el `.d.ts` instalado
+difiere de esto (por ejemplo por un upgrade de versión del SDK), ajusta aquí para que coincida
+con los tipos reales, que siempre mandan sobre este plan.
 
 ```bash
 git add apps/web/app/api/billing/portal/route.ts
