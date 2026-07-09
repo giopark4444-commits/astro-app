@@ -49,3 +49,23 @@ export {
   EARTHLY_BRANCHES,
 } from "./bazi/bazi";
 export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef } from "./bazi/bazi";
+export { sexagenaryIndex, nayin, NAYIN, type NayinDef } from "./bazi/nayin";
+export { lifeStage, TWELVE_STAGES, type StageKey, type StageDef } from "./bazi/stages";
+export {
+  detectInteractions, branchPairInteractions, TRINES,
+  type Interaction, type InteractionType, type PillarPos, type PillarSet,
+} from "./bazi/interactions";
+export {
+  symbolicStars, voidBranches, STARS,
+  type StarKey, type StarDef, type StarHit,
+} from "./bazi/stars";
+export {
+  dayMasterStrength, favorableElements, seasonState, elementAt,
+  STRENGTH_THRESHOLDS, STRENGTH_WEIGHTS,
+  type DayMasterStrength, type StrengthDriver, type StrengthVerdict, type SeasonState,
+} from "./bazi/strength";
+export {
+  luckDirection, luckPillars, annualPillars,
+  type LuckDirection, type LuckPillarItem, type LuckSequence, type LuckInput, type AnnualPillarItem,
+} from "./bazi/luck";
+export { STEM_LABELS, BRANCH_LABELS, TEN_GOD_KO, type ScriptLabel } from "./bazi/labels";

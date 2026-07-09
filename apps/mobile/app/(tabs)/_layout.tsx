@@ -44,6 +44,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="pilares"
+        options={{
+          title: t("nav.pilares"),
+          tabBarIcon: ({ color }) => <TabGlyph glyph="八" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="numeros"
         options={{
           title: t("nav.numeros"),

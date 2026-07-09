@@ -1,8 +1,8 @@
 import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
-import { computeChart, setEphePath } from "@aluna/ephemeris";
+import { computeChart, jieBoundaries, setEphePath } from "@aluna/ephemeris";
 import { yearPillar, monthPillar, dayPillar, hourPillar, type Pillar } from "@aluna/core";
-import { createClient } from "@/lib/supabase/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { isSolarChart, profileToChartInput } from "@/lib/chart";
 
 // Cuatro Pilares (Ba Zi / Saju). Server-only: usa @aluna/ephemeris (sweph nativo) solo
@@ -25,15 +25,12 @@ export async function POST(request: NextRequest) {
   const profileId = String(body.profileId ?? "");
   if (!profileId) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabase
     .from("birth_profiles")
-    .select("birth_date, birth_time, time_known, latitude, longitude, time_zone")
+    .select("birth_date, birth_time, time_known, latitude, longitude, time_zone, gender")
     .eq("id", profileId)
     .maybeSingle();
   if (!profile) return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -63,7 +60,18 @@ export async function POST(request: NextRequest) {
     const timeKnown = !isSolarChart(profile);
     const hour: Pillar | null = timeKnown ? hourPillar(day.stem, input.hour) : null;
 
-    return NextResponse.json({ year, month, day, hour, solarYear, timeKnown });
+    // Términos solares (jie) que delimitan el pilar de mes actual — para mostrar
+    // "cuánto falta/pasó" en el Modo Pro. Género del perfil, normalizado a los tres
+    // valores que entiende la UI (dato del usuario, no calculado).
+    const { daysToPrevJie, daysToNextJie } = jieBoundaries(input);
+    const rawGender = String((profile as { gender?: unknown }).gender ?? "");
+    const gender =
+      rawGender === "feminine" || rawGender === "masculine" ? rawGender : "neutral";
+
+    return NextResponse.json({
+      year, month, day, hour, solarYear, timeKnown,
+      gender, birthYear: cy, daysToPrevJie, daysToNextJie,
+    });
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }
