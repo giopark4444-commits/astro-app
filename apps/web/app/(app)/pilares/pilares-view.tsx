@@ -155,8 +155,18 @@ export function PilaresView() {
                   <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
                     {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
                   </span>
+                  <span className={styles.roman}>
+                    {script === "hangul"
+                      ? STEM_LABELS[pillar.stem]!.romanKo
+                      : STEM_LABELS[pillar.stem]!.pinyin}
+                  </span>
                   <span className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""}`}>
                     {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+                  </span>
+                  <span className={styles.roman}>
+                    {script === "hangul"
+                      ? BRANCH_LABELS[pillar.branch]!.romanKo
+                      : BRANCH_LABELS[pillar.branch]!.pinyin}
                   </span>
                   <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
                   {isDay && <span className={styles.dayTag}>{t("pilares.dayMaster")}</span>}
