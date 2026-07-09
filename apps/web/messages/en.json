@@ -260,7 +260,6 @@
     "interactionsEmpty": "No major interactions between your pillars: a serene map.",
     "starsTitle": "Symbolic stars",
     "threePillarsNote": "Without a birth time the calculation uses 3 pillars; the hour pillar and its stars are omitted.",
-    "seasonState": "Seasonal state",
-    "score": "Score"
+    "seasonState": "Seasonal state"
   }
 }
