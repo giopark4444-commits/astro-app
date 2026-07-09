@@ -4,6 +4,8 @@ import { useTranslations } from "next-intl";
 import {
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
+  STEM_LABELS,
+  BRANCH_LABELS,
   hiddenStems,
   tenGod,
   type Pillar,
@@ -11,6 +13,7 @@ import {
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
+import { ProLamina } from "./pro-lamina";
 import styles from "./pilares.module.css";
 
 interface BaZiData {
@@ -20,6 +23,10 @@ interface BaZiData {
   hour: Pillar | null;
   solarYear: number;
   timeKnown: boolean;
+  gender: "feminine" | "masculine" | "neutral";
+  birthYear: number;
+  daysToPrevJie: number;
+  daysToNextJie: number;
 }
 
 const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
@@ -53,6 +60,7 @@ export function PilaresView() {
   const [data, setData] = useState<BaZiData | null>(null);
   const [error, setError] = useState(false);
   const [pro, setPro] = useState(false);
+  const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
 
   useEffect(() => {
     if (!active) return;
@@ -145,10 +153,10 @@ export function PilaresView() {
                     </span>
                   )}
                   <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
-                    {stem.hanzi}
+                    {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
                   </span>
                   <span className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""}`}>
-                    {branch.hanzi}
+                    {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
                   </span>
                   <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
                   {isDay && <span className={styles.dayTag}>{t("pilares.dayMaster")}</span>}
@@ -187,6 +195,22 @@ export function PilaresView() {
             {t("pilares.modePro")}
           </button>
           {pro && <p className={styles.proHint}>{t("pilares.modeProHint")}</p>}
+          {pro && (
+            <div className={styles.scriptRow} role="tablist" aria-label="Ba Zi / Saju">
+              {(["hanzi", "hangul"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="tab"
+                  aria-selected={script === s}
+                  className={`${styles.scriptBtn} ${script === s ? styles.scriptOn : ""}`}
+                  onClick={() => setScript(s)}
+                >
+                  {t(s === "hanzi" ? "pilares.scriptBazi" : "pilares.scriptSaju")}
+                </button>
+              ))}
+            </div>
+          )}
 
           {!data.timeKnown && <p className={styles.note}>{t("pilares.noTime")}</p>}
 
@@ -206,7 +230,7 @@ export function PilaresView() {
             ))}
           </div>
 
-          {pro && <p className={styles.proSoon}>{t("pilares.proSoon")}</p>}
+          {pro && data && <ProLamina data={data} script={script} />}
         </>
       )}
     </main>

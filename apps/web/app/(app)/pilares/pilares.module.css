@@ -46,11 +46,6 @@
 .elBar { display: block; height: 100%; border-radius: 999px; transition: width var(--dur) var(--ease-spring); }
 .elCount { font-size: 12px; color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
 
-.proSoon {
-  position: relative; z-index: 1; margin-top: 22px; font-size: 12.5px; font-style: italic;
-  color: var(--soft); line-height: 1.5;
-}
-
 /* ---- Modo Pro: interruptor (consistente con la carta) ---- */
 .proToggle {
   position: relative; z-index: 1;
@@ -109,3 +104,60 @@
 .elBg_earth { background: #d4a85f; }
 .elBg_metal { background: #b8b6c8; }
 .elBg_water { background: #7aaae0; }
+
+/* ---- Modo Pro: conmutador de escritura (漢字 ↔ 한글) ---- */
+.scriptRow { position: relative; z-index: 1; display: flex; gap: 8px; margin-top: 10px; }
+.scriptBtn {
+  font-family: var(--font-ui); border: 1px solid var(--line); border-radius: 999px;
+  background: none; color: var(--soft); padding: 5px 16px; font-size: 13px; cursor: pointer;
+}
+.scriptOn { border-color: var(--acc); color: var(--acc); }
+
+/* ── Lámina Pro: las 8 secciones ── */
+.lamina { position: relative; z-index: 1; display: grid; gap: 16px; width: 100%; max-width: 720px; margin-top: 24px; }
+.card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 20px; }
+.cardH {
+  font-family: var(--font-ui); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--acc); margin: 0 0 12px;
+}
+.row { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: none; }
+.rowLabel { min-width: 64px; color: var(--soft); font-size: 13px; }
+.rowGlyph { font-size: 18px; }
+.rowValue { flex: 1; font-size: 14px; color: var(--ink); }
+.subRow { color: var(--soft); font-size: 13px; margin: 10px 0 6px; }
+.method { color: var(--soft); font-size: 12px; font-style: italic; margin-top: 10px; }
+
+.meterRow { display: flex; align-items: center; gap: 12px; }
+.verdict { font-size: 18px; font-family: var(--font-display); font-style: italic; color: var(--ink); }
+.meterTrack { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.meterFill { display: block; height: 100%; background: var(--acc); border-radius: 3px; }
+.meterScore { font-size: 13px; color: var(--soft); min-width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.drivers { display: grid; gap: 4px; margin-top: 10px; }
+.driver { display: flex; justify-content: space-between; font-size: 13px; color: var(--soft); }
+.driverPts { color: var(--acc); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--ink); }
+.chipDim { opacity: 0.6; }
+.mark { color: var(--acc); font-size: 12px; font-style: normal; }
+
+/* 大運/流年 */
+.luckBlock { margin-top: 8px; }
+.luckScroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+.luckCol {
+  min-width: 108px; border: 1px solid var(--line); border-radius: 14px; background: none;
+  color: inherit; padding: 10px 8px; display: grid; gap: 4px; justify-items: center; cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.luckNow { border-color: var(--acc); }
+.luckOpen { background: var(--surface-2); }
+.luckAge { font-size: 11px; color: var(--soft); }
+.luckGlyph { font-size: 20px; color: var(--ink); }
+.luckGod { font-size: 11px; color: var(--ink); }
+.luckNayin { font-size: 10px; color: var(--soft); }
+.luckTag {
+  font-family: var(--font-ui); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--acc);
+}
+.annual { margin-top: 10px; }
