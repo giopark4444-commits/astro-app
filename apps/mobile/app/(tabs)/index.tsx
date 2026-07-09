@@ -103,6 +103,11 @@ export default function HomeScreen() {
           <Text style={styles.soonBody}>{t("hoy.cartaBody")}</Text>
         </Pressable>
 
+        <Pressable style={styles.soonCard} onPress={() => router.push("/(tabs)/pilares")}>
+          <Text style={styles.soonTitle}>{t("hoy.pilaresTitle")}</Text>
+          <Text style={styles.soonBody}>{t("hoy.pilaresBody")}</Text>
+        </Pressable>
+
         <Text style={styles.sectionLabel}>{t("hoy.soon")}</Text>
 
         <SoonCard styles={styles} title={t("hoy.climateTitle")} body={t("hoy.climateBody")} soon={t("settings.soon")} />

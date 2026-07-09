@@ -149,7 +149,7 @@ export default function AjustesScreen() {
           <Text style={styles.cardEyebrow}>{t("settings.systems")}</Text>
           <SystemRow styles={styles} name={t("settings.sysNumerology")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysCarta")} status={t("settings.available")} on />
-          <SystemRow styles={styles} name={t("settings.sysBazi")} status={t("settings.soon")} />
+          <SystemRow styles={styles} name={t("settings.sysBazi")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysReadings")} status={t("settings.soon")} last />
         </View>
 
