@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aluna — Hoy (después)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* tokens base */
+    --bg-grad: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+    --surface: rgba(150,150,190,0.07);
+    --surface-2: rgba(231,201,134,0.06);
+    --ink: #ece7f6;
+    --soft: rgba(233,228,245,0.6);
+    --line: rgba(231,201,134,0.2);
+    --acc: #e7c986; --acc-rgb: 231,201,134;
+    --radius: 16px; --radius-lg: 22px;
+    --glow: 0 0 24px rgba(231,201,134,0.42);
+    --glow-soft: 0 0 14px rgba(231,201,134,0.28);
+    --elev: 0 18px 50px rgba(6,8,24,0.45);
+    --ease: cubic-bezier(0.22,0.61,0.36,1);
+
+    /* escala tipografica */
+    --text-2xs: 11px; --text-xs: 12px; --text-sm: 13px; --text-md: 15px;
+    --text-lg: 17px; --text-xl: 20px; --text-2xl: 24px; --text-3xl: 32px;
+    --display-sm: 44px; --display: 60px;
+
+    /* espaciado */
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 28px; --sp-7: 40px;
+
+    /* semanticos nuevos */
+    --ink-on-acc: #1a1305;
+    --tone-warm: #e0795a;
+    --tone-cool: #7aaae0;
+
+    /* glass movil despues */
+    --glass-mobile-bg: rgba(20,26,58,0.55);
+    --glass-mobile-border: rgba(231,201,134,0.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:#000;}
+  body{
+    width:390px; height:844px;
+    overflow:hidden;
+    position:relative;
+    background:var(--bg-grad);
+    color:var(--ink);
+    font-family:'Quicksand', -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{ font-family:'Cormorant Garamond', Georgia, serif; }
+
+  /* starfield sutil */
+  .stars{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.3px 1.3px at 34px 56px, rgba(255,255,255,.5), transparent 100%),
+      radial-gradient(1px 1px at 120px 128px, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1.5px 1.5px at 216px 34px, rgba(231,201,134,.45), transparent 100%),
+      radial-gradient(1px 1px at 302px 172px, rgba(255,255,255,.3), transparent 100%),
+      radial-gradient(1.1px 1.1px at 56px 296px, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1px 1px at 254px 254px, rgba(231,201,134,.35), transparent 100%),
+      radial-gradient(1.3px 1.3px at 354px 92px, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1px 1px at 16px 416px, rgba(255,255,255,.28), transparent 100%),
+      radial-gradient(1.2px 1.2px at 184px 470px, rgba(231,201,134,.3), transparent 100%),
+      radial-gradient(1px 1px at 346px 518px, rgba(255,255,255,.28), transparent 100%),
+      radial-gradient(1.1px 1.1px at 88px 616px, rgba(255,255,255,.3), transparent 100%),
+      radial-gradient(1px 1px at 270px 656px, rgba(231,201,134,.28), transparent 100%);
+    background-repeat:no-repeat;
+  }
+
+  /* status bar */
+  .statusbar{
+    position:relative; z-index:2;
+    height:44px; padding:0 22px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .statusbar .time{ font-size:var(--text-md); font-weight:600; letter-spacing:.2px; font-family:'Quicksand',sans-serif; }
+  .statusbar .icons{ display:flex; align-items:center; gap:5px; }
+  .statusbar svg{ display:block; }
+
+  /* screen content */
+  .screen{
+    position:relative; z-index:2;
+    padding:var(--sp-2) var(--sp-5) 0 var(--sp-5);
+  }
+
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:var(--sp-4);
+  }
+  .eyebrow{
+    font-size:var(--text-2xs);
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--acc);
+    font-weight:600;
+    margin-bottom:var(--sp-1);
+  }
+  .greeting{
+    font-size:var(--text-3xl);
+    font-weight:600;
+    line-height:1.08;
+    letter-spacing:.2px;
+  }
+  .avatar{
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(160deg, rgba(var(--acc-rgb),0.28), rgba(var(--acc-rgb),0.1));
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:var(--text-sm); font-weight:700; color:var(--acc);
+    font-family:'Quicksand',sans-serif;
+    flex-shrink:0; margin-top:1px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .card{
+    background:var(--glass-mobile-bg);
+    border:1px solid var(--glass-mobile-border);
+    border-radius:var(--radius-lg);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    padding:var(--sp-5);
+    margin-bottom:var(--sp-4);
+  }
+  .card.accent{
+    background: linear-gradient(165deg, rgba(var(--acc-rgb),0.10), rgba(20,26,58,0.55) 55%);
+  }
+  .card-title{
+    font-size:var(--text-2xs);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--acc);
+    margin-bottom:var(--sp-3);
+  }
+
+  /* clima del alma */
+  .transit-row{
+    display:flex; align-items:center; gap:var(--sp-3);
+    padding:var(--sp-1) 0;
+  }
+  .transit-row + .transit-row{ border-top:1px solid rgba(231,201,134,0.10); }
+  .transit-glyphs{
+    height:34px; flex-shrink:0; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    padding:0 9px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:var(--text-md);
+    font-weight:600;
+  }
+  .transit-glyphs svg{ flex-shrink:0; }
+  .transit-text{ flex:1; min-width:0; }
+  .transit-title{ font-size:var(--text-md); color:var(--ink); font-weight:500; }
+  .transit-deg{ font-size:var(--text-xs); color:var(--soft); margin-top:2px; }
+  .transit-tag{
+    font-size:10px; text-transform:uppercase; letter-spacing:1px;
+    font-weight:600; padding:2px 7px; border-radius:999px;
+    flex-shrink:0;
+  }
+
+  /* energia */
+  .energy-row{ margin-bottom:var(--sp-2); }
+  .energy-row:last-child{ margin-bottom:0; }
+  .energy-labels{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:var(--sp-1);
+  }
+  .energy-label{ font-size:var(--text-sm); color:var(--soft); font-weight:500; }
+  .energy-value{ font-size:var(--text-sm); font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .energy-track{
+    height:6px; border-radius:999px;
+    background:var(--surface);
+    overflow:hidden;
+  }
+  .energy-fill{ height:100%; border-radius:999px; }
+
+  /* numerologia */
+  .num-row{ display:flex; align-items:center; gap:var(--sp-4); }
+  .num-hero{
+    font-family:'Cormorant Garamond', serif;
+    font-size:var(--display-sm);
+    font-weight:600;
+    line-height:1.02;
+    color:var(--acc);
+    text-shadow: var(--glow-soft);
+    flex-shrink:0;
+  }
+  .num-copy .num-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:2px; font-weight:600;
+    color:var(--acc); margin-bottom:var(--sp-1);
+  }
+  .num-copy .num-line{ font-size:var(--text-md); color:var(--ink); font-weight:500; }
+
+  /* tab bar */
+  .tabbar{
+    position:absolute; left:0; right:0; bottom:0; z-index:3;
+    height:82px;
+    background:rgba(13,17,42,0.72);
+    backdrop-filter: blur(6px);
+    border-top:1px solid var(--line);
+    display:flex; align-items:flex-start; justify-content:space-around;
+    padding-top:12px;
+  }
+  .tab{
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    color:var(--soft);
+    width:60px;
+  }
+  .tab svg{ display:block; stroke:currentColor; }
+  .tab .label{ font-size:10.5px; font-weight:500; font-family:'Quicksand',sans-serif; }
+  .tab.active{
+    color:var(--acc);
+  }
+  .tab.active svg{ filter:drop-shadow(0 0 5px rgba(231,201,134,0.55)); }
+  .tab.active .label{ font-weight:700; }
+
+  .home-indicator{
+    position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+    width:134px; height:5px; border-radius:3px;
+    background:rgba(231,201,134,0.3);
+    z-index:4;
+  }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="statusbar">
+    <div class="time">9:41</div>
+    <div class="icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+        <rect x="0" y="7" width="3" height="5" rx="0.5" fill="#ece7f6"/>
+        <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#ece7f6"/>
+        <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#ece7f6"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#ece7f6"/>
+      </svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M1 4.2C5.6 -0.4 10.4 -0.4 15 4.2" stroke="#ece7f6" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M3.6 7C6.6 4 9.4 4 12.4 7" stroke="#ece7f6" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="8" cy="10" r="1.1" fill="#ece7f6"/>
+      </svg>
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+        <rect x="0.75" y="0.75" width="19.5" height="10.5" rx="2.5" stroke="#ece7f6" stroke-width="1"/>
+        <rect x="2.25" y="2.25" width="14" height="7.5" rx="1.2" fill="#ece7f6"/>
+        <rect x="21" y="4" width="1.6" height="4" rx="0.8" fill="#ece7f6"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header>
+      <div>
+        <div class="eyebrow">Miércoles 9 de julio</div>
+        <div class="greeting display">Buenos días, Gio</div>
+      </div>
+      <div class="avatar">G</div>
+    </header>
+
+    <section class="card">
+      <div class="card-title">Tu clima del alma</div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="background:rgba(224,121,90,0.14); color:var(--tone-warm);">♄ □ ♀</div>
+        <div class="transit-text">
+          <div class="transit-title">Saturno □ tu Venus</div>
+          <div class="transit-deg">0.2° de orbe</div>
+        </div>
+        <div class="transit-tag" style="background:rgba(224,121,90,0.14); color:var(--tone-warm);">Tenso</div>
+      </div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="background:rgba(122,170,224,0.14); color:var(--tone-cool);">☽ △ ☉</div>
+        <div class="transit-text">
+          <div class="transit-title">Luna △ tu Sol</div>
+          <div class="transit-deg">1.1° de orbe</div>
+        </div>
+        <div class="transit-tag" style="background:rgba(122,170,224,0.14); color:var(--tone-cool);">Fluido</div>
+      </div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="background:rgba(224,121,90,0.14); color:var(--tone-warm);">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3c-4.5 0-7.5 2.4-7.5 5.4 0 2.3 2.1 3.6 4.6 3.6H17"/><path d="M13 3v14"/></svg>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="10" x2="18" y2="10"/><circle cx="10" cy="10" r="4.2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14.5" r="3"/><line x1="10" y1="11.5" x2="10" y2="3"/><line x1="6" y1="7" x2="14" y2="7"/></svg>
+        </div>
+        <div class="transit-text">
+          <div class="transit-title">Júpiter ☍ tu Urano</div>
+          <div class="transit-deg">2.4° de orbe</div>
+        </div>
+        <div class="transit-tag" style="background:rgba(224,121,90,0.14); color:var(--tone-warm);">Tenso</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tu energía de hoy</div>
+
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Amor</span><span class="energy-value">62</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:62%; background:var(--acc); box-shadow:var(--glow-soft);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Dinero</span><span class="energy-value">48</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:48%; background:var(--tone-warm); box-shadow:0 0 10px rgba(224,121,90,0.45);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Trabajo</span><span class="energy-value">71</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:71%; background:var(--tone-cool); box-shadow:0 0 10px rgba(122,170,224,0.45);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Salud</span><span class="energy-value">55</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:55%; background:var(--acc); box-shadow:var(--glow-soft);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Ánimo</span><span class="energy-value">67</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:67%; background:var(--tone-cool); box-shadow:0 0 10px rgba(122,170,224,0.45);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Suerte</span><span class="energy-value">43</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:43%; background:var(--tone-warm); box-shadow:0 0 10px rgba(224,121,90,0.45);"></div></div>
+      </div>
+    </section>
+
+    <section class="card accent">
+      <div class="card-title">Numerología de hoy</div>
+      <div class="num-row">
+        <div class="num-hero">4</div>
+        <div class="num-copy">
+          <div class="num-label">Día personal</div>
+          <div class="num-line">Día de orden y cimientos</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabbar">
+    <div class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 11.5L12 4l8 7.5"/>
+        <path d="M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9"/>
+      </svg>
+      <div class="label">Inicio</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.2"/>
+        <circle cx="12" cy="12" r="2.6"/>
+        <line x1="12" y1="2.6" x2="12" y2="4.6"/>
+        <line x1="12" y1="19.4" x2="12" y2="21.4"/>
+        <line x1="2.6" y1="12" x2="4.6" y2="12"/>
+        <line x1="19.4" y1="12" x2="21.4" y2="12"/>
+      </svg>
+      <div class="label">Carta</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4.5l7 13H5l7-13z"/>
+        <circle cx="12" cy="4.5" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="19" cy="17.5" r="1" fill="currentColor" stroke="none"/>
+        <circle cx="5" cy="17.5" r="1" fill="currentColor" stroke="none"/>
+      </svg>
+      <div class="label">Números</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="19" x2="5" y2="8"/>
+        <line x1="9.5" y1="19" x2="9.5" y2="5"/>
+        <line x1="14.5" y1="19" x2="14.5" y2="6.5"/>
+        <line x1="19" y1="19" x2="19" y2="9.5"/>
+        <line x1="3" y1="19.6" x2="21" y2="19.6"/>
+      </svg>
+      <div class="label">Pilares</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" y1="6.5" x2="20" y2="6.5"/>
+        <circle cx="15" cy="6.5" r="1.9" fill="currentColor" stroke="none"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <circle cx="9" cy="12" r="1.9" fill="currentColor" stroke="none"/>
+        <line x1="4" y1="17.5" x2="20" y2="17.5"/>
+        <circle cx="16" cy="17.5" r="1.9" fill="currentColor" stroke="none"/>
+      </svg>
+      <div class="label">Ajustes</div>
+    </div>
+  </nav>
+  <div class="home-indicator"></div>
+</body>
+</html>

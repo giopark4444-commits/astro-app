@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aluna — Hoy (antes)</title>
+<style>
+  :root{
+    --bg:#0a0d24;
+    --surface: rgba(150,150,190,0.07);
+    --surface-2: rgba(231,201,134,0.06);
+    --ink:#ece7f6;
+    --soft: rgba(233,228,245,0.6);
+    --acc:#e7c986;
+    --tone-warm:#e0795a;
+    --tone-cool:#7aaae0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:#000;}
+  body{
+    width:390px; height:844px;
+    overflow:hidden;
+    position:relative;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{ font-family: Georgia, "Times New Roman", Times, serif; }
+
+  /* starfield — puntos estaticos */
+  .stars{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.4px 1.4px at 32px 58px, rgba(255,255,255,.55), transparent 100%),
+      radial-gradient(1px 1px at 118px 132px, rgba(255,255,255,.4), transparent 100%),
+      radial-gradient(1.6px 1.6px at 214px 36px, rgba(231,201,134,.5), transparent 100%),
+      radial-gradient(1px 1px at 300px 176px, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1.2px 1.2px at 58px 300px, rgba(255,255,255,.4), transparent 100%),
+      radial-gradient(1px 1px at 252px 258px, rgba(231,201,134,.4), transparent 100%),
+      radial-gradient(1.4px 1.4px at 352px 96px, rgba(255,255,255,.4), transparent 100%),
+      radial-gradient(1px 1px at 18px 420px, rgba(255,255,255,.3), transparent 100%),
+      radial-gradient(1.3px 1.3px at 182px 476px, rgba(231,201,134,.35), transparent 100%),
+      radial-gradient(1px 1px at 344px 522px, rgba(255,255,255,.3), transparent 100%),
+      radial-gradient(1.2px 1.2px at 90px 620px, rgba(255,255,255,.35), transparent 100%),
+      radial-gradient(1px 1px at 268px 660px, rgba(231,201,134,.3), transparent 100%);
+    background-repeat:no-repeat;
+  }
+
+  /* status bar */
+  .statusbar{
+    position:relative; z-index:2;
+    height:44px; padding:0 22px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .statusbar .time{ font-size:15px; font-weight:600; letter-spacing:.2px; }
+  .statusbar .icons{ display:flex; align-items:center; gap:5px; }
+  .statusbar svg{ display:block; }
+
+  /* screen content */
+  .screen{
+    position:relative; z-index:2;
+    padding:8px 20px 0 20px;
+  }
+
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    font-size:11.5px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    color:var(--acc);
+    opacity:.8;
+    margin-bottom:5px;
+  }
+  .greeting{
+    font-size:25px;
+    font-weight:400;
+    line-height:1.15;
+  }
+  .avatar{
+    width:32px; height:32px; border-radius:50%;
+    background:rgba(231,201,134,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:var(--acc);
+    flex-shrink:0; margin-top:2px;
+  }
+
+  .card{
+    background:var(--surface);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card.accent{ background:var(--surface-2); }
+  .card-title{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    opacity:.92;
+    margin-bottom:12px;
+  }
+
+  /* clima del alma */
+  .transit-row{
+    display:flex; align-items:center; gap:10px;
+    padding:7px 0;
+  }
+  .transit-row + .transit-row{ border-top:1px solid rgba(255,255,255,0.05); }
+  .transit-glyphs{
+    font-size:14px;
+    width:52px; flex-shrink:0;
+    letter-spacing:1px;
+    display:flex; align-items:center; gap:3px;
+  }
+  .transit-glyphs svg{ flex-shrink:0; }
+  .transit-text{ flex:1; min-width:0; }
+  .transit-title{ font-size:12.5px; color:var(--ink); opacity:.95; }
+  .transit-deg{ font-size:11.5px; color:var(--soft); margin-top:2px; }
+
+  /* energia */
+  .energy-row{ margin-bottom:10px; }
+  .energy-row:last-child{ margin-bottom:0; }
+  .energy-labels{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:4px;
+  }
+  .energy-label{ font-size:11.5px; color:var(--soft); }
+  .energy-value{ font-size:12.5px; font-weight:600; color:var(--ink); }
+  .energy-track{
+    height:5px; border-radius:3px;
+    background:rgba(255,255,255,0.07);
+    overflow:hidden;
+  }
+  .energy-fill{ height:100%; border-radius:3px; }
+
+  /* numerologia */
+  .num-row{ display:flex; align-items:center; gap:16px; }
+  .num-hero{
+    font-family: Georgia, "Times New Roman", serif;
+    font-size:48px;
+    font-weight:400;
+    line-height:1;
+    color:var(--acc);
+    flex-shrink:0;
+  }
+  .num-copy .num-label{
+    font-size:11.5px; text-transform:uppercase; letter-spacing:.8px;
+    color:var(--soft); margin-bottom:4px;
+  }
+  .num-copy .num-line{ font-size:13.5px; color:var(--ink); opacity:.95; }
+
+  /* tab bar */
+  .tabbar{
+    position:absolute; left:0; right:0; bottom:0; z-index:3;
+    height:80px;
+    background:#0b0e26;
+    border-top:1px solid rgba(255,255,255,0.06);
+    display:flex; align-items:flex-start; justify-content:space-around;
+    padding-top:10px;
+  }
+  .tab{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:var(--soft);
+    width:60px;
+  }
+  .tab .glyph{
+    font-family: Georgia, "Times New Roman", serif;
+    font-size:19px;
+    line-height:1;
+  }
+  .tab .label{ font-size:10px; }
+  .tab.active{ color:var(--ink); }
+  .home-indicator{
+    position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+    width:134px; height:5px; border-radius:3px;
+    background:rgba(255,255,255,0.35);
+    z-index:4;
+  }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+
+  <div class="statusbar">
+    <div class="time">9:41</div>
+    <div class="icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+        <rect x="0" y="7" width="3" height="5" rx="0.5" fill="#ece7f6"/>
+        <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#ece7f6"/>
+        <rect x="9" y="3" width="3" height="9" rx="0.5" fill="#ece7f6"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="#ece7f6"/>
+      </svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M1 4.2C5.6 -0.4 10.4 -0.4 15 4.2" stroke="#ece7f6" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M3.6 7C6.6 4 9.4 4 12.4 7" stroke="#ece7f6" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="8" cy="10" r="1.1" fill="#ece7f6"/>
+      </svg>
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+        <rect x="0.75" y="0.75" width="19.5" height="10.5" rx="2.5" stroke="#ece7f6" stroke-width="1"/>
+        <rect x="2.25" y="2.25" width="14" height="7.5" rx="1.2" fill="#ece7f6"/>
+        <rect x="21" y="4" width="1.6" height="4" rx="0.8" fill="#ece7f6"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="screen">
+    <header>
+      <div>
+        <div class="eyebrow">Miércoles 9 de julio</div>
+        <div class="greeting serif">Buenos días, Gio</div>
+      </div>
+      <div class="avatar serif">G</div>
+    </header>
+
+    <section class="card">
+      <div class="card-title">Tu clima del alma</div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="color:var(--tone-warm)">♄ □ ♀</div>
+        <div class="transit-text">
+          <div class="transit-title">Saturno □ tu Venus</div>
+          <div class="transit-deg">0.2° · tenso</div>
+        </div>
+      </div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="color:var(--tone-cool)">☽ △ ☉</div>
+        <div class="transit-text">
+          <div class="transit-title">Luna △ tu Sol</div>
+          <div class="transit-deg">1.1° · fluido</div>
+        </div>
+      </div>
+      <div class="transit-row">
+        <div class="transit-glyphs" style="color:var(--tone-warm)">
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3c-4.5 0-7.5 2.4-7.5 5.4 0 2.3 2.1 3.6 4.6 3.6H17"/><path d="M13 3v14"/></svg>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="10" x2="18" y2="10"/><circle cx="10" cy="10" r="4.2"/></svg>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14.5" r="3"/><line x1="10" y1="11.5" x2="10" y2="3"/><line x1="6" y1="7" x2="14" y2="7"/></svg>
+        </div>
+        <div class="transit-text">
+          <div class="transit-title">Júpiter ☍ tu Urano</div>
+          <div class="transit-deg">2.4° · tenso</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Tu energía de hoy</div>
+
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Amor</span><span class="energy-value">62</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:62%; background:var(--acc);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Dinero</span><span class="energy-value">48</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:48%; background:var(--tone-warm);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Trabajo</span><span class="energy-value">71</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:71%; background:var(--tone-cool);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Salud</span><span class="energy-value">55</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:55%; background:var(--acc);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Ánimo</span><span class="energy-value">67</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:67%; background:var(--tone-cool);"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="energy-labels"><span class="energy-label">Suerte</span><span class="energy-value">43</span></div>
+        <div class="energy-track"><div class="energy-fill" style="width:43%; background:var(--tone-warm);"></div></div>
+      </div>
+    </section>
+
+    <section class="card accent">
+      <div class="card-title">Numerología de hoy</div>
+      <div class="num-row">
+        <div class="num-hero">4</div>
+        <div class="num-copy">
+          <div class="num-label">Día personal</div>
+          <div class="num-line">Día de orden y cimientos</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabbar">
+    <div class="tab active">
+      <div class="glyph">☾</div>
+      <div class="label">Inicio</div>
+    </div>
+    <div class="tab">
+      <div class="glyph">☉</div>
+      <div class="label">Carta</div>
+    </div>
+    <div class="tab">
+      <div class="glyph">八</div>
+      <div class="label">Números</div>
+    </div>
+    <div class="tab">
+      <div class="glyph">✦</div>
+      <div class="label">Pilares</div>
+    </div>
+    <div class="tab">
+      <div class="glyph">◷</div>
+      <div class="label">Ajustes</div>
+    </div>
+  </nav>
+  <div class="home-indicator"></div>
+</body>
+</html>

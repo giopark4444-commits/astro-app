@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Aluna — Carta (Desktop, DESPUÉS)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* --- tokens base (Observatorio, del repo) --- */
+    --bg: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+    --surface: rgba(150,150,190,0.07);
+    --surface-2: rgba(231,201,134,0.06);
+    --ink: #ece7f6;
+    --soft: rgba(233,228,245,0.6);
+    --line: rgba(231,201,134,0.2);
+    --acc: #e7c986; --acc-rgb: 231,201,134;
+    --radius: 16px; --radius-lg: 22px;
+    --glow: 0 0 24px rgba(231,201,134,0.42);
+    --glow-soft: 0 0 14px rgba(231,201,134,0.28);
+    --elev: 0 18px 50px rgba(6,8,24,0.45);
+    --ease: cubic-bezier(0.22,0.61,0.36,1);
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-ui: 'Quicksand', system-ui, sans-serif;
+
+    /* --- escala "después" --- */
+    --text-2xs: 11px; --text-xs: 12px; --text-sm: 13px; --text-md: 15px;
+    --text-lg: 17px;  --text-xl: 20px; --text-2xl: 24px; --text-3xl: 32px;
+    --display-sm: 44px; --display: 60px;
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 28px; --sp-7: 40px;
+    --ink-on-acc: #1a1305;
+    --tone-warm: #e0795a;
+    --tone-cool: #7aaae0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { min-width: 1440px; }
+  body {
+    width: 1440px;
+    min-height: 1024px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+  h1, h3, h4 { font-family: var(--font-display); font-weight: 600; margin: 0; }
+
+  /* ---- starfield: full-bleed, igual que hoy ---- */
+  .stars {
+    position: absolute; inset: 0; height: 680px; pointer-events: none; opacity: 0.55;
+    background-image:
+      radial-gradient(1.5px 1.5px at 6% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 14% 22%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 22% 6%, rgba(var(--acc-rgb),1), transparent),
+      radial-gradient(1px 1px at 31% 30%, #cdd6ff, transparent),
+      radial-gradient(1px 1px at 40% 14%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 47% 26%, rgba(var(--acc-rgb),1), transparent),
+      radial-gradient(1px 1px at 55% 8%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 62% 34%, #fff, transparent),
+      radial-gradient(1px 1px at 69% 16%, #cdd6ff, transparent),
+      radial-gradient(1.6px 1.6px at 76% 28%, rgba(var(--acc-rgb),1), transparent),
+      radial-gradient(1px 1px at 84% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 91% 24%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 97% 18%, rgba(var(--acc-rgb),1), transparent),
+      radial-gradient(1px 1px at 3% 42%, #fff, transparent),
+      radial-gradient(1px 1px at 88% 44%, #cdd6ff, transparent);
+    animation: twinkle 7s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100% { opacity: 0.4; } 50% { opacity: 0.75; } }
+
+  /* ---- header: full-bleed, tokens nuevos ---- */
+  .header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-4) var(--sp-7);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: 0.5px; color: var(--ink); }
+  .brand::first-letter { color: var(--acc); }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--acc); font-family: var(--font-display);
+    font-size: var(--text-xl); font-weight: 600; display: grid; place-items: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* ---- contenedor re-escalado: ~720px, no dos columnas ---- */
+  .main { position: relative; z-index: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: var(--sp-6) var(--sp-6) 168px; }
+
+  .head { display: flex; align-items: center; justify-content: space-between; }
+  .eyebrow { font-size: var(--text-2xs); letter-spacing: 3px; text-transform: uppercase; color: var(--acc); font-weight: 600; }
+  .enso { color: var(--acc); display: inline-flex; opacity: 0.9; }
+  .h1 {
+    font-family: var(--font-display); font-weight: 600; font-size: var(--display-sm); line-height: 1.02;
+    color: var(--ink); margin: var(--sp-3) 0 var(--sp-5);
+    background: linear-gradient(180deg, var(--ink) 60%, rgba(236,231,246,0.75));
+    -webkit-background-clip: text; background-clip: text;
+  }
+
+  /* ---- Seg (segmented) + Chip control, receta canónica ---- */
+  .kindRow { display: flex; gap: var(--sp-2); padding: var(--sp-2); border: 1px solid var(--line); border-radius: 999px; background: var(--surface); margin-bottom: var(--sp-3); }
+  .kindBtn {
+    flex: 1; min-width: 0; padding: var(--sp-3) var(--sp-3); border: 0; border-radius: 999px; background: transparent;
+    font-family: var(--font-ui); font-weight: 600; font-size: var(--text-md); color: var(--soft); text-align: center;
+    letter-spacing: 0.2px;
+  }
+  .kindOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb),1), rgba(var(--acc-rgb),0.8)); box-shadow: var(--glow-soft); }
+  .kindHint { margin: 0 0 var(--sp-4); text-align: center; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); }
+
+  .wheelWrap { display: flex; justify-content: center; padding: var(--sp-2) 0 var(--sp-1); }
+  .wheel { width: 100%; max-width: 480px; height: auto; display: block; filter: drop-shadow(0 22px 46px rgba(6,8,24,0.55)); }
+  .ring { fill: none; stroke: var(--line); stroke-width: 1; }
+  .ringFaint { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.5; }
+  .signGlyph { font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+  .cusp { stroke: var(--line); stroke-width: 1; }
+  .cuspAngle { stroke: rgba(var(--acc-rgb),0.7); stroke-width: 1.5; }
+  .houseNum { font-size: 8px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
+  .angleMark { font-size: 9.5px; font-weight: 700; fill: var(--acc); text-anchor: middle; dominant-baseline: central; }
+  .bodyHit { fill: var(--surface-2); }
+  .bodyGlyph { font-size: 14px; fill: var(--ink); text-anchor: middle; dominant-baseline: central; }
+  .bodyDeg { font-size: 6.5px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
+
+  .tapHint { text-align: center; font-size: var(--text-xs); color: var(--soft); margin: var(--sp-2) 0 var(--sp-4); }
+
+  /* ---- Card (glass) canónica, en fila ---- */
+  .cardsRow { display: flex; gap: var(--sp-5); align-items: stretch; }
+  .card {
+    flex: 1; min-width: 0;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: var(--sp-5); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .card.accent { background: var(--surface-2); }
+
+  .cardTop { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+  .cardGlyph { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc); line-height: 1; }
+  .cardTitles { display: flex; flex-direction: column; gap: 2px; }
+  .cardName { font-family: var(--font-display); font-weight: 600; font-size: var(--text-xl); color: var(--ink); }
+  .cardMeta { font-size: var(--text-sm); color: var(--soft); }
+  .cardMeta .tagWarn { color: var(--tone-warm); }
+
+  .essence { margin: 0 0 var(--sp-4); font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.55; color: var(--ink); }
+
+  .ctrlRow { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .ctrl {
+    padding: var(--sp-2) var(--sp-4); border-radius: 999px; border: 1px solid var(--line); background: transparent;
+    font-family: var(--font-ui); font-weight: 600; font-size: var(--text-xs); color: var(--soft);
+  }
+  .ctrlOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb),1), rgba(var(--acc-rgb),0.8)); border-color: transparent; box-shadow: var(--glow-soft); }
+
+  .balanceH { margin: 0 0 var(--sp-4); font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc); font-weight: 600; }
+  .barRow { display: grid; grid-template-columns: 72px 1fr 22px; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+  .barLabel { font-size: var(--text-sm); color: var(--ink); font-weight: 500; }
+  .barLabel .dom { color: var(--acc); font-weight: 600; }
+  .barTrack { height: 9px; border-radius: 5px; background: rgba(255,255,255,0.06); overflow: hidden; }
+  .barFill { display: block; height: 100%; border-radius: 5px; }
+  .barN { font-size: var(--text-sm); color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---- DOCK flotante: reemplaza el BottomNav ---- */
+  .dock {
+    position: fixed; left: 50%; bottom: var(--sp-6); transform: translateX(-50%); z-index: 5;
+    display: flex; gap: var(--sp-1); padding: var(--sp-2);
+    background: rgba(16,20,46,0.72); border: 1px solid rgba(231,201,134,0.2);
+    border-radius: 999px; backdrop-filter: blur(20px);
+    box-shadow: var(--elev), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .dockItem {
+    display: flex; flex-direction: column; align-items: center; gap: 3px; width: 68px;
+    padding: var(--sp-2) var(--sp-2) 7px; border-radius: 999px; color: var(--soft); text-decoration: none;
+    font-size: var(--text-2xs); font-weight: 600; letter-spacing: 0.2px;
+  }
+  .dockItem svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .dockOn { color: var(--ink-on-acc); background: linear-gradient(180deg, rgba(var(--acc-rgb),1), rgba(var(--acc-rgb),0.86)); box-shadow: var(--glow-soft); }
+  .dockOn svg { stroke: var(--ink-on-acc); filter: drop-shadow(0 0 6px rgba(var(--acc-rgb),0.5)); }
+</style>
+</head>
+<body>
+
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="header">
+    <span class="brand">Aluna</span>
+    <span class="avatar">G</span>
+  </header>
+
+  <main class="main">
+    <div class="head">
+      <span class="eyebrow">CARTA NATAL</span>
+      <span class="enso" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16.5 5.5a8 8 0 1 0 3 7.5" /><path d="M19 4.5a4 4 0 0 0 0 6 5 5 0 0 1 0-6Z" />
+        </svg>
+      </span>
+    </div>
+    <h1 class="h1">Gio</h1>
+
+    <div class="kindRow" role="tablist" aria-label="Tipo de carta">
+      <button class="kindBtn kindOn" role="tab" aria-selected="true">Natal</button>
+      <button class="kindBtn" role="tab" aria-selected="false">Tu Clima</button>
+      <button class="kindBtn" role="tab" aria-selected="false">Rev. Solar</button>
+      <button class="kindBtn" role="tab" aria-selected="false">Progresiones</button>
+    </div>
+    <p class="kindHint">Tu cielo de nacimiento.</p>
+
+    <div class="wheelWrap">
+      <svg id="wheel" class="wheel" viewBox="0 0 360 360" role="img" aria-label="Rueda de la carta astral"></svg>
+    </div>
+    <p class="tapHint">Toca un planeta para ver su detalle</p>
+
+    <div class="cardsRow">
+      <section class="card">
+        <div class="cardTop">
+          <span class="cardGlyph">☉</span>
+          <div class="cardTitles">
+            <span class="cardName">Sol</span>
+            <span class="cardMeta">Acuario · Casa 11 · <span class="tagWarn">Exilio</span></span>
+          </div>
+        </div>
+        <p class="essence">Tu Sol en Acuario ilumina la casa de las comunidades: tu propósito florece cuando piensas para el grupo, no para la tribuna…</p>
+        <div class="ctrlRow" role="tablist" aria-label="Profundidad de la lectura">
+          <button class="ctrl ctrlOn" role="tab" aria-selected="true">Esencia</button>
+          <button class="ctrl" role="tab" aria-selected="false">Profunda</button>
+          <button class="ctrl" role="tab" aria-selected="false">Completa</button>
+        </div>
+      </section>
+
+      <section class="card accent">
+        <h4 class="balanceH">Elementos</h4>
+        <div class="barRow"><span class="barLabel">Fuego</span><span class="barTrack"><span class="barFill" style="width:2%; background:var(--tone-warm); opacity:0.5"></span></span><span class="barN">0</span></div>
+        <div class="barRow"><span class="barLabel"><span class="dom">Tierra</span></span><span class="barTrack"><span class="barFill" style="width:100%; background:linear-gradient(90deg, rgba(202,168,95,0.55), rgba(202,168,95,1)); box-shadow:0 0 10px rgba(202,168,95,0.35)"></span></span><span class="barN">3</span></div>
+        <div class="barRow"><span class="barLabel">Aire</span><span class="barTrack"><span class="barFill" style="width:66%; background:rgba(122,170,224,0.75)"></span></span><span class="barN">2</span></div>
+        <div class="barRow"><span class="barLabel">Agua</span><span class="barTrack"><span class="barFill" style="width:100%; background:rgba(155,143,192,0.8)"></span></span><span class="barN">3</span></div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="dock" aria-label="Navegación principal">
+    <a class="dockItem dockOn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3.2" /><path d="M12 3v3.4M12 17.6V21M3 12h3.4M17.6 12H21" /></svg>Carta</a>
+    <a class="dockItem"><svg viewBox="0 0 24 24">
+        <circle cx="6" cy="6" r="1" /><circle cx="12" cy="6" r="1" /><circle cx="18" cy="6" r="1" />
+        <circle cx="6" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="18" cy="12" r="1" />
+        <circle cx="6" cy="18" r="1" /><circle cx="12" cy="18" r="1" /><circle cx="18" cy="18" r="1" />
+      </svg>Números</a>
+    <a class="dockItem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" /></svg>Hoy</a>
+    <a class="dockItem"><svg viewBox="0 0 24 24"><path d="M6 4v16M11 4v16M16 4v16M21 4v16" /></svg>Pilares</a>
+  </nav>
+
+<script>
+(function(){
+  const WHEEL = { CX:180, CY:180, R_SIGN_OUT:166, R_SIGN_IN:136, R_SIGN_GLYPH:151, R_HOUSE_IN:58, R_HOUSE_NUM:66, R_BODY:114, R_ASPECT:94 };
+  function pointAt(r, lon, asc){
+    const a = (180 + (lon - asc)) * Math.PI / 180;
+    return [WHEEL.CX + r*Math.cos(a), WHEEL.CY - r*Math.sin(a)];
+  }
+  function annularSector(rOut, rIn, lonA, lonB, asc){
+    const [x1o,y1o]=pointAt(rOut,lonA,asc), [x2o,y2o]=pointAt(rOut,lonB,asc);
+    const [x2i,y2i]=pointAt(rIn,lonB,asc), [x1i,y1i]=pointAt(rIn,lonA,asc);
+    return `M ${x1o} ${y1o} A ${rOut} ${rOut} 0 0 0 ${x2o} ${y2o} L ${x2i} ${y2i} A ${rIn} ${rIn} 0 0 1 ${x1i} ${y1i} Z`;
+  }
+  const TEXT_VS = "︎";
+  const SIGNS = [
+    {key:'aries',el:'fire',glyph:'♈'},{key:'taurus',el:'earth',glyph:'♉'},{key:'gemini',el:'air',glyph:'♊'},
+    {key:'cancer',el:'water',glyph:'♋'},{key:'leo',el:'fire',glyph:'♌'},{key:'virgo',el:'earth',glyph:'♍'},
+    {key:'libra',el:'air',glyph:'♎'},{key:'scorpio',el:'water',glyph:'♏'},{key:'sagittarius',el:'fire',glyph:'♐'},
+    {key:'capricorn',el:'earth',glyph:'♑'},{key:'aquarius',el:'air',glyph:'♒'},{key:'pisces',el:'water',glyph:'♓'},
+  ];
+  const ELEMENT_FILL = { fire:'rgba(224,121,90,0.18)', earth:'rgba(202,168,95,0.18)', air:'rgba(122,170,224,0.18)', water:'rgba(155,143,192,0.18)' };
+  const ELEMENT_INK  = { fire:'#e0795a', earth:'#caa85f', air:'#7aaae0', water:'#9b8fc0' };
+
+  const ASC = 356.1, MC = (ASC - 90 + 360) % 360;
+  const BODIES = [
+    {key:'sun',     glyph:'☉', lon:315.95},
+    {key:'moon',    glyph:'☽', lon:216},
+    {key:'mercury', glyph:'☿', lon:225},
+    {key:'venus',   glyph:'♀', lon:274},
+    {key:'mars',    glyph:'♂', lon:283},
+    {key:'jupiter', glyph:'♃', lon:195.95},
+    {key:'saturn',  glyph:'♄', lon:292},
+    {key:'pluto',   glyph:'♇', lon:234, retro:true},
+  ];
+  const ASPECTS = [
+    {a:'sun', b:'mercury', kind:'square'},
+    {a:'sun', b:'jupiter', kind:'trine'},
+    {a:'jupiter', b:'mars', kind:'square'},
+  ];
+  const ASPECT_STROKE = { trine:'rgba(231,201,134,0.75)', square:'rgba(224,121,90,0.65)' };
+
+  function dms(lon){
+    const si = Math.floor(lon/30);
+    const within = lon - si*30;
+    const deg = Math.floor(within);
+    const min = Math.round((within-deg)*60);
+    return deg + '°' + String(min).padStart(2,'0') + '′';
+  }
+
+  function buildWheel(svgId){
+    const svg = document.getElementById(svgId);
+    if(!svg) return;
+    let out = '';
+    out += `<circle cx="180" cy="180" r="${WHEEL.R_SIGN_OUT}" class="ring"/>`;
+    out += `<circle cx="180" cy="180" r="${WHEEL.R_SIGN_IN}" class="ring"/>`;
+    out += `<circle cx="180" cy="180" r="${WHEEL.R_HOUSE_IN}" class="ringFaint"/>`;
+    SIGNS.forEach((s,i)=>{
+      const lonA = i*30, lonB = lonA+30;
+      const [gx,gy] = pointAt(WHEEL.R_SIGN_GLYPH, lonA+15, ASC);
+      out += `<path d="${annularSector(WHEEL.R_SIGN_OUT, WHEEL.R_SIGN_IN, lonA, lonB, ASC)}" fill="${ELEMENT_FILL[s.el]}"/>`;
+      out += `<text x="${gx.toFixed(2)}" y="${gy.toFixed(2)}" class="signGlyph" fill="${ELEMENT_INK[s.el]}">${s.glyph}${TEXT_VS}</text>`;
+    });
+    SIGNS.forEach((s,i)=>{
+      const [xo,yo]=pointAt(WHEEL.R_SIGN_OUT, i*30, ASC);
+      const [xi,yi]=pointAt(WHEEL.R_SIGN_IN, i*30, ASC);
+      out += `<line x1="${xo.toFixed(2)}" y1="${yo.toFixed(2)}" x2="${xi.toFixed(2)}" y2="${yi.toFixed(2)}" class="ring"/>`;
+    });
+    for(let i=0;i<12;i++){
+      const cusp = ASC + i*30;
+      const [x1,y1]=pointAt(WHEEL.R_HOUSE_IN, cusp, ASC);
+      const [x2,y2]=pointAt(WHEEL.R_SIGN_IN, cusp, ASC);
+      const isAngle = i===0||i===3||i===6||i===9;
+      const [nx,ny]=pointAt(WHEEL.R_HOUSE_NUM, cusp+15, ASC);
+      out += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" class="${isAngle?'cuspAngle':'cusp'}"/>`;
+      out += `<text x="${nx.toFixed(2)}" y="${ny.toFixed(2)}" class="houseNum">${i+1}</text>`;
+    }
+    const [acx,acy] = pointAt(WHEEL.R_SIGN_OUT+9, ASC, ASC);
+    const [mcx,mcy] = pointAt(WHEEL.R_SIGN_OUT+9, MC, ASC);
+    out += `<text x="${acx.toFixed(2)}" y="${acy.toFixed(2)}" class="angleMark">AC</text>`;
+    out += `<text x="${mcx.toFixed(2)}" y="${mcy.toFixed(2)}" class="angleMark">MC</text>`;
+    const byKey = Object.fromEntries(BODIES.map(b=>[b.key,b]));
+    ASPECTS.forEach(asp=>{
+      const a = byKey[asp.a], b = byKey[asp.b];
+      const [x1,y1]=pointAt(WHEEL.R_ASPECT, a.lon, ASC);
+      const [x2,y2]=pointAt(WHEEL.R_ASPECT, b.lon, ASC);
+      out += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${ASPECT_STROKE[asp.kind]}" stroke-width="1.5"/>`;
+    });
+    BODIES.forEach(b=>{
+      const [gx,gy]=pointAt(WHEEL.R_BODY, b.lon, ASC);
+      const [tx,ty]=pointAt(WHEEL.R_BODY+16, b.lon, ASC);
+      out += `<g class="bodyG">`;
+      out += `<circle cx="${gx.toFixed(2)}" cy="${gy.toFixed(2)}" r="11" class="bodyHit"/>`;
+      out += `<text x="${gx.toFixed(2)}" y="${gy.toFixed(2)}" class="bodyGlyph">${b.glyph}${TEXT_VS}</text>`;
+      out += `<text x="${tx.toFixed(2)}" y="${ty.toFixed(2)}" class="bodyDeg">${dms(b.lon)}${b.retro?'℞':''}</text>`;
+      out += `</g>`;
+    });
+    svg.innerHTML = out;
+  }
+  buildWheel('wheel');
+})();
+</script>
+</body>
+</html>
