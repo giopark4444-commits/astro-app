@@ -70,28 +70,65 @@ o `active` Y (`current_period_end` es null O es futuro). Vive en `@aluna/supabas
 
 ## 5. Checkout (solo web)
 
-`POST /api/billing/checkout` (server, RLS — usa el `userId` de la sesión, nunca del body):
+`POST /api/billing/checkout` (server, RLS — usa el `userId`/email de la sesión, nunca del body):
 recibe `{ plan: "monthly" | "yearly" }`, resuelve el `product_id` de Dodo desde env vars
 (`DODO_PRODUCT_MONTHLY`, `DODO_PRODUCT_YEARLY` — un producto por plan, creados en el dashboard
-de Dodo), crea la sesión de checkout con `customer.email` del usuario autenticado,
-**`metadata: { userId }`** (así el webhook resuelve la fila sin depender de buscar por email —
-ver §6) y `subscription_data: { trial_period_days: 14 }`, devuelve `{ checkoutUrl }`. La UI
-redirige `window.location.href = checkoutUrl`. `return_url` apunta a `/ajustes?checkout=success`.
+de Dodo), crea la sesión de checkout con `customer: { email, name }` del usuario autenticado
+(Dodo crea el customer implícito la primera vez) y `subscription_data: { trial_period_days: 14 }`,
+devuelve `{ checkoutUrl }`. La UI redirige `window.location.href = checkoutUrl`. `return_url`
+apunta a `/ajustes?checkout=success`.
 
 ## 6. Webhook
 
+**Verificación de firma (Standard Webhooks spec, confirmado en la documentación vigente):**
+headers `webhook-id` / `webhook-signature` (formato `v1,<firma>`) / `webhook-timestamp` (epoch
+segundos); firma = `base64(HMAC-SHA256(DODO_PAYMENTS_WEBHOOK_SECRET, `${timestamp}.${rawBody}`))`,
+comparada con `crypto.timingSafeEqual` contra la parte después de `v1,`; rechazar además si
+`timestamp` tiene más de 5 minutos de diferencia con el reloj del servidor (anti-replay).
+
+**Resolución de usuario:** el payload trae `data.customer.email` (confirmado en los ejemplos de
+la documentación de eventos de suscripción) — SIN depender de que `metadata` se propague al
+evento (no confirmado en la documentación). Se resuelve `email → user_id` con una función SQL
+`security definer` nueva, **mismo patrón ya usado en este proyecto** por `handle_new_user()`
+(migración `0001_core_schema.sql`) para leer `auth.users` con privilegio elevado:
+
+```sql
+create or replace function public.user_id_by_email(lookup_email text)
+returns uuid
+language sql
+security definer
+set search_path = public
+as $$
+  select id from auth.users where email = lookup_email limit 1;
+$$;
+
+revoke execute on function public.user_id_by_email(text) from anon, authenticated, public;
+grant execute on function public.user_id_by_email(text) to service_role;
+```
+
+El webhook (`service_role`) llama `supabase.rpc("user_id_by_email", { lookup_email: email })`.
+
 `POST /api/webhooks/dodo` (server, runtime nodejs, **sin** `authenticateRoute` — Dodo no manda
 sesión de usuario, manda su propia firma):
-1. Lee el body crudo + header de firma; verifica HMAC contra `DODO_PAYMENTS_WEBHOOK_SECRET`
-   (comparación de tiempo constante, `crypto.timingSafeEqual`) — 401 si no coincide.
-2. Según el tipo de evento (`subscription.active`, `subscription.cancelled`, y los de
-   renovación/fallo de pago que se confirmen contra la documentación vigente al construir —
-   nombres exactos a verificar en `docs.dodopayments.com` con el skill `dodo-best-practices`
-   como primer paso del plan de implementación, no asumir del training):
-   resuelve el `user_id` desde `metadata.userId` del payload del evento (sembrado en el
-   checkout, §5) — robusto, sin depender de buscar por email.
-3. Upsert en `subscriptions` vía `service_role` (`onConflict: dodo_subscription_id`).
-4. Responde 200 rápido (Dodo reintenta si no hay 200 — la lógica pesada, si la hubiera, no debe
+1. Lee el body crudo + headers; verifica firma y frescura del timestamp como arriba — 401 si
+   falla cualquiera de las dos.
+2. Resuelve `user_id` vía `user_id_by_email(data.customer.email)`; si no hay match, responde 200
+   igual (log de aviso) — un email sin cuenta Aluna no debe hacer que Dodo reintente en bucle.
+3. Mapea el tipo de evento a una fila `subscriptions` (`onConflict: dodo_subscription_id`):
+   - `subscription.active` → upsert `{status: trialing_o_active_según_next_billing_date, plan,
+     current_period_end: next_billing_date}` (el propio payload no distingue trial de activo por
+     tipo de evento — se infiere por `next_billing_date` vs. la fecha de creación, o se usa
+     siempre `active` y se deja que la UI muestre "en prueba" si `created_at` es reciente;
+     decisión de detalle en el plan).
+   - `subscription.renewed` → actualiza `status: active`, `current_period_end`.
+   - `subscription.on_hold` → `status: past_due`.
+   - `subscription.cancelled` / `subscription.expired` → `status: cancelled`.
+   - `subscription.plan_changed` → actualiza `plan` desde `product_id` (mapeado a monthly/yearly
+     por los env vars `DODO_PRODUCT_*`).
+   - Cualquier otro tipo (`subscription.updated`, `subscription.failed`, eventos de pago/crédito
+     no usados por este modelo plano): log y 200, sin escribir nada — evento reconocido pero
+     fuera del alcance de esta sub-fase.
+4. Responde 200 rápido (Dodo reintenta si no hay 200 — el trabajo pesado, si lo hubiera, no debe
    bloquear la respuesta).
 
 ## 7. Portal de gestión
