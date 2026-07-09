@@ -122,6 +122,7 @@ function makeCard(t: ThemeTokens) {
       borderWidth: 1,
       borderColor: t.accHair,
       borderRadius: radius.lg,
+      // xl (24) en vez del 20 del SPEC: la escala `space` del repo no tiene ese paso y las pantallas existentes ya usan 24 en paneles.
       padding: space.xl,
     },
     wrapAccent: {
@@ -246,27 +247,30 @@ export function FadeIn({
   delay?: number;
   style?: StyleProp<ViewStyle>;
 }) {
-  const reduceMotion = useRef(false);
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     let alive = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((v) => {
-      if (!alive) return;
-      reduceMotion.current = v;
-      if (v) {
-        // Reducir movimiento: aparece directo, sin animación.
-        progress.setValue(1);
-      } else {
-        Animated.timing(progress, {
-          toValue: 1,
-          duration: FADE_DURATION_MS,
-          delay,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }).start();
-      }
-    });
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((v) => {
+        if (!alive) return;
+        if (v) {
+          // Reducir movimiento: aparece directo, sin animación.
+          progress.setValue(1);
+        } else {
+          Animated.timing(progress, {
+            toValue: 1,
+            duration: FADE_DURATION_MS,
+            delay,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }).start();
+        }
+      })
+      .catch(() => {
+        // Si el módulo nativo falta, la promesa rechaza — el contenido JAMÁS debe quedar invisible.
+        if (alive) progress.setValue(1);
+      });
     return () => {
       alive = false;
     };
