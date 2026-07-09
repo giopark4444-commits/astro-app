@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { isPlusActive, type SubscriptionStatus } from "@aluna/core";
+import type { SubscriptionStatus } from "@aluna/core";
 import styles from "./settings.module.css";
 
 interface Row {
@@ -21,7 +21,11 @@ export function PlanCard({ row }: { row: Row | null }) {
   const [busy, setBusy] = useState<"monthly" | "yearly" | "portal" | null>(null);
   const [error, setError] = useState(false);
 
-  const active = isPlusActive(row ? { status: row.status, currentPeriodEnd: row.current_period_end } : null);
+  // Rama a mostrar: "gestión" para cualquier suscripción no cancelada
+  // (trialing, active, past_due), no solo la que tiene acceso Plus AHORA
+  // (eso es lo que responde isPlusActive, que no aplica aquí: un past_due
+  // debe ver "Gestionar suscripción", no los botones de checkout).
+  const hasManagedSubscription = row !== null && row.status !== "cancelled";
 
   async function startCheckout(plan: "monthly" | "yearly") {
     setBusy(plan);
@@ -62,7 +66,7 @@ export function PlanCard({ row }: { row: Row | null }) {
   return (
     <section className={styles.section}>
       <h3 className={styles.label}>{t("title")}</h3>
-      {!active ? (
+      {!hasManagedSubscription ? (
         <>
           <p>{t("freeBody")}</p>
           <div className={styles.seg} role="group" aria-label={t("title")}>
