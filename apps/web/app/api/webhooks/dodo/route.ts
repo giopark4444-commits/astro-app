@@ -33,35 +33,69 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "bad_json" }, { status: 400 });
   }
 
-  const email = event.data.customer?.email;
-  if (!email) return NextResponse.json({ received: true }); // sin email, nada que resolver
-
   const supabase = createServiceSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  const { data: userId, error: rpcError } = await supabase.rpc("user_id_by_email", { lookup_email: email });
-  if (rpcError) {
-    console.error("[webhook dodo] user_id_by_email falló:", rpcError.message);
-    return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // fallo real, no "no encontrado" — que Dodo reintente
-  }
-  if (!userId) return NextResponse.json({ received: true }); // sin cuenta Aluna con ese email
+  // Orden de resolución del usuario: primero por dodo_subscription_id (fila
+  // ya existente, es `unique` en la tabla), y SOLO si no existe todavía
+  // (primer evento de esta suscripción, típicamente subscription.active)
+  // caemos a resolver por el email que manda Dodo en este evento puntual.
+  // Por qué: si el usuario cambia su email de cuenta en Aluna DESPUÉS de
+  // suscribirse, los eventos siguientes (renovación, cancelación, etc.)
+  // siguen trayendo el email ORIGINAL del customer de Dodo — resolver
+  // siempre por email dejaría esa fila obsoleta para siempre. El campo crudo
+  // se lee acá mismo (no se duplica el mapeo completo de mapDodoEventToRow,
+  // que sigue sin cambios).
+  const dodoSubscriptionId = event.data.subscription_id;
+  let userId: string | null = null;
+  let existingPlan: "monthly" | "yearly" | null = null;
 
-  const { data: existing, error: existingError } = await supabase
-    .from("subscriptions")
-    .select("plan")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (existingError) {
-    console.error("[webhook dodo] lectura de subscriptions falló:", existingError.message);
-    return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // no confundir con "sin fila" — puede disparar el downgrade fantasma yearly→monthly
+  if (dodoSubscriptionId) {
+    const { data: bySubscription, error: bySubscriptionError } = await supabase
+      .from("subscriptions")
+      .select("user_id, plan")
+      .eq("dodo_subscription_id", dodoSubscriptionId)
+      .maybeSingle();
+    if (bySubscriptionError) {
+      console.error("[webhook dodo] lectura de subscriptions por dodo_subscription_id falló:", bySubscriptionError.message);
+      return NextResponse.json({ error: "lookup_failed" }, { status: 500 });
+    }
+    if (bySubscription) {
+      userId = bySubscription.user_id;
+      existingPlan = (bySubscription.plan as "monthly" | "yearly" | undefined) ?? null;
+    }
+  }
+
+  if (!userId) {
+    const email = event.data.customer?.email;
+    if (!email) return NextResponse.json({ received: true }); // sin fila previa ni email, nada que resolver
+
+    const { data: userIdByEmail, error: rpcError } = await supabase.rpc("user_id_by_email", { lookup_email: email });
+    if (rpcError) {
+      console.error("[webhook dodo] user_id_by_email falló:", rpcError.message);
+      return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // fallo real, no "no encontrado" — que Dodo reintente
+    }
+    if (!userIdByEmail) return NextResponse.json({ received: true }); // sin cuenta Aluna con ese email
+    userId = userIdByEmail;
+
+    const { data: existing, error: existingError } = await supabase
+      .from("subscriptions")
+      .select("plan")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (existingError) {
+      console.error("[webhook dodo] lectura de subscriptions falló:", existingError.message);
+      return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // no confundir con "sin fila" — puede disparar el downgrade fantasma yearly→monthly
+    }
+    existingPlan = (existing?.plan as "monthly" | "yearly" | undefined) ?? null;
   }
 
   const row = mapDodoEventToRow(
     event,
     { monthlyProductId: process.env.DODO_PRODUCT_MONTHLY, yearlyProductId: process.env.DODO_PRODUCT_YEARLY },
-    (existing?.plan as "monthly" | "yearly" | undefined) ?? null,
+    existingPlan,
   );
   if (!row) return NextResponse.json({ received: true }); // evento no mapeado o payload incompleto
 
