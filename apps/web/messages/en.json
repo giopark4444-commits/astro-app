@@ -261,5 +261,22 @@
     "starsTitle": "Symbolic stars",
     "threePillarsNote": "Without a birth time the calculation uses 3 pillars; the hour pillar and its stars are omitted.",
     "seasonState": "Seasonal state"
+  },
+  "billing": {
+    "title": "Your plan",
+    "freeBody": "Full Numerology and Birth Chart, free forever.",
+    "monthly": "$4.99/mo",
+    "yearly": "$39.99/yr",
+    "trialNote": "14 days free",
+    "planTrialing": "Free trial",
+    "planActive": "Aluna Plus",
+    "planPastDue": "Payment overdue",
+    "renewsOn": "Renews on {date}",
+    "trialEndsOn": "Trial ends on {date}",
+    "pastDueNote": "Your last payment failed. Update your payment method to keep Plus.",
+    "manage": "Manage subscription",
+    "loading": "One moment…",
+    "error": "Something went wrong. Please try again.",
+    "checkoutProcessing": "Payment received, activating your account…"
   }
 }

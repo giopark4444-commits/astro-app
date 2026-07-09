@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,6 +9,8 @@ import { useAuth } from "../../lib/auth-context";
 import { useTheme, type ModePref } from "../../lib/theme-context";
 import { useT, type Locale } from "../../lib/i18n-context";
 import { formatPlace } from "../../lib/geocode";
+import { getSupabase } from "../../lib/supabase";
+import type { SubscriptionStatus } from "@aluna/core";
 import { THEMES, THEME_LABELS, fonts, radius, space, type ThemeName, type ThemeTokens } from "../../theme/tokens";
 
 const prettyDate = (iso: string, locale: Locale) => {
@@ -23,10 +25,33 @@ export default function AjustesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { profile, reset } = useProfile();
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
   const { t: tk, theme, modePref, setTheme, setModePref } = useTheme();
   const { t, locale, setLocale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
+
+  const [subRow, setSubRow] = useState<{ status: SubscriptionStatus; current_period_end: string | null } | null>(null);
+  useEffect(() => {
+    if (!session) return;
+    let alive = true;
+    getSupabase()
+      .from("subscriptions")
+      .select("status, current_period_end")
+      .eq("user_id", session.user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (alive) setSubRow(data as typeof subRow);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [session]);
+  // NO uses isPlusActive aquí para decidir qué rama pintar: esa función
+  // devuelve false para "past_due" a propósito (¿tiene acceso Plus AHORA?),
+  // y un usuario con pago fallido SÍ debe ver la rama de gestión (con el
+  // aviso de pago pendiente), no la de "hazte Plus" como si nunca se
+  // hubiera suscrito. La rama se decide por presencia de fila + status.
+  const hasManagedSubscription = subRow !== null && subRow.status !== "cancelled";
 
   function confirmLogout() {
     Alert.alert(t("settings.logoutConfirmTitle"), t("settings.logoutConfirmBody"), [
@@ -142,6 +167,24 @@ export default function AjustesScreen() {
             value={locale}
             onChange={(v) => setLocale(v as Locale)}
           />
+        </View>
+
+        {/* Tu plan: solo lectura — el móvil nunca vende, suscribirse es solo en aluna.app */}
+        <View style={styles.card}>
+          <Text style={styles.cardEyebrow}>{t("billing.title")}</Text>
+          {hasManagedSubscription ? (
+            <>
+              <Text style={styles.profileName}>
+                {t(subRow!.status === "trialing" ? "billing.planTrialing" : subRow!.status === "past_due" ? "billing.planPastDue" : "billing.planActive")}
+              </Text>
+              <Text style={styles.muted}>{t("billing.manageNote")}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.rowLabel}>{t("billing.freeBody")}</Text>
+              <Text style={[styles.muted, { marginTop: space.sm }]}>{t("billing.upsell")}</Text>
+            </>
+          )}
         </View>
 
         {/* Sistemas */}
@@ -271,6 +314,7 @@ function makeStyles(t: ThemeTokens) {
       fontFamily: fonts.sans,
     },
     profileName: { color: t.text, fontSize: 24, fontFamily: fonts.serif, fontStyle: "italic", marginBottom: space.lg },
+    muted: { color: t.textFaint, fontSize: 13, fontFamily: fonts.sans },
 
     fieldLabel: {
       color: t.textDim,

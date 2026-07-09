@@ -13,4 +13,11 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/ajustes")).toBe(false);
     expect(isPublicPath("/api/auth")).toBe(false);
   });
+  it("permite el webhook de Dodo sin sesión (se autentica con su propia firma HMAC)", () => {
+    expect(isPublicPath("/api/webhooks/dodo")).toBe(true);
+  });
+  it("no vuelve público todo /api/webhooks por accidente — solo la ruta exacta de Dodo", () => {
+    expect(isPublicPath("/api/webhooks")).toBe(false);
+    expect(isPublicPath("/api/webhooks/otro-proveedor-futuro")).toBe(false);
+  });
 });

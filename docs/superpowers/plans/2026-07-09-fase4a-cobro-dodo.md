@@ -558,11 +558,15 @@ export async function POST(_request: NextRequest) {
   if (!sub) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   try {
-    const portal = await getDodoClient().customers.createPortalSession({
-      customer_id: sub.dodo_customer_id,
+    // Confirmado contra los tipos reales del SDK instalado en Task 4
+    // (dodopayments@2.42.2): NO existe `customers.createPortalSession(...)`.
+    // El método real es el sub-recurso anidado `customerPortal.create`, que
+    // recibe el customerId como primer argumento posicional (no dentro del
+    // objeto) y devuelve `{ link }`, no `{ url }`.
+    const portal = await getDodoClient().customers.customerPortal.create(sub.dodo_customer_id, {
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes`,
     });
-    return NextResponse.json({ portalUrl: portal.url });
+    return NextResponse.json({ portalUrl: portal.link });
   } catch {
     return NextResponse.json({ error: "portal_failed" }, { status: 500 });
   }
@@ -572,8 +576,10 @@ export async function POST(_request: NextRequest) {
 - [ ] **Step 2: Verificar + commit**
 
 Run: `cd apps/web && npx tsc --noEmit`
-Expected: 0 errores. Si `customer_id`/`return_url`/`.url` no coinciden con los tipos reales del
-SDK (verificados en Task 4 Step 2), ajusta aquí también.
+Expected: 0 errores. El código de arriba ya refleja la forma real confirmada por Task 4
+(`customerPortal.create(customerId, { return_url })` → `{ link }`) — si el `.d.ts` instalado
+difiere de esto (por ejemplo por un upgrade de versión del SDK), ajusta aquí para que coincida
+con los tipos reales, que siempre mandan sobre este plan.
 
 ```bash
 git add apps/web/app/api/billing/portal/route.ts
@@ -930,7 +936,7 @@ git commit -m "feat(billing): tarjeta 'Tu plan' en Ajustes web (checkout + porta
 - Modify: `apps/mobile/lib/strings.ts` (namespace `billing` ES/EN)
 
 **Interfaces:**
-- Consumes: `getSupabase` de `../../lib/supabase`; `useAuth` de `../../lib/auth-context`; `isPlusActive` de `@aluna/core` (Task 2).
+- Consumes: `getSupabase` de `../../lib/supabase`; `useAuth` de `../../lib/auth-context`; `SubscriptionStatus` (tipo) de `@aluna/core` (Task 2) — NO `isPlusActive`, ver nota de corrección en el Step 2 (mismo bug ya encontrado y arreglado en Task 8: esa función oculta `past_due` a propósito, no sirve para decidir qué rama de UI mostrar).
 - Produces: sección "Tu plan" solo lectura dentro de la pantalla Ajustes existente.
 
 - [ ] **Step 1: Claves i18n**
@@ -989,11 +995,18 @@ En `apps/mobile/app/(tabs)/ajustes.tsx`:
       alive = false;
     };
   }, [session]);
-  const plusActive = isPlusActive(subRow ? { status: subRow.status, currentPeriodEnd: subRow.current_period_end } : null);
+  // NO uses isPlusActive aquí para decidir qué rama pintar: esa función
+  // devuelve false para "past_due" a propósito (¿tiene acceso Plus AHORA?),
+  // y un usuario con pago fallido SÍ debe ver la rama de gestión (con el
+  // aviso de pago pendiente), no la de "hazte Plus" como si nunca se
+  // hubiera suscrito. La rama se decide por presencia de fila + status.
+  const hasManagedSubscription = subRow !== null && subRow.status !== "cancelled";
 ```
 
 (`session` ya existe en este archivo vía `useAuth()` — verificar el nombre real de la
-desestructuración antes de asumir; si el archivo usa otro nombre, ajustar.)
+desestructuración antes de asumir; si el archivo usa otro nombre, ajustar. `isPlusActive`
+NO se importa para esta pantalla — no hace falta, la decisión de rama usa `hasManagedSubscription`
+de arriba.)
 
 3. Nueva tarjeta JSX, siguiendo el patrón `styles.card`/`styles.cardEyebrow` ya usado por las
    demás secciones de esta pantalla (perfil, apariencia, sistemas) — insertar ANTES de la
@@ -1002,7 +1015,7 @@ desestructuración antes de asumir; si el archivo usa otro nombre, ajustar.)
 ```tsx
         <View style={styles.card}>
           <Text style={styles.cardEyebrow}>{t("billing.title")}</Text>
-          {plusActive ? (
+          {hasManagedSubscription ? (
             <>
               <Text style={styles.profileName}>
                 {t(subRow!.status === "trialing" ? "billing.planTrialing" : subRow!.status === "past_due" ? "billing.planPastDue" : "billing.planActive")}

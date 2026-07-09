@@ -185,9 +185,52 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      subscriptions: {
+        Row: {
+          created_at: string;
+          current_period_end: string | null;
+          dodo_customer_id: string;
+          dodo_subscription_id: string;
+          plan: string;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          current_period_end?: string | null;
+          dodo_customer_id: string;
+          dodo_subscription_id: string;
+          plan: string;
+          status: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          current_period_end?: string | null;
+          dodo_customer_id?: string;
+          dodo_subscription_id?: string;
+          plan?: string;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
+    // función security definer que el webhook de Dodo usa para resolver el
+    // user_id de Aluna a partir del email que manda el evento.
+    Functions: {
+      user_id_by_email: {
+        Args: { lookup_email: string };
+        Returns: string;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
