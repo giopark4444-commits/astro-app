@@ -59,3 +59,8 @@ export {
   symbolicStars, voidBranches, STARS,
   type StarKey, type StarDef, type StarHit,
 } from "./bazi/stars";
+export {
+  dayMasterStrength, favorableElements, seasonState, elementAt,
+  STRENGTH_THRESHOLDS, STRENGTH_WEIGHTS,
+  type DayMasterStrength, type StrengthDriver, type StrengthVerdict, type SeasonState,
+} from "./bazi/strength";
