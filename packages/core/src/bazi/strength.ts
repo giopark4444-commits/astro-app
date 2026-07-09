@@ -30,7 +30,10 @@ export interface StrengthDriver {
   pillar: PillarPos;
 }
 export interface DayMasterStrength {
+  /** Puntaje capado a 100 — para el medidor 0-100 de la UI. */
   score: number;
+  /** Suma exacta de drivers[].points SIN cap — la UI debe usar este si pinta el desglose. */
+  raw: number;
   verdict: StrengthVerdict;
   seasonState: SeasonState;
   drivers: StrengthDriver[];
@@ -103,13 +106,15 @@ export function dayMasterStrength(pillars: PillarSet): DayMasterStrength {
     }
   }
 
+  // `raw` = suma exacta de los drivers (transparente para el desglose);
+  // `score` = capado a 100 solo para el medidor — la UI no debe sumar drivers contra `score`.
   const raw = drivers.reduce((a, d) => a + d.points, 0);
   const score = Math.min(100, raw);
   const verdict: StrengthVerdict =
     score > STRENGTH_THRESHOLDS.strongAbove ? "strong"
     : score < STRENGTH_THRESHOLDS.weakBelow ? "weak"
     : "balanced";
-  return { score, verdict, seasonState: state, drivers };
+  return { score, raw, verdict, seasonState: state, drivers };
 }
 
 /** 喜用神/忌神 por verdicto. Offsets desde el DM: par 0, drenaje +1, riqueza +2, control +3, recurso +4(=-1). */

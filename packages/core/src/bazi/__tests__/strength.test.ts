@@ -19,10 +19,11 @@ describe("dayMasterStrength (puntaje transparente)", () => {
     expect(s.verdict).toBe("weak");
     expect(s.score).toBeLessThan(STRENGTH_THRESHOLDS.weakBelow);
   });
-  it("los drivers suman exactamente el score", () => {
+  it("los drivers suman exactamente el raw, y el score es el raw capado a 100", () => {
     const s = dayMasterStrength({ year: P(8, 2), month: P(0, 2), day: P(0, 0), hour: P(1, 11) });
     const sum = s.drivers.reduce((a, d) => a + d.points, 0);
-    expect(Math.min(100, sum)).toBe(s.score);
+    expect(sum).toBe(s.raw);
+    expect(s.score).toBe(Math.min(100, s.raw));
   });
   it("estados estacionales: 甲 en 亥 (invierno)=相; 甲 en 午 (verano)=休; 甲 en 未 (tierra)=囚", () => {
     expect(dayMasterStrength({ year: P(2, 0), month: P(2, 11), day: P(0, 6), hour: null }).seasonState).toBe("xiang");
