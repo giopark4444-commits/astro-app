@@ -3,6 +3,7 @@
 .wrap { display: grid; gap: 24px; }
 .section { display: grid; gap: 10px; }
 .label { margin: 0; font-family: var(--font-ui); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
+.section p { margin: 0; font-size: 14px; color: var(--soft); }
 
 /* Segmentado (modo de luz, idioma) */
 .seg {

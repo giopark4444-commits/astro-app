@@ -261,5 +261,21 @@
     "starsTitle": "Estrellas simbólicas",
     "threePillarsNote": "Sin hora de nacimiento el cálculo usa 3 pilares; el pilar de hora y sus estrellas se omiten.",
     "seasonState": "Estado estacional"
+  },
+  "billing": {
+    "title": "Tu plan",
+    "freeBody": "Numerología y Carta completas, gratis para siempre.",
+    "monthly": "$4.99/mes",
+    "yearly": "$39.99/año",
+    "trialNote": "14 días gratis",
+    "planTrialing": "En prueba gratis",
+    "planActive": "Aluna Plus",
+    "planPastDue": "Pago pendiente",
+    "renewsOn": "Se renueva el {date}",
+    "trialEndsOn": "La prueba termina el {date}",
+    "pastDueNote": "Tu último pago falló. Actualiza tu método de pago para seguir con Plus.",
+    "manage": "Gestionar suscripción",
+    "loading": "Un momento…",
+    "error": "Algo salió mal. Inténtalo de nuevo."
   }
 }
