@@ -1,34 +1,52 @@
-// Verificación de firma de los webhooks de Dodo Payments (Standard Webhooks
-// spec: https://standardwebhooks.com/): HMAC-SHA256 en base64 de
-// "{timestamp}.{rawBody}", header "webhook-signature: v1,<firma>", más una
-// ventana anti-replay de 5 minutos sobre "webhook-timestamp" (epoch segundos).
-// Server-only (node:crypto).
-import crypto from "node:crypto";
-
-const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
+// Verificación de firma de los webhooks de Dodo Payments — delega en la
+// librería real `standardwebhooks` (Standard Webhooks spec), la misma que
+// usa internamente el SDK oficial de Dodo (dodopayments/resources/webhooks,
+// método `unwrap`). Confirmado leyendo esa librería instalada
+// (node_modules/.pnpm/standardwebhooks@1.0.0), NO asumido de la doc pública:
+//  - El contenido firmado real es "{webhook-id}.{webhook-timestamp}.{rawBody}"
+//    — el header "webhook-id" SÍ participa de la firma.
+//  - La clave HMAC no es el secreto crudo: `new Webhook(secret)` le saca el
+//    prefijo "whsec_" y decodifica el resto de base64 a bytes — es la
+//    librería la que hace esto, no lo repetimos acá.
+//  - "webhook-signature" puede traer varias firmas "v1,<sig>" separadas por
+//    ESPACIO (rotación de secreto); `.verify()` acepta cualquiera que matchee.
+//
+// Nota sobre `now`: la versión anterior de esta función aceptaba un `now`
+// inyectable para tests deterministas. La ventana anti-replay de 5 minutos
+// la aplica `Webhook.verify()` de forma interna y exclusiva contra
+// `Date.now()` real (ver `verifyTimestamp` en el paquete) — no expone forma
+// de inyectar un reloj propio. Reimplementar esa ventana acá aparte, solo
+// para poder inyectar `now`, crearía una segunda fuente de verdad para un
+// chequeo de seguridad crítico, con riesgo real de que diverja del real
+// (p.ej. semántica de borde `>` vs `>=`). Se decidió NO duplicarla y quitar
+// `now` del contrato: los tests logran determinismo igual que antes, generando
+// el `webhook-timestamp` en relación a `Date.now()` real en el momento del
+// test (no contra un reloj falso) — ver dodo-webhook.test.ts.
+// Server-only (usa node:crypto por debajo, vía la librería).
+import { Webhook } from "standardwebhooks";
 
 export function verifyDodoSignature(params: {
   rawBody: string;
+  webhookId: string | null;
   signatureHeader: string | null;
   timestampHeader: string | null;
   secret: string;
-  now?: number;
 }): boolean {
-  const { rawBody, signatureHeader, timestampHeader, secret, now = Date.now() } = params;
-  if (!signatureHeader || !timestampHeader) return false;
+  const { rawBody, webhookId, signatureHeader, timestampHeader, secret } = params;
+  if (!webhookId || !signatureHeader || !timestampHeader) return false;
 
-  const provided = signatureHeader.split(",")[1];
-  if (!provided) return false;
-
-  const signedPayload = `${timestampHeader}.${rawBody}`;
-  const expected = crypto.createHmac("sha256", secret).update(signedPayload).digest("base64");
-
-  const expectedBuf = Buffer.from(expected);
-  const providedBuf = Buffer.from(provided);
-  if (expectedBuf.length !== providedBuf.length) return false;
-  if (!crypto.timingSafeEqual(expectedBuf, providedBuf)) return false;
-
-  const eventMs = Number(timestampHeader) * 1000;
-  if (!Number.isFinite(eventMs)) return false;
-  return Math.abs(now - eventMs) <= MAX_CLOCK_SKEW_MS;
+  try {
+    const webhook = new Webhook(secret);
+    webhook.verify(rawBody, {
+      "webhook-id": webhookId,
+      "webhook-signature": signatureHeader,
+      "webhook-timestamp": timestampHeader,
+    });
+    return true;
+  } catch {
+    // Firma inválida, timestamp fuera de ventana, o headers mal formados —
+    // el contrato de esta función sigue siendo boolean, nunca lanzar: la
+    // consume route.ts sin try/catch alrededor de esta llamada.
+    return false;
+  }
 }

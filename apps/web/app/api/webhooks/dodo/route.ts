@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
 
   const valid = verifyDodoSignature({
     rawBody,
+    webhookId: request.headers.get("webhook-id"),
     signatureHeader: request.headers.get("webhook-signature"),
     timestampHeader: request.headers.get("webhook-timestamp"),
     secret,
