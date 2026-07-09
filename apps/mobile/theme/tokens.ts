@@ -1,5 +1,3 @@
-import { Platform } from "react-native";
-
 /**
  * Sistema visual de Aluna, portado a RN desde la web (apps/web/lib/theme/tokens.css).
  * Tres temas — observatory (noche dorada), aurora (pastel) y cosmic (neón) —, cada
@@ -57,6 +55,10 @@ export interface ThemeTokens {
   warnSoft: string;
   /** true en modos claros (para barra de estado y matices). */
   isLight: boolean;
+  /** Tinte superior del fondo radial (el "amanecer" del gradiente). */
+  bgGlow: string;
+  /** Superficie glass de las tarjetas del rediseño (más presente que panelSoft). */
+  glass: string;
 }
 
 /**
@@ -87,6 +89,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#b5604f",
             warnSoft: "rgba(181,96,79,0.14)",
             isLight: true,
+            bgGlow: "#fdf3ec",
+            glass: "rgba(255,255,255,0.6)",
           }
         : {
             bg: "#0a0d24",
@@ -107,6 +111,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#d98c8c",
             warnSoft: "rgba(217,140,140,0.16)",
             isLight: false,
+            bgGlow: "#28316b",
+            glass: "rgba(20,26,58,0.55)",
           };
 
     case "aurora":
@@ -131,6 +137,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#b5604f",
             warnSoft: "rgba(181,96,79,0.14)",
             isLight: true,
+            bgGlow: "#fdf3ec",
+            glass: "rgba(255,255,255,0.6)",
           }
         : {
             bg: "#241d38",
@@ -151,6 +159,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#e0a0a0",
             warnSoft: "rgba(224,160,160,0.16)",
             isLight: false,
+            bgGlow: "#332a4d",
+            glass: "rgba(42,33,64,0.55)",
           };
 
     case "cosmic":
@@ -174,6 +184,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#c4564f",
             warnSoft: "rgba(196,86,79,0.14)",
             isLight: true,
+            bgGlow: "#fbeaf6",
+            glass: "rgba(255,255,255,0.7)",
           }
         : {
             bg: "#280a39",
@@ -194,6 +206,8 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             warn: "#ff9d9d",
             warnSoft: "rgba(255,157,157,0.16)",
             isLight: false,
+            bgGlow: "#3d0b54",
+            glass: "rgba(40,10,57,0.55)",
           };
   }
 }
@@ -204,10 +218,16 @@ export const THEME_LABELS: Record<"es" | "en", Record<ThemeName, string>> = {
   en: { observatory: "Observatory", aurora: "Aurora", cosmic: "Cosmic" },
 };
 
-/** Serif elegante para nombres y números display; sans del sistema para UI. */
+/** Fuentes de marca (cargadas en app/_layout.tsx vía expo-font). RN no
+ * sintetiza pesos con fuentes custom en Android: cada peso es su familia. */
 export const fonts = {
-  serif: Platform.select({ ios: "Georgia", android: "serif", default: "serif" })!,
-  sans: Platform.select({ ios: "System", android: "sans-serif", default: "System" })!,
+  serif: "CormorantGaramond_500Medium",
+  serifSemi: "CormorantGaramond_600SemiBold",
+  serifBold: "CormorantGaramond_700Bold",
+  sans: "Quicksand_400Regular",
+  sansMedium: "Quicksand_500Medium",
+  sansSemi: "Quicksand_600SemiBold",
+  sansBold: "Quicksand_700Bold",
 } as const;
 
 export const space = {
@@ -225,6 +245,12 @@ export const radius = {
   md: 16,
   lg: 22,
   pill: 999,
+} as const;
+
+/** Escala tipográfica del rediseño (SPEC de mockups aprobados). */
+export const type = {
+  xs2: 11, xs: 12, sm: 13, md: 15, lg: 17, xl: 20, xl2: 24, xl3: 32,
+  displaySm: 44, display: 60,
 } as const;
 
 /**
