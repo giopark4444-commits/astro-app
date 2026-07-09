@@ -6,6 +6,7 @@
 // - 空亡: par de ramas ausentes de la decena (旬) del pilar de DÍA
 import type { Pillar } from "./bazi";
 import { sexagenaryIndex } from "./nayin";
+import { TRINES } from "./interactions";
 import type { PillarPos, PillarSet } from "./interactions";
 
 const mod = (n: number, m: number) => ((n % m) + m) % m;
@@ -53,16 +54,13 @@ const ACADEMIC: readonly number[] = [5, 6, 8, 9, 8, 9, 11, 0, 2, 3] as const;
 /** 羊刃 por tronco de día (solo yang; -1 = no aplica). */
 const GOAT_BLADE: readonly number[] = [3, -1, 6, -1, 6, -1, 9, -1, 0, -1] as const;
 
-/** Por grupo de trino (índice del grupo en TRINES-orden agua/fuego/metal/madera). */
-const TRINE_GROUPS: readonly (readonly [number, number, number])[] = [
-  [8, 0, 4], [2, 6, 10], [5, 9, 1], [11, 3, 7],
-] as const;
+/** Por grupo de trino (índice del grupo en TRINES, orden agua/fuego/metal/madera). */
 const PEACH: readonly number[] = [9, 3, 6, 0] as const; // 酉 卯 午 子
 const HORSE: readonly number[] = [2, 8, 11, 5] as const; // 寅 申 亥 巳
 const CANOPY: readonly number[] = [4, 10, 1, 7] as const; // 辰 戌 丑 未
 
 function trineGroupOf(branch: number): number {
-  return TRINE_GROUPS.findIndex((g) => g.includes(mod(branch, 12)));
+  return TRINES.findIndex((t) => t.branches.includes(mod(branch, 12)));
 }
 
 /** 空亡: las 2 ramas ausentes de la decena (旬) a la que pertenece el pilar de día. */

@@ -24,6 +24,10 @@
   color: var(--soft); font-weight: 700;
 }
 .char { font-size: 30px; line-height: 1.1; font-weight: 600; }
+.roman {
+  font-family: var(--font-ui); font-size: 11px; line-height: 1.1;
+  color: var(--soft); opacity: 0.85; margin-top: -3px;
+}
 .animal { font-size: 11px; color: var(--soft); margin-top: 2px; }
 .empty { font-size: 26px; color: var(--soft); opacity: 0.5; }
 .dayTag {

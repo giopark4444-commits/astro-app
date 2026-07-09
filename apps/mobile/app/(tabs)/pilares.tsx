@@ -208,8 +208,18 @@ export default function PilaresScreen() {
                     <Text style={[styles.char, { color: EL_COLOR[stem.element] }]}>
                       {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
                     </Text>
+                    <Text style={styles.roman}>
+                      {script === "hangul"
+                        ? STEM_LABELS[pillar.stem]!.romanKo
+                        : STEM_LABELS[pillar.stem]!.pinyin}
+                    </Text>
                     <Text style={[styles.char, { color: EL_COLOR[branch.element] }]}>
                       {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+                    </Text>
+                    <Text style={styles.roman}>
+                      {script === "hangul"
+                        ? BRANCH_LABELS[pillar.branch]!.romanKo
+                        : BRANCH_LABELS[pillar.branch]!.pinyin}
                     </Text>
                     <Text style={styles.animal}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
                     {isDay && <Text style={styles.dayTag}>{t("pilares.dayMaster")}</Text>}
@@ -734,6 +744,7 @@ function makeStyles(t: ThemeTokens) {
     dayCol: { borderColor: t.accSoft },
     colLabel: { color: t.textDim, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, fontWeight: "700" },
     char: { fontSize: 26, fontFamily: fonts.serif, fontWeight: "600", marginTop: 2 },
+    roman: { color: t.textFaint, fontSize: 11, fontFamily: fonts.sans, marginTop: -2 },
     animal: { color: t.textDim, fontSize: 11, fontFamily: fonts.sans, marginTop: 2 },
     empty: { color: t.textFaint, fontSize: 22, opacity: 0.5, marginTop: space.md },
     dayTag: {

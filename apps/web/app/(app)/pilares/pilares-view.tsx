@@ -14,20 +14,8 @@ import {
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
+import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
-
-interface BaZiData {
-  year: Pillar;
-  month: Pillar;
-  day: Pillar;
-  hour: Pillar | null;
-  solarYear: number;
-  timeKnown: boolean;
-  gender: "feminine" | "masculine" | "neutral";
-  birthYear: number;
-  daysToPrevJie: number;
-  daysToNextJie: number;
-}
 
 const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
 const ELEMENT_KEY: Record<string, string> = {
@@ -155,8 +143,18 @@ export function PilaresView() {
                   <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
                     {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
                   </span>
+                  <span className={styles.roman}>
+                    {script === "hangul"
+                      ? STEM_LABELS[pillar.stem]!.romanKo
+                      : STEM_LABELS[pillar.stem]!.pinyin}
+                  </span>
                   <span className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""}`}>
                     {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+                  </span>
+                  <span className={styles.roman}>
+                    {script === "hangul"
+                      ? BRANCH_LABELS[pillar.branch]!.romanKo
+                      : BRANCH_LABELS[pillar.branch]!.pinyin}
                   </span>
                   <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
                   {isDay && <span className={styles.dayTag}>{t("pilares.dayMaster")}</span>}
