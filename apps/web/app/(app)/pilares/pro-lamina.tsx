@@ -24,20 +24,9 @@ import {
   type LuckSequence,
 } from "@aluna/core";
 import { baziLabels } from "@/lib/content/bazi-labels";
+import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
-interface BaZiData {
-  year: Pillar;
-  month: Pillar;
-  day: Pillar;
-  hour: Pillar | null;
-  solarYear: number;
-  timeKnown: boolean;
-  gender: "feminine" | "masculine" | "neutral";
-  birthYear: number;
-  daysToPrevJie: number;
-  daysToNextJie: number;
-}
 type Script = "hanzi" | "hangul";
 const POS_KEYS = ["year", "month", "day", "hour"] as const;
 

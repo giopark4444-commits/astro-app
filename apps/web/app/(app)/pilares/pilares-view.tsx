@@ -14,20 +14,8 @@ import {
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
+import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
-
-interface BaZiData {
-  year: Pillar;
-  month: Pillar;
-  day: Pillar;
-  hour: Pillar | null;
-  solarYear: number;
-  timeKnown: boolean;
-  gender: "feminine" | "masculine" | "neutral";
-  birthYear: number;
-  daysToPrevJie: number;
-  daysToNextJie: number;
-}
 
 const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
 const ELEMENT_KEY: Record<string, string> = {
