@@ -7,7 +7,15 @@ import { parseBearerToken } from "./bearer";
 //  - "/" NO está aquí a propósito → queda protegida (redirige a /login).
 //  - Las rutas de auth (confirmación de email, callbacks) DEBEN vivir bajo /auth/*
 //    (p.ej. app/auth/confirm/route.ts), NO bajo /api/auth/* — el matcher protege /api/*.
-const PUBLIC_PREFIXES = ["/login", "/signup", "/auth"];
+//  - "/api/webhooks/dodo" es pública a propósito: Dodo la llama sin cookie de
+//    sesión ni Bearer, y el middleware la redirigía (307) a /login antes de
+//    que llegara al handler — el pago nunca se reflejaba en la BD. Es seguro
+//    EXACTAMENTE porque esa ruta verifica su propia firma HMAC (Standard
+//    Webhooks, ver lib/billing/dodo-webhook.ts) como autenticación real, no
+//    depende de la sesión. Se usa la ruta EXACTA (no el prefijo genérico
+//    "/api/webhooks") a propósito: cualquier webhook futuro bajo ese prefijo
+//    debe optar explícitamente por ser público, no heredarlo por accidente.
+const PUBLIC_PREFIXES = ["/login", "/signup", "/auth", "/api/webhooks/dodo"];
 
 /** True si la ruta es pública (no requiere sesión). */
 export function isPublicPath(path: string): boolean {
