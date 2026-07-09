@@ -69,14 +69,14 @@ const EN: BaziLabelMaps = {
     academic: "Academic Star", canopy: "Flower Canopy", goat_blade: "Goat Blade", void: "Void",
   },
   interactions: {
-    stem_combo: "Stem combination", six_combo: "Combination", trine: "Full trine",
-    half_trine: "Half trine", clash: "Clash", punishment: "Punishment", self_punishment: "Self-punishment", harm: "Harm",
+    stem_combo: "Stem Combination", six_combo: "Combination", trine: "Full Trine",
+    half_trine: "Half Trine", clash: "Clash", punishment: "Punishment", self_punishment: "Self-Punishment", harm: "Harm",
   },
-  seasonStates: { wang: "In command", xiang: "Supported", xiu: "Resting", qiu: "Restrained", si: "Unsupported" },
+  seasonStates: { wang: "In Command", xiang: "Supported", xiu: "Resting", qiu: "Restrained", si: "Unsupported" },
   verdicts: { strong: "Strong", weak: "Weak", balanced: "Balanced" },
   drivers: {
-    season: "Month command (season)", root_principal: "Principal root", root_residual: "Residual root",
-    visible_support: "Visible support",
+    season: "Month Command (Season)", root_principal: "Principal Root", root_residual: "Residual Root",
+    visible_support: "Visible Support",
   },
 };
 
