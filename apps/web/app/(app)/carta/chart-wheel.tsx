@@ -1,53 +1,28 @@
 "use client";
-import { ZODIAC_SIGNS, PLANETS, type ChartResult, type BodyPosition } from "@aluna/core";
+import {
+  ZODIAC_SIGNS,
+  PLANETS,
+  WHEEL,
+  pointAt,
+  annularSector,
+  spreadBodies,
+  type ChartResult,
+  type BodyPosition,
+} from "@aluna/core";
 import { HARMONY_STROKE, ELEMENT_FILL, ELEMENT_INK } from "./wheel-colors";
 import styles from "./carta.module.css";
 
 // La rueda. Geometría astrológica estándar: Ascendente a la IZQUIERDA (9 en
 // punto), longitud creciente en sentido ANTIHORARIO, Medio Cielo arriba.
 // SVG con y hacia abajo → invertimos seno para que el antihorario se vea bien.
+// La geometría (radios, pointAt, annularSector, spreadBodies) vive en
+// @aluna/core para compartirla con la carta móvil (RN-safe).
 
-const CX = 180;
-const CY = 180;
-const R_SIGN_OUT = 166;
-const R_SIGN_IN = 136;
-const R_SIGN_GLYPH = 151;
-const R_HOUSE_IN = 58;
-const R_HOUSE_NUM = 66;
-const R_BODY = 114;
-const R_ASPECT = 94;
+const { CX, CY, R_SIGN_OUT, R_SIGN_IN, R_SIGN_GLYPH, R_HOUSE_IN, R_HOUSE_NUM, R_BODY, R_ASPECT } = WHEEL;
 
 // U+FE0E fuerza presentación de TEXTO (no emoji) en los símbolos astrológicos.
 const TEXT_VS = "︎";
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
-
-/** longitud eclíptica → punto en pantalla, con el Ascendente a la izquierda. */
-function pointAt(r: number, lon: number, asc: number): [number, number] {
-  const a = ((180 + (lon - asc)) * Math.PI) / 180;
-  return [CX + r * Math.cos(a), CY - r * Math.sin(a)];
-}
-
-function annularSector(rOut: number, rIn: number, lonA: number, lonB: number, asc: number): string {
-  const [x1o, y1o] = pointAt(rOut, lonA, asc);
-  const [x2o, y2o] = pointAt(rOut, lonB, asc);
-  const [x2i, y2i] = pointAt(rIn, lonB, asc);
-  const [x1i, y1i] = pointAt(rIn, lonA, asc);
-  // Antihorario en pantalla = sweep-flag 0 (arco exterior), 1 al volver (interior).
-  return `M ${x1o} ${y1o} A ${rOut} ${rOut} 0 0 0 ${x2o} ${y2o} L ${x2i} ${y2i} A ${rIn} ${rIn} 0 0 1 ${x1i} ${y1i} Z`;
-}
-
-/** Reparte cuerpos muy juntos para que sus glifos no se encimen. */
-function spread(bodies: BodyPosition[], gap: number): Map<string, number> {
-  const sorted = [...bodies].sort((a, b) => a.longitude - b.longitude);
-  const out = new Map<string, number>();
-  let last = -1000;
-  for (const b of sorted) {
-    const a = b.longitude - last < gap ? last + gap : b.longitude;
-    out.set(b.body, a);
-    last = a;
-  }
-  return out;
-}
 
 const ANGLE_MARKS: Array<{ key: string; cusp: number }> = [
   { key: "AC", cusp: 0 },
@@ -66,7 +41,7 @@ export function ChartWheel({
   onSelect: (b: BodyPosition) => void;
 }) {
   const asc = chart.houses.ascendant;
-  const disp = spread(chart.bodies, 7);
+  const disp = spreadBodies(chart.bodies, 7);
   const lonOf = (b: BodyPosition) => disp.get(b.body) ?? b.longitude;
   const houseOpacity = solar ? 0.28 : 1;
 

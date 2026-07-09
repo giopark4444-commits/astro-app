@@ -3,10 +3,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
-  type ChartResult, type BodyPosition, type Aspect,
+  type ChartResult, type BodyPosition, type Aspect, type HouseSystem, type Zodiac,
 } from "@aluna/core";
 import { Starfield } from "../../components/Starfield";
 import { Enso } from "../../components/Enso";
+import { ChartWheel } from "../../components/ChartWheel";
+import { BodyReadingReader } from "../../components/BodyReading";
+import { BottomSheet } from "../../components/BottomSheet";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
@@ -43,28 +46,32 @@ export default function CartaScreen() {
   const L = astroLabels(locale);
 
   const [kind, setKind] = useState<ChartKind>("natal");
+  const [houseSystem, setHouseSystem] = useState<HouseSystem>("placidus");
+  const [zodiac, setZodiac] = useState<Zodiac>("tropical");
   const [pro, setPro] = useState(false);
+  const [sheet, setSheet] = useState<BodyPosition | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
-  const cache = useRef<Map<ChartKind, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
+  const cache = useRef<Map<string, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
     new Map(),
   );
 
   const profileId = profile?.id ?? null;
   const accessToken = session?.access_token ?? null;
+  const cacheKey = `${kind}:${houseSystem}:${zodiac}`;
 
   useEffect(() => {
     if (!profileId || !accessToken) return;
-    const hit = cache.current.get(kind);
+    const hit = cache.current.get(cacheKey);
     if (hit) {
       setState({ s: "ready", ...hit });
       return;
     }
     let alive = true;
     setState({ s: "loading" });
-    fetchChart({ accessToken, profileId, kind })
+    fetchChart({ accessToken, profileId, kind, houseSystem, zodiac })
       .then((res) => {
         if (!alive) return;
-        cache.current.set(kind, res);
+        cache.current.set(cacheKey, res);
         setState({ s: "ready", ...res });
       })
       .catch(() => {
@@ -73,7 +80,7 @@ export default function CartaScreen() {
     return () => {
       alive = false;
     };
-  }, [profileId, accessToken, kind]);
+  }, [profileId, accessToken, kind, houseSystem, zodiac]);
 
   const ready = state.s === "ready" ? state : null;
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
@@ -123,12 +130,42 @@ export default function CartaScreen() {
         </View>
         <Text style={styles.kindHint}>{t(`carta.kind${KIND_KEY[kind]}Hint`)}</Text>
 
+        {/* Sistema de casas */}
+        <View style={styles.kindRow}>
+          {(["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"] as HouseSystem[]).map((h) => {
+            const on = houseSystem === h;
+            return (
+              <Pressable key={h} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setHouseSystem(h)}>
+                <Text style={[styles.kindText, on && styles.kindTextOn]}>{L.houses[h]}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* Zodiaco */}
+        <View style={styles.kindRow}>
+          {(["tropical", "sidereal"] as Zodiac[]).map((z) => {
+            const on = zodiac === z;
+            return (
+              <Pressable key={z} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setZodiac(z)}>
+                <Text style={[styles.kindText, on && styles.kindTextOn]}>
+                  {t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         {state.s === "loading" && <Text style={styles.note}>{t("carta.loadingChart")}</Text>}
         {state.s === "error" && <Text style={styles.note}>{t("carta.errorChart")}</Text>}
 
         {ready && ascPos && (
           <>
             {ready.solar && <Text style={styles.solar}>☉ {t("carta.solarNotice")}</Text>}
+
+            {/* Rueda interactiva */}
+            <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} />
+            <Text style={styles.kindHint}>{t("carta.tapHint")}</Text>
 
             {/* Núcleo: Sol / Luna / Ascendente */}
             <View style={styles.core}>
@@ -245,6 +282,14 @@ export default function CartaScreen() {
           </>
         )}
       </ScrollView>
+
+      <BottomSheet
+        open={!!sheet}
+        onClose={() => setSheet(null)}
+        title={sheet ? (L.bodies[sheet.body] ?? sheet.body) : ""}
+      >
+        {sheet && <BodyReadingReader body={sheet} profileName={profile.name} />}
+      </BottomSheet>
     </View>
   );
 }

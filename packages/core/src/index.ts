@@ -33,6 +33,7 @@ export type {
   SynastryTone,
   SynastryDriver,
 } from "./astrology/synastry";
+export { WHEEL, pointAt, annularSector, spreadBodies } from "./astrology/wheel-geometry";
 
 // Cuatro Pilares (八字 Ba Zi / 사주 Saju) — sistema sexagenario, RN-safe
 export {
