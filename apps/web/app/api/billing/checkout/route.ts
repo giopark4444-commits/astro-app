@@ -1,0 +1,36 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getDodoClient, dodoProductId } from "@/lib/billing/dodo-client";
+
+// Crea la sesión de checkout de Aluna Plus. SOLO la web la llama (el móvil
+// nunca vende dentro de la app). El email sale de la sesión autenticada,
+// nunca del body — evita que alguien inicie un checkout a nombre de otro.
+export async function POST(request: NextRequest) {
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  }
+  const body = (raw ?? {}) as Record<string, unknown>;
+  const plan = body.plan === "monthly" || body.plan === "yearly" ? body.plan : null;
+  if (!plan) return NextResponse.json({ error: "bad_request" }, { status: 400 });
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  try {
+    const session = await getDodoClient().checkoutSessions.create({
+      product_cart: [{ product_id: dodoProductId(plan), quantity: 1 }],
+      customer: { email: user.email },
+      subscription_data: { trial_period_days: 14 },
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes?checkout=success`,
+    });
+    return NextResponse.json({ checkoutUrl: session.checkout_url });
+  } catch {
+    return NextResponse.json({ error: "checkout_failed" }, { status: 500 });
+  }
+}
