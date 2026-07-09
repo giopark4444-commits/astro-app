@@ -68,3 +68,4 @@ export {
   luckDirection, luckPillars, annualPillars,
   type LuckDirection, type LuckPillarItem, type LuckSequence, type LuckInput, type AnnualPillarItem,
 } from "./bazi/luck";
+export { STEM_LABELS, BRANCH_LABELS, TEN_GOD_KO, type ScriptLabel } from "./bazi/labels";
