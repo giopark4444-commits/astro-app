@@ -12,6 +12,7 @@ import { I18nProvider } from "../lib/i18n-context";
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { getSupabase } from "../lib/supabase";
 import { fetchRemoteProfile } from "../lib/profile-sync";
+import { ThemedBackground } from "../components/ThemedBackground";
 
 // Retiene el splash hasta que las fuentes de marca estén listas (evita FOUT).
 // OJO: en Expo Go el splash real no se ve (muestra el ícono) — la verificación
@@ -75,6 +76,10 @@ function RootGate() {
 
   return (
     <View style={[styles.root, { backgroundColor: t.bg }]}>
+      {/* Capa fija de fondo (gradiente radial + starfield) detrás de todo el
+          contenido navegable. Las pantallas todavía pintan su propio bg encima
+          (Tasks 5-9 las harán transparentes), así que hoy no cambia nada visible. */}
+      <ThemedBackground />
       <StatusBar style={t.isLight ? "dark" : "light"} />
       <Slot />
     </View>
