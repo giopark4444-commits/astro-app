@@ -55,3 +55,7 @@ export {
   detectInteractions, branchPairInteractions, TRINES,
   type Interaction, type InteractionType, type PillarPos, type PillarSet,
 } from "./bazi/interactions";
+export {
+  symbolicStars, voidBranches, STARS,
+  type StarKey, type StarDef, type StarHit,
+} from "./bazi/stars";
