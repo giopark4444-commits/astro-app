@@ -70,3 +70,6 @@ export {
   type LuckDirection, type LuckPillarItem, type LuckSequence, type LuckInput, type AnnualPillarItem,
 } from "./bazi/luck";
 export { STEM_LABELS, BRANCH_LABELS, TEN_GOD_KO, type ScriptLabel } from "./bazi/labels";
+
+// Facturación (Aluna Plus / Dodo Payments) — puro, compartido web+móvil
+export { isPlusActive, type SubscriptionStatus, type SubscriptionRow } from "./billing/subscription";
