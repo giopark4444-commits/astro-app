@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
       subscription_data: { trial_period_days: 14 },
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes?checkout=success`,
     });
+    if (!session.checkout_url) {
+      return NextResponse.json({ error: "checkout_failed" }, { status: 500 });
+    }
     return NextResponse.json({ checkoutUrl: session.checkout_url });
   } catch {
     return NextResponse.json({ error: "checkout_failed" }, { status: 500 });
