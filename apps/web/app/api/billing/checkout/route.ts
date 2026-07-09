@@ -26,11 +26,15 @@ export async function POST(request: NextRequest) {
   // (trialing/active/past_due) podría abrir otra sesión de checkout y Dodo le
   // daría OTRA prueba gratis de 14 días. RLS ya limita el select a la fila
   // propia del usuario.
-  const { data: existingSubscription } = await supabase
+  const { data: existingSubscription, error: existingSubscriptionError } = await supabase
     .from("subscriptions")
     .select("status")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (existingSubscriptionError) {
+    console.error("[billing checkout] lectura de subscriptions falló:", existingSubscriptionError.message);
+    return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // fail closed: no dejar pasar el guard anti-doble-suscripción por un hiccup de DB
+  }
   // Cast necesario: mismo bug de inferencia de @supabase/ssr que colapsa el
   // tipo de fila a `never` (workaround ya usado en ajustes/page.tsx y
   // billing/portal/route.ts).
