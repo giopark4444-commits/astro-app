@@ -64,3 +64,7 @@ export {
   STRENGTH_THRESHOLDS, STRENGTH_WEIGHTS,
   type DayMasterStrength, type StrengthDriver, type StrengthVerdict, type SeasonState,
 } from "./bazi/strength";
+export {
+  luckDirection, luckPillars, annualPillars,
+  type LuckDirection, type LuckPillarItem, type LuckSequence, type LuckInput, type AnnualPillarItem,
+} from "./bazi/luck";
