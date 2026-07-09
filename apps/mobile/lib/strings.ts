@@ -230,6 +230,15 @@ export const STRINGS = {
       masculine: "Masculino",
       neutral: "Neutro",
     },
+    billing: {
+      title: "Tu plan",
+      freeBody: "Numerología y Carta completas, gratis para siempre.",
+      upsell: "Hazte Plus en aluna.app",
+      planTrialing: "En prueba gratis",
+      planActive: "Aluna Plus",
+      planPastDue: "Pago pendiente",
+      manageNote: "Gestiona tu suscripción en aluna.app",
+    },
   },
 
   en: {
@@ -456,6 +465,15 @@ export const STRINGS = {
       feminine: "Feminine",
       masculine: "Masculine",
       neutral: "Neutral",
+    },
+    billing: {
+      title: "Your plan",
+      freeBody: "Full Numerology and Birth Chart, free forever.",
+      upsell: "Go Plus at aluna.app",
+      planTrialing: "Free trial",
+      planActive: "Aluna Plus",
+      planPastDue: "Payment overdue",
+      manageNote: "Manage your subscription at aluna.app",
     },
   },
 };
