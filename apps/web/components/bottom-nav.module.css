@@ -1,6 +1,7 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
 .nav { position: sticky; bottom: 0; display: flex; justify-content: space-around;
-  padding: 10px 8px 16px; border-top: 1px solid var(--line); background: var(--bg); }
-.item { display: flex; flex-direction: column; align-items: center; gap: 5px;
-  font-size: 9px; color: var(--soft); font-weight: 600; }
+  padding: var(--sp-3) var(--sp-2) var(--sp-4); /* 10→12 */ border-top: 1px solid var(--line); background: var(--bg); }
+.item { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); /* 5→4 */
+  font-size: var(--text-2xs); /* 9→11 piso (labels del nav) */ color: var(--soft); font-weight: 600; }
 .on { color: var(--acc); }
 .soon { opacity: 0.4; }

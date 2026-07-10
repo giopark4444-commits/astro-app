@@ -1,3 +1,4 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -17,7 +18,7 @@
   border-top-left-radius: 26px;
   border-top-right-radius: 26px;
   box-shadow: var(--elev);
-  padding: 12px 18px max(22px, env(safe-area-inset-bottom));
+  padding: var(--sp-3) var(--sp-5) max(20px, env(safe-area-inset-bottom)); /* 18/22 → sp-5 (contenedor) */
   max-height: 86dvh;
   overflow-y: auto;
   animation: aluna-sheet-up var(--dur) var(--ease) both;
@@ -27,22 +28,22 @@
   height: 4px;
   border-radius: 4px;
   background: var(--line);
-  margin: 4px auto 14px;
+  margin: var(--sp-1) auto var(--sp-4);
 }
 .title {
-  font-size: 19px;
+  font-size: var(--text-xl); /* 19→20 */
   color: var(--acc);
-  margin: 0 0 14px;
+  margin: 0 0 var(--sp-4);
 }
 
 /* Variante centrada (modal) — para reveals enfocados como el detalle de un número. */
-.centered { align-items: center; padding: 24px; }
+.centered { align-items: center; padding: var(--sp-6); } /* 24→28: respiro modal → mayor */
 .modal {
   width: 100%;
   max-width: 360px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  padding: 20px 20px 22px;
+  padding: var(--sp-5) var(--sp-5) var(--sp-5); /* 20/22 → sp-5 */
   max-height: 82dvh;
   animation: aluna-rise-in var(--dur) var(--ease) both;
 }
