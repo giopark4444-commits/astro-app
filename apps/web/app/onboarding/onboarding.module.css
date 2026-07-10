@@ -1,3 +1,4 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
 .shell {
   min-height: 100dvh;
   display: flex;
@@ -41,31 +42,31 @@
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  padding: 0 26px;
+  padding: 0 var(--sp-6); /* 26→28 */
   display: flex;
   flex-direction: column;
 }
 .eyebrow {
-  font-size: 11px;
+  font-size: var(--text-2xs);
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--acc);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-3); /* 10→12 */
 }
 .question {
   font-size: clamp(26px, 7vw, 33px);
   line-height: 1.12;
   color: var(--ink);
-  margin: 0 0 26px;
+  margin: 0 0 var(--sp-6); /* 26→28 */
 }
-.field { display: flex; flex-direction: column; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: var(--sp-3); }
 
 /* --- Inputs --- */
 .input {
   width: 100%;
-  padding: 15px 16px;
-  font-size: 16px;
+  padding: var(--sp-4) var(--sp-4); /* 15→16 */
+  font-size: var(--text-md); /* 16: empate 15/17 → input cómodo pero apoyo → menor (paridad auth) */
   font-family: var(--font-ui);
   color: var(--ink);
   background: var(--surface);
@@ -84,20 +85,20 @@
 .check {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  font-size: 13px;
+  gap: var(--sp-2); /* 9→8 */
+  font-size: var(--text-sm);
   color: var(--soft);
   cursor: pointer;
   user-select: none;
 }
 .check input { width: 16px; height: 16px; accent-color: var(--acc); }
-.hint { font-size: 12px; line-height: 1.5; color: var(--soft); margin: 4px 2px 0; }
+.hint { font-size: var(--text-xs); line-height: 1.5; color: var(--soft); margin: var(--sp-1) 2px 0; }
 
 /* --- Género --- */
-.genders { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+.genders { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); } /* 9→8 */
 .gender {
-  padding: 14px 6px;
-  font-size: 13px;
+  padding: var(--sp-4) 6px; /* 14: botón de opción → mayor; 6 micro: excepción */
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--ink);
   background: var(--surface);
@@ -118,8 +119,8 @@
 .autocomplete { position: relative; }
 .options {
   list-style: none;
-  margin: 8px 0 0;
-  padding: 6px;
+  margin: var(--sp-2) 0 0;
+  padding: 6px; /* micro-padding del dropdown: excepción */
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -133,26 +134,26 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 10px 12px;
+  padding: var(--sp-3) var(--sp-3); /* 10→12 */
   border-radius: 11px;
   cursor: pointer;
   transition: background var(--dur-fast) var(--ease);
 }
 .option:hover, .option:focus { background: var(--surface-2); outline: none; }
-.optName { font-size: 14px; color: var(--ink); }
-.optMeta { font-size: 11px; color: var(--soft); }
+.optName { font-size: var(--text-md); color: var(--ink); } /* 14: lectura → md */
+.optMeta { font-size: var(--text-2xs); color: var(--soft); }
 
 /* --- Pie: dots + acciones --- */
 .foot {
   max-width: 420px;
   width: 100%;
   margin: 0 auto;
-  padding: 18px 26px max(26px, env(safe-area-inset-bottom));
+  padding: var(--sp-5) var(--sp-6) max(28px, env(safe-area-inset-bottom)); /* 18→sp-5; 26→28 */
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--sp-5); /* 18 separación → sp-5 */
 }
-.dots { display: flex; gap: 7px; justify-content: center; }
+.dots { display: flex; gap: var(--sp-2); justify-content: center; } /* 7→8 */
 .dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--line);
@@ -164,10 +165,10 @@
   background: var(--acc);
   box-shadow: var(--glow-soft);
 }
-.actions { display: flex; gap: 10px; align-items: center; }
+.actions { display: flex; gap: var(--sp-3); align-items: center; } /* 10→12 */
 .back {
-  padding: 14px 18px;
-  font-size: 14px;
+  padding: var(--sp-4) var(--sp-5); /* 14→16; 18→20 */
+  font-size: var(--text-md); /* 14: botón → md */
   color: var(--soft);
   background: transparent;
   border: 1px solid var(--line);
@@ -178,10 +179,10 @@
 .back:hover { color: var(--ink); }
 .cta {
   flex: 1;
-  padding: 15px 18px;
-  font-size: 15px;
+  padding: var(--sp-4) var(--sp-5); /* 15→16; 18→20 */
+  font-size: var(--text-md);
   font-weight: 700;
-  color: #1a1305;
+  color: var(--ink-on-acc);
   background: linear-gradient(180deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.82));
   border: none;
   border-radius: var(--radius);
