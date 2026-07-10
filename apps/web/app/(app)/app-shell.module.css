@@ -1,3 +1,4 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
 .shell {
   display: flex;
   flex-direction: column;
@@ -10,14 +11,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 18px;
+  padding: var(--sp-3) var(--sp-5); /* 18→20 (header lateral) */
   background: color-mix(in oklab, var(--bg) 82%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
 .brand {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: var(--text-xl);
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--ink);

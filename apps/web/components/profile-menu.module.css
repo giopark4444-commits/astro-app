@@ -1,3 +1,4 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
 .avatar {
   width: 36px;
   height: 36px;
@@ -6,7 +7,7 @@
   background: var(--surface-2);
   color: var(--acc);
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: var(--text-lg);
   font-weight: 600;
   cursor: pointer;
   display: grid;
@@ -15,13 +16,13 @@
 }
 .avatar:hover { transform: translateY(-1px); box-shadow: var(--glow-soft); }
 
-.list { display: flex; flex-direction: column; gap: 6px; }
+.list { display: flex; flex-direction: column; gap: var(--sp-2); } /* 6px→sp-2: paso más cercano */
 .row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--sp-3);
   width: 100%;
-  padding: 11px 12px;
+  padding: var(--sp-3) var(--sp-3); /* 11→12 */
   border: 1px solid transparent;
   border-radius: var(--radius);
   background: var(--surface);
@@ -38,19 +39,19 @@
   background: var(--surface-2);
   color: var(--acc);
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: var(--text-md); /* 14: inicial legible → md */
   flex-shrink: 0;
 }
-.rowName { flex: 1; font-size: 14px; }
+.rowName { flex: 1; font-size: var(--text-md); } /* 14: lectura → md */
 .rowCheck { color: var(--acc); display: inline-flex; }
 
-.actions { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.actions { display: flex; flex-direction: column; gap: var(--sp-1); /* 2px→sp-1: piso de la escala */ margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--line); }
 .action {
   display: block;
-  padding: 11px 12px;
+  padding: var(--sp-3) var(--sp-3); /* 11→12 */
   border-radius: var(--radius);
   color: var(--soft);
-  font-size: 14px;
+  font-size: var(--text-md); /* 14: lectura → md */
   text-decoration: none;
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }

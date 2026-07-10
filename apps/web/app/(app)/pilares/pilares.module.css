@@ -1,61 +1,62 @@
-.wrap { position: relative; padding: 24px 20px 96px; }
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
+.wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 24→sp-6 empate (jerarquía principal, chrome de página); 96px = alto del bottom-nav fijo, excepción fuera de escala */
 .sky { position: absolute; inset: 0 0 auto; height: 240px; pointer-events: none; z-index: 0; }
 
-.head { position: relative; z-index: 1; margin-bottom: 24px; }
-.eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 5px; }
-.title { font-family: var(--font-display); font-size: clamp(28px, 8vw, 38px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+.head { position: relative; z-index: 1; margin-bottom: var(--sp-6); } /* 24→sp-6 empate (cierre del bloque de título, jerarquía principal) */
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 var(--sp-1); }
+.title { font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm)); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; } /* doble empate: 28→3xl y 38→display-sm; H1 de página en fuente display → jerarquía principal, ambos al mayor */
 
-.note { position: relative; z-index: 1; color: var(--soft); font-size: 13.5px; line-height: 1.5; margin: 4px 0 18px; }
+.note { position: relative; z-index: 1; color: var(--soft); font-size: var(--text-sm); line-height: 1.5; margin: var(--sp-1) 0 var(--sp-4); } /* 18→sp-4 empate (texto de apoyo) */
 
 /* Rejilla de los 4 pilares */
 .grid {
   position: relative; z-index: 1;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-2); /* 10→sp-2 empate, vara: mockup movil-pilares-despues .pillars-grid gap */
 }
 .col {
-  display: flex; flex-direction: column; align-items: center; gap: 7px;
-  padding: 14px 6px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-1) var(--sp-4); /* 14→sp-4 empate (tile de contenido principal, no es .card-glass); 6→sp-1 empate (respiro horizontal, apoyo) */
   border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
   position: relative;
 }
 .dayCol { border-color: rgba(var(--acc-rgb), 0.5); box-shadow: var(--glow-soft); }
 .colLabel {
-  font-family: var(--font-ui); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase;
   color: var(--soft); font-weight: 700;
 }
-.char { font-size: 30px; line-height: 1.1; font-weight: 600; }
+.char { font-size: var(--text-3xl); line-height: 1.1; font-weight: 600; }
 .roman {
-  font-family: var(--font-ui); font-size: 11px; line-height: 1.1;
-  color: var(--soft); opacity: 0.85; margin-top: -3px;
+  font-family: var(--font-ui); font-size: var(--text-2xs); line-height: 1.1;
+  color: var(--soft); opacity: 0.85; margin-top: -3px; /* excepción: ajuste fino negativo de línea base, sin token negativo en la escala */
 }
-.animal { font-size: 11px; color: var(--soft); margin-top: 2px; }
-.empty { font-size: 26px; color: var(--soft); opacity: 0.5; }
+.animal { font-size: var(--text-2xs); color: var(--soft); margin-top: var(--sp-1); }
+.empty { font-size: var(--text-2xl); color: var(--soft); opacity: 0.5; }
 .dayTag {
-  margin-top: 4px; font-size: 8.5px; letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--acc); border: 1px solid rgba(var(--acc-rgb), 0.4); border-radius: 6px; padding: 2px 5px;
+  margin-top: var(--sp-1); font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--acc); border: 1px solid rgba(var(--acc-rgb), 0.4); border-radius: 6px; padding: var(--sp-1) var(--sp-1);
   text-align: center;
 }
 
 .section {
-  position: relative; z-index: 1; margin: 26px 0 12px;
-  font-family: var(--font-ui); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  position: relative; z-index: 1; margin: var(--sp-6) 0 var(--sp-3);
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--soft); font-weight: 700;
 }
 
 /* Balance de elementos */
-.balance { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 9px; }
-.elRow { display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: 10px; }
-.elName { font-size: 13px; color: var(--ink); }
+.balance { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); }
+.elRow { display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: var(--sp-3); } /* 10→sp-3 empate, vara: mockup .bal-row gap */
+.elName { font-size: var(--text-sm); color: var(--ink); }
 .elTrack { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .elBar { display: block; height: 100%; border-radius: 999px; transition: width var(--dur) var(--ease-spring); }
-.elCount { font-size: 12px; color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
+.elCount { font-size: var(--text-xs); color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ---- Modo Pro: interruptor (consistente con la carta) ---- */
 .proToggle {
   position: relative; z-index: 1;
-  display: inline-flex; align-items: center; gap: 9px; margin: 18px 0 0; padding: 9px 15px;
+  display: inline-flex; align-items: center; gap: var(--sp-2); margin: var(--sp-4) 0 0; padding: var(--sp-2) var(--sp-4); /* 18→sp-4 empate (control secundario, apoyo) */
   font-family: var(--font-ui);
-  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
+  font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
   color: var(--acc); background: transparent; border: 1px solid var(--line); border-radius: 20px; cursor: pointer;
 }
 .proDot { width: 26px; height: 15px; border-radius: 8px; background: var(--line); position: relative; transition: background var(--dur) var(--ease); }
@@ -63,41 +64,47 @@
 .proDot[data-on] { background: rgba(var(--acc-rgb), 0.4); }
 .proDot[data-on]::after { transform: translateX(11px); background: var(--acc); }
 .proHint {
-  position: relative; z-index: 1; margin: 9px 0 0; font-size: 12px; font-style: italic;
+  position: relative; z-index: 1; margin: var(--sp-2) 0 0; font-size: var(--text-xs); font-style: italic;
   color: var(--soft); line-height: 1.45;
 }
 
 /* ---- Modo Pro: Diez Dioses por pilar ---- */
 /* El Dios del tronco, sobre el carácter. El del Maestro del Día es su propio anclaje. */
 .god {
-  font-family: var(--font-ui); font-size: 8.5px; line-height: 1.25; font-weight: 700;
+  font-family: var(--font-ui); font-size: var(--text-2xs); line-height: 1.25; font-weight: 700;
   letter-spacing: 0.3px; text-align: center; text-transform: uppercase;
   color: var(--acc);
   border: 1px solid rgba(var(--acc-rgb), 0.3); border-radius: 6px;
-  padding: 2px 4px; min-height: 24px; display: flex; align-items: center; justify-content: center;
+  padding: var(--sp-1) var(--sp-1); min-height: 24px; display: flex; align-items: center; justify-content: center;
 }
-.godSelf { border-color: transparent; background: rgba(var(--acc-rgb), 0.12); font-size: 11px; }
+.godSelf { border-color: transparent; background: rgba(var(--acc-rgb), 0.12); font-size: var(--text-2xs); }
 
 /* ---- Modo Pro: troncos ocultos (藏干) por rama ---- */
+/* Piso de escala: .god (8.5px), .hiddenLabel (7.5px) y .hiddenGod (8px) colapsan los tres a
+   --text-2xs (11px) — antes era una micro-jerarquía de 3 pasos en este bloque denso. Vigilar
+   en el pase visual Pro (candidato del propio plan a excepción si se ve desproporcionado). */
 .hidden {
-  width: 100%; margin-top: 4px; padding-top: 8px;
+  width: 100%; margin-top: var(--sp-1); padding-top: var(--sp-2);
   border-top: 1px solid var(--line);
-  display: flex; flex-direction: column; gap: 5px;
+  display: flex; flex-direction: column; gap: var(--sp-1);
 }
 .hiddenLabel {
-  font-family: var(--font-ui); font-size: 7.5px; letter-spacing: 0.8px; text-transform: uppercase;
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 0.8px; text-transform: uppercase;
   color: var(--soft); font-weight: 700; text-align: center; opacity: 0.85;
 }
 .hiddenRow {
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); /* 1px→sp-1, piso de la escala de espaciado */
 }
-.hiddenChar { font-size: 15px; line-height: 1.1; font-weight: 600; }
+.hiddenChar { font-size: var(--text-md); line-height: 1.1; font-weight: 600; }
 .hiddenGod {
-  font-family: var(--font-ui); font-size: 8px; line-height: 1.2; letter-spacing: 0.2px;
+  font-family: var(--font-ui); font-size: var(--text-2xs); line-height: 1.2; letter-spacing: 0.2px;
   color: var(--soft); text-align: center;
 }
 
-/* Colores de los cinco elementos (Wu Xing) */
+/* Colores de los cinco elementos (Wu Xing) — DOMINIO, intocable.
+   el_fire/elBg_fire (#e0795a) y el_water/elBg_water (#7aaae0) coinciden en valor con los nuevos
+   --tone-warm/--tone-cool, pero son ejes semánticos distintos (elemento Wu Xing vs. tono de
+   tránsito) — NO se reemplazan por los tokens semánticos. */
 .el_wood { color: #7fb069; }
 .el_fire { color: #e0795a; }
 .el_earth { color: #d4a85f; }
@@ -110,58 +117,58 @@
 .elBg_water { background: #7aaae0; }
 
 /* ---- Modo Pro: conmutador de escritura (漢字 ↔ 한글) ---- */
-.scriptRow { position: relative; z-index: 1; display: flex; gap: 8px; margin-top: 10px; }
+.scriptRow { position: relative; z-index: 1; display: flex; gap: var(--sp-2); margin-top: var(--sp-2); } /* 10→sp-2 empate (fila de control secundaria, apoyo) */
 .scriptBtn {
   font-family: var(--font-ui); border: 1px solid var(--line); border-radius: 999px;
-  background: none; color: var(--soft); padding: 5px 16px; font-size: 13px; cursor: pointer;
+  background: none; color: var(--soft); padding: var(--sp-1) var(--sp-4); font-size: var(--text-sm); cursor: pointer;
 }
 .scriptOn { border-color: var(--acc); color: var(--acc); }
 
 /* ── Lámina Pro: las 8 secciones ── */
-.lamina { position: relative; z-index: 1; display: grid; gap: 16px; width: 100%; max-width: 720px; margin-top: 24px; }
-.card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 20px; }
+.lamina { position: relative; z-index: 1; display: grid; gap: var(--sp-4); width: 100%; max-width: 720px; margin-top: var(--sp-6); } /* 24→sp-6 empate (entrada a la lámina Pro, jerarquía principal) */
+.card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: var(--sp-5); }
 .cardH {
-  font-family: var(--font-ui); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--acc); margin: 0 0 12px;
+  font-family: var(--font-ui); font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase;
+  color: var(--acc); margin: 0 0 var(--sp-3);
 }
-.row { display: flex; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.row { display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); } /* 6→sp-1 empate (fila de datos, apoyo) */
 .row:last-child { border-bottom: none; }
-.rowLabel { min-width: 64px; color: var(--soft); font-size: 13px; }
-.rowGlyph { font-size: 18px; }
-.rowValue { flex: 1; font-size: 14px; color: var(--ink); }
-.subRow { color: var(--soft); font-size: 13px; margin: 10px 0 6px; }
-.method { color: var(--soft); font-size: 12px; font-style: italic; margin-top: 10px; }
+.rowLabel { min-width: 64px; color: var(--soft); font-size: var(--text-sm); }
+.rowGlyph { font-size: var(--text-lg); }
+.rowValue { flex: 1; font-size: var(--text-md); color: var(--ink); } /* 14→text-md empate (valor por encima de la etiqueta en jerarquía) */
+.subRow { color: var(--soft); font-size: var(--text-sm); margin: var(--sp-2) 0 var(--sp-1); } /* 10→sp-2 y 6→sp-1 empates (texto de apoyo) */
+.method { color: var(--soft); font-size: var(--text-xs); font-style: italic; margin-top: var(--sp-2); } /* 10→sp-2 empate (nota al pie, apoyo) */
 
-.meterRow { display: flex; align-items: center; gap: 12px; }
-.verdict { font-size: 18px; font-family: var(--font-display); font-style: italic; color: var(--ink); }
+.meterRow { display: flex; align-items: center; gap: var(--sp-3); }
+.verdict { font-size: var(--text-lg); font-family: var(--font-display); font-style: italic; color: var(--ink); }
 .meterTrack { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .meterFill { display: block; height: 100%; background: var(--acc); border-radius: 3px; }
-.meterScore { font-size: 13px; color: var(--soft); min-width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
+.meterScore { font-size: var(--text-sm); color: var(--soft); min-width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
 
-.drivers { display: grid; gap: 4px; margin-top: 10px; }
-.driver { display: flex; justify-content: space-between; font-size: 13px; color: var(--soft); }
+.drivers { display: grid; gap: var(--sp-1); margin-top: var(--sp-2); } /* 10→sp-2 empate (lista de apoyo) */
+.driver { display: flex; justify-content: space-between; font-size: var(--text-sm); color: var(--soft); }
 .driverPts { color: var(--acc); }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.chip { border: 1px solid var(--line); border-radius: 999px; padding: var(--sp-1) var(--sp-3); font-size: var(--text-sm); color: var(--ink); }
 .chipDim { opacity: 0.6; }
-.mark { color: var(--acc); font-size: 12px; font-style: normal; }
+.mark { color: var(--acc); font-size: var(--text-xs); font-style: normal; }
 
 /* 大運/流年 */
-.luckBlock { margin-top: 8px; }
-.luckScroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+.luckBlock { margin-top: var(--sp-2); }
+.luckScroll { display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: var(--sp-2); }
 .luckCol {
   min-width: 108px; border: 1px solid var(--line); border-radius: 14px; background: none;
-  color: inherit; padding: 10px 8px; display: grid; gap: 4px; justify-items: center; cursor: pointer;
+  color: inherit; padding: var(--sp-3) var(--sp-2); display: grid; gap: var(--sp-1); justify-items: center; cursor: pointer; /* 10→sp-3 empate (tile de contenido, análogo a .col → principal) */
   transition: border-color var(--dur-fast) var(--ease);
 }
 .luckNow { border-color: var(--acc); }
 .luckOpen { background: var(--surface-2); }
-.luckAge { font-size: 11px; color: var(--soft); }
-.luckGlyph { font-size: 20px; color: var(--ink); }
-.luckGod { font-size: 11px; color: var(--ink); }
-.luckNayin { font-size: 10px; color: var(--soft); }
+.luckAge { font-size: var(--text-2xs); color: var(--soft); }
+.luckGlyph { font-size: var(--text-xl); color: var(--ink); }
+.luckGod { font-size: var(--text-2xs); color: var(--ink); }
+.luckNayin { font-size: var(--text-2xs); color: var(--soft); }
 .luckTag {
-  font-family: var(--font-ui); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--acc);
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc);
 }
-.annual { margin-top: 10px; }
+.annual { margin-top: var(--sp-2); } /* 10→sp-2 empate (apoyo) */
