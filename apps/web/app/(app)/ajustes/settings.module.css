@@ -2,7 +2,7 @@
 .page { padding: var(--sp-5) var(--sp-5) 96px; } /* 22→20 (contenedor, diff 2); 96px clearance nav (excepción) */
 .title { font-size: var(--text-3xl); margin: 0 0 var(--sp-5); color: var(--ink); } /* 30→32; 22→20 */
 .wrap { display: grid; gap: var(--sp-6); } /* 24→28: separación de secciones → mayor */
-.section { display: grid; gap: var(--sp-3); } /* 10→12 */
+.section { display: grid; gap: var(--sp-3); } /* 10: empate 8/12 → separación → mayor */
 .label { margin: 0; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .section p { margin: 0; font-size: var(--text-md); color: var(--soft); } /* 14: lectura → md */
 
@@ -16,7 +16,7 @@
 }
 .segItem {
   flex: 1; text-align: center;
-  padding: var(--sp-3) 6px; /* 11→12; 6 micro: excepción */
+  padding: var(--sp-3) var(--sp-2); /* 11→12; 6px→sp-2: paso más cercano */
   font-size: var(--text-sm); font-weight: 600;
   color: var(--soft);
   background: transparent; border: none; border-radius: 9px;

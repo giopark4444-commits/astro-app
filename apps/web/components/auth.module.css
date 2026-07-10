@@ -17,7 +17,7 @@
   filter: drop-shadow(0 0 16px rgba(var(--acc-rgb), 0.5));
   animation: aluna-float 7s var(--ease-soft) infinite;
 }
-.brand { font-size: var(--display-sm); margin: var(--sp-3) 0 2px; color: var(--ink); letter-spacing: 0.5px; } /* 38→44: la marca ES el héroe de la portada (empate 32/44 diff 6/6 → mayor, flagship login) */
+.brand { font-size: var(--display-sm); margin: var(--sp-3) 0 var(--sp-1); color: var(--ink); letter-spacing: 0.5px; } /* 38→44: la marca ES el héroe de la portada (empate 32/44 diff 6/6 → mayor, flagship login); 10: empate 8/12 → separación → mayor; 2px→sp-1: piso de la escala */
 .brand::first-letter { color: var(--acc); }
 .tag { font-size: var(--text-sm); color: var(--soft); margin: 0; }
 

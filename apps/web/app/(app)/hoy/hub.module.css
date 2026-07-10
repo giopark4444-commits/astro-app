@@ -26,7 +26,7 @@ a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 
   position: absolute; top: var(--sp-3); right: var(--sp-3); /* 13→12: paso más cercano */
   font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; /* 8.5→11: piso de la escala */
   color: var(--soft); background: var(--surface-2);
-  border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; /* micro-padding de badge: excepción (sub-sp-1 deliberado) */
+  border: 1px solid var(--line); border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
 }
 
 /* Tu clima de hoy (tránsitos al abrir) */
@@ -38,10 +38,10 @@ a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 
 }
 .weatherCard:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
 .weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.weatherList { display: flex; flex-direction: column; gap: 7px; } /* 7: micro-gap entre filas (sub-sp-2, ritmo compacto deliberado — excepción documentada) */
+.weatherList { display: flex; flex-direction: column; gap: var(--sp-2); } /* 7→sp-2 (8): paso más cercano */
 .weatherRow { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */
 .weatherGlyphs { font-size: var(--text-md); color: var(--ink); flex-shrink: 0; }
 .weatherAsp { color: var(--acc); }
-.weatherText { color: var(--soft); font-size: var(--text-sm); line-height: 1.4; } /* 12.5→13 */
+.weatherText { color: var(--soft); font-size: var(--text-xs); line-height: 1.4; } /* 12.5: empate 12/13 → apoyo → menor */
 .harm_hard .weatherAsp { color: var(--tone-warm); }
 .harm_soft .weatherAsp { color: var(--tone-cool); }

@@ -18,7 +18,7 @@
   border-top-left-radius: 26px;
   border-top-right-radius: 26px;
   box-shadow: var(--elev);
-  padding: var(--sp-3) var(--sp-5) max(20px, env(safe-area-inset-bottom)); /* 18/22 → sp-5 (contenedor) */
+  padding: var(--sp-3) var(--sp-5) max(var(--sp-5), env(safe-area-inset-bottom)); /* 18/22 → sp-5 (contenedor) */
   max-height: 86dvh;
   overflow-y: auto;
   animation: aluna-sheet-up var(--dur) var(--ease) both;

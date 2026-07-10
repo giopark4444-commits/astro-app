@@ -41,7 +41,7 @@
 .master {
   border-radius: 999px;
   box-shadow: 0 0 0 1px rgba(var(--acc-rgb), 0.4) inset;
-  padding: 6px 0;
+  padding: var(--sp-2) 0; /* 6px→sp-2: paso más cercano */
 }
 
 .body {
@@ -68,7 +68,7 @@
   display: flex;
   align-items: baseline;
   gap: var(--sp-2);
-  margin-top: 2px; /* micro-ajuste: excepción */
+  margin-top: var(--sp-1); /* 2px→sp-1: piso de la escala */
 }
 .chip {
   font-family: var(--font-ui);

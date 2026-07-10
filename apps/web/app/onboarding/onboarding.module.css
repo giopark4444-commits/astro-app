@@ -97,7 +97,7 @@
 /* --- Género --- */
 .genders { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); } /* 9→8 */
 .gender {
-  padding: var(--sp-4) 6px; /* 14: botón de opción → mayor; 6 micro: excepción */
+  padding: var(--sp-4) var(--sp-2); /* 14: botón de opción → mayor; 6px→sp-2: paso más cercano */
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--ink);
@@ -120,7 +120,7 @@
 .options {
   list-style: none;
   margin: var(--sp-2) 0 0;
-  padding: 6px; /* micro-padding del dropdown: excepción */
+  padding: var(--sp-2); /* 6px→sp-2: paso más cercano */
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -133,7 +133,7 @@
 .option {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--sp-1); /* 1px→sp-1: piso de la escala */
   padding: var(--sp-3) var(--sp-3); /* 10→12 */
   border-radius: 11px;
   cursor: pointer;
@@ -148,7 +148,7 @@
   max-width: 420px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--sp-5) var(--sp-6) max(28px, env(safe-area-inset-bottom)); /* 18→sp-5; 26→28 */
+  padding: var(--sp-5) var(--sp-6) max(var(--sp-6), env(safe-area-inset-bottom)); /* 18→sp-5; 26→28 */
   display: flex;
   flex-direction: column;
   gap: var(--sp-5); /* 18 separación → sp-5 */

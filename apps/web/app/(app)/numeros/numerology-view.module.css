@@ -39,7 +39,7 @@
   background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.78));
   box-shadow: var(--glow-soft);
 }
-.heroLabel { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); margin-top: var(--sp-3); } /* 18→17; 10→12 */
+.heroLabel { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); margin-top: var(--sp-3); } /* 18→17; 10: empate 8/12 → separación → mayor */
 .calc {
   display: block; margin-top: var(--sp-3); padding-top: var(--sp-3); width: 100%; /* 11→12 */
   border-top: 1px solid var(--line);
@@ -50,7 +50,7 @@
 /* ---- Núcleo ---- */
 .lentes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-4); } /* 10: empate 8/12 → apoyo… grid de núcleo → 12 por paridad con hub .lenses; 14: empate 12/16 → separación → mayor */
 .lz {
-  display: flex; flex-direction: column; gap: 3px; text-align: left;
+  display: flex; flex-direction: column; gap: var(--sp-1); text-align: left; /* 3px→sp-1: piso de la escala */
   padding: var(--sp-3) var(--sp-4); /* 13→12; 14: empate → contenedor → mayor */
   border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--surface); cursor: pointer;
@@ -58,13 +58,13 @@
 }
 .lz:hover { transform: translateY(-2px); border-color: rgba(var(--acc-rgb), 0.4); }
 .lzN { font-family: var(--font-display); font-weight: 600; font-size: var(--text-3xl); line-height: 1; color: var(--acc); } /* 28→32: núcleo homogéneo a 3xl (vara mockup: los 4 números del núcleo al MISMO paso) */
-.lzL { font-size: var(--text-xs); color: var(--ink); margin-top: 3px; } /* 3px micro: excepción */
+.lzL { font-size: var(--text-xs); color: var(--ink); margin-top: var(--sp-1); } /* 3px→sp-1: piso de la escala */
 .lzSub { font-size: var(--text-2xs); color: var(--soft); } /* 10→11 piso */
 
 /* ---- Toggle Modo Pro ---- */
 .proToggle {
   display: inline-flex; align-items: center; gap: var(--sp-2); /* 9→8 */
-  margin: var(--sp-5) 0 var(--sp-1); /* 18 separación → sp-5 */
+  margin: var(--sp-4) 0 var(--sp-1); /* 18→sp-4: empate, control secundario (precedente flagship pilares.module.css .proToggle) */
   padding: var(--sp-2) var(--sp-4); /* 9→8; 15→16 */
   font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
   color: var(--acc); background: transparent;
@@ -82,15 +82,15 @@
 .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: var(--sp-5); } /* 14 tarjeta canónica → sp-5 (receta SPEC) */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .cardSub { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--text-2xs); /* 9.5→11 piso; 7→8 */ letter-spacing: 1px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; } /* 6: micro-gap de chips, excepción de ritmo */
-.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--acc); border-radius: 9px; padding: 3px var(--sp-3) /* 11→12; 3 micro: excepción */; font-size: var(--text-sm); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6: empate 4/8 → apoyo → menor (precedente carta .chips) */
+.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--acc); border-radius: 9px; padding: var(--sp-1) var(--sp-3) /* 11→12; 3px→sp-1: piso de la escala */; font-size: var(--text-sm); font-weight: 600; }
 .chipWarn { border-color: rgba(220, 120, 80, 0.6); color: #e0a07a; }
 .muted { font-size: var(--text-xs); color: var(--soft); margin: var(--sp-2) 0 0; }
 
 .incl { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--sp-1); }
-.cell { text-align: center; border-radius: 8px; padding: 7px 0 5px; background: var(--surface-2); border: 1px solid var(--line); }
+.cell { text-align: center; border-radius: 8px; padding: var(--sp-2) 0 var(--sp-1); /* 7px→sp-2; 5px→sp-1: pasos más cercanos */ background: var(--surface-2); border: 1px solid var(--line); }
 .cellD { display: block; font-size: var(--text-xs); font-weight: 700; color: var(--ink); }
-.cellC { display: block; font-size: var(--text-2xs); /* 8→11 piso (celda de conteo) */ color: var(--soft); margin-top: 1px; }
+.cellC { display: block; font-size: var(--text-2xs); /* 8→11 piso (celda de conteo) */ color: var(--soft); margin-top: var(--sp-1); /* 1px→sp-1: piso de la escala (celda micro, vigilar en pase visual) */ }
 .cellHot { background: rgba(var(--acc-rgb), 0.22); border-color: rgba(var(--acc-rgb), 0.5); }
 .cellHot .cellD { color: var(--acc); }
 .cellMiss { opacity: 0.42; }
@@ -110,12 +110,12 @@
 /* ---- Hoja tap-to-expand ---- */
 .sheetBody { display: flex; flex-direction: column; }
 .sheetN { font-family: var(--font-display); font-weight: 600; font-size: var(--display-sm); /* héroe de hoja 56→44 (tabla del plan) */ color: var(--acc); text-align: center; line-height: 1; text-shadow: 0 0 24px rgba(var(--acc-rgb), 0.4); }
-.soon { font-style: italic; font-size: var(--text-xs); color: var(--soft); margin: var(--sp-3) 0 0; }
+.soon { font-style: italic; font-size: var(--text-xs); color: var(--soft); margin: var(--sp-3) 0 0; } /* 10: empate 8/12 → separación → mayor */
 
 /* Lectura rica del número (Plan 6 draft) */
 .calcMini { font-size: var(--text-xs); color: var(--soft); margin: var(--sp-2) 0 var(--sp-4); text-align: center; }
 .reading { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14: empate → contenedor de bloques → mayor */
-.lens { margin: 0 0 2px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); font-size: var(--text-sm); /* 12.5→13 */ font-style: italic; line-height: 1.55; color: var(--soft); text-align: center; }
+.lens { margin: 0 0 var(--sp-1); /* 2px→sp-1: piso de la escala */ padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); font-size: var(--text-xs); /* 12.5: empate 12/13 → apoyo → menor */ font-style: italic; line-height: 1.55; color: var(--soft); text-align: center; }
 .essence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); /* 18→17 */ line-height: 1.5; color: var(--ink); }
 .block { display: flex; flex-direction: column; gap: var(--sp-1); } /* 5→4 */
 .block p { margin: 0; font-size: var(--text-sm); /* 13.5→13 */ line-height: 1.62; color: var(--ink); }
@@ -127,7 +127,7 @@
 .readingWrap { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14 → mayor (contenedor) */
 .tierRow { display: flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
 .tier {
-  flex: 1; padding: var(--sp-2) 6px; /* 7→8; 6 micro: excepción */ border: 0; border-radius: 10px; background: transparent;
+  flex: 1; padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border: 0; border-radius: 10px; background: transparent;
   font-family: inherit; font-size: var(--text-2xs); letter-spacing: 0.3px; font-weight: 600;
   color: var(--soft); cursor: pointer;
   transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
@@ -144,12 +144,12 @@
 }
 .shimmer:nth-child(2) { width: 88%; }
 .shimmer:nth-child(3) { width: 68%; }
-.loadingNote { margin: 6px 0 0; text-align: center; font-size: var(--text-xs); /* 6 micro: excepción */ font-style: italic; color: var(--acc); }
+.loadingNote { margin: var(--sp-2) 0 0; text-align: center; font-size: var(--text-xs); /* 6px→sp-2: paso más cercano */ font-style: italic; color: var(--acc); }
 @keyframes nm-shimmer { to { background-position: -200% 0; } }
 
 .gated { display: flex; flex-direction: column; gap: var(--sp-3); }
 .gatedGlyph { align-self: center; font-size: var(--text-2xl); color: var(--acc); opacity: 0.85; }
 .gatedNote {
-  margin: 0; text-align: center; font-size: var(--text-sm); font-style: italic; line-height: 1.6; color: var(--soft); /* 12.5→13 */
+  margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); /* 12.5: empate 12/13 → apoyo → menor */
   padding: var(--sp-3) var(--sp-4); /* 14 → contenedor → mayor */ border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 14px; background: var(--surface-2);
 }
