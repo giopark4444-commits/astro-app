@@ -13,6 +13,7 @@ import {
   type ChartResult, type BodyPosition,
 } from "@aluna/core";
 import { useTheme } from "../lib/theme-context";
+import { fonts } from "../theme/tokens";
 
 const { CX, CY, R_SIGN_OUT, R_SIGN_IN, R_SIGN_GLYPH, R_HOUSE_IN, R_HOUSE_NUM, R_BODY, R_ASPECT } = WHEEL;
 
@@ -48,10 +49,15 @@ const ANGLE_MARKS: Array<{ key: string; cusp: number }> = [
 export function ChartWheel({
   chart,
   solar,
+  selected,
   onSelect,
 }: {
   chart: ChartResult;
   solar: boolean;
+  /** Clave del cuerpo resaltado ahora mismo (p. ej. el de la hoja abierta en
+   * la pantalla) — pinta un halo dorado detrás suyo. Opcional: null/undefined
+   * = ningún cuerpo resaltado. */
+  selected?: string | null;
   onSelect: (b: BodyPosition) => void;
 }) {
   const { t: tk } = useTheme();
@@ -111,8 +117,20 @@ export function ChartWheel({
           })}
           {ANGLE_MARKS.map((m) => {
             const [x, y] = pointAt(R_SIGN_OUT + 9, chart.houses.cusps[m.cusp]!, asc);
+            // AC/MC en paridad con la web (fill: var(--acc); font-weight: 700) — IC/DC
+            // quedan tenues, sin negrita, como marcas secundarias.
+            const primary = m.key === "AC" || m.key === "MC";
             return (
-              <SvgText key={m.key} x={x} y={y} fill={tk.textDim} fontSize={9} textAnchor="middle" alignmentBaseline="central">
+              <SvgText
+                key={m.key}
+                x={x}
+                y={y}
+                fill={primary ? tk.acc : tk.textDim}
+                fontFamily={primary ? fonts.serifBold : undefined}
+                fontSize={9}
+                textAnchor="middle"
+                alignmentBaseline="central"
+              >
                 {m.key}
               </SvgText>
             );
@@ -131,13 +149,17 @@ export function ChartWheel({
           })}
         </G>
 
-        {/* cuerpos (área táctil de 32px lógicos: r=16 en viewBox de 360 sobre ~size px) */}
+        {/* cuerpos: halo dorado del seleccionado detrás + área táctil de 44pt
+            (r=23 en viewBox 360 ≈ 44pt de diámetro en un ancho de 375) ANTES
+            del glifo visible, que no cambia de tamaño. */}
         {chart.bodies.map((b) => {
           const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
           const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
+          const isSelected = b.body === selected;
           return (
             <G key={b.body} onPress={() => onSelect(b)}>
-              <Circle cx={gx} cy={gy} r={16} fill="rgba(0,0,0,0.01)" />
+              {isSelected && <Circle cx={gx} cy={gy} r={16} fill={tk.acc} opacity={0.12} />}
+              <Circle cx={gx} cy={gy} r={23} fill="transparent" />
               <SvgText x={gx} y={gy} fill={tk.text} fontSize={13} textAnchor="middle" alignmentBaseline="central">
                 {PLANET_GLYPH[b.body] ?? "•"}
               </SvgText>
