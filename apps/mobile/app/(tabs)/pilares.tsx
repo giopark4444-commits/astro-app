@@ -176,8 +176,9 @@ export default function PilaresScreen() {
         {data && laminaData && (
           <>
             {/* Rejilla de los 4 pilares — cada uno es ahora un <Card>; el pilar del DÍA
-                se destaca con borde t.accSoft más grueso + badge 日主 (receta visual de
-                SoonBadge, texto canónico de dominio). Vara: movil-pilares-despues.html */}
+                se destaca con borde t.accSoft más grueso + badge 日主 · Maestro del Día como
+                pill flotante fuera de flujo (position:absolute, receta `.pillar-badge` del
+                mockup) para no forzar el ancho de la columna. Vara: movil-pilares-despues.html */}
             <FadeIn delay={0} style={styles.fadeFull}>
               <View style={styles.grid}>
                 {POS_KEYS.map((key) => {
@@ -200,7 +201,7 @@ export default function PilaresScreen() {
                     <Card key={key} style={[styles.col, isDay && styles.dayCol]}>
                       {isDay && (
                         <View style={styles.dayBadge}>
-                          <Text style={styles.dayBadgeText}>
+                          <Text style={styles.dayBadgeText} numberOfLines={1}>
                             {t("pilares.dayMasterHanzi")} · {t("pilares.dayMaster")}
                           </Text>
                         </View>
@@ -774,9 +775,14 @@ function makeStyles(t: ThemeTokens) {
       flexBasis: "22%", flexGrow: 1, minWidth: 72, alignItems: "center", gap: 4,
       paddingVertical: space.md, paddingHorizontal: space.xs,
     },
-    // Pilar del DÍA destacado (日主): SOLO cambia el borde (más grueso, en el acento del
-    // tema) — mismo fondo que sus hermanos, igual que `.pillar.day` en el mockup.
-    dayCol: { borderColor: t.accSoft, borderWidth: 1.5 },
+    // Pilar del DÍA destacado (日主): cambia el borde (más grueso, en el acento del tema)
+    // — mismo fondo que sus hermanos, igual que `.pillar.day` en el mockup. overflow:
+    // "visible" explícito (defensivo): la pill del badge vive fuera del cuadro de la
+    // card (top negativo) y esta Card tiene borderRadius — RN 0.85/Expo 56 corre sobre
+    // New Architecture (Fabric), donde el viejo bug de Android que recortaba hijos
+    // absolutos negativos contra padres con radius+clipping ya no aplica, pero se deja
+    // explícito por las dudas (no tiene costo).
+    dayCol: { borderColor: t.accSoft, borderWidth: 1.5, overflow: "visible" },
     colLabel: { color: t.textDim, fontSize: typeScale.xs2, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sansBold },
     // Hanzi grandes de la rejilla: fonts.serifSemi a type.xl3 (política de esta tarea).
     char: { fontSize: typeScale.xl3, fontFamily: fonts.serifSemi, marginTop: 2 },
@@ -787,12 +793,22 @@ function makeStyles(t: ThemeTokens) {
     // de sus hermanos para no desentonar en la fila.
     empty: { color: t.textFaint, fontSize: typeScale.xl3, opacity: 0.5, marginTop: space.md },
 
-    // Badge 日主 del pilar del día — receta visual de SoonBadge (pill bordeada, texto
-    // pequeño) con texto canónico de dominio (dayMasterHanzi + dayMaster, ambas claves
-    // i18n ya existentes — cero contenido nuevo). Reemplaza al antiguo `dayTag` suelto.
+    // Badge 日主 · Maestro del Día del pilar del día — pill flotante ABSOLUTA (receta
+    // `.pillar-badge` del mockup: position:absolute, top:-11, centrada), no hijo en flujo
+    // normal. Motivo (hallazgo Important del review de b29457c): el texto completo
+    // ("日主 · Maestro del Día", ~20 chars) no cabe en el presupuesto real de una columna
+    // de ~80pt a fontSize xs2 — como hijo en flujo envolvía a 2-3 líneas, crecía el alto
+    // de la columna del día y, al no declarar `grid.alignItems` (stretch por defecto de
+    // RN), estiraba las otras 3 Cards de la fila. Al sacarla del flujo con position:
+    // absolute vive fuera del constraint de ancho de la card, igual que en el mockup.
+    // alignSelf:"center" sigue funcionando para centrar un hijo absoluto sin left/right/
+    // transform: Yoga respeta alignSelf (o el alignItems del padre) en el eje no
+    // restringido por top/bottom de un nodo absoluto. numberOfLines={1} en el Text es
+    // cinturón extra por si el dispositivo tiene fuente accesible más grande.
     dayBadge: {
-      alignSelf: "center", borderWidth: 1, borderColor: t.accSoft, borderRadius: radius.pill,
-      backgroundColor: t.accFaint, paddingHorizontal: space.sm, paddingVertical: 3, marginBottom: space.xs,
+      position: "absolute", top: -11, alignSelf: "center", zIndex: 1,
+      borderWidth: 1, borderColor: t.accSoft, borderRadius: radius.pill,
+      backgroundColor: t.accFaint, paddingHorizontal: space.sm, paddingVertical: 3,
     },
     dayBadgeText: { color: t.acc, fontSize: typeScale.xs2, fontFamily: fonts.sansBold, letterSpacing: 0.3 },
 
