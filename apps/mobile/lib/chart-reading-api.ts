@@ -4,7 +4,7 @@
 // ACUMULADA (sin efecto máquina — spec §3.4) y parseamos el objeto
 // {essence,flow,shadow}. Un HIT de caché vuelve como JSON estructurado directo.
 import type { BodyReading } from "../content/astrology-readings-es";
-import { API_URL } from "./supabase";
+import { apiUrl } from "./config";
 
 export class ChartReadingApiError extends Error {}
 
@@ -34,8 +34,7 @@ export async function fetchChartReading(params: {
   locale: "es" | "en";
   profileName: string;
 }): Promise<{ available: false } | { available: true; reading: BodyReading }> {
-  if (!API_URL) throw new ChartReadingApiError("apiUrl no configurado");
-  const res = await fetch(`${API_URL}/api/chart-reading`, {
+  const res = await fetch(`${apiUrl()}/api/chart-reading`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${params.accessToken}` },
     body: JSON.stringify({
