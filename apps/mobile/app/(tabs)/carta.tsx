@@ -5,18 +5,18 @@ import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
   type ChartResult, type BodyPosition, type Aspect, type HouseSystem, type Zodiac,
 } from "@aluna/core";
-import { Starfield } from "../../components/Starfield";
 import { Enso } from "../../components/Enso";
 import { ChartWheel } from "../../components/ChartWheel";
 import { BodyReadingReader } from "../../components/BodyReading";
 import { BottomSheet } from "../../components/BottomSheet";
+import { Card, Chip, FadeIn } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { astroLabels, ASPECT_GLYPHS } from "../../content/astrology";
 import { fetchChart, type ChartKind } from "../../lib/chart-api";
-import { fonts, radius, space, type ThemeTokens } from "../../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -102,11 +102,9 @@ export default function CartaScreen() {
   }
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: el radial nocturno + estrellas
+    // ya viven en ThemedBackground (capa raíz, Task 2) — esta pantalla queda transparente.
     <View style={styles.root}>
-      <View style={styles.sky} pointerEvents="none">
-        <Starfield count={44} height={420} />
-      </View>
-
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
@@ -115,16 +113,20 @@ export default function CartaScreen() {
           <Text style={styles.eyebrow}>{t("carta.title")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("carta.subtitle")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("carta.subtitle")}</Text>
 
-        {/* Tipo de carta */}
+        {/* Tipo de carta — chips canónicos del rediseño */}
         <View style={styles.kindRow}>
           {KINDS.map((k) => {
             const on = kind === k;
             return (
-              <Pressable key={k} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setKind(k)}>
-                <Text style={[styles.kindText, on && styles.kindTextOn]}>{t(`carta.kind${KIND_KEY[k]}`)}</Text>
-              </Pressable>
+              <Chip
+                key={k}
+                kind="control"
+                label={t(`carta.kind${KIND_KEY[k]}`)}
+                selected={on}
+                onPress={() => setKind(k)}
+              />
             );
           })}
         </View>
@@ -135,9 +137,7 @@ export default function CartaScreen() {
           {(["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"] as HouseSystem[]).map((h) => {
             const on = houseSystem === h;
             return (
-              <Pressable key={h} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setHouseSystem(h)}>
-                <Text style={[styles.kindText, on && styles.kindTextOn]}>{L.houses[h]}</Text>
-              </Pressable>
+              <Chip key={h} kind="control" label={L.houses[h]} selected={on} onPress={() => setHouseSystem(h)} />
             );
           })}
         </View>
@@ -147,11 +147,13 @@ export default function CartaScreen() {
           {(["tropical", "sidereal"] as Zodiac[]).map((z) => {
             const on = zodiac === z;
             return (
-              <Pressable key={z} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setZodiac(z)}>
-                <Text style={[styles.kindText, on && styles.kindTextOn]}>
-                  {t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
-                </Text>
-              </Pressable>
+              <Chip
+                key={z}
+                kind="control"
+                label={t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
+                selected={on}
+                onPress={() => setZodiac(z)}
+              />
             );
           })}
         </View>
@@ -164,65 +166,71 @@ export default function CartaScreen() {
             {ready.solar && <Text style={styles.solar}>☉ {t("carta.solarNotice")}</Text>}
 
             {/* Rueda interactiva */}
-            <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} />
-            <Text style={styles.kindHint}>{t("carta.tapHint")}</Text>
+            <FadeIn delay={0}>
+              <ChartWheel chart={ready.chart} solar={ready.solar} selected={sheet?.body ?? null} onSelect={setSheet} />
+              <Text style={styles.kindHint}>{t("carta.tapHint")}</Text>
+            </FadeIn>
 
             {/* Núcleo: Sol / Luna / Ascendente */}
-            <View style={styles.core}>
-              {byKey.get("sun") && (
+            <FadeIn delay={60} style={styles.fadeFull}>
+              <View style={styles.core}>
+                {byKey.get("sun") && (
+                  <CoreCard
+                    styles={styles}
+                    glyph={PLANET_GLYPH.sun!}
+                    name={L.bodies.sun!}
+                    sign={L.signs[byKey.get("sun")!.sign]!}
+                    signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
+                    sub={`${t("carta.house")} ${byKey.get("sun")!.house}`}
+                  />
+                )}
+                {byKey.get("moon") && (
+                  <CoreCard
+                    styles={styles}
+                    glyph={PLANET_GLYPH.moon!}
+                    name={L.bodies.moon!}
+                    sign={L.signs[byKey.get("moon")!.sign]!}
+                    signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
+                    sub={`${t("carta.house")} ${byKey.get("moon")!.house}`}
+                  />
+                )}
                 <CoreCard
                   styles={styles}
-                  glyph={PLANET_GLYPH.sun!}
-                  name={L.bodies.sun!}
-                  sign={L.signs[byKey.get("sun")!.sign]!}
-                  signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                  sub={`${t("carta.house")} ${byKey.get("sun")!.house}`}
+                  glyph="Asc"
+                  name={t("carta.ascendant")}
+                  sign={L.signs[ascPos.sign]!}
+                  signGlyph={SIGN_GLYPH[ascPos.sign]!}
+                  sub={`${ascPos.degree}°`}
+                  dim={ready.solar}
                 />
-              )}
-              {byKey.get("moon") && (
-                <CoreCard
-                  styles={styles}
-                  glyph={PLANET_GLYPH.moon!}
-                  name={L.bodies.moon!}
-                  sign={L.signs[byKey.get("moon")!.sign]!}
-                  signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                  sub={`${t("carta.house")} ${byKey.get("moon")!.house}`}
-                />
-              )}
-              <CoreCard
-                styles={styles}
-                glyph="Asc"
-                name={t("carta.ascendant")}
-                sign={L.signs[ascPos.sign]!}
-                signGlyph={SIGN_GLYPH[ascPos.sign]!}
-                sub={`${ascPos.degree}°`}
-                dim={ready.solar}
-              />
-            </View>
+              </View>
+            </FadeIn>
 
             {/* Balance de elementos y modalidades */}
-            <Balance
-              styles={styles}
-              title={t("carta.elements")}
-              entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
-              dominant={ready.chart.distribution.dominantElement}
-              dominantLabel={t("carta.dominant")}
-            />
-            <Balance
-              styles={styles}
-              title={t("carta.modalities")}
-              entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
-              dominant={ready.chart.distribution.dominantModality}
-              dominantLabel={t("carta.dominant")}
-            />
+            <FadeIn delay={120} style={styles.fadeFull}>
+              <Balance
+                styles={styles}
+                title={t("carta.elements")}
+                entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                dominant={ready.chart.distribution.dominantElement}
+                dominantLabel={t("carta.dominant")}
+              />
+              <Balance
+                styles={styles}
+                title={t("carta.modalities")}
+                entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                dominant={ready.chart.distribution.dominantModality}
+                dominantLabel={t("carta.dominant")}
+              />
+            </FadeIn>
 
             {/* Tu Clima: aspectos tránsito-a-natal */}
             {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-              <Card styles={styles} title={t("carta.weatherTitle")}>
+              <SectionCard styles={styles} title={t("carta.weatherTitle")}>
                 {ready.transitAspects.map((a, i) => (
                   <AspectRow key={i} styles={styles} a={a} L={L} t={t} last={i === ready.transitAspects!.length - 1} />
                 ))}
-              </Card>
+              </SectionCard>
             )}
 
             {/* Modo Pro */}
@@ -233,7 +241,7 @@ export default function CartaScreen() {
 
             {pro && (
               <View style={styles.proBody}>
-                <Card styles={styles} title={t("carta.positions")}>
+                <SectionCard styles={styles} title={t("carta.positions")}>
                   {ready.chart.bodies.map((b, i) => (
                     <View key={b.body} style={[styles.posRow, i === ready.chart.bodies.length - 1 && styles.rowLast]}>
                       <Text style={styles.posGlyph}>{PLANET_GLYPH[b.body] ?? "•"}</Text>
@@ -245,13 +253,13 @@ export default function CartaScreen() {
                       </View>
                       <View style={styles.posTags}>
                         {b.retrograde && <Text style={styles.tagWarn}>℞</Text>}
-                        {b.dignity && <Text style={styles.tag}>{L.dignities[b.dignity]}</Text>}
+                        {b.dignity && <Chip kind="tag" label={L.dignities[b.dignity]} />}
                       </View>
                     </View>
                   ))}
-                </Card>
+                </SectionCard>
 
-                <Card styles={styles} title={t("carta.aspectsTitle")}>
+                <SectionCard styles={styles} title={t("carta.aspectsTitle")}>
                   {ready.chart.aspects.length === 0 ? (
                     <Text style={styles.muted}>—</Text>
                   ) : (
@@ -259,9 +267,9 @@ export default function CartaScreen() {
                       <AspectRow key={i} styles={styles} a={a} L={L} t={t} last={i === ready.chart.aspects.length - 1} />
                     ))
                   )}
-                </Card>
+                </SectionCard>
 
-                <Card styles={styles} title={t("carta.patterns")}>
+                <SectionCard styles={styles} title={t("carta.patterns")}>
                   {ready.chart.patterns.length === 0 ? (
                     <Text style={styles.muted}>{t("carta.noPatterns")}</Text>
                   ) : (
@@ -271,7 +279,7 @@ export default function CartaScreen() {
                       </Text>
                     ))
                   )}
-                </Card>
+                </SectionCard>
 
                 <Text style={styles.footNote}>
                   {t("carta.ut")} {ready.chart.meta.utcHour.toFixed(2)}h · {t("carta.julianDay")}{" "}
@@ -306,14 +314,14 @@ function CoreCard({
   dim?: boolean;
 }) {
   return (
-    <View style={[styles.coreCard, dim && styles.coreCardDim]}>
+    <Card style={[styles.coreCard, dim && styles.coreCardDim]}>
       <Text style={styles.coreGlyph}>{glyph}</Text>
       <Text style={styles.coreName}>{name}</Text>
       <Text style={styles.coreSign}>
         {signGlyph} {sign}
       </Text>
       <Text style={styles.coreSub}>{sub}</Text>
-    </View>
+    </Card>
   );
 }
 
@@ -328,7 +336,7 @@ function Balance({
 }) {
   const max = Math.max(1, ...entries.map((e) => e.n));
   return (
-    <View style={styles.balanceCard}>
+    <Card accent style={styles.balanceCard}>
       <Text style={styles.cardH}>{title}</Text>
       {entries.map((e) => (
         <View key={e.k} style={styles.balRow}>
@@ -342,11 +350,13 @@ function Balance({
           <Text style={styles.balN}>{e.n}</Text>
         </View>
       ))}
-    </View>
+    </Card>
   );
 }
 
-function Card({
+/** Tarjeta con título "eyebrow" (BALANCE/POSICIONES/...) sobre el primitivo <Card>.
+ * Renombrada de "Card" a "SectionCard" para no chocar con el primitivo importado. */
+function SectionCard({
   styles, title, children,
 }: {
   styles: ReturnType<typeof makeStyles>;
@@ -354,10 +364,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.card}>
+    <Card style={styles.card}>
       <Text style={styles.cardH}>{title}</Text>
       {children}
-    </View>
+    </Card>
   );
 }
 
@@ -390,50 +400,47 @@ function AspectRow({
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
-    sky: { position: "absolute", top: 0, left: 0, right: 0, height: 420 },
+    root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
-    emptyText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
+    emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: 12, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sans },
-    h1: { color: t.text, fontSize: 28, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
+    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
 
+    // Contenedor de cualquier fila de chips (tipo de carta / casas / zodiaco):
+    // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
     kindRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%" },
-    kindChip: {
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill,
-      paddingHorizontal: space.lg, paddingVertical: space.sm + 2, backgroundColor: t.panelSoft,
-    },
-    kindChipOn: { borderColor: t.acc, backgroundColor: t.accFaint },
-    kindText: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans },
-    kindTextOn: { color: t.acc, fontWeight: "600" },
-    kindHint: { color: t.textFaint, fontSize: 12, fontStyle: "italic", fontFamily: fonts.serif, textAlign: "center", marginTop: space.md, marginBottom: space.xl },
+    kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.md, marginBottom: space.xl },
 
-    note: { color: t.textDim, fontSize: 14, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.xxl },
-    solar: { color: t.acc, fontSize: 13, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.lg, lineHeight: 19 },
+    note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.xxl },
+    solar: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.lg, lineHeight: 19 },
+
+    // <FadeIn> envuelve secciones que ya declaraban width:"100%" (necesario
+    // porque `scroll` centra sus hijos con alignItems — sin este ancho
+    // explícito en el propio wrapper de FadeIn, el % interno no tendría contra
+    // qué resolverse).
+    fadeFull: { width: "100%" },
 
     core: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%", marginBottom: space.xl },
-    coreCard: {
-      flexGrow: 1, minWidth: 100, alignItems: "center", paddingVertical: space.lg, paddingHorizontal: space.md,
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.md, backgroundColor: t.panelSoft,
-    },
+    // Ya no lleva borde/fondo propios — eso lo da <Card>; acá solo el layout
+    // de mini-tarjeta (crece, encoge, centra su contenido).
+    coreCard: { flexGrow: 1, minWidth: 100, alignItems: "center", paddingVertical: space.lg, paddingHorizontal: space.md },
     coreCardDim: { opacity: 0.7 },
-    coreGlyph: { color: t.acc, fontSize: 20, fontFamily: fonts.serif, marginBottom: space.xs },
-    coreName: { color: t.textFaint, fontSize: 10, letterSpacing: 1.5, textTransform: "uppercase", fontFamily: fonts.sans },
-    coreSign: { color: t.text, fontSize: 16, fontFamily: fonts.serif, marginTop: space.xs },
-    coreSub: { color: t.textDim, fontSize: 11, marginTop: 2, fontFamily: fonts.sans },
+    coreGlyph: { color: t.acc, fontSize: typeScale.xl, fontFamily: fonts.serif, marginBottom: space.xs },
+    coreName: { color: t.textFaint, fontSize: typeScale.xs2, letterSpacing: 1.5, textTransform: "uppercase", fontFamily: fonts.sans },
+    coreSign: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.serif, marginTop: space.xs },
+    coreSub: { color: t.textDim, fontSize: typeScale.xs2, marginTop: 2, fontFamily: fonts.sans },
 
-    balanceCard: {
-      width: "100%", borderWidth: 1, borderColor: t.accHair, borderRadius: radius.lg,
-      backgroundColor: t.panelSoft, padding: space.xl, marginBottom: space.lg,
-    },
+    // Ídem: fondo/borde ahora los da <Card accent> (variante --surface-2 del SPEC).
+    balanceCard: { width: "100%", marginBottom: space.lg },
     balRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.sm },
-    balLabel: { color: t.textDim, fontSize: 12, fontFamily: fonts.sans, width: 88 },
-    balTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: t.accHair, overflow: "hidden" },
-    balFill: { height: "100%", backgroundColor: t.accSoft, borderRadius: 3 },
+    balLabel: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 88 },
+    balTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.accHair, overflow: "hidden" },
+    balFill: { height: "100%", backgroundColor: t.accSoft, borderRadius: 4 },
     balFillOn: { backgroundColor: t.acc },
-    balN: { color: t.textFaint, fontSize: 11, fontFamily: fonts.sans, width: 18, textAlign: "right" },
+    balN: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans, width: 18, textAlign: "right" },
 
     proToggle: {
       flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.lg,
@@ -441,39 +448,36 @@ function makeStyles(t: ThemeTokens) {
     },
     proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
     proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: 15, letterSpacing: 1, fontFamily: fonts.sans },
+    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
-    card: {
-      width: "100%", borderWidth: 1, borderColor: t.accHair, borderRadius: radius.lg,
-      backgroundColor: t.panelSoft, padding: space.xl,
-    },
-    cardH: { color: t.acc, fontSize: 13, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sans },
-    muted: { color: t.textFaint, fontSize: 13, fontFamily: fonts.sans },
+    // Fondo/borde/radio ahora los da <Card>; queda solo el ancho (mismo motivo que fadeFull).
+    card: { width: "100%" },
+    cardH: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
+    muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     posRow: {
       flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: space.sm + 2,
       borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    posGlyph: { color: t.acc, fontSize: 16, fontFamily: fonts.serif, width: 22 },
+    posGlyph: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.serif, width: 22 },
     posMain: { flex: 1 },
-    posName: { color: t.text, fontSize: 14, fontFamily: fonts.sans },
-    posDetail: { color: t.textFaint, fontSize: 11, marginTop: 1, fontFamily: fonts.sans },
-    posTags: { flexDirection: "row", gap: space.xs },
-    tag: { color: t.acc, fontSize: 10, letterSpacing: 0.5, fontFamily: fonts.sans },
-    tagWarn: { color: t.warn, fontSize: 13, fontFamily: fonts.sans },
+    posName: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    posDetail: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 1, fontFamily: fonts.sans },
+    posTags: { flexDirection: "row", alignItems: "center", gap: space.xs },
+    tagWarn: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     aspRow: { paddingVertical: space.sm + 2, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair },
-    aspGlyphs: { color: t.text, fontSize: 14, fontFamily: fonts.serif },
+    aspGlyphs: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.serif },
     aspHard: { color: t.warn },
     aspSoft: { color: t.acc },
     aspMain: { marginTop: 2 },
-    aspName: { color: t.textDim, fontSize: 12, fontFamily: fonts.sans },
-    aspSub: { color: t.textFaint, fontSize: 11, marginTop: 1, fontFamily: fonts.sans },
+    aspName: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans },
+    aspSub: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 1, fontFamily: fonts.sans },
 
-    patternRow: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, marginTop: space.xs },
+    patternRow: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, marginTop: space.xs },
 
-    footNote: { color: t.textFaint, fontSize: 11, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
+    footNote: { color: t.textFaint, fontSize: typeScale.xs2, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
   });
 }

@@ -1,8 +1,8 @@
 // Cliente Supabase del móvil: sesión persistida en AsyncStorage (por defecto
 // supabase-js la guarda solo en memoria, se perdería al cerrar la app).
 // URL/anon key vienen de app.json → expo.extra (públicas, seguro exponerlas;
-// RLS protege los datos, no la llave). apiUrl es el server Next (Route
-// Handlers) que corre el motor sweph — el móvil nunca lo importa directo.
+// RLS protege los datos, no la llave). El server Next (Route Handlers) que
+// corre el motor sweph se resuelve con apiUrl() de ./config, no acá.
 
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,14 +11,12 @@ import { createBrowserSupabaseClient, type AlunaSupabaseClient } from "@aluna/su
 interface Extra {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
-  apiUrl?: string;
 }
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Extra;
 
 export const SUPABASE_URL = extra.supabaseUrl ?? "";
 export const SUPABASE_ANON_KEY = extra.supabaseAnonKey ?? "";
-export const API_URL = extra.apiUrl ?? "";
 
 let client: AlunaSupabaseClient | null = null;
 

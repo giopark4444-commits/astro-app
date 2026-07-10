@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
-// ../chart-reading-api importa (estático) API_URL de ../supabase, que a su vez
+// ../chart-reading-api importa (estático) apiUrl() de ../config, que a su vez
 // importa expo-constants → react-native. react-native publica su entrada en
 // Flow crudo (`import typeof * as X from './index.js.flow'` en su index.js),
 // que el parser de Vite/Rollup no entiende fuera de Metro. Mockeamos el módulo
 // para no cargar esa cadena — no probamos fetchChartReading aquí (red/RN),
 // solo el parser puro parseReadingText (mismo patrón que aplicaría a
 // chart-api.ts/bazi-api.ts si algún día se testean).
-vi.mock("../supabase", () => ({ API_URL: "https://example.test" }));
+vi.mock("../config", () => ({ apiUrl: () => "https://example.test" }));
 import { parseReadingText } from "../chart-reading-api";
 
 describe("parseReadingText (respuesta acumulada de /api/chart-reading)", () => {

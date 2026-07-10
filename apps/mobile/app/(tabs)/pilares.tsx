@@ -25,15 +25,15 @@ import {
   type TenGod,
   type LuckSequence,
 } from "@aluna/core";
-import { Starfield } from "../../components/Starfield";
 import { Enso } from "../../components/Enso";
+import { Card, Chip, FadeIn } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { baziContent, type BaziContent } from "../../content/bazi";
 import { fetchBaZi, type BaZiData } from "../../lib/bazi-api";
-import { fonts, radius, space, type ThemeTokens } from "../../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 // Colores fijos de los 5 elementos (Wu Xing), iguales a la web (pilares.module.css):
 // identidad del elemento, no del tema — se ven igual en cualquier tema/modo de luz.
@@ -157,11 +157,9 @@ export default function PilaresScreen() {
   }
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: el radial nocturno + estrellas
+    // ya viven en ThemedBackground (capa raíz, Task 2) — esta pantalla queda transparente.
     <View style={styles.root}>
-      <View style={styles.sky} pointerEvents="none">
-        <Starfield count={44} height={360} />
-      </View>
-
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
@@ -170,79 +168,90 @@ export default function PilaresScreen() {
           <Text style={styles.eyebrow}>{t("pilares.subtitle")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("pilares.title")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("pilares.title")}</Text>
 
         {state.s === "loading" && <Text style={styles.note}>{t("pilares.loading")}</Text>}
         {state.s === "error" && <Text style={styles.note}>{t("pilares.error")}</Text>}
 
         {data && laminaData && (
           <>
-            {/* Rejilla de los 4 pilares */}
-            <View style={styles.grid}>
-              {POS_KEYS.map((key) => {
-                const pillar = data[key];
-                if (!pillar) {
+            {/* Rejilla de los 4 pilares — cada uno es ahora un <Card>; el pilar del DÍA
+                se destaca con borde t.accSoft más grueso + badge 日主 · Maestro del Día como
+                pill flotante fuera de flujo (position:absolute, receta `.pillar-badge` del
+                mockup) para no forzar el ancho de la columna. Vara: movil-pilares-despues.html */}
+            <FadeIn delay={0} style={styles.fadeFull}>
+              <View style={styles.grid}>
+                {POS_KEYS.map((key) => {
+                  const pillar = data[key];
+                  if (!pillar) {
+                    return (
+                      <Card key={key} style={styles.col}>
+                        <Text style={styles.colLabel}>{content.ui.position[key]}</Text>
+                        <Text style={styles.empty}>—</Text>
+                      </Card>
+                    );
+                  }
+                  const stem = HEAVENLY_STEMS[pillar.stem]!;
+                  const branch = EARTHLY_BRANCHES[pillar.branch]!;
+                  const isDay = key === "day";
+                  // El tronco del pilar de DÍA es el Maestro del Día (日主): referencia
+                  // de todos los Diez Dioses. Él mismo no tiene Dios (sería 比肩 trivial).
+                  const dayMaster = data.day.stem;
                   return (
-                    <View key={key} style={styles.col}>
+                    <Card key={key} style={[styles.col, isDay && styles.dayCol]}>
+                      {isDay && (
+                        <View style={styles.dayBadge}>
+                          <Text style={styles.dayBadgeText} numberOfLines={1}>
+                            {t("pilares.dayMasterHanzi")} · {t("pilares.dayMaster")}
+                          </Text>
+                        </View>
+                      )}
+                      {pro && (
+                        <View style={[styles.godBadge, isDay && styles.godBadgeSelf]}>
+                          <Text style={[styles.godText, isDay && styles.godTextSelf]}>
+                            {isDay ? t("pilares.dayMasterHanzi") : content.ui.god[tenGod(dayMaster, pillar.stem)]}
+                          </Text>
+                        </View>
+                      )}
                       <Text style={styles.colLabel}>{content.ui.position[key]}</Text>
-                      <Text style={styles.empty}>—</Text>
-                    </View>
+                      <Text style={[styles.char, { color: EL_COLOR[stem.element] }]}>
+                        {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
+                      </Text>
+                      <Text style={styles.roman}>
+                        {script === "hangul"
+                          ? STEM_LABELS[pillar.stem]!.romanKo
+                          : STEM_LABELS[pillar.stem]!.pinyin}
+                      </Text>
+                      <Text style={[styles.char, { color: EL_COLOR[branch.element] }]}>
+                        {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+                      </Text>
+                      <Text style={styles.roman}>
+                        {script === "hangul"
+                          ? BRANCH_LABELS[pillar.branch]!.romanKo
+                          : BRANCH_LABELS[pillar.branch]!.pinyin}
+                      </Text>
+                      <Text style={styles.animal}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
+                      {pro && (
+                        <View style={styles.hiddenWrap}>
+                          <Text style={styles.hiddenLabel}>{t("pilares.hiddenStems")}</Text>
+                          {hiddenStems(pillar.branch).map((hs, j) => {
+                            const hidden = HEAVENLY_STEMS[hs]!;
+                            return (
+                              <View key={j} style={styles.hiddenRow}>
+                                <Text style={[styles.hiddenChar, { color: EL_COLOR[hidden.element] }]}>
+                                  {hidden.hanzi}
+                                </Text>
+                                <Text style={styles.hiddenGod}>{content.ui.god[tenGod(dayMaster, hs)]}</Text>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </Card>
                   );
-                }
-                const stem = HEAVENLY_STEMS[pillar.stem]!;
-                const branch = EARTHLY_BRANCHES[pillar.branch]!;
-                const isDay = key === "day";
-                // El tronco del pilar de DÍA es el Maestro del Día (日主): referencia
-                // de todos los Diez Dioses. Él mismo no tiene Dios (sería 比肩 trivial).
-                const dayMaster = data.day.stem;
-                return (
-                  <View key={key} style={[styles.col, isDay && styles.dayCol]}>
-                    <Text style={styles.colLabel}>{content.ui.position[key]}</Text>
-                    {pro && (
-                      <View style={[styles.godBadge, isDay && styles.godBadgeSelf]}>
-                        <Text style={[styles.godText, isDay && styles.godTextSelf]}>
-                          {isDay ? t("pilares.dayMasterHanzi") : content.ui.god[tenGod(dayMaster, pillar.stem)]}
-                        </Text>
-                      </View>
-                    )}
-                    <Text style={[styles.char, { color: EL_COLOR[stem.element] }]}>
-                      {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
-                    </Text>
-                    <Text style={styles.roman}>
-                      {script === "hangul"
-                        ? STEM_LABELS[pillar.stem]!.romanKo
-                        : STEM_LABELS[pillar.stem]!.pinyin}
-                    </Text>
-                    <Text style={[styles.char, { color: EL_COLOR[branch.element] }]}>
-                      {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
-                    </Text>
-                    <Text style={styles.roman}>
-                      {script === "hangul"
-                        ? BRANCH_LABELS[pillar.branch]!.romanKo
-                        : BRANCH_LABELS[pillar.branch]!.pinyin}
-                    </Text>
-                    <Text style={styles.animal}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
-                    {isDay && <Text style={styles.dayTag}>{t("pilares.dayMaster")}</Text>}
-                    {pro && (
-                      <View style={styles.hiddenWrap}>
-                        <Text style={styles.hiddenLabel}>{t("pilares.hiddenStems")}</Text>
-                        {hiddenStems(pillar.branch).map((hs, j) => {
-                          const hidden = HEAVENLY_STEMS[hs]!;
-                          return (
-                            <View key={j} style={styles.hiddenRow}>
-                              <Text style={[styles.hiddenChar, { color: EL_COLOR[hidden.element] }]}>
-                                {hidden.hanzi}
-                              </Text>
-                              <Text style={styles.hiddenGod}>{content.ui.god[tenGod(dayMaster, hs)]}</Text>
-                            </View>
-                          );
-                        })}
-                      </View>
-                    )}
-                  </View>
-                );
-              })}
-            </View>
+                })}
+              </View>
+            </FadeIn>
 
             {/* Modo Pro */}
             <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
@@ -251,17 +260,19 @@ export default function PilaresScreen() {
             </Pressable>
             {pro && <Text style={styles.proHint}>{t("pilares.modeProHint")}</Text>}
 
-            {/* Conmutador de escritura (漢字 ↔ 한글) */}
+            {/* Conmutador de escritura (漢字 ↔ 한글) — chips canónicos del rediseño */}
             {pro && (
               <View style={styles.scriptRow}>
                 {(["hanzi", "hangul"] as const).map((s) => {
                   const on = script === s;
                   return (
-                    <Pressable key={s} style={[styles.kindChip, on && styles.kindChipOn]} onPress={() => setScript(s)}>
-                      <Text style={[styles.kindText, on && styles.kindTextOn]}>
-                        {t(s === "hanzi" ? "pilares.scriptBazi" : "pilares.scriptSaju")}
-                      </Text>
-                    </Pressable>
+                    <Chip
+                      key={s}
+                      kind="control"
+                      label={t(s === "hanzi" ? "pilares.scriptBazi" : "pilares.scriptSaju")}
+                      selected={on}
+                      onPress={() => setScript(s)}
+                    />
                   );
                 })}
               </View>
@@ -270,23 +281,30 @@ export default function PilaresScreen() {
             {!data.timeKnown && <Text style={styles.note}>{t("pilares.noTime")}</Text>}
 
             {/* Balance de elementos */}
-            <Text style={styles.section}>{t("pilares.balance")}</Text>
-            <View style={styles.balanceCard}>
-              {ELEMENTS.map((el) => (
-                <View key={el} style={styles.balRow}>
-                  <Text style={styles.balLabel}>{elName(el)}</Text>
-                  <View style={styles.balTrack}>
-                    <View
-                      style={[
-                        styles.balFill,
-                        { width: `${((counts[el] ?? 0) / totalEls) * 100}%`, backgroundColor: EL_COLOR[el] },
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.balN}>{counts[el] ?? 0}</Text>
-                </View>
-              ))}
-            </View>
+            <FadeIn delay={60} style={styles.fadeFull}>
+              <SectionCard styles={styles} title={t("pilares.balance")}>
+                {ELEMENTS.map((el) => {
+                  const n = counts[el] ?? 0;
+                  const empty = n === 0;
+                  return (
+                    <View key={el} style={styles.balRow}>
+                      <Text style={styles.balLabel}>{elName(el)}</Text>
+                      <View style={[styles.balTrack, empty && styles.balTrackEmpty]}>
+                        {!empty && (
+                          <View
+                            style={[
+                              styles.balFill,
+                              { width: `${(n / totalEls) * 100}%`, backgroundColor: EL_COLOR[el] },
+                            ]}
+                          />
+                        )}
+                      </View>
+                      <Text style={styles.balN}>{n}</Text>
+                    </View>
+                  );
+                })}
+              </SectionCard>
+            </FadeIn>
 
             {/* Lámina Pro: las 8 secciones */}
             {pro && (
@@ -349,7 +367,10 @@ export default function PilaresScreen() {
   );
 }
 
-function Card({
+/** Tarjeta con título "eyebrow" (BALANCE/NAYIN/...) sobre el primitivo <Card>.
+ * Renombrada de "Card" a "SectionCard" para no chocar con el primitivo importado
+ * (misma convención que carta.tsx/numeros.tsx). */
+function SectionCard({
   styles,
   title,
   children,
@@ -359,10 +380,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.card}>
+    <Card style={styles.card}>
       <Text style={styles.cardH}>{title}</Text>
       {children}
-    </View>
+    </Card>
   );
 }
 
@@ -380,7 +401,7 @@ function NayinSection({
   glyphPillar: (p: Pillar) => string;
 }) {
   return (
-    <Card styles={styles} title={t("pilares.nayinTitle")}>
+    <SectionCard styles={styles} title={t("pilares.nayinTitle")}>
       {entries.map((e, i) => {
         const n = nayin(e.pillar);
         return (
@@ -393,7 +414,7 @@ function NayinSection({
           </View>
         );
       })}
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -409,15 +430,26 @@ function StrengthSection({
   strength: ReturnType<typeof dayMasterStrength>;
 }) {
   return (
-    <Card styles={styles} title={t("pilares.strengthTitle")}>
+    <SectionCard styles={styles} title={t("pilares.strengthTitle")}>
       <View style={styles.meterRow}>
-        <Text style={styles.verdict}>{content.verdicts[strength.verdict]}</Text>
+        {/* Verdicto en pill bordeada (receta "tag-chip" del mockup) en vez del texto
+           suelto anterior — mismo `content.verdicts[strength.verdict]`, cero dato nuevo. */}
+        <View style={styles.verdictTag}>
+          <Text style={styles.verdictTagText}>{content.verdicts[strength.verdict]}</Text>
+        </View>
         {/* El medidor usa `score` (0-100, capado); el número mostrado usa `raw` (suma
            exacta de los drivers) para no contradecir el desglose de abajo — Task 5. */}
-        <View style={styles.meterTrack}>
-          <View style={[styles.meterFill, { width: `${strength.score}%` }]} />
-        </View>
         <Text style={styles.meterScore}>{strength.raw}</Text>
+      </View>
+      <View style={styles.meterTrack}>
+        <View style={[styles.meterFill, { width: `${strength.score}%` }]} />
+      </View>
+      {/* Etiquetas del eje (Débil/Equilibrado/Fuerte) — mismas claves i18n que ya usa
+         `content.verdicts[strength.verdict]` arriba, sin contenido nuevo. */}
+      <View style={styles.meterLabels}>
+        <Text style={styles.meterLabelText}>{content.verdicts.weak}</Text>
+        <Text style={styles.meterLabelText}>{content.verdicts.balanced}</Text>
+        <Text style={styles.meterLabelText}>{content.verdicts.strong}</Text>
       </View>
       <Text style={styles.subRow}>
         {t("pilares.seasonState")}: {content.seasonStates[strength.seasonState]}
@@ -433,7 +465,7 @@ function StrengthSection({
         ))}
       </View>
       <Text style={styles.method}>{t("pilares.strengthMethod")}</Text>
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -453,7 +485,7 @@ function FavorSection({
   elName: (el: string) => string;
 }) {
   return (
-    <Card styles={styles} title={t("pilares.favorTitle")}>
+    <SectionCard styles={styles} title={t("pilares.favorTitle")}>
       {strength.verdict === "balanced" ? (
         <Text style={styles.note}>{t("pilares.balancedNote")}</Text>
       ) : (
@@ -475,7 +507,7 @@ function FavorSection({
           </View>
         </>
       )}
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -507,7 +539,7 @@ function LuckSection({
   setOpenDecade: (n: number | null) => void;
 }) {
   return (
-    <Card styles={styles} title={t("pilares.luckTitle")}>
+    <SectionCard styles={styles} title={t("pilares.luckTitle")}>
       {gender === "neutral" && <Text style={styles.note}>{t("pilares.luckNeutralNote")}</Text>}
       {!timeKnown && <Text style={styles.note}>{t("pilares.luckNoTimeNote")}</Text>}
       {sequences.map((seq) => (
@@ -525,7 +557,7 @@ function LuckSection({
           setOpenDecade={setOpenDecade}
         />
       ))}
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -631,7 +663,7 @@ function StagesSection({
   script: "hanzi" | "hangul";
 }) {
   return (
-    <Card styles={styles} title={t("pilares.stagesTitle")}>
+    <SectionCard styles={styles} title={t("pilares.stagesTitle")}>
       {entries.map((e, i) => {
         const st = lifeStage(dayStem, e.pillar.branch);
         const def = TWELVE_STAGES.find((x) => x.key === st)!;
@@ -645,7 +677,7 @@ function StagesSection({
           </View>
         );
       })}
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -663,7 +695,7 @@ function InteractionsSection({
   elName: (el: string) => string;
 }) {
   return (
-    <Card styles={styles} title={t("pilares.interactionsTitle")}>
+    <SectionCard styles={styles} title={t("pilares.interactionsTitle")}>
       {interactions.length === 0 ? (
         <Text style={styles.note}>{t("pilares.interactionsEmpty")}</Text>
       ) : (
@@ -677,7 +709,7 @@ function InteractionsSection({
           </View>
         ))
       )}
-    </Card>
+    </SectionCard>
   );
 }
 
@@ -695,7 +727,7 @@ function StarsSection({
   script: "hanzi" | "hangul";
 }) {
   return (
-    <Card styles={styles} title={t("pilares.starsTitle")}>
+    <SectionCard styles={styles} title={t("pilares.starsTitle")}>
       {stars.length === 0 ? (
         <Text style={styles.note}>—</Text>
       ) : (
@@ -712,63 +744,90 @@ function StarsSection({
           })}
         </View>
       )}
-    </Card>
+    </SectionCard>
   );
 }
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
-    sky: { position: "absolute", top: 0, left: 0, right: 0, height: 360 },
+    root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
-    emptyText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
+    emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: 12, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sans },
-    h1: { color: t.text, fontSize: 28, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
+    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
 
-    note: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.md, lineHeight: 19 },
-    section: {
-      color: t.textFaint, fontSize: 11, letterSpacing: 2, textTransform: "uppercase", fontFamily: fonts.sans,
-      marginTop: space.xl, marginBottom: space.md, alignSelf: "flex-start",
-    },
+    note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.md, lineHeight: 19 },
 
-    // Rejilla de los 4 pilares
+    // <FadeIn> envuelve secciones que ya declaran width:"100%" (necesario porque `scroll`
+    // centra sus hijos con alignItems — mismo motivo que carta.tsx/numeros.tsx).
+    fadeFull: { width: "100%" },
+
+    // Rejilla de los 4 pilares — cada columna es ahora un <Card>.
     grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%", marginBottom: space.lg },
+    // Ancho/alineación del ítem de grilla; borde/fondo/radio los da <Card>. El padding
+    // vertical/horizontal más ajustado que el de <Card> (space.xl) SÍ pisa el default:
+    // mismo mecanismo que `cell` en numeros.tsx — paddingVertical/Horizontal explícitos
+    // ganan sobre el `padding` general de la tarjeta en la resolución de bordes de Yoga.
     col: {
       flexBasis: "22%", flexGrow: 1, minWidth: 72, alignItems: "center", gap: 4,
       paddingVertical: space.md, paddingHorizontal: space.xs,
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.md, backgroundColor: t.panelSoft,
     },
-    dayCol: { borderColor: t.accSoft },
-    colLabel: { color: t.textDim, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, fontWeight: "700" },
-    char: { fontSize: 26, fontFamily: fonts.serif, fontWeight: "600", marginTop: 2 },
-    roman: { color: t.textFaint, fontSize: 11, fontFamily: fonts.sans, marginTop: -2 },
-    animal: { color: t.textDim, fontSize: 11, fontFamily: fonts.sans, marginTop: 2 },
-    empty: { color: t.textFaint, fontSize: 22, opacity: 0.5, marginTop: space.md },
-    dayTag: {
-      marginTop: 4, fontSize: 8.5, letterSpacing: 0.5, textTransform: "uppercase", color: t.acc,
-      borderWidth: 1, borderColor: t.accSoft, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 2,
-      fontFamily: fonts.sans, textAlign: "center",
+    // Pilar del DÍA destacado (日主): cambia el borde (más grueso, en el acento del tema)
+    // — mismo fondo que sus hermanos, igual que `.pillar.day` en el mockup. overflow:
+    // "visible" explícito (defensivo): la pill del badge vive fuera del cuadro de la
+    // card (top negativo) y esta Card tiene borderRadius — RN 0.85/Expo 56 corre sobre
+    // New Architecture (Fabric), donde el viejo bug de Android que recortaba hijos
+    // absolutos negativos contra padres con radius+clipping ya no aplica, pero se deja
+    // explícito por las dudas (no tiene costo).
+    dayCol: { borderColor: t.accSoft, borderWidth: 1.5, overflow: "visible" },
+    colLabel: { color: t.textDim, fontSize: typeScale.xs2, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sansBold },
+    // Hanzi grandes de la rejilla: fonts.serifSemi a type.xl3 (política de esta tarea).
+    char: { fontSize: typeScale.xl3, fontFamily: fonts.serifSemi, marginTop: 2 },
+    // Pinyin/romanización: type.xs fonts.sans (política de esta tarea).
+    roman: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.sans, marginTop: -2 },
+    animal: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans, marginTop: 2 },
+    // Guion de pilar ausente (sin hora de nacimiento): a la misma escala que los hanzi
+    // de sus hermanos para no desentonar en la fila.
+    empty: { color: t.textFaint, fontSize: typeScale.xl3, opacity: 0.5, marginTop: space.md },
+
+    // Badge 日主 · Maestro del Día del pilar del día — pill flotante ABSOLUTA (receta
+    // `.pillar-badge` del mockup: position:absolute, top:-11, centrada), no hijo en flujo
+    // normal. Motivo (hallazgo Important del review de b29457c): el texto completo
+    // ("日主 · Maestro del Día", ~20 chars) no cabe en el presupuesto real de una columna
+    // de ~80pt a fontSize xs2 — como hijo en flujo envolvía a 2-3 líneas, crecía el alto
+    // de la columna del día y, al no declarar `grid.alignItems` (stretch por defecto de
+    // RN), estiraba las otras 3 Cards de la fila. Al sacarla del flujo con position:
+    // absolute vive fuera del constraint de ancho de la card, igual que en el mockup.
+    // alignSelf:"center" sigue funcionando para centrar un hijo absoluto sin left/right/
+    // transform: Yoga respeta alignSelf (o el alignItems del padre) en el eje no
+    // restringido por top/bottom de un nodo absoluto. numberOfLines={1} en el Text es
+    // cinturón extra por si el dispositivo tiene fuente accesible más grande.
+    dayBadge: {
+      position: "absolute", top: -11, alignSelf: "center", zIndex: 1,
+      borderWidth: 1, borderColor: t.accSoft, borderRadius: radius.pill,
+      backgroundColor: t.accFaint, paddingHorizontal: space.sm, paddingVertical: 3,
     },
+    dayBadgeText: { color: t.acc, fontSize: typeScale.xs2, fontFamily: fonts.sansBold, letterSpacing: 0.3 },
 
     godBadge: {
       borderWidth: 1, borderColor: t.accHair, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2,
       minHeight: 22, alignItems: "center", justifyContent: "center", marginTop: 2,
     },
     godBadgeSelf: { borderColor: "transparent", backgroundColor: t.accFaint },
-    godText: { color: t.acc, fontSize: 8.5, fontWeight: "700", letterSpacing: 0.3, textTransform: "uppercase", fontFamily: fonts.sans, textAlign: "center" },
-    godTextSelf: { fontSize: 11 },
+    godText: { color: t.acc, fontSize: typeScale.xs2, fontFamily: fonts.sansBold, letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center" },
+    godTextSelf: { fontSize: typeScale.xs },
 
     hiddenWrap: {
       width: "100%", marginTop: 4, paddingTop: space.sm,
       borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.accHair, gap: 4, alignItems: "center",
     },
-    hiddenLabel: { color: t.textFaint, fontSize: 7.5, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: fonts.sans, fontWeight: "700", textAlign: "center", opacity: 0.85 },
+    hiddenLabel: { color: t.textFaint, fontSize: typeScale.xs2, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: fonts.sansBold, textAlign: "center", opacity: 0.85 },
     hiddenRow: { alignItems: "center", gap: 1 },
-    hiddenChar: { fontSize: 14, fontWeight: "600", fontFamily: fonts.serif },
-    hiddenGod: { color: t.textDim, fontSize: 8, fontFamily: fonts.sans, textAlign: "center" },
+    hiddenChar: { fontSize: typeScale.sm, fontFamily: fonts.serifSemi },
+    hiddenGod: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans, textAlign: "center" },
 
     proToggle: {
       flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.lg, alignSelf: "center",
@@ -776,63 +835,74 @@ function makeStyles(t: ThemeTokens) {
     },
     proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
     proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: 15, letterSpacing: 1, fontFamily: fonts.sans },
-    proHint: { color: t.textDim, fontSize: 12, fontStyle: "italic", fontFamily: fonts.serif, textAlign: "center", marginTop: space.sm },
+    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
+    proHint: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.sm },
 
+    // Conmutador 漢字/한글 — ahora <Chip kind="control"> (patrón de carta.tsx); esta fila
+    // solo reparte los chips, ya no lleva estilos propios de chip.
     scriptRow: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginTop: space.md },
-    kindChip: {
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill,
-      paddingHorizontal: space.lg, paddingVertical: space.sm + 2, backgroundColor: t.panelSoft,
-    },
-    kindChipOn: { borderColor: t.acc, backgroundColor: t.accFaint },
-    kindText: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans },
-    kindTextOn: { color: t.acc, fontWeight: "600" },
 
-    balanceCard: { width: "100%", gap: space.sm },
     balRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xs },
-    balLabel: { color: t.textDim, fontSize: 12, fontFamily: fonts.sans, width: 64 },
+    balLabel: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 64 },
     balTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.accHair, overflow: "hidden" },
+    // Elemento ausente (count 0): pista vacía con borde punteado, sin relleno — igual
+    // que `.bal-track.empty` del mockup (la barra de Agua "visiblemente vacía").
+    balTrackEmpty: { borderStyle: "dashed", backgroundColor: "transparent" },
     balFill: { height: "100%", borderRadius: 4 },
-    balN: { color: t.textFaint, fontSize: 12, fontFamily: fonts.sans, width: 18, textAlign: "right" },
+    balN: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 18, textAlign: "right" },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
-    card: {
-      width: "100%", borderWidth: 1, borderColor: t.accHair, borderRadius: radius.lg,
-      backgroundColor: t.panelSoft, padding: space.xl,
-    },
-    cardH: { color: t.acc, fontSize: 13, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sans },
+    // Fondo/borde/radio/padding ahora los da <Card>; queda solo el ancho (mismo motivo
+    // que carta.tsx/numeros.tsx SectionCard).
+    card: { width: "100%" },
+    cardH: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
 
     row: {
       flexDirection: "row", alignItems: "baseline", gap: space.md, paddingVertical: space.sm,
       borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    rowLabel: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, width: 64 },
-    rowGlyph: { color: t.text, fontSize: 18, fontFamily: fonts.serif },
-    rowValue: { flex: 1, color: t.text, fontSize: 14, fontFamily: fonts.sans },
-    subRow: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, marginTop: space.md, marginBottom: space.xs },
-    method: { color: t.textFaint, fontSize: 12, fontStyle: "italic", fontFamily: fonts.serif, marginTop: space.md },
+    rowLabel: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, width: 64 },
+    rowGlyph: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif },
+    rowValue: { flex: 1, color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    subRow: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, marginTop: space.md, marginBottom: space.xs },
+    method: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, marginTop: space.md },
 
-    meterRow: { flexDirection: "row", alignItems: "center", gap: space.md },
-    verdict: { color: t.text, fontSize: 18, fontFamily: fonts.serif, fontStyle: "italic" },
-    meterTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: t.accHair, overflow: "hidden" },
+    meterRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.sm },
+    // Verdicto en pill bordeada (receta "tag-chip" del mockup) en vez del texto suelto
+    // grande anterior — mismo dato (`content.verdicts[strength.verdict]`).
+    verdictTag: {
+      borderWidth: 1, borderColor: t.accHair, backgroundColor: t.accFaint, borderRadius: radius.pill,
+      paddingHorizontal: space.md, paddingVertical: 4,
+    },
+    verdictTagText: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sansSemi, letterSpacing: 0.3 },
+    meterTrack: { height: 6, borderRadius: 3, backgroundColor: t.accHair, overflow: "hidden" },
     meterFill: { height: "100%", backgroundColor: t.acc, borderRadius: 3 },
-    meterScore: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, minWidth: 24, textAlign: "right" },
+    meterScore: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, minWidth: 24, textAlign: "right" },
+    // Etiquetas del eje del medidor (Débil/Equilibrado/Fuerte) — mismas claves i18n que
+    // ya consume `content.verdicts[strength.verdict]` arriba: cero contenido nuevo.
+    meterLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: space.xs },
+    meterLabelText: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans, textTransform: "uppercase", letterSpacing: 0.5 },
 
     drivers: { marginTop: space.md, gap: 4 },
     driver: { flexDirection: "row", justifyContent: "space-between" },
-    driverLabel: { color: t.textDim, fontSize: 13, fontFamily: fonts.sans, flexShrink: 1, paddingRight: space.sm },
-    driverPts: { color: t.acc, fontSize: 13, fontFamily: fonts.sans },
+    driverLabel: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, flexShrink: 1, paddingRight: space.sm },
+    driverPts: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+    // Chips de Favor/Evitar y de Estrellas: NO migrados al primitivo <Chip> — codifican
+    // un color dinámico por elemento (EL_COLOR) o llevan borde de pill que el primitivo
+    // compartido no ofrece en su variante "tag" (gap conocido de ui.tsx, ver informe).
+    // Migrarlos perdería el color-coding Wu Xing (regla dura de esta tarea) o rompería
+    // la consistencia visual entre ambas secciones — quedan como locales legítimos.
     chip: {
       borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill,
       paddingHorizontal: space.md, paddingVertical: space.xs + 2,
     },
     chipDim: { opacity: 0.6 },
-    chipText: { color: t.text, fontSize: 13, fontFamily: fonts.sans },
-    chipTextOn: { color: "#fff", fontSize: 13, fontFamily: fonts.sans, fontWeight: "600" },
-    mark: { color: t.acc, fontSize: 12, fontFamily: fonts.sans },
+    chipText: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    chipTextOn: { color: "#fff", fontSize: typeScale.sm, fontFamily: fonts.sansSemi },
+    mark: { color: t.acc, fontSize: typeScale.xs, fontFamily: fonts.sans },
 
     luckBlock: { marginTop: space.sm },
     luckScroll: { marginTop: space.sm },
@@ -842,11 +912,11 @@ function makeStyles(t: ThemeTokens) {
     },
     luckNow: { borderColor: t.acc },
     luckOpen: { backgroundColor: t.panel },
-    luckAge: { color: t.textDim, fontSize: 11, fontFamily: fonts.sans },
-    luckGlyph: { color: t.text, fontSize: 20, fontFamily: fonts.serif },
-    luckGod: { color: t.text, fontSize: 11, fontFamily: fonts.sans },
-    luckNayin: { color: t.textFaint, fontSize: 10, fontFamily: fonts.sans },
-    luckTag: { color: t.acc, fontSize: 9, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, marginTop: 2 },
+    luckAge: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans },
+    luckGlyph: { color: t.text, fontSize: typeScale.xl, fontFamily: fonts.serif },
+    luckGod: { color: t.text, fontSize: typeScale.xs2, fontFamily: fonts.sans },
+    luckNayin: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans },
+    luckTag: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, marginTop: 2 },
     annual: { marginTop: space.md },
   });
 }

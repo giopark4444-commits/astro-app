@@ -2,7 +2,7 @@
 // Llama /api/bazi con Bearer (patrón de chart-api.ts). El motor sexagenario corre
 // client-side desde @aluna/core; el server solo aporta pilares + datos astronómicos.
 import type { Pillar } from "@aluna/core";
-import { API_URL } from "./supabase";
+import { apiUrl } from "./config";
 
 export interface BaZiData {
   year: Pillar;
@@ -20,8 +20,7 @@ export interface BaZiData {
 export class BaZiApiError extends Error {}
 
 export async function fetchBaZi(params: { accessToken: string; profileId: string }): Promise<BaZiData> {
-  if (!API_URL) throw new BaZiApiError("apiUrl no configurado (app.json → expo.extra.apiUrl)");
-  const res = await fetch(`${API_URL}/api/bazi`, {
+  const res = await fetch(`${apiUrl()}/api/bazi`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${params.accessToken}` },
     body: JSON.stringify({ profileId: params.profileId }),

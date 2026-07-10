@@ -4,7 +4,7 @@
 // no con cookies (el móvil no tiene) — ver apps/web/lib/supabase/route-auth.ts.
 
 import type { ChartResult, Aspect, HouseSystem, Zodiac } from "@aluna/core";
-import { API_URL } from "./supabase";
+import { apiUrl } from "./config";
 
 export type ChartKind = "natal" | "transits" | "solar_return" | "progressed";
 
@@ -25,8 +25,7 @@ export interface FetchChartResult {
 export class ChartApiError extends Error {}
 
 export async function fetchChart(params: FetchChartParams): Promise<FetchChartResult> {
-  if (!API_URL) throw new ChartApiError("apiUrl no configurado (app.json → expo.extra.apiUrl)");
-  const res = await fetch(`${API_URL}/api/chart`, {
+  const res = await fetch(`${apiUrl()}/api/chart`, {
     method: "POST",
     headers: {
       "content-type": "application/json",

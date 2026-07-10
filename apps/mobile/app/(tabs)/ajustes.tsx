@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Enso } from "../../components/Enso";
-import { SoonBadge } from "../../components/ui";
+import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme, type ModePref } from "../../lib/theme-context";
@@ -11,7 +11,7 @@ import { useT, type Locale } from "../../lib/i18n-context";
 import { formatPlace } from "../../lib/geocode";
 import { getSupabase } from "../../lib/supabase";
 import type { SubscriptionStatus } from "@aluna/core";
-import { THEMES, THEME_LABELS, fonts, radius, space, type ThemeName, type ThemeTokens } from "../../theme/tokens";
+import { THEMES, THEME_LABELS, fonts, radius, space, type as typeScale, type ThemeName, type ThemeTokens } from "../../theme/tokens";
 
 const prettyDate = (iso: string, locale: Locale) => {
   const [y, m, d] = iso.split("-").map(Number);
@@ -99,6 +99,9 @@ export default function AjustesScreen() {
   ];
 
   return (
+    // Sin backgroundColor propio: Ajustes vive en Tabs, cuya escena ya es transparente
+    // (sceneStyle en (tabs)/_layout.tsx) — el radial + estrellas de ThemedBackground
+    // (capa raíz) quedan visibles detrás. Nunca tuvo <Starfield/> local que quitar.
     <View style={styles.root}>
       <ScrollView
         contentContainerStyle={[
@@ -109,92 +112,115 @@ export default function AjustesScreen() {
       >
         <View style={styles.head}>
           <Enso size={24} />
-          <Text style={styles.title}>{t("settings.title")}</Text>
+          <Text style={styles.title} maxFontSizeMultiplier={1.2}>{t("settings.title")}</Text>
         </View>
 
         {profile && (
-          <View style={styles.card}>
-            <Text style={styles.cardEyebrow}>{t("settings.profile")}</Text>
-            <Text style={styles.profileName}>{profile.name}</Text>
-            <Row styles={styles} label={t("settings.birth")} value={prettyDate(profile.birthDate, locale)} />
-            <Row
-              styles={styles}
-              label={t("settings.time")}
-              value={profile.timeKnown && profile.birthTime ? profile.birthTime : t("settings.timeUnset")}
-            />
-            <Row styles={styles} label={t("settings.place")} value={profile.place ? formatPlace(profile.place) : "—"} />
-            <Row styles={styles} label={t("settings.gender")} value={profile.gender ? genderLabel(profile.gender) : "—"} last />
-          </View>
+          <FadeIn delay={0} style={styles.cardGap}>
+            <Card>
+              <Text style={styles.cardEyebrow}>{t("settings.profile")}</Text>
+              <Text style={styles.profileName}>{profile.name}</Text>
+              <Row styles={styles} label={t("settings.birth")} value={prettyDate(profile.birthDate, locale)} />
+              <Row
+                styles={styles}
+                label={t("settings.time")}
+                value={profile.timeKnown && profile.birthTime ? profile.birthTime : t("settings.timeUnset")}
+              />
+              <Row styles={styles} label={t("settings.place")} value={profile.place ? formatPlace(profile.place) : "—"} />
+              <Row styles={styles} label={t("settings.gender")} value={profile.gender ? genderLabel(profile.gender) : "—"} last />
+            </Card>
+          </FadeIn>
         )}
 
         {/* Apariencia: tema · modo de luz */}
-        <View style={styles.card}>
-          <Text style={styles.cardEyebrow}>{t("settings.appearance")}</Text>
+        <FadeIn delay={60} style={styles.cardGap}>
+          <Card>
+            <Text style={styles.cardEyebrow}>{t("settings.appearance")}</Text>
 
-          <Text style={styles.fieldLabel}>{t("settings.theme")}</Text>
-          <View style={styles.themeRow}>
-            {THEMES.map((th: ThemeName) => {
-              const on = theme === th;
-              return (
-                <Pressable
-                  key={th}
-                  style={[styles.themeChip, on && styles.themeChipOn]}
-                  onPress={() => setTheme(th)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: on }}
-                >
-                  <View style={[styles.swatch, { backgroundColor: SWATCH[th] }]} />
-                  <Text style={[styles.themeChipText, on && styles.themeChipTextOn]}>
-                    {THEME_LABELS[locale][th]}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+            <Text style={styles.fieldLabel}>{t("settings.theme")}</Text>
+            {/* Selector de tema: NO migrado al primitivo <Chip> — lleva una muestra de
+               color (swatch) por tema, algo que la variante "control" del primitivo no
+               ofrece (mismo criterio que los chips de elemento Wu Xing en pilares.tsx:
+               local legítimo, ver informe). */}
+            <View style={styles.themeRow}>
+              {THEMES.map((th: ThemeName) => {
+                const on = theme === th;
+                return (
+                  <Pressable
+                    key={th}
+                    style={[styles.themeChip, on && styles.themeChipOn]}
+                    onPress={() => setTheme(th)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                  >
+                    <View style={[styles.swatch, { backgroundColor: SWATCH[th] }]} />
+                    <Text style={[styles.themeChipText, on && styles.themeChipTextOn]}>
+                      {THEME_LABELS[locale][th]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.lightMode")}</Text>
-          <Segmented
-            styles={styles}
-            options={modeOptions}
-            value={modePref}
-            onChange={(v) => setModePref(v as ModePref)}
-          />
+            {/* El Segmented local migra a fila de <Chip kind="control"> (patrón del
+               rediseño) para modo de luz e idioma — mismos options/handlers de antes. */}
+            <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.lightMode")}</Text>
+            <View style={styles.chipRow}>
+              {modeOptions.map((o) => (
+                <Chip
+                  key={o.id}
+                  kind="control"
+                  label={o.label}
+                  selected={modePref === o.id}
+                  onPress={() => setModePref(o.id)}
+                />
+              ))}
+            </View>
 
-          <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.language")}</Text>
-          <Segmented
-            styles={styles}
-            options={localeOptions}
-            value={locale}
-            onChange={(v) => setLocale(v as Locale)}
-          />
-        </View>
+            <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.language")}</Text>
+            <View style={styles.chipRow}>
+              {localeOptions.map((o) => (
+                <Chip
+                  key={o.id}
+                  kind="control"
+                  label={o.label}
+                  selected={locale === o.id}
+                  onPress={() => setLocale(o.id)}
+                />
+              ))}
+            </View>
+          </Card>
+        </FadeIn>
 
-        {/* Tu plan: solo lectura — el móvil nunca vende, suscribirse es solo en aluna.app */}
-        <View style={styles.card}>
-          <Text style={styles.cardEyebrow}>{t("billing.title")}</Text>
-          {hasManagedSubscription ? (
-            <>
-              <Text style={styles.profileName}>
-                {t(subRow!.status === "trialing" ? "billing.planTrialing" : subRow!.status === "past_due" ? "billing.planPastDue" : "billing.planActive")}
-              </Text>
-              <Text style={styles.muted}>{t("billing.manageNote")}</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.rowLabel}>{t("billing.freeBody")}</Text>
-              <Text style={[styles.muted, { marginTop: space.sm }]}>{t("billing.upsell")}</Text>
-            </>
-          )}
-        </View>
+        {/* Tu plan: solo lectura — el móvil nunca vende, suscribirse es solo en aluna.app.
+           Misma lógica/strings de siempre, solo el envoltorio pasa a <Card>. */}
+        <FadeIn delay={120} style={styles.cardGap}>
+          <Card>
+            <Text style={styles.cardEyebrow}>{t("billing.title")}</Text>
+            {hasManagedSubscription ? (
+              <>
+                <Text style={styles.profileName}>
+                  {t(subRow!.status === "trialing" ? "billing.planTrialing" : subRow!.status === "past_due" ? "billing.planPastDue" : "billing.planActive")}
+                </Text>
+                <Text style={styles.muted}>{t("billing.manageNote")}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.rowLabel}>{t("billing.freeBody")}</Text>
+                <Text style={[styles.muted, { marginTop: space.sm }]}>{t("billing.upsell")}</Text>
+              </>
+            )}
+          </Card>
+        </FadeIn>
 
         {/* Sistemas */}
-        <View style={styles.card}>
+        <Card style={styles.cardGap}>
           <Text style={styles.cardEyebrow}>{t("settings.systems")}</Text>
           <SystemRow styles={styles} name={t("settings.sysNumerology")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysCarta")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysBazi")} status={t("settings.available")} on />
           <SystemRow styles={styles} name={t("settings.sysReadings")} status={t("settings.soon")} last />
-        </View>
+        </Card>
 
         <Pressable style={styles.reset} onPress={confirmReset}>
           <Text style={styles.resetText}>{t("settings.reset")}</Text>
@@ -217,37 +243,6 @@ const SWATCH: Record<ThemeName, string> = {
   aurora: "#c9b8f2",
   cosmic: "#ff8ae0",
 };
-
-function Segmented<T extends string>({
-  styles,
-  options,
-  value,
-  onChange,
-}: {
-  styles: ReturnType<typeof makeStyles>;
-  options: Array<{ id: T; label: string }>;
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <View style={styles.segment}>
-      {options.map((o) => {
-        const on = value === o.id;
-        return (
-          <Pressable
-            key={o.id}
-            style={[styles.segOption, on && styles.segOptionOn]}
-            onPress={() => onChange(o.id)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: on }}
-          >
-            <Text style={[styles.segText, on && styles.segTextOn]}>{o.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 function Row({
   styles,
@@ -291,34 +286,34 @@ function SystemRow({
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
+    root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl },
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.xxl },
-    title: { color: t.text, fontSize: 30, fontFamily: fonts.serif, fontStyle: "italic" },
+    title: { color: t.text, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
 
-    card: {
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.lg,
-      backgroundColor: t.panelSoft,
-      padding: space.xl,
-      marginBottom: space.lg,
-    },
+    // Espaciado entre tarjetas — antes vivía dentro de `card` (marginBottom); ahora
+    // el fondo/borde/radio/padding los da <Card>, esto solo separa una de la próxima
+    // (mismo mecanismo que cardGapLg/cardGapMd en index.tsx).
+    cardGap: { marginBottom: space.lg },
+    // Eyebrow canónico (SPEC), byte-idéntico al de index.tsx/carta.tsx/pilares.tsx:
+    // 11px / letterSpacing 3 / uppercase / Quicksand semibold / acc. Estas tarjetas
+    // no llevan título serif debajo (son eyebrow suelto), así que no encajan en
+    // <SectionHeading> — se queda como Text local con la receta canónica.
     cardEyebrow: {
       color: t.acc,
-      fontSize: 11,
-      letterSpacing: 2,
+      fontSize: typeScale.xs2,
+      letterSpacing: 3,
       textTransform: "uppercase",
       marginBottom: space.md,
-      fontFamily: fonts.sans,
+      fontFamily: fonts.sansSemi,
     },
-    profileName: { color: t.text, fontSize: 24, fontFamily: fonts.serif, fontStyle: "italic", marginBottom: space.lg },
-    muted: { color: t.textFaint, fontSize: 13, fontFamily: fonts.sans },
+    profileName: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifItalic, marginBottom: space.lg },
+    muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     fieldLabel: {
       color: t.textDim,
-      fontSize: 12,
+      fontSize: typeScale.xs,
       letterSpacing: 1,
       textTransform: "uppercase",
       marginBottom: space.md,
@@ -326,7 +321,8 @@ function makeStyles(t: ThemeTokens) {
     },
     fieldLabelGap: { marginTop: space.xl },
 
-    // Selector de tema: chips con muestra de color + nombre.
+    // Selector de tema: chips con muestra de color + nombre — local legítimo (ver
+    // comentario junto al JSX): el primitivo <Chip> no tiene variante con swatch.
     themeRow: { flexDirection: "row", gap: space.sm },
     themeChip: {
       flex: 1,
@@ -341,22 +337,11 @@ function makeStyles(t: ThemeTokens) {
     },
     themeChipOn: { borderColor: t.acc, backgroundColor: t.accFaint },
     swatch: { width: 22, height: 22, borderRadius: 11, borderWidth: StyleSheet.hairlineWidth, borderColor: t.accHair },
-    themeChipText: { color: t.textDim, fontSize: 12, fontFamily: fonts.sans, textAlign: "center" },
+    themeChipText: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans, textAlign: "center" },
     themeChipTextOn: { color: t.acc },
 
-    // Control segmentado (modo de luz, idioma).
-    segment: {
-      flexDirection: "row",
-      backgroundColor: t.panel,
-      borderRadius: radius.pill,
-      padding: 4,
-      borderWidth: 1,
-      borderColor: t.accHair,
-    },
-    segOption: { flex: 1, paddingVertical: space.sm + 2, alignItems: "center", borderRadius: radius.pill },
-    segOptionOn: { backgroundColor: t.accFaint },
-    segText: { color: t.textDim, fontSize: 14, fontFamily: fonts.sans },
-    segTextOn: { color: t.acc, fontWeight: "600" },
+    // Fila de chips del primitivo (modo de luz, idioma) — reemplaza al Segmented local.
+    chipRow: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
 
     row: {
       flexDirection: "row",
@@ -367,10 +352,10 @@ function makeStyles(t: ThemeTokens) {
       borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    rowLabel: { color: t.textDim, fontSize: 14, fontFamily: fonts.sans },
-    rowValue: { color: t.text, fontSize: 14, fontFamily: fonts.sans, flexShrink: 1, textAlign: "right", marginLeft: space.lg },
-    systemName: { color: t.text, fontSize: 15 },
-    systemOn: { color: t.acc, fontSize: 12, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans },
+    rowLabel: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
+    rowValue: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sans, flexShrink: 1, textAlign: "right", marginLeft: space.lg },
+    systemName: { color: t.text, fontSize: typeScale.md },
+    systemOn: { color: t.acc, fontSize: typeScale.xs, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans },
 
     reset: {
       borderWidth: 1,
@@ -380,11 +365,11 @@ function makeStyles(t: ThemeTokens) {
       alignItems: "center",
       marginTop: space.md,
     },
-    resetText: { color: t.acc, fontSize: 15, letterSpacing: 0.5, fontFamily: fonts.sans },
+    resetText: { color: t.acc, fontSize: typeScale.md, letterSpacing: 0.5, fontFamily: fonts.sans },
     logout: { marginTop: space.md, borderColor: t.warnSoft },
     logoutText: { color: t.warn },
 
-    footNote: { color: t.textDim, fontSize: 13, textAlign: "center", marginTop: space.xxl, fontFamily: fonts.serif, fontStyle: "italic" },
-    version: { color: t.textFaint, fontSize: 12, textAlign: "center", marginTop: space.sm, lineHeight: 18, fontFamily: fonts.sans },
+    footNote: { color: t.textDim, fontSize: typeScale.sm, textAlign: "center", marginTop: space.xxl, fontFamily: fonts.serifItalic },
+    version: { color: t.textFaint, fontSize: typeScale.xs, textAlign: "center", marginTop: space.sm, lineHeight: 18, fontFamily: fonts.sans },
   });
 }

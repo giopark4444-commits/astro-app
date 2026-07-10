@@ -2,16 +2,16 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { computeNumerology, type NumerologyResult, type ReductionTrace } from "@aluna/core";
-import { Starfield } from "../../components/Starfield";
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { NumberReading } from "../../components/NumberReading";
+import { Card, Chip, FadeIn } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { profileToNumerologyInput } from "../../lib/profile";
 import { numerologyContent } from "../../content/numerology";
-import { fonts, radius, space, type ThemeTokens } from "../../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 type CoreKey = "expression" | "soulUrge" | "personality" | "birthday" | "maturity";
 const formatReduction = (tr: Pick<ReductionTrace, "steps">) => tr.steps.join("  →  ");
@@ -64,11 +64,9 @@ export default function NumerosScreen() {
   const maxIncl = Math.max(1, ...Object.values(karmic.inclusion));
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: el radial nocturno + estrellas
+    // ya viven en ThemedBackground (capa raíz, Task 2) — esta pantalla queda transparente.
     <View style={styles.root}>
-      <View style={styles.sky} pointerEvents="none">
-        <Starfield count={44} height={420} />
-      </View>
-
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -80,39 +78,53 @@ export default function NumerosScreen() {
           <Text style={styles.eyebrow}>{t("numerology.title")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("numerology.subtitle")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("numerology.subtitle")}</Text>
         <Text style={styles.who}>{profile.name}</Text>
 
-        {/* HERO — Camino de Vida */}
-        <Pressable
-          style={styles.hero}
-          onPress={() => setSheet({ positionKey: "lifePath", trace: core.lifePath })}
-        >
-          <View style={styles.ringOuter}>
-            <View style={styles.ring}>
-              <Text style={styles.heroN}>{core.lifePath.value}</Text>
-            </View>
-          </View>
-          {core.lifePath.isMaster && <Text style={styles.pill}>{t("numerology.master")}</Text>}
-          <Text style={styles.heroLabel}>{labels.lifePath}</Text>
-          <Text style={styles.heroGloss}>{gloss.lifePath}</Text>
-          <Text style={styles.calc}>{formatReduction(core.lifePath)}</Text>
-        </Pressable>
+        {/* HERO — Camino de Vida: tarjeta acentuada (receta "hero" de Hoy), número
+            libre en fonts.serifSemi a type.display, la insignia de número maestro
+            ahora es el chip canónico "tag". */}
+        <FadeIn delay={0} style={styles.heroGap}>
+          <Pressable onPress={() => setSheet({ positionKey: "lifePath", trace: core.lifePath })}>
+            <Card accent style={styles.hero}>
+              <View style={styles.ringOuter}>
+                <View style={styles.ring}>
+                  <Text style={styles.heroN} maxFontSizeMultiplier={1.2}>
+                    {core.lifePath.value}
+                  </Text>
+                </View>
+              </View>
+              {core.lifePath.isMaster && (
+                <View style={styles.masterBadge}>
+                  <Chip kind="tag" label={t("numerology.master")} />
+                </View>
+              )}
+              <Text style={styles.heroLabel}>{labels.lifePath}</Text>
+              <Text style={styles.heroGloss}>{gloss.lifePath}</Text>
+              <Text style={styles.calc}>{formatReduction(core.lifePath)}</Text>
+            </Card>
+          </Pressable>
+        </FadeIn>
 
-        {/* Núcleo */}
-        <View style={styles.grid}>
-          {coreItems.map((it) => (
-            <Pressable
-              key={it.key}
-              style={styles.cell}
-              onPress={() => setSheet({ positionKey: it.key, trace: it.trace })}
-            >
-              <Text style={styles.cellN}>{it.trace.value}</Text>
-              <Text style={styles.cellL}>{labels[it.key]}</Text>
-              <Text style={styles.cellSub}>{gloss[it.key]}</Text>
-            </Pressable>
-          ))}
-        </View>
+        {/* Núcleo: los 5 números conviven en la MISMA escala (type.xl3) — antes
+            tenían tamaños sueltos (34px), justo la inconsistencia que mata el rediseño. */}
+        <FadeIn delay={60} style={styles.fadeFull}>
+          <View style={styles.grid}>
+            {coreItems.map((it) => (
+              <Pressable
+                key={it.key}
+                style={styles.cellPress}
+                onPress={() => setSheet({ positionKey: it.key, trace: it.trace })}
+              >
+                <Card style={styles.cell}>
+                  <Text style={styles.cellN}>{it.trace.value}</Text>
+                  <Text style={styles.cellL}>{labels[it.key]}</Text>
+                  <Text style={styles.cellSub}>{gloss[it.key]}</Text>
+                </Card>
+              </Pressable>
+            ))}
+          </View>
+        </FadeIn>
 
         {/* Toggle Modo Pro */}
         <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
@@ -123,7 +135,7 @@ export default function NumerosScreen() {
         {pro && (
           <View style={styles.proBody}>
             {/* Lecciones y deudas kármicas */}
-            <Card styles={styles} title={t("numerology.karmicLessons")}>
+            <SectionCard styles={styles} title={t("numerology.karmicLessons")}>
               <View style={styles.chips}>
                 {karmic.lessons.length ? (
                   karmic.lessons.map((n) => (
@@ -147,10 +159,10 @@ export default function NumerosScreen() {
                   </View>
                 </>
               )}
-            </Card>
+            </SectionCard>
 
             {/* Tabla de inclusión */}
-            <Card styles={styles} title={t("numerology.inclusion")}>
+            <SectionCard styles={styles} title={t("numerology.inclusion")}>
               <View style={styles.incl}>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => {
                   const c = karmic.inclusion[d] ?? 0;
@@ -169,23 +181,23 @@ export default function NumerosScreen() {
                   {t("numerology.hiddenPassion")}: {karmic.hiddenPassion.join(", ")}
                 </Text>
               )}
-            </Card>
+            </SectionCard>
 
             {/* Pináculos y desafíos */}
-            <Card styles={styles} title={t("numerology.pinnacles")}>
+            <SectionCard styles={styles} title={t("numerology.pinnacles")}>
               <Timeline styles={styles} items={pinnacles.map((p) => ({ value: p.value, age: ageLabel(p.startAge, p.endAge) }))} />
               <Text style={styles.cardSub}>{t("numerology.challenges")}</Text>
               <Timeline styles={styles} items={challenges.map((c) => ({ value: c.value, age: ageLabel(c.startAge, c.endAge) }))} />
-            </Card>
+            </SectionCard>
 
             {/* Ciclos del momento */}
-            <Card styles={styles} title={t("numerology.cycles")}>
+            <SectionCard styles={styles} title={t("numerology.cycles")}>
               <View style={styles.cycles}>
                 <Cyc styles={styles} value={cycles.personalYear.value} label={t("numerology.personalYear")} />
                 <Cyc styles={styles} value={cycles.personalMonth.value} label={t("numerology.personalMonth")} />
                 <Cyc styles={styles} value={cycles.personalDay.value} label={t("numerology.personalDay")} />
               </View>
-            </Card>
+            </SectionCard>
           </View>
         )}
 
@@ -203,7 +215,10 @@ export default function NumerosScreen() {
   );
 }
 
-function Card({
+/** Tarjeta con título "eyebrow" (LECCIONES/INCLUSIÓN/...) sobre el primitivo <Card>.
+ * Renombrada de "Card" a "SectionCard" para no chocar con el primitivo importado
+ * (misma convención que carta.tsx). */
+function SectionCard({
   styles,
   title,
   children,
@@ -213,10 +228,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.card}>
+    <Card style={styles.card}>
       <Text style={styles.cardH}>{title}</Text>
       {children}
-    </View>
+    </Card>
   );
 }
 
@@ -258,25 +273,28 @@ function Cyc({
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
-    sky: { position: "absolute", top: 0, left: 0, right: 0, height: 420 },
+    root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
-    emptyText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
+    emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: 12, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sans },
-    h1: { color: t.text, fontSize: 30, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center" },
+    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center" },
     who: {
       color: t.textDim,
-      fontSize: 15,
+      fontSize: typeScale.md,
       marginTop: space.xs,
       marginBottom: space.xxl,
-      fontFamily: fonts.serif,
-      fontStyle: "italic",
+      fontFamily: fonts.serifItalic,
     },
 
-    hero: { alignItems: "center", marginBottom: space.xxl },
+    // FadeIn del hero: el marginBottom que antes vivía en el propio Pressable/hero
+    // ahora vive en el wrapper de entrada (misma convención que Hoy/Carta).
+    heroGap: { marginBottom: space.xxl },
+    // Tarjeta acentuada (--surface-2 del SPEC): fondo/borde/radio/padding los da
+    // <Card accent>; acá solo el centrado de los hijos.
+    hero: { alignItems: "center" },
     ringOuter: {
       width: 188,
       height: 188,
@@ -296,39 +314,29 @@ function makeStyles(t: ThemeTokens) {
       borderColor: t.accSoft,
       backgroundColor: t.panelSoft,
     },
-    heroN: { color: t.acc, fontSize: 76, fontFamily: fonts.serif, lineHeight: 84 },
-    pill: {
-      marginTop: space.lg,
-      color: t.acc,
-      fontSize: 11,
-      letterSpacing: 1.5,
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.pill,
-      paddingHorizontal: space.md,
-      paddingVertical: 3,
-      overflow: "hidden",
+    // Número héroe: fonts.serifSemi a type.display (política de la pasada de pantalla).
+    heroN: { color: t.acc, fontSize: typeScale.display, fontFamily: fonts.serifSemi, lineHeight: 64 },
+    masterBadge: { marginTop: space.lg },
+    // Serif semibold sin cursiva, type.xl — receta "heroLabel" del mockup web de Números.
+    heroLabel: { color: t.text, fontSize: typeScale.xl, marginTop: space.lg, fontFamily: fonts.serifSemi },
+    heroGloss: {
+      color: t.textDim,
+      fontSize: typeScale.sm,
+      lineHeight: 20,
+      marginTop: space.xs,
       fontFamily: fonts.sans,
     },
-    heroLabel: { color: t.text, fontSize: 19, marginTop: space.lg, fontFamily: fonts.serif, fontStyle: "italic" },
-    heroGloss: { color: t.textDim, fontSize: 13, marginTop: space.xs, fontFamily: fonts.sans },
-    calc: { color: t.textFaint, fontSize: 13, marginTop: space.sm, fontFamily: fonts.serif, fontStyle: "italic" },
+    calc: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.sm, fontFamily: fonts.serifItalic },
 
     grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%" },
-    cell: {
-      width: "47%",
-      minWidth: 150,
-      paddingVertical: space.lg,
-      paddingHorizontal: space.md,
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.md,
-      backgroundColor: t.panelSoft,
-    },
-    cellN: { color: t.acc, fontSize: 34, fontFamily: fonts.serif },
-    cellL: { color: t.text, fontSize: 15, marginTop: space.xs, fontFamily: fonts.sans },
-    cellSub: { color: t.textFaint, fontSize: 11, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
+    // Ancho de grilla en el Pressable (participa del flex-wrap 2 columnas); el resto
+    // del look de la celda (borde/fondo/radio) lo da <Card>.
+    cellPress: { width: "47%", minWidth: 150 },
+    cell: { alignItems: "center", paddingVertical: space.lg, paddingHorizontal: space.md },
+    // Serif semibold, type.xl3 — TODOS los números del núcleo a la misma escala.
+    cellN: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
+    cellL: { color: t.text, fontSize: typeScale.sm, marginTop: space.xs, fontFamily: fonts.sansMedium },
+    cellSub: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
 
     proToggle: {
       flexDirection: "row",
@@ -343,36 +351,33 @@ function makeStyles(t: ThemeTokens) {
     },
     proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
     proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: 15, letterSpacing: 1, fontFamily: fonts.sans },
+    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
-    card: {
-      width: "100%",
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.lg,
-      backgroundColor: t.panelSoft,
-      padding: space.xl,
-    },
+    // Fondo/borde/radio ahora los da <Card>; queda solo el ancho.
+    card: { width: "100%" },
     cardH: {
       color: t.acc,
-      fontSize: 13,
+      fontSize: typeScale.sm,
       letterSpacing: 2,
       textTransform: "uppercase",
-      marginBottom: space.lg,
-      fontFamily: fonts.sans,
+      marginBottom: space.md,
+      fontFamily: fonts.sansSemi,
     },
     cardSub: {
       color: t.textDim,
-      fontSize: 12,
+      fontSize: typeScale.xs,
       letterSpacing: 1,
       textTransform: "uppercase",
       marginTop: space.lg,
       marginBottom: space.md,
-      fontFamily: fonts.sans,
+      fontFamily: fonts.sansSemi,
     },
-    muted: { color: t.textFaint, fontSize: 14, fontFamily: fonts.sans },
+    muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
+    // Chips de dígito kármico: badge circular fijo, no una pill de <Chip> (la data
+    // solo trae dígitos sueltos, no el texto descriptivo del mockup web) — local
+    // legítimo, ver informe de la tarea.
     chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
     chip: {
       width: 38,
@@ -384,10 +389,12 @@ function makeStyles(t: ThemeTokens) {
       borderColor: t.accSoft,
       backgroundColor: t.accFaint,
     },
-    chipText: { color: t.acc, fontSize: 16, fontFamily: fonts.serif },
+    chipText: { color: t.acc, fontSize: typeScale.lg, fontFamily: fonts.serif },
     chipWarn: { borderColor: t.warn, backgroundColor: t.warnSoft },
     chipWarnText: { color: t.warn },
 
+    // Celdas de la tabla de inclusión: radio/fondo propios (radius.sm sobre t.panel,
+    // no el patrón de <Card>) — mini-estadística, no tarjeta.
     incl: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, justifyContent: "space-between" },
     inclCell: {
       width: "30%",
@@ -400,9 +407,9 @@ function makeStyles(t: ThemeTokens) {
     },
     inclHot: { borderColor: t.acc, backgroundColor: t.accFaint },
     inclMiss: { opacity: 0.45 },
-    inclD: { color: t.text, fontSize: 18, fontFamily: fonts.serif },
+    inclD: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif },
     inclDHot: { color: t.acc },
-    inclC: { color: t.textDim, fontSize: 12, marginTop: 2, fontFamily: fonts.sans },
+    inclC: { color: t.textDim, fontSize: typeScale.xs, marginTop: 2, fontFamily: fonts.sans },
 
     timeline: { flexDirection: "row", justifyContent: "space-between", gap: space.sm },
     tcell: {
@@ -414,14 +421,19 @@ function makeStyles(t: ThemeTokens) {
       borderRadius: radius.sm,
       backgroundColor: t.panel,
     },
-    tN: { color: t.acc, fontSize: 22, fontFamily: fonts.serif },
-    tAge: { color: t.textFaint, fontSize: 11, marginTop: 2, fontFamily: fonts.sans },
+    tN: { color: t.acc, fontSize: typeScale.xl, fontFamily: fonts.serif },
+    tAge: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 2, fontFamily: fonts.sans },
 
     cycles: { flexDirection: "row", justifyContent: "space-between", gap: space.md },
     cyc: { flex: 1, alignItems: "center" },
-    cycN: { color: t.acc, fontSize: 30, fontFamily: fonts.serif },
-    cycL: { color: t.textDim, fontSize: 12, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
+    cycN: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serif },
+    cycL: { color: t.textDim, fontSize: typeScale.xs, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
 
-    tapHint: { color: t.textFaint, fontSize: 13, marginTop: space.xxl, textAlign: "center", fontFamily: fonts.sans },
+    // <FadeIn> envuelve la grilla del núcleo, que ya declara width:"100%" (mismo
+    // motivo que carta.tsx: sin este ancho explícito en el propio wrapper de
+    // FadeIn, el % interno no tendría contra qué resolverse).
+    fadeFull: { width: "100%" },
+
+    tapHint: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.xxl, textAlign: "center", fontFamily: fonts.sans },
   });
 }

@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Starfield } from "../components/Starfield";
 import { Enso } from "../components/Enso";
+import { Card, FadeIn } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 import { useTheme } from "../lib/theme-context";
 import { useT } from "../lib/i18n-context";
-import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -47,52 +47,51 @@ export default function LoginScreen() {
   }
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: esta pantalla vive fuera de
+    // Tabs, en el Slot raíz de app/_layout.tsx, que NO envuelve en fondo opaco — el
+    // radial + estrellas de ThemedBackground (capa raíz) ya quedan visibles detrás.
     <View style={styles.root}>
-      <View style={[styles.aura, { height: 220 + insets.top }]}>
-        <Starfield count={40} height={220 + insets.top} />
-        <View style={[styles.glyph, { top: insets.top + 40 }]}>
-          <Enso size={46} />
-        </View>
-      </View>
-
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingTop: 170 + insets.top, paddingBottom: insets.bottom + space.xxl }]}
+          contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xxl, paddingBottom: insets.bottom + space.xxl }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Enso size={40} />
           <Text style={styles.brand}>{t("app.name")}</Text>
           <Text style={styles.tagline}>{t("app.tagline")}</Text>
 
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder={t("auth.email")}
-              placeholderTextColor={tk.textFaint}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-            />
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder={t("auth.password")}
-              placeholderTextColor={tk.textFaint}
-              secureTextEntry
-              textContentType="password"
-            />
+          <FadeIn delay={0} style={styles.formGap}>
+            <Card style={styles.form}>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder={t("auth.email")}
+                placeholderTextColor={tk.textFaint}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                textContentType="emailAddress"
+              />
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder={t("auth.password")}
+                placeholderTextColor={tk.textFaint}
+                secureTextEntry
+                textContentType="password"
+              />
 
-            {error && <Text style={styles.error}>{error}</Text>}
-            {notice && <Text style={styles.notice}>{notice}</Text>}
+              {error && <Text style={styles.error}>{error}</Text>}
+              {notice && <Text style={styles.notice}>{notice}</Text>}
 
-            <Pressable style={[styles.cta, busy && styles.ctaOff]} onPress={submit} disabled={busy}>
-              <Text style={styles.ctaText}>{busy ? t("auth.loggingIn") : t("auth.login")}</Text>
-            </Pressable>
-          </View>
+              <Pressable style={[styles.cta, busy && styles.ctaOff]} onPress={submit} disabled={busy}>
+                <Text style={styles.ctaText}>{busy ? t("auth.loggingIn") : t("auth.login")}</Text>
+              </Pressable>
+            </Card>
+          </FadeIn>
 
           <View style={styles.switchRow}>
             <Text style={styles.switchText}>{t("auth.noAccount")}</Text>
@@ -108,30 +107,38 @@ export default function LoginScreen() {
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
+    root: { flex: 1 },
     flex: { flex: 1 },
-    aura: { position: "absolute", top: 0, left: 0, right: 0, overflow: "hidden" },
-    glyph: { position: "absolute", alignSelf: "center" },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
 
-    brand: { color: t.acc, fontSize: 32, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center" },
-    tagline: { color: t.textDim, fontSize: 14, marginTop: space.sm, marginBottom: space.xxl, fontFamily: fonts.sans, textAlign: "center" },
+    brand: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.lg },
+    tagline: { color: t.textDim, fontSize: typeScale.md, marginTop: space.sm, marginBottom: space.xxl, fontFamily: fonts.sans, textAlign: "center" },
 
-    form: { width: "100%", maxWidth: 420, gap: space.md },
+    // Ancho del formulario — vive en el wrapper de <FadeIn> (necesario porque
+    // `scroll` centra sus hijos con alignItems: sin este ancho explícito el %
+    // interno de <Card style={form}> no tendría contra qué resolverse, mismo
+    // mecanismo que fadeFull en carta.tsx/pilares.tsx).
+    formGap: { width: "100%", maxWidth: 420 },
+    // Fondo/borde/radio/padding ahora los da <Card>; queda el espaciado interno
+    // entre input/input/error/CTA.
+    form: { gap: space.md },
+    // Receta "glass" de los inputs: borde accHair + fondo t.panel (superficie más
+    // opaca que la propia <Card>, para que el campo se distinga de la tarjeta que
+    // lo contiene en vez de fundirse con su translucidez).
     input: {
       width: "100%",
-      backgroundColor: t.panelSoft,
+      backgroundColor: t.panel,
       borderWidth: 1,
       borderColor: t.accHair,
       borderRadius: radius.md,
       paddingHorizontal: space.lg,
       paddingVertical: space.md + 4,
       color: t.text,
-      fontSize: 16,
+      fontSize: typeScale.lg,
       fontFamily: fonts.sans,
     },
-    error: { color: t.warn, fontSize: 13, fontFamily: fonts.sans, textAlign: "center" },
-    notice: { color: t.acc, fontSize: 13, fontFamily: fonts.sans, textAlign: "center" },
+    error: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center" },
+    notice: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center" },
 
     cta: {
       backgroundColor: t.acc,
@@ -141,10 +148,12 @@ function makeStyles(t: ThemeTokens) {
       marginTop: space.sm,
     },
     ctaOff: { opacity: 0.6 },
-    ctaText: { color: t.onAcc, fontSize: 17, fontWeight: "600", fontFamily: fonts.sans },
+    // CTA en t.acc/t.onAcc con fonts.sansSemi (política de la pasada de pantalla) —
+    // se quita el fontWeight numérico, ya lo da la variante de fuente.
+    ctaText: { color: t.onAcc, fontSize: typeScale.lg, fontFamily: fonts.sansSemi },
 
     switchRow: { flexDirection: "row", gap: space.sm, marginTop: space.xxl, alignItems: "center" },
-    switchText: { color: t.textDim, fontSize: 14, fontFamily: fonts.sans },
-    switchLink: { color: t.acc, fontSize: 14, fontFamily: fonts.sans, fontWeight: "600" },
+    switchText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
+    switchLink: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.sansSemi },
   });
 }

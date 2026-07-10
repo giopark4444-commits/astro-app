@@ -14,8 +14,8 @@ import {
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
-import { Starfield } from "../components/Starfield";
 import { Enso } from "../components/Enso";
+import { Card } from "../components/ui";
 import { PlaceAutocomplete } from "../components/PlaceAutocomplete";
 import { type Gender, EMPTY_PROFILE, type Profile, isProfileComplete } from "../lib/profile";
 import { useProfile } from "../lib/profile-context";
@@ -24,7 +24,7 @@ import { getSupabase } from "../lib/supabase";
 import { insertRemoteProfile } from "../lib/profile-sync";
 import { useTheme } from "../lib/theme-context";
 import { useT, type Locale } from "../lib/i18n-context";
-import { fonts, radius, space, type ThemeTokens } from "../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
 
 type Step = "name" | "date" | "time" | "place" | "gender";
 const STEPS: Step[] = ["name", "date", "time", "place", "gender"];
@@ -138,18 +138,22 @@ export default function Onboarding() {
   };
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: esta pantalla vive fuera de
+    // Tabs, en el Slot raíz de app/_layout.tsx, que NO envuelve en fondo opaco — el
+    // radial + estrellas de ThemedBackground (capa raíz) ya quedan visibles detrás.
+    // El Enso pasa de "aura" con Starfield propia (absoluta, banda fija) a una marca
+    // estática simple en el flujo normal — igual criterio que login.tsx/signup.tsx.
+    // Vive FUERA del <Animated.View> del paso (no reanima con `reveal`): el flujo
+    // ceremonial paso a paso no se toca, así que el glifo sigue siendo persistente
+    // en vez de reaparecer en cada transición.
     <View style={styles.root}>
-      {/* Aura estrellada de cabecera */}
-      <View style={[styles.aura, { height: 220 + insets.top }]}>
-        <Starfield count={40} height={220 + insets.top} />
-        <View style={[styles.glyph, { top: insets.top + 28 }]}>
-          <Enso size={46} />
-        </View>
+      <View style={[styles.header, { paddingTop: insets.top + space.lg }]}>
+        <Enso size={40} />
       </View>
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingTop: 150 + insets.top, paddingBottom: insets.bottom + 120 }]}
+          contentContainerStyle={[styles.scroll, { paddingTop: space.xl, paddingBottom: insets.bottom + 120 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -241,12 +245,10 @@ export default function Onboarding() {
                     {GENDER_IDS.map((id) => {
                       const on = a.gender === id;
                       return (
-                        <Pressable
-                          key={id}
-                          style={[styles.gender, on && styles.genderOn]}
-                          onPress={() => setA({ ...a, gender: id })}
-                        >
-                          <Text style={[styles.genderText, on && styles.genderTextOn]}>{t(`gender.${id}`)}</Text>
+                        <Pressable key={id} onPress={() => setA({ ...a, gender: id })}>
+                          <Card style={[styles.gender, on && styles.genderOn]}>
+                            <Text style={[styles.genderText, on && styles.genderTextOn]}>{t(`gender.${id}`)}</Text>
+                          </Card>
                         </Pressable>
                       );
                     })}
@@ -288,31 +290,37 @@ export default function Onboarding() {
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
+    root: { flex: 1 },
     flex: { flex: 1 },
-    aura: { position: "absolute", top: 0, left: 0, right: 0, overflow: "hidden" },
-    glyph: { position: "absolute", alignSelf: "center" },
+    // Marca estática (reemplaza la banda "aura" absoluta + <Starfield/> propia):
+    // el Enso vive en flujo normal, no reanima con el paso — mismo criterio que
+    // login.tsx/signup.tsx.
+    header: { alignItems: "center" },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
     stage: { width: "100%", maxWidth: 460, alignItems: "center" },
+    // Eyebrow canónico (SPEC): letterSpacing 3 + Quicksand semibold + acc, igual que
+    // en el resto de pasadas de pantalla — antes era fonts.sans (peso regular).
     eyebrow: {
       color: t.acc,
-      fontSize: 12,
+      fontSize: typeScale.xs2,
       letterSpacing: 3,
       textTransform: "uppercase",
-      fontFamily: fonts.sans,
+      fontFamily: fonts.sansSemi,
       marginBottom: space.md,
     },
     question: {
       color: t.text,
-      fontSize: 30,
-      lineHeight: 38,
-      fontFamily: fonts.serif,
-      fontStyle: "italic",
+      fontSize: typeScale.xl3,
+      lineHeight: 40,
+      fontFamily: fonts.serifItalic,
       textAlign: "center",
       marginBottom: space.xxl,
     },
     field: { width: "100%" },
     center: { width: "100%", alignItems: "center" },
+    // Receta "glass" del campo (borde accHair) — TextInput no puede envolverse en
+    // <Card> (no es una View con children); se queda como primitivo local, igual
+    // criterio que login.tsx/signup.tsx para sus inputs.
     input: {
       width: "100%",
       backgroundColor: t.panelSoft,
@@ -322,28 +330,28 @@ function makeStyles(t: ThemeTokens) {
       paddingHorizontal: space.lg,
       paddingVertical: space.md + 4,
       color: t.text,
-      fontSize: 19,
+      fontSize: typeScale.xl,
       fontFamily: fonts.sans,
       textAlign: "center",
     },
-    inputText: { color: t.text, fontSize: 19, textAlign: "center", fontFamily: fonts.sans },
+    inputText: { color: t.text, fontSize: typeScale.xl, textAlign: "center", fontFamily: fonts.sans },
     placeholder: { color: t.textFaint },
     toggleRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl },
-    toggleLabel: { color: t.text, fontSize: 16, fontFamily: fonts.sans },
-    hint: { color: t.textDim, fontSize: 14, textAlign: "center", marginTop: space.lg, lineHeight: 20, fontFamily: fonts.sans },
+    toggleLabel: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sans },
+    hint: { color: t.textDim, fontSize: typeScale.sm, textAlign: "center", marginTop: space.lg, lineHeight: 20, fontFamily: fonts.sans },
     genders: { width: "100%", gap: space.md },
-    gender: {
-      width: "100%",
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.md,
-      paddingVertical: space.lg,
-      alignItems: "center",
-      backgroundColor: t.panelSoft,
-    },
+    // Fondo/borde/radio ahora los da <Card>; queda el layout (ancho, centrado,
+    // padding vertical más compacto que el default xl de <Card> — mismo mecanismo
+    // que coreCard en carta.tsx).
+    gender: { width: "100%", alignItems: "center", paddingVertical: space.lg },
     genderOn: { borderColor: t.acc, backgroundColor: t.accFaint },
-    genderText: { color: t.textDim, fontSize: 17, fontFamily: fonts.sans },
+    genderText: { color: t.textDim, fontSize: typeScale.lg, fontFamily: fonts.sans },
     genderTextOn: { color: t.acc },
+    // Pie fijo con backgroundColor SÓLIDO deliberado (no transparente): es una barra
+    // de navegación funcional superpuesta al scroll (progreso + CTA), igual que la
+    // tabBarStyle opaca de (tabs)/_layout.tsx — no es el "fondo propio de la
+    // pantalla" que pide quitar el patrón de esta tarea, es chrome fijo que necesita
+    // legibilidad garantizada sobre el contenido que se desplaza detrás.
     foot: {
       position: "absolute",
       left: 0,
@@ -355,7 +363,7 @@ function makeStyles(t: ThemeTokens) {
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: t.accHair,
     },
-    errorText: { color: t.warn, fontSize: 13, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.md },
+    errorText: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.md },
     dots: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginBottom: space.lg },
     dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: t.accHair },
     dotOn: { backgroundColor: t.acc, width: 22 },
@@ -363,7 +371,7 @@ function makeStyles(t: ThemeTokens) {
     actions: { flexDirection: "row", alignItems: "center", gap: space.md },
     back: { paddingHorizontal: space.lg, paddingVertical: space.md },
     backSpacer: { width: 1 },
-    backText: { color: t.textDim, fontSize: 16, fontFamily: fonts.sans },
+    backText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
     cta: {
       flex: 1,
       backgroundColor: t.acc,
@@ -372,6 +380,8 @@ function makeStyles(t: ThemeTokens) {
       alignItems: "center",
     },
     ctaOff: { opacity: 0.4 },
-    ctaText: { color: t.onAcc, fontSize: 17, fontWeight: "600", fontFamily: fonts.sans },
+    // CTA en t.acc/t.onAcc con fonts.sansSemi (política de la pasada de pantalla) —
+    // se quita el fontWeight numérico, ya lo da la variante de fuente.
+    ctaText: { color: t.onAcc, fontSize: typeScale.lg, fontFamily: fonts.sansSemi },
   });
 }

@@ -3,12 +3,21 @@ import { StyleSheet, View } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useFonts, CormorantGaramond_500Medium, CormorantGaramond_500Medium_Italic, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold } from "@expo-google-fonts/cormorant-garamond";
+import { Quicksand_400Regular, Quicksand_500Medium, Quicksand_600SemiBold, Quicksand_700Bold } from "@expo-google-fonts/quicksand";
+import * as SplashScreen from "expo-splash-screen";
 import { ProfileProvider, useProfile } from "../lib/profile-context";
 import { ThemeProvider, useTheme } from "../lib/theme-context";
 import { I18nProvider } from "../lib/i18n-context";
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { getSupabase } from "../lib/supabase";
 import { fetchRemoteProfile } from "../lib/profile-sync";
+import { ThemedBackground } from "../components/ThemedBackground";
+
+// Retiene el splash hasta que las fuentes de marca estén listas (evita FOUT).
+// OJO: en Expo Go el splash real no se ve (muestra el ícono) — la verificación
+// de esta carga es por logs de Metro, no visual (límite conocido del plan).
+void SplashScreen.preventAutoHideAsync();
 
 /**
  * Layout raíz: provee SafeArea + tema + idioma + sesión + perfil. Fija la barra
@@ -67,6 +76,10 @@ function RootGate() {
 
   return (
     <View style={[styles.root, { backgroundColor: t.bg }]}>
+      {/* Capa fija de fondo (gradiente radial + starfield) detrás de todo el
+          contenido navegable. Las pantallas son transparentes; este bg es el
+          fallback bajo el radial. */}
+      <ThemedBackground />
       <StatusBar style={t.isLight ? "dark" : "light"} />
       <Slot />
     </View>
@@ -74,6 +87,28 @@ function RootGate() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontsError] = useFonts({
+    CormorantGaramond_500Medium,
+    CormorantGaramond_500Medium_Italic,
+    CormorantGaramond_600SemiBold,
+    CormorantGaramond_700Bold,
+    Quicksand_400Regular,
+    Quicksand_500Medium,
+    Quicksand_600SemiBold,
+    Quicksand_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontsError) {
+      // Con error seguimos igual (cae al default del sistema) — mejor app sin
+      // marca tipográfica que app colgada en el splash.
+      if (fontsError) console.warn("[fonts] fallo de carga, usando sistema:", fontsError.message);
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontsError]);
+
+  if (!fontsLoaded && !fontsError) return null; // splash retenido
+
   return (
     <SafeAreaProvider>
       <ThemeProvider>
