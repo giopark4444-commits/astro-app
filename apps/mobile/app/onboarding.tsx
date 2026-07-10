@@ -302,7 +302,7 @@ function makeStyles(t: ThemeTokens) {
     // en el resto de pasadas de pantalla — antes era fonts.sans (peso regular).
     eyebrow: {
       color: t.acc,
-      fontSize: typeScale.xs,
+      fontSize: typeScale.xs2,
       letterSpacing: 3,
       textTransform: "uppercase",
       fontFamily: fonts.sansSemi,
