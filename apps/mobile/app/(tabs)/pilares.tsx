@@ -168,7 +168,7 @@ export default function PilaresScreen() {
           <Text style={styles.eyebrow}>{t("pilares.subtitle")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("pilares.title")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("pilares.title")}</Text>
 
         {state.s === "loading" && <Text style={styles.note}>{t("pilares.loading")}</Text>}
         {state.s === "error" && <Text style={styles.note}>{t("pilares.error")}</Text>}
@@ -757,7 +757,7 @@ function makeStyles(t: ThemeTokens) {
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
     eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
 
     note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.md, lineHeight: 19 },
 
@@ -836,7 +836,7 @@ function makeStyles(t: ThemeTokens) {
     proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
     proDotOn: { backgroundColor: t.acc },
     proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
-    proHint: { color: t.textDim, fontSize: typeScale.xs, fontStyle: "italic", fontFamily: fonts.serif, textAlign: "center", marginTop: space.sm },
+    proHint: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.sm },
 
     // Conmutador 漢字/한글 — ahora <Chip kind="control"> (patrón de carta.tsx); esta fila
     // solo reparte los chips, ya no lleva estilos propios de chip.
@@ -866,7 +866,7 @@ function makeStyles(t: ThemeTokens) {
     rowGlyph: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif },
     rowValue: { flex: 1, color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
     subRow: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, marginTop: space.md, marginBottom: space.xs },
-    method: { color: t.textFaint, fontSize: typeScale.xs, fontStyle: "italic", fontFamily: fonts.serif, marginTop: space.md },
+    method: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, marginTop: space.md },
 
     meterRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.sm },
     // Verdicto en pill bordeada (receta "tag-chip" del mockup) en vez del texto suelto

@@ -127,7 +127,7 @@ function makeStyles(t: ThemeTokens) {
     flex: { flex: 1 },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
 
-    brand: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginTop: space.lg },
+    brand: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.lg },
     tagline: { color: t.textDim, fontSize: typeScale.md, marginTop: space.sm, marginBottom: space.xxl, fontFamily: fonts.sans, textAlign: "center" },
 
     // Ancho del formulario — vive en el wrapper de <FadeIn> (necesario porque

@@ -77,8 +77,8 @@ function RootGate() {
   return (
     <View style={[styles.root, { backgroundColor: t.bg }]}>
       {/* Capa fija de fondo (gradiente radial + starfield) detrás de todo el
-          contenido navegable. Las pantallas todavía pintan su propio bg encima
-          (Tasks 5-9 las harán transparentes), así que hoy no cambia nada visible. */}
+          contenido navegable. Las pantallas son transparentes; este bg es el
+          fallback bajo el radial. */}
       <ThemedBackground />
       <StatusBar style={t.isLight ? "dark" : "light"} />
       <Slot />

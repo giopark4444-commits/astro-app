@@ -113,7 +113,7 @@ export default function CartaScreen() {
           <Text style={styles.eyebrow}>{t("carta.title")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("carta.subtitle")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("carta.subtitle")}</Text>
 
         {/* Tipo de carta — chips canónicos del rediseño */}
         <View style={styles.kindRow}>
@@ -407,12 +407,12 @@ function makeStyles(t: ThemeTokens) {
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
     eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
 
     // Contenedor de cualquier fila de chips (tipo de carta / casas / zodiaco):
     // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
     kindRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%" },
-    kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontStyle: "italic", fontFamily: fonts.serif, textAlign: "center", marginTop: space.md, marginBottom: space.xl },
+    kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.md, marginBottom: space.xl },
 
     note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.xxl },
     solar: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.lg, lineHeight: 19 },

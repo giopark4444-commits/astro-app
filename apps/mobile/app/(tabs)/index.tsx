@@ -58,7 +58,7 @@ export default function HomeScreen() {
         </View>
 
         <Text style={styles.greeting}>{greeting()},</Text>
-        <Text style={styles.name}>{profile ? firstName(profile.name) : t("hoy.traveler")}</Text>
+        <Text style={styles.name} maxFontSizeMultiplier={1.2}>{profile ? firstName(profile.name) : t("hoy.traveler")}</Text>
 
         {result && (
           // "Numerología de hoy" — mismo card que el hero acentuado del mockup (num-row):
@@ -182,8 +182,7 @@ function makeStyles(t: ThemeTokens) {
     name: {
       color: t.text,
       fontSize: typeScale.xl3,
-      fontFamily: fonts.serif,
-      fontStyle: "italic",
+      fontFamily: fonts.serifSemi,
       marginBottom: space.xxl,
     },
 
@@ -237,7 +236,7 @@ function makeStyles(t: ThemeTokens) {
       fontFamily: fonts.sansSemi,
     },
     soonHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    soonTitle: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif, fontStyle: "italic" },
+    soonTitle: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serifItalic },
     soonBody: { color: t.textDim, fontSize: typeScale.md, lineHeight: 20, marginTop: space.sm, fontFamily: fonts.sans },
   });
 }

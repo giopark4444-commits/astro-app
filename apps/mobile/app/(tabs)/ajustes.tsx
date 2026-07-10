@@ -112,7 +112,7 @@ export default function AjustesScreen() {
       >
         <View style={styles.head}>
           <Enso size={24} />
-          <Text style={styles.title}>{t("settings.title")}</Text>
+          <Text style={styles.title} maxFontSizeMultiplier={1.2}>{t("settings.title")}</Text>
         </View>
 
         {profile && (
@@ -290,7 +290,7 @@ function makeStyles(t: ThemeTokens) {
     scroll: { paddingHorizontal: space.xl },
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.xxl },
-    title: { color: t.text, fontSize: typeScale.xl3, fontFamily: fonts.serif, fontStyle: "italic" },
+    title: { color: t.text, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
 
     // Espaciado entre tarjetas — antes vivía dentro de `card` (marginBottom); ahora
     // el fondo/borde/radio/padding los da <Card>, esto solo separa una de la próxima
@@ -308,7 +308,7 @@ function makeStyles(t: ThemeTokens) {
       marginBottom: space.md,
       fontFamily: fonts.sansSemi,
     },
-    profileName: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serif, fontStyle: "italic", marginBottom: space.lg },
+    profileName: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifItalic, marginBottom: space.lg },
     muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     fieldLabel: {
@@ -369,7 +369,7 @@ function makeStyles(t: ThemeTokens) {
     logout: { marginTop: space.md, borderColor: t.warnSoft },
     logoutText: { color: t.warn },
 
-    footNote: { color: t.textDim, fontSize: typeScale.sm, textAlign: "center", marginTop: space.xxl, fontFamily: fonts.serif, fontStyle: "italic" },
+    footNote: { color: t.textDim, fontSize: typeScale.sm, textAlign: "center", marginTop: space.xxl, fontFamily: fonts.serifItalic },
     version: { color: t.textFaint, fontSize: typeScale.xs, textAlign: "center", marginTop: space.sm, lineHeight: 18, fontFamily: fonts.sans },
   });
 }

@@ -78,7 +78,7 @@ export default function NumerosScreen() {
           <Text style={styles.eyebrow}>{t("numerology.title")}</Text>
           <Enso size={22} />
         </View>
-        <Text style={styles.h1}>{t("numerology.subtitle")}</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("numerology.subtitle")}</Text>
         <Text style={styles.who}>{profile.name}</Text>
 
         {/* HERO — Camino de Vida: tarjeta acentuada (receta "hero" de Hoy), número
@@ -280,14 +280,13 @@ function makeStyles(t: ThemeTokens) {
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
     eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center" },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center" },
     who: {
       color: t.textDim,
       fontSize: typeScale.md,
       marginTop: space.xs,
       marginBottom: space.xxl,
-      fontFamily: fonts.serif,
-      fontStyle: "italic",
+      fontFamily: fonts.serifItalic,
     },
 
     // FadeIn del hero: el marginBottom que antes vivía en el propio Pressable/hero
@@ -326,9 +325,8 @@ function makeStyles(t: ThemeTokens) {
       lineHeight: 20,
       marginTop: space.xs,
       fontFamily: fonts.sans,
-      fontStyle: "italic",
     },
-    calc: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.sm, fontFamily: fonts.serif, fontStyle: "italic" },
+    calc: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.sm, fontFamily: fonts.serifItalic },
 
     grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%" },
     // Ancho de grilla en el Pressable (participa del flex-wrap 2 columnas); el resto
