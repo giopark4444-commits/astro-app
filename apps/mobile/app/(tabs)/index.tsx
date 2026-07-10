@@ -3,15 +3,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { computeNumerology, type NumerologyResult } from "@aluna/core";
-import { Starfield } from "../../components/Starfield";
 import { Enso } from "../../components/Enso";
-import { SoonBadge } from "../../components/ui";
+import { Card, FadeIn, SoonBadge } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { profileToNumerologyInput } from "../../lib/profile";
 import { numerologyContent } from "../../content/numerology";
-import { fonts, radius, space, type ThemeTokens } from "../../theme/tokens";
+import { fonts, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 const firstName = (full: string) => full.trim().split(/\s+/)[0] ?? full;
 
@@ -43,11 +42,9 @@ export default function HomeScreen() {
   const dayLine = result ? numerologyContent(locale).personalDay[result.cycles.personalDay.value] : undefined;
 
   return (
+    // Sin backgroundColor propio ni <Starfield/> local: el radial nocturno + estrellas
+    // ya viven en ThemedBackground (capa raíz, Task 2) — esta pantalla queda transparente.
     <View style={styles.root}>
-      <View style={styles.sky} pointerEvents="none">
-        <Starfield count={56} height={360} />
-      </View>
-
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -64,48 +61,65 @@ export default function HomeScreen() {
         <Text style={styles.name}>{profile ? firstName(profile.name) : t("hoy.traveler")}</Text>
 
         {result && (
-          <Pressable
-            style={styles.todayCard}
-            onPress={() => router.push("/(tabs)/numeros")}
-            accessibilityRole="button"
-            accessibilityLabel={`${t("hoy.dayNumberTitle")} ${result.cycles.personalDay.value}`}
-          >
-            <View style={styles.todayTop}>
-              <View style={styles.todayLeft}>
-                <Text style={styles.todayEyebrow}>{t("hoy.dayNumberTitle")}</Text>
-                {dayLine && <Text style={styles.todayHint}>{dayLine}</Text>}
-              </View>
-              <View style={styles.todayN}>
-                <Text style={styles.todayNText}>{result.cycles.personalDay.value}</Text>
-              </View>
-            </View>
+          // "Numerología de hoy" — mismo card que el hero acentuado del mockup (num-row):
+          // eyebrow + hero number en fonts.serifSemi/type.displaySm, sin badge circular.
+          <FadeIn delay={0} style={styles.cardGapLg}>
+            <Pressable
+              onPress={() => router.push("/(tabs)/numeros")}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("hoy.dayNumberTitle")} ${result.cycles.personalDay.value}`}
+            >
+              <Card accent>
+                <View style={styles.todayTop}>
+                  <View style={styles.todayLeft}>
+                    <Text style={styles.eyebrow}>{t("hoy.dayNumberTitle")}</Text>
+                    {dayLine && <Text style={styles.todayHint}>{dayLine}</Text>}
+                  </View>
+                  <Text style={styles.heroNumber} maxFontSizeMultiplier={1.2}>
+                    {result.cycles.personalDay.value}
+                  </Text>
+                </View>
 
-            <View style={styles.todaySats}>
-              <Sat styles={styles} label={t("hoy.dayNumberMonth")} value={result.cycles.personalMonth.value} />
-              <View style={styles.satDivider} />
-              <Sat styles={styles} label={t("hoy.dayNumberYear")} value={result.cycles.personalYear.value} />
-            </View>
-          </Pressable>
+                <View style={styles.todaySats}>
+                  <Sat styles={styles} label={t("hoy.dayNumberMonth")} value={result.cycles.personalMonth.value} />
+                  <View style={styles.satDivider} />
+                  <Sat styles={styles} label={t("hoy.dayNumberYear")} value={result.cycles.personalYear.value} />
+                </View>
+              </Card>
+            </Pressable>
+          </FadeIn>
         )}
 
         {result && (
-          <Pressable style={styles.lifeCard} onPress={() => router.push("/(tabs)/numeros")}>
-            <Text style={styles.lifeEyebrow}>{t("hoy.lifePathEyebrow")}</Text>
-            <View style={styles.lifeRow}>
-              <Text style={styles.lifeN}>{result.core.lifePath.value}</Text>
-              <Text style={styles.lifeGo}>{t("hoy.lifePathGo")}</Text>
-            </View>
-          </Pressable>
+          <FadeIn delay={60} style={styles.cardGapXxl}>
+            <Pressable onPress={() => router.push("/(tabs)/numeros")}>
+              <Card>
+                <Text style={styles.eyebrow}>{t("hoy.lifePathEyebrow")}</Text>
+                <View style={styles.lifeRow}>
+                  <Text style={styles.heroNumber} maxFontSizeMultiplier={1.2}>
+                    {result.core.lifePath.value}
+                  </Text>
+                  <Text style={styles.lifeGo}>{t("hoy.lifePathGo")}</Text>
+                </View>
+              </Card>
+            </Pressable>
+          </FadeIn>
         )}
 
-        <Pressable style={styles.soonCard} onPress={() => router.push("/(tabs)/carta")}>
-          <Text style={styles.soonTitle}>{t("hoy.cartaTitle")}</Text>
-          <Text style={styles.soonBody}>{t("hoy.cartaBody")}</Text>
-        </Pressable>
+        <FadeIn delay={120} style={styles.cardGapMd}>
+          <Pressable onPress={() => router.push("/(tabs)/carta")}>
+            <Card>
+              <Text style={styles.soonTitle}>{t("hoy.cartaTitle")}</Text>
+              <Text style={styles.soonBody}>{t("hoy.cartaBody")}</Text>
+            </Card>
+          </Pressable>
+        </FadeIn>
 
-        <Pressable style={styles.soonCard} onPress={() => router.push("/(tabs)/pilares")}>
-          <Text style={styles.soonTitle}>{t("hoy.pilaresTitle")}</Text>
-          <Text style={styles.soonBody}>{t("hoy.pilaresBody")}</Text>
+        <Pressable style={styles.cardGapMd} onPress={() => router.push("/(tabs)/pilares")}>
+          <Card>
+            <Text style={styles.soonTitle}>{t("hoy.pilaresTitle")}</Text>
+            <Text style={styles.soonBody}>{t("hoy.pilaresBody")}</Text>
+          </Card>
         </Pressable>
 
         <Text style={styles.sectionLabel}>{t("hoy.soon")}</Text>
@@ -146,63 +160,57 @@ function SoonCard({
   soon: string;
 }) {
   return (
-    <View style={styles.soonCard}>
+    <Card style={styles.cardGapMd}>
       <View style={styles.soonHead}>
         <Text style={styles.soonTitle}>{title}</Text>
         <SoonBadge label={soon} />
       </View>
       <Text style={styles.soonBody}>{body}</Text>
-    </View>
+    </Card>
   );
 }
 
 function makeStyles(t: ThemeTokens) {
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: t.bg },
-    sky: { position: "absolute", top: 0, left: 0, right: 0, height: 360 },
+    root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl },
 
     brandRow: { flexDirection: "row", alignItems: "center", gap: space.sm, marginBottom: space.xxl },
-    brand: { color: t.acc, fontSize: 20, letterSpacing: 2, fontFamily: fonts.serif },
+    brand: { color: t.acc, fontSize: typeScale.xl, letterSpacing: 2, fontFamily: fonts.serif },
 
-    greeting: { color: t.textDim, fontSize: 18, fontFamily: fonts.sans },
+    greeting: { color: t.textDim, fontSize: typeScale.lg, fontFamily: fonts.sans },
     name: {
       color: t.text,
-      fontSize: 36,
+      fontSize: typeScale.xl3,
       fontFamily: fonts.serif,
       fontStyle: "italic",
       marginBottom: space.xxl,
     },
 
-    todayCard: {
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.lg,
-      backgroundColor: t.panelSoft,
-      padding: space.xl,
-      marginBottom: space.lg,
+    // Espaciados entre cards — reemplazan el marginBottom que antes vivía dentro de
+    // cada estilo de tarjeta local (ahora la tarjeta es <Card>, sin margen propio).
+    cardGapLg: { marginBottom: space.lg },
+    cardGapXxl: { marginBottom: space.xxl },
+    cardGapMd: { marginBottom: space.md },
+
+    // Eyebrow canónico (SPEC): 11px / letterSpacing 3 / uppercase / Quicksand semibold / acc.
+    // Compartido por el eyebrow del día personal y el del camino de vida — ninguno de los
+    // dos trae un título serif debajo, así que no encajan en <SectionHeading>.
+    eyebrow: {
+      color: t.acc,
+      fontSize: typeScale.xs2,
+      letterSpacing: 3,
+      textTransform: "uppercase",
+      fontFamily: fonts.sansSemi,
     },
+
     todayTop: { flexDirection: "row", alignItems: "center" },
     todayLeft: { flex: 1, paddingRight: space.lg },
-    todayEyebrow: {
-      color: t.acc,
-      fontSize: 12,
-      letterSpacing: 2,
-      textTransform: "uppercase",
-      fontFamily: fonts.sans,
-    },
-    todayHint: { color: t.textDim, fontSize: 13, lineHeight: 19, marginTop: space.sm, fontFamily: fonts.sans },
-    todayN: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: t.accSoft,
-      backgroundColor: t.accFaint,
-    },
-    todayNText: { color: t.acc, fontSize: 30, fontFamily: fonts.serif },
+    todayHint: { color: t.textDim, fontSize: typeScale.sm, lineHeight: 19, marginTop: space.sm, fontFamily: fonts.sans },
+    // Número héroe: fonts.serifSemi a type.displaySm (política de la pasada de pantalla).
+    // El día personal ya no vive en un badge circular — es un número libre, igual que el
+    // camino de vida, por consistencia con la receta "num-hero" del mockup.
+    heroNumber: { color: t.acc, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi },
 
     todaySats: {
       flexDirection: "row",
@@ -213,52 +221,23 @@ function makeStyles(t: ThemeTokens) {
       borderTopColor: t.accHair,
     },
     sat: { flex: 1, flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: space.sm },
-    satN: { color: t.acc, fontSize: 20, fontFamily: fonts.serif },
-    satL: { color: t.textDim, fontSize: 12, letterSpacing: 0.5, fontFamily: fonts.sans },
+    satN: { color: t.acc, fontSize: typeScale.xl, fontFamily: fonts.serif },
+    satL: { color: t.textDim, fontSize: typeScale.xs, letterSpacing: 0.5, fontFamily: fonts.sans },
     satDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch", backgroundColor: t.accHair },
 
-    lifeCard: {
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.lg,
-      backgroundColor: t.panelSoft,
-      padding: space.xl,
-      marginBottom: space.xxl,
-    },
-    lifeEyebrow: {
-      color: t.acc,
-      fontSize: 12,
-      letterSpacing: 2,
-      textTransform: "uppercase",
-      fontFamily: fonts.sans,
-    },
-    lifeRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginTop: space.sm,
-    },
-    lifeN: { color: t.text, fontSize: 44, fontFamily: fonts.serif },
-    lifeGo: { color: t.textDim, fontSize: 14, fontFamily: fonts.sans },
+    lifeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.sm },
+    lifeGo: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
     sectionLabel: {
       color: t.textFaint,
-      fontSize: 11,
+      fontSize: typeScale.xs2,
       letterSpacing: 3,
       textTransform: "uppercase",
       marginBottom: space.lg,
-      fontFamily: fonts.sans,
-    },
-    soonCard: {
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.md,
-      backgroundColor: t.panelSoft,
-      padding: space.lg,
-      marginBottom: space.md,
+      fontFamily: fonts.sansSemi,
     },
     soonHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    soonTitle: { color: t.text, fontSize: 18, fontFamily: fonts.serif, fontStyle: "italic" },
-    soonBody: { color: t.textDim, fontSize: 14, lineHeight: 20, marginTop: space.sm, fontFamily: fonts.sans },
+    soonTitle: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif, fontStyle: "italic" },
+    soonBody: { color: t.textDim, fontSize: typeScale.md, lineHeight: 20, marginTop: space.sm, fontFamily: fonts.sans },
   });
 }
