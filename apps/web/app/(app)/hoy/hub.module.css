@@ -1,17 +1,18 @@
-.wrap { position: relative; padding: 24px 20px 96px; }
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
+.wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px: clearance del bottom-nav (excepción del plan); 24→sp-6 por precedente pilares */
 .sky { position: absolute; inset: 0 0 auto; height: 280px; pointer-events: none; z-index: 0; }
 
-.greet { position: relative; z-index: 1; margin-bottom: 26px; }
-.hello { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 4px; }
-.name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+.greet { position: relative; z-index: 1; margin-bottom: var(--sp-6); } /* 26→28: paso más cercano */
+.hello { font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 var(--sp-1); }
+.name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; } /* clamp responsivo: excepción (no es un paso fijo) */
 
-.section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 12px; }
-.lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }
+.lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); } /* 11→12: paso más cercano */
 
 .tile {
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: var(--sp-3);
   min-height: 116px;
-  padding: 15px;
+  padding: var(--sp-4); /* 15→16: paso más cercano */
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface);
   position: relative;
@@ -19,28 +20,28 @@
 }
 a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
 .tileIcon { color: var(--acc); display: inline-flex; }
-.tileName { margin-top: auto; font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+.tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
 .soon { opacity: 0.55; }
 .badge {
-  position: absolute; top: 13px; right: 13px;
-  font-size: 8.5px; letter-spacing: 0.5px; text-transform: uppercase;
+  position: absolute; top: var(--sp-3); right: var(--sp-3); /* 13→12: paso más cercano */
+  font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; /* 8.5→11: piso de la escala */
   color: var(--soft); background: var(--surface-2);
-  border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px;
+  border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; /* micro-padding de badge: excepción (sub-sp-1 deliberado) */
 }
 
 /* Tu clima de hoy (tránsitos al abrir) */
 .weatherCard {
-  position: relative; z-index: 1; display: flex; flex-direction: column; gap: 9px;
-  padding: 16px; margin-bottom: 24px;
+  position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
+  padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
   border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
   transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 .weatherCard:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
-.weatherH { font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.weatherList { display: flex; flex-direction: column; gap: 7px; }
-.weatherRow { display: flex; align-items: baseline; gap: 9px; }
-.weatherGlyphs { font-size: 15px; color: var(--ink); flex-shrink: 0; }
+.weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.weatherList { display: flex; flex-direction: column; gap: 7px; } /* 7: micro-gap entre filas (sub-sp-2, ritmo compacto deliberado — excepción documentada) */
+.weatherRow { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */
+.weatherGlyphs { font-size: var(--text-md); color: var(--ink); flex-shrink: 0; }
 .weatherAsp { color: var(--acc); }
-.weatherText { color: var(--soft); font-size: 12.5px; line-height: 1.4; }
-.harm_hard .weatherAsp { color: #e0795a; }
-.harm_soft .weatherAsp { color: #7aaae0; }
+.weatherText { color: var(--soft); font-size: var(--text-sm); line-height: 1.4; } /* 12.5→13 */
+.harm_hard .weatherAsp { color: var(--tone-warm); }
+.harm_soft .weatherAsp { color: var(--tone-cool); }
