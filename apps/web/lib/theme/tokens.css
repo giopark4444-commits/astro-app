@@ -15,6 +15,32 @@
   --dur: 0.55s;
   --dur-fast: 0.22s;
 
+  /* Escala tipográfica (R2: ritmo consistente en toda la web) */
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --display-sm: 44px;
+  --display: 60px;
+
+  /* Escala de espaciado (R2) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 28px;
+  --sp-7: 40px;
+
+  /* Semánticos (R2): tinta sobre acento y tonos armonía/tenso-fluido, hoy hardcodeados en varios módulos */
+  --ink-on-acc: #1a1305;
+  --tone-warm: #e0795a;
+  --tone-cool: #7aaae0;
+
   /* Resplandor y elevación, derivados del acento del tema */
   --glow: 0 0 24px rgba(var(--acc-rgb), 0.42);
   --glow-soft: 0 0 14px rgba(var(--acc-rgb), 0.28);
