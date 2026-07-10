@@ -18,7 +18,13 @@
 - **Regla de mapeo**: cada font-size migra al paso MÁS CERCANO de la escala; empates exactos → el paso menor si es texto de apoyo, el mayor si es jerarquía principal (documentar cada empate con un comentario corto). Medios píxeles (11.5/12.5/13.5/9.5/8.5/10.5/16.5) → paso más cercano. Sub-11px (7.5/8.5/9.5) → `--text-2xs` (piso de la escala; si algo se ve gigante tras subir de 8.5→11, es candidato a excepción documentada).
 - **Héroes**: numerology hero 66→`--display`; sheet hero 56→`--display-sm`; compat score 56→`--display-sm`; day-number 48→`--display-sm`. (Vara: mockup web-numeros usa 60 para el hero de página.)
 - **Padding de tarjeta canónico**: 14px actuales → `--sp-5` (20px) SOLO en las tarjetas patrón `.card`-glass (la receta del SPEC); otros paddings → paso más cercano.
-- **Excepciones legítimas** (NO migrar): valores de geometría SVG (la rueda), border-width 1px, radios (ya tokenizados --radius/--radius-lg), los `style={{"--i": n}}` de stagger, anchos %.
+- **Excepciones legítimas** (NO migrar): valores de geometría SVG (la rueda), border-width 1px, radios (ya tokenizados --radius/--radius-lg), los `style={{"--i": n}}` de stagger, anchos %, el clearance de 96px del bottom-nav (patrón repetido en los wraps de página — se deja como está en R2), y ajustes de línea base negativos (-Npx).
+- **Reglas calibradas por el spike de pilares (T2) — aplican a TODAS las tandas:**
+  - La regla de empate menor/mayor por ROL (apoyo→menor, jerarquía→mayor) aplica también a gap/padding/margin, no solo a font-size.
+  - Si existe mockup "después" de la pantalla (numeros, carta/desktop-carta, pilares, hoy móvil como referencia de recetas), la vara del mockup MANDA sobre la heurística de rol — citar la línea del mockup en el comentario del empate. Pantallas SIN mockup (compat/chat/ajustes/onboarding/auth/shell): heurística de rol + consistencia con los módulos ya migrados (pilares como precedente), y esas tandas reciben escrutinio visual extra del controlador.
+  - Empate 18px (sp-4 16 vs sp-5 20, diff 2 ambos): paddings de contenedor/tarjeta → sp-5 (20, coherente con la receta canónica de card del SPEC); gaps internos/apoyo → sp-4 (16). Documentar cada caso.
+  - Empate 14px (sm 13 vs md 15): texto de apoyo → sm; texto de lectura/valor → md.
+  - Colisiones numéricas con tokens semánticos de OTRO eje (ej. un color que coincide con --tone-*) NO se alias — ejes semánticos distintos se mantienen separados.
 - Gate por tarea: `cd apps/web && npx tsc --noEmit && npx vitest run && rm -rf .next && npx next build` — verde.
 - Verificación visual: cada tanda termina con pase visual del CONTROLADOR en navegador vivo (localhost:3002, los 3 temas × 2 modos en las páginas tocadas) — regresiones de wrap/overflow se cazan ahí; especial atención en EN (textos más largos).
 - Comentarios en español; cada archivo migrado abre con una línea `/* R2: valores sobre la escala tokenizada (ver tokens.css) */`.
