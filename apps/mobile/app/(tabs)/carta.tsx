@@ -407,7 +407,7 @@ function makeStyles(t: ThemeTokens) {
 
     head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
     eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.xl3, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
+    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serif, fontStyle: "italic", textAlign: "center", marginBottom: space.xl },
 
     // Contenedor de cualquier fila de chips (tipo de carta / casas / zodiaco):
     // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
