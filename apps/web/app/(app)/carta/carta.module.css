@@ -38,7 +38,7 @@
 /* Geometría SVG de la rueda (radios/ángulos calibrados con el script de abajo) — excepción legítima, intocable */
 .ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .ringFaint { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.5; }
-.signGlyph { font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+.signGlyph { font-size: 13px; text-anchor: middle; dominant-baseline: central; } /* texto SVG de la rueda: escala con el viewBox, excepción */
 .cusp { stroke: var(--line); stroke-width: 1; }
 .cuspAngle { stroke: rgba(var(--acc-rgb), 0.65); stroke-width: 1.5; }
 .houseNum { font-size: 8px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }

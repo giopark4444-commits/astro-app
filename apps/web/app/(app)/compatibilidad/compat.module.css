@@ -73,7 +73,7 @@
 .barHead {
   display: flex; align-items: baseline; justify-content: space-between;
   width: 100%; background: none; border: 0; padding: 0 0 5px; /* micro-gap barra↔head: excepción (paridad energy) */
-  cursor: pointer; color: inherit; text-align: left; gap: 10px;
+  cursor: pointer; color: inherit; text-align: left; gap: var(--sp-3); /* 10→12 */
 }
 .barLabel { font-family: var(--font-display); font-size: var(--text-md); /* 16: empate → apoyo → menor (paridad energy) */ color: var(--ink); }
 .barScore { font-family: var(--font-ui); font-size: var(--text-sm); color: var(--soft); font-variant-numeric: tabular-nums; letter-spacing: 0.5px; flex-shrink: 0; }
