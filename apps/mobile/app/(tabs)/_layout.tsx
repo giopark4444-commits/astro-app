@@ -22,6 +22,10 @@ export default function TabsLayout() {
           paddingTop: 8,
         },
         tabBarLabelStyle: { fontSize: typeScale.xs2, letterSpacing: 0.5, fontFamily: fonts.sansMedium },
+        // Sin esto, cada escena se envuelve en el `Background` de react-navigation
+        // (colors.background del DefaultTheme = rgb(242,242,242) gris opaco), que
+        // tapa el gradiente radial + Starfield de ThemedBackground en _layout.tsx raíz.
+        sceneStyle: { backgroundColor: "transparent" },
       }}
     >
       <Tabs.Screen
