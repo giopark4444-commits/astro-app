@@ -113,7 +113,7 @@ function makeStyles(t: ThemeTokens) {
       marginBottom: space.xs,
       fontFamily: fonts.sans,
     },
-    calcValue: { color: t.textDim, fontSize: 16, fontFamily: fonts.serif, fontStyle: "italic" },
+    calcValue: { color: t.textDim, fontSize: 16, fontFamily: fonts.serifItalic },
     tiers: {
       flexDirection: "row",
       gap: space.sm,
@@ -139,8 +139,7 @@ function makeStyles(t: ThemeTokens) {
       color: t.acc,
       fontSize: 15,
       lineHeight: 23,
-      fontStyle: "italic",
-      fontFamily: fonts.serif,
+      fontFamily: fonts.serifItalic,
       marginBottom: space.lg,
     },
     reading: {},

@@ -2,8 +2,9 @@ import { describe, it, expect } from "vitest";
 import { makeTokens, fonts, type as typeScale, THEMES } from "../../theme/tokens";
 
 describe("tokens del rediseño R1", () => {
-  it("expone las 7 variantes de fuente de marca (sin pesos sintetizados)", () => {
+  it("expone las 8 variantes de fuente de marca (sin pesos sintetizados)", () => {
     expect(fonts.serif).toBe("CormorantGaramond_500Medium");
+    expect(fonts.serifItalic).toBe("CormorantGaramond_500Medium_Italic");
     expect(fonts.serifSemi).toBe("CormorantGaramond_600SemiBold");
     expect(fonts.serifBold).toBe("CormorantGaramond_700Bold");
     expect(fonts.sans).toBe("Quicksand_400Regular");

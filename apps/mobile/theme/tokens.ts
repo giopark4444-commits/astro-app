@@ -222,6 +222,9 @@ export const THEME_LABELS: Record<"es" | "en", Record<ThemeName, string>> = {
  * sintetiza pesos con fuentes custom en Android: cada peso es su familia. */
 export const fonts = {
   serif: "CormorantGaramond_500Medium",
+  // Variante itálica real (no fontStyle: "italic"): Android no sintetiza
+  // itálica/bold para fuentes custom, así que cada estilo necesita su propia familia.
+  serifItalic: "CormorantGaramond_500Medium_Italic",
   serifSemi: "CormorantGaramond_600SemiBold",
   serifBold: "CormorantGaramond_700Bold",
   sans: "Quicksand_400Regular",

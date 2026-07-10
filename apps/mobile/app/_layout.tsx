@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useFonts, CormorantGaramond_500Medium, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold } from "@expo-google-fonts/cormorant-garamond";
+import { useFonts, CormorantGaramond_500Medium, CormorantGaramond_500Medium_Italic, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold } from "@expo-google-fonts/cormorant-garamond";
 import { Quicksand_400Regular, Quicksand_500Medium, Quicksand_600SemiBold, Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import * as SplashScreen from "expo-splash-screen";
 import { ProfileProvider, useProfile } from "../lib/profile-context";
@@ -89,6 +89,7 @@ function RootGate() {
 export default function RootLayout() {
   const [fontsLoaded, fontsError] = useFonts({
     CormorantGaramond_500Medium,
+    CormorantGaramond_500Medium_Italic,
     CormorantGaramond_600SemiBold,
     CormorantGaramond_700Bold,
     Quicksand_400Regular,

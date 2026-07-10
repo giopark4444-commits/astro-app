@@ -102,9 +102,8 @@ function makeStyles(t: ThemeTokens) {
     },
     title: {
       color: t.acc,
-      fontFamily: fonts.serif,
+      fontFamily: fonts.serifItalic,
       fontSize: 22,
-      fontStyle: "italic",
       textAlign: "center",
       marginBottom: space.sm,
     },
