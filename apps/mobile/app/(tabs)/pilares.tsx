@@ -905,6 +905,9 @@ function makeStyles(t: ThemeTokens) {
     // ajustado que el default xl de <Card> —, mismo mecanismo que `col` (rejilla
     // de 4 pilares) más arriba en este archivo.
     luckCol: {
+      // transparente a propósito: el tile vive DENTRO del glass del SectionCard;
+      // sin esto heredaría el t.glass de Card y apilaría una 2ª capa (card-en-card).
+      backgroundColor: "transparent",
       minWidth: 100, paddingVertical: space.md, paddingHorizontal: space.sm,
       alignItems: "center", marginRight: space.sm, gap: 4,
     },
