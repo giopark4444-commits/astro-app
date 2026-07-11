@@ -8,14 +8,17 @@
 .h1 { position: relative; z-index: 1; font-style: italic; font-size: var(--text-2xl); color: var(--ink); margin: var(--sp-2) 0 var(--sp-4); } /* 26→2xl (nearest, no empate) */
 
 /* ---- Selector de tipo de carta (Natal / Tu Clima / Progresiones) ---- */
-.kindRow { position: relative; z-index: 1; display: flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); margin-bottom: var(--sp-2); } /* 5→sp-1 (nearest); 6→sp-2 empate, vara: mockup movil-carta-despues.html .seg margin-bottom (línea 153) */
+/* R3: migrado al primitivo global .seg.seg--gradient/.seg__item/.seg__item--active
+   (globals.css) — el radio propio (16px/11px) ya empataba con el --radius del
+   primitivo (16px, ver tokens.css), así que no se redeclara. Lo único que queda
+   local es la font-family display (serif), específica de este consumidor
+   flagship, no parte de .seg__item compartido. Ver carta-view.tsx:
+   className="seg seg--gradient ${styles.kindRow}" / "seg__item ${styles.kindBtn} ...". */
+.kindRow { position: relative; z-index: 1; margin-bottom: var(--sp-2); } /* 6→sp-2 empate, vara: mockup movil-carta-despues.html .seg margin-bottom (línea 153) */
 .kindBtn {
-  flex: 1; min-width: 0; padding: var(--sp-2) var(--sp-1); border: 0; border-radius: 11px; background: transparent;
-  font-family: var(--font-display); font-size: var(--text-sm); line-height: 1.15; color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  min-width: 0; padding: var(--sp-2) var(--sp-1);
+  font-family: var(--font-display); font-size: var(--text-sm); line-height: 1.15;
 } /* 9→sp-2 (nearest) */
-.kindBtn:hover { color: var(--ink); }
-.kindOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); box-shadow: var(--glow-soft); }
 .kindHint { position: relative; z-index: 1; margin: 0 0 var(--sp-3); text-align: center; font-size: var(--text-2xs); font-style: italic; color: var(--soft); } /* 11.5→2xs empate (texto de apoyo) */
 
 /* ---- Controles (casas / zodiaco) ---- */

@@ -133,6 +133,33 @@ button { font-family: inherit; }
   background: transparent; color: var(--acc); border-color: var(--acc); box-shadow: none;
 }
 
+/* ----------------------------------------------------------------
+   R3: primitivo .seg (segmentado) — dos formas. Base .seg/.seg__item/
+   .seg__item--active con relleno PLANO (settings: modo de luz, idioma;
+   energy: selector de periodo). Modificador .seg--gradient para el
+   relleno GRADIENTE flagship (carta.kindRow, numerology.tierRow) — NO
+   aplanar, es intencional. Mismo mecanismo de consumo que .card/.chip
+   (clases globales junto a la clase de módulo). Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.seg {
+  display: flex; gap: var(--sp-1); padding: var(--sp-1);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.seg__item {
+  flex: 1; border: 0; border-radius: calc(var(--radius) - 5px);
+  background: transparent; color: var(--soft); font-family: inherit; cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.seg__item:hover { color: var(--ink); }
+/* Relleno plano — settings (modo de luz, idioma), energy (periodo). */
+.seg__item--active {
+  background: var(--acc); color: var(--ink-on-acc); box-shadow: var(--glow-soft); font-weight: 600;
+}
+/* Relleno gradiente — flagship carta/numerología, NO aplanar a plano. */
+.seg--gradient .seg__item--active {
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

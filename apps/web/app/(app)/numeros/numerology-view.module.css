@@ -126,15 +126,17 @@
 
 /* ---- Selector de profundidad (Esencia · Profunda · Completa) ---- */
 .readingWrap { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14 → mayor (contenedor) */
-.tierRow { display: flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+/* R3: migrado al primitivo global .seg.seg--gradient/.seg__item/.seg__item--active
+   (globals.css) — solo lo que difiere queda local: el radio propio (14px/10px, no el
+   --radius del primitivo, 16px/11px) y font-size (2xs, no el sm heredado de .seg__item
+   font-family:inherit — este consumidor usa font-family:inherit ya, así que no colisiona
+   con el override serif de carta.kindBtn). Ver numerology-view.tsx / number-reading.tsx:
+   className="seg seg--gradient ${styles.tierRow}" / "seg__item ${styles.tier} ...". */
+.tierRow { border-radius: 14px; }
 .tier {
-  flex: 1; padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border: 0; border-radius: 10px; background: transparent;
-  font-family: inherit; font-size: var(--text-2xs); letter-spacing: 0.3px; font-weight: 600;
-  color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border-radius: 10px;
+  font-size: var(--text-2xs); letter-spacing: 0.3px;
 }
-.tier:hover { color: var(--ink); }
-.tierOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); box-shadow: var(--glow-soft); }
 .tierHint { margin: -5px 0 0 /* baseline negativa: excepción */; text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); }
 
 .readingLoading { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-1) 0 2px; } /* 9→8 */

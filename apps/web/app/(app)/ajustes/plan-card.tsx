@@ -78,11 +78,11 @@ export function PlanCard({ row, checkoutSuccess = false }: { row: Row | null; ch
       ) : !hasManagedSubscription ? (
         <>
           <p>{t("freeBody")}</p>
-          <div className={styles.seg} role="group" aria-label={t("title")}>
-            <button className={styles.segItem} disabled={busy !== null} onClick={() => startCheckout("monthly")}>
+          <div className={styles.planActions} role="group" aria-label={t("title")}>
+            <button className={styles.planBtn} disabled={busy !== null} onClick={() => startCheckout("monthly")}>
               {busy === "monthly" ? t("loading") : `${t("monthly")} · ${t("trialNote")}`}
             </button>
-            <button className={styles.segItem} disabled={busy !== null} onClick={() => startCheckout("yearly")}>
+            <button className={styles.planBtn} disabled={busy !== null} onClick={() => startCheckout("yearly")}>
               {busy === "yearly" ? t("loading") : `${t("yearly")} · ${t("trialNote")}`}
             </button>
           </div>
@@ -94,7 +94,7 @@ export function PlanCard({ row, checkoutSuccess = false }: { row: Row | null; ch
             <p>{t(row!.status === "trialing" ? "trialEndsOn" : "renewsOn", { date: dateLabel })}</p>
           )}
           {row?.status === "past_due" && <p>{t("pastDueNote")}</p>}
-          <button className={styles.segItem} disabled={busy !== null} onClick={openPortal}>
+          <button className={styles.planBtn} disabled={busy !== null} onClick={openPortal}>
             {busy === "portal" ? t("loading") : t("manage")}
           </button>
         </>

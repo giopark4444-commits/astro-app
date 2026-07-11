@@ -114,14 +114,14 @@ export function CartaView() {
       <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
 
       {/* tipo de carta */}
-      <div className={styles.kindRow} role="tablist" aria-label={t("title")}>
+      <div className={`seg seg--gradient ${styles.kindRow}`} role="tablist" aria-label={t("title")}>
         {CHART_KINDS.map((k) => (
           <button
             key={k}
             type="button"
             role="tab"
             aria-selected={kind === k}
-            className={`${styles.kindBtn} ${kind === k ? styles.kindOn : ""}`}
+            className={`seg__item ${styles.kindBtn} ${kind === k ? "seg__item--active" : ""}`}
             onClick={() => setKind(k)}
           >
             {t(`kind${KIND_KEY[k]}`)}
