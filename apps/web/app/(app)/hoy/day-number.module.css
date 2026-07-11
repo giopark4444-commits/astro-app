@@ -24,7 +24,7 @@
   font-size: var(--display-sm); /* héroe 48→44 (tabla de héroes del plan) */
   font-style: italic;
   line-height: 1;
-  color: var(--acc);
+  color: var(--acc-text);
   font-variant-numeric: tabular-nums;
 }
 /* Maestros (11/22): un aro tenue del acento honra su peso, sin mover el layout. */
@@ -45,7 +45,7 @@
   font-size: var(--text-2xs);
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 700;
 }
 .meaning {

@@ -10,7 +10,7 @@
 
 .head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); } /* 10: empate 8/12 → separación → mayor */
 .eyebrow { font-family: var(--font-display); font-style: italic; font-size: var(--text-2xl); /* 22 → mayor (título) */ color: var(--ink); }
-.enso { color: var(--acc); display: inline-flex; opacity: 0.9; }
+.enso { color: var(--acc-text); display: inline-flex; opacity: 0.9; }
 
 .thread {
   position: relative; z-index: 1;
@@ -31,12 +31,12 @@
   background: var(--surface); border: 1px solid var(--line);
   font-family: var(--font-display); font-size: var(--text-md); line-height: 1.6;
 }
-.thinking { align-self: flex-start; margin: var(--sp-1) 0; /* 2px→sp-1: piso de la escala */ font-size: var(--text-sm); font-style: italic; color: var(--acc); }
+.thinking { align-self: flex-start; margin: var(--sp-1) 0; /* 2px→sp-1: piso de la escala */ font-size: var(--text-sm); font-style: italic; color: var(--acc-text); }
 
 /* .dormant migrado al primitivo global card+card--dashed — ver chat-view.tsx:
    className="card card--dashed ..." */
 .dormant { margin: var(--sp-6) auto; max-width: 32ch; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding: var(--sp-5) var(--sp-5); }
-.dormantGlyph { font-size: var(--text-2xl); /* 26→24 */ color: var(--acc); opacity: 0.85; }
+.dormantGlyph { font-size: var(--text-2xl); /* 26→24 */ color: var(--acc-text); opacity: 0.85; }
 .dormantTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); /* 18→17 */ color: var(--ink); }
 .dormantBody { margin: 0; font-size: var(--text-sm); font-style: italic; line-height: 1.6; color: var(--soft); }
 

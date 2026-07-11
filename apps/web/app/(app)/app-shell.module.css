@@ -23,5 +23,5 @@
   letter-spacing: 0.5px;
   color: var(--ink);
 }
-.brand::first-letter { color: var(--acc); }
+.brand::first-letter { color: var(--acc-text); }
 .main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto; }

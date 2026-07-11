@@ -3,7 +3,7 @@
 .sky { position: absolute; inset: 0 0 auto; height: 280px; pointer-events: none; z-index: 0; }
 
 .greet { position: relative; z-index: 1; margin-bottom: var(--sp-6); } /* 26→28: paso más cercano */
-.hello { font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc); margin: 0 0 var(--sp-1); }
+.hello { font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
 .name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; } /* clamp responsivo: excepción (no es un paso fijo) */
 
 .section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }
@@ -17,7 +17,7 @@
   padding: var(--sp-4); /* 15→16: paso más cercano */
   position: relative;
 }
-.tileIcon { color: var(--acc); display: inline-flex; }
+.tileIcon { color: var(--acc-text); display: inline-flex; }
 .tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
 .soon { opacity: 0.55; }
 /* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
@@ -35,11 +35,11 @@
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
   padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
 }
-.weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
 .weatherList { display: flex; flex-direction: column; gap: var(--sp-2); } /* 7→sp-2 (8): paso más cercano */
 .weatherRow { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */
 .weatherGlyphs { font-size: var(--text-md); color: var(--ink); flex-shrink: 0; }
-.weatherAsp { color: var(--acc); }
+.weatherAsp { color: var(--acc-text); }
 .weatherText { color: var(--soft); font-size: var(--text-xs); line-height: 1.4; } /* 12.5: empate 12/13 → apoyo → menor */
 .harm_hard .weatherAsp { color: var(--tone-warm); }
 .harm_soft .weatherAsp { color: var(--tone-cool); }

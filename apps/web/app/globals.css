@@ -130,7 +130,7 @@ button { font-family: inherit; }
 .chip--control-disabled { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
 /* pilares.scriptBtn: activo = SOLO borde+texto, sin relleno — variante, no aplanar a -on. */
 .chip--control-outline.chip--control-on {
-  background: transparent; color: var(--acc); border-color: var(--acc); box-shadow: none;
+  background: transparent; color: var(--acc-text); border-color: var(--acc); box-shadow: none;
 }
 
 /* ----------------------------------------------------------------
