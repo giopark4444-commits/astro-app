@@ -10,7 +10,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { AlunaSupabaseClient } from "@aluna/supabase";
 import type { BodyPosition, ChartResult } from "@aluna/core";
-import type { ChatOptions, CompleteOptions, ReadingProvider } from "../../reading/provider";
+import type { ReadingProvider } from "../../reading/provider";
 import { runReportGeneration } from "../generate";
 
 // ---------------------------------------------------------------------------
@@ -103,13 +103,13 @@ function fakeProvider(name: string, behavior: () => Promise<string>): ReadingPro
     name,
     model: `${name}-model`,
     complete: behavior,
-    async *completeStream(_opts: CompleteOptions) {
+    async *completeStream() {
       yield await behavior();
     },
-    async chat(_opts: ChatOptions) {
+    async chat() {
       return behavior();
     },
-    async *chatStream(_opts: ChatOptions) {
+    async *chatStream() {
       yield await behavior();
     },
   };

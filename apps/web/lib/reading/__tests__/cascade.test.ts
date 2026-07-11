@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { completeWithCascade, resolveReportCascade } from "../provider";
-import type { ChatMessage, ChatOptions, CompleteOptions, ReadingProvider } from "../provider";
+import type { CompleteOptions, ReadingProvider } from "../provider";
+// Nota: los métodos fake abajo (completeStream/chat/chatStream) omiten el
+// parámetro de opciones porque no lo usan — una función con menos parámetros
+// es asignable al tipo de la interfaz (TS lo permite estructuralmente), y así
+// evitamos el error de lint no-unused-vars sobre un parámetro que nunca haría falta leer.
 
 // Guardamos las llaves originales para no filtrar estado entre archivos de test.
 const ENV_KEYS = ["NOUS_API_KEY", "DEEPSEEK_API_KEY", "OPENAI_API_KEY"] as const;
@@ -29,13 +33,13 @@ function fakeProvider(name: string, behavior: () => Promise<string>): ReadingPro
     name,
     model: `${name}-model`,
     complete: behavior,
-    async *completeStream(_opts: CompleteOptions) {
+    async *completeStream() {
       yield await behavior();
     },
-    async chat(_opts: ChatOptions) {
+    async chat() {
       return behavior();
     },
-    async *chatStream(_opts: ChatOptions) {
+    async *chatStream() {
       yield await behavior();
     },
   };
