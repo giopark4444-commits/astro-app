@@ -1,0 +1,58 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css). Vista MÍNIMA de
+   verificación (Fase 4b, Task 6) — no es la UI de lujo: legible y ordenada,
+   sin decoración (Starfield/Icon quedan para la fase de pulido). */
+.page { padding: var(--sp-5) var(--sp-5) 96px; } /* 96px: clearance del bottom-nav fijo (excepción, precedente ajustes/carta/compat) */
+.title { font-size: var(--text-3xl); margin: 0 0 var(--sp-5); color: var(--ink); }
+
+.list { display: grid; gap: var(--sp-5); }
+
+.card {
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface); padding: var(--sp-5);
+}
+.cardHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.cardTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
+
+.note { margin: 0; font-size: var(--text-sm); font-style: italic; color: var(--soft); line-height: 1.6; }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-2) var(--sp-4); border: 0; border-radius: 999px; cursor: pointer;
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 700; color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft); text-decoration: none;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; }
+.btnGhost {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-2) var(--sp-4); border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 600; color: var(--soft);
+  background: var(--surface-2); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.btnGhost:hover { color: var(--ink); }
+.btnGhost:disabled { opacity: 0.5; cursor: default; }
+
+/* Estados "durmiente" (sin llave IA) y "Plus" (tease): mismo lenguaje visual
+   que el oráculo dormido del chat (precedente app/(app)/preguntar/chat.module.css). */
+.dormant, .plusTease, .emptyProfile {
+  text-align: center; padding: var(--sp-5); border: 1px dashed rgba(var(--acc-rgb), 0.35);
+  border-radius: 14px; background: var(--surface-2);
+}
+.dormantTitle, .plusTitle, .emptyProfileTitle {
+  margin: 0 0 var(--sp-2); font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink);
+}
+.dormantBody, .plusBody, .emptyProfileBody {
+  margin: 0; font-size: var(--text-sm); font-style: italic; line-height: 1.6; color: var(--soft);
+}
+.plusTease .btn, .emptyProfile .btn { margin-top: var(--sp-4); }
+
+/* Contenido del informe listo: texto plano legible, sin markdown. */
+.body { display: grid; gap: var(--sp-4); }
+.lead { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--ink); }
+.section { display: grid; gap: var(--sp-1); }
+.sectionTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
+.sectionBody { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--soft); white-space: pre-wrap; }
+.modelUsed { margin: 0; font-size: var(--text-2xs); color: var(--soft); opacity: 0.7; }

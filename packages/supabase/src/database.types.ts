@@ -220,6 +220,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0006_user_reports.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      user_reports: {
+        Row: {
+          content: Json;
+          created_at: string;
+          id: string;
+          kind: string;
+          locale: string;
+          model_used: string | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+          year: number | null;
+        };
+        Insert: {
+          content: Json;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          locale: string;
+          model_used?: string | null;
+          status: string;
+          updated_at?: string;
+          user_id: string;
+          year?: number | null;
+        };
+        Update: {
+          content?: Json;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          locale?: string;
+          model_used?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          year?: number | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
@@ -228,6 +269,20 @@ export type Database = {
     Functions: {
       user_id_by_email: {
         Args: { lookup_email: string };
+        Returns: string;
+      };
+      // Añadida a mano junto con supabase/migrations/0007_claim_report_generation.sql:
+      // claim atómico (row lock) que decide 'claimed' | 'ready' | 'generating'
+      // para evitar la carrera doble-tap de handleReportRequest.
+      claim_report_generation: {
+        Args: {
+          p_user_id: string;
+          p_kind: string;
+          p_year: number | null;
+          p_locale: string;
+          p_stale_seconds: number;
+          p_respect_ready: boolean;
+        };
         Returns: string;
       };
     };

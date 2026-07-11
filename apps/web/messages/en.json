@@ -278,5 +278,33 @@
     "loading": "One moment…",
     "error": "Something went wrong. Please try again.",
     "checkoutProcessing": "Payment received, activating your account…"
+  },
+  "reports": {
+    "title": "Evolutionary reports",
+    "natalTitle": "Birth chart",
+    "solarTitle": "Solar Return {year}",
+    "refresh": "Refresh",
+    "generate": "Generate",
+    "regenerate": "Regenerate",
+    "retry": "Retry",
+    "checking": "Checking…",
+    "none": "You haven't generated this report yet.",
+    "generating": "Generating your report… tap Refresh in a moment.",
+    "error": "Something went wrong.",
+    "dormantTitle": "The oracle still sleeps",
+    "dormantBody": "Evolutionary reports light up once Aluna's AI voice is connected.",
+    "plusTitle": "Evolutionary reports are part of Aluna Plus",
+    "plusBody": "Go Plus to unlock your birth chart and solar return in depth.",
+    "plusCta": "See plans",
+    "modelUsed": "Generated with {model}",
+    "introLabel": "Introduction",
+    "outroLabel": "Closing",
+    "essayLabel": "Essay of the year",
+    "mantraLabel": "Mantra",
+    "themeWhyLabel": "Why",
+    "themeInvitationLabel": "Invitation",
+    "noProfileTitle": "Create your profile first",
+    "noProfileBody": "You need a profile with a birth date and place to generate your reports.",
+    "noProfileCta": "Create profile"
   }
 }

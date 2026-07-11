@@ -278,5 +278,33 @@
     "loading": "Un momento…",
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "checkoutProcessing": "Pago recibido, activando tu cuenta…"
+  },
+  "reports": {
+    "title": "Informes evolutivos",
+    "natalTitle": "Carta natal",
+    "solarTitle": "Revolución Solar {year}",
+    "refresh": "Actualizar",
+    "generate": "Generar",
+    "regenerate": "Regenerar",
+    "retry": "Reintentar",
+    "checking": "Consultando…",
+    "none": "Todavía no generaste este informe.",
+    "generating": "Generando tu informe… toca Actualizar en un momento.",
+    "error": "Algo salió mal.",
+    "dormantTitle": "El oráculo aún duerme",
+    "dormantBody": "Los informes evolutivos se encienden cuando conectes la voz de IA de Aluna.",
+    "plusTitle": "Los informes evolutivos son parte de Aluna Plus",
+    "plusBody": "Hazte Plus para desbloquear tu carta natal y tu revolución solar en profundidad.",
+    "plusCta": "Ver planes",
+    "modelUsed": "Generado con {model}",
+    "introLabel": "Introducción",
+    "outroLabel": "Cierre",
+    "essayLabel": "Ensayo del año",
+    "mantraLabel": "Mantra",
+    "themeWhyLabel": "Por qué",
+    "themeInvitationLabel": "Invitación",
+    "noProfileTitle": "Crea tu perfil primero",
+    "noProfileBody": "Necesitas un perfil con fecha y lugar de nacimiento para generar tus informes.",
+    "noProfileCta": "Crear perfil"
   }
 }
