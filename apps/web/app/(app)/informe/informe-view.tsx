@@ -23,13 +23,27 @@ type ViewState =
   | { s: "ready"; content: NatalReport | SolarReport; modelUsed: string | null }
   | { s: "error" }; // incluye stale:true (proceso muerto) y cualquier forma inesperada
 
+/**
+ * Un informe 'ready' cuyo `content` perdió su forma (p.ej. `{}`: una regeneración
+ * concurrente reclamó la fila y la dejó en `{}` entre el claim y la relectura fuera
+ * del lock del POST 'ready') NO debe renderizarse — NatalContent/SolarContent harían
+ * `.map` sobre `undefined`. Chequeamos que exista el array que cada uno consume
+ * (sections para natal, themes para solar) antes de tratarlo como listo.
+ */
+function isRenderableReport(content: unknown): boolean {
+  if (!content || typeof content !== "object") return false;
+  const c = content as Record<string, unknown>;
+  return Array.isArray(c.sections) || Array.isArray(c.themes);
+}
+
 /** Interpreta la respuesta de GET /api/reports. */
 function interpretGet(httpStatus: number, data: Record<string, unknown>): ViewState {
   if (httpStatus === 403) return { s: "plusRequired" };
-  if (data.status === "ready") {
+  if (data.status === "ready" && isRenderableReport(data.content)) {
     return { s: "ready", content: data.content as NatalReport | SolarReport, modelUsed: (data.model_used as string | null) ?? null };
   }
-  if (data.status === "generating") return { s: "generating" };
+  // 'ready' sin forma (regeneración concurrente) se trata como en curso: se auto-sana con Actualizar.
+  if (data.status === "ready" || data.status === "generating") return { s: "generating" };
   if (data.status === "none") return { s: "none" };
   // status:'error' (con o sin stale) o forma inesperada → mismo estado de error.
   return { s: "error" };
@@ -40,10 +54,10 @@ function interpretPost(httpStatus: number, data: Record<string, unknown>): ViewS
   if (httpStatus === 403) return { s: "plusRequired" };
   if (httpStatus === 409) return { s: "generating" }; // already_generating: ya hay una en curso
   if (data.available === false) return { s: "dormant" };
-  if (data.status === "ready") {
+  if (data.status === "ready" && isRenderableReport(data.content)) {
     return { s: "ready", content: data.content as NatalReport | SolarReport, modelUsed: (data.model_used as string | null) ?? null };
   }
-  if (data.status === "generating") return { s: "generating" };
+  if (data.status === "ready" || data.status === "generating") return { s: "generating" };
   return { s: "error" };
 }
 
