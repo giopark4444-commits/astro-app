@@ -110,7 +110,7 @@
 /* ── Estado vacío (menos de dos perfiles) ── */
 /* .empty migrado al primitivo global card+card--dashed — ver compat-view.tsx:
    className="card card--dashed ..." */
-.empty { margin-top: var(--sp-7); text-align: center; padding: var(--sp-6) var(--sp-5); }
+.empty { position: relative; z-index: 1; margin-top: var(--sp-7); text-align: center; padding: var(--sp-6) var(--sp-5); }
 .emptyGlyph { font-size: var(--text-3xl); /* 30→32 */ color: var(--acc); opacity: 0.85; }
 .emptyTitle { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--ink); margin: var(--sp-3) 0 var(--sp-2); }
 .emptyBody { font-size: var(--text-sm); color: var(--soft); line-height: 1.6; max-width: 34ch; margin: 0 auto var(--sp-5); }

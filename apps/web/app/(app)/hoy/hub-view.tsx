@@ -86,7 +86,7 @@ export function HubView() {
       <div className={styles.lenses}>
         {LENSES.map((l, i) => {
           const inner = (
-            <span className={`card card--interactive ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
+            <span className={`card ${l.soon ? "" : "card--interactive"} ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
               <span className={styles.tileIcon}>
                 <Icon name={l.icon} size={26} />
               </span>
