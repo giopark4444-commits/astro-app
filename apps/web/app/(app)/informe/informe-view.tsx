@@ -125,7 +125,7 @@ export function InformeView() {
     return (
       <main className={styles.page}>
         <h1 className={styles.title}>{t("title")}</h1>
-        <div className={styles.emptyProfile}>
+        <div className={`card card--dashed ${styles.emptyProfile}`}>
           <p className={styles.emptyProfileTitle}>{t("noProfileTitle")}</p>
           <p className={styles.emptyProfileBody}>{t("noProfileBody")}</p>
           <Link href="/onboarding" className={styles.btn}>
@@ -202,14 +202,14 @@ function ReportCard({
       )}
 
       {state.s === "dormant" && (
-        <div className={styles.dormant}>
+        <div className={`card card--dashed ${styles.dormant}`}>
           <p className={styles.dormantTitle}>{t("dormantTitle")}</p>
           <p className={styles.dormantBody}>{t("dormantBody")}</p>
         </div>
       )}
 
       {state.s === "plusRequired" && (
-        <div className={styles.plusTease}>
+        <div className={`card card--dashed ${styles.plusTease}`}>
           <p className={styles.plusTitle}>{t("plusTitle")}</p>
           <p className={styles.plusBody}>{t("plusBody")}</p>
           <Link href="/ajustes" className={styles.btn}>

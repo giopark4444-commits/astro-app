@@ -9,16 +9,14 @@
 .section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }
 .lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); } /* 11→12: paso más cercano */
 
+/* .tile migrado al primitivo global card+card--interactive — ver hub-view.tsx:
+   className="card card--interactive ..." (el hover ahora sale de .card--interactive:hover) */
 .tile {
   display: flex; flex-direction: column; gap: var(--sp-3);
   min-height: 116px;
   padding: var(--sp-4); /* 15→16: paso más cercano */
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--surface);
   position: relative;
-  transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
-a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
 .tileIcon { color: var(--acc); display: inline-flex; }
 .tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
 .soon { opacity: 0.55; }
@@ -29,14 +27,13 @@ a .tile:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 
   border: 1px solid var(--line); border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
 }
 
-/* Tu clima de hoy (tránsitos al abrir) */
+/* Tu clima de hoy (tránsitos al abrir) — migrado al primitivo global
+   card+card--interactive — ver hub-view.tsx: className="card card--interactive ..."
+   (el hover ahora sale de .card--interactive:hover) */
 .weatherCard {
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
   padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
-  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
-  transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
-.weatherCard:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
 .weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .weatherList { display: flex; flex-direction: column; gap: var(--sp-2); } /* 7→sp-2 (8): paso más cercano */
 .weatherRow { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */

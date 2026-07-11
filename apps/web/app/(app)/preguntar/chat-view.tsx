@@ -103,7 +103,7 @@ export function ChatView() {
         {st === "loading" && <p className={styles.thinking}>{t("thinking")}</p>}
         {st === "error" && <p className={styles.thinking}>{t("error")}</p>}
         {st === "dormant" && (
-          <div className={styles.dormant}>
+          <div className={`card card--dashed ${styles.dormant}`}>
             <span className={styles.dormantGlyph} aria-hidden>
               ☾
             </span>

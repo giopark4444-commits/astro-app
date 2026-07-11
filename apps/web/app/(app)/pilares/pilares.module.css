@@ -161,7 +161,7 @@
 .luckBlock { margin-top: var(--sp-2); }
 .luckScroll { display: flex; gap: var(--sp-2); overflow-x: auto; padding-bottom: var(--sp-2); }
 .luckCol {
-  min-width: 108px; border: 1px solid var(--line); border-radius: 14px; background: none;
+  min-width: 108px; border: 1px solid var(--line); border-radius: var(--radius); background: none;
   color: inherit; padding: var(--sp-3) var(--sp-2); display: grid; gap: var(--sp-1); justify-items: center; cursor: pointer; /* 10→sp-3 empate (tile de contenido, análogo a .col → principal) */
   transition: border-color var(--dur-fast) var(--ease);
 }

@@ -83,11 +83,12 @@ button { font-family: inherit; }
   border-color: rgba(var(--acc-rgb), 0.45);
   box-shadow: var(--glow-soft);
 }
-/* Estado vacío/durmiente — borde punteado, surface-2. */
+/* Estado vacío/durmiente — borde punteado, surface-2. Radio: el base .card ya
+   aporta --radius-lg (dashed siempre se aplica junto a .card), así que no se
+   redeclara aquí (regla de modificadores: solo lo que difiere). */
 .card--dashed {
   border: 1px dashed rgba(var(--acc-rgb), 0.35);
   background: var(--surface-2);
-  border-radius: var(--radius-lg);
 }
 /* Elevada — flagship login/signup. */
 .card--elevated {

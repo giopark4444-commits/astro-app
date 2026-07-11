@@ -108,8 +108,9 @@
   line-height: 1.65; color: var(--soft); border-left: 2px solid rgba(var(--acc-rgb), 0.4); }
 
 /* ── Estado vacío (menos de dos perfiles) ── */
-.empty { position: relative; z-index: 1; margin-top: var(--sp-7); text-align: center; padding: var(--sp-6) var(--sp-5);
-  border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: var(--radius-lg); background: var(--surface-2); }
+/* .empty migrado al primitivo global card+card--dashed — ver compat-view.tsx:
+   className="card card--dashed ..." */
+.empty { margin-top: var(--sp-7); text-align: center; padding: var(--sp-6) var(--sp-5); }
 .emptyGlyph { font-size: var(--text-3xl); /* 30→32 */ color: var(--acc); opacity: 0.85; }
 .emptyTitle { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--ink); margin: var(--sp-3) 0 var(--sp-2); }
 .emptyBody { font-size: var(--text-sm); color: var(--soft); line-height: 1.6; max-width: 34ch; margin: 0 auto var(--sp-5); }

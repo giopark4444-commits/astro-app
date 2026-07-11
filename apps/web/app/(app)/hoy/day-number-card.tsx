@@ -48,7 +48,7 @@ export function DayNumberCard({ birthDate }: { birthDate: string }) {
   return (
     <Link
       href="/numeros"
-      className={`${styles.card} reveal`}
+      className={`card card--interactive ${styles.card} reveal`}
       style={{ ["--i" as string]: 1 }}
       aria-label={t("dayNumberAria", { n: day })}
     >

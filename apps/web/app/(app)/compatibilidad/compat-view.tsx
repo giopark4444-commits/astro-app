@@ -131,7 +131,7 @@ export function CompatView() {
           </span>
         </div>
         <h1 className={styles.h1}>{t("subtitle")}</h1>
-        <div className={`${styles.empty} reveal`} style={{ ["--i" as string]: 0 }}>
+        <div className={`card card--dashed ${styles.empty} reveal`} style={{ ["--i" as string]: 0 }}>
           <span className={styles.emptyGlyph} aria-hidden>
             ☍
           </span>

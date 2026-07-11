@@ -120,7 +120,7 @@
 .block { display: flex; flex-direction: column; gap: var(--sp-1); } /* 5→4 */
 .block p { margin: 0; font-size: var(--text-sm); /* 13.5→13 */ line-height: 1.62; color: var(--ink); }
 .blockH { font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: var(--sp-3); } /* 13→12 */
+.practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-3); } /* 13→12 */
 .practiceBlock p { color: var(--soft); }
 
 /* ---- Selector de profundidad (Esencia · Profunda · Completa) ---- */
@@ -149,7 +149,6 @@
 
 .gated { display: flex; flex-direction: column; gap: var(--sp-3); }
 .gatedGlyph { align-self: center; font-size: var(--text-2xl); color: var(--acc); opacity: 0.85; }
-.gatedNote {
-  margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); /* 12.5: empate 12/13 → apoyo → menor */
-  padding: var(--sp-3) var(--sp-4); /* 14 → contenedor → mayor */ border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 14px; background: var(--surface-2);
-}
+/* .gatedNote migrado al primitivo global card+card--dashed — ver numerology-view.tsx:
+   className="card card--dashed ..." */
+.gatedNote { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); padding: var(--sp-3) var(--sp-4); }

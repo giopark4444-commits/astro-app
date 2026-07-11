@@ -169,14 +169,14 @@ export function NumberReading({
           <span className={styles.gatedGlyph} aria-hidden>
             ☾
           </span>
-          <p className={styles.gatedNote}>{t("gated")}</p>
+          <p className={`card card--dashed ${styles.gatedNote}`}>{t("gated")}</p>
           <Reading meaning={meaning} lens={lens} />
         </div>
       )}
 
       {state.status === "error" && (
         <div className={styles.gated}>
-          <p className={styles.gatedNote}>{t("error")}</p>
+          <p className={`card card--dashed ${styles.gatedNote}`}>{t("error")}</p>
           <Reading meaning={meaning} lens={lens} />
         </div>
       )}
