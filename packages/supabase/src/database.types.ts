@@ -271,6 +271,20 @@ export type Database = {
         Args: { lookup_email: string };
         Returns: string;
       };
+      // Añadida a mano junto con supabase/migrations/0007_claim_report_generation.sql:
+      // claim atómico (row lock) que decide 'claimed' | 'ready' | 'generating'
+      // para evitar la carrera doble-tap de handleReportRequest.
+      claim_report_generation: {
+        Args: {
+          p_user_id: string;
+          p_kind: string;
+          p_year: number | null;
+          p_locale: string;
+          p_stale_seconds: number;
+          p_respect_ready: boolean;
+        };
+        Returns: string;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

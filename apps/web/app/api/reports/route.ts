@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import { requirePlus, isGateResponse } from "@/lib/reports/access";
-import { selectReport } from "@/lib/reports/request";
+import { selectReport, STALE_MS } from "@/lib/reports/request";
 
 // Lee el informe guardado del usuario. NO genera ni gasta — solo devuelve el
 // estado actual de la fila. Una fila 'generating' vieja (proceso muerto) se
@@ -9,8 +9,6 @@ import { selectReport } from "@/lib/reports/request";
 // usuario la recupera con /regenerate.
 
 export const runtime = "nodejs";
-
-const STALE_MS = 150_000;
 
 export async function GET(request: NextRequest) {
   const gate = await requirePlus(request);
