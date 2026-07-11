@@ -481,7 +481,7 @@ export function resolveReportCascade(timeoutMs: number = REPORT_TIMEOUT_MS): Rea
  */
 export async function completeWithCascade(
   providers: ReadingProvider[],
-  opts: CompleteOptions & { timeoutMs?: number },
+  opts: CompleteOptions,
 ): Promise<{ text: string; modelUsed: string }> {
   let lastError: unknown = new Error("completeWithCascade: no hay proveedores en la cascada");
   for (const provider of providers) {

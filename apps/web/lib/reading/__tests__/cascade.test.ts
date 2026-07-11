@@ -134,10 +134,4 @@ describe("completeWithCascade", () => {
   it("con lista de proveedores vacía, lanza", async () => {
     await expect(completeWithCascade([], OPTS)).rejects.toThrow();
   });
-
-  it("acepta timeoutMs opcional en opts sin romper el tipo (no depende de env)", async () => {
-    const a = fakeProvider("hermes", async () => "ok");
-    const res = await completeWithCascade([a], { ...OPTS, timeoutMs: 150000 });
-    expect(res.modelUsed).toBe("hermes");
-  });
 });
