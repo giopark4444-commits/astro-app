@@ -104,7 +104,10 @@
 /* Colores de los cinco elementos (Wu Xing) — DOMINIO, intocable.
    el_fire/elBg_fire (#e0795a) y el_water/elBg_water (#7aaae0) coinciden en valor con los nuevos
    --tone-warm/--tone-cool, pero son ejes semánticos distintos (elemento Wu Xing vs. tono de
-   tránsito) — NO se reemplazan por los tokens semánticos. */
+   tránsito) — NO se reemplazan por los tokens semánticos.
+   Espejo de @aluna/core WU_XING_COLORS (packages/core/src/bazi/colors.ts) — CSS no puede
+   importar TS, así que estas clases son la fuente de verdad PARA EL NAVEGADOR, pero los
+   valores deben permanecer byte-idénticos al export de core (verificado por test en core). */
 .el_wood { color: #7fb069; }
 .el_fire { color: #e0795a; }
 .el_earth { color: #d4a85f; }
