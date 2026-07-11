@@ -20,6 +20,7 @@ import {
   favorableElements,
   luckPillars,
   annualPillars,
+  WU_XING_COLORS as EL_COLOR,
   type Pillar,
   type PillarSet,
   type TenGod,
@@ -35,15 +36,6 @@ import { baziContent, type BaziContent } from "../../content/bazi";
 import { fetchBaZi, type BaZiData } from "../../lib/bazi-api";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
-// Colores fijos de los 5 elementos (Wu Xing), iguales a la web (pilares.module.css):
-// identidad del elemento, no del tema — se ven igual en cualquier tema/modo de luz.
-const EL_COLOR: Record<string, string> = {
-  wood: "#7fb069",
-  fire: "#e0795a",
-  earth: "#d4a85f",
-  metal: "#b8b6c8",
-  water: "#7aaae0",
-};
 const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
 const POS_KEYS = ["year", "month", "day", "hour"] as const;
 type PosKey = (typeof POS_KEYS)[number];

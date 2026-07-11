@@ -10,6 +10,7 @@ import Svg, { Circle, G, Line, Path, Text as SvgText } from "react-native-svg";
 import {
   WHEEL, pointAt, annularSector, spreadBodies,
   ZODIAC_SIGNS, PLANETS,
+  ELEMENT_FILL, ELEMENT_INK, ASPECT_COLORS as HARMONY_STROKE,
   type ChartResult, type BodyPosition,
 } from "@aluna/core";
 import { useTheme } from "../lib/theme-context";
@@ -19,25 +20,6 @@ const { CX, CY, R_SIGN_OUT, R_SIGN_IN, R_SIGN_GLYPH, R_HOUSE_IN, R_HOUSE_NUM, R_
 
 const TEXT_VS = "︎"; // U+FE0E: presentación de texto en los glifos
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
-
-// Paridad con apps/web/app/(app)/carta/wheel-colors.ts (theme-agnostic).
-const ELEMENT_FILL: Record<string, string> = {
-  fire: "rgba(224,121,90,0.12)",
-  earth: "rgba(127,176,105,0.12)",
-  air: "rgba(122,170,224,0.12)",
-  water: "rgba(150,140,214,0.12)",
-};
-const ELEMENT_INK: Record<string, string> = {
-  fire: "#e0795a",
-  earth: "#7fb069",
-  air: "#7aaae0",
-  water: "#9b8fd6",
-};
-const HARMONY_STROKE: Record<string, string> = {
-  hard: "rgba(224,121,90,0.55)",
-  soft: "rgba(122,170,224,0.5)",
-  neutral: "rgba(231,201,134,0.4)",
-};
 
 const ANGLE_MARKS: Array<{ key: string; cusp: number }> = [
   { key: "AC", cusp: 0 },
