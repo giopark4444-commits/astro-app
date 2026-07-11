@@ -14,17 +14,62 @@ export class ReportParseError extends Error {
 
 /**
  * Extrae el objeto JSON de un texto que puede venir envuelto en fences de
- * markdown (```json ... ```) o con texto alrededor: toma desde el primer "{"
- * hasta el último "}" y parsea ese fragmento. Los modelos a veces envuelven
- * así la respuesta pese a que se les pide JSON puro.
+ * markdown (```json ... ```) o con texto alrededor. Los modelos a veces
+ * envuelven así la respuesta pese a que se les pide JSON puro, y esa prosa
+ * puede traer llaves sueltas propias (un aparte con `{}`, una fórmula, etc.)
+ * antes o después del objeto real.
+ *
+ * En vez de cortar del primer "{" al último "}" (heurística frágil: una "}"
+ * suelta en la prosa posterior arruina el corte), escaneamos carácter a
+ * carácter desde el primer "{" llevando la profundidad de anidamiento y
+ * respetando strings JSON (las llaves dentro de "..." no cuentan, y los
+ * escapes tipo \" y \\ no cierran el string antes de tiempo). En cuanto la
+ * profundidad vuelve a 0 encontramos la "}" que cierra el objeto real y
+ * cortamos ahí, ignorando lo que venga después.
  */
 function extractJsonObject(raw: string): unknown {
   const text = raw.trim();
   const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end <= start) {
+  if (start === -1) {
     throw new ReportParseError("no se encontró un objeto JSON en la respuesta del modelo");
   }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let end = -1;
+
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+    } else if (ch === "{") {
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+
+  if (end === -1) {
+    throw new ReportParseError("no se encontró un objeto JSON en la respuesta del modelo");
+  }
+
   const slice = text.slice(start, end + 1);
   try {
     return JSON.parse(slice);

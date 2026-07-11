@@ -244,8 +244,35 @@ describe("parseNatalReport", () => {
     expect(report.sections).toHaveLength(4);
   });
 
+  it("extrae el objeto correcto aunque la prosa DESPUÉS del JSON traiga una llave suelta", () => {
+    // Regresión: la heurística vieja (primer "{" a último "}") mordía esta
+    // prosa final y el slice quedaba con basura detrás del objeto real.
+    const trailing = `${JSON.stringify(WELL_FORMED_NATAL)}\n\nP.D.: la fórmula es {x, y} y por ahí queda una suelta } sin pareja.`;
+    const report = parseNatalReport(trailing);
+    expect(report.intro).toBe(WELL_FORMED_NATAL.intro);
+    expect(report.sections).toHaveLength(4);
+    expect(report.outro).toBe(WELL_FORMED_NATAL.outro);
+  });
+
+  it("no se confunde con llaves dentro de un string interno del JSON", () => {
+    // "abre y cierra {así}" trae un par balanceado, y encima una "}" suelta
+    // sin pareja: sin conciencia de strings, el conteo de profundidad
+    // cerraría el objeto de más antes de tiempo.
+    const withBraces = {
+      ...WELL_FORMED_NATAL,
+      intro: "Bienvenida: abre y cierra {así}, y una suelta } al final.",
+    };
+    const report = parseNatalReport(JSON.stringify(withBraces));
+    expect(report.intro).toBe(withBraces.intro);
+    expect(report.sections).toHaveLength(4);
+  });
+
   it("lanza ReportParseError ante JSON malformado", () => {
     expect(() => parseNatalReport("esto no es json {")).toThrow(ReportParseError);
+  });
+
+  it("lanza ReportParseError si no hay ningún objeto JSON en el texto", () => {
+    expect(() => parseNatalReport("esto no tiene ninguna llave, nada de nada")).toThrow(ReportParseError);
   });
 
   it("lanza ReportParseError si sections no tiene longitud 4", () => {
@@ -280,6 +307,23 @@ describe("parseSolarReport", () => {
   it("extrae el JSON envuelto en fences de markdown", () => {
     const wrapped = "```json\n" + JSON.stringify(WELL_FORMED_SOLAR) + "\n```";
     const report = parseSolarReport(wrapped, 2027);
+    expect(report.themes).toHaveLength(10);
+  });
+
+  it("extrae el objeto correcto aunque la prosa después del JSON traiga una llave suelta", () => {
+    const trailing = `${JSON.stringify(WELL_FORMED_SOLAR)}\n\nOjalá te sirva. Nota al margen: { esto no es json }`;
+    const report = parseSolarReport(trailing, 2027);
+    expect(report.themes).toHaveLength(10);
+    expect(report.mantra).toBe(WELL_FORMED_SOLAR.mantra);
+  });
+
+  it("no se confunde con llaves dentro de un string interno (mantra) del JSON", () => {
+    const withBraces = {
+      ...WELL_FORMED_SOLAR,
+      mantra: "abre y cierra {así}, incluso con una suelta } al final",
+    };
+    const report = parseSolarReport(JSON.stringify(withBraces), 2027);
+    expect(report.mantra).toBe(withBraces.mantra);
     expect(report.themes).toHaveLength(10);
   });
 
