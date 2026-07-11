@@ -135,7 +135,7 @@
 .tierRow { border-radius: 14px; }
 .tier {
   padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border-radius: 10px;
-  font-size: var(--text-2xs); letter-spacing: 0.3px;
+  font-size: var(--text-2xs); letter-spacing: 0.3px; font-weight: 600;
 }
 .tierHint { margin: -5px 0 0 /* baseline negativa: excepción */; text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); }
 

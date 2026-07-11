@@ -6,9 +6,11 @@
 .label { margin: 0; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .section p { margin: 0; font-size: var(--text-md); color: var(--soft); } /* 14: lectura → md */
 
-/* Segmentado (modo de luz, idioma) — R3: migrado 100% al primitivo global
-   .seg/.seg__item/.seg__item--active (globals.css), sin resto local — ver
-   settings-controls.tsx: className="seg" / "seg__item ...seg__item--active". */
+/* Segmentado (modo de luz, idioma) — R3: track + estado activo del primitivo
+   global .seg/.seg__item/.seg__item--active (globals.css); .segItem aporta el
+   override local de padding/tamaño/peso que el primitivo NO define a propósito
+   (igual que carta.kindBtn y numerology.tier) — ver settings-controls.tsx. */
+.segItem { padding: var(--sp-3) var(--sp-2); font-size: var(--text-sm); font-weight: 600; }
 
 /* Grupo de botones plano (plan/checkout) — SIN semántica de "seleccionado",
    por eso NO reusa .seg/.seg__item--active (ver plan-card.tsx). Misma receta
