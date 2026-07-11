@@ -134,4 +134,33 @@ describe("completeWithCascade", () => {
   it("con lista de proveedores vacía, lanza", async () => {
     await expect(completeWithCascade([], OPTS)).rejects.toThrow();
   });
+
+  it("si `validate` rechaza el texto del primer proveedor (malformado) pero acepta el del segundo, cae al segundo", async () => {
+    const a = fakeProvider("hermes", async () => "esto no es JSON válido");
+    const b = fakeProvider("deepseek", async () => '{"ok": true}');
+    const validate = (text: string) => {
+      try {
+        JSON.parse(text);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    const res = await completeWithCascade([a, b], { ...OPTS, validate });
+    expect(res).toEqual({ text: '{"ok": true}', modelUsed: "deepseek" });
+  });
+
+  it("si `validate` rechaza el texto de TODOS los proveedores, lanza", async () => {
+    const a = fakeProvider("hermes", async () => "prosa suelta");
+    const b = fakeProvider("deepseek", async () => "más prosa suelta");
+    const validate = (text: string) => {
+      try {
+        JSON.parse(text);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    await expect(completeWithCascade([a, b], { ...OPTS, validate })).rejects.toThrow();
+  });
 });

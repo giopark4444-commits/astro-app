@@ -137,11 +137,27 @@ export async function runReportGeneration(args: RunReportArgs): Promise<void> {
   try {
     const spec = buildPrompt(args);
     const cascade = args.providers ?? resolveReportCascade();
+    // `validate` hace que la cascada trate un JSON malformado del proveedor
+    // igual que un error/texto vacío: cae al siguiente en vez de quedarse con
+    // un "ganador" cuyo texto luego reventaría al parsear. Reutiliza
+    // `parseContent` (la misma función que parsea el texto ganador abajo) así
+    // "pasa validate" y "parsea de verdad" nunca pueden divergir.
     const { text, modelUsed } = await completeWithCascade(cascade, {
       system: spec.system,
       prompt: spec.prompt,
       maxTokens: spec.maxTokens,
+      validate: (candidate) => {
+        try {
+          parseContent(args.kind, args.year, candidate);
+          return true;
+        } catch {
+          return false;
+        }
+      },
     });
+    // Re-parsea el texto ganador (barato y puro): completeWithCascade ya
+    // confirmó que pasa `validate`, pero ese resultado es un boolean — hace
+    // falta el `ReportContent` real para persistirlo.
     const content = parseContent(args.kind, args.year, text);
 
     await writeStatus(args.supabase, match, { status: "ready", content, modelUsed });

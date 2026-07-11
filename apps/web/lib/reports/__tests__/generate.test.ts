@@ -286,6 +286,32 @@ describe("runReportGeneration", () => {
     expect(updates[0]!.payload.status).toBe("error");
   });
 
+  it("si el primer proveedor de la cascada devuelve JSON malformado, cae al segundo y persiste ready con su model_used (bug del review de c6b64bd)", async () => {
+    const { supabase, updates } = makeFakeSupabase();
+    const malformed = fakeProvider("hermes", async () => "esto no es JSON de ninguna forma");
+    const wellFormed = fakeProvider("deepseek", async () => WELL_FORMED_NATAL_JSON);
+
+    await expect(
+      runReportGeneration({
+        supabase,
+        userId: "user-8",
+        kind: "natal",
+        year: null,
+        locale: "es",
+        natalChart: NATAL_CHART,
+        providers: [malformed, wellFormed],
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(updates).toHaveLength(1);
+    expect(updates[0]!.payload.status).toBe("ready");
+    expect(updates[0]!.payload.model_used).toBe("deepseek");
+    expect(updates[0]!.payload.content).toMatchObject({
+      intro: "Bienvenida a tu mapa.",
+      outro: "Cierre integrador.",
+    });
+  });
+
   it("si el propio Supabase revienta al escribir, NUNCA propaga (try/catch total)", async () => {
     const throwingSupabase = {
       from() {

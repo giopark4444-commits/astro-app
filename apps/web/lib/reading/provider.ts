@@ -473,24 +473,34 @@ export function resolveReportCascade(timeoutMs: number = REPORT_TIMEOUT_MS): Rea
 
 /**
  * Recorre `providers` en orden e intenta cada uno con `complete()`. Un
- * proveedor "falla" si lanza una excepción O si devuelve texto vacío/solo
- * espacios (texto vacío = fallo, cae al siguiente). Si todos fallan, lanza
- * con el motivo del último intento. La lista de proveedores es inyectada
- * (normalmente viene de `resolveReportCascade()`) para que la cascada sea
- * testeable con fakes, sin depender de variables de entorno.
+ * proveedor "falla" si (a) lanza una excepción, (b) devuelve texto
+ * vacío/solo espacios, o (c) — cuando se pasa `opts.validate` — devuelve
+ * texto que NO pasa esa validación (p.ej. no parsea a la forma esperada del
+ * informe). En cualquiera de los tres casos se cae al siguiente proveedor de
+ * la lista. Solo se devuelve `{text, modelUsed}` del proveedor cuyo texto
+ * (i) no está vacío y (ii) pasa `validate` (si se dio uno; sin `validate`, el
+ * comportamiento es el de siempre: cualquier texto no vacío gana). Si todos
+ * fallan, lanza con el motivo del último intento. La lista de proveedores es
+ * inyectada (normalmente viene de `resolveReportCascade()`) para que la
+ * cascada sea testeable con fakes, sin depender de variables de entorno.
  */
 export async function completeWithCascade(
   providers: ReadingProvider[],
-  opts: CompleteOptions,
+  opts: CompleteOptions & { validate?: (text: string) => boolean },
 ): Promise<{ text: string; modelUsed: string }> {
   let lastError: unknown = new Error("completeWithCascade: no hay proveedores en la cascada");
   for (const provider of providers) {
     try {
       const text = await provider.complete(opts);
-      if (text.trim().length > 0) {
-        return { text, modelUsed: provider.name };
+      if (text.trim().length === 0) {
+        lastError = new Error(`${provider.name}: devolvió texto vacío`);
+        continue;
       }
-      lastError = new Error(`${provider.name}: devolvió texto vacío`);
+      if (opts.validate && !opts.validate(text)) {
+        lastError = new Error(`${provider.name}: devolvió texto que no pasó la validación`);
+        continue;
+      }
+      return { text, modelUsed: provider.name };
     } catch (err) {
       lastError = err;
     }
