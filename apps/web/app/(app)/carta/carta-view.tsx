@@ -186,7 +186,7 @@ export function CartaView() {
 
           {/* Tu Clima: aspectos tránsito-a-natal */}
           {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-            <section className={`${styles.card} fade-in`}>
+            <section className="card card--tight fade-in">
               <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
               <div className={styles.aspList}>
                 {ready.transitAspects.map((a, i) => (
@@ -216,7 +216,7 @@ export function CartaView() {
           {pro && (
             <div className={styles.pro}>
               {/* posiciones */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("positions")}</h3>
                 <div className={styles.posTable}>
                   {ready.chart.bodies.map((b) => (
@@ -233,7 +233,7 @@ export function CartaView() {
               </section>
 
               {/* distribución */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("distribution")}</h3>
                 <div className={styles.distGrid}>
                   {ELEMENTS.map((k) => (
@@ -246,7 +246,7 @@ export function CartaView() {
               </section>
 
               {/* aspectario */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
                 <div className={styles.aspList}>
                   {ready.chart.aspects.map((a, i) => (
@@ -262,7 +262,7 @@ export function CartaView() {
               </section>
 
               {/* patrones */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("patterns")}</h3>
                 {ready.chart.patterns.length ? (
                   <div className={styles.chips}>
@@ -278,7 +278,7 @@ export function CartaView() {
               </section>
 
               {/* cabecera técnica */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <div className={styles.tech}>
                   <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
                   <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
@@ -331,7 +331,7 @@ function BigCard({ glyph, name, sign, signGlyph, sub, dim }: {
   glyph: string; name: string; sign: string; signGlyph: string; sub: string; dim?: boolean;
 }) {
   return (
-    <div className={`${styles.big} ${dim ? styles.bigDim : ""}`}>
+    <div className={`card card--tight ${styles.big} ${dim ? styles.bigDim : ""}`}>
       <span className={styles.bigGlyph}>{glyph}</span>
       <span className={styles.bigName}>{name}</span>
       <span className={styles.bigSign}>{signGlyph} {sign}</span>

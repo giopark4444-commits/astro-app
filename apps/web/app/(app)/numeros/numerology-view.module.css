@@ -79,7 +79,7 @@
 
 /* ---- Pro ---- */
 .pro { display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→12; 10: empate → separación → 12 */
-.card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: var(--sp-5); } /* 14 tarjeta canónica → sp-5 (receta SPEC) */
+/* .card migrado al primitivo global card+card--tight — ver numerology-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .cardSub { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--text-2xs); /* 9.5→11 piso; 7→8 */ letter-spacing: 1px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6: empate 4/8 → apoyo → menor (precedente carta .chips) */

@@ -54,7 +54,11 @@
 
 /* ---- Núcleo: Sol / Luna / Asc ---- */
 .bigThree { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); margin-bottom: var(--sp-3); } /* 9→sp-2 nearest; 14→sp-3 empate (apoyo, consistente con .controls arriba) */
-.big { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); text-align: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); } /* 2→sp-1 piso; 13→sp-3 nearest; 6→sp-1 empate (apoyo) */
+/* .big migrado al primitivo global card+card--tight (border/border-radius/background);
+   el padding propio (sp-3/sp-1, distinto del sp-5 uniforme del primitivo) queda local y
+   debe GANAR por orden de fuente (CSS de módulo carga después de globals.css en Next) —
+   ver carta-view.tsx BigCard: className={`card card--tight ${styles.big} ...`} */
+.big { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); text-align: center; } /* 2→sp-1 piso; 13→sp-3 nearest; 6→sp-1 empate (apoyo) */
 .bigDim { opacity: 0.62; }
 .bigGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc); line-height: 1; }
 .bigName { font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin-top: var(--sp-1); } /* 10→2xs piso (sub-11); 3→sp-1 nearest */
@@ -85,7 +89,7 @@
 
 /* ---- Lámina Pro ---- */
 .pro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→sp-3 nearest; 10→sp-3 empate (jerarquía: entrada al bloque Pro, consistente con .lamina de pilares) */
-.card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: var(--sp-5); } /* 14→sp-5, receta canónica de tarjeta (Global Constraints, tarjeta patrón surface+line) */
+/* .card migrado al primitivo global card+card--tight — ver carta-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
 
 .posTable { display: flex; flex-direction: column; gap: var(--sp-1); } /* 2→sp-1 piso */

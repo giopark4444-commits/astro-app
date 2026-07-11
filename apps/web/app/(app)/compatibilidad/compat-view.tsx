@@ -195,7 +195,7 @@ export function CompatView() {
       {state.s === "ready" && (
         <>
           <section
-            className={`${styles.overall} reveal`}
+            className={`card ${styles.overall} reveal`}
             style={{ ["--i" as string]: 0 }}
             aria-label={t("overallTitle")}
           >

@@ -129,7 +129,7 @@
 
 /* ── Lámina Pro: las 8 secciones ── */
 .lamina { position: relative; z-index: 1; display: grid; gap: var(--sp-4); width: 100%; max-width: 720px; margin-top: var(--sp-6); } /* 24→sp-6 empate (entrada a la lámina Pro, jerarquía principal) */
-.card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: var(--sp-5); }
+/* .card migrado al primitivo global (globals.css) — ver pro-lamina.tsx: className="card" */
 .cardH {
   font-family: var(--font-ui); font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase;
   color: var(--acc); margin: 0 0 var(--sp-3);

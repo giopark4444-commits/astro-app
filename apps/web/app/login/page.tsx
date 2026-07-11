@@ -25,7 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <h1 className={styles.brand}>Aluna</h1>
           <p className={styles.tag}>{tApp("tagline")}</p>
         </div>
-        <div className={styles.card}>
+        <div className={`card card--elevated ${styles.card}`}>
           {msgKey && <p role="alert" className={styles.error}>{t(msgKey)}</p>}
           <LoginForm />
         </div>

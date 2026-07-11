@@ -81,7 +81,7 @@ export function NumerologyView() {
 
       {pro && (
         <div className={styles.pro}>
-          <section className={`${styles.card} fade-in`}>
+          <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("karmicLessons")}</h3>
             <div className={styles.chips}>
               {karmic.lessons.length
@@ -96,7 +96,7 @@ export function NumerologyView() {
             )}
           </section>
 
-          <section className={`${styles.card} fade-in`}>
+          <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("inclusion")}</h3>
             <div className={styles.incl}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => {
@@ -115,7 +115,7 @@ export function NumerologyView() {
             )}
           </section>
 
-          <section className={`${styles.card} fade-in`}>
+          <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("pinnacles")}</h3>
             <div className={styles.timeline}>
               {pinnacles.map((p, k) => (
@@ -136,7 +136,7 @@ export function NumerologyView() {
             </div>
           </section>
 
-          <section className={`${styles.card} fade-in`}>
+          <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("cycles")}</h3>
             <div className={styles.cycles}>
               <div className={styles.cyc}><span className={styles.cycN}>{cycles.personalYear.value}</span><span className={styles.cycL}>{t("personalYear")}</span></div>

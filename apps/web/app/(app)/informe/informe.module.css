@@ -6,10 +6,7 @@
 
 .list { display: grid; gap: var(--sp-5); }
 
-.card {
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--surface); padding: var(--sp-5);
-}
+/* .card migrado al primitivo global (globals.css) — ver informe-view.tsx: className="card" */
 .cardHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
 .cardTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
 

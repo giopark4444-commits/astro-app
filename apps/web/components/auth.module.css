@@ -21,13 +21,10 @@
 .brand::first-letter { color: var(--acc); }
 .tag { font-size: var(--text-sm); color: var(--soft); margin: 0; }
 
+/* .card migrado al primitivo global .card + .card--elevated (background/border/radius/
+   padding/box-shadow/backdrop-filter); esta clase de módulo queda solo con la animación
+   propia — ver login/page.tsx y signup/page.tsx: className={`card card--elevated ${styles.card}`} */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: var(--sp-5) var(--sp-5); /* 22/20 → sp-5 (contenedor) */
-  box-shadow: var(--elev);
-  backdrop-filter: blur(8px);
   animation: aluna-rise-in var(--dur) var(--ease) both;
 }
 .form { display: grid; gap: var(--sp-3); }

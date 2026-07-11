@@ -180,7 +180,7 @@ function ReportCard({
   const busy = state.s === "loading";
 
   return (
-    <section className={styles.card}>
+    <section className="card">
       <div className={styles.cardHead}>
         <h2 className={styles.cardTitle}>{heading}</h2>
         <button type="button" className={styles.btnGhost} disabled={busy} onClick={onRefresh}>
