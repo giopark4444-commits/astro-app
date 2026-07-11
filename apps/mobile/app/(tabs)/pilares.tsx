@@ -27,7 +27,7 @@ import {
   type LuckSequence,
 } from "@aluna/core";
 import { Enso } from "../../components/Enso";
-import { Card, Chip, FadeIn } from "../../components/ui";
+import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
@@ -246,10 +246,12 @@ export default function PilaresScreen() {
             </FadeIn>
 
             {/* Modo Pro */}
-            <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
-              <View style={[styles.proDot, pro && styles.proDotOn]} />
-              <Text style={styles.proText}>{t("pilares.modePro")}</Text>
-            </Pressable>
+            <ToggleRow
+              label={t("pilares.modePro")}
+              on={pro}
+              onPress={() => setPro(!pro)}
+              style={{ marginTop: space.lg, alignSelf: "center" }}
+            />
             {pro && <Text style={styles.proHint}>{t("pilares.modeProHint")}</Text>}
 
             {/* Conmutador de escritura (漢字 ↔ 한글) — chips canónicos del rediseño */}
@@ -821,13 +823,6 @@ function makeStyles(t: ThemeTokens) {
     hiddenChar: { fontSize: typeScale.sm, fontFamily: fonts.serifSemi },
     hiddenGod: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans, textAlign: "center" },
 
-    proToggle: {
-      flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.lg, alignSelf: "center",
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill, paddingHorizontal: space.xl, paddingVertical: space.md,
-    },
-    proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
-    proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
     proHint: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.sm },
 
     // Conmutador 漢字/한글 — ahora <Chip kind="control"> (patrón de carta.tsx); esta fila

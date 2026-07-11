@@ -228,6 +228,46 @@ function makeChip(t: ThemeTokens) {
   });
 }
 
+/**
+ * Fila de interruptor "Modo Pro": pill bordeada + dot animable + label. Extraído de
+ * 3 copias byte-idénticas (carta.tsx, numeros.tsx, pilares.tsx) — R3. `style` (mismo
+ * patrón que `Card`/`FadeIn`) es del llamador: los 3 orígenes solo diferían en
+ * `marginTop`/`alignSelf`, que es layout, no parte del primitivo.
+ */
+export function ToggleRow({
+  label,
+  on,
+  onPress,
+  style,
+}: {
+  label: string;
+  on: boolean;
+  onPress: () => void;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { t } = useTheme();
+  const s = useMemo(() => makeToggleRow(t), [t]);
+  return (
+    <Pressable style={[s.wrap, style]} onPress={onPress}>
+      <View style={[s.dot, on && s.dotOn]} />
+      <Text style={s.text}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function makeToggleRow(t: ThemeTokens) {
+  return StyleSheet.create({
+    wrap: {
+      flexDirection: "row", alignItems: "center", gap: space.md,
+      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill,
+      paddingHorizontal: space.xl, paddingVertical: space.md,
+    },
+    dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
+    dotOn: { backgroundColor: t.acc },
+    text: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
+  });
+}
+
 const FADE_DURATION_MS = 550;
 const FADE_TRANSLATE_Y = 8;
 
