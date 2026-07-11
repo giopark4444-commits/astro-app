@@ -137,14 +137,14 @@ export function NumberReading({
 
   return (
     <div className={styles.readingWrap}>
-      <div className={styles.tierRow} role="tablist" aria-label={t("tierEssenceHint")}>
+      <div className={`seg seg--gradient ${styles.tierRow}`} role="tablist" aria-label={t("tierEssenceHint")}>
         {TIER_IDS.map((id) => (
           <button
             key={id}
             type="button"
             role="tab"
             aria-selected={tier === id}
-            className={`${styles.tier} ${tier === id ? styles.tierOn : ""}`}
+            className={`seg__item ${styles.tier} ${tier === id ? "seg__item--active" : ""}`}
             onClick={() => choose(id)}
           >
             {t(`tier${TIER_KEY[id]}`)}
@@ -169,14 +169,14 @@ export function NumberReading({
           <span className={styles.gatedGlyph} aria-hidden>
             ☾
           </span>
-          <p className={styles.gatedNote}>{t("gated")}</p>
+          <p className={`card card--dashed ${styles.gatedNote}`}>{t("gated")}</p>
           <Reading meaning={meaning} lens={lens} />
         </div>
       )}
 
       {state.status === "error" && (
         <div className={styles.gated}>
-          <p className={styles.gatedNote}>{t("error")}</p>
+          <p className={`card card--dashed ${styles.gatedNote}`}>{t("error")}</p>
           <Reading meaning={meaning} lens={lens} />
         </div>
       )}

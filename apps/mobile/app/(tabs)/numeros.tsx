@@ -5,7 +5,7 @@ import { computeNumerology, type NumerologyResult, type ReductionTrace } from "@
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { NumberReading } from "../../components/NumberReading";
-import { Card, Chip, FadeIn } from "../../components/ui";
+import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
@@ -127,10 +127,7 @@ export default function NumerosScreen() {
         </FadeIn>
 
         {/* Toggle Modo Pro */}
-        <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
-          <View style={[styles.proDot, pro && styles.proDotOn]} />
-          <Text style={styles.proText}>{t("numerology.pro")}</Text>
-        </Pressable>
+        <ToggleRow label={t("numerology.pro")} on={pro} onPress={() => setPro(!pro)} style={{ marginTop: space.xxl }} />
 
         {pro && (
           <View style={styles.proBody}>
@@ -337,21 +334,6 @@ function makeStyles(t: ThemeTokens) {
     cellN: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
     cellL: { color: t.text, fontSize: typeScale.sm, marginTop: space.xs, fontFamily: fonts.sansMedium },
     cellSub: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
-
-    proToggle: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: space.md,
-      marginTop: space.xxl,
-      borderWidth: 1,
-      borderColor: t.accHair,
-      borderRadius: radius.pill,
-      paddingHorizontal: space.xl,
-      paddingVertical: space.md,
-    },
-    proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
-    proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
     // Fondo/borde/radio ahora los da <Card>; queda solo el ancho.

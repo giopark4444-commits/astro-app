@@ -131,7 +131,7 @@ export function CompatView() {
           </span>
         </div>
         <h1 className={styles.h1}>{t("subtitle")}</h1>
-        <div className={`${styles.empty} reveal`} style={{ ["--i" as string]: 0 }}>
+        <div className={`card card--dashed ${styles.empty} reveal`} style={{ ["--i" as string]: 0 }}>
           <span className={styles.emptyGlyph} aria-hidden>
             ☍
           </span>
@@ -195,7 +195,7 @@ export function CompatView() {
       {state.s === "ready" && (
         <>
           <section
-            className={`${styles.overall} reveal`}
+            className={`card ${styles.overall} reveal`}
             style={{ ["--i" as string]: 0 }}
             aria-label={t("overallTitle")}
           >
@@ -322,7 +322,7 @@ function PersonPicker({
             <button
               key={p.id}
               type="button"
-              className={`${styles.chip} ${on ? styles.chipOn : ""} ${disabled ? styles.chipDisabled : ""}`}
+              className={`chip--control ${on ? "chip--control-on" : ""} ${disabled ? "chip--control-disabled" : ""}`}
               aria-pressed={on}
               aria-disabled={disabled}
               onClick={() => !disabled && onPick(p.id)}

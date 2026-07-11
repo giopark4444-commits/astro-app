@@ -6,31 +6,25 @@
 .label { margin: 0; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .section p { margin: 0; font-size: var(--text-md); color: var(--soft); } /* 14: lectura → md */
 
-/* Segmentado (modo de luz, idioma) */
-.seg {
-  display: flex; gap: var(--sp-1);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  padding: var(--sp-1);
-}
-.segItem {
-  flex: 1; text-align: center;
-  padding: var(--sp-3) var(--sp-2); /* 11→12; 6px→sp-2: paso más cercano */
-  font-size: var(--text-sm); font-weight: 600;
-  color: var(--soft);
-  background: transparent; border: none; border-radius: 9px;
-  cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
-}
-.segItem:hover { color: var(--ink); }
-.segOn { background: var(--acc); color: var(--ink-on-acc); box-shadow: var(--glow-soft); }
+/* Segmentado (modo de luz, idioma) — R3: track + estado activo del primitivo
+   global .seg/.seg__item/.seg__item--active (globals.css); .segItem aporta el
+   override local de padding/tamaño/peso que el primitivo NO define a propósito
+   (igual que carta.kindBtn y numerology.tier) — ver settings-controls.tsx. */
+.segItem { padding: var(--sp-3) var(--sp-2); font-size: var(--text-sm); font-weight: 600; }
+
+/* Grupo de botones plano (plan/checkout) — SIN semántica de "seleccionado",
+   por eso NO reusa .seg/.seg__item--active (ver plan-card.tsx). Misma receta
+   visual que el viejo .seg/.segItem, sin el estado activo. */
+.planActions { display: flex; gap: var(--sp-1); padding: var(--sp-1); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); } /* = geometría del .seg hermano (era 13px suelto) */
+.planBtn { flex: 1; text-align: center; padding: var(--sp-3) var(--sp-2); font-size: var(--text-sm); font-weight: 600; color: var(--soft); background: transparent; border: none; border-radius: calc(var(--radius) - 5px); cursor: pointer; transition: color var(--dur-fast) var(--ease); }
+.planBtn:hover { color: var(--ink); }
+.planBtn:disabled { opacity: 0.5; cursor: default; }
 
 /* Tarjetas de tema */
 .themes { display: flex; gap: var(--sp-2); } /* 9→8 */
 .tc {
   flex: 1;
-  border: 1px solid var(--line); border-radius: 14px;
+  border: 1px solid var(--line); border-radius: var(--radius);
   padding: var(--sp-2) var(--sp-2); /* 9/7→8 */
   text-align: center; font-size: var(--text-2xs); font-weight: 600; color: var(--ink);
   background: var(--surface);

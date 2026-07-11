@@ -6,10 +6,7 @@
 
 .list { display: grid; gap: var(--sp-5); }
 
-.card {
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--surface); padding: var(--sp-5);
-}
+/* .card migrado al primitivo global (globals.css) — ver informe-view.tsx: className="card" */
 .cardHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
 .cardTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
 
@@ -37,10 +34,9 @@
 
 /* Estados "durmiente" (sin llave IA) y "Plus" (tease): mismo lenguaje visual
    que el oráculo dormido del chat (precedente app/(app)/preguntar/chat.module.css). */
-.dormant, .plusTease, .emptyProfile {
-  text-align: center; padding: var(--sp-5); border: 1px dashed rgba(var(--acc-rgb), 0.35);
-  border-radius: 14px; background: var(--surface-2);
-}
+/* migrado al primitivo global card+card--dashed — ver informe-view.tsx:
+   className="card card--dashed ..." */
+.dormant, .plusTease, .emptyProfile { text-align: center; padding: var(--sp-5); }
 .dormantTitle, .plusTitle, .emptyProfileTitle {
   margin: 0 0 var(--sp-2); font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink);
 }

@@ -79,12 +79,13 @@
 
 /* ---- Pro ---- */
 .pro { display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→12; 10: empate → separación → 12 */
-.card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: var(--sp-5); } /* 14 tarjeta canónica → sp-5 (receta SPEC) */
+/* .card migrado al primitivo global card+card--tight — ver numerology-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .cardSub { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--text-2xs); /* 9.5→11 piso; 7→8 */ letter-spacing: 1px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6: empate 4/8 → apoyo → menor (precedente carta .chips) */
-.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--acc); border-radius: 9px; padding: var(--sp-1) var(--sp-3) /* 11→12; 3px→sp-1: piso de la escala */; font-size: var(--text-sm); font-weight: 600; }
-.chipWarn { border-color: rgba(220, 120, 80, 0.6); color: #e0a07a; }
+/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.chip { border-color: rgba(var(--acc-rgb), 0.4); color: var(--acc); font-weight: 600; }
+.chipWarn { border-color: rgba(var(--tone-caution-rgb), 0.6); color: var(--tone-caution); } /* R3: token --tone-caution (tokens.css), antes literal duplicado con carta .tagWarn */
 .muted { font-size: var(--text-xs); color: var(--soft); margin: var(--sp-2) 0 0; }
 
 .incl { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--sp-1); }
@@ -120,20 +121,22 @@
 .block { display: flex; flex-direction: column; gap: var(--sp-1); } /* 5→4 */
 .block p { margin: 0; font-size: var(--text-sm); /* 13.5→13 */ line-height: 1.62; color: var(--ink); }
 .blockH { font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: var(--sp-3); } /* 13→12 */
+.practiceBlock { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-3); } /* 13→12 */
 .practiceBlock p { color: var(--soft); }
 
 /* ---- Selector de profundidad (Esencia · Profunda · Completa) ---- */
 .readingWrap { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14 → mayor (contenedor) */
-.tierRow { display: flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); }
+/* R3: migrado al primitivo global .seg.seg--gradient/.seg__item/.seg__item--active
+   (globals.css) — solo lo que difiere queda local: el radio propio (14px/10px, no el
+   --radius del primitivo, 16px/11px) y font-size (2xs, no el sm heredado de .seg__item
+   font-family:inherit — este consumidor usa font-family:inherit ya, así que no colisiona
+   con el override serif de carta.kindBtn). Ver numerology-view.tsx / number-reading.tsx:
+   className="seg seg--gradient ${styles.tierRow}" / "seg__item ${styles.tier} ...". */
+.tierRow { border-radius: 14px; }
 .tier {
-  flex: 1; padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border: 0; border-radius: 10px; background: transparent;
-  font-family: inherit; font-size: var(--text-2xs); letter-spacing: 0.3px; font-weight: 600;
-  color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  padding: var(--sp-2) var(--sp-2); /* 7→8; 6px→sp-2: paso más cercano */ border-radius: 10px;
+  font-size: var(--text-2xs); letter-spacing: 0.3px; font-weight: 600;
 }
-.tier:hover { color: var(--ink); }
-.tierOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); box-shadow: var(--glow-soft); }
 .tierHint { margin: -5px 0 0 /* baseline negativa: excepción */; text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); }
 
 .readingLoading { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-1) 0 2px; } /* 9→8 */
@@ -149,7 +152,6 @@
 
 .gated { display: flex; flex-direction: column; gap: var(--sp-3); }
 .gatedGlyph { align-self: center; font-size: var(--text-2xl); color: var(--acc); opacity: 0.85; }
-.gatedNote {
-  margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); /* 12.5: empate 12/13 → apoyo → menor */
-  padding: var(--sp-3) var(--sp-4); /* 14 → contenedor → mayor */ border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 14px; background: var(--surface-2);
-}
+/* .gatedNote migrado al primitivo global card+card--dashed — ver numerology-view.tsx:
+   className="card card--dashed ..." */
+.gatedNote { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); padding: var(--sp-3) var(--sp-4); }

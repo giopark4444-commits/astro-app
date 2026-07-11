@@ -8,26 +8,26 @@
 .h1 { position: relative; z-index: 1; font-style: italic; font-size: var(--text-2xl); color: var(--ink); margin: var(--sp-2) 0 var(--sp-4); } /* 26→2xl (nearest, no empate) */
 
 /* ---- Selector de tipo de carta (Natal / Tu Clima / Progresiones) ---- */
-.kindRow { position: relative; z-index: 1; display: flex; gap: var(--sp-1); padding: var(--sp-1); border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); margin-bottom: var(--sp-2); } /* 5→sp-1 (nearest); 6→sp-2 empate, vara: mockup movil-carta-despues.html .seg margin-bottom (línea 153) */
+/* R3: migrado al primitivo global .seg.seg--gradient/.seg__item/.seg__item--active
+   (globals.css) — el radio propio (16px/11px) ya empataba con el --radius del
+   primitivo (16px, ver tokens.css), así que no se redeclara. Lo único que queda
+   local es la font-family display (serif), específica de este consumidor
+   flagship, no parte de .seg__item compartido. Ver carta-view.tsx:
+   className="seg seg--gradient ${styles.kindRow}" / "seg__item ${styles.kindBtn} ...". */
+.kindRow { position: relative; z-index: 1; margin-bottom: var(--sp-2); } /* 6→sp-2 empate, vara: mockup movil-carta-despues.html .seg margin-bottom (línea 153) */
 .kindBtn {
-  flex: 1; min-width: 0; padding: var(--sp-2) var(--sp-1); border: 0; border-radius: 11px; background: transparent;
-  font-family: var(--font-display); font-size: var(--text-sm); line-height: 1.15; color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  min-width: 0; padding: var(--sp-2) var(--sp-1);
+  font-family: var(--font-display); font-size: var(--text-sm); line-height: 1.15;
 } /* 9→sp-2 (nearest) */
-.kindBtn:hover { color: var(--ink); }
-.kindOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); box-shadow: var(--glow-soft); }
 .kindHint { position: relative; z-index: 1; margin: 0 0 var(--sp-3); text-align: center; font-size: var(--text-2xs); font-style: italic; color: var(--soft); } /* 11.5→2xs empate (texto de apoyo) */
 
 /* ---- Controles (casas / zodiaco) ---- */
 .controls { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); } /* 7→sp-2 nearest; 14→sp-3 empate (apoyo, separa controles del contenido) */
 .ctrlRow { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
-.ctrl {
-  padding: var(--sp-1) var(--sp-3); border: 1px solid var(--line); border-radius: 18px; background: var(--surface);
-  font-family: inherit; font-size: var(--text-2xs); font-weight: 600; color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
-} /* 6→sp-1 empate (control pequeño, apoyo — consistente con .row de pilares) */
-.ctrl:hover { color: var(--ink); }
-.ctrlOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); border-color: transparent; box-shadow: var(--glow-soft); }
+/* R3: .ctrl/.ctrlOn migrados al primitivo global .chip--control/.chip--control-on
+   (globals.css) — cubre 100% de la receta salvo el radio (18px→999px, cambio
+   visual señalado en el plan, ver carta-view.tsx houseSystem/zodiac y
+   body-reading.tsx tier tabs: className="chip--control ...on? chip--control-on"). */
 
 .note { position: relative; z-index: 1; text-align: center; font-style: italic; color: var(--soft); font-size: var(--text-sm); padding: var(--sp-7) 0; }
 .solar { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); font-style: italic; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 12px; background: var(--surface-2); } /* 11.5→2xs empate, misma regla que .kindHint */
@@ -54,7 +54,11 @@
 
 /* ---- Núcleo: Sol / Luna / Asc ---- */
 .bigThree { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); margin-bottom: var(--sp-3); } /* 9→sp-2 nearest; 14→sp-3 empate (apoyo, consistente con .controls arriba) */
-.big { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); text-align: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); } /* 2→sp-1 piso; 13→sp-3 nearest; 6→sp-1 empate (apoyo) */
+/* .big migrado al primitivo global card+card--tight (border/border-radius/background);
+   el padding propio (sp-3/sp-1, distinto del sp-5 uniforme del primitivo) queda local y
+   debe GANAR por orden de fuente (CSS de módulo carga después de globals.css en Next) —
+   ver carta-view.tsx BigCard: className={`card card--tight ${styles.big} ...`} */
+.big { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); text-align: center; } /* 2→sp-1 piso; 13→sp-3 nearest; 6→sp-1 empate (apoyo) */
 .bigDim { opacity: 0.62; }
 .bigGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc); line-height: 1; }
 .bigName { font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin-top: var(--sp-1); } /* 10→2xs piso (sub-11); 3→sp-1 nearest */
@@ -85,7 +89,7 @@
 
 /* ---- Lámina Pro ---- */
 .pro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→sp-3 nearest; 10→sp-3 empate (jerarquía: entrada al bloque Pro, consistente con .lamina de pilares) */
-.card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: var(--sp-5); } /* 14→sp-5, receta canónica de tarjeta (Global Constraints, tarjeta patrón surface+line) */
+/* .card migrado al primitivo global card+card--tight — ver carta-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
 
 .posTable { display: flex; flex-direction: column; gap: var(--sp-1); } /* 2→sp-1 piso */
@@ -111,7 +115,8 @@
 .harm_soft .aspGlyph { color: var(--tone-cool); } /* eje tono armonía (fluido), coincide con el semántico R2 */
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6→sp-1 empate (apoyo) */
-.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--ink); border-radius: 9px; padding: var(--sp-1) var(--sp-3); font-size: var(--text-xs); } /* 11→sp-3 nearest */
+/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.chip { border-color: rgba(var(--acc-rgb), 0.4); font-size: var(--text-xs); } /* 11→sp-3 nearest */
 .muted { font-size: var(--text-xs); color: var(--soft); margin: 0; }
 
 .tech { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; } /* 6→sp-1 empate (apoyo); 10.5→2xs piso (sub-11) */
@@ -121,8 +126,9 @@
 .sheetBig { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc); line-height: 1; } /* 34→3xl (nearest, no empate; NO es el "sheet hero" del plan — ese vive en numerology-view.module.css .sheetN) */
 .sheetSign { font-size: var(--text-md); color: var(--ink); } /* 14→md empate (valor bajo el glifo, análogo a .rowValue de pilares) */
 .sheetMeta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-1); margin-top: var(--sp-1); } /* 6→sp-1 empate (apoyo) ×2 */
-.tag { font-size: var(--text-2xs); color: var(--soft); border: 1px solid var(--line); border-radius: 9px; padding: var(--sp-1) var(--sp-2); } /* 3→sp-1 nearest; 10→sp-2 empate (apoyo, padding de chip) */
-.tagWarn { border-color: rgba(220, 120, 80, 0.6); color: #e0a07a; } /* tono de aviso propio, distinto de --tone-warm — no coincide en valor, no se alias */
+/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.tag { font-size: var(--text-2xs); color: var(--soft); padding: var(--sp-1) var(--sp-2); } /* 3→sp-1 nearest; 10→sp-2 empate (apoyo, padding de chip) */
+.tagWarn { border-color: rgba(var(--tone-caution-rgb), 0.6); color: var(--tone-caution); } /* R3: token --tone-caution (tokens.css), antes literal duplicado con numerology-view .chipWarn */
 
 /* Lectura base del cuerpo (compuesta planeta+signo+casa) */
 .bodyReading { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--line); text-align: left; } /* 14→sp-4 empate ×2 (jerarquía: entrada de la sección de lectura) */

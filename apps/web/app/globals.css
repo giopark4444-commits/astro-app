@@ -52,12 +52,112 @@ button { font-family: inherit; }
   animation-delay: calc(var(--i, 0) * 70ms); }
 .fade-in { animation: aluna-fade var(--dur) var(--ease-soft) both; }
 
-/* Superficie glass reutilizable. */
-.glass {
+/* ----------------------------------------------------------------
+   R3: primitivo .card — base + 4 modificadores. Semilla: la antigua
+   .glass (huérfana, 0 consumidores). Se consume aplicando las clases
+   globales junto a la clase de módulo (className="card card--tight ..."
+   o `composes: card from global` desde el módulo); los modificadores
+   solo sobreescriben lo que difiere del base, así que se componen
+   juntos. Nota de cascada: el CSS de Módulo carga DESPUÉS de globals.css
+   en Next, así que un override local (p.ej. padding de carta.big) gana
+   por orden de fuente; si un caso no ganara, subir especificidad con
+   `.card.big` en el módulo. Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.card {
   background: var(--surface);
   border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+/* Radio menor (16px) — bloques Pro / mini-tarjetas del núcleo. */
+.card--tight {
   border-radius: var(--radius);
+}
+/* Superficie con feedback de hover — tiles/tarjetas clicables (hub, day-number). */
+.card--interactive {
+  transition: transform var(--dur-fast) var(--ease-spring),
+    border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.card--interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--acc-rgb), 0.45);
+  box-shadow: var(--glow-soft);
+}
+/* Estado vacío/durmiente — borde punteado, surface-2. Radio: el base .card ya
+   aporta --radius-lg (dashed siempre se aplica junto a .card), así que no se
+   redeclara aquí (regla de modificadores: solo lo que difiere). */
+.card--dashed {
+  border: 1px dashed rgba(var(--acc-rgb), 0.35);
+  background: var(--surface-2);
+}
+/* Elevada — flagship login/signup. */
+.card--elevated {
+  box-shadow: var(--elev);
   backdrop-filter: blur(8px);
+}
+
+/* ----------------------------------------------------------------
+   R3: primitivos de chip. Dos formas — .chip (estático, tag/display) y
+   .chip--control (interactivo, botón/toggle) — más modificadores documentados:
+   .chip--pill (radio 999px, outlier de pilares Favor/Avoid+estrellas), y para
+   .chip--control: -on/-disabled/-outline. Mismo mecanismo de consumo que .card
+   (clases globales junto a la clase de módulo; el módulo solo sobreescribe lo
+   que difiere). Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  border: 1px solid var(--line); border-radius: 9px;
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--text-sm); color: var(--ink);
+}
+/* Outlier documentado: pilares Favor/Avoid + estrellas — pill 999px, no aplanar en .chip base. */
+.chip--pill { border-radius: 999px; }
+
+.chip--control {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-family: inherit; font-size: var(--text-xs); font-weight: 600;
+  color: var(--soft); cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.chip--control:hover { color: var(--ink); }
+.chip--control-on {
+  color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  border-color: transparent;
+  box-shadow: var(--glow-soft);
+}
+.chip--control-disabled { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
+/* pilares.scriptBtn: activo = SOLO borde+texto, sin relleno — variante, no aplanar a -on. */
+.chip--control-outline.chip--control-on {
+  background: transparent; color: var(--acc); border-color: var(--acc); box-shadow: none;
+}
+
+/* ----------------------------------------------------------------
+   R3: primitivo .seg (segmentado) — dos formas. Base .seg/.seg__item/
+   .seg__item--active con relleno PLANO (settings: modo de luz, idioma;
+   energy: selector de periodo). Modificador .seg--gradient para el
+   relleno GRADIENTE flagship (carta.kindRow, numerology.tierRow) — NO
+   aplanar, es intencional. Mismo mecanismo de consumo que .card/.chip
+   (clases globales junto a la clase de módulo). Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.seg {
+  display: flex; gap: var(--sp-1); padding: var(--sp-1);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.seg__item {
+  flex: 1; border: 0; border-radius: calc(var(--radius) - 5px); text-align: center;
+  background: transparent; color: var(--soft); font-family: inherit; cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.seg__item:hover { color: var(--ink); }
+/* Relleno plano — settings (modo de luz, idioma), energy (periodo). */
+.seg__item--active {
+  background: var(--acc); color: var(--ink-on-acc); box-shadow: var(--glow-soft); font-weight: 600;
+}
+/* Relleno gradiente — flagship carta/numerología, NO aplanar a plano. */
+.seg--gradient .seg__item--active {
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
 }
 
 @media (prefers-reduced-motion: reduce) {

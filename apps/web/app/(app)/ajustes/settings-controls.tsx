@@ -21,9 +21,9 @@ export function SettingsControls({ currentLocale }: { currentLocale: string }) {
     <div className={styles.wrap}>
       <section className={styles.section}>
         <h3 className={styles.label}>{t("lightMode")}</h3>
-        <div className={styles.seg} role="group" aria-label={t("lightMode")}>
+        <div className="seg" role="group" aria-label={t("lightMode")}>
           {MODES.map((m) => (
-            <button key={m} className={`${styles.segItem} ${mode === m ? styles.segOn : ""}`}
+            <button key={m} className={`seg__item ${styles.segItem} ${mode === m ? "seg__item--active" : ""}`}
               aria-pressed={mode === m} onClick={() => setMode(m)}>{t(m)}</button>
           ))}
         </div>
@@ -44,9 +44,9 @@ export function SettingsControls({ currentLocale }: { currentLocale: string }) {
 
       <section className={styles.section}>
         <h3 className={styles.label}>{t("language")}</h3>
-        <div className={styles.seg} role="group" aria-label={t("language")}>
+        <div className="seg" role="group" aria-label={t("language")}>
           {(["es", "en"] as const).map((loc) => (
-            <button key={loc} className={`${styles.segItem} ${currentLocale === loc ? styles.segOn : ""}`}
+            <button key={loc} className={`seg__item ${styles.segItem} ${currentLocale === loc ? "seg__item--active" : ""}`}
               aria-pressed={currentLocale === loc}
               onClick={async () => { await setLanguage(loc); router.refresh(); }}>{loc.toUpperCase()}</button>
           ))}

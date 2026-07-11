@@ -110,6 +110,9 @@ function makeStyles(t: ThemeTokens) {
       textAlign: "center",
     },
     spin: { position: "absolute", right: space.md },
+    // Superficie tipo Card a mano, NO el primitivo: necesita overflow:"hidden" para
+    // recortar los divisores de las filas contra el radio — <Card> no declara overflow
+    // (su highlight absoluto lo necesita visible). Local legítimo, ver R3/Task 11.
     options: {
       marginTop: space.sm,
       backgroundColor: t.panel,

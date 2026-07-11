@@ -13,6 +13,7 @@ export { reduce, reduceWithTrace, digitsSum, isMaster } from "./numerology/reduc
 
 // Constantes de astrología (para los planes 2+)
 export * from "./constants/astrology";
+export * from "./constants/colors";
 
 // Dominio de carta astral (puro)
 export * from "./astrology/types";
@@ -49,7 +50,8 @@ export {
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
 } from "./bazi/bazi";
-export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef } from "./bazi/bazi";
+export type { BaZiInput, BaZiResult, Pillar, StemDef, BranchDef, TenGod, TenGodDef, WuXingElement } from "./bazi/bazi";
+export { WU_XING_COLORS } from "./bazi/colors";
 export { sexagenaryIndex, nayin, NAYIN, type NayinDef } from "./bazi/nayin";
 export { lifeStage, TWELVE_STAGES, type StageKey, type StageDef } from "./bazi/stages";
 export {

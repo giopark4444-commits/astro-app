@@ -87,7 +87,7 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
               type="button"
               role="tab"
               aria-selected={p === period}
-              className={`${styles.period} ${p === period ? styles.periodOn : ""}`}
+              className={`seg__item ${styles.period} ${p === period ? "seg__item--active" : ""}`}
               onClick={() => setPeriod(p)}
             >
               {t(`hoy.${PERIOD_KEY[p]}`)}

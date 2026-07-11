@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
@@ -9,14 +9,14 @@ import { Enso } from "../../components/Enso";
 import { ChartWheel } from "../../components/ChartWheel";
 import { BodyReadingReader } from "../../components/BodyReading";
 import { BottomSheet } from "../../components/BottomSheet";
-import { Card, Chip, FadeIn } from "../../components/ui";
+import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { astroLabels, ASPECT_GLYPHS } from "../../content/astrology";
 import { fetchChart, type ChartKind } from "../../lib/chart-api";
-import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
+import { fonts, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -234,10 +234,7 @@ export default function CartaScreen() {
             )}
 
             {/* Modo Pro */}
-            <Pressable style={styles.proToggle} onPress={() => setPro(!pro)}>
-              <View style={[styles.proDot, pro && styles.proDotOn]} />
-              <Text style={styles.proText}>{t("carta.pro")}</Text>
-            </Pressable>
+            <ToggleRow label={t("carta.pro")} on={pro} onPress={() => setPro(!pro)} style={{ marginTop: space.lg }} />
 
             {pro && (
               <View style={styles.proBody}>
@@ -441,14 +438,6 @@ function makeStyles(t: ThemeTokens) {
     balFill: { height: "100%", backgroundColor: t.accSoft, borderRadius: 4 },
     balFillOn: { backgroundColor: t.acc },
     balN: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans, width: 18, textAlign: "right" },
-
-    proToggle: {
-      flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.lg,
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill, paddingHorizontal: space.xl, paddingVertical: space.md,
-    },
-    proDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: t.accHair },
-    proDotOn: { backgroundColor: t.acc },
-    proText: { color: t.text, fontSize: typeScale.md, letterSpacing: 1, fontFamily: fonts.sans },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
     // Fondo/borde/radio ahora los da <Card>; queda solo el ancho (mismo motivo que fadeFull).

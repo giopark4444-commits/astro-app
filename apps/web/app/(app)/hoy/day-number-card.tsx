@@ -48,7 +48,7 @@ export function DayNumberCard({ birthDate }: { birthDate: string }) {
   return (
     <Link
       href="/numeros"
-      className={`${styles.card} reveal`}
+      className={`card card--interactive ${styles.card} reveal`}
       style={{ ["--i" as string]: 1 }}
       aria-label={t("dayNumberAria", { n: day })}
     >
@@ -59,13 +59,13 @@ export function DayNumberCard({ birthDate }: { birthDate: string }) {
         <span className={styles.eyebrow}>{t("dayNumberTitle")}</span>
         <span className={styles.meaning}>{meaning}</span>
         <span className={styles.context}>
-          <span className={styles.chip}>
+          <span className={styles.stat}>
             {t("dayNumberMonth")} <b>{month}</b>
           </span>
           <span className={styles.dot} aria-hidden>
             ·
           </span>
-          <span className={styles.chip}>
+          <span className={styles.stat}>
             {t("dayNumberYear")} <b>{year}</b>
           </span>
         </span>

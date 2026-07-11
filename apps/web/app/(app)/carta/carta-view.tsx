@@ -114,14 +114,14 @@ export function CartaView() {
       <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
 
       {/* tipo de carta */}
-      <div className={styles.kindRow} role="tablist" aria-label={t("title")}>
+      <div className={`seg seg--gradient ${styles.kindRow}`} role="tablist" aria-label={t("title")}>
         {CHART_KINDS.map((k) => (
           <button
             key={k}
             type="button"
             role="tab"
             aria-selected={kind === k}
-            className={`${styles.kindBtn} ${kind === k ? styles.kindOn : ""}`}
+            className={`seg__item ${styles.kindBtn} ${kind === k ? "seg__item--active" : ""}`}
             onClick={() => setKind(k)}
           >
             {t(`kind${KIND_KEY[k]}`)}
@@ -134,7 +134,7 @@ export function CartaView() {
       <div className={styles.controls}>
         <div className={styles.ctrlRow} role="tablist" aria-label={t("houseSystem")}>
           {HOUSE_SYSTEMS.map((h) => (
-            <button key={h} className={`${styles.ctrl} ${houseSystem === h ? styles.ctrlOn : ""}`}
+            <button key={h} className={`chip--control ${houseSystem === h ? "chip--control-on" : ""}`}
               aria-selected={houseSystem === h} role="tab" onClick={() => setHouseSystem(h)}>
               {t(`houseSystems.${h}`)}
             </button>
@@ -142,7 +142,7 @@ export function CartaView() {
         </div>
         <div className={styles.ctrlRow} role="tablist" aria-label={t("zodiac")}>
           {(["tropical", "sidereal"] as Zodiac[]).map((z) => (
-            <button key={z} className={`${styles.ctrl} ${zodiac === z ? styles.ctrlOn : ""}`}
+            <button key={z} className={`chip--control ${zodiac === z ? "chip--control-on" : ""}`}
               aria-selected={zodiac === z} role="tab" onClick={() => setZodiac(z)}>
               {t(z)}
             </button>
@@ -186,7 +186,7 @@ export function CartaView() {
 
           {/* Tu Clima: aspectos tránsito-a-natal */}
           {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-            <section className={`${styles.card} fade-in`}>
+            <section className="card card--tight fade-in">
               <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
               <div className={styles.aspList}>
                 {ready.transitAspects.map((a, i) => (
@@ -216,7 +216,7 @@ export function CartaView() {
           {pro && (
             <div className={styles.pro}>
               {/* posiciones */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("positions")}</h3>
                 <div className={styles.posTable}>
                   {ready.chart.bodies.map((b) => (
@@ -233,7 +233,7 @@ export function CartaView() {
               </section>
 
               {/* distribución */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("distribution")}</h3>
                 <div className={styles.distGrid}>
                   {ELEMENTS.map((k) => (
@@ -246,7 +246,7 @@ export function CartaView() {
               </section>
 
               {/* aspectario */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
                 <div className={styles.aspList}>
                   {ready.chart.aspects.map((a, i) => (
@@ -262,12 +262,12 @@ export function CartaView() {
               </section>
 
               {/* patrones */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <h3 className={styles.cardH}>{t("patterns")}</h3>
                 {ready.chart.patterns.length ? (
                   <div className={styles.chips}>
                     {ready.chart.patterns.map((p, i) => (
-                      <span key={i} className={styles.chip}>
+                      <span key={i} className={`chip ${styles.chip}`}>
                         {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
                       </span>
                     ))}
@@ -278,7 +278,7 @@ export function CartaView() {
               </section>
 
               {/* cabecera técnica */}
-              <section className={`${styles.card} fade-in`}>
+              <section className="card card--tight fade-in">
                 <div className={styles.tech}>
                   <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
                   <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
@@ -298,9 +298,9 @@ export function CartaView() {
             <div className={styles.sheetBig}>{SIGN_GLYPH[sheet.sign]} {dms(sheet)}</div>
             <div className={styles.sheetSign}>{L.signs[sheet.sign]} · {t("house")} {sheet.house}</div>
             <div className={styles.sheetMeta}>
-              {sheet.dignity && <span className={styles.tag}>{L.dignities[sheet.dignity]}</span>}
-              {sheet.retrograde && <span className={`${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
-              <span className={styles.tag}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
+              {sheet.dignity && <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>}
+              {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
+              <span className={`chip ${styles.tag}`}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
             </div>
             {(() => {
                 const compose = locale === "en" ? composeReadingEn : composeReadingEs;
@@ -331,7 +331,7 @@ function BigCard({ glyph, name, sign, signGlyph, sub, dim }: {
   glyph: string; name: string; sign: string; signGlyph: string; sub: string; dim?: boolean;
 }) {
   return (
-    <div className={`${styles.big} ${dim ? styles.bigDim : ""}`}>
+    <div className={`card card--tight ${styles.big} ${dim ? styles.bigDim : ""}`}>
       <span className={styles.bigGlyph}>{glyph}</span>
       <span className={styles.bigName}>{name}</span>
       <span className={styles.bigSign}>{signGlyph} {sign}</span>

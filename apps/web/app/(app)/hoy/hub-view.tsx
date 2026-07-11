@@ -60,7 +60,7 @@ export function HubView() {
       </div>
 
       {weather && weather.length > 0 && (
-        <Link href="/carta" className={`${styles.weatherCard} reveal`} style={{ ["--i" as string]: 1 }}>
+        <Link href="/carta" className={`card card--interactive ${styles.weatherCard} reveal`} style={{ ["--i" as string]: 1 }}>
           <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
           <span className={styles.weatherList}>
             {weather.map((a, i) => (
@@ -86,12 +86,12 @@ export function HubView() {
       <div className={styles.lenses}>
         {LENSES.map((l, i) => {
           const inner = (
-            <span className={`${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
+            <span className={`card ${l.soon ? "" : "card--interactive"} ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
               <span className={styles.tileIcon}>
                 <Icon name={l.icon} size={26} />
               </span>
               <span className={styles.tileName}>{t(`nav.${l.key}`)}</span>
-              {l.soon && <span className={styles.badge}>{t("hoy.soon")}</span>}
+              {l.soon && <span className={`chip ${styles.badge}`}>{t("hoy.soon")}</span>}
             </span>
           );
           return l.soon ? (

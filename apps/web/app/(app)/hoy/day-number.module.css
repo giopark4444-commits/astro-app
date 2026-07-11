@@ -3,6 +3,8 @@
    otras tarjetas del hub (surface/line/radius/lift/reveal); su firma es el número
    en la serif del nombre, grande, como héroe. Todo el color sale de tokens del
    tema (oro/lila/neón según observatory/aurora/cosmic, claro+oscuro). */
+/* .card migrado al primitivo global card+card--interactive — ver day-number-card.tsx:
+   className="card card--interactive ..." */
 .card {
   position: relative;
   z-index: 1;
@@ -11,18 +13,6 @@
   gap: var(--sp-4); /* 18→16: gap interno → sp-4 (regla calibrada) */
   padding: var(--sp-4) var(--sp-5); /* 18 padding de tarjeta → sp-5 (regla calibrada) */
   margin-bottom: var(--sp-6); /* 24→28: empate → mayor (separación de sección, como hub) */
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  transition:
-    transform var(--dur-fast) var(--ease-spring),
-    border-color var(--dur-fast) var(--ease),
-    box-shadow var(--dur-fast) var(--ease);
-}
-.card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(var(--acc-rgb), 0.45);
-  box-shadow: var(--glow-soft);
 }
 
 /* El héroe: el número del día en la serif del nombre. */
@@ -70,13 +60,15 @@
   gap: var(--sp-2);
   margin-top: var(--sp-1); /* 2px→sp-1: piso de la escala */
 }
-.chip {
+/* R3: renombrado .chip → .stat — no es un chip visual (sin borde/fondo/radio), es
+   texto enfatizado; no se le fuerza el primitivo .chip. */
+.stat {
   font-family: var(--font-ui);
   font-size: var(--text-2xs); /* 11.5: empate 11/12 → apoyo → menor */
   letter-spacing: 0.3px;
   color: var(--soft);
 }
-.chip b {
+.stat b {
   color: var(--ink);
   font-weight: 600;
   font-variant-numeric: tabular-nums;

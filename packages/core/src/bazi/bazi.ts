@@ -17,6 +17,10 @@ export interface StemDef {
   element: "wood" | "fire" | "earth" | "metal" | "water";
   yin: boolean;
 }
+
+/** Elemento de un tronco/rama del sistema Wu Xing (五行) — clave de WU_XING_COLORS. */
+export type WuXingElement = StemDef["element"];
+
 export const HEAVENLY_STEMS: readonly StemDef[] = [
   { key: "jia", hanzi: "甲", element: "wood", yin: false },
   { key: "yi", hanzi: "乙", element: "wood", yin: true },

@@ -104,7 +104,7 @@ Grep gate C: selectores viejos `^\.(chip|chipOn|chipWarn|chipDim|chipDisabled|ch
 - **`.seg`** track: `display:flex; gap:var(--sp-1); padding:var(--sp-1); background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius)` + **`.seg__item`** (`flex:1; border:0; border-radius:calc(var(--radius) - 5px); background:transparent; color:var(--soft)`) + **`.seg__item--active`** (relleno plano `background:var(--acc); color:var(--ink-on-acc); box-shadow:var(--glow-soft)`).
 - **`.seg--gradient`** (modificador, preserva flagship): activo con relleno gradiente acc 1→0.8. Para carta.kindRow/.kindOn y numerology.tierRow/.tierOn (pantallas flagship — NO aplanar a plano).
 - Mapea directo: settings.seg (ya casi igual), energy.periods (el que SÍ se renderiza).
-- **CÓDIGO MUERTO — BORRAR**: `hoy/hub.module.css` `.periods/.period/.periodOn` (hub-view.tsx NO los usa; el selector real vive en energy-panel.tsx/energy.module.css). Borrado directo, cero riesgo.
+- **CORRECCIÓN (verificado por grep 2026-07-11):** NO hay código muerto en `hub.module.css` (el 1er inventario se equivocó). El bloque `.periods/.period/.periodOn` vive SOLO en `hoy/energy.module.css` (vivo, renderizado por energy-panel.tsx) — ése es el seg a unificar, no hay copia que borrar.
 - **`#14132a`** (tinta activa navy del period-selector, comentada "decisión pendiente") → converge al `--ink-on-acc` theme-aware (decisión 1). Cambio visible en el pill activo → cubierto por axe/screenshot.
 - **plan-card.tsx** reusa `.seg`/`.segItem` para botones de plan SIN estado activo (mal uso semántico) → repuntar a una clase button-group plana, no al `.seg` nuevo.
 
