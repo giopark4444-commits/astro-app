@@ -347,6 +347,158 @@ function geminiProvider(apiKey: string): ReadingProvider {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Cascada de proveedores para informes evolutivos (Fase 4b)
+// ---------------------------------------------------------------------------
+// A diferencia de las lecturas cortas (un solo proveedor vía
+// resolveReadingProvider, timeout de 60s), un informe evolutivo es una
+// generación larga: necesita varios proveedores de respaldo en cascada
+// (Hermes → DeepSeek → OpenAI, los dos primeros mucho más baratos) y un
+// timeout mayor — con 60s un informe largo se cortaría siempre.
+
+/** Timeout por defecto de la cascada de informes: 150s (vs. 60s de lecturas). */
+const REPORT_TIMEOUT_MS = 150_000;
+
+/**
+ * Factory genérico para proveedores REST compatibles con la API de OpenAI en
+ * `/chat/completions` (Hermes vía Nous Portal, DeepSeek, y también el propio
+ * OpenAI para la cascada de informes). Mismo estilo que `openaiProvider` de
+ * arriba: fetch crudo, sin SDK, `response_format: json_object` y timeout vía
+ * `AbortSignal.timeout`. NO reemplaza a `openaiProvider` (esa sigue intacta
+ * para chart-reading/reading/chat) — es una pieza nueva y paralela.
+ *
+ * `completeStream`/`chat`/`chatStream` delegan a `complete()`: los informes
+ * solo llaman `complete()`, así que no hace falta streaming/chat real aquí.
+ */
+function openAICompatibleProvider(
+  name: string,
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  timeoutMs: number,
+): ReadingProvider {
+  async function complete({ system, prompt, maxTokens }: CompleteOptions): Promise<string> {
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: prompt },
+        ],
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!res.ok) throw new Error(`${name} ${res.status}`);
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    return json.choices?.[0]?.message?.content ?? "";
+  }
+
+  async function chat({ system, messages, maxTokens }: ChatOptions): Promise<string> {
+    // Los informes no usan chat(): se resuelve delegando a complete() con el
+    // último turno del usuario, así el proveedor cumple la interfaz entera.
+    const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+    return complete({ system, prompt: lastUser, maxTokens });
+  }
+
+  return {
+    name,
+    model,
+    complete,
+    async *completeStream(opts) {
+      yield await complete(opts);
+    },
+    chat,
+    async *chatStream(opts) {
+      yield await chat(opts);
+    },
+  };
+}
+
+function hermesProvider(apiKey: string, timeoutMs: number): ReadingProvider {
+  return openAICompatibleProvider(
+    "hermes",
+    "https://api.nousresearch.com/v1",
+    apiKey,
+    process.env.NOUS_MODEL || "Hermes-4-70B",
+    timeoutMs,
+  );
+}
+
+function deepseekProvider(apiKey: string, timeoutMs: number): ReadingProvider {
+  return openAICompatibleProvider(
+    "deepseek",
+    "https://api.deepseek.com",
+    apiKey,
+    process.env.DEEPSEEK_READING_MODEL || "deepseek-chat",
+    timeoutMs,
+  );
+}
+
+/** OpenAI como último respaldo de la cascada de informes. Deliberadamente
+ *  separado del `openaiProvider` de las lecturas cortas: ese usa fetch a
+ *  https://api.openai.com/v1/chat/completions con timeout fijo de 60s
+ *  (correcto para lecturas breves); los informes necesitan `timeoutMs`
+ *  configurable (150s por defecto), así que se arma vía el factory genérico
+ *  en vez de reutilizar/tocar esa función existente. */
+function openaiReportProvider(apiKey: string, timeoutMs: number): ReadingProvider {
+  return openAICompatibleProvider(
+    "openai",
+    "https://api.openai.com/v1",
+    apiKey,
+    process.env.OPENAI_READING_MODEL || "gpt-4o",
+    timeoutMs,
+  );
+}
+
+/**
+ * Arma la cascada real de proveedores para informes desde las variables de
+ * entorno, en orden Hermes → DeepSeek → OpenAI: cada uno entra solo si su
+ * llave está presente. Sin ninguna llave presente, cascada vacía (el
+ * llamador decide qué hacer, p. ej. dejar el informe latente).
+ */
+export function resolveReportCascade(timeoutMs: number = REPORT_TIMEOUT_MS): ReadingProvider[] {
+  const providers: ReadingProvider[] = [];
+  const nousKey = process.env.NOUS_API_KEY;
+  const deepseekKey = process.env.DEEPSEEK_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (nousKey) providers.push(hermesProvider(nousKey, timeoutMs));
+  if (deepseekKey) providers.push(deepseekProvider(deepseekKey, timeoutMs));
+  if (openaiKey) providers.push(openaiReportProvider(openaiKey, timeoutMs));
+  return providers;
+}
+
+/**
+ * Recorre `providers` en orden e intenta cada uno con `complete()`. Un
+ * proveedor "falla" si lanza una excepción O si devuelve texto vacío/solo
+ * espacios (texto vacío = fallo, cae al siguiente). Si todos fallan, lanza
+ * con el motivo del último intento. La lista de proveedores es inyectada
+ * (normalmente viene de `resolveReportCascade()`) para que la cascada sea
+ * testeable con fakes, sin depender de variables de entorno.
+ */
+export async function completeWithCascade(
+  providers: ReadingProvider[],
+  opts: CompleteOptions & { timeoutMs?: number },
+): Promise<{ text: string; modelUsed: string }> {
+  let lastError: unknown = new Error("completeWithCascade: no hay proveedores en la cascada");
+  for (const provider of providers) {
+    try {
+      const text = await provider.complete(opts);
+      if (text.trim().length > 0) {
+        return { text, modelUsed: provider.name };
+      }
+      lastError = new Error(`${provider.name}: devolvió texto vacío`);
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  const reason = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(`Todos los proveedores de la cascada de informes fallaron: ${reason}`);
+}
+
 /**
  * Lee un cuerpo de respuesta SSE (text/event-stream) y emite el contenido de cada
  * campo `data:`. Junta los chunks de red, parte por líneas y maneja trozos partidos.
