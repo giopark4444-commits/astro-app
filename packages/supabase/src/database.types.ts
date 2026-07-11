@@ -220,6 +220,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0006_user_reports.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      user_reports: {
+        Row: {
+          content: Json;
+          created_at: string;
+          id: string;
+          kind: string;
+          locale: string;
+          model_used: string | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+          year: number | null;
+        };
+        Insert: {
+          content: Json;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          locale: string;
+          model_used?: string | null;
+          status: string;
+          updated_at?: string;
+          user_id: string;
+          year?: number | null;
+        };
+        Update: {
+          content?: Json;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          locale?: string;
+          model_used?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+          year?: number | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
