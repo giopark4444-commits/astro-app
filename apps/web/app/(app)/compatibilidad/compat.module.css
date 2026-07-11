@@ -60,7 +60,7 @@
   margin: 0 -6px /* solape deliberado: excepción */; color: var(--acc-text); font-size: var(--text-xl); opacity: 0.9; } /* 19→20 */
 .arc { width: 56px; height: 22px; display: block; }
 .arcPath { fill: none; stroke: rgba(var(--acc-rgb), 0.7); stroke-width: 1.5; }
-.arcGlyph { fill: var(--acc); font-size: var(--text-sm); /* SVG textual, sí escala */ text-anchor: middle; dominant-baseline: central; }
+.arcGlyph { fill: var(--acc-text); font-size: var(--text-sm); /* SVG textual, sí escala */ text-anchor: middle; dominant-baseline: central; }
 
 .score { position: relative; font-family: var(--font-display); font-size: var(--display-sm); /* héroe 56→44 (tabla del plan) */ line-height: 1; color: var(--acc-text);
   text-shadow: 0 0 26px rgba(var(--acc-rgb), 0.4); font-variant-numeric: tabular-nums; }

@@ -42,7 +42,7 @@
 .cusp { stroke: var(--line); stroke-width: 1; }
 .cuspAngle { stroke: rgba(var(--acc-rgb), 0.65); stroke-width: 1.5; }
 .houseNum { font-size: 8px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
-.angleMark { font-size: 9px; font-weight: 700; fill: var(--acc); text-anchor: middle; dominant-baseline: central; }
+.angleMark { font-size: 9px; font-weight: 700; fill: var(--acc-text); text-anchor: middle; dominant-baseline: central; }
 .aspects line { stroke-width: 1; }
 .bodyG { cursor: pointer; }
 .bodyHit { fill: var(--surface-2); }
