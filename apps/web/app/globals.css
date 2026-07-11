@@ -52,11 +52,46 @@ button { font-family: inherit; }
   animation-delay: calc(var(--i, 0) * 70ms); }
 .fade-in { animation: aluna-fade var(--dur) var(--ease-soft) both; }
 
-/* Superficie glass reutilizable. */
-.glass {
+/* ----------------------------------------------------------------
+   R3: primitivo .card — base + 4 modificadores. Semilla: la antigua
+   .glass (huérfana, 0 consumidores). Se consume aplicando las clases
+   globales junto a la clase de módulo (className="card card--tight ..."
+   o `composes: card from global` desde el módulo); los modificadores
+   solo sobreescriben lo que difiere del base, así que se componen
+   juntos. Nota de cascada: el CSS de Módulo carga DESPUÉS de globals.css
+   en Next, así que un override local (p.ej. padding de carta.big) gana
+   por orden de fuente; si un caso no ganara, subir especificidad con
+   `.card.big` en el módulo. Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.card {
   background: var(--surface);
   border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+/* Radio menor (16px) — bloques Pro / mini-tarjetas del núcleo. */
+.card--tight {
   border-radius: var(--radius);
+}
+/* Superficie con feedback de hover — tiles/tarjetas clicables (hub, day-number). */
+.card--interactive {
+  transition: transform var(--dur-fast) var(--ease-spring),
+    border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.card--interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(var(--acc-rgb), 0.45);
+  box-shadow: var(--glow-soft);
+}
+/* Estado vacío/durmiente — borde punteado, surface-2. */
+.card--dashed {
+  border: 1px dashed rgba(var(--acc-rgb), 0.35);
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+}
+/* Elevada — flagship login/signup. */
+.card--elevated {
+  box-shadow: var(--elev);
   backdrop-filter: blur(8px);
 }
 
