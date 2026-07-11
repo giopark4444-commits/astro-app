@@ -100,13 +100,26 @@ export function Card({
   children,
   accent = false,
   style,
+  onPress,
 }: {
   children: ReactNode;
   accent?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** NEW (R3/Task 11) — si se pasa, la tarjeta se vuelve interactiva (`Pressable`)
+   *  en vez de una `View` estática; usado por tiles tocables como `luckCol` en
+   *  pilares.tsx (大運/流年). Sin `onPress` el render es idéntico al de siempre. */
+  onPress?: () => void;
 }) {
   const { t } = useTheme();
   const s = useMemo(() => makeCard(t), [t]);
+  if (onPress) {
+    return (
+      <Pressable style={[s.wrap, accent && s.wrapAccent, style]} onPress={onPress} accessibilityRole="button">
+        <View style={s.highlight} pointerEvents="none" />
+        {children}
+      </Pressable>
+    );
+  }
   return (
     <View style={[s.wrap, accent && s.wrapAccent, style]}>
       <View style={s.highlight} pointerEvents="none" />
@@ -144,7 +157,11 @@ function makeCard(t: ThemeTokens) {
  * - "control": pill seleccionable (Pressable). El color según selección sale
  *   de `chipColors` (helper puro, testeado aparte).
  * - "tag": etiqueta estática en mayúsculas, sin fondo — no es interactiva
- *   (no recibe onPress).
+ *   (no recibe onPress). Con `tint` (NEW, R3/Task 11) se vuelve una pill
+ *   bordeada/rellena con color dinámico por instancia (p.ej. Wu Xing) — cierra
+ *   el gap que documentaba pilares.tsx (chips de Favor/Evitar y Estrellas).
+ *   Sin `tint` el render es idéntico al de siempre (solo texto, sin borde):
+ *   los consumidores existentes (carta.tsx, numeros.tsx) no cambian.
  */
 export function Chip({
   label,
@@ -152,17 +169,39 @@ export function Chip({
   selected = false,
   onPress,
   icon,
+  tint,
+  dim = false,
+  bold = false,
 }: {
   label: string;
   kind: "control" | "tag";
   selected?: boolean;
   onPress?: () => void;
   icon?: ReactNode;
+  /** NEW — "tag" únicamente: color dinámico por instancia (Wu Xing u otro).
+   *  `bg`/`border` pintan la pill, `fg` el texto. Omitido = look de siempre. */
+  tint?: { bg: string; border: string; fg: string };
+  /** NEW — "tag"+`tint` únicamente: atenúa la pill entera (opacity 0.6),
+   *  equivalente a `.chipDim` (pilares.tsx) — p.ej. elementos a "evitar". */
+  dim?: boolean;
+  /** NEW — "tag"+`tint` únicamente: texto en `fonts.sansSemi` en vez de
+   *  `fonts.sans` (familia preglifada distinta, no `fontWeight` — convención
+   *  R1 de fuentes custom en Android). Distingue p.ej. Favor (relleno, bold)
+   *  de Evitar/Estrellas (solo borde, regular). */
+  bold?: boolean;
 }) {
   const { t } = useTheme();
   const s = useMemo(() => makeChip(t), [t]);
 
   if (kind === "tag") {
+    if (tint) {
+      return (
+        <View style={[s.tagPill, { backgroundColor: tint.bg, borderColor: tint.border }, dim && s.tagPillDim]}>
+          {icon}
+          <Text style={[s.tagPillText, { color: tint.fg }, bold && s.tagPillTextBold]}>{label}</Text>
+        </View>
+      );
+    }
     return (
       <View style={s.tag}>
         {icon}
@@ -225,6 +264,20 @@ function makeChip(t: ThemeTokens) {
       textTransform: "uppercase",
       fontFamily: fonts.sansSemi,
     },
+    // Pill bordeada/rellena de "tag"+tint — receta `.chip` de pilares.tsx portada
+    // al primitivo (R3/Task 11): borde+relleno vienen del `tint` de cada instancia.
+    tagPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space.xs,
+      borderWidth: 1,
+      borderRadius: radius.pill,
+      paddingHorizontal: space.md,
+      paddingVertical: space.xs + 2,
+    },
+    tagPillDim: { opacity: 0.6 },
+    tagPillText: { fontSize: typeScale.sm, fontFamily: fonts.sans },
+    tagPillTextBold: { fontFamily: fonts.sansSemi },
   });
 }
 

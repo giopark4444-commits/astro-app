@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   HEAVENLY_STEMS,
@@ -316,6 +316,7 @@ export default function PilaresScreen() {
                   strength={laminaData.strength}
                   favor={laminaData.favor}
                   elName={elName}
+                  tk={tk}
                 />
 
                 <LuckSection
@@ -351,7 +352,7 @@ export default function PilaresScreen() {
                   elName={elName}
                 />
 
-                <StarsSection styles={styles} content={content} t={t} stars={laminaData.stars} script={script} />
+                <StarsSection styles={styles} content={content} t={t} stars={laminaData.stars} script={script} tk={tk} />
               </View>
             )}
           </>
@@ -470,6 +471,7 @@ function FavorSection({
   strength,
   favor,
   elName,
+  tk,
 }: {
   styles: ReturnType<typeof makeStyles>;
   content: BaziContent;
@@ -477,6 +479,7 @@ function FavorSection({
   strength: ReturnType<typeof dayMasterStrength>;
   favor: ReturnType<typeof favorableElements>;
   elName: (el: string) => string;
+  tk: ThemeTokens;
 }) {
   return (
     <SectionCard styles={styles} title={t("pilares.favorTitle")}>
@@ -486,17 +489,25 @@ function FavorSection({
         <>
           <View style={styles.chips}>
             {favor.favor.map((el) => (
-              <View key={el} style={[styles.chip, { backgroundColor: EL_COLOR[el], borderColor: EL_COLOR[el] }]}>
-                <Text style={styles.chipTextOn}>{elName(el)}</Text>
-              </View>
+              <Chip
+                key={el}
+                kind="tag"
+                label={elName(el)}
+                tint={{ bg: EL_COLOR[el], border: EL_COLOR[el], fg: "#fff" }}
+                bold
+              />
             ))}
           </View>
           <Text style={styles.subRow}>{t("pilares.avoidTitle")}</Text>
           <View style={styles.chips}>
             {favor.avoid.map((el) => (
-              <View key={el} style={[styles.chip, styles.chipDim]}>
-                <Text style={styles.chipText}>{elName(el)}</Text>
-              </View>
+              <Chip
+                key={el}
+                kind="tag"
+                label={elName(el)}
+                tint={{ bg: "transparent", border: tk.accHair, fg: tk.text }}
+                dim
+              />
             ))}
           </View>
         </>
@@ -590,10 +601,10 @@ function LuckRow({
           const id = seq.direction === "forward" ? i : 100 + i;
           const open = openDecade === id;
           return (
-            <Pressable
+            <Card
               key={i}
-              style={[styles.luckCol, current && styles.luckNow, open && styles.luckOpen]}
               onPress={() => setOpenDecade(open ? null : id)}
+              style={[styles.luckCol, current && styles.luckNow, open && styles.luckOpen]}
             >
               <Text style={styles.luckAge}>
                 {p.startAge} {t("pilares.age")}
@@ -604,7 +615,7 @@ function LuckRow({
               </Text>
               <Text style={styles.luckNayin}>{content.nayin[p.nayin.key]}</Text>
               {current && <Text style={styles.luckTag}>{t("pilares.currentDecade")}</Text>}
-            </Pressable>
+            </Card>
           );
         })}
       </ScrollView>
@@ -713,12 +724,14 @@ function StarsSection({
   t,
   stars,
   script,
+  tk,
 }: {
   styles: ReturnType<typeof makeStyles>;
   content: BaziContent;
   t: (key: string) => string;
   stars: ReturnType<typeof symbolicStars>;
   script: "hanzi" | "hangul";
+  tk: ThemeTokens;
 }) {
   return (
     <SectionCard styles={styles} title={t("pilares.starsTitle")}>
@@ -729,11 +742,12 @@ function StarsSection({
           {stars.map((h, i) => {
             const def = STARS.find((s) => s.key === h.star)!;
             return (
-              <View key={i} style={styles.chip}>
-                <Text style={styles.chipText}>
-                  {script === "hangul" ? def.hangul : def.hanzi} {content.stars[h.star]} · {content.ui.position[h.pillar]}
-                </Text>
-              </View>
+              <Chip
+                key={i}
+                kind="tag"
+                label={`${script === "hangul" ? def.hangul : def.hanzi} ${content.stars[h.star]} · ${content.ui.position[h.pillar]}`}
+                tint={{ bg: "transparent", border: tk.accHair, fg: tk.text }}
+              />
             );
           })}
         </View>
@@ -877,25 +891,22 @@ function makeStyles(t: ThemeTokens) {
     driverPts: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-    // Chips de Favor/Evitar y de Estrellas: NO migrados al primitivo <Chip> — codifican
-    // un color dinámico por elemento (EL_COLOR) o llevan borde de pill que el primitivo
-    // compartido no ofrece en su variante "tag" (gap conocido de ui.tsx, ver informe).
-    // Migrarlos perdería el color-coding Wu Xing (regla dura de esta tarea) o rompería
-    // la consistencia visual entre ambas secciones — quedan como locales legítimos.
-    chip: {
-      borderWidth: 1, borderColor: t.accHair, borderRadius: radius.pill,
-      paddingHorizontal: space.md, paddingVertical: space.xs + 2,
-    },
-    chipDim: { opacity: 0.6 },
-    chipText: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
-    chipTextOn: { color: "#fff", fontSize: typeScale.sm, fontFamily: fonts.sansSemi },
+    // Chips de Favor/Evitar y de Estrellas: gap cerrado en R3/Task 11 — ahora son
+    // <Chip kind="tag" tint={...}> (pill bordeada/rellena, color dinámico Wu Xing
+    // vía `tint`). Las locales `chip`/`chipDim`/`chipText`/`chipTextOn` de arriba
+    // quedaron obsoletas y se borraron.
     mark: { color: t.acc, fontSize: typeScale.xs, fontFamily: fonts.sans },
 
     luckBlock: { marginTop: space.sm },
     luckScroll: { marginTop: space.sm },
+    // luckCol ahora es un <Card onPress> (R3/Task 11): borderWidth/borderColor
+    // base y borderRadius (radius.lg, antes radius.md — cambio menor sancionado
+    // por el brief) los da <Card>. El padding SÍ sigue explícito acá — más
+    // ajustado que el default xl de <Card> —, mismo mecanismo que `col` (rejilla
+    // de 4 pilares) más arriba en este archivo.
     luckCol: {
-      minWidth: 100, borderWidth: 1, borderColor: t.accHair, borderRadius: radius.md,
-      paddingVertical: space.md, paddingHorizontal: space.sm, alignItems: "center", marginRight: space.sm, gap: 4,
+      minWidth: 100, paddingVertical: space.md, paddingHorizontal: space.sm,
+      alignItems: "center", marginRight: space.sm, gap: 4,
     },
     luckNow: { borderColor: t.acc },
     luckOpen: { backgroundColor: t.panel },

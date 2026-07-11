@@ -138,10 +138,13 @@ export default function AjustesScreen() {
             <Text style={styles.cardEyebrow}>{t("settings.appearance")}</Text>
 
             <Text style={styles.fieldLabel}>{t("settings.theme")}</Text>
-            {/* Selector de tema: NO migrado al primitivo <Chip> — lleva una muestra de
-               color (swatch) por tema, algo que la variante "control" del primitivo no
-               ofrece (mismo criterio que los chips de elemento Wu Xing en pilares.tsx:
-               local legítimo, ver informe). */}
+            {/* Selector de tema: investigado en R3/Task 11 — el prop `icon` de
+               <Chip kind="control"> es estructuralmente compatible con el swatch (icon
+               inline antes del label), pero esa variante es una pill radius.pill de
+               ancho automático con layout en fila, mientras este selector es una tarjeta
+               radius.md de ancho IGUAL (flex:1, 3 iguales) con el swatch ARRIBA de la
+               etiqueta (layout columna) — migrar cambiaría la forma de la tira de temas
+               (tarjeta→pill), no solo "¿existe el prop?". Se deja local a propósito. */}
             <View style={styles.themeRow}>
               {THEMES.map((th: ThemeName) => {
                 const on = theme === th;
@@ -321,8 +324,10 @@ function makeStyles(t: ThemeTokens) {
     },
     fieldLabelGap: { marginTop: space.xl },
 
-    // Selector de tema: chips con muestra de color + nombre — local legítimo (ver
-    // comentario junto al JSX): el primitivo <Chip> no tiene variante con swatch.
+    // Selector de tema: investigado en R3/Task 11 (ver comentario junto al JSX) —
+    // el prop `icon` de <Chip> es compatible en el papel, pero su forma (pill de
+    // ancho automático, layout en fila) no matchea esta tira de tarjetas iguales
+    // de ancho fijo con el swatch arriba del label; queda local a propósito.
     themeRow: { flexDirection: "row", gap: space.sm },
     themeChip: {
       flex: 1,
