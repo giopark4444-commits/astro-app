@@ -134,7 +134,7 @@ export function CartaView() {
       <div className={styles.controls}>
         <div className={styles.ctrlRow} role="tablist" aria-label={t("houseSystem")}>
           {HOUSE_SYSTEMS.map((h) => (
-            <button key={h} className={`${styles.ctrl} ${houseSystem === h ? styles.ctrlOn : ""}`}
+            <button key={h} className={`chip--control ${houseSystem === h ? "chip--control-on" : ""}`}
               aria-selected={houseSystem === h} role="tab" onClick={() => setHouseSystem(h)}>
               {t(`houseSystems.${h}`)}
             </button>
@@ -142,7 +142,7 @@ export function CartaView() {
         </div>
         <div className={styles.ctrlRow} role="tablist" aria-label={t("zodiac")}>
           {(["tropical", "sidereal"] as Zodiac[]).map((z) => (
-            <button key={z} className={`${styles.ctrl} ${zodiac === z ? styles.ctrlOn : ""}`}
+            <button key={z} className={`chip--control ${zodiac === z ? "chip--control-on" : ""}`}
               aria-selected={zodiac === z} role="tab" onClick={() => setZodiac(z)}>
               {t(z)}
             </button>
@@ -267,7 +267,7 @@ export function CartaView() {
                 {ready.chart.patterns.length ? (
                   <div className={styles.chips}>
                     {ready.chart.patterns.map((p, i) => (
-                      <span key={i} className={styles.chip}>
+                      <span key={i} className={`chip ${styles.chip}`}>
                         {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
                       </span>
                     ))}
@@ -298,9 +298,9 @@ export function CartaView() {
             <div className={styles.sheetBig}>{SIGN_GLYPH[sheet.sign]} {dms(sheet)}</div>
             <div className={styles.sheetSign}>{L.signs[sheet.sign]} · {t("house")} {sheet.house}</div>
             <div className={styles.sheetMeta}>
-              {sheet.dignity && <span className={styles.tag}>{L.dignities[sheet.dignity]}</span>}
-              {sheet.retrograde && <span className={`${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
-              <span className={styles.tag}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
+              {sheet.dignity && <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>}
+              {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
+              <span className={`chip ${styles.tag}`}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
             </div>
             {(() => {
                 const compose = locale === "en" ? composeReadingEn : composeReadingEs;

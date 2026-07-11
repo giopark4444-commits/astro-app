@@ -83,8 +83,9 @@
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
 .cardSub { margin: var(--sp-3) 0 var(--sp-2); font-size: var(--text-2xs); /* 9.5→11 piso; 7→8 */ letter-spacing: 1px; text-transform: uppercase; color: var(--soft); font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6: empate 4/8 → apoyo → menor (precedente carta .chips) */
-.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--acc); border-radius: 9px; padding: var(--sp-1) var(--sp-3) /* 11→12; 3px→sp-1: piso de la escala */; font-size: var(--text-sm); font-weight: 600; }
-.chipWarn { border-color: rgba(220, 120, 80, 0.6); color: #e0a07a; }
+/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.chip { border-color: rgba(var(--acc-rgb), 0.4); color: var(--acc); font-weight: 600; }
+.chipWarn { border-color: rgba(var(--tone-caution-rgb), 0.6); color: var(--tone-caution); } /* R3: token --tone-caution (tokens.css), antes literal duplicado con carta .tagWarn */
 .muted { font-size: var(--text-xs); color: var(--soft); margin: var(--sp-2) 0 0; }
 
 .incl { display: grid; grid-template-columns: repeat(9, 1fr); gap: var(--sp-1); }

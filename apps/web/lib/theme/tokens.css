@@ -40,6 +40,10 @@
   --ink-on-acc: #1a1305;
   --tone-warm: #e0795a;
   --tone-cool: #7aaae0;
+  /* R3: aviso de chip (carta .tagWarn / numerología .chipWarn) — distinto eje que
+     --tone-warm (tenso de aspecto); triplete RGB al lado, precedente --acc-rgb. */
+  --tone-caution: #e0a07a;
+  --tone-caution-rgb: 224, 160, 122;
 
   /* Resplandor y elevación, derivados del acento del tema */
   --glow: 0 0 24px rgba(var(--acc-rgb), 0.42);

@@ -118,11 +118,11 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
         ) : (
           <>
             <div className={styles.chips}>
-              {favor.favor.map((el) => <span key={el} className={`${styles.chip} ${styles[`elBg_${el}`] ?? ""}`}>{elName(el)}</span>)}
+              {favor.favor.map((el) => <span key={el} className={`chip chip--pill ${styles[`elBg_${el}`] ?? ""}`}>{elName(el)}</span>)}
             </div>
             <p className={styles.subRow}>{t("pilares.avoidTitle")}</p>
             <div className={styles.chips}>
-              {favor.avoid.map((el) => <span key={el} className={`${styles.chip} ${styles.chipDim}`}>{elName(el)}</span>)}
+              {favor.avoid.map((el) => <span key={el} className={`chip chip--pill ${styles.chipDim}`}>{elName(el)}</span>)}
             </div>
           </>
         )}
@@ -183,7 +183,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
             {stars.map((h, i) => {
               const def = STARS.find((s) => s.key === h.star)!;
               return (
-                <span key={i} className={styles.chip}>
+                <span key={i} className="chip chip--pill">
                   {script === "hangul" ? def.hangul : def.hanzi} {L.stars[h.star]} · {t(`pilares.${h.pillar}`)}
                 </span>
               );

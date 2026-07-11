@@ -85,13 +85,13 @@ export function NumerologyView() {
             <h3 className={styles.cardH}>{t("karmicLessons")}</h3>
             <div className={styles.chips}>
               {karmic.lessons.length
-                ? karmic.lessons.map((n) => <span key={n} className={styles.chip}>{n}</span>)
+                ? karmic.lessons.map((n) => <span key={n} className={`chip ${styles.chip}`}>{n}</span>)
                 : <span className={styles.muted}>{t("none")}</span>}
             </div>
             {karmic.debts.length > 0 && (
               <>
                 <h4 className={styles.cardSub}>{t("debts")}</h4>
-                <div className={styles.chips}>{karmic.debts.map((n) => <span key={n} className={`${styles.chip} ${styles.chipWarn}`}>{n}</span>)}</div>
+                <div className={styles.chips}>{karmic.debts.map((n) => <span key={n} className={`chip ${styles.chip} ${styles.chipWarn}`}>{n}</span>)}</div>
               </>
             )}
           </section>

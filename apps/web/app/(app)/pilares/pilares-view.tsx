@@ -134,7 +134,7 @@ export function PilaresView() {
                 >
                   <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
                   {pro && (
-                    <span className={`${styles.god} ${isDay ? styles.godSelf : ""}`}>
+                    <span className={`chip ${styles.god} ${isDay ? styles.godSelf : ""}`}>
                       {isDay
                         ? t("pilares.dayMasterHanzi")
                         : t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
@@ -157,7 +157,7 @@ export function PilaresView() {
                       : BRANCH_LABELS[pillar.branch]!.pinyin}
                   </span>
                   <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
-                  {isDay && <span className={styles.dayTag}>{t("pilares.dayMaster")}</span>}
+                  {isDay && <span className={`chip ${styles.dayTag}`}>{t("pilares.dayMaster")}</span>}
                   {pro && (
                     <div className={styles.hidden}>
                       <span className={styles.hiddenLabel}>{t("pilares.hiddenStems")}</span>
@@ -201,7 +201,7 @@ export function PilaresView() {
                   type="button"
                   role="tab"
                   aria-selected={script === s}
-                  className={`${styles.scriptBtn} ${script === s ? styles.scriptOn : ""}`}
+                  className={`chip--control chip--control-outline ${script === s ? "chip--control-on" : ""}`}
                   onClick={() => setScript(s)}
                 >
                   {t(s === "hanzi" ? "pilares.scriptBazi" : "pilares.scriptSaju")}

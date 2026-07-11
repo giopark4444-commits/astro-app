@@ -96,6 +96,43 @@ button { font-family: inherit; }
   backdrop-filter: blur(8px);
 }
 
+/* ----------------------------------------------------------------
+   R3: primitivos de chip. Dos formas — .chip (estático, tag/display) y
+   .chip--control (interactivo, botón/toggle) — más modificadores documentados:
+   .chip--pill (radio 999px, outlier de pilares Favor/Avoid+estrellas), y para
+   .chip--control: -on/-disabled/-outline. Mismo mecanismo de consumo que .card
+   (clases globales junto a la clase de módulo; el módulo solo sobreescribe lo
+   que difiere). Ver docs/redesign/R3-sistema.md.
+----------------------------------------------------------------- */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  border: 1px solid var(--line); border-radius: 9px;
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--text-sm); color: var(--ink);
+}
+/* Outlier documentado: pilares Favor/Avoid + estrellas — pill 999px, no aplanar en .chip base. */
+.chip--pill { border-radius: 999px; }
+
+.chip--control {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-family: inherit; font-size: var(--text-xs); font-weight: 600;
+  color: var(--soft); cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.chip--control:hover { color: var(--ink); }
+.chip--control-on {
+  color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  border-color: transparent;
+  box-shadow: var(--glow-soft);
+}
+.chip--control-disabled { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
+/* pilares.scriptBtn: activo = SOLO borde+texto, sin relleno — variante, no aplanar a -on. */
+.chip--control-outline.chip--control-on {
+  background: transparent; color: var(--acc); border-color: var(--acc); box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

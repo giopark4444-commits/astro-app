@@ -21,13 +21,10 @@
 /* ---- Controles (casas / zodiaco) ---- */
 .controls { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); } /* 7→sp-2 nearest; 14→sp-3 empate (apoyo, separa controles del contenido) */
 .ctrlRow { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
-.ctrl {
-  padding: var(--sp-1) var(--sp-3); border: 1px solid var(--line); border-radius: 18px; background: var(--surface);
-  font-family: inherit; font-size: var(--text-2xs); font-weight: 600; color: var(--soft); cursor: pointer;
-  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
-} /* 6→sp-1 empate (control pequeño, apoyo — consistente con .row de pilares) */
-.ctrl:hover { color: var(--ink); }
-.ctrlOn { color: var(--ink-on-acc); background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8)); border-color: transparent; box-shadow: var(--glow-soft); }
+/* R3: .ctrl/.ctrlOn migrados al primitivo global .chip--control/.chip--control-on
+   (globals.css) — cubre 100% de la receta salvo el radio (18px→999px, cambio
+   visual señalado en el plan, ver carta-view.tsx houseSystem/zodiac y
+   body-reading.tsx tier tabs: className="chip--control ...on? chip--control-on"). */
 
 .note { position: relative; z-index: 1; text-align: center; font-style: italic; color: var(--soft); font-size: var(--text-sm); padding: var(--sp-7) 0; }
 .solar { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); font-style: italic; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 12px; background: var(--surface-2); } /* 11.5→2xs empate, misma regla que .kindHint */
@@ -115,7 +112,8 @@
 .harm_soft .aspGlyph { color: var(--tone-cool); } /* eje tono armonía (fluido), coincide con el semántico R2 */
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-1); } /* 6→sp-1 empate (apoyo) */
-.chip { border: 1px solid rgba(var(--acc-rgb), 0.4); color: var(--ink); border-radius: 9px; padding: var(--sp-1) var(--sp-3); font-size: var(--text-xs); } /* 11→sp-3 nearest */
+/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.chip { border-color: rgba(var(--acc-rgb), 0.4); font-size: var(--text-xs); } /* 11→sp-3 nearest */
 .muted { font-size: var(--text-xs); color: var(--soft); margin: 0; }
 
 .tech { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; } /* 6→sp-1 empate (apoyo); 10.5→2xs piso (sub-11) */
@@ -125,8 +123,9 @@
 .sheetBig { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc); line-height: 1; } /* 34→3xl (nearest, no empate; NO es el "sheet hero" del plan — ese vive en numerology-view.module.css .sheetN) */
 .sheetSign { font-size: var(--text-md); color: var(--ink); } /* 14→md empate (valor bajo el glifo, análogo a .rowValue de pilares) */
 .sheetMeta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-1); margin-top: var(--sp-1); } /* 6→sp-1 empate (apoyo) ×2 */
-.tag { font-size: var(--text-2xs); color: var(--soft); border: 1px solid var(--line); border-radius: 9px; padding: var(--sp-1) var(--sp-2); } /* 3→sp-1 nearest; 10→sp-2 empate (apoyo, padding de chip) */
-.tagWarn { border-color: rgba(220, 120, 80, 0.6); color: #e0a07a; } /* tono de aviso propio, distinto de --tone-warm — no coincide en valor, no se alias */
+/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+.tag { font-size: var(--text-2xs); color: var(--soft); padding: var(--sp-1) var(--sp-2); } /* 3→sp-1 nearest; 10→sp-2 empate (apoyo, padding de chip) */
+.tagWarn { border-color: rgba(var(--tone-caution-rgb), 0.6); color: var(--tone-caution); } /* R3: token --tone-caution (tokens.css), antes literal duplicado con numerology-view .chipWarn */
 
 /* Lectura base del cuerpo (compuesta planeta+signo+casa) */
 .bodyReading { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--line); text-align: left; } /* 14→sp-4 empate ×2 (jerarquía: entrada de la sección de lectura) */

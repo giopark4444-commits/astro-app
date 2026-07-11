@@ -31,9 +31,10 @@
 }
 .animal { font-size: var(--text-2xs); color: var(--soft); margin-top: var(--sp-1); }
 .empty { font-size: var(--text-2xl); color: var(--soft); opacity: 0.5; }
+/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
 .dayTag {
   margin-top: var(--sp-1); font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--acc); border: 1px solid rgba(var(--acc-rgb), 0.4); border-radius: 6px; padding: var(--sp-1) var(--sp-1);
+  color: var(--acc); border-color: rgba(var(--acc-rgb), 0.4); border-radius: 6px; padding: var(--sp-1) var(--sp-1);
   text-align: center;
 }
 
@@ -70,14 +71,14 @@
 
 /* ---- Modo Pro: Diez Dioses por pilar ---- */
 /* El Dios del tronco, sobre el carácter. El del Maestro del Día es su propio anclaje. */
+/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local
+   (el color/familia base ahora vienen de .chip; .god conserva su forma de badge pequeño). */
 .god {
-  font-family: var(--font-ui); font-size: var(--text-2xs); line-height: 1.25; font-weight: 700;
-  letter-spacing: 0.3px; text-align: center; text-transform: uppercase;
-  color: var(--acc);
-  border: 1px solid rgba(var(--acc-rgb), 0.3); border-radius: 6px;
+  line-height: 1.25; font-weight: 700; letter-spacing: 0.3px; text-align: center; text-transform: uppercase;
+  color: var(--acc); border-color: rgba(var(--acc-rgb), 0.3); border-radius: 6px;
   padding: var(--sp-1) var(--sp-1); min-height: 24px; display: flex; align-items: center; justify-content: center;
 }
-.godSelf { border-color: transparent; background: rgba(var(--acc-rgb), 0.12); font-size: var(--text-2xs); }
+.godSelf { border-color: transparent; background: rgba(var(--acc-rgb), 0.12); }
 
 /* ---- Modo Pro: troncos ocultos (藏干) por rama ---- */
 /* Piso de escala: .god (8.5px), .hiddenLabel (7.5px) y .hiddenGod (8px) colapsan los tres a
@@ -121,11 +122,10 @@
 
 /* ---- Modo Pro: conmutador de escritura (漢字 ↔ 한글) ---- */
 .scriptRow { position: relative; z-index: 1; display: flex; gap: var(--sp-2); margin-top: var(--sp-2); } /* 10→sp-2 empate (fila de control secundaria, apoyo) */
-.scriptBtn {
-  font-family: var(--font-ui); border: 1px solid var(--line); border-radius: 999px;
-  background: none; color: var(--soft); padding: var(--sp-1) var(--sp-4); font-size: var(--text-sm); cursor: pointer;
-}
-.scriptOn { border-color: var(--acc); color: var(--acc); }
+/* R3: .scriptBtn/.scriptOn migrados a los primitivos globales .chip--control +
+   .chip--control-outline (globals.css) — activo = SOLO borde+texto, sin relleno de
+   gradiente (variante -outline, no la receta -on por defecto). Ver pilares-view.tsx:
+   className="chip--control chip--control-outline ...on? chip--control-on". */
 
 /* ── Lámina Pro: las 8 secciones ── */
 .lamina { position: relative; z-index: 1; display: grid; gap: var(--sp-4); width: 100%; max-width: 720px; margin-top: var(--sp-6); } /* 24→sp-6 empate (entrada a la lámina Pro, jerarquía principal) */
@@ -153,7 +153,10 @@
 .driverPts { color: var(--acc); }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.chip { border: 1px solid var(--line); border-radius: 999px; padding: var(--sp-1) var(--sp-3); font-size: var(--text-sm); color: var(--ink); }
+/* R3: .chip migrado íntegro a los primitivos globales .chip + .chip--pill (globals.css)
+   — este era el único chip 999px "de tag", el outlier documentado. Ver pro-lamina.tsx:
+   className="chip chip--pill ...". El tinte Wu Xing (.elBg_*, dominio intocable) se
+   aplica alongside, sin contienda de especificidad porque .chip no declara background. */
 .chipDim { opacity: 0.6; }
 .mark { color: var(--acc); font-size: var(--text-xs); font-style: normal; }
 

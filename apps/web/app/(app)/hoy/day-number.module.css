@@ -60,13 +60,15 @@
   gap: var(--sp-2);
   margin-top: var(--sp-1); /* 2px→sp-1: piso de la escala */
 }
-.chip {
+/* R3: renombrado .chip → .stat — no es un chip visual (sin borde/fondo/radio), es
+   texto enfatizado; no se le fuerza el primitivo .chip. */
+.stat {
   font-family: var(--font-ui);
   font-size: var(--text-2xs); /* 11.5: empate 11/12 → apoyo → menor */
   letter-spacing: 0.3px;
   color: var(--soft);
 }
-.chip b {
+.stat b {
   color: var(--ink);
   font-weight: 600;
   font-variant-numeric: tabular-nums;

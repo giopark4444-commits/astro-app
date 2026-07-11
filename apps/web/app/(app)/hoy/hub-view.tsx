@@ -91,7 +91,7 @@ export function HubView() {
                 <Icon name={l.icon} size={26} />
               </span>
               <span className={styles.tileName}>{t(`nav.${l.key}`)}</span>
-              {l.soon && <span className={styles.badge}>{t("hoy.soon")}</span>}
+              {l.soon && <span className={`chip ${styles.badge}`}>{t("hoy.soon")}</span>}
             </span>
           );
           return l.soon ? (

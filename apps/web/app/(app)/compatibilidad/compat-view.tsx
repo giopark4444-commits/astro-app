@@ -322,7 +322,7 @@ function PersonPicker({
             <button
               key={p.id}
               type="button"
-              className={`${styles.chip} ${on ? styles.chipOn : ""} ${disabled ? styles.chipDisabled : ""}`}
+              className={`chip--control ${on ? "chip--control-on" : ""} ${disabled ? "chip--control-disabled" : ""}`}
               aria-pressed={on}
               aria-disabled={disabled}
               onClick={() => !disabled && onPick(p.id)}

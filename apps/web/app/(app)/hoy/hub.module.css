@@ -20,11 +20,12 @@
 .tileIcon { color: var(--acc); display: inline-flex; }
 .tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
 .soon { opacity: 0.55; }
+/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
 .badge {
   position: absolute; top: var(--sp-3); right: var(--sp-3); /* 13→12: paso más cercano */
   font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; /* 8.5→11: piso de la escala */
   color: var(--soft); background: var(--surface-2);
-  border: 1px solid var(--line); border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
+  border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
 }
 
 /* Tu clima de hoy (tránsitos al abrir) — migrado al primitivo global

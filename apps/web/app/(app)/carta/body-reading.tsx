@@ -142,7 +142,7 @@ export function BodyReadingView({
             type="button"
             role="tab"
             aria-selected={tier === id}
-            className={`${styles.ctrl} ${tier === id ? styles.ctrlOn : ""}`}
+            className={`chip--control ${tier === id ? "chip--control-on" : ""}`}
             onClick={() => choose(id)}
           >
             {t(`tier${TIER_KEY[id]}`)}
