@@ -38,6 +38,7 @@
 /* Geometría SVG de la rueda (radios/ángulos calibrados con el script de abajo) — excepción legítima, intocable */
 .ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .ringFaint { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.5; }
+.signSector { } /* hook de clase para la ceremonia — el relleno lo pone el `fill` inline */
 .signGlyph { font-size: 13px; text-anchor: middle; dominant-baseline: central; } /* texto SVG de la rueda: escala con el viewBox, excepción */
 .cusp { stroke: var(--line); stroke-width: 1; }
 .cuspAngle { stroke: rgba(var(--acc-rgb), 0.65); stroke-width: 1.5; }
@@ -49,6 +50,32 @@
 .bodyG:hover .bodyHit { fill: rgba(var(--acc-rgb), 0.2); }
 .bodyGlyph { font-size: 14px; fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .bodyDeg { font-size: 6.5px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+
+/* ---- Ceremonia de dibujo (R5, opt-in vía prop `animated` → [data-ceremony]) ----
+   Timings vienen de @aluna/core (wheel-ceremony.ts) como custom properties en
+   el <svg>; acá solo la coreografía visual. Estado final = estado estático
+   (dashoffset 0 / opacity 1 / scale 1), así que sin ceremonia no cambia nada. */
+@keyframes wheelDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes wheelBloom { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+[data-ceremony] .ring, [data-ceremony] .ringFaint {
+  stroke-dasharray: 1; animation: wheelDraw var(--struct-dur) var(--ease) both;
+}
+[data-ceremony] .cusp, [data-ceremony] .cuspAngle {
+  stroke-dasharray: 1; animation: wheelDraw var(--struct-dur) var(--ease) both; animation-delay: 120ms;
+}
+[data-ceremony] .signSector, [data-ceremony] .signGlyph {
+  transform-box: fill-box; transform-origin: center;
+  animation: wheelBloom var(--signs-dur) var(--ease-spring) both;
+  animation-delay: calc(var(--signs-delay) + var(--i, 0) * var(--signs-stagger));
+}
+[data-ceremony] .bodyG {
+  transform-box: fill-box; transform-origin: center;
+  animation: wheelBloom var(--bodies-dur) var(--ease-spring) both;
+  animation-delay: calc(var(--bodies-delay) + var(--i, 0) * var(--bodies-stagger));
+}
+[data-ceremony] .aspects {
+  animation: wheelBloom var(--aspects-dur) var(--ease) both; animation-delay: var(--aspects-delay);
+}
 
 .tapHint { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); margin: var(--sp-1) 0 var(--sp-4); } /* 6→sp-1 empate (apoyo) */
 
