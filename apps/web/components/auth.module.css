@@ -13,12 +13,12 @@
 
 .mark { text-align: center; margin-bottom: var(--sp-6); } /* separación de marca → mayor */
 .glyph {
-  display: inline-flex; color: var(--acc);
+  display: inline-flex; color: var(--acc-text);
   filter: drop-shadow(0 0 16px rgba(var(--acc-rgb), 0.5));
   animation: aluna-float 7s var(--ease-soft) infinite;
 }
 .brand { font-size: var(--display-sm); margin: var(--sp-3) 0 var(--sp-1); color: var(--ink); letter-spacing: 0.5px; } /* 38→44: la marca ES el héroe de la portada (empate 32/44 diff 6/6 → mayor, flagship login); 10: empate 8/12 → separación → mayor; 2px→sp-1: piso de la escala */
-.brand::first-letter { color: var(--acc); }
+.brand::first-letter { color: var(--acc-text); }
 .tag { font-size: var(--text-sm); color: var(--soft); margin: 0; }
 
 /* .card migrado al primitivo global .card + .card--elevated (background/border/radius/
@@ -55,10 +55,10 @@
 .cta:hover { transform: translateY(-2px); }
 
 .error {
-  text-align: center; font-size: var(--text-sm); color: var(--acc);
+  text-align: center; font-size: var(--text-sm); color: var(--acc-text);
   margin: 0 0 var(--sp-4); /* 14 → mayor (respiro del error) */
   animation: aluna-fade var(--dur-fast) var(--ease) both;
 }
 .switch { text-align: center; font-size: var(--text-sm); color: var(--soft); margin: var(--sp-5) 0 0; } /* 18 separación → sp-5 */
-.switch a { color: var(--acc); text-decoration: none; }
+.switch a { color: var(--acc-text); text-decoration: none; }
 .switch a:hover { text-decoration: underline; }

@@ -19,7 +19,7 @@
 }
 .glyph {
   position: relative;
-  color: var(--acc);
+  color: var(--acc-text);
   filter: drop-shadow(0 0 16px rgba(var(--acc-rgb), 0.5));
   animation: aluna-float 7s var(--ease-soft) infinite;
 }
@@ -50,7 +50,7 @@
   font-size: var(--text-2xs);
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--acc);
+  color: var(--acc-text);
   font-weight: 700;
   margin-bottom: var(--sp-3); /* 10→12 */
 }
@@ -110,7 +110,7 @@
 .gender:hover { transform: translateY(-2px); }
 .genderOn {
   border-color: rgba(var(--acc-rgb), 0.7);
-  color: var(--acc);
+  color: var(--acc-text);
   box-shadow: var(--glow-soft);
   background: var(--surface-2);
 }

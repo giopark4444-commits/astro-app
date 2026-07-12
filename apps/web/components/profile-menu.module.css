@@ -5,7 +5,7 @@
   border-radius: 50%;
   border: 1px solid var(--line);
   background: var(--surface-2);
-  color: var(--acc);
+  color: var(--acc-text);
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 600;
@@ -37,13 +37,13 @@
   width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--surface-2);
-  color: var(--acc);
+  color: var(--acc-text);
   font-family: var(--font-display);
   font-size: var(--text-md); /* 14: inicial legible → md */
   flex-shrink: 0;
 }
 .rowName { flex: 1; font-size: var(--text-md); } /* 14: lectura → md */
-.rowCheck { color: var(--acc); display: inline-flex; }
+.rowCheck { color: var(--acc-text); display: inline-flex; }
 
 .actions { display: flex; flex-direction: column; gap: var(--sp-1); /* 2px→sp-1: piso de la escala */ margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--line); }
 .action {
@@ -56,4 +56,4 @@
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .action:hover { background: var(--surface-2); color: var(--ink); }
-.plus { color: var(--acc); font-weight: 700; }
+.plus { color: var(--acc-text); font-weight: 700; }

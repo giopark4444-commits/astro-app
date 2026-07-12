@@ -3,15 +3,15 @@
 .sky { position: absolute; inset: 0 0 auto; height: 300px; pointer-events: none; z-index: 0; }
 
 .head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
-.eyebrow { font-size: var(--text-2xs); letter-spacing: 3px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.enso { color: var(--acc); display: inline-flex; opacity: 0.9; }
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 3px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.enso { color: var(--acc-text); display: inline-flex; opacity: 0.9; }
 .h1 { position: relative; z-index: 1; font-style: italic; font-size: var(--text-2xl); color: var(--ink); margin: var(--sp-2) 0 var(--sp-1); } /* 26→24 */
 .sub { position: relative; z-index: 1; margin: 0 0 var(--sp-4); font-size: var(--text-xs); /* 12.5: empate 12/13 → apoyo → menor; 18→sp-4: empate, texto de apoyo (precedente pilares .note) */ font-style: italic; color: var(--soft); }
 
 /* ---- Selectores de persona (dos píldoras segmentadas como en la carta) ---- */
 .pickers { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-4); }
 .picker {}
-.pickerLabel { display: block; margin: 0 0 var(--sp-2); /* 6px→sp-2: paso más cercano */ font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.pickerLabel { display: block; margin: 0 0 var(--sp-2); /* 6px→sp-2: paso más cercano */ font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
 .chips { display: flex; gap: var(--sp-1); flex-wrap: wrap; } /* 5→4 */
 /* R3: .chip/.chip:hover/.chipOn/.chipDisabled migrados íntegros a los primitivos
    globales .chip--control/-on/-disabled (globals.css) — esta receta ya era pill,
@@ -22,7 +22,7 @@
 :global(.chip--control-on) .chipDot { background: rgba(26, 19, 5, 0.18); color: var(--ink-on-acc); } /* rgba deriva del mismo ink-on-acc */
 .chipDot {
   display: inline-grid; place-items: center; width: 19px; height: 19px; border-radius: 50%;
-  background: var(--surface-2); color: var(--acc); font-size: var(--text-2xs); font-weight: 700; font-family: var(--font-display);
+  background: var(--surface-2); color: var(--acc-text); font-size: var(--text-2xs); font-weight: 700; font-family: var(--font-display);
 }
 
 .compareBtn {
@@ -50,19 +50,19 @@
   background: radial-gradient(60% 60% at 50% 0%, rgba(var(--acc-rgb), 0.16), transparent 70%);
   pointer-events: none;
 }
-.overallH { position: relative; margin: 0 0 var(--sp-4); font-size: var(--text-2xs); /* 14 → mayor (separación); 10→11 piso */ letter-spacing: 1.6px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+.overallH { position: relative; margin: 0 0 var(--sp-4); font-size: var(--text-2xs); /* 14 → mayor (separación); 10→11 piso */ letter-spacing: 1.6px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
 /* Dos iniciales unidas por un arco glífico: la sinastría hecha imagen. */
 .bridge { position: relative; display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: var(--sp-4); }
 .face { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
   font-family: var(--font-display); font-size: var(--text-2xl); color: var(--ink); /* 22 → mayor (jerarquía, precedente pilares) */
   background: var(--surface-2); border: 1px solid var(--line); }
 .link { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 30px;
-  margin: 0 -6px /* solape deliberado: excepción */; color: var(--acc); font-size: var(--text-xl); opacity: 0.9; } /* 19→20 */
+  margin: 0 -6px /* solape deliberado: excepción */; color: var(--acc-text); font-size: var(--text-xl); opacity: 0.9; } /* 19→20 */
 .arc { width: 56px; height: 22px; display: block; }
 .arcPath { fill: none; stroke: rgba(var(--acc-rgb), 0.7); stroke-width: 1.5; }
-.arcGlyph { fill: var(--acc); font-size: var(--text-sm); /* SVG textual, sí escala */ text-anchor: middle; dominant-baseline: central; }
+.arcGlyph { fill: var(--acc-text); font-size: var(--text-sm); /* SVG textual, sí escala */ text-anchor: middle; dominant-baseline: central; }
 
-.score { position: relative; font-family: var(--font-display); font-size: var(--display-sm); /* héroe 56→44 (tabla del plan) */ line-height: 1; color: var(--acc);
+.score { position: relative; font-family: var(--font-display); font-size: var(--display-sm); /* héroe 56→44 (tabla del plan) */ line-height: 1; color: var(--acc-text);
   text-shadow: 0 0 26px rgba(var(--acc-rgb), 0.4); font-variant-numeric: tabular-nums; }
 .scoreSub { position: relative; display: block; margin-top: var(--sp-2); font-size: var(--text-sm); font-style: italic; color: var(--soft); line-height: 1.5; max-width: 30ch; margin-left: auto; margin-right: auto; }
 
@@ -108,7 +108,7 @@
 /* .empty migrado al primitivo global card+card--dashed — ver compat-view.tsx:
    className="card card--dashed ..." */
 .empty { position: relative; z-index: 1; margin-top: var(--sp-7); text-align: center; padding: var(--sp-6) var(--sp-5); }
-.emptyGlyph { font-size: var(--text-3xl); /* 30→32 */ color: var(--acc); opacity: 0.85; }
+.emptyGlyph { font-size: var(--text-3xl); /* 30→32 */ color: var(--acc-text); opacity: 0.85; }
 .emptyTitle { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--ink); margin: var(--sp-3) 0 var(--sp-2); }
 .emptyBody { font-size: var(--text-sm); color: var(--soft); line-height: 1.6; max-width: 34ch; margin: 0 auto var(--sp-5); }
 .emptyCta {

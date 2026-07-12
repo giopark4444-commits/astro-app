@@ -3,8 +3,8 @@
 .sky { position: absolute; inset: 0 0 auto; height: 300px; pointer-events: none; z-index: 0; }
 
 .head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
-.eyebrow { font-size: var(--text-2xs); letter-spacing: 3px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
-.enso { color: var(--acc); display: inline-flex; opacity: 0.9; }
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 3px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.enso { color: var(--acc-text); display: inline-flex; opacity: 0.9; }
 .h1 { position: relative; z-index: 1; font-style: italic; font-size: var(--text-2xl); color: var(--ink); margin: var(--sp-2) 0 var(--sp-4); } /* 26→2xl (nearest, no empate) */
 
 /* ---- Selector de tipo de carta (Natal / Tu Clima / Progresiones) ---- */
@@ -42,7 +42,7 @@
 .cusp { stroke: var(--line); stroke-width: 1; }
 .cuspAngle { stroke: rgba(var(--acc-rgb), 0.65); stroke-width: 1.5; }
 .houseNum { font-size: 8px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
-.angleMark { font-size: 9px; font-weight: 700; fill: var(--acc); text-anchor: middle; dominant-baseline: central; }
+.angleMark { font-size: 9px; font-weight: 700; fill: var(--acc-text); text-anchor: middle; dominant-baseline: central; }
 .aspects line { stroke-width: 1; }
 .bodyG { cursor: pointer; }
 .bodyHit { fill: var(--surface-2); }
@@ -60,14 +60,14 @@
    ver carta-view.tsx BigCard: className={`card card--tight ${styles.big} ...`} */
 .big { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-1); text-align: center; } /* 2→sp-1 piso; 13→sp-3 nearest; 6→sp-1 empate (apoyo) */
 .bigDim { opacity: 0.62; }
-.bigGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc); line-height: 1; }
+.bigGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc-text); line-height: 1; }
 .bigName { font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin-top: var(--sp-1); } /* 10→2xs piso (sub-11); 3→sp-1 nearest */
 .bigSign { font-size: var(--text-sm); color: var(--ink); }
 .bigSub { font-size: var(--text-2xs); color: var(--soft); } /* 10.5→2xs piso (sub-11) */
 
 /* ---- Balance ---- */
 .balance { position: relative; z-index: 1; margin-bottom: var(--sp-3); }
-.balanceH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; } /* 7→sp-2 nearest; 10→2xs piso (sub-11) */
+.balanceH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 7→sp-2 nearest; 10→2xs piso (sub-11) */
 .barRow { display: grid; grid-template-columns: 92px 1fr 18px; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-1); } /* 5→sp-1 nearest */
 .barLabel { font-size: var(--text-2xs); color: var(--ink); }
 .barTrack { height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
@@ -80,7 +80,7 @@
   position: relative; z-index: 1;
   display: inline-flex; align-items: center; gap: var(--sp-2); margin: var(--sp-1) 0 var(--sp-1); padding: var(--sp-2) var(--sp-4); /* 9→sp-2 nearest; 6→sp-1 y 4→sp-1 (apoyo); 15→sp-4 nearest */
   font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;
-  color: var(--acc); background: transparent; border: 1px solid var(--line); border-radius: 20px; cursor: pointer;
+  color: var(--acc-text); background: transparent; border: 1px solid var(--line); border-radius: 20px; cursor: pointer;
 }
 .proDot { width: 26px; height: 15px; border-radius: 8px; background: var(--line); position: relative; transition: background var(--dur) var(--ease); }
 .proDot::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--soft); transition: transform var(--dur) var(--ease-spring), background var(--dur) var(--ease); }
@@ -90,13 +90,13 @@
 /* ---- Lámina Pro ---- */
 .pro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→sp-3 nearest; 10→sp-3 empate (jerarquía: entrada al bloque Pro, consistente con .lamina de pilares) */
 /* .card migrado al primitivo global card+card--tight — ver carta-view.tsx: className="card card--tight fade-in" */
-.cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
+.cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
 
 .posTable { display: flex; flex-direction: column; gap: var(--sp-1); } /* 2→sp-1 piso */
 .posRow { display: grid; grid-template-columns: 1.3fr 1.1fr 0.7fr 0.9fr; align-items: center; gap: var(--sp-1); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); font-size: var(--text-2xs); } /* 6→sp-1 empate (apoyo); 4→sp-1 nearest; 11.5→2xs empate (apoyo) */
 .posRow:last-child { border-bottom: 0; }
 .posBody { color: var(--ink); }
-.posSign { color: var(--acc); font-variant-numeric: tabular-nums; }
+.posSign { color: var(--acc-text); font-variant-numeric: tabular-nums; }
 .posHouse { color: var(--soft); font-size: var(--text-2xs); } /* 10.5→2xs piso (sub-11) */
 .posDign { color: var(--soft); font-size: var(--text-2xs); text-align: right; } /* 10.5→2xs piso (sub-11) */
 
@@ -108,7 +108,7 @@
 .aspRow { display: grid; grid-template-columns: 0.7fr 1fr 1.3fr; align-items: center; gap: var(--sp-1); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); font-size: var(--text-2xs); } /* 6→sp-1 empate (apoyo); 5→sp-1 nearest; 11.5→2xs empate (apoyo) */
 .aspRow:last-child { border-bottom: 0; }
 .aspPair { color: var(--ink); font-size: var(--text-sm); }
-.aspGlyph { color: var(--acc); }
+.aspGlyph { color: var(--acc-text); }
 .aspName { color: var(--ink); }
 .aspOrb { color: var(--soft); font-size: var(--text-2xs); text-align: right; font-variant-numeric: tabular-nums; } /* 10→2xs piso (sub-11) */
 .harm_hard .aspGlyph { color: var(--tone-warm); } /* eje tono armonía (tenso), coincide con el semántico R2 */
@@ -123,7 +123,7 @@
 
 /* ---- Hoja de detalle ---- */
 .sheet { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; } /* 6→sp-1 empate (apoyo) */
-.sheetBig { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc); line-height: 1; } /* 34→3xl (nearest, no empate; NO es el "sheet hero" del plan — ese vive en numerology-view.module.css .sheetN) */
+.sheetBig { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc-text); line-height: 1; } /* 34→3xl (nearest, no empate; NO es el "sheet hero" del plan — ese vive en numerology-view.module.css .sheetN) */
 .sheetSign { font-size: var(--text-md); color: var(--ink); } /* 14→md empate (valor bajo el glifo, análogo a .rowValue de pilares) */
 .sheetMeta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-1); margin-top: var(--sp-1); } /* 6→sp-1 empate (apoyo) ×2 */
 /* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
@@ -135,5 +135,5 @@
 .brEssence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.5; color: var(--ink); } /* 16.5→lg (nearest, no empate) */
 .brBlock { display: flex; flex-direction: column; gap: var(--sp-1); }
 .brBlock p { margin: 0; font-size: var(--text-sm); line-height: 1.6; color: var(--soft); }
-.brH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); font-weight: 700; } /* 10→2xs piso (sub-11) */
+.brH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→2xs piso (sub-11) */
 .tierHint { margin: -4px 0 var(--sp-1); text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); } /* -4px excepción (ajuste de línea base negativo); 2→sp-1 piso */

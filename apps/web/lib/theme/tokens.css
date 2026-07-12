@@ -38,6 +38,11 @@
 
   /* Semánticos (R2): tinta sobre acento y tonos armonía/tenso-fluido, hoy hardcodeados en varios módulos */
   --ink-on-acc: #1a1305;
+  /* R3/WCAG: color del TEXTO de acento (eyebrows/labels/números). En modos oscuros = --acc
+     (vibrante sobre fondo oscuro, alto contraste). En los 3 modos CLAROS se oscurece por tema
+     para pasar AA (el acento claro sobre fondo claro fallaba 2.0-2.8:1). Rellenos/bordes/glow
+     siguen en --acc brillante. */
+  --acc-text: var(--acc);
   --tone-warm: #e0795a;
   --tone-cool: #7aaae0;
   /* R3: aviso de chip (carta .tagWarn / numerología .chipWarn) — distinto eje que
@@ -72,6 +77,7 @@
   --line: rgba(142, 124, 195, 0.25);
   --acc: #caa85f;
   --acc-rgb: 202, 168, 95;
+  --acc-text: #836d3e; /* WCAG: bronce oscuro para texto (el oro claro sobre fondo claro fallaba 2.07:1 → 4.5:1) */
   --stars: 0;
   --elev: 0 18px 44px rgba(120, 100, 160, 0.18);
 }
@@ -87,6 +93,7 @@
   --line: rgba(155, 143, 192, 0.25);
   --acc: #9b8fc0;
   --acc-rgb: 155, 143, 192;
+  --acc-text: #736a8e; /* WCAG: lavanda profunda para texto (2.68:1 → 4.56:1) */
   --stars: 0;
   --elev: 0 18px 44px rgba(160, 130, 220, 0.2);
 }
@@ -99,6 +106,7 @@
   --line: rgba(180, 160, 230, 0.22);
   --acc: #c9b8f2;
   --acc-rgb: 201, 184, 242;
+  --acc-text: var(--acc); /* aurora-dark: reset al acento vibrante (fondo oscuro, contraste alto) */
   --stars: 0.25;
   --elev: 0 18px 50px rgba(6, 8, 24, 0.45);
 }
@@ -124,6 +132,7 @@
   --line: rgba(154, 107, 255, 0.25);
   --acc: #b86bff;
   --acc-rgb: 184, 107, 255;
+  --acc-text: #8c51c2; /* WCAG: púrpura profundo para texto (2.82:1 → 4.56:1) */
   --stars: 0;
   --elev: 0 18px 44px rgba(154, 107, 255, 0.2);
 }
