@@ -43,7 +43,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // —incluida la resolución de "auto" (DEFAULT_MODE)— lo aplica el ThemeProvider en
   // cliente dentro de (app)/layout.
   return (
-    <html lang={locale} data-theme="observatory" data-mode="dark" className={`${cormorant.variable} ${quicksand.variable}`}>
+    // suppressHydrationWarning: el FOUC_SCRIPT muta data-theme/data-mode en <html>
+    // ANTES de la hidratación, así que para cualquier usuario cuyo modo resuelto no
+    // sea el default hardcodeado (deslogueado en SO claro, o cookie de tema/modo
+    // distinta) los atributos del DOM ya difieren de los que React serializó en el
+    // server. Sin esto React 19 emite un hydration mismatch en cada una de esas
+    // cargas (y en el peor caso recae a client-render, reintroduciendo el flash que
+    // R6 elimina). Solo silencia el warning de ESTE elemento — es la técnica estándar
+    // (next-themes) para atributos mutados por un script pre-paint.
+    <html lang={locale} data-theme="observatory" data-mode="dark" suppressHydrationWarning className={`${cormorant.variable} ${quicksand.variable}`}>
       {/* Anti-FOUC: corre antes del primer paint (está en <head>) y sobreescribe
           data-theme/data-mode con la cookie del usuario, resolviendo "auto" con matchMedia. */}
       <head><script dangerouslySetInnerHTML={{ __html: FOUC_SCRIPT }} /></head>

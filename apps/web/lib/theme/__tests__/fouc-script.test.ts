@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { THEME_COOKIE, MODE_COOKIE, FOUC_SCRIPT, resolveMode } from "../fouc-script";
 
 describe("fouc-script: resolveMode", () => {
@@ -43,5 +44,56 @@ describe("fouc-script: constantes + script", () => {
     // defensivo: no debe reventar si algo falla
     expect(FOUC_SCRIPT).toContain("try");
     expect(FOUC_SCRIPT).toContain("catch");
+  });
+});
+
+// Ejecuta el STRING que se envía al navegador (no el helper resolveMode, que no
+// corre en producción). Cierra la brecha de "falsa confianza": el path real que
+// aplica el anti-FOUC queda cubierto, no solo string-matcheado.
+describe("fouc-script: FOUC_SCRIPT ejecutado (jsdom)", () => {
+  // FOUC_SCRIPT es una constante ESTÁTICA del repo (sin interpolación de input no
+  // confiable) y jsdom no ejecuta <script> inline por defecto → new Function es la
+  // vía estándar y segura de ejercer el string exacto que se envía al navegador.
+  const run = () => new Function(FOUC_SCRIPT)();
+
+  beforeEach(() => {
+    // limpia cookies y datasets entre casos
+    document.cookie.split("; ").forEach((c) => {
+      const name = c.split("=")[0];
+      if (name) document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    });
+    delete document.documentElement.dataset.theme;
+    delete document.documentElement.dataset.mode;
+    // por defecto: SO en claro (matchMedia determinista; jsdom no lo trae)
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia;
+  });
+
+  it("aplica el tema y el modo explícito de la cookie", () => {
+    document.cookie = "theme=cosmic";
+    document.cookie = "light_mode=dark";
+    run();
+    expect(document.documentElement.dataset.theme).toBe("cosmic");
+    expect(document.documentElement.dataset.mode).toBe("dark");
+  });
+
+  it("sin cookies + prefersDark -> observatory/dark (default + auto)", () => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia;
+    run();
+    expect(document.documentElement.dataset.theme).toBe("observatory");
+    expect(document.documentElement.dataset.mode).toBe("dark");
+  });
+
+  it("light_mode=light gana aunque el SO esté en oscuro", () => {
+    document.cookie = "light_mode=light";
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia;
+    run();
+    expect(document.documentElement.dataset.mode).toBe("light");
+  });
+
+  it("si matchMedia lanza, cae a los defaults sin romper", () => {
+    window.matchMedia = (() => { throw new Error("no matchMedia"); }) as unknown as typeof window.matchMedia;
+    expect(run).not.toThrow();
+    expect(document.documentElement.dataset.theme).toBe("observatory");
+    expect(document.documentElement.dataset.mode).toBe("light");
   });
 });

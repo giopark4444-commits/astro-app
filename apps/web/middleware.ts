@@ -13,5 +13,8 @@ export const config = {
   // todo el propósito del "shell público" de R6). Es el patrón idiomático de
   // Next (su ejemplo de matcher lista robots.txt/sitemap.xml) y de paso evita
   // el round-trip a Supabase por cada request de estos assets.
+  // ⚠️ Estos tokens son PREFIJOS sin frontera: no añadas una ruta PROTEGIDA que
+  // empiece por icon/apple-icon/opengraph-image (p.ej. /iconografia, /icons) — el
+  // matcher la excluiría del auth-check silenciosamente. Ninguna ruta actual lo hace.
   matcher: ["/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|opengraph-image|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };
