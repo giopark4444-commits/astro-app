@@ -40,7 +40,9 @@ export function AvatarUpload({ userId, initialUrl, fallback }: { userId: string;
       if (dbErr) throw dbErr;
       setUrl(busted);
     } catch {
-      setError(t("photoBadType"));
+      // la validación de formato/tamaño ya pasó arriba → aquí el fallo es de
+      // subida (red/RLS/BD), no del archivo: mensaje genérico, no "formato inválido"
+      setError(t("photoError"));
     } finally {
       setBusy(false);
     }

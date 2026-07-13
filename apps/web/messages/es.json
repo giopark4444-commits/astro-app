@@ -56,7 +56,7 @@
     "genderNeutral": "Neutro",
     "genderHint": "Define el género con que te hablan tus lecturas."
   },
-  "profile": { "title": "Perfiles", "new": "Nuevo perfil", "changePhoto": "Cambiar foto", "photoTooBig": "La imagen supera los 5 MB", "photoBadType": "Formato no válido (usa PNG, JPG o WEBP)", "uploading": "Subiendo…" },
+  "profile": { "title": "Perfiles", "new": "Nuevo perfil", "changePhoto": "Cambiar foto", "photoTooBig": "La imagen supera los 5 MB", "photoBadType": "Formato no válido (usa PNG, JPG o WEBP)", "uploading": "Subiendo…", "photoError": "No pudimos subir la foto. Intenta de nuevo." },
   "numerology": {
     "title": "Numerología",
     "subtitle": "Tu mapa numérico",
