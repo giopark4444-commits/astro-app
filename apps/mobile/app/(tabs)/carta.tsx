@@ -83,11 +83,18 @@ export default function CartaScreen() {
   }, [profileId, accessToken, kind, houseSystem, zodiac]);
 
   const ready = state.s === "ready" ? state : null;
+  // Ceremonia de dibujo (R5): solo en el PRIMER chart listo — togglear casas/
+  // zodiaco/kind re-renderiza la misma rueda pero no la re-dibuja. Espejo del web.
+  const ceremonyPlayed = useRef(false);
+  const playCeremony = ready !== null && !ceremonyPlayed.current;
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
   const byKey = useMemo(() => {
     const m = new Map<string, BodyPosition>();
     if (ready) for (const b of ready.chart.bodies) m.set(b.body, b);
     return m;
+  }, [ready]);
+  useEffect(() => {
+    if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
 
   if (!profile || !profileId) {
@@ -167,7 +174,7 @@ export default function CartaScreen() {
 
             {/* Rueda interactiva */}
             <FadeIn delay={0}>
-              <ChartWheel chart={ready.chart} solar={ready.solar} selected={sheet?.body ?? null} onSelect={setSheet} />
+              <ChartWheel chart={ready.chart} solar={ready.solar} selected={sheet?.body ?? null} onSelect={setSheet} animated={playCeremony} />
               <Text style={styles.kindHint}>{t("carta.tapHint")}</Text>
             </FadeIn>
 

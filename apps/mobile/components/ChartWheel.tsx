@@ -5,7 +5,7 @@
 // (diseñadas para funcionar sobre cualquier tema); anillos y textos toman
 // el tema activo.
 import { useMemo } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { Animated, View, useWindowDimensions } from "react-native";
 import Svg, { Circle, G, Line, Path, Text as SvgText } from "react-native-svg";
 import {
   WHEEL, pointAt, annularSector, spreadBodies,
@@ -15,6 +15,11 @@ import {
 } from "@aluna/core";
 import { useTheme } from "../lib/theme-context";
 import { fonts } from "../theme/tokens";
+import { useCeremony } from "./use-ceremony";
+
+// <G> animable por Animated (R5, ceremonia de dibujo) — fuera del componente
+// para no recrear el wrapper en cada render.
+const AnimatedG = Animated.createAnimatedComponent(G);
 
 const { CX, CY, R_SIGN_OUT, R_SIGN_IN, R_SIGN_GLYPH, R_HOUSE_IN, R_HOUSE_NUM, R_BODY, R_ASPECT } = WHEEL;
 
@@ -33,6 +38,7 @@ export function ChartWheel({
   solar,
   selected,
   onSelect,
+  animated = false,
 }: {
   chart: ChartResult;
   solar: boolean;
@@ -41,10 +47,16 @@ export function ChartWheel({
    * = ningún cuerpo resaltado. */
   selected?: string | null;
   onSelect: (b: BodyPosition) => void;
+  /** R5 — ceremonia de dibujo en 3 fases (estructura → signos → cuerpos) al
+   * primer montaje de una carta lista. Default false = comportamiento
+   * estático de siempre (los 3 grupos nacen en opacity 1, sin animar); el
+   * consumidor decide CUÁNDO pasar true (gate de primer-montaje, Task 5). */
+  animated?: boolean;
 }) {
   const { t: tk } = useTheme();
   const { width } = useWindowDimensions();
   const size = Math.min(width - 32, 420);
+  const { structure, signs, bodies } = useCeremony(animated);
 
   const asc = chart.houses.ascendant;
   const disp = useMemo(() => spreadBodies(chart.bodies, 7), [chart]);
@@ -54,103 +66,114 @@ export function ChartWheel({
   return (
     <View style={{ width: size, height: size, alignSelf: "center" }}>
       <Svg viewBox="0 0 360 360" width={size} height={size}>
-        {/* anillos base */}
-        <Circle cx={CX} cy={CY} r={R_SIGN_OUT} stroke={tk.accHair} strokeWidth={1} fill="none" />
-        <Circle cx={CX} cy={CY} r={R_SIGN_IN} stroke={tk.accHair} strokeWidth={1} fill="none" />
-        <Circle cx={CX} cy={CY} r={R_HOUSE_IN} stroke={tk.accFaint} strokeWidth={1} fill="none" />
+        {/* FASE 1/3 — estructura: anillos base, líneas divisorias de 30° y
+            cúspides de casas. Sin stagger por-elemento (deliberado, anti-jank
+            — ver use-ceremony.ts). houseOpacity (dimming solar) compone
+            multiplicativo dentro de este grupo, no hace falta tocarlo. */}
+        <AnimatedG opacity={structure}>
+          <Circle cx={CX} cy={CY} r={R_SIGN_OUT} stroke={tk.accHair} strokeWidth={1} fill="none" />
+          <Circle cx={CX} cy={CY} r={R_SIGN_IN} stroke={tk.accHair} strokeWidth={1} fill="none" />
+          <Circle cx={CX} cy={CY} r={R_HOUSE_IN} stroke={tk.accFaint} strokeWidth={1} fill="none" />
 
-        {/* sectores de signos, tintados por elemento */}
-        {ZODIAC_SIGNS.map((s, i) => {
-          const lonA = i * 30;
-          const [gx, gy] = pointAt(R_SIGN_GLYPH, lonA + 15, asc);
-          return (
-            <G key={s.key}>
-              <Path d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)} fill={ELEMENT_FILL[s.element]} />
-              <SvgText x={gx} y={gy} fill={ELEMENT_INK[s.element]} fontSize={13} textAnchor="middle" alignmentBaseline="central">
-                {s.glyph + TEXT_VS}
-              </SvgText>
-            </G>
-          );
-        })}
-        {ZODIAC_SIGNS.map((s, i) => {
-          const [xo, yo] = pointAt(R_SIGN_OUT, i * 30, asc);
-          const [xi, yi] = pointAt(R_SIGN_IN, i * 30, asc);
-          return <Line key={`d${i}`} x1={xo} y1={yo} x2={xi} y2={yi} stroke={tk.accHair} strokeWidth={1} />;
-        })}
+          {ZODIAC_SIGNS.map((s, i) => {
+            const [xo, yo] = pointAt(R_SIGN_OUT, i * 30, asc);
+            const [xi, yi] = pointAt(R_SIGN_IN, i * 30, asc);
+            return <Line key={`d${i}`} x1={xo} y1={yo} x2={xi} y2={yi} stroke={tk.accHair} strokeWidth={1} />;
+          })}
 
-        {/* cúspides de casas + números + marcas de ángulos */}
-        <G opacity={houseOpacity}>
-          {chart.houses.cusps.map((cusp, i) => {
-            const [x1, y1] = pointAt(R_HOUSE_IN, cusp, asc);
-            const [x2, y2] = pointAt(R_SIGN_IN, cusp, asc);
-            const isAngle = i === 0 || i === 3 || i === 6 || i === 9;
-            const next = chart.houses.cusps[(i + 1) % 12]!;
-            const span = (next - cusp + 360) % 360;
-            const [nx, ny] = pointAt(R_HOUSE_NUM, cusp + span / 2, asc);
+          {/* cúspides de casas + números + marcas de ángulos */}
+          <G opacity={houseOpacity}>
+            {chart.houses.cusps.map((cusp, i) => {
+              const [x1, y1] = pointAt(R_HOUSE_IN, cusp, asc);
+              const [x2, y2] = pointAt(R_SIGN_IN, cusp, asc);
+              const isAngle = i === 0 || i === 3 || i === 6 || i === 9;
+              const next = chart.houses.cusps[(i + 1) % 12]!;
+              const span = (next - cusp + 360) % 360;
+              const [nx, ny] = pointAt(R_HOUSE_NUM, cusp + span / 2, asc);
+              return (
+                <G key={`h${i}`}>
+                  <Line x1={x1} y1={y1} x2={x2} y2={y2}
+                    stroke={isAngle ? tk.accSoft : tk.accHair} strokeWidth={isAngle ? 1.4 : 0.7} />
+                  <SvgText x={nx} y={ny} fill={tk.textFaint} fontSize={8} textAnchor="middle" alignmentBaseline="central">
+                    {i + 1}
+                  </SvgText>
+                </G>
+              );
+            })}
+            {ANGLE_MARKS.map((m) => {
+              const [x, y] = pointAt(R_SIGN_OUT + 9, chart.houses.cusps[m.cusp]!, asc);
+              // AC/MC en paridad con la web (fill: var(--acc); font-weight: 700) — IC/DC
+              // quedan tenues, sin negrita, como marcas secundarias.
+              const primary = m.key === "AC" || m.key === "MC";
+              return (
+                <SvgText
+                  key={m.key}
+                  x={x}
+                  y={y}
+                  fill={primary ? tk.acc : tk.textDim}
+                  fontFamily={primary ? fonts.serifBold : undefined}
+                  fontSize={9}
+                  textAnchor="middle"
+                  alignmentBaseline="central"
+                >
+                  {m.key}
+                </SvgText>
+              );
+            })}
+          </G>
+        </AnimatedG>
+
+        {/* FASE 2/3 — signos: sectores tintados por elemento + glifos. */}
+        <AnimatedG opacity={signs}>
+          {ZODIAC_SIGNS.map((s, i) => {
+            const lonA = i * 30;
+            const [gx, gy] = pointAt(R_SIGN_GLYPH, lonA + 15, asc);
             return (
-              <G key={`h${i}`}>
-                <Line x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={isAngle ? tk.accSoft : tk.accHair} strokeWidth={isAngle ? 1.4 : 0.7} />
-                <SvgText x={nx} y={ny} fill={tk.textFaint} fontSize={8} textAnchor="middle" alignmentBaseline="central">
-                  {i + 1}
+              <G key={s.key}>
+                <Path d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)} fill={ELEMENT_FILL[s.element]} />
+                <SvgText x={gx} y={gy} fill={ELEMENT_INK[s.element]} fontSize={13} textAnchor="middle" alignmentBaseline="central">
+                  {s.glyph + TEXT_VS}
                 </SvgText>
               </G>
             );
           })}
-          {ANGLE_MARKS.map((m) => {
-            const [x, y] = pointAt(R_SIGN_OUT + 9, chart.houses.cusps[m.cusp]!, asc);
-            // AC/MC en paridad con la web (fill: var(--acc); font-weight: 700) — IC/DC
-            // quedan tenues, sin negrita, como marcas secundarias.
-            const primary = m.key === "AC" || m.key === "MC";
+        </AnimatedG>
+
+        {/* FASE 3/3 — cuerpos: líneas de aspecto + planetas/luminarias. */}
+        <AnimatedG opacity={bodies}>
+          {/* líneas de aspecto */}
+          <G>
+            {chart.aspects.map((asp, i) => {
+              const a = chart.bodies.find((b) => b.body === asp.a);
+              const b = chart.bodies.find((b) => b.body === asp.b);
+              if (!a || !b) return null;
+              const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
+              const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
+              return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} strokeWidth={1} />;
+            })}
+          </G>
+
+          {/* cuerpos: halo dorado del seleccionado detrás + área táctil de 44pt
+              (r=23 en viewBox 360 ≈ 44pt de diámetro en un ancho de 375) ANTES
+              del glifo visible, que no cambia de tamaño. */}
+          {chart.bodies.map((b) => {
+            const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
+            const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
+            const isSelected = b.body === selected;
             return (
-              <SvgText
-                key={m.key}
-                x={x}
-                y={y}
-                fill={primary ? tk.acc : tk.textDim}
-                fontFamily={primary ? fonts.serifBold : undefined}
-                fontSize={9}
-                textAnchor="middle"
-                alignmentBaseline="central"
-              >
-                {m.key}
-              </SvgText>
+              <G key={b.body} onPress={() => onSelect(b)}>
+                {isSelected && <Circle cx={gx} cy={gy} r={16} fill={tk.acc} opacity={0.12} />}
+                <Circle cx={gx} cy={gy} r={23} fill="transparent" />
+                <SvgText x={gx} y={gy} fill={tk.text} fontSize={13} textAnchor="middle" alignmentBaseline="central">
+                  {PLANET_GLYPH[b.body] ?? "•"}
+                </SvgText>
+                <SvgText x={tx} y={ty} fill={tk.textFaint} fontSize={7} textAnchor="middle" alignmentBaseline="central">
+                  {`${b.degree}°${b.retrograde ? "℞" : ""}`}
+                </SvgText>
+              </G>
             );
           })}
-        </G>
-
-        {/* líneas de aspecto */}
-        <G>
-          {chart.aspects.map((asp, i) => {
-            const a = chart.bodies.find((b) => b.body === asp.a);
-            const b = chart.bodies.find((b) => b.body === asp.b);
-            if (!a || !b) return null;
-            const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
-            const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
-            return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} strokeWidth={1} />;
-          })}
-        </G>
-
-        {/* cuerpos: halo dorado del seleccionado detrás + área táctil de 44pt
-            (r=23 en viewBox 360 ≈ 44pt de diámetro en un ancho de 375) ANTES
-            del glifo visible, que no cambia de tamaño. */}
-        {chart.bodies.map((b) => {
-          const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
-          const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
-          const isSelected = b.body === selected;
-          return (
-            <G key={b.body} onPress={() => onSelect(b)}>
-              {isSelected && <Circle cx={gx} cy={gy} r={16} fill={tk.acc} opacity={0.12} />}
-              <Circle cx={gx} cy={gy} r={23} fill="transparent" />
-              <SvgText x={gx} y={gy} fill={tk.text} fontSize={13} textAnchor="middle" alignmentBaseline="central">
-                {PLANET_GLYPH[b.body] ?? "•"}
-              </SvgText>
-              <SvgText x={tx} y={ty} fill={tk.textFaint} fontSize={7} textAnchor="middle" alignmentBaseline="central">
-                {`${b.degree}°${b.retrograde ? "℞" : ""}`}
-              </SvgText>
-            </G>
-          );
-        })}
+        </AnimatedG>
       </Svg>
     </View>
   );

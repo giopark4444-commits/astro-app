@@ -164,7 +164,13 @@ button { font-family: inherit; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
+    /* también cero los delays: si no, una animación escalonada (p.ej. la ceremonia
+       de la rueda, --i * stagger) igual APARECE en secuencia por ~1.75s aunque cada
+       paso sea instantáneo — eso sigue siendo "movimiento". Con delay 0 todo aparece
+       de una. Mejora de accesibilidad global (cazada en el review de R5). */
+    animation-delay: 0s !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
   }
   .reveal { opacity: 1; }
 }

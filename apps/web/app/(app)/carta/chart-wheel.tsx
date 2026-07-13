@@ -3,6 +3,8 @@ import {
   ZODIAC_SIGNS,
   PLANETS,
   WHEEL,
+  WHEEL_CEREMONY,
+  WHEEL_CEREMONY_ASPECTS,
   pointAt,
   annularSector,
   spreadBodies,
@@ -31,26 +33,56 @@ const ANGLE_MARKS: Array<{ key: string; cusp: number }> = [
   { key: "MC", cusp: 9 },
 ];
 
+// Ceremonia de dibujo (R5, opt-in vía prop `animated`): timings leídos UNA
+// VEZ de @aluna/core y volcados a custom properties CSS que consume
+// carta.module.css bajo `[data-ceremony]`. Coreografía en wheel-ceremony.ts;
+// aquí solo se traduce a nombres de variable, cero lógica de animación.
+const CEREMONY_STRUCTURE = WHEEL_CEREMONY.find((p) => p.key === "structure")!;
+const CEREMONY_SIGNS = WHEEL_CEREMONY.find((p) => p.key === "signs")!;
+const CEREMONY_BODIES = WHEEL_CEREMONY.find((p) => p.key === "bodies")!;
+const CEREMONY_STYLE = {
+  ["--struct-dur" as string]: `${CEREMONY_STRUCTURE.durationMs}ms`,
+  ["--signs-delay" as string]: `${CEREMONY_SIGNS.delayMs}ms`,
+  ["--signs-dur" as string]: `${CEREMONY_SIGNS.durationMs}ms`,
+  ["--signs-stagger" as string]: `${CEREMONY_SIGNS.staggerMs}ms`,
+  ["--bodies-delay" as string]: `${CEREMONY_BODIES.delayMs}ms`,
+  ["--bodies-dur" as string]: `${CEREMONY_BODIES.durationMs}ms`,
+  ["--bodies-stagger" as string]: `${CEREMONY_BODIES.staggerMs}ms`,
+  ["--aspects-delay" as string]: `${WHEEL_CEREMONY_ASPECTS.delayMs}ms`,
+  ["--aspects-dur" as string]: `${WHEEL_CEREMONY_ASPECTS.durationMs}ms`,
+};
+
 export function ChartWheel({
   chart,
   solar,
   onSelect,
+  animated = false,
 }: {
   chart: ChartResult;
   solar: boolean;
   onSelect: (b: BodyPosition) => void;
+  animated?: boolean;
 }) {
   const asc = chart.houses.ascendant;
   const disp = spreadBodies(chart.bodies, 7);
   const lonOf = (b: BodyPosition) => disp.get(b.body) ?? b.longitude;
   const houseOpacity = solar ? 0.28 : 1;
+  // style con --i solo bajo ceremonia: en estático no debe cambiar el markup.
+  const iVar = (i: number) => (animated ? { ["--i" as string]: i } : undefined);
 
   return (
-    <svg viewBox="0 0 360 360" className={styles.wheel} role="img" aria-label="Rueda de la carta astral">
+    <svg
+      viewBox="0 0 360 360"
+      className={styles.wheel}
+      role="img"
+      aria-label="Rueda de la carta astral"
+      data-ceremony={animated ? "" : undefined}
+      style={animated ? CEREMONY_STYLE : undefined}
+    >
       {/* anillos base */}
-      <circle cx={CX} cy={CY} r={R_SIGN_OUT} className={styles.ring} />
-      <circle cx={CX} cy={CY} r={R_SIGN_IN} className={styles.ring} />
-      <circle cx={CX} cy={CY} r={R_HOUSE_IN} className={styles.ringFaint} />
+      <circle cx={CX} cy={CY} r={R_SIGN_OUT} className={styles.ring} pathLength={1} />
+      <circle cx={CX} cy={CY} r={R_SIGN_IN} className={styles.ring} pathLength={1} />
+      <circle cx={CX} cy={CY} r={R_HOUSE_IN} className={styles.ringFaint} pathLength={1} />
 
       {/* sectores de signos, tintados por elemento */}
       {ZODIAC_SIGNS.map((s, i) => {
@@ -58,8 +90,13 @@ export function ChartWheel({
         const [gx, gy] = pointAt(R_SIGN_GLYPH, lonA + 15, asc);
         return (
           <g key={s.key}>
-            <path d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)} fill={ELEMENT_FILL[s.element]} />
-            <text x={gx} y={gy} className={styles.signGlyph} fill={ELEMENT_INK[s.element]}>
+            <path
+              d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)}
+              fill={ELEMENT_FILL[s.element]}
+              className={styles.signSector}
+              style={iVar(i)}
+            />
+            <text x={gx} y={gy} className={styles.signGlyph} fill={ELEMENT_INK[s.element]} style={iVar(i)}>
               {s.glyph + TEXT_VS}
             </text>
           </g>
@@ -69,7 +106,7 @@ export function ChartWheel({
       {ZODIAC_SIGNS.map((s, i) => {
         const [xo, yo] = pointAt(R_SIGN_OUT, i * 30, asc);
         const [xi, yi] = pointAt(R_SIGN_IN, i * 30, asc);
-        return <line key={`d${i}`} x1={xo} y1={yo} x2={xi} y2={yi} className={styles.ring} />;
+        return <line key={`d${i}`} x1={xo} y1={yo} x2={xi} y2={yi} className={styles.ring} pathLength={1} />;
       })}
 
       {/* cúspides de casas + números */}
@@ -83,7 +120,14 @@ export function ChartWheel({
           const [nx, ny] = pointAt(R_HOUSE_NUM, cusp + span / 2, asc);
           return (
             <g key={`h${i}`}>
-              <line x1={x1} y1={y1} x2={x2} y2={y2} className={isAngle ? styles.cuspAngle : styles.cusp} />
+              <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                className={isAngle ? styles.cuspAngle : styles.cusp}
+                pathLength={1}
+              />
               <text x={nx} y={ny} className={styles.houseNum}>
                 {i + 1}
               </text>
@@ -108,16 +152,25 @@ export function ChartWheel({
           if (!a || !b) return null;
           const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
           const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
-          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} />;
+          return (
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} pathLength={1} />
+          );
         })}
       </g>
 
       {/* cuerpos */}
-      {chart.bodies.map((b) => {
+      {chart.bodies.map((b, i) => {
         const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
         const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
         return (
-          <g key={b.body} className={styles.bodyG} onClick={() => onSelect(b)} role="button" aria-label={b.body}>
+          <g
+            key={b.body}
+            className={styles.bodyG}
+            style={iVar(i)}
+            onClick={() => onSelect(b)}
+            role="button"
+            aria-label={b.body}
+          >
             <circle cx={gx} cy={gy} r={11} className={styles.bodyHit} />
             <text x={gx} y={gy} className={styles.bodyGlyph}>
               {PLANET_GLYPH[b.body] ?? "•"}
