@@ -8,6 +8,11 @@ describe("authMessageKey", () => {
     expect(authMessageKey("auth")).toBe("errAuth");
     expect(authMessageKey("confirm")).toBe("confirmEmail");
   });
+  it("mapea los códigos de reset de contraseña a su clave de traducción", () => {
+    expect(authMessageKey("reset_sent")).toBe("resetLinkSent");
+    expect(authMessageKey("reset_invalid")).toBe("errResetLink");
+    expect(authMessageKey("reset_ok")).toBe("resetSuccess");
+  });
   it("devuelve null para ausente o desconocido", () => {
     expect(authMessageKey(undefined)).toBeNull();
     expect(authMessageKey(null)).toBeNull();
