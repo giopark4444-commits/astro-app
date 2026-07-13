@@ -46,7 +46,7 @@ const AREA_RULERS: Record<LifeArea, readonly string[]> = {
 // Peso del planeta EN TRÁNSITO: los lentos pesan más (su influencia dura y marca
 // el clima de fondo); la Luna es veloz y fugaz (cuenta para "hoy", se promedia en
 // periodos largos).
-const TRANSIT_WEIGHT: Record<string, number> = {
+export const TRANSIT_WEIGHT: Record<string, number> = {
   moon: 0.5,
   sun: 1,
   mercury: 1,
@@ -63,8 +63,8 @@ const TRANSIT_WEIGHT: Record<string, number> = {
   lilith: 0.6,
 };
 
-const BENEFIC = new Set(["venus", "jupiter"]);
-const MALEFIC = new Set(["mars", "saturn", "pluto"]);
+export const BENEFIC = new Set(["venus", "jupiter"]);
+export const MALEFIC = new Set(["mars", "saturn", "pluto"]);
 
 // Orbe máximo por aspecto (mismo criterio que DEFAULT_ORBS): normaliza la cercanía.
 const MAX_ORB: Record<string, number> = {
