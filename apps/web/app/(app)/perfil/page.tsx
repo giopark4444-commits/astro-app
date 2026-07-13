@@ -5,6 +5,7 @@ import type { SubscriptionStatus } from "@aluna/core";
 import { PerfilHero } from "./perfil-hero";
 import { Personas } from "./personas";
 import { Manifestations } from "./manifestations";
+import { Journal } from "./journal";
 import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import styles from "./perfil.module.css";
@@ -48,7 +49,10 @@ export default async function PerfilPage({
     <main className={styles.page}>
       <PerfilHero userId={user.id} avatarUrl={publicUrl} />
       <Personas />
-      <Manifestations />
+      <div className={styles.diarioGrid}>
+        <Manifestations />
+        <Journal />
+      </div>
       <section className={styles.prefs}>
         <h2 className={styles.prefsTitle}>{t("preferences")}</h2>
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
