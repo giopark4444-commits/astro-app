@@ -1,7 +1,7 @@
 {
   "app": { "name": "Aluna", "tagline": "Tu mapa de autoconocimiento" },
   "common": { "loading": "Un momento…" },
-  "nav": { "carta": "Carta", "numeros": "Números", "hoy": "Hoy", "pilares": "Pilares", "perfil": "Perfil" },
+  "nav": { "carta": "Carta", "numeros": "Números", "hoy": "Hoy", "pilares": "Pilares", "perfil": "Perfil", "horoscopo": "Horóscopo", "mainNav": "Navegación principal" },
   "auth": { "login": "Entrar", "signup": "Crear cuenta", "email": "Correo", "password": "Contraseña", "logout": "Salir", "noAccount": "¿No tienes cuenta?", "haveAccount": "¿Ya tienes cuenta?", "errEmail": "Correo inválido", "errPassword": "La contraseña debe tener al menos 8 caracteres", "errAuth": "Correo o contraseña incorrectos", "confirmEmail": "Revisa tu correo para confirmar tu cuenta", "forgotPassword": "¿Olvidaste tu contraseña?", "forgotTitle": "Encontremos el camino de vuelta", "forgotBody": "Dinos tu correo y te enviamos un enlace para elegir una contraseña nueva.", "sendResetLink": "Enviar enlace", "resetLinkSent": "Si ese correo tiene cuenta, el enlace ya va en camino. Revisa tu bandeja.", "resetTitle": "Elige una nueva contraseña", "newPassword": "Nueva contraseña", "confirmPassword": "Confirmar contraseña", "updatePassword": "Actualizar contraseña", "resetSuccess": "Tu contraseña quedó actualizada. Entra con tu nueva llave.", "errResetLink": "Este enlace es inválido o ya venció. Pide uno nuevo.", "errPasswordMatch": "Las contraseñas no coinciden", "backToLogin": "Volver a iniciar sesión" },
   "settings": { "title": "Ajustes", "lightMode": "Modo de luz", "light": "Claro", "dark": "Oscuro", "auto": "Auto", "theme": "Tema", "language": "Idioma", "observatory": "Observatorio", "aurora": "Aurora", "cosmic": "Cósmico" },
   "hoy": {
@@ -27,7 +27,9 @@
     "areaLuck": "Suerte",
     "toneHigh": "fluida",
     "toneMixed": "mixta",
-    "toneLow": "en reto"
+    "toneLow": "en reto",
+    "askAluna": "Pregúntale a Aluna",
+    "askHint": "Tu carta, tus números y el cielo de hoy, en la respuesta."
   },
   "onboarding": {
     "progress": "Paso {n} de {total}",
@@ -149,7 +151,11 @@
     "kindSolarReturnHint": "Tu carta del año, desde tu último cumpleaños.",
     "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años.",
     "weatherTitle": "Tu clima de hoy",
-    "yourPossessive": "tu"
+    "yourPossessive": "tu",
+    "tabNucleo": "Núcleo",
+    "tabPosiciones": "Posiciones",
+    "tabAspectos": "Aspectos",
+    "tabBalance": "Balance"
   },
   "chat": {
     "title": "Pregúntale a Aluna",

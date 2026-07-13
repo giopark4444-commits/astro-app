@@ -25,3 +25,19 @@
 }
 .brand::first-letter { color: var(--acc-text); }
 .main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto; }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  /* header: marca izq · tabs centro · perfil der (mockup: grid 1fr auto 1fr, 66px) */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    height: 66px; /* mockup 06 */
+    padding: 0 var(--sp-7);
+  }
+  /* slot del perfil: clase estable, NO :last-child — el BottomSheet del
+     ProfileMenu renderiza un backdrop hermano al abrirse y robaba el match
+     estructural (el avatar saltaba a la izquierda). Hallazgo review T1. */
+  .menuSlot { justify-self: end; }
+  /* la columna de teléfono se vuelve lienzo (mockup: min(1280px, 100% - 112px)) */
+  .main { max-width: min(1280px, calc(100% - 112px)); }
+}
