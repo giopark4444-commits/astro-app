@@ -151,7 +151,11 @@
     "kindSolarReturnHint": "Your chart for the year, from your last birthday.",
     "kindProgressedHint": "Your advanced chart: how your sky matures over the years.",
     "weatherTitle": "Today's weather",
-    "yourPossessive": "your"
+    "yourPossessive": "your",
+    "tabNucleo": "Core",
+    "tabPosiciones": "Positions",
+    "tabAspectos": "Aspects",
+    "tabBalance": "Balance"
   },
   "chat": {
     "title": "Ask Aluna",

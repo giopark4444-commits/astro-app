@@ -14,6 +14,7 @@ import { BodyReadingView } from "./body-reading";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { ChartTabs, type ChartTab } from "./chart-tabs";
 import styles from "./carta.module.css";
 
 const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifos
@@ -46,6 +47,7 @@ export function CartaView() {
   const [zodiac, setZodiac] = useState<Zodiac>("tropical");
   const [kind, setKind] = useState<ChartKind>("natal");
   const [pro, setPro] = useState(false);
+  const [tab, setTab] = useState<ChartTab>("nucleo");
   const [sheet, setSheet] = useState<BodyPosition | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
   const cache = useRef<Map<string, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
@@ -99,6 +101,7 @@ export function CartaView() {
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
   const ascSign = ascPos?.sign ?? "";
   const ascDeg = ascPos?.degree ?? 0;
+  const pane = (key: ChartTab) => `${styles.pane} ${tab === key ? styles.paneOn : ""}`;
   const byKey = useMemo(() => {
     const m = new Map<string, BodyPosition>();
     if (ready) for (const b of ready.chart.bodies) m.set(b.body, b);
@@ -161,69 +164,77 @@ export function CartaView() {
       {state.s === "error" && <p className={styles.note}>{t("errorChart")}</p>}
 
       {ready && (
-        <>
-          {ready.solar && <p className={styles.solar}>☉ {t("solarNotice")}</p>}
+        <div className={styles.deskCols}>
+          <div className={styles.wheelCol}>
+            {ready.solar && <p className={styles.solar}>☉ {t("solarNotice")}</p>}
 
-          <div className={`${styles.wheelWrap} ${playCeremony ? "" : "reveal"}`} style={{ ["--i" as string]: 1 }}>
-            <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} animated={playCeremony} />
-          </div>
-          <p className={styles.tapHint}>{t("tapHint")}</p>
-
-          {/* núcleo: Sol / Luna / Ascendente */}
-          <div className={styles.bigThree}>
-            {byKey.get("sun") && (
-              <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
-                sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                sub={`${t("house")} ${byKey.get("sun")!.house}`} />
-            )}
-            {byKey.get("moon") && (
-              <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
-                sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                sub={`${t("house")} ${byKey.get("moon")!.house}`} />
-            )}
-            <BigCard glyph="Asc" name={t("ascendant")} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
-              sub={`${ascDeg}°`} dim={ready.solar} />
+            <div className={`${styles.wheelWrap} ${playCeremony ? "" : "reveal"}`} style={{ ["--i" as string]: 1 }}>
+              <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} animated={playCeremony} />
+            </div>
+            <p className={styles.tapHint}>{t("tapHint")}</p>
           </div>
 
-          {/* balance de elementos y modalidades */}
-          <Balance title={t("elements")} entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
-            dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
-          <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
-            dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+          <div className={styles.readCol}>
+            <ChartTabs active={tab} onSelect={setTab} />
 
-          {/* Tu Clima: aspectos tránsito-a-natal */}
-          {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-            <section className="card card--tight fade-in">
-              <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
-              <div className={styles.aspList}>
-                {ready.transitAspects.map((a, i) => (
-                  <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
-                    <span className={styles.aspPair}>
-                      {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                      {PLANET_GLYPH[a.b]}
-                    </span>
-                    <span className={styles.aspName}>
-                      {L.bodies[a.a]} {L.aspects[a.aspect]} {t("yourPossessive")} {L.bodies[a.b]}
-                    </span>
-                    <span className={styles.aspOrb}>
-                      {a.orb.toFixed(1)}° · {a.applying ? t("applying") : t("separating")}
-                    </span>
-                  </div>
-                ))}
+            {/* núcleo: Sol / Luna / Ascendente */}
+            <div className={pane("nucleo")}>
+              <div className={styles.bigThree}>
+                {byKey.get("sun") && (
+                  <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
+                    sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
+                    sub={`${t("house")} ${byKey.get("sun")!.house}`} />
+                )}
+                {byKey.get("moon") && (
+                  <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
+                    sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
+                    sub={`${t("house")} ${byKey.get("moon")!.house}`} />
+                )}
+                <BigCard glyph="Asc" name={t("ascendant")} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
+                  sub={`${ascDeg}°`} dim={ready.solar} />
               </div>
-            </section>
-          )}
+            </div>
 
-          {/* Modo Pro */}
-          <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
-            <span className={styles.proDot} data-on={pro || undefined} />
-            {t("pro")}
-          </button>
+            {/* balance de elementos y modalidades */}
+            <div className={pane("balance")}>
+              <Balance title={t("elements")} entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
+              <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+            </div>
 
-          {pro && (
-            <div className={styles.pro}>
+            {/* Tu Clima: aspectos tránsito-a-natal */}
+            {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
+              <section className={`card card--tight fade-in ${pane("nucleo")}`}>
+                <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
+                <div className={styles.aspList}>
+                  {ready.transitAspects.map((a, i) => (
+                    <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
+                      <span className={styles.aspPair}>
+                        {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
+                        {PLANET_GLYPH[a.b]}
+                      </span>
+                      <span className={styles.aspName}>
+                        {L.bodies[a.a]} {L.aspects[a.aspect]} {t("yourPossessive")} {L.bodies[a.b]}
+                      </span>
+                      <span className={styles.aspOrb}>
+                        {a.orb.toFixed(1)}° · {a.applying ? t("applying") : t("separating")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Modo Pro */}
+            <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
+              <span className={styles.proDot} data-on={pro || undefined} />
+              {t("pro")}
+            </button>
+
+            <div className={styles.pro} data-pro={pro || undefined}>
               {/* posiciones */}
-              <section className="card card--tight fade-in">
+              <section className={`card card--tight fade-in ${pane("posiciones")}`}>
                 <h3 className={styles.cardH}>{t("positions")}</h3>
                 <div className={styles.posTable}>
                   {ready.chart.bodies.map((b) => (
@@ -240,7 +251,7 @@ export function CartaView() {
               </section>
 
               {/* distribución */}
-              <section className="card card--tight fade-in">
+              <section className={`card card--tight fade-in ${pane("balance")}`}>
                 <h3 className={styles.cardH}>{t("distribution")}</h3>
                 <div className={styles.distGrid}>
                   {ELEMENTS.map((k) => (
@@ -253,7 +264,7 @@ export function CartaView() {
               </section>
 
               {/* aspectario */}
-              <section className="card card--tight fade-in">
+              <section className={`card card--tight fade-in ${pane("aspectos")}`}>
                 <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
                 <div className={styles.aspList}>
                   {ready.chart.aspects.map((a, i) => (
@@ -269,7 +280,7 @@ export function CartaView() {
               </section>
 
               {/* patrones */}
-              <section className="card card--tight fade-in">
+              <section className={`card card--tight fade-in ${pane("balance")}`}>
                 <h3 className={styles.cardH}>{t("patterns")}</h3>
                 {ready.chart.patterns.length ? (
                   <div className={styles.chips}>
@@ -285,7 +296,7 @@ export function CartaView() {
               </section>
 
               {/* cabecera técnica */}
-              <section className="card card--tight fade-in">
+              <section className={`card card--tight fade-in ${pane("posiciones")}`}>
                 <div className={styles.tech}>
                   <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
                   <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
@@ -294,8 +305,8 @@ export function CartaView() {
                 </div>
               </section>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
 
       <BottomSheet open={!!sheet} onClose={() => setSheet(null)} center

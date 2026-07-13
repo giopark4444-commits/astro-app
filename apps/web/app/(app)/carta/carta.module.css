@@ -164,3 +164,50 @@
 .brBlock p { margin: 0; font-size: var(--text-sm); line-height: 1.6; color: var(--soft); }
 .brH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→2xs piso (sub-11) */
 .tierHint { margin: -4px 0 var(--sp-1); text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); } /* -4px excepción (ajuste de línea base negativo); 2→sp-1 piso */
+
+/* ===== R4a desktop (mockup 06): 2 columnas 55/45, rueda sticky, tabs ===== */
+.deskCols { display: contents; }
+.dtabs { display: none; }
+/* móvil: la lámina pro solo se ve con el toggle encendido (mismo efecto que
+   el {pro && ...} que reemplazó — ver carta-view Step 6c) */
+.pro:not([data-pro]) { display: none; }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr; /* mockup: rueda 55% / panel 45% */
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .wheelCol { position: sticky; top: 84px; /* header 66px + respiro */ }
+  .readCol { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+  /* tab-strip (mockup .dtabs) */
+  .dtabs {
+    display: flex; padding: 0 var(--sp-2);
+    border-bottom: 1px solid rgba(var(--acc-rgb), 0.16);
+    background: color-mix(in oklab, var(--bg) 75%, transparent);
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .dtab {
+    position: relative; padding: var(--sp-3) var(--sp-4);
+    background: none; border: 0; cursor: pointer;
+    color: var(--soft); font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 600;
+  }
+  .dtab:hover { color: var(--ink); }
+  .dtab[data-on] { color: var(--ink); }
+  .dtab[data-on]::after {
+    content: ""; position: absolute; left: var(--sp-3); right: var(--sp-3); bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--acc), transparent);
+    box-shadow: 0 0 14px rgba(var(--acc-rgb), 0.55);
+  }
+
+  /* panes: en desktop solo se ve el activo; en móvil (fuera del media) todos */
+  .readCol .pane { display: none; }
+  .readCol .paneOn { display: block; }
+
+  /* en desktop la lámina pro vive en las tabs: el toggle sobra y la lámina
+     se muestra siempre (sus secciones ya se filtran por pane) */
+  .proToggle { display: none; }
+  .pro:not([data-pro]) { display: block; }
+}

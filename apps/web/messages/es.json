@@ -151,7 +151,11 @@
     "kindSolarReturnHint": "Tu carta del año, desde tu último cumpleaños.",
     "kindProgressedHint": "Tu carta avanzada: cómo madura tu cielo con los años.",
     "weatherTitle": "Tu clima de hoy",
-    "yourPossessive": "tu"
+    "yourPossessive": "tu",
+    "tabNucleo": "Núcleo",
+    "tabPosiciones": "Posiciones",
+    "tabAspectos": "Aspectos",
+    "tabBalance": "Balance"
   },
   "chat": {
     "title": "Pregúntale a Aluna",
