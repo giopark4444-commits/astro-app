@@ -1,21 +1,20 @@
 "use client";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
-import { validateAvatarFile, avatarPath } from "@/lib/avatar";
-import type { TablesUpdate } from "@aluna/supabase";
+import { validateAvatarFile } from "@/lib/avatar";
 import styles from "./avatar-upload.module.css";
 
-// exactOptionalPropertyTypes hace que postgrest-js infiera el arg de update() como
-// `never` (mismo shim que app/onboarding/actions.ts para insert()).
-type ProfileUpdate = { update: (v: TablesUpdate<"profiles_user">) => { eq: (col: string, val: string) => Promise<{ error: { message: string } | null }> } };
-
-/** Avatar de la cuenta con subida a Storage. La foto es pública (bucket public);
- *  la escritura la restringe la RLS a la carpeta {userId}/. El cache-bust ?v=
- *  fuerza refresco tras sobrescribir la misma ruta. */
-export function AvatarUpload({ userId, initialUrl, fallback }: { userId: string; initialUrl: string | null; fallback: string }) {
+/** Avatar de la cuenta. La subida va por `/api/avatar` (server-side,
+ *  service-role): el path en Storage se deriva de la sesión verificada del
+ *  server, nunca de este componente. Nace de la Fase 5 — el servicio de
+ *  Storage de este proyecto no resuelve auth.uid() de los tokens ES256, así
+ *  que la subida client-side directa daba 403 aunque la RLS fuera correcta.
+ *  La foto es pública (bucket public); el cache-bust ?v= fuerza refresco tras
+ *  sobrescribir la misma ruta. `userId` ya no se usa para la ruta de Storage
+ *  (la decide el server) — se conserva en la interfaz porque el resto del
+ *  hero identifica al dueño de la cuenta con él. */
+export function AvatarUpload({ initialUrl, fallback }: { userId: string; initialUrl: string | null; fallback: string }) {
   const t = useTranslations("profile");
-  const supabase = createClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState<string | null>(initialUrl);
   const [busy, setBusy] = useState(false);
@@ -30,18 +29,15 @@ export function AvatarUpload({ userId, initialUrl, fallback }: { userId: string;
     setError(null);
     setBusy(true);
     try {
-      const path = avatarPath(userId);
-      const up = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
-      if (up.error) throw up.error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const busted = `${data.publicUrl}?v=${Date.now()}`;
-      const builder = supabase.from("profiles_user") as unknown as ProfileUpdate;
-      const { error: dbErr } = await builder.update({ avatar_url: path }).eq("id", userId);
-      if (dbErr) throw dbErr;
-      setUrl(busted);
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/avatar", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(String(res.status));
+      const { url: publicUrl } = (await res.json()) as { url: string };
+      setUrl(`${publicUrl}?v=${Date.now()}`);
     } catch {
       // la validación de formato/tamaño ya pasó arriba → aquí el fallo es de
-      // subida (red/RLS/BD), no del archivo: mensaje genérico, no "formato inválido"
+      // subida (red/servidor), no del archivo: mensaje genérico, no "formato inválido"
       setError(t("photoError"));
     } finally {
       setBusy(false);
