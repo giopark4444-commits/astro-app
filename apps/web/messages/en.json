@@ -56,7 +56,7 @@
     "genderNeutral": "Neutral",
     "genderHint": "Sets the grammatical gender your readings use."
   },
-  "profile": { "title": "Profiles", "new": "New profile" },
+  "profile": { "title": "Profiles", "new": "New profile", "changePhoto": "Change photo", "photoTooBig": "The image is over 5 MB", "photoBadType": "Invalid format (use PNG, JPG or WEBP)", "uploading": "Uploading…" },
   "numerology": {
     "title": "Numerology",
     "subtitle": "Your numeric map",
