@@ -212,7 +212,7 @@ function ReportCard({
         <div className={`card card--dashed ${styles.plusTease}`}>
           <p className={styles.plusTitle}>{t("plusTitle")}</p>
           <p className={styles.plusBody}>{t("plusBody")}</p>
-          <Link href="/ajustes" className={styles.btn}>
+          <Link href="/perfil" className={styles.btn}>
             {t("plusCta")}
           </Link>
         </div>

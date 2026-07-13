@@ -33,10 +33,10 @@ describe("TopNav", () => {
     expect(screen.getByText(es.nav.hoy).closest("a")!.getAttribute("data-on")).toBeNull();
   });
 
-  it("Perfil apunta a /ajustes (hasta R4b) y se activa en /ajustes", () => {
-    renderNav("/ajustes");
+  it("Perfil apunta a /perfil y se activa en /perfil", () => {
+    renderNav("/perfil");
     const perfil = screen.getByText(es.nav.perfil).closest("a")!;
-    expect(perfil.getAttribute("href")).toBe("/ajustes");
+    expect(perfil.getAttribute("href")).toBe("/perfil");
     expect(perfil.getAttribute("data-on")).toBe("true");
   });
 });

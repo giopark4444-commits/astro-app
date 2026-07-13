@@ -23,6 +23,9 @@
 .personaAdd { border-style: dashed; color: var(--soft); }
 .personaName { font-size: var(--text-2xs); color: var(--soft); }
 
+.prefs { display: flex; flex-direction: column; gap: var(--sp-4); }
+.prefsTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 0; }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   .page { max-width: min(1080px, calc(100% - 112px)); }
   .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); }
