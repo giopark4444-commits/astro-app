@@ -306,5 +306,13 @@
     "noProfileTitle": "Crea tu perfil primero",
     "noProfileBody": "Necesitas un perfil con fecha y lugar de nacimiento para generar tus informes.",
     "noProfileCta": "Crear perfil"
+  },
+  "errors": {
+    "notFoundTitle": "Esta constelación no existe",
+    "notFoundBody": "Se nos perdió esa página en el cielo. Volvamos a terreno conocido.",
+    "errorTitle": "Algo se nubló",
+    "errorBody": "Tuvimos un tropiezo inesperado. Prueba de nuevo en un momento.",
+    "retry": "Reintentar",
+    "backHome": "Volver a Hoy"
   }
 }

@@ -306,5 +306,13 @@
     "noProfileTitle": "Create your profile first",
     "noProfileBody": "You need a profile with a birth date and place to generate your reports.",
     "noProfileCta": "Create profile"
+  },
+  "errors": {
+    "notFoundTitle": "This constellation isn't on the map",
+    "notFoundBody": "That page got lost among the stars. Let's head back to familiar ground.",
+    "errorTitle": "Something clouded over",
+    "errorBody": "We hit an unexpected snag. Try again in a moment.",
+    "retry": "Try again",
+    "backHome": "Back to Today"
   }
 }
