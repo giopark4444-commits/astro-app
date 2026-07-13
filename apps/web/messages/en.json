@@ -56,7 +56,7 @@
     "genderNeutral": "Neutral",
     "genderHint": "Sets the grammatical gender your readings use."
   },
-  "profile": { "title": "Profiles", "new": "New profile", "changePhoto": "Change photo", "photoTooBig": "The image is over 5 MB", "photoBadType": "Invalid format (use PNG, JPG or WEBP)", "uploading": "Uploading…", "photoError": "We couldn't upload the photo. Please try again." },
+  "profile": { "title": "Profiles", "new": "New profile", "changePhoto": "Change photo", "photoTooBig": "The image is over 5 MB", "photoBadType": "Invalid format (use PNG, JPG or WEBP)", "uploading": "Uploading…", "photoError": "We couldn't upload the photo. Please try again.", "sanctuary": "Your sanctuary", "birthData": "Birth data", "people": "People", "peopleSub": "The skies of your loved ones, kept beside yours.", "addPerson": "Add person", "compatibility": "Compatibility", "lifePath": "Life path" },
   "numerology": {
     "title": "Numerology",
     "subtitle": "Your numeric map",
