@@ -27,6 +27,8 @@
 .card {
   animation: aluna-rise-in var(--dur) var(--ease) both;
 }
+.title { text-align: center; font-size: var(--text-lg); color: var(--ink); margin: 0 0 var(--sp-2); }
+.intro { text-align: center; font-size: var(--text-sm); color: var(--soft); margin: 0 0 var(--sp-4); }
 .form { display: grid; gap: var(--sp-3); }
 .input {
   width: 100%;

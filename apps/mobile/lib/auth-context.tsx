@@ -19,6 +19,11 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
+  /** Manda el correo de recuperación; el link abre `aluna://reset-password`. */
+  resetPassword: (email: string) => Promise<AuthResult>;
+  /** Requiere una sesión viva (la de recovery, establecida en reset-password.tsx
+   *  a mano desde el deep link — ver lib/recovery-link.ts). */
+  updatePassword: (password: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -69,9 +74,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await getSupabase().auth.signOut();
   }, []);
 
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      redirectTo: "aluna://reset-password",
+    });
+    return { error: error ? error.message : null };
+  }, []);
+
+  const updatePassword = useCallback(async (password: string): Promise<AuthResult> => {
+    const { error } = await getSupabase().auth.updateUser({ password });
+    return { error: error ? error.message : null };
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ ready, session, signIn, signUp, signOut }),
-    [ready, session, signIn, signUp, signOut],
+    () => ({ ready, session, signIn, signUp, signOut, resetPassword, updatePassword }),
+    [ready, session, signIn, signUp, signOut, resetPassword, updatePassword],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

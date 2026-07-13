@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Enso } from "../components/Enso";
 import { Card, FadeIn } from "../components/ui";
@@ -18,32 +18,25 @@ import { useTheme } from "../lib/theme-context";
 import { useT } from "../lib/i18n-context";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
 
-export default function LoginScreen() {
+export default function ForgotPasswordScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const { signIn } = useAuth();
+  const { resetPassword } = useAuth();
   const { t: tk } = useTheme();
   const { t } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function submit() {
     if (busy) return;
-    setError(null);
-    setNotice(null);
     setBusy(true);
-    const { error: err } = await signIn(email.trim(), password);
+    await resetPassword(email.trim());
     setBusy(false);
-    if (err) {
-      setError(t("auth.errAuth"));
-      return;
-    }
-    router.replace("/");
+    // Anti-enumeración: mismo aviso siempre, exista o no la cuenta — nunca
+    // revelamos si resetPassword() encontró un error o no.
+    setNotice(t("auth.resetLinkSent"));
   }
 
   return (
@@ -63,44 +56,35 @@ export default function LoginScreen() {
 
           <FadeIn delay={0} style={styles.formGap}>
             <Card style={styles.form}>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder={t("auth.email")}
-                placeholderTextColor={tk.textFaint}
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="email-address"
-                textContentType="emailAddress"
-              />
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder={t("auth.password")}
-                placeholderTextColor={tk.textFaint}
-                secureTextEntry
-                textContentType="password"
-              />
+              <Text style={styles.title}>{t("auth.forgotTitle")}</Text>
 
-              {error && <Text style={styles.error}>{error}</Text>}
-              {notice && <Text style={styles.notice}>{notice}</Text>}
-
-              <Pressable style={[styles.cta, busy && styles.ctaOff]} onPress={submit} disabled={busy}>
-                <Text style={styles.ctaText}>{busy ? t("auth.loggingIn") : t("auth.login")}</Text>
-              </Pressable>
-
-              <Link href="/forgot-password" style={styles.forgotLink}>
-                {t("auth.forgotPassword")}
-              </Link>
+              {notice ? (
+                <Text style={styles.notice}>{notice}</Text>
+              ) : (
+                <>
+                  <Text style={styles.intro}>{t("auth.forgotBody")}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder={t("auth.email")}
+                    placeholderTextColor={tk.textFaint}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    textContentType="emailAddress"
+                  />
+                  <Pressable style={[styles.cta, busy && styles.ctaOff]} onPress={submit} disabled={busy}>
+                    <Text style={styles.ctaText}>{t("auth.sendResetLink")}</Text>
+                  </Pressable>
+                </>
+              )}
             </Card>
           </FadeIn>
 
           <View style={styles.switchRow}>
-            <Text style={styles.switchText}>{t("auth.noAccount")}</Text>
-            <Link href="/signup" style={styles.switchLink}>
-              {t("auth.signup")}
+            <Link href="/login" style={styles.switchLink}>
+              {t("auth.backToLogin")}
             </Link>
           </View>
         </ScrollView>
@@ -118,17 +102,13 @@ function makeStyles(t: ThemeTokens) {
     brand: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.lg },
     tagline: { color: t.textDim, fontSize: typeScale.md, marginTop: space.sm, marginBottom: space.xxl, fontFamily: fonts.sans, textAlign: "center" },
 
-    // Ancho del formulario — vive en el wrapper de <FadeIn> (necesario porque
-    // `scroll` centra sus hijos con alignItems: sin este ancho explícito el %
-    // interno de <Card style={form}> no tendría contra qué resolverse, mismo
-    // mecanismo que fadeFull en carta.tsx/pilares.tsx).
     formGap: { width: "100%", maxWidth: 420 },
-    // Fondo/borde/radio/padding ahora los da <Card>; queda el espaciado interno
-    // entre input/input/error/CTA.
     form: { gap: space.md },
-    // Receta "glass" de los inputs: borde accHair + fondo t.panel (superficie más
-    // opaca que la propia <Card>, para que el campo se distinga de la tarjeta que
-    // lo contiene en vez de fundirse con su translucidez).
+
+    title: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi, textAlign: "center" },
+    intro: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans, textAlign: "center" },
+
+    // Receta "glass" de los inputs: borde accHair + fondo t.panel — igual que login/signup.
     input: {
       width: "100%",
       backgroundColor: t.panel,
@@ -141,7 +121,6 @@ function makeStyles(t: ThemeTokens) {
       fontSize: typeScale.lg,
       fontFamily: fonts.sans,
     },
-    error: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center" },
     notice: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center" },
 
     cta: {
@@ -152,13 +131,9 @@ function makeStyles(t: ThemeTokens) {
       marginTop: space.sm,
     },
     ctaOff: { opacity: 0.6 },
-    // CTA en t.acc/t.onAcc con fonts.sansSemi (política de la pasada de pantalla) —
-    // se quita el fontWeight numérico, ya lo da la variante de fuente.
     ctaText: { color: t.onAcc, fontSize: typeScale.lg, fontFamily: fonts.sansSemi },
-    forgotLink: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginTop: space.md },
 
-    switchRow: { flexDirection: "row", gap: space.sm, marginTop: space.xxl, alignItems: "center" },
-    switchText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
+    switchRow: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginTop: space.xxl, alignItems: "center" },
     switchLink: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.sansSemi },
   });
 }

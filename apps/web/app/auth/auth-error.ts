@@ -4,6 +4,9 @@ const KEYS: Record<string, string> = {
   password: "errPassword",
   auth: "errAuth",
   confirm: "confirmEmail",
+  reset_sent: "resetLinkSent",
+  reset_invalid: "errResetLink",
+  reset_ok: "resetSuccess",
 };
 
 export function authMessageKey(code: string | undefined | null): string | null {

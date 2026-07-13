@@ -60,13 +60,22 @@ function RootGate() {
   useEffect(() => {
     if (!booted || hydrating) return;
     const seg = segments[0];
-    const inAuth = seg === "login" || seg === "signup";
+    const inAuth = seg === "login" || seg === "signup" || seg === "forgot-password";
+    // reset-password es un caso especial: llega vía deep link y ESTABLECE su
+    // propia sesión de recovery a mano (ver lib/recovery-link.ts — auth-js no
+    // dispara nada distinguible tipo PASSWORD_RECOVERY en RN). Esa sesión hace
+    // a `session` truthy antes de que el usuario alcance a poner la contraseña
+    // nueva; si no la exceptuamos acá, este gate la mandaría a onboarding o de
+    // vuelta a (tabs) apenas se resuelve el perfil, cortando el flujo. La
+    // pantalla misma navega (router.replace) cuando updatePassword() termina.
+    const inReset = seg === "reset-password";
     const inOnboarding = seg === "onboarding";
 
     if (!session) {
-      if (!inAuth) router.replace("/login");
+      if (!inAuth && !inReset) router.replace("/login");
       return;
     }
+    if (inReset) return;
     if (!synced) {
       if (!inOnboarding) router.replace("/onboarding");
       return;
