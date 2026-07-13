@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { SubscriptionStatus } from "@aluna/core";
 import styles from "./settings.module.css";
 
@@ -18,6 +18,7 @@ const STATUS_KEY: Record<SubscriptionStatus, string> = {
 
 export function PlanCard({ row, checkoutSuccess = false }: { row: Row | null; checkoutSuccess?: boolean }) {
   const t = useTranslations("billing");
+  const locale = useLocale();
   const [busy, setBusy] = useState<"monthly" | "yearly" | "portal" | null>(null);
   const [error, setError] = useState(false);
 
@@ -67,7 +68,7 @@ export function PlanCard({ row, checkoutSuccess = false }: { row: Row | null; ch
   }
 
   const dateLabel = row?.current_period_end
-    ? new Date(row.current_period_end).toLocaleDateString()
+    ? new Date(row.current_period_end).toLocaleDateString(locale)
     : "";
 
   return (
