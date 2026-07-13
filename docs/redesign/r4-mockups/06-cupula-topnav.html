@@ -315,6 +315,161 @@ a{color:inherit;text-decoration:none}
 /* fluido 1200–1680 */
 @media (min-width:1560px){ .shell{width:min(1360px, calc(100% - 160px))} }
 </style>
+<style id="pf-styles">
+/* ============ PANTALLA 3 · PERFIL — estilos aditivos (prefijo pf-) ============ */
+.pf-wrap{padding-bottom:46px}
+
+/* — hero de identidad — */
+.pf-hero{display:flex;align-items:center;gap:30px;padding:26px 0 24px}
+.pf-photo-col{display:flex;flex-direction:column;align-items:center;gap:11px;flex:none}
+.pf-photo{
+  position:relative;width:118px;height:118px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(120% 120% at 30% 22%, rgba(var(--acc-rgb),.34), rgba(30,26,66,.92) 58%, rgba(10,13,36,.96));
+  border:1px solid rgba(var(--acc-rgb),.55);
+  box-shadow:0 0 0 7px rgba(var(--acc-rgb),.06), var(--glow-soft);
+}
+.pf-photo b{font-family:var(--font-display);font-size:56px;font-weight:600;color:var(--acc);text-shadow:0 0 22px rgba(var(--acc-rgb),.45)}
+.pf-photo i{position:absolute;top:8px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px rgba(var(--acc-rgb),.9)}
+.pf-chg{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);color:var(--soft);font-family:var(--font-ui);font-size:11.5px;font-weight:600;cursor:pointer;
+  transition:color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.pf-chg:hover{color:var(--ink);border-color:rgba(var(--acc-rgb),.5)}
+.pf-name{font-size:46px;line-height:1.04;font-weight:600;margin-top:2px}
+.pf-name em{font-style:italic;color:var(--acc);text-shadow:0 0 24px rgba(var(--acc-rgb),.35)}
+.pf-sig{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.pf-sig>span{display:inline-flex;align-items:center;gap:9px;padding:5px 15px 5px 6px;border-radius:999px;border:1px solid rgba(var(--acc-rgb),.3);background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--ink)}
+.pf-sig .g{
+  display:inline-grid;place-items:center;width:26px;height:26px;flex:none;border-radius:50%;
+  border:1px solid rgba(var(--acc-rgb),.42);background:rgba(var(--acc-rgb),.08);
+  color:var(--acc);font-family:var(--font-display);font-size:13.5px;font-weight:600;
+}
+.pf-birth{
+  margin-left:auto;flex:none;min-width:284px;border:1px dashed rgba(var(--acc-rgb),.38);border-radius:var(--radius-lg);
+  padding:16px 20px 14px;background:rgba(10,13,36,.42);
+}
+.pf-birth-h{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:9px}
+.pf-edit{
+  width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);
+  color:var(--acc);background:var(--surface-2);cursor:pointer;transition:box-shadow var(--dur-fast) var(--ease);
+}
+.pf-edit:hover{box-shadow:var(--glow-soft)}
+.pf-birth-d{display:flex;flex-direction:column;gap:3px}
+.pf-birth-d b{font-size:15px;font-weight:600}
+.pf-birth-d span{font-size:12.5px;color:var(--soft)}
+.pf-since{margin:11px 0 0;font-family:var(--font-display);font-style:italic;font-size:13.5px;color:var(--soft)}
+
+/* — manifestaciones (la joya) — */
+.pf-manif{grid-column:span 8;display:flex;flex-direction:column}
+.pf-mh{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.pf-mh .p-eyebrow{display:block;margin-bottom:4px}
+.pf-sub{margin:3px 0 0;font-family:var(--font-display);font-style:italic;font-size:14.5px;color:var(--soft)}
+.pf-btn{
+  flex:none;height:38px;padding:0 20px;border-radius:999px;border:0;cursor:pointer;margin-top:6px;
+  background:linear-gradient(90deg, var(--acc), #d9b46a);color:var(--ink-on-acc);
+  font-family:var(--font-ui);font-size:12.5px;font-weight:700;box-shadow:var(--glow-soft);
+}
+.pf-mgrid{display:grid;grid-template-columns:1.18fr 1fr;gap:14px;flex:1}
+.pf-card{
+  position:relative;display:flex;flex-direction:column;gap:9px;overflow:hidden;
+  border-radius:var(--radius);border:1px solid var(--line);padding:16px 18px;background:rgba(10,13,36,.35);
+}
+.pf-card.feat{grid-row:1/3;padding:20px 22px}
+.pf-card.slim{grid-column:1/-1;flex-direction:row;align-items:center;gap:18px;padding:13px 18px}
+.pf-card.solar{background:linear-gradient(155deg, rgba(122,170,224,.18), rgba(122,170,224,.05) 55%, rgba(10,13,36,.32));border-color:rgba(122,170,224,.4)}
+.pf-card.llena{background:linear-gradient(155deg, rgba(var(--acc-rgb),.2), rgba(var(--acc-rgb),.05) 60%, rgba(10,13,36,.3));border-color:rgba(var(--acc-rgb),.42)}
+.pf-card.nueva{background:linear-gradient(155deg, rgba(124,110,196,.26), rgba(124,110,196,.07) 60%, rgba(10,13,36,.38));border-color:rgba(150,140,214,.44)}
+.pf-card.tres{background:linear-gradient(120deg, rgba(224,121,90,.16), rgba(224,121,90,.04) 55%, rgba(10,13,36,.3));border-color:rgba(224,121,90,.38)}
+.pf-crow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pf-hz{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+.pf-hz svg{flex:none}
+.solar .pf-hz{color:#a9c7ec}
+.llena .pf-hz{color:var(--acc)}
+.nueva .pf-hz{color:#c9bdf0}
+.tres .pf-hz{color:#eda88d}
+.pf-int{font-family:var(--font-display);font-weight:600;font-size:21px;line-height:1.22;color:var(--ink);margin:0}
+.feat .pf-int{font-size:27px}
+.slim .pf-int{font-size:18px;flex:1}
+.pf-why{margin:0;font-family:var(--font-display);font-style:italic;font-size:14.5px;line-height:1.5;color:var(--soft)}
+.pf-rit{
+  margin-top:2px;padding:9px 13px;border-radius:11px;background:rgba(10,13,36,.42);
+  border:1px dashed rgba(122,170,224,.38);font-family:var(--font-display);font-style:italic;
+  font-size:13.8px;line-height:1.5;color:var(--soft);
+}
+.pf-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid rgba(236,231,246,.1)}
+.slim .pf-foot{margin:0;padding:0;border:0;gap:16px;flex:none}
+.pf-phase{display:inline-flex;align-items:center;gap:9px}
+.pf-dots{display:inline-flex;align-items:center;gap:5px}
+.pf-dots i{width:7px;height:7px;border-radius:50%;border:1px solid rgba(236,231,246,.4)}
+.pf-dots i.done{background:rgba(236,231,246,.6);border-color:transparent}
+.pf-dots i.now{background:var(--acc);border-color:transparent;box-shadow:0 0 8px rgba(var(--acc-rgb),.7)}
+.pf-ph-lbl{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.pf-ph-lbl.gold{color:var(--acc)}
+.pf-sown{font-size:11px;color:var(--soft)}
+.pf-wm{position:absolute;right:8px;top:-10px;font-family:var(--font-display);font-size:92px;line-height:1;color:rgba(122,170,224,.13);pointer-events:none}
+
+/* — diario / notas — */
+.pf-notes{grid-column:span 4;display:flex;flex-direction:column}
+.pf-note{display:flex;gap:12px;padding:13px 2px;border-bottom:1px solid rgba(236,231,246,.09)}
+.pf-note:first-of-type{padding-top:4px}
+.pf-note-g{
+  flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;margin-top:1px;
+  font-size:12px;color:var(--acc);background:rgba(var(--acc-rgb),.08);border:1px solid rgba(var(--acc-rgb),.28);
+}
+.pf-note-g.cool{color:#a9c7ec;border-color:rgba(122,170,224,.32);background:rgba(122,170,224,.08)}
+.pf-note-g.warm{color:var(--tone-caution);border-color:rgba(224,160,122,.32);background:rgba(224,160,122,.08)}
+.pf-note-b{flex:1}
+.pf-note-d{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
+.pf-note-t{margin:0;font-family:var(--font-display);font-style:italic;font-size:15.5px;line-height:1.55;color:rgba(236,231,246,.82)}
+.pf-ghost{
+  margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px;height:40px;
+  border:1px dashed rgba(var(--acc-rgb),.35);border-radius:12px;background:rgba(10,13,36,.25);
+  color:var(--acc);font-family:var(--font-ui);font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:box-shadow var(--dur-fast) var(--ease);
+}
+.pf-notes .pf-ghost{margin-top:14px}
+.pf-ghost:hover{box-shadow:var(--glow-soft)}
+
+/* — personas — */
+.pf-people{grid-column:span 7;background:linear-gradient(160deg, rgba(150,140,214,.09), rgba(150,150,190,.05) 65%)}
+.pf-people-row{display:flex;gap:30px;align-items:flex-start;padding-top:8px}
+.pf-person{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;width:104px}
+.pf-ava{
+  width:58px;height:58px;border-radius:50%;display:grid;place-items:center;position:relative;
+  font-family:var(--font-display);font-size:24px;font-weight:700;border:1px solid var(--line);
+}
+.pf-person.me .pf-ava{
+  background:linear-gradient(140deg, rgba(var(--acc-rgb),.3), rgba(var(--acc-rgb),.08));
+  border-color:rgba(var(--acc-rgb),.55);color:var(--acc);
+  box-shadow:0 0 0 5px rgba(var(--acc-rgb),.08), var(--glow-soft);
+}
+.pf-person.kin .pf-ava{background:linear-gradient(140deg, rgba(122,170,224,.26), rgba(122,170,224,.07));border-color:rgba(122,170,224,.45);color:#a9c7ec}
+.pf-person.add .pf-ava{border-style:dashed;border-color:rgba(var(--acc-rgb),.42);background:rgba(10,13,36,.3);color:var(--acc)}
+.pf-p-name{font-size:13px;font-weight:700}
+.pf-p-sub{font-size:11px;color:var(--soft);line-height:1.45}
+
+/* — preferencias (compactas, silenciosas) — */
+.pf-prefs{grid-column:span 5;display:flex;flex-direction:column;gap:13px}
+.pf-prefs .p-eyebrow{margin-bottom:2px}
+.pf-prow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pf-plab{width:64px;flex:none;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.pf-sw{
+  display:inline-flex;align-items:center;gap:8px;padding:5px 13px 5px 6px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface);font-size:11.5px;font-weight:600;color:var(--soft);cursor:pointer;
+}
+.pf-sw i{width:16px;height:16px;border-radius:50%;border:1px solid rgba(236,231,246,.25)}
+.pf-sw.on{border-color:rgba(var(--acc-rgb),.55);color:var(--ink);box-shadow:var(--glow-soft)}
+.pf-sw.obs i{background:radial-gradient(circle at 32% 28%, #2b3570, #0a0d24 72%);border-color:rgba(var(--acc-rgb),.7)}
+.pf-sw.aur i{background:linear-gradient(140deg, #f3ecff, #cdb9f2 60%, #f7d9c4)}
+.pf-sw.cos i{background:linear-gradient(140deg, #3d1d63, #7a2f8f 55%, #e56ca4)}
+.pf-acct{
+  margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-top:13px;border-top:1px solid rgba(var(--acc-rgb),.14);font-size:12px;color:var(--soft);
+}
+.pf-out{font-weight:600;opacity:.85;transition:color var(--dur-fast) var(--ease)}
+.pf-out:hover{color:var(--tone-warm);opacity:1}
+</style>
 </head>
 <body>
 
@@ -338,7 +493,7 @@ a{color:inherit;text-decoration:none}
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 13.5C2.2 8 3.6 4.6 5.4 4.6c1.5 0 2.6 1.7 2.6 4.2 0-2.5 1.1-4.2 2.6-4.2 1.8 0 3.2 3.4 3.2 8.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>Horóscopo</a>
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg>Números</a>
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg>Pilares</a>
-      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.4" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.6v2.1M8 12.3v2.1M14.4 8h-2.1M3.7 8H1.6M12.5 3.5l-1.5 1.5M5 11l-1.5 1.5M12.5 12.5L11 11M5 5L3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Ajustes</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.4" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 13.8c.9-2.7 3-4.2 5.4-4.2s4.5 1.5 5.4 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Perfil</a>
     </div>
     <div class="nav-right">
       <span class="mode-chip">☾&#xFE0E; Observatorio</span>
@@ -503,7 +658,7 @@ a{color:inherit;text-decoration:none}
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 13.5C2.2 8 3.6 4.6 5.4 4.6c1.5 0 2.6 1.7 2.6 4.2 0-2.5 1.1-4.2 2.6-4.2 1.8 0 3.2 3.4 3.2 8.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>Horóscopo</a>
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg>Números</a>
       <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg>Pilares</a>
-      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="2.4" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.6v2.1M8 12.3v2.1M14.4 8h-2.1M3.7 8H1.6M12.5 3.5l-1.5 1.5M5 11l-1.5 1.5M12.5 12.5L11 11M5 5L3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Ajustes</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.4" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 13.8c.9-2.7 3-4.2 5.4-4.2s4.5 1.5 5.4 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Perfil</a>
     </div>
     <div class="nav-right">
       <span class="mode-chip">☾&#xFE0E; Observatorio</span>
@@ -705,6 +860,222 @@ a{color:inherit;text-decoration:none}
           </div>
 
           <p class="d-hint">Toca un planeta en la rueda y te cuento su historia: su don, su sombra y la casa donde vive.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<div class="divider">pantalla 3 · <b>/perfil</b> — el santuario personal</div>
+
+<!-- ================= PANTALLA 3 · PERFIL ================= -->
+<section class="screen">
+  <div class="stars" data-stars="110"></div>
+
+  <nav class="nav">
+    <a class="brand" href="#">
+      <svg class="brand-enso" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M22.6 15.2A10 10 0 1 1 16.4 3.7" stroke="#e7c986" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="19.5" cy="6.5" r="2.1" fill="#e7c986"/>
+      </svg>
+      <span class="brand-name">Aluna</span>
+    </a>
+    <div class="tabs">
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M13 3l-1.4 1.4M4.4 11.6L3 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Hoy</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.5v4M8 10.6v3.9M1.5 8h4M10.6 8h3.9" stroke="currentColor" stroke-width="1.1"/></svg>Carta</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.2 13.5C2.2 8 3.6 4.6 5.4 4.6c1.5 0 2.6 1.7 2.6 4.2 0-2.5 1.1-4.2 2.6-4.2 1.8 0 3.2 3.4 3.2 8.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/></svg>Horóscopo</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg>Números</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg>Pilares</a>
+      <a class="tab on" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="5.4" r="2.7" stroke="currentColor" stroke-width="1.3"/><path d="M2.6 13.8c.9-2.7 3-4.2 5.4-4.2s4.5 1.5 5.4 4.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Perfil</a>
+    </div>
+    <div class="nav-right">
+      <span class="mode-chip">☾&#xFE0E; Observatorio</span>
+      <span class="avatar">G</span>
+    </div>
+  </nav>
+
+  <div class="shell pf-wrap">
+    <!-- hero de identidad -->
+    <header class="pf-hero">
+      <div class="pf-photo-col">
+        <span class="pf-photo"><b>G</b><i></i></span>
+        <button class="pf-chg" type="button">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.6" y="4.6" width="12.8" height="9" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5.4 4.6 6.5 2.9h3l1.1 1.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="9" r="2.4" stroke="currentColor" stroke-width="1.2"/></svg>
+          Cambiar foto
+        </button>
+      </div>
+      <div>
+        <span class="p-eyebrow">Tu santuario</span>
+        <h1 class="pf-name"><em>Gio</em></h1>
+        <div class="pf-sig">
+          <span><span class="g">☉&#xFE0E;</span> Acuario</span>
+          <span><span class="g">☽&#xFE0E;</span> Escorpio</span>
+          <span><span class="g">AC</span> Piscis</span>
+          <span><span class="g">11</span> Camino de vida</span>
+        </div>
+      </div>
+      <div class="pf-birth">
+        <div class="pf-birth-h">
+          <span class="p-eyebrow">Datos de nacimiento</span>
+          <button class="pf-edit" type="button" aria-label="Editar datos de nacimiento">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3.2 12.8.6-2.6 6.8-6.8a1.3 1.3 0 0 1 1.8 0l.2.2a1.3 1.3 0 0 1 0 1.8L5.8 12.2l-2.6.6Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="pf-birth-d">
+          <b>4 de febrero de 1990</b>
+          <span>06:12 · Bogotá, Colombia</span>
+        </div>
+        <p class="pf-since">En Aluna desde marzo 2026 ✦</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Manifestaciones · la joya -->
+      <section class="panel pf-manif">
+        <div class="pf-mh">
+          <div>
+            <span class="p-eyebrow">Diario &amp; manifestación</span>
+            <h2 class="p-title">Manifestaciones</h2>
+            <p class="pf-sub">Se siembra en luna nueva, se cosecha en la llena.</p>
+          </div>
+          <button class="pf-btn" type="button">+ Sembrar una intención</button>
+        </div>
+        <div class="pf-mgrid">
+          <!-- destacada · revolución solar (azul) -->
+          <article class="pf-card feat solar">
+            <span class="pf-wm">☉&#xFE0E;</span>
+            <div class="pf-crow">
+              <span class="pf-hz"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="4.6" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/></svg>Mi revolución solar · 4 feb</span>
+            </div>
+            <h3 class="pf-int">Lanzar Aluna al mundo.</h3>
+            <p class="pf-why">Que la app que me enseñó a mirarme llegue a más manos que las mías.</p>
+            <div class="pf-rit">Se revisa en cada retorno: este año, que salga de mi laptop y viva en el cielo de alguien más.</div>
+            <div class="pf-foot">
+              <span class="pf-phase"><span class="pf-dots"><i class="done"></i><i class="now"></i><i></i></span><span class="pf-ph-lbl">Creciendo</span></span>
+              <span class="pf-sown">Sembrada el 29 jun · luna nueva en Cáncer</span>
+            </div>
+          </article>
+
+          <!-- luna llena (oro) -->
+          <article class="pf-card llena">
+            <div class="pf-crow">
+              <span class="pf-hz"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="4.2" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="4.2" fill="currentColor" opacity=".25"/><path d="M2.6 2.6l1 1M13.4 2.6l-1 1M2.6 13.4l1-1M13.4 13.4l-1-1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>Luna llena · 18 jul</span>
+            </div>
+            <h3 class="pf-int">Volver a pintar los domingos.</h3>
+            <div class="pf-foot">
+              <span class="pf-phase"><span class="pf-dots"><i class="done"></i><i class="now"></i><i></i></span><span class="pf-ph-lbl gold">Se cosecha en 5 días</span></span>
+              <span class="pf-sown">Sembrada el 5 jul</span>
+            </div>
+          </article>
+
+          <!-- próxima luna nueva (violeta noche) -->
+          <article class="pf-card nueva">
+            <div class="pf-crow">
+              <span class="pf-hz"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8.53A6 6 0 1 1 7.47 2 4.67 4.67 0 0 0 14 8.53Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Próxima luna nueva · 24 jul</span>
+            </div>
+            <h3 class="pf-int">Aprender a leer mi propia carta.</h3>
+            <div class="pf-foot">
+              <span class="pf-phase"><span class="pf-dots"><i class="now"></i><i></i><i></i></span><span class="pf-ph-lbl">Sembrada</span></span>
+              <span class="pf-sown">Sembrada el 11 jul</span>
+            </div>
+          </article>
+
+          <!-- tres lunas (terracota, horizontal) -->
+          <article class="pf-card slim tres">
+            <span class="pf-hz"><svg width="18" height="13" viewBox="0 0 20 14" fill="none" aria-hidden="true"><circle cx="3.2" cy="7" r="2.1" stroke="currentColor" stroke-width="1.1"/><circle cx="10" cy="7" r="2.1" stroke="currentColor" stroke-width="1.1"/><path d="M10 4.9a2.1 2.1 0 0 1 0 4.2Z" fill="currentColor"/><circle cx="16.8" cy="7" r="2.1" fill="currentColor"/></svg>Tres lunas · hacia octubre</span>
+            <h3 class="pf-int">Estar en paz con mi hermano.</h3>
+            <div class="pf-foot">
+              <span class="pf-phase"><span class="pf-dots"><i class="now"></i><i></i><i></i></span><span class="pf-ph-lbl">Sembrada</span></span>
+              <span class="pf-sown">Sembrada el 10 jul · sin prisa</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Diario · cuaderno nocturno -->
+      <section class="panel pf-notes">
+        <div class="p-head">
+          <div>
+            <span class="p-eyebrow" style="display:block;margin-bottom:4px">Cuaderno nocturno</span>
+            <h2 class="p-title">Diario</h2>
+          </div>
+        </div>
+        <article class="pf-note">
+          <span class="pf-note-g cool">☽&#xFE0E;</span>
+          <div class="pf-note-b">
+            <div class="pf-note-d">11 jul · madrugada</div>
+            <p class="pf-note-t">Soñé con una casa junto al mar que por dentro era mi cuarto de niño. Desperté sin susto, con ganas de quedarme.</p>
+          </div>
+        </article>
+        <article class="pf-note">
+          <span class="pf-note-g warm">♄&#xFE0E;</span>
+          <div class="pf-note-b">
+            <div class="pf-note-d">8 jul · tránsito de Saturno</div>
+            <p class="pf-note-t">Se sintió toda la semana: menos ganas, más orden. Raro que las dos cosas lleguen juntas — o no.</p>
+          </div>
+        </article>
+        <article class="pf-note">
+          <span class="pf-note-g">✦</span>
+          <div class="pf-note-b">
+            <div class="pf-note-d">4 jul · idea</div>
+            <p class="pf-note-t">Dibujar la rueda de mi carta a mano y colgarla en el estudio, antes de que la dibuje la app.</p>
+          </div>
+        </article>
+        <button class="pf-ghost" type="button">+ Nueva nota</button>
+      </section>
+    </div>
+
+    <div class="grid row2">
+      <!-- Personas -->
+      <section class="panel pf-people">
+        <div class="p-head">
+          <h2 class="p-title">Personas</h2>
+          <a class="p-link" href="#">Compatibilidad →</a>
+        </div>
+        <p class="pf-sub" style="margin:-10px 0 4px">Los cielos de los tuyos, guardados junto al tuyo.</p>
+        <div class="pf-people-row">
+          <div class="pf-person me">
+            <span class="pf-ava">G</span>
+            <span class="pf-p-name">Gio</span>
+            <span class="pf-p-sub">☉&#xFE0E; Acuario · tú</span>
+          </div>
+          <div class="pf-person kin">
+            <span class="pf-ava">M</span>
+            <span class="pf-p-name">Mamá</span>
+            <span class="pf-p-sub">☉&#xFE0E; Cáncer</span>
+          </div>
+          <div class="pf-person add">
+            <span class="pf-ava"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+            <span class="pf-p-name">Añadir persona</span>
+            <span class="pf-p-sub">otra carta, otro cielo</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preferencias -->
+      <section class="panel pf-prefs">
+        <span class="p-eyebrow">Preferencias</span>
+        <div class="pf-prow">
+          <span class="pf-plab">Tema</span>
+          <button class="pf-sw obs on" type="button"><i></i>Observatorio</button>
+          <button class="pf-sw aur" type="button"><i></i>Aurora</button>
+          <button class="pf-sw cos" type="button"><i></i>Cósmico</button>
+        </div>
+        <div class="pf-prow">
+          <span class="pf-plab">Modo</span>
+          <div class="seg-mini" role="tablist" aria-label="Modo de color">
+            <span>Claro</span><span class="on">Oscuro</span><span>Auto</span>
+          </div>
+        </div>
+        <div class="pf-prow">
+          <span class="pf-plab">Idioma</span>
+          <div class="seg-mini" role="tablist" aria-label="Idioma">
+            <span class="on">Español</span><span>English</span>
+          </div>
+        </div>
+        <div class="pf-acct">
+          <span>gio.park.4444@gmail.com</span>
+          <a class="pf-out" href="#">Cerrar sesión</a>
         </div>
       </section>
     </div>
