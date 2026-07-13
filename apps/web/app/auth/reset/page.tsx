@@ -38,7 +38,7 @@ export default function ResetPasswordPage() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!resolvedByEvent) setStatus(session ? "ready" : "invalid");
-    });
+    }).catch(() => { if (!resolvedByEvent) setStatus("invalid"); }); // fallo de red → invalid, no colgado en checking
 
     return () => subscription.unsubscribe();
   }, []);
@@ -62,7 +62,9 @@ export default function ResetPasswordPage() {
       setFormError("errResetLink");
       return;
     }
-    router.replace("/login?error=reset_ok");
+    // Tras updateUser el cliente ya tiene sesión plena; ir a /login rebotaría a /hoy por su
+    // guard getUser (dejando muerto el banner reset_ok). Vamos directo a /hoy (ya logueado).
+    router.replace("/hoy");
   }
 
   return (

@@ -56,7 +56,8 @@ export default function ResetPasswordScreen() {
       processedRef.current = true;
       getSupabase()
         .auth.setSession({ access_token: result.accessToken, refresh_token: result.refreshToken })
-        .then(({ error: err }) => setStatus(err ? "invalid" : "ready"));
+        .then(({ error: err }) => setStatus(err ? "invalid" : "ready"))
+        .catch(() => setStatus("invalid")); // fallo de red → invalid, no colgado en checking
       return;
     }
     if (result.status === "error") {
