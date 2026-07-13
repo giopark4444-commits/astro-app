@@ -27,7 +27,9 @@
     "areaLuck": "Suerte",
     "toneHigh": "fluida",
     "toneMixed": "mixta",
-    "toneLow": "en reto"
+    "toneLow": "en reto",
+    "askAluna": "Pregúntale a Aluna",
+    "askHint": "Tu carta, tus números y el cielo de hoy, en la respuesta."
   },
   "onboarding": {
     "progress": "Paso {n} de {total}",

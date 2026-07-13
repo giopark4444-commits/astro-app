@@ -59,51 +59,60 @@ export function HubView() {
         <h1 className={`${styles.name} reveal`} style={{ ["--i" as string]: 0 }}>{active?.name ?? "Aluna"}</h1>
       </div>
 
-      {weather && weather.length > 0 && (
-        <Link href="/carta" className={`card card--interactive ${styles.weatherCard} reveal`} style={{ ["--i" as string]: 1 }}>
-          <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
-          <span className={styles.weatherList}>
-            {weather.map((a, i) => (
-              <span key={i} className={`${styles.weatherRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
-                <span className={styles.weatherGlyphs}>
-                  {PLANET_GLYPH[a.a]} <span className={styles.weatherAsp}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                  {PLANET_GLYPH[a.b]}
+      <div className={styles.deskGrid}>
+        {weather && weather.length > 0 && (
+          <Link href="/carta" className={`card card--interactive ${styles.weatherCard} ${styles.heroWeather} reveal`} style={{ ["--i" as string]: 1 }}>
+            <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
+            <span className={styles.weatherList}>
+              {weather.map((a, i) => (
+                <span key={i} className={`${styles.weatherRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
+                  <span className={styles.weatherGlyphs}>
+                    {PLANET_GLYPH[a.a]} <span className={styles.weatherAsp}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
+                    {PLANET_GLYPH[a.b]}
+                  </span>
+                  <span className={styles.weatherText}>
+                    {L.bodies[a.a]} {L.aspects[a.aspect]} {t("carta.yourPossessive")} {L.bodies[a.b]}
+                  </span>
                 </span>
-                <span className={styles.weatherText}>
-                  {L.bodies[a.a]} {L.aspects[a.aspect]} {t("carta.yourPossessive")} {L.bodies[a.b]}
-                </span>
-              </span>
-            ))}
-          </span>
+              ))}
+            </span>
+          </Link>
+        )}
+
+        <div className={styles.heroDay}>{active && <DayNumberCard birthDate={active.birth_date} />}</div>
+
+        <div className={styles.heroEnergy}>{active && <EnergyPanel profileId={active.id} />}</div>
+
+        <h2 className={`${styles.section} ${styles.gridFull}`}>{t("hoy.lenses")}</h2>
+
+        {/* CTA desktop (mockup 06): en móvil no existe (display:none) */}
+        <Link href="/preguntar" className={`card card--interactive ${styles.askCta}`}>
+          <span className={styles.askTitle}>{t("hoy.askAluna")}</span>
+          <span className={styles.askHint}>{t("hoy.askHint")}</span>
         </Link>
-      )}
 
-      {active && <DayNumberCard birthDate={active.birth_date} />}
-
-      {active && <EnergyPanel profileId={active.id} />}
-
-      <h2 className={styles.section}>{t("hoy.lenses")}</h2>
-      <div className={styles.lenses}>
-        {LENSES.map((l, i) => {
-          const inner = (
-            <span className={`card ${l.soon ? "" : "card--interactive"} ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
-              <span className={styles.tileIcon}>
-                <Icon name={l.icon} size={26} />
+        <div className={styles.lenses}>
+          {LENSES.map((l, i) => {
+            const inner = (
+              <span className={`card ${l.soon ? "" : "card--interactive"} ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
+                <span className={styles.tileIcon}>
+                  <Icon name={l.icon} size={26} />
+                </span>
+                <span className={styles.tileName}>{t(`nav.${l.key}`)}</span>
+                {l.soon && <span className={`chip ${styles.badge}`}>{t("hoy.soon")}</span>}
               </span>
-              <span className={styles.tileName}>{t(`nav.${l.key}`)}</span>
-              {l.soon && <span className={`chip ${styles.badge}`}>{t("hoy.soon")}</span>}
-            </span>
-          );
-          return l.soon ? (
-            <span key={l.key} role="button" aria-disabled="true">
-              {inner}
-            </span>
-          ) : (
-            <Link key={l.key} href={l.href}>
-              {inner}
-            </Link>
-          );
-        })}
+            );
+            return l.soon ? (
+              <span key={l.key} role="button" aria-disabled="true">
+                {inner}
+              </span>
+            ) : (
+              <Link key={l.key} href={l.href}>
+                {inner}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </main>
   );

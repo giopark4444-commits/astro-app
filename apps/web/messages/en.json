@@ -27,7 +27,9 @@
     "areaLuck": "Luck",
     "toneHigh": "flowing",
     "toneMixed": "mixed",
-    "toneLow": "challenged"
+    "toneLow": "challenged",
+    "askAluna": "Ask Aluna",
+    "askHint": "Your chart, your numbers and today's sky — in the answer."
   },
   "onboarding": {
     "progress": "Step {n} of {total}",

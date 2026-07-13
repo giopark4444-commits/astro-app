@@ -43,3 +43,51 @@
 .weatherText { color: var(--soft); font-size: var(--text-xs); line-height: 1.4; } /* 12.5: empate 12/13 → apoyo → menor */
 .harm_hard .weatherAsp { color: var(--tone-warm); }
 .harm_soft .weatherAsp { color: var(--tone-cool); }
+
+/* ===== R4a desktop (mockup 06): fila hero 5/4/3 + CTA + lentes ===== */
+/* En móvil los wrappers no existen visualmente y el CTA está oculto. */
+.deskGrid { display: contents; }
+.heroDay, .heroEnergy { display: contents; }
+.askCta { display: none; }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .deskGrid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--sp-5); /* mockup: 20px */
+    position: relative; z-index: 1;
+  }
+  .heroEnergy { display: block; grid-column: span 5; order: 1; }
+  .heroWeather { grid-column: span 4; order: 2; margin-bottom: 0; }
+  .heroDay { display: block; grid-column: span 3; order: 3; }
+  .section.gridFull { grid-column: 1 / -1; order: 4; margin-top: var(--sp-4); }
+  .askCta {
+    display: flex; flex-direction: column; gap: var(--sp-2); justify-content: center;
+    grid-column: span 6; order: 5; padding: var(--sp-5);
+    /* mockup .p-energy: superficie dorada dominante del CTA */
+    background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
+    border-color: rgba(var(--acc-rgb), 0.34);
+  }
+  .askTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
+  .askHint { font-size: var(--text-xs); color: var(--soft); }
+  .lenses { grid-column: span 6; order: 6; grid-template-columns: repeat(3, 1fr); }
+
+  /* tintes por dominio (mockup: energía oro / clima azul / numerología violeta).
+     .wrap .heroEnergy > * = especificidad (0,2,0): gana al .panel del módulo del
+     componente sin importar el orden de carga (regla R3: override por especificidad). */
+  .wrap .heroEnergy > * {
+    background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
+    border-color: rgba(var(--acc-rgb), 0.34);
+    height: 100%;
+  }
+  .wrap .heroWeather {
+    background: linear-gradient(155deg, rgba(122, 170, 224, 0.14), rgba(122, 170, 224, 0.04) 55%, var(--surface)); /* mockup: --tone-cool 7aaae0 */
+    border-color: rgba(122, 170, 224, 0.34);
+  }
+  .wrap .heroDay > * {
+    background: linear-gradient(160deg, rgba(150, 140, 214, 0.14), rgba(150, 140, 214, 0.04) 60%, var(--surface)); /* mockup: violeta numerología */
+    border-color: rgba(150, 140, 214, 0.34);
+    height: 100%;
+  }
+  .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav no hace falta el clearance de 96px */
+}
