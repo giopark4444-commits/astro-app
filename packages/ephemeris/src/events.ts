@@ -4,7 +4,7 @@
 // derived.ts/jie.ts, pero con bracket garantizado). Server-only (sweph).
 import { DateTime } from "luxon";
 import sweph from "sweph";
-import { normalizeAngle, signOfLongitude } from "@aluna/core";
+import { normalizeAngle, signOfLongitude, angularSeparation } from "@aluna/core";
 import { computeBodies, type RawBody } from "./bodies";
 import { localToJulianDay } from "./time";
 import { initEphemeris } from "./init";
@@ -121,4 +121,84 @@ export function lunations(fromIso: string, toIso: string): SkyEvent[] {
     }
   }
   return out.sort((a, b) => a.atIso.localeCompare(b.atIso));
+}
+
+const STATION_BODIES = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron"] as const;
+const INGRESS_BODIES = ["sun", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"] as const;
+
+/** Estaciones (velocidad = 0) del rango. Dirección: signo de la velocidad DESPUÉS. */
+export function stations(fromIso: string, toIso: string): SkyEvent[] {
+  const from = DateTime.fromISO(fromIso, { zone: "utc" });
+  const to = DateTime.fromISO(toIso, { zone: "utc" });
+  const out: SkyEvent[] = [];
+  for (const body of STATION_BODIES) {
+    const roots = findCrossings(from, to, 1, (dt) => bodyAt(dt, body).speed);
+    for (const dt of roots) {
+      const after = bodyAt(dt.plus({ days: 1 }), body);
+      out.push({
+        kind: "station",
+        atIso: dt.toUTC().toISO()!,
+        body,
+        direction: after.speed < 0 ? "retrograde" : "direct",
+        sign: signOfLongitude(after.longitude).sign,
+      });
+    }
+  }
+  return out.sort((a, b) => a.atIso.localeCompare(b.atIso));
+}
+
+/** Ingresos de signo del rango (detecta cambio de signo muestreado y refina la frontera). */
+export function ingresses(fromIso: string, toIso: string, opts: { includeMoon?: boolean } = {}): SkyEvent[] {
+  const from = DateTime.fromISO(fromIso, { zone: "utc" });
+  const to = DateTime.fromISO(toIso, { zone: "utc" });
+  const bodies = opts.includeMoon ? ["moon", ...INGRESS_BODIES] : [...INGRESS_BODIES];
+  const out: SkyEvent[] = [];
+  for (const body of bodies) {
+    const step = body === "moon" ? 0.5 : 1;
+    let t0 = from;
+    let lon0 = bodyAt(t0, body).longitude;
+    while (t0 < to) {
+      const t1 = DateTime.min(t0.plus({ days: step }), to);
+      const lon1 = bodyAt(t1, body).longitude;
+      const s0 = Math.floor(lon0 / 30), s1 = Math.floor(lon1 / 30);
+      if (s0 !== s1) {
+        // Frontera compartida: al avanzar es el inicio del signo nuevo; al
+        // retroceder (retro), el inicio del signo que se abandona.
+        const forward = ((s1 - s0 + 12) % 12) === 1;
+        const boundary = (forward ? s1 : s0) * 30;
+        const root = findCrossings(t0, t1, step, (dt) => signedDelta(boundary, bodyAt(dt, body).longitude), 90)[0];
+        if (root) {
+          const fromSign = signOfLongitude((boundary - 1 + 360) % 360).sign;
+          const toSign = signOfLongitude((boundary + 1) % 360).sign;
+          out.push({
+            kind: "ingress",
+            atIso: root.toUTC().toISO()!,
+            body,
+            fromSign: forward ? fromSign : toSign,
+            toSign: forward ? toSign : fromSign,
+          });
+        }
+      }
+      if (t1.equals(to)) break;
+      t0 = t1;
+      lon0 = lon1;
+    }
+  }
+  return out.sort((a, b) => a.atIso.localeCompare(b.atIso));
+}
+
+/** Instante (ISO) en que `body` perfecciona `aspectAngle` con un punto fijo, cerca de nearIso. */
+export function exactAspectAt(
+  body: string, fixedLongitude: number, aspectAngle: number,
+  nearIso: string, windowDays = 20,
+): string | null {
+  const center = DateTime.fromISO(nearIso, { zone: "utc" });
+  const from = center.minus({ days: windowDays });
+  const to = center.plus({ days: windowDays });
+  const f = (dt: DateTime) => angularSeparation(bodyAt(dt, body).longitude, fixedLongitude) - aspectAngle;
+  const roots = findCrossings(from, to, 0.5, f, 90);
+  if (roots.length === 0) return null;
+  const nearest = roots.reduce((best, r) =>
+    Math.abs(r.diff(center, "days").days) < Math.abs(best.diff(center, "days").days) ? r : best);
+  return nearest.toUTC().toISO()!;
 }
