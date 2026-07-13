@@ -75,7 +75,7 @@ describe("ResetPasswordPage", () => {
     expect(updateUserMock).not.toHaveBeenCalled();
   });
 
-  it("al actualizar la contraseña con éxito redirige a /login?error=reset_ok", async () => {
+  it("al actualizar la contraseña con éxito redirige a /hoy (ya logueado)", async () => {
     getSessionMock.mockResolvedValue({ data: { session: { user: { id: "u1" } } } });
     updateUserMock.mockResolvedValue({ error: null });
     await act(async () => {
@@ -87,7 +87,7 @@ describe("ResetPasswordPage", () => {
     fireEvent.click(screen.getByRole("button", { name: es.auth.updatePassword }));
     await waitFor(() => {
       expect(updateUserMock).toHaveBeenCalledWith({ password: "password1" });
-      expect(replaceMock).toHaveBeenCalledWith("/login?error=reset_ok");
+      expect(replaceMock).toHaveBeenCalledWith("/hoy");
     });
   });
 
