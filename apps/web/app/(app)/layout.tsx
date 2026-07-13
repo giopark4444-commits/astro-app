@@ -4,6 +4,7 @@ import { settingsToThemeState } from "@/lib/settings";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { ProfilesProvider, type BirthProfile } from "@/lib/profiles/profiles-provider";
 import { BottomNav } from "@/components/bottom-nav";
+import { TopNav } from "@/components/top-nav";
 import { ProfileMenu } from "@/components/profile-menu";
 import { persistSettings } from "./actions";
 import styles from "./app-shell.module.css";
@@ -31,6 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className={styles.shell}>
           <header className={styles.header}>
             <span className={styles.brand}>Aluna</span>
+            <TopNav />
             <ProfileMenu />
           </header>
           <div className={styles.main}>{children}</div>

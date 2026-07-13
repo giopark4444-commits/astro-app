@@ -5,3 +5,7 @@
   font-size: var(--text-2xs); /* 9→11 piso (labels del nav) */ color: var(--soft); font-weight: 600; }
 .on { color: var(--acc-text); }
 .soon { opacity: 0.4; }
+
+@media (min-width: 1080px) { /* bp desktop R4a: navega el TopNav */
+  .nav { display: none; }
+}
