@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       product_cart: [{ product_id: dodoProductId(plan), quantity: 1 }],
       customer: { email: user.email },
       subscription_data: { trial_period_days: 14 },
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes?checkout=success`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/perfil?checkout=success`,
     });
     if (!session.checkout_url) {
       return NextResponse.json({ error: "checkout_failed" }, { status: 500 });

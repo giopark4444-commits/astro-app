@@ -40,7 +40,7 @@ export function ProfileMenu() {
           <Link href="/onboarding" className={styles.action} onClick={() => setOpen(false)}>
             <span className={styles.plus}>+</span> {t("profile.new")}
           </Link>
-          <Link href="/ajustes" className={styles.action} onClick={() => setOpen(false)}>{t("settings.title")}</Link>
+          <Link href="/perfil" className={styles.action} onClick={() => setOpen(false)}>{t("settings.title")}</Link>
         </div>
       </BottomSheet>
     </>
