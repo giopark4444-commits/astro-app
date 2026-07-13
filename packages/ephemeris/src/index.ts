@@ -6,3 +6,4 @@ export { computeHouses } from "./houses";
 export { computeChart } from "./chart";
 export { computeDerivedChart, type DerivedKind } from "./derived";
 export { jieBoundaries } from "./jie";
+export { nextLunarPhase, solarReturnDate } from "./lunar";
