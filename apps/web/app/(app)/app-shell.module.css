@@ -34,7 +34,10 @@
     height: 66px; /* mockup 06 */
     padding: 0 var(--sp-7);
   }
-  .header > :last-child { justify-self: end; }
+  /* slot del perfil: clase estable, NO :last-child — el BottomSheet del
+     ProfileMenu renderiza un backdrop hermano al abrirse y robaba el match
+     estructural (el avatar saltaba a la izquierda). Hallazgo review T1. */
+  .menuSlot { justify-self: end; }
   /* la columna de teléfono se vuelve lienzo (mockup: min(1280px, 100% - 112px)) */
   .main { max-width: min(1280px, calc(100% - 112px)); }
 }

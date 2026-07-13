@@ -20,7 +20,7 @@ export function TopNav() {
   const path = usePathname();
   const t = useTranslations("nav");
   return (
-    <nav className={styles.tabs} aria-label="principal">
+    <nav className={styles.tabs} aria-label={t("mainNav")}>
       {ITEMS.map((it) => {
         const active = path === it.href || path.startsWith(it.href + "/");
         const inner = (

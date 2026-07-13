@@ -33,7 +33,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <header className={styles.header}>
             <span className={styles.brand}>Aluna</span>
             <TopNav />
-            <ProfileMenu />
+            {/* wrapper estable: ProfileMenu es un Fragment (botón + BottomSheet
+                condicional) — sin esto, al abrir el sheet el backdrop se vuelve
+                el :last-child del header y el avatar pierde su alineación en el
+                grid desktop (hallazgo de la review de T1) */}
+            <div className={styles.menuSlot}><ProfileMenu /></div>
           </header>
           <div className={styles.main}>{children}</div>
           <BottomNav />
