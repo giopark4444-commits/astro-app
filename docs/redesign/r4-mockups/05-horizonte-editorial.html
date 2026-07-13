@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="es" data-theme="observatory" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Aluna — R4 · 05 Horizonte editorial (desktop)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   R4 · Dirección 05 — "HORIZONTE EDITORIAL"
+   Aluna como publicación astronómica de lujo. La elegancia es
+   tipográfica: jerarquía, tracking, números tabulares, reglas
+   hairline doradas. Color en superficies grandes (banda hero oro,
+   banda efemérides azul profundo). Nada de cards genéricas.
+   ============================================================ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+  --ink: #ece7f6;
+  --soft: rgba(233, 228, 245, 0.62);
+  --faint: rgba(233, 228, 245, 0.42);
+  --line: rgba(231, 201, 134, 0.2);
+  --hair: rgba(231, 201, 134, 0.16);
+  --acc: #e7c986;
+  --acc-rgb: 231, 201, 134;
+  --warm: #e0795a;      /* tenso */
+  --cool: #7aaae0;      /* fluido / armónico */
+  --caution: #e0a07a;   /* exilio / caída / ℞ */
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "Quicksand", system-ui, sans-serif;
+}
+
+body {
+  background: #06081a;
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- pantalla = captura real, 1440×900, fluida 1200–1680 ---------- */
+.screen {
+  position: relative;
+  min-height: 900px;
+  min-width: 1200px;
+  max-width: 1680px;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.pad { padding-inline: clamp(48px, 5vw, 104px); }
+
+/* estrellas sutiles (identidad observatorio) — solo en bandas */
+.stars {
+  background-image:
+    radial-gradient(1px 1px at 12% 30%, rgba(236,231,246,.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 72%, rgba(236,231,246,.34) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 44% 18%, rgba(231,201,134,.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 55%, rgba(236,231,246,.3) 50%, transparent 51%),
+    radial-gradient(1px 1px at 71% 26%, rgba(236,231,246,.44) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 83% 64%, rgba(231,201,134,.34) 50%, transparent 51%),
+    radial-gradient(1px 1px at 93% 38%, rgba(236,231,246,.36) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 82%, rgba(236,231,246,.3) 50%, transparent 51%);
+}
+
+/* ---------- tipografía editorial ---------- */
+.kicker {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.32em;
+  text-transform: uppercase; color: var(--acc);
+}
+.smallcaps {
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--soft);
+}
+.serif-italic { font-family: var(--serif); font-style: italic; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* regla dorada con ornamento central */
+.rule-orn { display: flex; align-items: center; gap: 18px; }
+.rule-orn::before, .rule-orn::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--acc-rgb), 0.4));
+}
+.rule-orn::after { background: linear-gradient(90deg, rgba(var(--acc-rgb), 0.4), transparent); }
+.rule-orn span { color: var(--acc); font-size: 13px; letter-spacing: 0.2em; }
+
+/* ============================================================
+   CABECERA EDITORIAL (ambas pantallas)
+   ============================================================ */
+.masthead {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  height: 68px; border-bottom: 1px solid var(--hair);
+  position: relative; z-index: 3;
+}
+.brand { display: flex; align-items: baseline; gap: 14px; }
+.brand .word {
+  font-family: var(--serif); font-weight: 600; font-size: 24px;
+  letter-spacing: 0.05em; color: var(--ink);
+}
+.brand .enso { align-self: center; display: inline-flex; }
+.brand .tag {
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--faint);
+  border-left: 1px solid var(--hair); padding-left: 14px;
+}
+.mast-nav { display: flex; gap: 42px; }
+.mast-nav a {
+  text-decoration: none; color: var(--soft);
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;
+  padding: 25px 2px; position: relative;
+}
+.mast-nav a:hover { color: var(--ink); }
+.mast-nav a.active { color: var(--acc); }
+.mast-nav a.active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: var(--acc);
+}
+.mast-me {
+  justify-self: end; display: flex; align-items: center; gap: 18px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--soft);
+}
+.mast-me .glyphs { color: var(--acc); letter-spacing: 0.12em; }
+.mast-me .sep { width: 1px; height: 16px; background: var(--hair); }
+.mast-me a { color: var(--faint); text-decoration: none; }
+.mast-me a:hover { color: var(--ink); }
+
+/* ============================================================
+   PANTALLA 1 — HOY
+   ============================================================ */
+
+/* --- banda hero: superficie grande tintada de oro --- */
+.hero {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(var(--acc-rgb), 0.085) 0%, rgba(var(--acc-rgb), 0.045) 62%, rgba(var(--acc-rgb), 0) 100%);
+  border-bottom: 1px solid var(--hair);
+}
+.hero-in {
+  display: grid; grid-template-columns: 1fr auto; align-items: center;
+  gap: 64px; padding-top: 24px; padding-bottom: 20px;
+}
+.hero h1 {
+  font-family: var(--serif); font-weight: 500;
+  font-size: clamp(48px, 4.4vw, 64px);
+  line-height: 1.04; letter-spacing: -0.005em; margin-top: 10px;
+  max-width: 15ch;
+}
+.hero h1 em { font-style: italic; color: var(--acc); font-weight: 500; }
+.hero .stand {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 19px; line-height: 1.35; color: var(--soft);
+  margin-top: 10px; max-width: 56ch;
+}
+.hero-meta {
+  display: flex; align-items: center; gap: 14px; margin-top: 20px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--soft); white-space: nowrap;
+}
+.hero-meta b { color: var(--acc); font-weight: 700; }
+.hero-meta .star { color: rgba(var(--acc-rgb), 0.55); font-size: 9px; letter-spacing: 0; }
+
+/* luna: arte de portada, no ícono */
+.moon-art { text-align: center; padding-right: clamp(0px, 2vw, 40px); }
+.moon-art figcaption {
+  margin-top: 12px; font-size: 9.5px; font-weight: 600;
+  letter-spacing: 0.26em; text-transform: uppercase; color: var(--soft);
+}
+.moon-art figcaption b { color: var(--acc); font-weight: 700; }
+
+/* --- cuerpo editorial en columnas --- */
+.folio-cols {
+  flex: 1; display: grid;
+  grid-template-columns: 1.06fr 1fr 0.74fr;
+  padding-top: 26px; padding-bottom: 20px;
+}
+.col { padding-inline: clamp(28px, 2.6vw, 48px); }
+.col:first-child { padding-left: 0; }
+.col:last-child { padding-right: 0; }
+.col + .col { border-left: 1px solid rgba(231, 201, 134, 0.12); }
+.col-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+.col-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--acc);
+}
+.col-sub {
+  font-family: var(--serif); font-style: italic; font-size: 16px;
+  color: var(--soft); margin-bottom: 14px;
+}
+
+/* Tu energía: barras tipográficas */
+.periods { display: flex; gap: 18px; }
+.periods a {
+  text-decoration: none; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--faint);
+  padding-bottom: 3px;
+}
+.periods a.on { color: var(--acc); border-bottom: 1px solid var(--acc); }
+.energy { display: flex; flex-direction: column; }
+.e-row { padding: 7.5px 0 8.5px; border-bottom: 1px solid rgba(231, 201, 134, 0.1); }
+.e-row:last-child { border-bottom: 0; }
+.e-line { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+.e-name {
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--ink);
+}
+.e-num {
+  font-family: var(--serif); font-weight: 600; font-size: 24px;
+  line-height: 1; color: var(--acc); font-variant-numeric: tabular-nums;
+}
+.e-num small { font-size: 13px; font-weight: 500; color: var(--faint); margin-left: 3px; }
+.e-track { height: 2px; background: rgba(236, 231, 246, 0.1); position: relative; }
+.e-fill { position: absolute; inset: 0 auto 0 0; }
+.e-fill.high { background: linear-gradient(90deg, rgba(var(--acc-rgb), 0.55), var(--acc)); }
+.e-fill.mixed { background: linear-gradient(90deg, rgba(122, 170, 224, 0.4), var(--cool)); }
+.e-fill.low { background: linear-gradient(90deg, rgba(224, 121, 90, 0.4), var(--warm)); }
+.e-fill::after {
+  content: ""; position: absolute; right: -2.5px; top: -1.75px;
+  width: 5.5px; height: 5.5px; transform: rotate(45deg); background: inherit;
+}
+.e-why {
+  margin-top: 10px; padding: 8px 13px;
+  border-left: 2px solid var(--warm);
+  background: rgba(224, 121, 90, 0.06);
+  display: flex; align-items: baseline; gap: 12px;
+}
+.e-why .pair { font-family: var(--serif); font-size: 18px; color: var(--warm); white-space: nowrap; }
+.e-why .txt { font-size: 12.5px; line-height: 1.5; color: var(--soft); }
+.e-why .txt b { color: var(--ink); font-weight: 600; }
+
+/* Efemérides: columna sobre banda azul profundo (superficie grande) */
+.col-efem {
+  position: relative;
+  background: linear-gradient(180deg, rgba(40, 49, 107, 0.52), rgba(26, 33, 80, 0.38));
+  border-top: 1px solid rgba(122, 170, 224, 0.22);
+  margin-top: -26px; padding-top: 26px;    /* la banda sube hasta la regla del hero */
+  margin-bottom: -20px; padding-bottom: 20px;
+}
+.efem { list-style: none; }
+.efem li { padding: 11px 0 12px; border-bottom: 1px solid rgba(122, 170, 224, 0.14); }
+.efem li:last-of-type { border-bottom: 0; }
+.efem .top { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.efem .pair {
+  font-family: var(--serif); font-weight: 500; font-size: 23px;
+  letter-spacing: 0.08em; color: var(--acc); white-space: nowrap;
+}
+.efem .orb {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--soft); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.efem .orb b { font-weight: 700; }
+.efem .orb.tense b { color: var(--caution); }
+.efem .orb.flow b { color: var(--cool); }
+.efem .name { font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 5px; }
+.efem .gloss {
+  font-family: var(--serif); font-style: italic; font-size: 14.5px;
+  line-height: 1.38; color: var(--soft); margin-top: 3px;
+}
+.efem-link {
+  display: inline-block; margin-top: 14px; text-decoration: none;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--acc); border-bottom: 1px solid rgba(var(--acc-rgb), 0.45); padding-bottom: 4px;
+}
+
+/* Cuaderno de números: nota al margen con capitular */
+.note-7 { font-size: 13.5px; line-height: 1.68; color: var(--soft); text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.note-7 .cap {
+  float: left; font-family: var(--serif); font-weight: 500;
+  font-size: 92px; line-height: 0.78; color: var(--acc);
+  padding: 10px 16px 0 0;
+}
+.note-7 b { color: var(--ink); font-weight: 600; }
+.margin-rule { margin: 17px 0 13px; }
+.toc { list-style: none; }
+.toc li { padding: 7px 0; }
+.toc a {
+  display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink);
+}
+.toc .g { color: var(--acc); font-family: var(--serif); font-size: 17px; width: 20px; }
+.toc .t { font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+.toc .dots {
+  flex: 1; border-bottom: 1px dotted rgba(231, 201, 134, 0.35);
+  transform: translateY(-3px);
+}
+.toc .go { color: var(--faint); font-size: 12px; }
+.almanac { margin-top: 15px; padding: 11px 15px; border: 1px solid var(--hair); }
+.almanac .h {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--soft); margin-bottom: 7px;
+}
+.almanac .v { font-family: var(--serif); font-size: 17.5px; color: var(--ink); }
+.almanac .v i { color: var(--acc); font-style: normal; }
+
+/* folio de página */
+.folio {
+  border-top: 1px solid var(--hair);
+  padding-top: 13px; padding-bottom: 13px;
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--faint);
+}
+.folio .mid { color: rgba(var(--acc-rgb), 0.6); }
+
+/* ============================================================
+   DIVISOR DE PANTALLAS (anotación de spec, no parte de la UI)
+   ============================================================ */
+.divider {
+  background: #040512;
+  border-top: 1px dashed rgba(236, 231, 246, 0.25);
+  border-bottom: 1px dashed rgba(236, 231, 246, 0.25);
+  padding: 22px 0; text-align: center;
+}
+.divider .lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.34em;
+  text-transform: uppercase; color: rgba(236, 231, 246, 0.55);
+}
+.divider .lbl b { color: var(--acc); }
+
+/* ============================================================
+   PANTALLA 2 — CARTA · EL PLIEGO TÉCNICO
+   ============================================================ */
+.plate-band {
+  position: relative;
+  background: linear-gradient(180deg, rgba(40, 49, 107, 0.55), rgba(26, 33, 80, 0.25));
+  border-bottom: 1px solid rgba(122, 170, 224, 0.18);
+}
+.plate-band-in {
+  display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 48px;
+  padding-top: 16px;
+}
+.plate-band h2 {
+  font-family: var(--serif); font-weight: 500; font-size: 38px;
+  line-height: 1.04; margin-top: 7px;
+}
+.plate-band h2 em { font-style: italic; color: var(--acc); }
+.plate-caption { text-align: right; padding-bottom: 6px; }
+.plate-caption .who {
+  font-family: var(--serif); font-size: 21px; font-weight: 600; color: var(--ink);
+}
+.plate-caption .l {
+  margin-top: 5px; font-size: 10px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--soft); font-variant-numeric: tabular-nums;
+}
+.plate-caption .l i { font-style: normal; color: var(--acc); }
+.plate-caption a { color: var(--faint); text-decoration: none; border-bottom: 1px dotted var(--hair); }
+.plate-tabs {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; border-top: 1px solid rgba(122, 170, 224, 0.14);
+}
+.plate-tabs nav { display: flex; gap: 36px; }
+.plate-tabs nav a {
+  text-decoration: none; color: var(--soft); padding: 10px 2px 11px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+  position: relative;
+}
+.plate-tabs nav a.on { color: var(--acc); }
+.plate-tabs nav a.on::after {
+  content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 2px; background: var(--acc);
+}
+.promode {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--acc);
+}
+.promode .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--acc); box-shadow: 0 0 10px rgba(var(--acc-rgb), 0.8);
+}
+
+/* --- pliego: lámina + dos columnas tabulares --- */
+.plate {
+  flex: 1; display: grid;
+  grid-template-columns: minmax(400px, 470px) 1.14fr 1fr;
+  column-gap: clamp(30px, 3vw, 52px);
+  padding-top: 20px; padding-bottom: 18px;
+}
+.plate .tcol { border-left: 1px solid rgba(231, 201, 134, 0.12); padding-left: clamp(30px, 3vw, 52px); }
+
+.wheel-fig { text-align: center; }
+.wheel-fig svg { width: 100%; max-width: 424px; height: auto; display: block; margin: 0 auto; }
+.wheel-fig figcaption {
+  margin-top: 10px; font-family: var(--serif); font-style: italic;
+  font-size: 15.5px; color: var(--soft);
+}
+.wheel-fig figcaption b { color: var(--ink); font-weight: 600; }
+.core-row {
+  margin-top: 12px; display: flex; justify-content: center; gap: 34px;
+  padding-top: 10px; border-top: 1px solid var(--hair);
+}
+.core-row .c { text-align: center; }
+.core-row .g { font-family: var(--serif); font-size: 24px; color: var(--acc); line-height: 1.1; }
+.core-row .n {
+  margin-top: 3px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink);
+}
+.core-row .s { margin-top: 2px; font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+
+/* rueda: trazo de grabado */
+.w-rings circle { fill: none; stroke: rgba(var(--acc-rgb), 0.45); stroke-width: 0.8; }
+.w-div { stroke: rgba(var(--acc-rgb), 0.35); stroke-width: 0.6; }
+.w-ticks line { stroke: rgba(var(--acc-rgb), 0.5); stroke-width: 0.55; }
+.w-glyph {
+  font-family: var(--serif); font-size: 17px; fill: var(--acc);
+  text-anchor: middle; dominant-baseline: central;
+}
+.w-cusp { stroke: rgba(236, 231, 246, 0.16); stroke-width: 0.6; }
+.w-cusp-angle { stroke: rgba(var(--acc-rgb), 0.55); stroke-width: 0.9; }
+.w-house {
+  font-family: var(--serif); font-style: italic; font-size: 10.5px;
+  fill: rgba(236, 231, 246, 0.4); text-anchor: middle; dominant-baseline: central;
+}
+.w-angle {
+  font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  fill: var(--acc); text-anchor: middle; dominant-baseline: central;
+}
+.w-aspects line { stroke-width: 1.15; }
+.w-needle { stroke: rgba(var(--acc-rgb), 0.8); stroke-width: 1; }
+.w-body {
+  font-family: var(--serif); font-size: 19px; fill: var(--ink);
+  text-anchor: middle; dominant-baseline: central;
+}
+.w-deg {
+  font-family: var(--sans); font-size: 8.5px; font-weight: 600; letter-spacing: 0.04em;
+  fill: rgba(236, 231, 246, 0.68); text-anchor: middle; dominant-baseline: central;
+}
+
+/* tablas finas */
+.t-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--acc); margin-bottom: 4px;
+}
+.t-sub { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--soft); margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--soft); text-align: left; padding: 0 0 8px;
+  border-bottom: 1px solid rgba(var(--acc-rgb), 0.4);
+}
+th.r, td.r { text-align: right; }
+th.c, td.c { text-align: center; }
+td { border-bottom: 1px solid rgba(231, 201, 134, 0.1); padding: 6px 0; vertical-align: baseline; }
+tr:last-child td { border-bottom: 1px solid rgba(var(--acc-rgb), 0.35); }
+td.body-cell { white-space: nowrap; }
+td.body-cell .g { font-family: var(--serif); font-size: 17px; color: var(--acc); display: inline-block; width: 36px; }
+td.body-cell .n { font-family: var(--serif); font-size: 16.5px; font-weight: 500; color: var(--ink); }
+td.pos { font-size: 12px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.pos .sg { font-family: var(--serif); font-size: 14px; color: var(--acc); margin-right: 6px; }
+td.pos .rx { color: var(--caution); font-weight: 700; margin-left: 4px; }
+td.house { font-family: var(--serif); font-style: italic; font-size: 13.5px; color: var(--soft); }
+td.dign { font-family: var(--serif); font-style: italic; font-size: 13.5px; color: var(--faint); }
+td.dign .good { color: var(--acc); }
+td.dign .hard { color: var(--caution); }
+tr.angle-row td { padding-top: 10px; }
+tr.angle-row td.body-cell .n { font-style: italic; }
+
+/* aspectario */
+.asp { list-style: none; }
+.asp li {
+  display: grid; grid-template-columns: 86px 1fr auto; align-items: baseline; gap: 12px;
+  padding: 7px 0 7px 12px; border-bottom: 1px solid rgba(231, 201, 134, 0.1);
+  border-left: 2px solid transparent;
+}
+.asp li:last-child { border-bottom: 1px solid rgba(var(--acc-rgb), 0.35); }
+.asp li.tense { border-left-color: rgba(224, 121, 90, 0.7); }
+.asp li.flow { border-left-color: rgba(122, 170, 224, 0.7); }
+.asp li.neutral { border-left-color: rgba(var(--acc-rgb), 0.45); }
+.asp .pair { font-family: var(--serif); font-size: 17.5px; letter-spacing: 0.06em; color: var(--acc); white-space: nowrap; }
+.asp .nm { font-size: 11.5px; line-height: 1.4; font-weight: 600; color: var(--ink); }
+.asp .ob {
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--soft); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* distribución */
+.dist { margin-top: 14px; }
+.dist-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px; }
+.d-group-h {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--soft); padding-bottom: 7px; border-bottom: 1px solid rgba(var(--acc-rgb), 0.4);
+  margin-bottom: 4px;
+}
+.d-row { display: grid; grid-template-columns: 70px 1fr 16px; align-items: center; gap: 10px; padding: 4.5px 0; }
+.d-name { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--soft); }
+.d-name.dom { color: var(--acc); }
+.d-track { height: 2px; background: rgba(236, 231, 246, 0.1); position: relative; }
+.d-fill { position: absolute; inset: 0 auto 0 0; background: rgba(var(--acc-rgb), 0.75); }
+.d-fill.z { background: transparent; }
+.d-n { font-family: var(--serif); font-size: 15px; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+.d-leg { margin-top: 8px; font-size: 8.5px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); }
+
+/* configuración */
+.config { margin-top: 14px; padding: 11px 15px; border: 1px solid var(--hair); display: flex; align-items: baseline; gap: 14px; }
+.config .h { font-size: 9px; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: var(--soft); white-space: nowrap; }
+.config .v { font-family: var(--serif); font-size: 16.5px; color: var(--ink); }
+.config .v i { font-style: normal; color: var(--acc); letter-spacing: 0.08em; }
+.tech-line {
+  margin-top: 12px; font-size: 9px; font-weight: 600; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--soft); font-variant-numeric: tabular-nums;
+  display: flex; gap: 18px; flex-wrap: wrap;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ PANTALLA 1 · HOY ══════════════════════════ -->
+<section class="screen">
+
+  <header class="masthead pad">
+    <div class="brand">
+      <span class="enso" aria-hidden>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M 12 2.6 A 9.4 9.4 0 1 0 20.9 8.9" stroke="#e7c986" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="word">Aluna</span>
+      <span class="tag">El observatorio</span>
+    </div>
+    <nav class="mast-nav">
+      <a class="active" href="#">Hoy</a>
+      <a href="#">Números</a>
+      <a href="#">Carta</a>
+      <a href="#">Pilares</a>
+    </nav>
+    <div class="mast-me">
+      <span>Gio <span class="glyphs">· ☉&#xFE0E;♒&#xFE0E; · Asc ♓&#xFE0E;</span></span>
+      <span class="sep"></span>
+      <a href="#">Ajustes</a>
+    </div>
+  </header>
+
+  <!-- banda hero oro tenue: portada del día -->
+  <div class="hero stars">
+    <div class="hero-in pad">
+      <div>
+        <p class="kicker">Domingo 13 de julio de 2026 — buenos días, Gio</p>
+        <h1>Luna creciente en <em>Escorpio</em></h1>
+        <p class="stand">El cielo pide hondura antes que prisa: termina lo que dejaste a medias y guarda tus conclusiones para ti — hoy valen más en silencio.</p>
+        <div class="hero-meta">
+          <span>Día personal <b>7</b></span><span class="star">✶</span>
+          <span>La Luna transita tu casa <b>VIII</b></span><span class="star">✶</span>
+          <span><b>3</b> tránsitos activos</span><span class="star">✶</span>
+          <span>Puesta de sol <b>18:09</b></span>
+        </div>
+      </div>
+      <figure class="moon-art">
+        <svg width="172" height="172" viewBox="0 0 200 200" fill="none" role="img" aria-label="Fase lunar: creciente">
+          <circle cx="100" cy="100" r="93" stroke="rgba(231,201,134,0.3)" stroke-width="0.8"/>
+          <circle cx="100" cy="100" r="86" stroke="rgba(231,201,134,0.14)" stroke-width="0.6" stroke-dasharray="1 5"/>
+          <circle cx="100" cy="100" r="56" fill="rgba(236,231,246,0.07)" stroke="rgba(236,231,246,0.18)" stroke-width="0.6"/>
+          <path d="M 100 44 A 56 56 0 0 1 100 156 A 30 56 0 0 0 100 44 Z" fill="url(#moonlit)"/>
+          <defs>
+            <linearGradient id="moonlit" x1="100" y1="44" x2="140" y2="156" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#efd9a7"/><stop offset="1" stop-color="#c9a45e"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <figcaption>Fase — creciente iluminada · <b>♏&#xFE0E; Escorpio</b></figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- pliego editorial: tres columnas -->
+  <div class="folio-cols pad">
+
+    <!-- col 1 · tu energía -->
+    <section class="col">
+      <div class="col-head">
+        <h3 class="col-title">Tu energía</h3>
+        <nav class="periods">
+          <a class="on" href="#">Hoy</a><a href="#">Semana</a><a href="#">Mes</a><a href="#">Año</a>
+        </nav>
+      </div>
+      <p class="col-sub">Seis áreas de tu vida, leídas contra el cielo de hoy.</p>
+      <div class="energy">
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Trabajo</span><span class="e-num">71<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill high" style="width:71%"></span></div>
+        </div>
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Ánimo</span><span class="e-num">67<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill high" style="width:67%"></span></div>
+        </div>
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Amor</span><span class="e-num">62<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill mixed" style="width:62%"></span></div>
+          <div class="e-why">
+            <span class="pair">♄&#xFE0E; □ ♀&#xFE0E;</span>
+            <span class="txt"><b>Saturno en cuadratura a tu Venus</b> — 0.2° · aplicativo. La tensión del día pasa por el afecto: pide menos promesas y más estructura.</span>
+          </div>
+        </div>
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Suerte</span><span class="e-num">59<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill mixed" style="width:59%"></span></div>
+        </div>
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Salud</span><span class="e-num">55<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill mixed" style="width:55%"></span></div>
+        </div>
+        <div class="e-row">
+          <div class="e-line"><span class="e-name">Dinero</span><span class="e-num">48<small>/100</small></span></div>
+          <div class="e-track"><span class="e-fill low" style="width:48%"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- col 2 · efemérides sobre banda azul profundo -->
+    <section class="col col-efem stars">
+      <div class="col-head"><h3 class="col-title">Efemérides</h3></div>
+      <p class="col-sub">El clima del día sobre tu carta natal.</p>
+      <ul class="efem">
+        <li>
+          <div class="top">
+            <span class="pair">♄&#xFE0E; □ ♀&#xFE0E;</span>
+            <span class="orb tense">0.2° · aplicativo — <b>tensa</b></span>
+          </div>
+          <p class="name">Saturno en cuadratura a tu Venus</p>
+          <p class="gloss">El deseo se encuentra con el límite: define qué relación quieres sostener de verdad.</p>
+        </li>
+        <li>
+          <div class="top">
+            <span class="pair">☽&#xFE0E; ☍ ♅&#xFE0E;</span>
+            <span class="orb tense">1.4° · separativa — <b>tensa</b></span>
+          </div>
+          <p class="name">Luna en oposición a tu Urano</p>
+          <p class="gloss">Humor eléctrico, ganas de romper la rutina. Muévete, pero no quemes puentes.</p>
+        </li>
+        <li>
+          <div class="top">
+            <span class="pair">♀&#xFE0E; △ ☽&#xFE0E;</span>
+            <span class="orb flow">2.1° · separativa — <b>fluida</b></span>
+          </div>
+          <p class="name">Venus en trígono a tu Luna</p>
+          <p class="gloss">Bajo el ruido, ternura disponible: una conversación honesta rinde el doble hoy.</p>
+        </li>
+      </ul>
+      <a class="efem-link" href="#">Abrir la carta del cielo →</a>
+    </section>
+
+    <!-- col 3 · cuaderno de números (nota al margen) -->
+    <aside class="col">
+      <div class="col-head"><h3 class="col-title">Cuaderno de números</h3></div>
+      <p class="col-sub">Tu día personal, en cifra.</p>
+      <p class="note-7">
+        <span class="cap">7</span><b>Día personal siete</b> — jornada de puerta adentro. El siete no
+        empuja: observa. Estudia lo que ya tienes, ordena lo aprendido y deja que las
+        respuestas lleguen solas, sin forzarlas. Las decisiones grandes maduran mejor
+        esta noche que esta mañana.
+      </p>
+      <div class="rule-orn margin-rule"><span>☾&#xFE0E;</span></div>
+      <ul class="toc">
+        <li><a href="#"><span class="g">✶&#xFE0E;</span><span class="t">Números</span><span class="dots"></span><span class="go">→</span></a></li>
+        <li><a href="#"><span class="g">◯</span><span class="t">Carta</span><span class="dots"></span><span class="go">→</span></a></li>
+        <li><a href="#"><span class="g">卦</span><span class="t">Pilares</span><span class="dots"></span><span class="go">→</span></a></li>
+      </ul>
+      <div class="almanac">
+        <p class="h">Almanaque — próximo evento</p>
+        <p class="v">Luna llena en <i>Capricornio</i> · 18 de julio</p>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="folio pad">
+    <span>Aluna — Edición del día</span>
+    <span class="mid">✶ &nbsp;Domingo 13 de julio de 2026&nbsp; ✶</span>
+    <span>Página 1 de 2</span>
+  </footer>
+</section>
+
+<!-- ═════════════════ divisor de spec (no es parte de la UI) ═════════════════ -->
+<div class="divider">
+  <p class="lbl">▲ &nbsp;Pantalla 1 · <b>Hoy</b> — edición del día &nbsp;·&nbsp; 1440 × 900 &nbsp;·&nbsp; ▼ &nbsp;Pantalla 2 · <b>Carta</b> — el pliego técnico (Modo Pro)</p>
+</div>
+
+<!-- ══════════════════════════ PANTALLA 2 · CARTA ══════════════════════════ -->
+<section class="screen">
+
+  <header class="masthead pad">
+    <div class="brand">
+      <span class="enso" aria-hidden>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M 12 2.6 A 9.4 9.4 0 1 0 20.9 8.9" stroke="#e7c986" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="word">Aluna</span>
+      <span class="tag">El observatorio</span>
+    </div>
+    <nav class="mast-nav">
+      <a href="#">Hoy</a>
+      <a href="#">Números</a>
+      <a class="active" href="#">Carta</a>
+      <a href="#">Pilares</a>
+    </nav>
+    <div class="mast-me">
+      <span>Gio <span class="glyphs">· ☉&#xFE0E;♒&#xFE0E; · Asc ♓&#xFE0E;</span></span>
+      <span class="sep"></span>
+      <a href="#">Ajustes</a>
+    </div>
+  </header>
+
+  <!-- banda azul profundo: cabecera de lámina -->
+  <div class="plate-band stars">
+    <div class="pad plate-band-in">
+      <div>
+        <p class="kicker">Lámina I — el pliego técnico</p>
+        <h2>El cielo de tu <em>nacimiento</em></h2>
+      </div>
+      <div class="plate-caption">
+        <p class="who">Gio</p>
+        <p class="l">4 de febrero de 1990 · 09:41 · Bogotá, Colombia</p>
+        <p class="l"><i>Placidus</i> · Zodiaco tropical · <a href="#">cambiar sistema ▾</a></p>
+      </div>
+    </div>
+    <div class="pad">
+      <div class="plate-tabs">
+        <nav>
+          <a class="on" href="#">Natal</a>
+          <a href="#">Tránsitos</a>
+          <a href="#">Revolución solar</a>
+          <a href="#">Progresada</a>
+        </nav>
+        <span class="promode"><span class="dot"></span> Modo Pro — activo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- el pliego: lámina + tipografía tabular -->
+  <div class="plate pad">
+
+    <!-- lámina: la rueda como grabado de atlas -->
+    <figure class="wheel-fig">
+      <svg viewBox="0 0 560 560" role="img" aria-label="Rueda de la carta natal de Gio">
+        <g class="w-rings">
+          <circle cx="280" cy="280" r="258"/>
+          <circle cx="280" cy="280" r="220"/>
+          <circle cx="280" cy="280" r="213" opacity="0.5"/>
+          <circle cx="280" cy="280" r="86" opacity="0.55"/>
+        </g>
+        <g class="w-signs">
+          <path d="M 22.6 297.55 A 258 258 0 0 0 65.86 423.9 L 97.4 402.7 A 220 220 0 0 1 60.51 294.96 Z" fill="rgba(224,121,90,0.05)" stroke="none"/>
+          <path d="M 65.86 423.9 A 258 258 0 0 0 166.5 511.69 L 183.21 477.57 A 220 220 0 0 1 97.4 402.7 Z" fill="rgba(231,201,134,0.055)" stroke="none"/>
+          <path d="M 166.5 511.69 A 258 258 0 0 0 297.55 537.4 L 294.96 499.49 A 220 220 0 0 1 183.21 477.57 Z" fill="rgba(122,170,224,0.05)" stroke="none"/>
+          <path d="M 297.55 537.4 A 258 258 0 0 0 423.9 494.14 L 402.7 462.6 A 220 220 0 0 1 294.96 499.49 Z" fill="rgba(122,170,224,0.075)" stroke="none"/>
+          <path d="M 423.9 494.14 A 258 258 0 0 0 511.69 393.5 L 477.57 376.79 A 220 220 0 0 1 402.7 462.6 Z" fill="rgba(224,121,90,0.05)" stroke="none"/>
+          <path d="M 511.69 393.5 A 258 258 0 0 0 537.4 262.45 L 499.49 265.04 A 220 220 0 0 1 477.57 376.79 Z" fill="rgba(231,201,134,0.055)" stroke="none"/>
+          <path d="M 537.4 262.45 A 258 258 0 0 0 494.14 136.1 L 462.6 157.3 A 220 220 0 0 1 499.49 265.04 Z" fill="rgba(122,170,224,0.05)" stroke="none"/>
+          <path d="M 494.14 136.1 A 258 258 0 0 0 393.5 48.31 L 376.79 82.43 A 220 220 0 0 1 462.6 157.3 Z" fill="rgba(122,170,224,0.075)" stroke="none"/>
+          <path d="M 393.5 48.31 A 258 258 0 0 0 262.45 22.6 L 265.04 60.51 A 220 220 0 0 1 376.79 82.43 Z" fill="rgba(224,121,90,0.05)" stroke="none"/>
+          <path d="M 262.45 22.6 A 258 258 0 0 0 136.1 65.86 L 157.3 97.4 A 220 220 0 0 1 265.04 60.51 Z" fill="rgba(231,201,134,0.055)" stroke="none"/>
+          <path d="M 136.1 65.86 A 258 258 0 0 0 48.31 166.5 L 82.43 183.21 A 220 220 0 0 1 157.3 97.4 Z" fill="rgba(122,170,224,0.05)" stroke="none"/>
+          <path d="M 48.31 166.5 A 258 258 0 0 0 22.6 297.55 L 60.51 294.96 A 220 220 0 0 1 82.43 183.21 Z" fill="rgba(122,170,224,0.075)" stroke="none"/>
+          <text x="53.89" y="357.42" class="w-glyph">♈&#xFE0E;</text>
+          <text x="122.89" y="460.1" class="w-glyph">♉&#xFE0E;</text>
+          <text x="233.99" y="514.53" class="w-glyph">♊&#xFE0E;</text>
+          <text x="357.42" y="506.11" class="w-glyph">♋&#xFE0E;</text>
+          <text x="460.1" y="437.11" class="w-glyph">♌&#xFE0E;</text>
+          <text x="514.53" y="326.01" class="w-glyph">♍&#xFE0E;</text>
+          <text x="506.11" y="202.58" class="w-glyph">♎&#xFE0E;</text>
+          <text x="437.11" y="99.9" class="w-glyph">♏&#xFE0E;</text>
+          <text x="326.01" y="45.47" class="w-glyph">♐&#xFE0E;</text>
+          <text x="202.58" y="53.89" class="w-glyph">♑&#xFE0E;</text>
+          <text x="99.9" y="122.89" class="w-glyph">♒&#xFE0E;</text>
+          <text x="45.47" y="233.99" class="w-glyph">♓&#xFE0E;</text>
+          <line x1="22.6" y1="297.55" x2="60.51" y2="294.96" class="w-div"/>
+          <line x1="65.86" y1="423.9" x2="97.4" y2="402.7" class="w-div"/>
+          <line x1="166.5" y1="511.69" x2="183.21" y2="477.57" class="w-div"/>
+          <line x1="297.55" y1="537.4" x2="294.96" y2="499.49" class="w-div"/>
+          <line x1="423.9" y1="494.14" x2="402.7" y2="462.6" class="w-div"/>
+          <line x1="511.69" y1="393.5" x2="477.57" y2="376.79" class="w-div"/>
+          <line x1="537.4" y1="262.45" x2="499.49" y2="265.04" class="w-div"/>
+          <line x1="494.14" y1="136.1" x2="462.6" y2="157.3" class="w-div"/>
+          <line x1="393.5" y1="48.31" x2="376.79" y2="82.43" class="w-div"/>
+          <line x1="262.45" y1="22.6" x2="265.04" y2="60.51" class="w-div"/>
+          <line x1="136.1" y1="65.86" x2="157.3" y2="97.4" class="w-div"/>
+          <line x1="48.31" y1="166.5" x2="82.43" y2="183.21" class="w-div"/>
+        </g>
+        <g class="w-ticks">
+          <line x1="60.51" y1="294.96" x2="67.49" y2="294.49"/>
+          <line x1="62.65" y1="314.04" x2="66.6" y2="313.42" opacity="0.5"/>
+          <line x1="66.44" y1="332.85" x2="73.24" y2="331.17"/>
+          <line x1="71.86" y1="351.26" x2="75.65" y2="349.97" opacity="0.5"/>
+          <line x1="78.86" y1="369.13" x2="85.26" y2="366.3"/>
+          <line x1="87.4" y1="386.32" x2="90.9" y2="384.39" opacity="0.5"/>
+          <line x1="97.4" y1="402.7" x2="103.21" y2="398.8"/>
+          <line x1="108.79" y1="418.15" x2="111.9" y2="415.64" opacity="0.5"/>
+          <line x1="121.48" y1="432.55" x2="126.52" y2="427.69"/>
+          <line x1="135.38" y1="445.78" x2="138.01" y2="442.77" opacity="0.5"/>
+          <line x1="150.38" y1="457.76" x2="154.5" y2="452.1"/>
+          <line x1="166.36" y1="468.38" x2="168.43" y2="464.95" opacity="0.5"/>
+          <line x1="183.21" y1="477.57" x2="186.29" y2="471.28"/>
+          <line x1="200.8" y1="485.25" x2="202.24" y2="481.52" opacity="0.5"/>
+          <line x1="218.99" y1="491.37" x2="220.93" y2="484.65"/>
+          <line x1="237.65" y1="495.88" x2="238.42" y2="491.96" opacity="0.5"/>
+          <line x1="256.62" y1="498.75" x2="257.37" y2="491.79"/>
+          <line x1="275.78" y1="499.96" x2="275.85" y2="495.96" opacity="0.5"/>
+          <line x1="294.96" y1="499.49" x2="294.49" y2="492.51"/>
+          <line x1="314.04" y1="497.35" x2="313.42" y2="493.4" opacity="0.5"/>
+          <line x1="332.85" y1="493.56" x2="331.17" y2="486.76"/>
+          <line x1="351.26" y1="488.14" x2="349.97" y2="484.35" opacity="0.5"/>
+          <line x1="369.13" y1="481.14" x2="366.3" y2="474.74"/>
+          <line x1="386.32" y1="472.6" x2="384.39" y2="469.1" opacity="0.5"/>
+          <line x1="402.7" y1="462.6" x2="398.8" y2="456.79"/>
+          <line x1="418.15" y1="451.21" x2="415.64" y2="448.1" opacity="0.5"/>
+          <line x1="432.55" y1="438.52" x2="427.69" y2="433.48"/>
+          <line x1="445.78" y1="424.62" x2="442.77" y2="421.99" opacity="0.5"/>
+          <line x1="457.76" y1="409.62" x2="452.1" y2="405.5"/>
+          <line x1="468.38" y1="393.64" x2="464.95" y2="391.57" opacity="0.5"/>
+          <line x1="477.57" y1="376.79" x2="471.28" y2="373.71"/>
+          <line x1="485.25" y1="359.2" x2="481.52" y2="357.76" opacity="0.5"/>
+          <line x1="491.37" y1="341.01" x2="484.65" y2="339.07"/>
+          <line x1="495.88" y1="322.35" x2="491.96" y2="321.58" opacity="0.5"/>
+          <line x1="498.75" y1="303.38" x2="491.79" y2="302.63"/>
+          <line x1="499.96" y1="284.22" x2="495.96" y2="284.15" opacity="0.5"/>
+          <line x1="499.49" y1="265.04" x2="492.51" y2="265.51"/>
+          <line x1="497.35" y1="245.96" x2="493.4" y2="246.58" opacity="0.5"/>
+          <line x1="493.56" y1="227.15" x2="486.76" y2="228.83"/>
+          <line x1="488.14" y1="208.74" x2="484.35" y2="210.03" opacity="0.5"/>
+          <line x1="481.14" y1="190.87" x2="474.74" y2="193.7"/>
+          <line x1="472.6" y1="173.68" x2="469.1" y2="175.61" opacity="0.5"/>
+          <line x1="462.6" y1="157.3" x2="456.79" y2="161.2"/>
+          <line x1="451.21" y1="141.85" x2="448.1" y2="144.36" opacity="0.5"/>
+          <line x1="438.52" y1="127.45" x2="433.48" y2="132.31"/>
+          <line x1="424.62" y1="114.22" x2="421.99" y2="117.23" opacity="0.5"/>
+          <line x1="409.62" y1="102.24" x2="405.5" y2="107.9"/>
+          <line x1="393.64" y1="91.62" x2="391.57" y2="95.05" opacity="0.5"/>
+          <line x1="376.79" y1="82.43" x2="373.71" y2="88.72"/>
+          <line x1="359.2" y1="74.75" x2="357.76" y2="78.48" opacity="0.5"/>
+          <line x1="341.01" y1="68.63" x2="339.07" y2="75.35"/>
+          <line x1="322.35" y1="64.12" x2="321.58" y2="68.04" opacity="0.5"/>
+          <line x1="303.38" y1="61.25" x2="302.63" y2="68.21"/>
+          <line x1="284.22" y1="60.04" x2="284.15" y2="64.04" opacity="0.5"/>
+          <line x1="265.04" y1="60.51" x2="265.51" y2="67.49"/>
+          <line x1="245.96" y1="62.65" x2="246.58" y2="66.6" opacity="0.5"/>
+          <line x1="227.15" y1="66.44" x2="228.83" y2="73.24"/>
+          <line x1="208.74" y1="71.86" x2="210.03" y2="75.65" opacity="0.5"/>
+          <line x1="190.87" y1="78.86" x2="193.7" y2="85.26"/>
+          <line x1="173.68" y1="87.4" x2="175.61" y2="90.9" opacity="0.5"/>
+          <line x1="157.3" y1="97.4" x2="161.2" y2="103.21"/>
+          <line x1="141.85" y1="108.79" x2="144.36" y2="111.9" opacity="0.5"/>
+          <line x1="127.45" y1="121.48" x2="132.31" y2="126.52"/>
+          <line x1="114.22" y1="135.38" x2="117.23" y2="138.01" opacity="0.5"/>
+          <line x1="102.24" y1="150.38" x2="107.9" y2="154.5"/>
+          <line x1="91.62" y1="166.36" x2="95.05" y2="168.43" opacity="0.5"/>
+          <line x1="82.43" y1="183.21" x2="88.72" y2="186.29"/>
+          <line x1="74.75" y1="200.8" x2="78.48" y2="202.24" opacity="0.5"/>
+          <line x1="68.63" y1="218.99" x2="75.35" y2="220.93"/>
+          <line x1="64.12" y1="237.65" x2="68.04" y2="238.42" opacity="0.5"/>
+          <line x1="61.25" y1="256.62" x2="68.21" y2="257.37"/>
+          <line x1="60.04" y1="275.78" x2="64.04" y2="275.85" opacity="0.5"/>
+        </g>
+        <g class="w-houses">
+          <line x1="194" y1="280" x2="67" y2="280" class="w-cusp-angle"/>
+          <text x="182.6" y="306.74" class="w-house">I</text>
+          <line x1="206.05" y1="323.91" x2="96.85" y2="388.75" class="w-cusp"/>
+          <text x="208.89" y="351.73" class="w-house">II</text>
+          <line x1="236.74" y1="354.33" x2="172.86" y2="464.09" class="w-cusp"/>
+          <text x="252.16" y="377.09" class="w-house">III</text>
+          <line x1="277.3" y1="365.96" x2="273.31" y2="492.89" class="w-cusp-angle"/>
+          <text x="302.38" y="378.49" class="w-house">IV</text>
+          <line x1="319.58" y1="356.35" x2="378.02" y2="469.1" class="w-cusp"/>
+          <text x="348.3" y="354.41" class="w-house">V</text>
+          <line x1="352.69" y1="325.95" x2="460.04" y2="393.82" class="w-cusp"/>
+          <text x="377.01" y="308.09" class="w-house">VI</text>
+          <line x1="366" y1="280" x2="493" y2="280" class="w-cusp-angle"/>
+          <text x="377.4" y="253.26" class="w-house">VII</text>
+          <line x1="353.95" y1="236.09" x2="463.15" y2="171.25" class="w-cusp"/>
+          <text x="351.11" y="208.27" class="w-house">VIII</text>
+          <line x1="323.26" y1="205.67" x2="387.14" y2="95.91" class="w-cusp"/>
+          <text x="307.84" y="182.91" class="w-house">IX</text>
+          <line x1="282.7" y1="194.04" x2="286.69" y2="67.11" class="w-cusp-angle"/>
+          <text x="257.62" y="181.51" class="w-house">X</text>
+          <line x1="240.42" y1="203.65" x2="181.98" y2="90.9" class="w-cusp"/>
+          <text x="211.7" y="205.59" class="w-house">XI</text>
+          <line x1="207.31" y1="234.05" x2="99.96" y2="166.18" class="w-cusp"/>
+          <text x="182.99" y="251.91" class="w-house">XII</text>
+        </g>
+        <g class="w-angles">
+          <text x="12" y="280" class="w-angle">AC</text>
+          <text x="271.49" y="549" class="w-angle">IC</text>
+          <text x="548" y="280" class="w-angle">DC</text>
+          <text x="288.51" y="11" class="w-angle">MC</text>
+        </g>
+        <g class="w-aspects">
+          <line x1="215.78" y1="225.85" x2="333.23" y2="215.02" stroke="rgba(224,121,90,0.55)"/>
+          <line x1="215.78" y1="225.85" x2="336.26" y2="217.62" stroke="rgba(224,121,90,0.4)"/>
+          <line x1="234.78" y1="209.21" x2="196" y2="280" stroke="rgba(122,170,224,0.5)"/>
+        </g>
+        <g class="w-bodies">
+          <line x1="117.17" y1="142.69" x2="122.52" y2="147.2" class="w-needle"/>
+          <text x="150.04" y="170.41" class="w-body">☉&#xFE0E;</text>
+          <text x="169.92" y="187.17" class="w-deg">15°</text>
+          <line x1="437.62" y1="136.73" x2="432.44" y2="141.44" class="w-needle"/>
+          <text x="409.65" y="170.05" class="w-body">☽&#xFE0E;</text>
+          <text x="389.82" y="186.86" class="w-deg">8°</text>
+          <line x1="154.41" y1="107.96" x2="158.54" y2="113.62" class="w-needle"/>
+          <text x="173.48" y="147.51" class="w-body">☿&#xFE0E;</text>
+          <text x="189.77" y="167.78" class="w-deg">2°</text>
+          <line x1="165.34" y1="100.5" x2="169.1" y2="106.4" class="w-needle"/>
+          <text x="192.19" y="134.43" class="w-body">♀&#xFE0E;</text>
+          <text x="205.62" y="156.7" class="w-deg">28°</text>
+          <line x1="422.66" y1="121.83" x2="417.97" y2="127.03" class="w-needle"/>
+          <text x="397.02" y="156.69" class="w-body">♂&#xFE0E;</text>
+          <text x="379.12" y="175.55" class="w-deg">14°</text>
+          <line x1="414.97" y1="115.22" x2="410.53" y2="120.63" class="w-needle"/>
+          <text x="382.55" y="144.41" class="w-body">♇&#xFE0E;</text>
+          <text x="366.86" y="165.15" class="w-deg">16°℞</text>
+        </g>
+      </svg>
+      <figcaption>Fig. 1 — Rueda natal · Ascendente <b>♓&#xFE0E; 26°06′</b> · Medio Cielo <b>♐&#xFE0E; 24°18′</b></figcaption>
+      <div class="core-row">
+        <div class="c"><p class="g">☉&#xFE0E;</p><p class="n">Sol — Acuario</p><p class="s">Casa XI · Exilio</p></div>
+        <div class="c"><p class="g">☽&#xFE0E;</p><p class="n">Luna — Escorpio</p><p class="s">Casa VIII · Caída</p></div>
+        <div class="c"><p class="g">Asc</p><p class="n">Piscis</p><p class="s">26°06′ — horizonte</p></div>
+      </div>
+    </figure>
+
+    <!-- posiciones: tipografía tabular fina -->
+    <section class="tcol">
+      <h3 class="t-title">Posiciones</h3>
+      <p class="t-sub">Los diez cuerpos y los ángulos, al segundo de arco.</p>
+      <table>
+        <thead>
+          <tr><th>Cuerpo</th><th class="r">Posición</th><th class="c">Casa</th><th class="r">Dignidad</th></tr>
+        </thead>
+        <tbody class="tnum">
+          <tr>
+            <td class="body-cell"><span class="g">☉&#xFE0E;</span><span class="n">Sol</span></td>
+            <td class="pos r"><span class="sg">♒&#xFE0E;</span>15°57′32″</td>
+            <td class="house c">XI</td><td class="dign r"><span class="hard">Exilio</span></td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">☽&#xFE0E;</span><span class="n">Luna</span></td>
+            <td class="pos r"><span class="sg">♏&#xFE0E;</span>08°22′14″</td>
+            <td class="house c">VIII</td><td class="dign r"><span class="hard">Caída</span></td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">☿&#xFE0E;</span><span class="n">Mercurio</span></td>
+            <td class="pos r"><span class="sg">♒&#xFE0E;</span>02°14′51″</td>
+            <td class="house c">XI</td><td class="dign r">—</td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♀&#xFE0E;</span><span class="n">Venus</span></td>
+            <td class="pos r"><span class="sg">♑&#xFE0E;</span>28°40′09″</td>
+            <td class="house c">XI</td><td class="dign r">—</td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♂&#xFE0E;</span><span class="n">Marte</span></td>
+            <td class="pos r"><span class="sg">♏&#xFE0E;</span>14°03′27″</td>
+            <td class="house c">VIII</td><td class="dign r"><span class="good">Domicilio</span></td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♃&#xFE0E;</span><span class="n">Júpiter</span></td>
+            <td class="pos r"><span class="sg">♋&#xFE0E;</span>00°51′44″<span class="rx">℞</span></td>
+            <td class="house c">IV</td><td class="dign r"><span class="good">Exaltación</span></td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♄&#xFE0E;</span><span class="n">Saturno</span></td>
+            <td class="pos r"><span class="sg">♑&#xFE0E;</span>17°49′03″</td>
+            <td class="house c">X</td><td class="dign r"><span class="good">Domicilio</span></td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♅&#xFE0E;</span><span class="n">Urano</span></td>
+            <td class="pos r"><span class="sg">♑&#xFE0E;</span>07°02′56″</td>
+            <td class="house c">X</td><td class="dign r">—</td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♆&#xFE0E;</span><span class="n">Neptuno</span></td>
+            <td class="pos r"><span class="sg">♑&#xFE0E;</span>13°25′40″</td>
+            <td class="house c">X</td><td class="dign r">—</td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">♇&#xFE0E;</span><span class="n">Plutón</span></td>
+            <td class="pos r"><span class="sg">♏&#xFE0E;</span>16°47′11″<span class="rx">℞</span></td>
+            <td class="house c">VIII</td><td class="dign r"><span class="good">Domicilio</span></td>
+          </tr>
+          <tr class="angle-row">
+            <td class="body-cell"><span class="g">Asc</span><span class="n">Ascendente</span></td>
+            <td class="pos r"><span class="sg">♓&#xFE0E;</span>26°06′18″</td>
+            <td class="house c">I</td><td class="dign r">—</td>
+          </tr>
+          <tr>
+            <td class="body-cell"><span class="g">MC</span><span class="n">Medio Cielo</span></td>
+            <td class="pos r"><span class="sg">♐&#xFE0E;</span>24°18′05″</td>
+            <td class="house c">X</td><td class="dign r">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="tech-line"><span>TU 14.68 h</span><span>JD 2447927.11</span><span>ΔT 57.2 s</span><span>Lat 4°36′ N · Lon 74°05′ O</span></p>
+    </section>
+
+    <!-- aspectario + distribución -->
+    <section class="tcol">
+      <h3 class="t-title">Aspectario</h3>
+      <p class="t-sub">Las conversaciones entre tus planetas.</p>
+      <ul class="asp tnum">
+        <li class="tense"><span class="pair">☉&#xFE0E; □ ♇&#xFE0E;</span><span class="nm">Sol cuadratura Plutón</span><span class="ob">0.9° · apl.</span></li>
+        <li class="tense"><span class="pair">☉&#xFE0E; □ ♂&#xFE0E;</span><span class="nm">Sol cuadratura Marte</span><span class="ob">1.9° · sep.</span></li>
+        <li class="neutral"><span class="pair">♂&#xFE0E; ☌ ♇&#xFE0E;</span><span class="nm">Marte conjunción Plutón</span><span class="ob">2.7° · sep.</span></li>
+        <li class="flow"><span class="pair">☽&#xFE0E; ✶&#xFE0E; ♅&#xFE0E;</span><span class="nm">Luna sextil Urano</span><span class="ob">1.3° · apl.</span></li>
+        <li class="flow"><span class="pair">♀&#xFE0E; ✶&#xFE0E; Asc</span><span class="nm">Venus sextil Ascendente</span><span class="ob">2.6° · sep.</span></li>
+        <li class="neutral"><span class="pair">♄&#xFE0E; ☌ ♆&#xFE0E;</span><span class="nm">Saturno conjunción Neptuno</span><span class="ob">4.4° · sep.</span></li>
+      </ul>
+
+      <div class="dist">
+        <div class="dist-grid tnum">
+          <div>
+            <p class="d-group-h">Elementos</p>
+            <div class="d-row"><span class="d-name dom">Agua ✶</span><span class="d-track"><span class="d-fill" style="width:80%"></span></span><span class="d-n">4</span></div>
+            <div class="d-row"><span class="d-name">Tierra</span><span class="d-track"><span class="d-fill" style="width:80%; opacity:.55"></span></span><span class="d-n">4</span></div>
+            <div class="d-row"><span class="d-name">Aire</span><span class="d-track"><span class="d-fill" style="width:40%; opacity:.55"></span></span><span class="d-n">2</span></div>
+            <div class="d-row"><span class="d-name">Fuego</span><span class="d-track"><span class="d-fill z"></span></span><span class="d-n">0</span></div>
+          </div>
+          <div>
+            <p class="d-group-h">Modalidades</p>
+            <div class="d-row"><span class="d-name dom">Fija ✶</span><span class="d-track"><span class="d-fill" style="width:100%"></span></span><span class="d-n">5</span></div>
+            <div class="d-row"><span class="d-name">Cardinal</span><span class="d-track"><span class="d-fill" style="width:100%; opacity:.55"></span></span><span class="d-n">5</span></div>
+            <div class="d-row"><span class="d-name">Mutable</span><span class="d-track"><span class="d-fill z"></span></span><span class="d-n">0</span></div>
+          </div>
+        </div>
+        <p class="d-leg">✶ — dominante en tu carta</p>
+      </div>
+
+      <div class="config">
+        <span class="h">Configuración</span>
+        <span class="v">Stellium en Escorpio — <i>☽&#xFE0E; ♂&#xFE0E; ♇&#xFE0E;</i> · casa VIII</span>
+      </div>
+    </section>
+  </div>
+
+  <footer class="folio pad">
+    <span>Aluna — Pliego técnico</span>
+    <span class="mid">✶ &nbsp;Lámina I · carta natal de Gio&nbsp; ✶</span>
+    <span>Página 2 de 2</span>
+  </footer>
+</section>
+
+</body>
+</html>

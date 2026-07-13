@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="es" data-theme="observatory" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aluna · R4 desktop — 06 Cúpula con top-nav</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ Tokens (observatory dark, bloqueados) ============ */
+:root{
+  --font-ui:'Quicksand',system-ui,sans-serif;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --radius:16px; --radius-lg:22px;
+  --acc:#e7c986; --acc-rgb:231,201,134;
+  --ink:#ece7f6; --soft:rgba(233,228,245,.62);
+  --line:rgba(231,201,134,.2);
+  --surface:rgba(150,150,190,.07); --surface-2:rgba(231,201,134,.06);
+  --ink-on-acc:#1a1305;
+  --tone-warm:#e0795a; --tone-cool:#7aaae0; --tone-caution:#e0a07a;
+  --glow:0 0 24px rgba(var(--acc-rgb),.42); --glow-soft:0 0 14px rgba(var(--acc-rgb),.28);
+  --ease:cubic-bezier(.22,.61,.36,1); --dur-fast:.22s;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-width:1200px; background:#0a0d24; color:var(--ink);
+  font-family:var(--font-ui); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+h1,h2,h3,.display{font-family:var(--font-display);font-weight:600;margin:0}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(var(--acc-rgb),.28)}
+
+/* ============ Pantalla = cúpula (el domo de luz del --bg, por sección) ============ */
+.screen{
+  position:relative; min-height:900px; overflow:hidden;
+  background:radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+  display:flex; flex-direction:column;
+}
+/* halo dorado tenue en el cénit de la cúpula */
+.screen::before{
+  content:""; position:absolute; left:15%; right:15%; top:-6%; height:42%;
+  background:radial-gradient(55% 70% at 50% 0%, rgba(var(--acc-rgb),.09), transparent 72%);
+  pointer-events:none;
+}
+.stars{position:absolute; inset:0; pointer-events:none; z-index:0}
+.stars i{position:absolute; border-radius:50%; background:#efe9ff; animation:twinkle var(--tw,4s) ease-in-out infinite; animation-delay:var(--td,0s)}
+@keyframes twinkle{0%,100%{opacity:.28}50%{opacity:.75}}
+
+/* ============ Divisores etiquetados ============ */
+.divider{
+  display:flex; align-items:center; gap:18px; padding:24px 56px; background:#060919;
+  color:rgba(236,231,246,.5); font-size:11px; font-weight:600; letter-spacing:.22em; text-transform:uppercase;
+}
+.divider::before,.divider::after{content:""; flex:1; height:1px; background:linear-gradient(90deg, transparent, rgba(var(--acc-rgb),.35), transparent)}
+.divider b{color:var(--acc); font-weight:700}
+
+/* ============ Top-nav de vidrio ============ */
+.nav{
+  position:relative; z-index:5; height:66px;
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+  padding:0 44px; background:rgba(16,20,48,.42); backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(var(--acc-rgb),.16);
+}
+.brand{display:flex; align-items:center; gap:12px}
+.brand-enso{width:26px;height:26px;flex:none}
+.brand-name{font-family:var(--font-display); font-size:24px; font-weight:600; letter-spacing:.04em}
+.tabs{display:flex; gap:6px; height:66px}
+.tab{
+  position:relative; display:flex; align-items:center; gap:9px; padding:0 20px;
+  color:var(--soft); font-size:14px; font-weight:600; transition:color var(--dur-fast) var(--ease);
+}
+.tab svg{opacity:.75}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink)}
+.tab.on svg{opacity:1; filter:drop-shadow(0 0 6px rgba(var(--acc-rgb),.55))}
+.tab.on::after{
+  content:""; position:absolute; left:14px; right:14px; bottom:-1px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--acc), transparent);
+  box-shadow:0 0 14px rgba(var(--acc-rgb),.65);
+}
+.nav-right{display:flex; align-items:center; gap:12px; justify-content:flex-end}
+.mode-chip{
+  display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:999px;
+  border:1px solid var(--line); background:var(--surface); color:var(--soft); font-size:12px; font-weight:600;
+}
+.avatar{
+  width:34px;height:34px;border-radius:50%; display:grid; place-items:center;
+  background:linear-gradient(140deg, rgba(var(--acc-rgb),.25), rgba(var(--acc-rgb),.08));
+  border:1px solid rgba(var(--acc-rgb),.5); font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--acc);
+  box-shadow:var(--glow-soft);
+}
+
+/* ============ Grilla ============ */
+.shell{width:min(1280px, calc(100% - 112px)); margin:0 auto; position:relative; z-index:2}
+.grid{display:grid; grid-template-columns:repeat(12,1fr); gap:20px}
+
+/* ============ HOY ============ */
+.greet{display:flex; align-items:flex-end; justify-content:space-between; padding:24px 0 18px}
+.hello{margin:0 0 2px; color:var(--soft); font-size:15px}
+.greet h1{font-size:52px; line-height:1.02; font-weight:600}
+.greet h1 em{font-style:italic; color:var(--acc); text-shadow:0 0 24px rgba(var(--acc-rgb),.35)}
+.daymeta{text-align:right; color:var(--soft); font-size:13px; line-height:1.7; padding-bottom:8px}
+.daymeta b{color:var(--ink); font-weight:600}
+.daymeta .moon{color:var(--acc)}
+
+.panel{
+  position:relative; border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:22px 24px; backdrop-filter:blur(10px); background:var(--surface);
+}
+.p-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px}
+.p-title{font-family:var(--font-display); font-size:24px; font-weight:600}
+.p-eyebrow{font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--acc)}
+.p-link{font-size:12.5px; font-weight:600; color:var(--acc); opacity:.9}
+.p-link:hover{opacity:1}
+
+/* — Panel 1 · Tu energía (oro, el más ancho y denso) — */
+.p-energy{
+  grid-column:span 5;
+  background:linear-gradient(150deg, rgba(var(--acc-rgb),.14), rgba(var(--acc-rgb),.035) 55%, rgba(150,150,190,.05));
+  border-color:rgba(var(--acc-rgb),.34);
+}
+.seg-mini{display:inline-flex; gap:3px; padding:3px; background:rgba(10,13,36,.5); border:1px solid var(--line); border-radius:12px}
+.seg-mini span{padding:5px 12px; border-radius:9px; font-size:11.5px; font-weight:600; color:var(--soft)}
+.seg-mini .on{background:var(--acc); color:var(--ink-on-acc); box-shadow:var(--glow-soft)}
+.bars{display:flex; flex-direction:column; gap:11px}
+.bar-h{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:5px}
+.bar-h .lbl{font-size:13.5px; font-weight:600}
+.bar-h .tone{font-size:11px; color:var(--soft); margin-left:8px}
+.bar-h .n{font-family:var(--font-display); font-size:19px; font-weight:700; color:var(--acc); font-feature-settings:"lnum" 1}
+.track{height:7px; border-radius:99px; background:rgba(10,13,36,.55); overflow:hidden}
+.fill{display:block; height:100%; border-radius:99px}
+.fill.hi{background:linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb),.55)); box-shadow:0 0 10px rgba(var(--acc-rgb),.5)}
+.fill.mx{background:linear-gradient(90deg, #8ea8d8, rgba(122,170,224,.45))}
+.fill.lo{background:linear-gradient(90deg, var(--tone-warm), rgba(224,121,90,.45))}
+.why{
+  margin-top:9px; padding:10px 12px; border-radius:12px;
+  background:rgba(10,13,36,.4); border:1px dashed rgba(var(--acc-rgb),.28);
+  display:flex; flex-direction:column; gap:7px;
+}
+.why .drv{display:flex; align-items:baseline; gap:10px; font-size:12.5px; color:var(--soft)}
+.why .drv .t{flex:1; line-height:1.5}
+.why .g{font-size:14px; letter-spacing:.12em; color:var(--tone-cool); flex:none}
+.why b{color:var(--ink); font-weight:600}
+
+/* — Panel 2 · Tu clima (azul noche) — */
+.p-weather{
+  grid-column:span 4;
+  background:linear-gradient(150deg, rgba(122,170,224,.15), rgba(122,170,224,.04) 60%, rgba(150,150,190,.05));
+  border-color:rgba(122,170,224,.32);
+}
+.p-weather .p-title::before{content:"☾ "; color:var(--tone-cool)}
+.w-sub{margin:-8px 0 14px; color:var(--soft); font-style:italic; font-family:var(--font-display); font-size:14.5px}
+.asps{display:flex; flex-direction:column; gap:11px}
+.asp{
+  padding:12px 14px 11px; border-radius:12px; background:rgba(10,13,36,.35);
+  border-left:2px solid var(--tone-warm);
+}
+.asp.soft{border-left-color:var(--tone-cool)}
+.asp-top{display:flex; align-items:baseline; gap:11px}
+.asp-g{font-size:16px; color:var(--acc); letter-spacing:.1em; flex:none}
+.asp-name{font-size:13.5px; font-weight:600; flex:1}
+.asp-orb{font-size:11px; color:var(--soft); flex:none}
+.asp-why{margin:5px 0 0; font-family:var(--font-display); font-style:italic; font-size:14.5px; color:var(--soft); line-height:1.45}
+
+/* — Panel 3 · Numerología (violeta, el más silencioso) — */
+.p-day{
+  grid-column:span 3; display:flex; flex-direction:column; text-align:center;
+  background:linear-gradient(165deg, rgba(150,140,214,.17), rgba(150,140,214,.05) 70%, rgba(150,150,190,.05));
+  border-color:rgba(150,140,214,.36);
+}
+.p-day .p-eyebrow{color:#b3a6e8}
+.big-num{
+  font-family:var(--font-display); font-size:146px; line-height:1; font-weight:600; color:var(--acc);
+  text-shadow:0 0 34px rgba(var(--acc-rgb),.4); margin:4px 0 10px; font-feature-settings:"lnum" 1;
+}
+.day-meaning{font-size:13.5px; line-height:1.6; color:var(--soft); margin:0 2px}
+.day-meaning b{color:var(--ink); font-weight:600}
+.day-ctx{margin-top:auto; padding-top:14px; display:flex; justify-content:center; gap:8px}
+.day-ctx span{font-size:11.5px; color:var(--soft); border:1px solid rgba(150,140,214,.35); border-radius:999px; padding:4px 12px}
+.day-ctx b{color:#c9bdf0}
+
+/* — Fila 2: preguntar + lentes — */
+.row2{margin-top:16px}
+.ask{
+  grid-column:span 6; display:flex; flex-direction:column; gap:13px;
+  border-color:rgba(var(--acc-rgb),.3);
+  background:linear-gradient(120deg, rgba(var(--acc-rgb),.08), rgba(150,150,190,.05) 65%);
+}
+.ask-h{display:flex; align-items:baseline; gap:12px}
+.ask-h .p-title{font-size:22px}
+.ask-h small{font-size:12.5px; color:var(--soft)}
+.ask-row{display:flex; gap:10px}
+.ask-input{
+  flex:1; display:flex; align-items:center; padding:0 18px; height:44px; border-radius:999px;
+  border:1px solid var(--line); background:rgba(10,13,36,.5); color:var(--soft); font-size:13.5px;
+}
+.ask-btn{
+  height:44px; padding:0 24px; border-radius:999px; border:0; cursor:pointer;
+  background:linear-gradient(90deg, var(--acc), #d9b46a); color:var(--ink-on-acc);
+  font-family:var(--font-ui); font-size:13.5px; font-weight:700; box-shadow:var(--glow-soft);
+}
+.ask-sug{display:flex; gap:8px}
+.ask-sug span{font-size:11.5px; color:var(--soft); border:1px solid var(--line); border-radius:999px; padding:5px 13px; background:var(--surface-2)}
+.tile{
+  grid-column:span 2; display:flex; flex-direction:column; gap:10px; padding:20px;
+  transition:transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.tile:hover{transform:translateY(-3px); border-color:rgba(var(--acc-rgb),.45); box-shadow:var(--glow-soft)}
+.tile-ic{
+  width:40px;height:40px;border-radius:12px; display:grid; place-items:center;
+  background:rgba(var(--acc-rgb),.1); border:1px solid rgba(var(--acc-rgb),.3); color:var(--acc);
+}
+.tile-name{font-size:15px; font-weight:700}
+.tile-sub{font-size:11.5px; color:var(--soft); line-height:1.45}
+
+/* ============ CARTA ============ */
+.carta-head{text-align:center; padding:22px 0 2px}
+.carta-head .p-eyebrow{display:block; margin-bottom:6px}
+.carta-head h1{font-size:38px; font-weight:600}
+.seg{
+  display:inline-flex; gap:4px; padding:4px; margin-top:14px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+}
+.seg button{
+  border:0; background:transparent; cursor:pointer; color:var(--soft);
+  font-family:var(--font-ui); font-size:13.5px; font-weight:600; padding:9px 24px; border-radius:11px;
+  transition:color var(--dur-fast) var(--ease);
+}
+.seg button:hover{color:var(--ink)}
+.seg button.on{
+  background:linear-gradient(90deg, rgba(var(--acc-rgb),1), rgba(var(--acc-rgb),.8));
+  color:var(--ink-on-acc); box-shadow:var(--glow-soft);
+}
+
+.carta-main{display:grid; grid-template-columns:55fr 45fr; gap:26px; align-items:stretch; padding:18px 0 34px}
+.wheel-card{padding:22px 28px 16px; display:flex; flex-direction:column}
+.wheel{width:100%; max-width:566px; margin:0 auto; display:block}
+.w-ring{fill:none; stroke:rgba(var(--acc-rgb),.24); stroke-width:1}
+.w-ring-faint{fill:none; stroke:rgba(var(--acc-rgb),.12); stroke-width:1}
+.w-cusp{stroke:rgba(236,231,246,.16); stroke-width:1}
+.w-cusp-angle{stroke:rgba(var(--acc-rgb),.45); stroke-width:1.4}
+.w-sign{font-size:16px; text-anchor:middle; dominant-baseline:central; opacity:.95}
+.w-house{font-size:10px; fill:var(--soft); text-anchor:middle; dominant-baseline:central; font-family:var(--font-ui)}
+.w-angle{font-size:11px; font-weight:700; fill:var(--acc); text-anchor:middle; dominant-baseline:central; font-family:var(--font-ui); letter-spacing:.08em}
+.w-body{filter:drop-shadow(0 0 7px rgba(var(--acc-rgb),.5))}
+.w-hit{fill:rgba(16,20,48,.75); stroke:rgba(var(--acc-rgb),.35); stroke-width:1}
+.w-glyph{font-size:17px; fill:var(--acc); text-anchor:middle; dominant-baseline:central}
+.w-deg{font-size:10px; fill:var(--soft); text-anchor:middle; dominant-baseline:central; font-family:var(--font-ui)}
+.tap-hint{text-align:center; font-size:12px; color:var(--soft); margin:10px 0 14px}
+.ctrl-rows{display:flex; flex-direction:column; gap:9px; border-top:1px solid rgba(var(--acc-rgb),.14); padding-top:14px}
+.ctrl-row{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.ctrl-row .lab{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--soft); width:64px; flex:none}
+.chipc{
+  padding:6px 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
+  font-size:11.5px; font-weight:600; color:var(--soft);
+}
+.chipc.on{background:linear-gradient(90deg, rgba(var(--acc-rgb),1), rgba(var(--acc-rgb),.8)); color:var(--ink-on-acc); border-color:transparent; box-shadow:var(--glow-soft)}
+.pro-toggle{margin-left:auto; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--soft)}
+.pro-dot{width:26px;height:15px;border-radius:99px;border:1px solid var(--line);background:rgba(10,13,36,.5);position:relative}
+.pro-dot::after{content:"";position:absolute;left:2px;top:2px;width:9px;height:9px;border-radius:50%;background:var(--soft)}
+
+/* — panel derecho con tabs internas — */
+.detail{display:flex; flex-direction:column; padding:0; overflow:hidden}
+.dtabs{display:flex; border-bottom:1px solid rgba(var(--acc-rgb),.16); padding:0 10px; background:rgba(10,13,36,.25)}
+.dtab{
+  position:relative; padding:16px 18px; font-size:13.5px; font-weight:600; color:var(--soft); cursor:pointer;
+}
+.dtab.on{color:var(--ink)}
+.dtab.on::after{
+  content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--acc), transparent);
+  box-shadow:0 0 12px rgba(var(--acc-rgb),.6);
+}
+.dbody{padding:20px 24px 22px; display:flex; flex-direction:column; gap:18px; flex:1}
+.reading{
+  border:1px solid rgba(var(--acc-rgb),.22); background:rgba(10,13,36,.35);
+  border-radius:var(--radius); padding:14px 17px;
+}
+.reading .p-eyebrow{display:block; margin-bottom:6px; font-size:10.5px}
+.reading p{margin:0; font-family:var(--font-display); font-style:italic; font-size:16px; line-height:1.55; color:var(--soft); font-feature-settings:"lnum" 1}
+.reading b{color:var(--ink); font-weight:600; font-style:normal}
+.big3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+.big{
+  border:1px solid var(--line); border-radius:var(--radius); padding:16px 14px; text-align:center;
+  background:var(--surface-2); display:flex; flex-direction:column; gap:4px;
+}
+.big-g{font-family:var(--font-display); font-size:30px; color:var(--acc); text-shadow:0 0 16px rgba(var(--acc-rgb),.35); line-height:1.1}
+.big-nm{font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--soft)}
+.big-sg{font-family:var(--font-display); font-size:18px; font-weight:600}
+.big-sb{font-size:11.5px; color:var(--soft)}
+.big-sb .warn{color:var(--tone-caution); border:1px solid rgba(224,160,122,.4); border-radius:999px; padding:1px 8px; margin-left:4px; font-size:10.5px}
+.bal{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.bal h4{margin:0 0 10px; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); font-family:var(--font-ui)}
+.brow{display:grid; grid-template-columns:62px 1fr 30px; align-items:center; gap:9px; margin-bottom:8px}
+.brow .l{font-size:12px; color:var(--soft); white-space:nowrap}
+.brow .l.dom{color:var(--ink); font-weight:600}
+.brow .t{height:5px; border-radius:99px; background:rgba(10,13,36,.55); overflow:hidden}
+.brow .f{display:block; height:100%; border-radius:99px; background:rgba(var(--acc-rgb),.4)}
+.brow .f.dom{background:linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb),.6)); box-shadow:0 0 8px rgba(var(--acc-rgb),.5)}
+.brow .n{font-size:11.5px; color:var(--soft); text-align:right; white-space:nowrap}
+.brow .n.dom{color:var(--ink); font-weight:700}
+.brow .n.dom::after{content:" ✦"; color:var(--acc)}
+.bal-cap{margin:2px 0 0; font-size:10.5px; color:var(--soft)}
+.pats{display:flex; flex-wrap:wrap; gap:8px}
+.pat{
+  display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink);
+  border:1px solid var(--line); background:var(--surface-2); border-radius:9px; padding:6px 12px;
+}
+.pat b{color:var(--acc); font-weight:600}
+.d-hint{margin-top:auto; padding-top:6px; font-size:12px; color:var(--soft); text-align:center; font-style:italic; font-family:var(--font-display); font-size:14.5px}
+
+/* fluido 1200–1680 */
+@media (min-width:1560px){ .shell{width:min(1360px, calc(100% - 160px))} }
+</style>
+</head>
+<body>
+
+<div class="divider">Aluna · R4 desktop · dirección <b>06 — Cúpula con top-nav</b> · pantalla 1 · <b>/hoy</b></div>
+
+<!-- ================= PANTALLA 1 · HOY ================= -->
+<section class="screen">
+  <div class="stars" data-stars="110"></div>
+
+  <nav class="nav">
+    <a class="brand" href="#">
+      <svg class="brand-enso" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M22.6 15.2A10 10 0 1 1 16.4 3.7" stroke="#e7c986" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="19.5" cy="6.5" r="2.1" fill="#e7c986"/>
+      </svg>
+      <span class="brand-name">Aluna</span>
+    </a>
+    <div class="tabs">
+      <a class="tab on" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M13 3l-1.4 1.4M4.4 11.6L3 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Hoy</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg>Números</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.5v4M8 10.6v3.9M1.5 8h4M10.6 8h3.9" stroke="currentColor" stroke-width="1.1"/></svg>Carta</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg>Pilares</a>
+    </div>
+    <div class="nav-right">
+      <span class="mode-chip">☾&#xFE0E; Observatorio</span>
+      <span class="avatar">G</span>
+    </div>
+  </nav>
+
+  <div class="shell">
+    <header class="greet">
+      <div>
+        <p class="hello">Hola,</p>
+        <h1><em>Gio</em></h1>
+      </div>
+      <div class="daymeta">
+        <div><b>Domingo, 13 de julio</b></div>
+        <div><span class="moon">☽&#xFE0E;</span> Luna creciente en Libra · tu día personal es <b>7</b></div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Panel 1 · Tu energía -->
+      <section class="panel p-energy">
+        <div class="p-head">
+          <h2 class="p-title">Tu energía</h2>
+          <div class="seg-mini" role="tablist" aria-label="Periodo">
+            <span class="on">Hoy</span><span>Semana</span><span>Mes</span><span>Año</span>
+          </div>
+        </div>
+        <div class="bars">
+          <div>
+            <div class="bar-h"><span class="lbl">Amor <span class="tone">· mixta</span></span><span class="n">62</span></div>
+            <div class="track"><span class="fill mx" style="width:62%"></span></div>
+          </div>
+          <div>
+            <div class="bar-h"><span class="lbl">Dinero <span class="tone">· en reto</span></span><span class="n">48</span></div>
+            <div class="track"><span class="fill lo" style="width:48%"></span></div>
+          </div>
+          <div>
+            <div class="bar-h"><span class="lbl">Trabajo <span class="tone">· fluida</span></span><span class="n">71</span></div>
+            <div class="track"><span class="fill hi" style="width:71%"></span></div>
+            <div class="why">
+              <span class="drv"><span class="g">♃&#xFE0E; △ ☉&#xFE0E;</span><span class="t"><b>Júpiter</b> trígono a tu <b>Sol</b> — el impulso viene de donde ya brillas</span></span>
+              <span class="drv"><span class="g">☿&#xFE0E; ✶ MC</span><span class="t"><b>Mercurio</b> sextil a tu <b>Medio Cielo</b> — di lo que sabes, te están oyendo</span></span>
+            </div>
+          </div>
+          <div>
+            <div class="bar-h"><span class="lbl">Salud <span class="tone">· mixta</span></span><span class="n">55</span></div>
+            <div class="track"><span class="fill mx" style="width:55%"></span></div>
+          </div>
+          <div>
+            <div class="bar-h"><span class="lbl">Ánimo <span class="tone">· fluida</span></span><span class="n">67</span></div>
+            <div class="track"><span class="fill hi" style="width:67%"></span></div>
+          </div>
+          <div>
+            <div class="bar-h"><span class="lbl">Suerte <span class="tone">· mixta</span></span><span class="n">59</span></div>
+            <div class="track"><span class="fill mx" style="width:59%"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 2 · Tu clima -->
+      <section class="panel p-weather">
+        <div class="p-head">
+          <h2 class="p-title">Tu clima de hoy</h2>
+          <a class="p-link" href="#">Verlo en la carta →</a>
+        </div>
+        <p class="w-sub">El cielo de hoy sobre ti — tu clima del alma.</p>
+        <div class="asps">
+          <article class="asp">
+            <div class="asp-top">
+              <span class="asp-g">♄&#xFE0E; □ ♀&#xFE0E;</span>
+              <span class="asp-name">Saturno cuadratura a tu Venus</span>
+              <span class="asp-orb">0.2° · Aplicativo</span>
+            </div>
+            <p class="asp-why">El deber le aprieta la mano al deseo: hoy no firmes nada del corazón.</p>
+          </article>
+          <article class="asp">
+            <div class="asp-top">
+              <span class="asp-g">☽&#xFE0E; ☍ ♅&#xFE0E;</span>
+              <span class="asp-name">Luna oposición a tu Urano</span>
+              <span class="asp-orb">1.4° · Separativo</span>
+            </div>
+            <p class="asp-why">Antojo de romperlo todo; respira dos veces antes de decidir.</p>
+          </article>
+          <article class="asp soft">
+            <div class="asp-top">
+              <span class="asp-g">♃&#xFE0E; △ ☉&#xFE0E;</span>
+              <span class="asp-name">Júpiter trígono a tu Sol</span>
+              <span class="asp-orb">2.8° · Aplicativo</span>
+            </div>
+            <p class="asp-why">Una puerta se abre justo donde ya venías brillando.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Panel 3 · Numerología de hoy -->
+      <section class="panel p-day">
+        <span class="p-eyebrow">Numerología de hoy</span>
+        <div class="big-num">7</div>
+        <p class="day-meaning">Día de mirar hacia adentro: el <b>7</b> no busca respuestas afuera. Estudia, medita, deja que el silencio te diga lo que el ruido esconde.</p>
+        <div class="day-ctx">
+          <span>Mes <b>3</b></span>
+          <span>Año <b>5</b></span>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid row2">
+      <!-- CTA preguntar -->
+      <section class="panel ask">
+        <div class="ask-h">
+          <h2 class="p-title">Pregúntale a Aluna</h2>
+          <small>Tu carta, tus números y el cielo de hoy, en la respuesta.</small>
+        </div>
+        <div class="ask-row">
+          <span class="ask-input">¿Por qué me cuesta decidir hoy?</span>
+          <button class="ask-btn" type="button">Preguntar ✦</button>
+        </div>
+        <div class="ask-sug">
+          <span>¿Cómo aprovecho el trígono de Júpiter?</span>
+          <span>¿Qué me pide un día 7?</span>
+        </div>
+      </section>
+
+      <!-- lentes -->
+      <a class="panel tile" href="#">
+        <span class="tile-ic"><svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg></span>
+        <span class="tile-name">Números</span>
+        <span class="tile-sub">Tus ciclos y vibraciones personales</span>
+      </a>
+      <a class="panel tile" href="#">
+        <span class="tile-ic"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.5v4M8 10.6v3.9M1.5 8h4M10.6 8h3.9" stroke="currentColor" stroke-width="1.1"/></svg></span>
+        <span class="tile-name">Carta</span>
+        <span class="tile-sub">Tu cielo de nacimiento, vivo</span>
+      </a>
+      <a class="panel tile" href="#">
+        <span class="tile-ic"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg></span>
+        <span class="tile-name">Pilares</span>
+        <span class="tile-sub">Ba Zi · los Cuatro Pilares</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider">pantalla 2 · <b>/carta</b> — misma cúpula, mundo Carta · rueda 55% + panel con tabs internas</div>
+
+<!-- ================= PANTALLA 2 · CARTA ================= -->
+<section class="screen">
+  <div class="stars" data-stars="110"></div>
+
+  <nav class="nav">
+    <a class="brand" href="#">
+      <svg class="brand-enso" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M22.6 15.2A10 10 0 1 1 16.4 3.7" stroke="#e7c986" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="19.5" cy="6.5" r="2.1" fill="#e7c986"/>
+      </svg>
+      <span class="brand-name">Aluna</span>
+    </a>
+    <div class="tabs">
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M13 3l-1.4 1.4M4.4 11.6L3 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Hoy</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="8" cy="13" r="1.5"/><circle cx="13" cy="13" r="1.5"/></svg>Números</a>
+      <a class="tab on" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.6" stroke="currentColor" stroke-width="1.1"/><path d="M8 1.5v4M8 10.6v3.9M1.5 8h4M10.6 8h3.9" stroke="currentColor" stroke-width="1.1"/></svg>Carta</a>
+      <a class="tab" href="#"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="6.7" y="2" width="2.6" height="12" rx="1.3" stroke="currentColor" stroke-width="1.2"/><rect x="11.4" y="4" width="2.6" height="10" rx="1.3" stroke="currentColor" stroke-width="1.2"/></svg>Pilares</a>
+    </div>
+    <div class="nav-right">
+      <span class="mode-chip">☾&#xFE0E; Observatorio</span>
+      <span class="avatar">G</span>
+    </div>
+  </nav>
+
+  <div class="shell">
+    <header class="carta-head">
+      <span class="p-eyebrow">Carta astral</span>
+      <h1>Tu cielo de nacimiento</h1>
+      <div class="seg" role="tablist" aria-label="Tipo de carta">
+        <button class="on" type="button">Natal</button>
+        <button type="button">Tu Clima</button>
+        <button type="button">Rev. Solar</button>
+        <button type="button">Progresiones</button>
+      </div>
+    </header>
+
+    <div class="carta-main">
+      <!-- rueda -->
+      <section class="panel wheel-card">
+        <svg viewBox="0 0 580 580" class="wheel" role="img" aria-label="Rueda de la carta natal de Gio: Ascendente Piscis, Sol en Acuario casa 11, stellium en Escorpio">
+  <circle cx="290" cy="290" r="258" class="w-ring"/>
+  <circle cx="290" cy="290" r="222" class="w-ring"/>
+  <circle cx="290" cy="290" r="116" class="w-ring-faint"/>
+  <path d="M 32.6 307.5 A 258 258 0 0 0 75.9 433.9 L 105.7 413.8 A 222 222 0 0 1 68.5 305.1 Z" fill="rgba(224,121,90,0.12)"/>
+  <text x="62.9" y="367.7" class="w-sign" fill="#e0795a">♈&#xFE0E;</text>
+  <path d="M 75.9 433.9 A 258 258 0 0 0 176.5 521.7 L 192.3 489.4 A 222 222 0 0 1 105.7 413.8 Z" fill="rgba(127,176,105,0.12)"/>
+  <text x="132.2" y="470.9" class="w-sign" fill="#7fb069">♉&#xFE0E;</text>
+  <path d="M 176.5 521.7 A 258 258 0 0 0 307.5 547.4 L 305.1 511.5 A 222 222 0 0 1 192.3 489.4 Z" fill="rgba(122,170,224,0.12)"/>
+  <text x="243.8" y="525.5" class="w-sign" fill="#7aaae0">♊&#xFE0E;</text>
+  <path d="M 307.5 547.4 A 258 258 0 0 0 433.9 504.1 L 413.8 474.3 A 222 222 0 0 1 305.1 511.5 Z" fill="rgba(150,140,214,0.12)"/>
+  <text x="367.7" y="517.1" class="w-sign" fill="#9b8fd6">♋&#xFE0E;</text>
+  <path d="M 433.9 504.1 A 258 258 0 0 0 521.7 403.5 L 489.4 387.7 A 222 222 0 0 1 413.8 474.3 Z" fill="rgba(224,121,90,0.12)"/>
+  <text x="470.9" y="447.8" class="w-sign" fill="#e0795a">♌&#xFE0E;</text>
+  <path d="M 521.7 403.5 A 258 258 0 0 0 547.4 272.5 L 511.5 274.9 A 222 222 0 0 1 489.4 387.7 Z" fill="rgba(127,176,105,0.12)"/>
+  <text x="525.5" y="336.2" class="w-sign" fill="#7fb069">♍&#xFE0E;</text>
+  <path d="M 547.4 272.5 A 258 258 0 0 0 504.1 146.1 L 474.3 166.2 A 222 222 0 0 1 511.5 274.9 Z" fill="rgba(122,170,224,0.12)"/>
+  <text x="517.1" y="212.3" class="w-sign" fill="#7aaae0">♎&#xFE0E;</text>
+  <path d="M 504.1 146.1 A 258 258 0 0 0 403.5 58.3 L 387.7 90.6 A 222 222 0 0 1 474.3 166.2 Z" fill="rgba(150,140,214,0.12)"/>
+  <text x="447.8" y="109.1" class="w-sign" fill="#9b8fd6">♏&#xFE0E;</text>
+  <path d="M 403.5 58.3 A 258 258 0 0 0 272.5 32.6 L 274.9 68.5 A 222 222 0 0 1 387.7 90.6 Z" fill="rgba(224,121,90,0.12)"/>
+  <text x="336.2" y="54.5" class="w-sign" fill="#e0795a">♐&#xFE0E;</text>
+  <path d="M 272.5 32.6 A 258 258 0 0 0 146.1 75.9 L 166.2 105.7 A 222 222 0 0 1 274.9 68.5 Z" fill="rgba(127,176,105,0.12)"/>
+  <text x="212.3" y="62.9" class="w-sign" fill="#7fb069">♑&#xFE0E;</text>
+  <path d="M 146.1 75.9 A 258 258 0 0 0 58.3 176.5 L 90.6 192.3 A 222 222 0 0 1 166.2 105.7 Z" fill="rgba(122,170,224,0.12)"/>
+  <text x="109.1" y="132.2" class="w-sign" fill="#7aaae0">♒&#xFE0E;</text>
+  <path d="M 58.3 176.5 A 258 258 0 0 0 32.6 307.5 L 68.5 305.1 A 222 222 0 0 1 90.6 192.3 Z" fill="rgba(150,140,214,0.12)"/>
+  <text x="54.5" y="243.8" class="w-sign" fill="#9b8fd6">♓&#xFE0E;</text>
+  <line x1="32.6" y1="307.5" x2="68.5" y2="305.1" class="w-ring"/>
+  <line x1="75.9" y1="433.9" x2="105.7" y2="413.8" class="w-ring"/>
+  <line x1="176.5" y1="521.7" x2="192.3" y2="489.4" class="w-ring"/>
+  <line x1="307.5" y1="547.4" x2="305.1" y2="511.5" class="w-ring"/>
+  <line x1="433.9" y1="504.1" x2="413.8" y2="474.3" class="w-ring"/>
+  <line x1="521.7" y1="403.5" x2="489.4" y2="387.7" class="w-ring"/>
+  <line x1="547.4" y1="272.5" x2="511.5" y2="274.9" class="w-ring"/>
+  <line x1="504.1" y1="146.1" x2="474.3" y2="166.2" class="w-ring"/>
+  <line x1="403.5" y1="58.3" x2="387.7" y2="90.6" class="w-ring"/>
+  <line x1="272.5" y1="32.6" x2="274.9" y2="68.5" class="w-ring"/>
+  <line x1="146.1" y1="75.9" x2="166.2" y2="105.7" class="w-ring"/>
+  <line x1="58.3" y1="176.5" x2="90.6" y2="192.3" class="w-ring"/>
+  <line x1="174" y1="290" x2="68" y2="290" class="w-cusp-angle"/>
+  <text x="155.4" y="328.5" class="w-house">1</text>
+  <line x1="191.5" y1="351.3" x2="101.5" y2="407.3" class="w-cusp"/>
+  <text x="189.1" y="387.1" class="w-house">2</text>
+  <line x1="225" y1="386.1" x2="165.5" y2="473.8" class="w-cusp"/>
+  <text x="232.3" y="417.5" class="w-house">3</text>
+  <line x1="260.8" y1="402.3" x2="234" y2="504.8" class="w-cusp-angle"/>
+  <text x="283" y="429.8" class="w-house">4</text>
+  <line x1="307.9" y1="404.6" x2="324.3" y2="509.3" class="w-cusp"/>
+  <text x="362.9" y="409.5" class="w-house">5</text>
+  <line x1="383.7" y1="358.3" x2="469.4" y2="420.8" class="w-cusp"/>
+  <text x="423.1" y="333.4" class="w-house">6</text>
+  <line x1="406" y1="290" x2="512" y2="290" class="w-cusp-angle"/>
+  <text x="424.6" y="251.5" class="w-house">7</text>
+  <line x1="388.5" y1="228.7" x2="478.5" y2="172.7" class="w-cusp"/>
+  <text x="390.9" y="192.9" class="w-house">8</text>
+  <line x1="355" y1="193.9" x2="414.5" y2="106.2" class="w-cusp"/>
+  <text x="347.7" y="162.5" class="w-house">9</text>
+  <line x1="319.2" y1="177.7" x2="346" y2="75.2" class="w-cusp-angle"/>
+  <text x="297" y="150.2" class="w-house">10</text>
+  <line x1="272.1" y1="175.4" x2="255.7" y2="70.7" class="w-cusp"/>
+  <text x="217.1" y="170.5" class="w-house">11</text>
+  <line x1="196.3" y1="221.7" x2="110.6" y2="159.2" class="w-cusp"/>
+  <text x="156.9" y="246.6" class="w-house">12</text>
+  <text x="17" y="290" class="w-angle">AC</text>
+  <text x="221.2" y="554.2" class="w-angle">IC</text>
+  <text x="563" y="290" class="w-angle">DC</text>
+  <text x="358.8" y="25.8" class="w-angle">MC</text>
+  <line x1="205.9" y1="219.1" x2="354.8" y2="201.1" stroke="rgba(224,121,90,0.55)" stroke-width="1.35"/>
+  <line x1="205.9" y1="219.1" x2="365.2" y2="209.7" stroke="rgba(224,121,90,0.55)" stroke-width="1.35"/>
+  <line x1="374.4" y1="219.4" x2="365.2" y2="209.7" stroke="rgba(231,201,134,0.4)" stroke-width="1.35"/>
+  <line x1="267.2" y1="182.4" x2="374.4" y2="219.4" stroke="rgba(122,170,224,0.5)" stroke-width="1.35"/>
+  <g class="w-body">
+    <circle cx="152.4" cy="173.9" r="14" class="w-hit"/>
+    <text x="152.4" y="173.9" class="w-glyph">☉&#xFE0E;</text>
+    <text x="131.8" y="156.5" class="w-deg">15°</text>
+  </g>
+  <g class="w-body">
+    <circle cx="428.1" cy="174.5" r="14" class="w-hit"/>
+    <text x="428.1" y="174.5" class="w-glyph">☽&#xFE0E;</text>
+    <text x="448.8" y="157.2" class="w-deg">8°</text>
+  </g>
+  <g class="w-body">
+    <circle cx="183.9" cy="144.6" r="14" class="w-hit"/>
+    <text x="183.9" y="144.6" class="w-glyph">☿&#xFE0E;</text>
+    <text x="167.9" y="122.8" class="w-deg">2°</text>
+  </g>
+  <g class="w-body">
+    <circle cx="252.7" cy="113.9" r="14" class="w-hit"/>
+    <text x="252.7" y="113.9" class="w-glyph">♀&#xFE0E;</text>
+    <text x="247.1" y="87.5" class="w-deg">8°</text>
+  </g>
+  <g class="w-body">
+    <circle cx="396.1" cy="144.6" r="14" class="w-hit"/>
+    <text x="396.1" y="144.6" class="w-glyph">♂&#xFE0E;</text>
+    <text x="412" y="122.7" class="w-deg">17°</text>
+  </g>
+  <g class="w-body">
+    <circle cx="413" cy="158.6" r="14" class="w-hit"/>
+    <text x="413" y="158.6" class="w-glyph">♃&#xFE0E;</text>
+    <text x="431.4" y="138.9" class="w-deg">11°</text>
+  </g>
+</svg>
+        <p class="tap-hint">Toca un planeta para ver su detalle</p>
+        <div class="ctrl-rows">
+          <div class="ctrl-row">
+            <span class="lab">Casas</span>
+            <span class="chipc on">Placidus</span><span class="chipc">Koch</span><span class="chipc">Igual</span><span class="chipc">Whole</span><span class="chipc">Regiomontanus</span><span class="chipc">Porphyry</span>
+          </div>
+          <div class="ctrl-row">
+            <span class="lab">Zodiaco</span>
+            <span class="chipc on">Tropical</span><span class="chipc">Sideral</span>
+            <span class="pro-toggle"><span class="pro-dot"></span> Modo Pro</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- panel derecho -->
+      <section class="panel detail">
+        <div class="dtabs" role="tablist" aria-label="Detalle de la carta">
+          <span class="dtab on">Núcleo</span>
+          <span class="dtab">Posiciones</span>
+          <span class="dtab">Aspectos</span>
+          <span class="dtab">Balance</span>
+        </div>
+        <div class="dbody">
+          <div class="big3">
+            <article class="big">
+              <span class="big-g">☉&#xFE0E;</span>
+              <span class="big-nm">Sol</span>
+              <span class="big-sg">♒&#xFE0E; Acuario</span>
+              <span class="big-sb">15°57′ · Casa 11 <span class="warn">Exilio</span></span>
+            </article>
+            <article class="big">
+              <span class="big-g">☽&#xFE0E;</span>
+              <span class="big-nm">Luna</span>
+              <span class="big-sg">♏&#xFE0E; Escorpio</span>
+              <span class="big-sb">8°08′ · Casa 8</span>
+            </article>
+            <article class="big">
+              <span class="big-g">Asc</span>
+              <span class="big-nm">Ascendente</span>
+              <span class="big-sg">♓&#xFE0E; Piscis</span>
+              <span class="big-sb">26°06′</span>
+            </article>
+          </div>
+
+          <div class="reading">
+            <span class="p-eyebrow">Lectura del núcleo</span>
+            <p>Tu <b>Sol en Acuario</b> vive en la casa 11, en exilio: brillas cuando la tribu te necesita distinto. Tu <b>Luna en Escorpio</b>, casa 8, siente hondo lo que otros apenas rozan. Y con <b>Ascendente Piscis</b>, el mundo te conoce primero por tu marea.</p>
+          </div>
+
+          <div class="bal">
+            <div>
+              <h4>Elementos</h4>
+              <div class="brow"><span class="l">Fuego</span><span class="t"><span class="f" style="width:0%"></span></span><span class="n">0</span></div>
+              <div class="brow"><span class="l">Tierra</span><span class="t"><span class="f" style="width:33%"></span></span><span class="n">1</span></div>
+              <div class="brow"><span class="l">Aire</span><span class="t"><span class="f" style="width:66%"></span></span><span class="n">2</span></div>
+              <div class="brow"><span class="l dom">Agua</span><span class="t"><span class="f dom" style="width:100%"></span></span><span class="n dom">3</span></div>
+            </div>
+            <div>
+              <h4>Modalidades</h4>
+              <div class="brow"><span class="l">Cardinal</span><span class="t"><span class="f" style="width:20%"></span></span><span class="n">1</span></div>
+              <div class="brow"><span class="l dom">Fija</span><span class="t"><span class="f dom" style="width:100%"></span></span><span class="n dom">5</span></div>
+              <div class="brow"><span class="l">Mutable</span><span class="t"><span class="f" style="width:0%"></span></span><span class="n">0</span></div>
+            </div>
+          </div>
+          <p class="bal-cap">✦ dominantes de tu carta — agua fija: sientes hondo y no sueltas.</p>
+
+          <div>
+            <h4 style="margin:0 0 10px; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--acc); font-family:var(--font-ui)">Patrones</h4>
+            <div class="pats">
+              <span class="pat"><b>Stellium</b> ☽&#xFE0E; ♃&#xFE0E; ♂&#xFE0E; en Escorpio</span>
+              <span class="pat"><b>MC</b> en ♐&#xFE0E; Sagitario</span>
+              <span class="pat"><b>Cuadratura clave</b> ☉&#xFE0E; □ ♂&#xFE0E; · 1.0°</span>
+            </div>
+          </div>
+
+          <p class="d-hint">Toca un planeta en la rueda y te cuento su historia: su don, su sombra y la casa donde vive.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script>
+// Starfield liviano: puntitos con twinkle, densidad del tema (--stars 0.5)
+document.querySelectorAll(".stars").forEach(function (host) {
+  var n = +host.dataset.stars || 100;
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < n; i++) {
+    var s = document.createElement("i");
+    var size = Math.random() < 0.85 ? 1 + Math.random() : 2 + Math.random();
+    s.style.width = s.style.height = size.toFixed(1) + "px";
+    s.style.left = (Math.random() * 100).toFixed(2) + "%";
+    s.style.top = (Math.random() * 100).toFixed(2) + "%";
+    s.style.setProperty("--tw", (3 + Math.random() * 5).toFixed(1) + "s");
+    s.style.setProperty("--td", (-Math.random() * 8).toFixed(1) + "s");
+    s.style.opacity = "0";
+    frag.appendChild(s);
+  }
+  host.appendChild(frag);
+});
+</script>
+</body>
+</html>

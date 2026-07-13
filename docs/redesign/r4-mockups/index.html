@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aluna · R4 — 6 direcciones de desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0f1330; --night-deep: #0a0d24; --gold: #e7c986;
+    --ink: #eceaf6; --muted: rgba(236,234,246,.62);
+    --line: rgba(231,201,134,.22); --glass: rgba(150,150,190,.07);
+  }
+  * { margin: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, var(--night-deep) 100%);
+    min-height: 100vh; color: var(--ink);
+    font-family: "Quicksand", system-ui, sans-serif;
+    padding: 48px clamp(24px, 4vw, 64px) 96px;
+  }
+  header { max-width: 1600px; margin: 0 auto 40px; }
+  .eyebrow { color: var(--gold); letter-spacing: .18em; text-transform: uppercase; font-size: 12px; font-weight: 600; }
+  h1 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: clamp(34px, 4vw, 52px); margin-top: 10px; }
+  .sub { color: var(--muted); margin-top: 10px; max-width: 68ch; line-height: 1.6; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 32px; max-width: 1600px; margin: 0 auto; }
+  .opt {
+    background: var(--glass); border: 1px solid var(--line); border-radius: 22px;
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: transform .35s cubic-bezier(.22,1,.36,1), border-color .35s;
+  }
+  .opt:hover { transform: translateY(-4px); border-color: rgba(231,201,134,.5); }
+  .frame {
+    aspect-ratio: 1440 / 900; position: relative; background: var(--night-deep);
+    border-bottom: 1px solid var(--line); overflow: hidden;
+  }
+  .frame iframe {
+    width: 1440px; height: 3000px; border: 0;
+    transform-origin: top left; position: absolute; top: 0; left: 0;
+    pointer-events: none;
+  }
+  .meta { padding: 18px 22px 20px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .name { font-family: "Cormorant Garamond", Georgia, serif; font-size: 24px; font-weight: 600; }
+  .num { color: var(--gold); font-size: 13px; letter-spacing: .12em; }
+  .open {
+    color: var(--gold); text-decoration: none; font-weight: 600; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 7px 16px; white-space: nowrap;
+  }
+  .open:hover { background: rgba(231,201,134,.12); }
+  .missing { display: grid; place-items: center; height: 100%; color: var(--muted); font-size: 14px; }
+  footer { max-width: 1600px; margin: 48px auto 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+  footer b { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Aluna · Rediseño R4</div>
+  <h1>Seis direcciones para el desktop</h1>
+  <p class="sub">La identidad no cambia (noche + oro, Cormorant + Quicksand, glass + starfield).
+  Lo que cambia es cómo la app habita 1440px — hoy es una columna de teléfono centrada.
+  Cada tarjeta muestra la parte superior de la pantalla <b>Hoy</b> (o Carta en la 04); ábrela completa para ver Hoy + Carta con scroll.</p>
+</header>
+<div class="grid" id="grid"></div>
+<footer>
+  <b>Cómo verlas:</b> "Abrir completa" muestra la dirección a tamaño real (diseñadas a 1440×900, fluidas 1200–1680).
+  Cada archivo contiene las dos pantallas flagship — Hoy y Carta — separadas por un divisor.
+</footer>
+<script>
+  const OPTIONS = [
+    { file: "01-observatorio-lateral.html",  name: "Observatorio lateral",   num: "01" },
+    { file: "02-tres-columnas-dock.html",    name: "Tres columnas · dock de lectura", num: "02" },
+    { file: "03-bento-constelacion.html",    name: "Bento constelación",     num: "03" },
+    { file: "04-rueda-protagonista.html",    name: "La rueda protagonista",  num: "04" },
+    { file: "05-horizonte-editorial.html",   name: "Horizonte editorial",    num: "05" },
+    { file: "06-cupula-topnav.html",         name: "Cúpula · top-nav",       num: "06" },
+  ];
+  const grid = document.getElementById("grid");
+  for (const o of OPTIONS) {
+    const card = document.createElement("div");
+    card.className = "opt";
+    card.innerHTML = `
+      <div class="frame" data-file="${o.file}"></div>
+      <div class="meta">
+        <div><div class="num">OPCIÓN ${o.num}</div><div class="name">${o.name}</div></div>
+        <a class="open" href="${o.file}" target="_blank" rel="noopener">Abrir completa ↗</a>
+      </div>`;
+    grid.appendChild(card);
+  }
+  // Carga cada iframe y escálalo al ancho de su tarjeta (vista 1440px reducida).
+  async function mount() {
+    for (const frame of document.querySelectorAll(".frame")) {
+      const file = frame.dataset.file;
+      try {
+        const head = await fetch(file, { method: "HEAD" });
+        if (!head.ok) throw new Error();
+        const iframe = document.createElement("iframe");
+        iframe.src = file;
+        iframe.loading = "lazy";
+        frame.appendChild(iframe);
+        const scale = () => { iframe.style.transform = `scale(${frame.clientWidth / 1440})`; };
+        scale();
+        new ResizeObserver(scale).observe(frame);
+      } catch {
+        frame.innerHTML = `<div class="missing">⏳ Generándose… recarga en un momento</div>`;
+      }
+    }
+  }
+  mount();
+</script>
+</body>
+</html>

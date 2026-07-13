@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Herramienta de verificación (no es una opción): iframe a 1440×900 scrolleado
+     a una posición, para poder capturar la sección Carta con headless chrome.
+     Uso: _view.html?file=01-observatorio-lateral.html&at=frac  (at = fracción 0..1
+     del scroll total, o un número absoluto de px). -->
+<html>
+<head><meta charset="utf-8"><style>html,body{margin:0;overflow:hidden}iframe{width:1440px;height:900px;border:0;display:block}</style></head>
+<body>
+<iframe id="f"></iframe>
+<script>
+  const q = new URLSearchParams(location.search);
+  const f = document.getElementById("f");
+  f.src = q.get("file");
+  f.onload = () => setTimeout(() => {
+    const doc = f.contentDocument;
+    const max = doc.documentElement.scrollHeight - 900;
+    const at = q.get("at") || "0";
+    const y = at.includes(".") ? Math.round(max * parseFloat(at)) : parseInt(at, 10);
+    f.contentWindow.scrollTo(0, Math.min(Math.max(y, 0), max));
+    // El headless captura en t≈0 y las animaciones de entrada (ceremonia) quedan
+    // en su estado 'from' (opacity 0) — fuérzalas a su estado final. Las infinitas
+    // (twinkle/spin) lanzan al finish(): se saltan, son decorativas.
+    for (const a of doc.getAnimations({ subtree: true })) { try { a.finish(); } catch {} }
+  }, 900);
+</script>
+</body>
+</html>

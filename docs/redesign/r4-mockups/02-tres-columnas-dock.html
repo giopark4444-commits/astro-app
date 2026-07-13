@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="es" data-theme="observatory" data-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aluna · R4 desktop — Tres columnas con dock de lectura</title>
+<!--
+  R4 · Dirección de layout desktop: "TRES COLUMNAS CON DOCK DE LECTURA"
+  Rail izquierdo solo-glifos · columna central de contenido · atril derecho (~360px)
+  de vidrio SIEMPRE visible con la lectura del elemento seleccionado.
+  Lo que en móvil es bottom-sheet, en desktop es un dock persistente.
+  Tokens/copy/geometría: reales, del repo (tokens.css, es.json, @aluna/core).
+  Referencia 1440×900, fluido 1200–1680.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================= Tokens (observatory · dark — copiados de lib/theme/tokens.css) ================= */
+:root{
+  --font-ui:"Quicksand",system-ui,sans-serif;
+  --font-display:"Cormorant Garamond",Georgia,serif;
+  --radius:16px; --radius-lg:22px;
+  --acc:#e7c986; --acc-rgb:231,201,134; --acc-text:var(--acc);
+  --ink-on-acc:#1a1305;
+  --tone-warm:#e0795a; --tone-cool:#7aaae0;
+  --tone-caution:#e0a07a; --tone-caution-rgb:224,160,122;
+  --ease:cubic-bezier(.22,.61,.36,1); --ease-soft:cubic-bezier(.4,0,.2,1); --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --dur:.55s; --dur-fast:.22s;
+  --bg:radial-gradient(125% 85% at 50% -8%,#28316b 0%,#121737 46%,#0a0d24 100%);
+  --surface:rgba(150,150,190,.07);
+  --surface-2:rgba(231,201,134,.06);
+  --ink:#ece7f6; --soft:rgba(233,228,245,.6);
+  --line:rgba(231,201,134,.2);
+  --stars:.5;
+  --glow:0 0 24px rgba(var(--acc-rgb),.42);
+  --glow-soft:0 0 14px rgba(var(--acc-rgb),.28);
+  --elev:0 18px 50px rgba(6,8,24,.45);
+  /* colores de dominio (packages/core/src/constants/colors.ts) */
+  --el-fire:#e0795a; --el-earth:#7fb069; --el-air:#7aaae0; --el-water:#9b8fd6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#05070f;color:var(--ink);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3,.display{font-family:var(--font-display);font-weight:600;margin:0}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+::selection{background:rgba(var(--acc-rgb),.28)}
+
+@keyframes twinkle{0%,100%{opacity:calc(var(--o,.5)*.4)}50%{opacity:var(--o,.5)}}
+@keyframes selPulse{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes glowText{0%,100%{text-shadow:0 0 18px rgba(var(--acc-rgb),.35)}50%{text-shadow:0 0 30px rgba(var(--acc-rgb),.6)}}
+
+/* ================= Escenario: dos capturas apiladas ================= */
+.stage{max-width:1680px;min-width:1200px;margin:0 auto}
+.screen{position:relative;min-height:900px;background:var(--bg);overflow:hidden;
+  display:grid;grid-template-columns:88px minmax(0,1fr) 408px}
+.sky{position:absolute;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--tw,3.4s) var(--ease-soft) infinite;animation-delay:var(--td,0s)}
+
+/* divisor sutil etiquetado entre pantallas */
+.divider{display:flex;align-items:center;gap:18px;padding:26px 48px;background:#05070f}
+.divider .rule{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(var(--acc-rgb),.28),transparent)}
+.divider .lbl{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(231,201,134,.55);white-space:nowrap}
+
+/* ================= Rail izquierdo — solo glifos ================= */
+.rail{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+  padding:26px 0 24px;border-right:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(10,13,36,.32),rgba(10,13,36,.12));backdrop-filter:blur(10px)}
+.brandMark{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--acc-text)}
+.brandMark svg{display:block}
+.railNav{display:flex;flex-direction:column;gap:10px;margin:auto 0}
+.navBtn{width:46px;height:46px;border-radius:14px;border:1px solid transparent;background:transparent;
+  display:grid;place-items:center;color:var(--soft);cursor:pointer;position:relative;
+  transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease)}
+.navBtn:hover{color:var(--ink);background:var(--surface)}
+.navBtn.on{color:var(--acc-text);border-color:rgba(var(--acc-rgb),.45);
+  background:radial-gradient(120% 120% at 50% 0%,rgba(var(--acc-rgb),.16),rgba(var(--acc-rgb),.05));
+  box-shadow:var(--glow-soft)}
+.navBtn.on::after{content:"";position:absolute;left:-21px;top:12px;bottom:12px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent,var(--acc),transparent)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid rgba(var(--acc-rgb),.5);background:rgba(var(--acc-rgb),.12);
+  font-family:var(--font-display);font-style:italic;font-size:17px;color:var(--acc-text)}
+
+/* ================= Columna central ================= */
+.center{position:relative;z-index:1;min-width:0;padding:46px clamp(26px,3vw,44px) 40px clamp(28px,3.3vw,48px);display:flex;flex-direction:column}
+
+.eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--acc-text);font-weight:700}
+.softTxt{color:var(--soft)}
+
+/* ---- HOY: saludo + numerología ---- */
+.greetRow{display:flex;align-items:stretch;justify-content:space-between;gap:36px;margin-bottom:34px}
+.greet .name{font-size:clamp(52px,4.6vw,66px);font-style:italic;line-height:1.02;margin:10px 0 14px}
+.bridge{font-family:var(--font-display);font-style:italic;font-size:18px;line-height:1.5;color:var(--soft);max-width:46ch;margin:0}
+.bridge b{color:var(--acc-text);font-weight:600}
+
+.dayCard{flex-shrink:0;width:clamp(330px,28vw,400px);display:flex;align-items:center;gap:22px;
+  padding:22px 26px;border:1px solid rgba(var(--acc-rgb),.32);border-radius:var(--radius-lg);
+  background:linear-gradient(135deg,rgba(var(--acc-rgb),.13),rgba(var(--acc-rgb),.035) 62%,var(--surface));
+  transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-fast) var(--ease)}
+.dayCard:hover{transform:translateY(-3px);box-shadow:var(--glow-soft)}
+.dayNum{flex-shrink:0;width:66px;text-align:center;font-family:var(--font-display);font-style:italic;
+  font-size:64px;line-height:1;color:var(--acc-text);animation:glowText 5s var(--ease-soft) infinite}
+.daySep{width:1px;align-self:stretch;background:var(--line)}
+.dayBody{display:flex;flex-direction:column;gap:5px;min-width:0}
+.dayBody .eyebrow{font-size:11px;letter-spacing:1.4px}
+.dayMeaning{font-size:14px;line-height:1.5;color:var(--ink)}
+.dayCtx{font-size:11.5px;color:var(--soft);letter-spacing:.3px}
+.dayCtx b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---- HOY: panel Tu energía ---- */
+.energy{border:1px solid var(--line);border-radius:var(--radius-lg);
+  background:linear-gradient(180deg,rgba(var(--acc-rgb),.055),var(--surface) 38%);
+  padding:28px 32px 30px;flex:1;display:flex;flex-direction:column}
+.energyHead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+.energyTitle{font-size:24px}
+.periods{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.period{font-family:var(--font-ui);font-size:11.5px;letter-spacing:.3px;padding:6px 16px;border-radius:999px;
+  border:0;background:transparent;color:var(--soft);cursor:pointer;font-weight:600;
+  transition:color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease)}
+.period:hover{color:var(--ink)}
+.period.on{background:var(--acc);color:var(--ink-on-acc);box-shadow:var(--glow-soft)}
+.barsGrid{display:grid;grid-template-columns:1fr 1fr;gap:26px 44px;align-items:start;align-content:space-evenly;flex:1}
+.bar{padding:4px 2px}
+.barHead{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:8px}
+.barLabel{font-family:var(--font-display);font-size:18px;color:var(--ink)}
+.barScore{font-size:14px;color:var(--soft);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.track{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.fill{display:block;height:100%;border-radius:999px}
+.tone_high{background:var(--acc);box-shadow:var(--glow-soft)}
+.tone_mixed{background:rgba(var(--acc-rgb),.4)}
+.tone_low{background:var(--tone-warm)}
+/* celda seleccionada (Amor): abierta, tintada, conectada al atril */
+.barSel{border:1px solid rgba(var(--acc-rgb),.45);border-radius:var(--radius);
+  background:rgba(var(--acc-rgb),.06);box-shadow:var(--glow-soft);padding:14px 16px 14px}
+.why{display:flex;flex-direction:column;gap:8px;padding-top:12px}
+.driver{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--soft);line-height:1.4;padding:2px 2px}
+.driverGlyphs{font-size:15px;color:var(--ink);flex-shrink:0;letter-spacing:1px}
+.tense .driverGlyphs .asp{color:var(--tone-warm)}
+.fav .driverGlyphs .asp{color:var(--tone-cool)}
+.driverSel{border:1px solid rgba(var(--acc-rgb),.55);background:rgba(var(--acc-rgb),.09);
+  border-radius:12px;padding:8px 12px;color:var(--ink)}
+.dockCue{margin-left:auto;flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--acc-text);white-space:nowrap}
+
+/* ---- CARTA: cabecera ---- */
+.cartaHead{display:flex;align-items:flex-start;justify-content:space-between;gap:32px;margin-bottom:18px}
+.cartaHead .eyeRow{display:flex;align-items:center;gap:10px}
+.enso{color:var(--acc-text);opacity:.9;display:inline-flex}
+.cartaH1{font-size:32px;font-style:italic;margin-top:8px}
+.seg{display:flex;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius)}
+.seg button{border:0;border-radius:11px;background:transparent;color:var(--soft);cursor:pointer;white-space:nowrap;
+  font-family:var(--font-display);font-size:14.5px;line-height:1.15;padding:9px clamp(11px,1.3vw,18px);
+  transition:color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease)}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:linear-gradient(90deg,rgba(var(--acc-rgb),1),rgba(var(--acc-rgb),.8));
+  color:var(--ink-on-acc);font-weight:600;box-shadow:var(--glow-soft)}
+.ctrlRow{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.chipCtl{display:inline-flex;align-items:center;padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface);font-size:11px;font-weight:600;color:var(--soft);cursor:pointer;
+  transition:color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease)}
+.chipCtl:hover{color:var(--ink)}
+.chipCtl.on{color:var(--ink-on-acc);background:linear-gradient(90deg,rgba(var(--acc-rgb),1),rgba(var(--acc-rgb),.8));
+  border-color:transparent;box-shadow:var(--glow-soft)}
+.ctrlDot{color:var(--soft);opacity:.5;margin:0 6px}
+
+/* ---- CARTA: rueda + lateral ---- */
+.cartaGrid{display:grid;grid-template-columns:minmax(320px,530px) minmax(266px,1fr);gap:clamp(24px,2.8vw,44px);align-items:start;flex:1}
+.wheelWrap{position:relative}
+.wheelWrap::before{content:"";position:absolute;inset:6%;border-radius:50%;
+  background:radial-gradient(circle,rgba(var(--acc-rgb),.09),transparent 65%);pointer-events:none}
+.wheel{width:100%;height:auto;display:block}
+.wheelHint{text-align:center;font-size:12px;color:var(--soft);margin:14px 0 0;font-style:italic}
+.wheelHint b{color:var(--acc-text);font-weight:600;font-style:normal}
+
+.sideStack{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.coreRow{display:flex;align-items:center;gap:14px;padding:13px 16px;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--surface);
+  transition:transform var(--dur-fast) var(--ease-spring),border-color var(--dur-fast) var(--ease)}
+.coreRow:hover{transform:translateY(-2px);border-color:rgba(var(--acc-rgb),.45)}
+.coreGlyph{flex-shrink:0;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-family:var(--font-display);font-size:21px;color:var(--acc-text);background:var(--surface-2)}
+.coreBody{display:flex;flex-direction:column;gap:1px;min-width:0}
+.coreName{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--soft);font-weight:700}
+.coreSign{font-size:15px;color:var(--ink)}
+.coreSub{margin-left:auto;text-align:right;font-size:11px;color:var(--soft);flex-shrink:0}
+.coreSel{border-color:rgba(var(--acc-rgb),.6);background:linear-gradient(120deg,rgba(var(--acc-rgb),.13),var(--surface) 70%);box-shadow:var(--glow-soft)}
+.coreSel .coreGlyph{background:rgba(var(--acc-rgb),.18);box-shadow:inset 0 0 0 1px rgba(var(--acc-rgb),.4)}
+.coreSel .coreSub{color:var(--acc-text)}
+.stellium{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(var(--acc-rgb),.4);
+  border-radius:9px;padding:5px 12px;font-size:12px;color:var(--ink);background:var(--surface-2)}
+.stellium .g{color:var(--el-water);letter-spacing:2px}
+
+.balance{margin-top:10px}
+.balanceH{margin:0 0 9px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-text);font-weight:700}
+.balRow{display:grid;grid-template-columns:minmax(88px,104px) 1fr 18px;align-items:center;gap:10px;margin-bottom:6px}
+.balLabel{font-size:12px;color:var(--ink)}
+.balLabel i{color:var(--soft);font-size:10.5px;font-style:normal}
+.balTrack{height:8px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.balFill{display:block;height:100%;border-radius:5px;background:rgba(var(--acc-rgb),.4)}
+.balDom{background:linear-gradient(90deg,rgba(var(--acc-rgb),1),rgba(var(--acc-rgb),.7))}
+.balN{font-size:11px;color:var(--soft);text-align:right}
+
+/* ================= Dock derecho — el ATRIL ================= */
+.dock{position:relative;z-index:2;margin:20px 20px 20px 0;border:1px solid rgba(var(--acc-rgb),.28);
+  border-radius:var(--radius-lg);box-shadow:var(--elev);backdrop-filter:blur(14px);
+  background:linear-gradient(180deg,rgba(var(--acc-rgb),.10),rgba(var(--acc-rgb),.028) 26%,rgba(150,150,190,.06));
+  padding:22px 26px 18px;display:flex;flex-direction:column;overflow:hidden}
+.dockTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dockTop .eyebrow{font-size:10.5px;letter-spacing:2.4px}
+.dockCrumb{font-size:11px;color:var(--soft);margin-bottom:16px}
+.dockCrumb b{color:var(--ink);font-weight:600}
+.dockTitle{font-size:24px;font-style:italic;line-height:1.1}
+.dockSub{font-size:12px;color:var(--soft);margin:6px 0 12px}
+
+.transits{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.tRow{display:flex;align-items:center;gap:11px;padding:7px 12px;border:1px solid transparent;border-radius:12px;
+  cursor:pointer;transition:border-color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease)}
+.tRow:hover{background:var(--surface)}
+.tRow .pair{font-size:16px;color:var(--ink);flex-shrink:0;letter-spacing:1px}
+.tRow.tense .pair .asp{color:var(--tone-warm)}
+.tRow.fluid .pair .asp{color:var(--tone-cool)}
+.tRow .txt{font-size:12px;color:var(--soft);line-height:1.35;min-width:0}
+.tRow .orb{margin-left:auto;flex-shrink:0;font-size:10.5px;color:var(--soft);font-variant-numeric:tabular-nums;text-align:right}
+.tRow.sel{border-color:rgba(var(--acc-rgb),.55);background:rgba(var(--acc-rgb),.09);box-shadow:var(--glow-soft)}
+.tRow.sel .txt{color:var(--ink)}
+.tRow.sel .orb{color:var(--acc-text)}
+
+.dockHero{border-radius:var(--radius);padding:13px 16px;margin-bottom:12px;
+  border:1px solid rgba(var(--tone-caution-rgb),.35);
+  background:linear-gradient(120deg,rgba(224,121,90,.14),rgba(var(--acc-rgb),.05) 70%)}
+.dockHero.air{border-color:rgba(122,170,224,.35);
+  background:linear-gradient(120deg,rgba(122,170,224,.14),rgba(var(--acc-rgb),.05) 70%)}
+.heroGlyphs{font-family:var(--font-display);font-size:30px;line-height:1;color:var(--ink);letter-spacing:6px}
+.heroGlyphs .asp{color:var(--tone-warm)}
+.dockHero.air .heroGlyphs .asp{color:var(--el-air)}
+.heroBig{font-family:var(--font-display);font-size:34px;line-height:1;color:var(--acc-text)}
+.heroKicker{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--soft);font-weight:700;margin-top:8px}
+.heroRow{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tag{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:9px;
+  padding:4px 10px;font-size:11px;color:var(--soft)}
+.tagWarn{border-color:rgba(var(--tone-caution-rgb),.6);color:var(--tone-caution)}
+
+.tiers{display:flex;gap:5px;margin-bottom:6px}
+.tierHint{font-size:11px;font-style:italic;color:var(--soft);margin:0 0 14px}
+
+.readEssence{font-family:var(--font-display);font-size:16px;line-height:1.5;color:var(--ink);margin:0 0 11px}
+.readP{font-size:12.5px;line-height:1.6;color:var(--soft);margin:0 0 10px}
+.readBlock{margin:0 0 12px}
+.readH{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-text);font-weight:700;margin-bottom:4px}
+.readBlock p{margin:0;font-size:13px;line-height:1.6;color:var(--soft)}
+
+.dockFoot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);
+  font-size:11.5px;font-style:italic;color:var(--soft);line-height:1.5}
+.dockFoot b{color:var(--acc-text);font-weight:600;font-style:normal}
+
+/* rueda: estilos SVG (espejo de carta.module.css) */
+.ring{fill:none;stroke:var(--line);stroke-width:1}
+.ringFaint{fill:none;stroke:var(--line);stroke-width:1;opacity:.5}
+.signGlyph{font-size:13px;text-anchor:middle;dominant-baseline:central}
+.cusp{stroke:var(--line);stroke-width:1}
+.cuspAngle{stroke:rgba(var(--acc-rgb),.65);stroke-width:1.5}
+.houseNum{font-size:8px;fill:var(--soft);text-anchor:middle;dominant-baseline:central}
+.angleMark{font-size:9px;font-weight:700;fill:var(--acc-text);text-anchor:middle;dominant-baseline:central}
+.bodyHit{fill:var(--surface-2)}
+.bodyGlyph{font-size:14px;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.bodyDeg{font-size:6.5px;fill:var(--soft);text-anchor:middle;dominant-baseline:central}
+.bodySel{filter:drop-shadow(0 0 5px rgba(231,201,134,.8))}
+.bodySel .bodyGlyph{fill:var(--acc);font-size:15px}
+.bodySel .bodyDeg{fill:var(--acc-text)}
+.selHalo{fill:rgba(var(--acc-rgb),.16);animation:selPulse 3.2s var(--ease-soft) infinite}
+.selRing{fill:rgba(var(--acc-rgb),.2);stroke:var(--acc);stroke-width:1.4}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    animation-delay:0s!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+
+<!-- ══════════════════════ PANTALLA 1 · HOY ══════════════════════ -->
+<section class="screen" id="scrHoy">
+  <div class="sky" aria-hidden="true"></div>
+
+  <!-- rail: nav solo-glifos -->
+  <aside class="rail">
+    <div class="brandMark" title="Aluna">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <path d="M17 3.4a13.6 13.6 0 1 0 9.9 4.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <circle cx="21.5" cy="12.5" r="2.1" fill="currentColor"/>
+      </svg>
+    </div>
+    <nav class="railNav" aria-label="Mundos">
+      <button class="navBtn on" title="Hoy" aria-current="page">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+      </button>
+      <button class="navBtn" title="Números">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><g><circle cx="5.4" cy="5.4" r="1.7"/><circle cx="12" cy="5.4" r="1.7"/><circle cx="18.6" cy="5.4" r="1.7"/><circle cx="5.4" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.6" cy="12" r="1.7"/><circle cx="5.4" cy="18.6" r="1.7"/><circle cx="12" cy="18.6" r="1.7"/><circle cx="18.6" cy="18.6" r="1.7"/></g></svg>
+      </button>
+      <button class="navBtn" title="Carta">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M5.6 5.6l2.3 2.3M16.1 16.1l2.3 2.3M18.4 5.6l-2.3 2.3M7.9 16.1l-2.3 2.3"/></svg>
+      </button>
+      <button class="navBtn" title="Pilares">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.6" y="6" width="3.6" height="13" rx="1.6"/><rect x="10.2" y="3.4" width="3.6" height="17.2" rx="1.6"/><rect x="16.8" y="6" width="3.6" height="13" rx="1.6"/></svg>
+      </button>
+    </nav>
+    <div class="avatar" title="Gio">G</div>
+  </aside>
+
+  <!-- centro: saludo + numerología + energía -->
+  <main class="center">
+    <div class="greetRow">
+      <div class="greet">
+        <span class="eyebrow">Hola · lunes 13 de julio</span>
+        <h1 class="name">Gio</h1>
+        <p class="bridge">El cielo de hoy te pide forma: <b>Saturno afina, grado a grado, tu manera de amar</b>. El atril lo lee a tu derecha.</p>
+      </div>
+
+      <a class="dayCard" href="#" aria-label="Tu día personal es 7. Abrir Números.">
+        <span class="dayNum">7</span>
+        <span class="daySep" aria-hidden="true"></span>
+        <span class="dayBody">
+          <span class="eyebrow">Numerología de hoy</span>
+          <span class="dayMeaning">Día de adentro. Busca silencio: la respuesta vive en tu hondura.</span>
+          <span class="dayCtx">Mes <b>3</b> &nbsp;·&nbsp; Año <b>5</b></span>
+        </span>
+      </a>
+    </div>
+
+    <section class="energy" aria-label="Tu energía">
+      <div class="energyHead">
+        <h2 class="energyTitle">Tu energía</h2>
+        <div class="periods" role="tablist" aria-label="Periodo">
+          <button class="period on" role="tab" aria-selected="true">Hoy</button>
+          <button class="period" role="tab">Semana</button>
+          <button class="period" role="tab">Mes</button>
+          <button class="period" role="tab">Año</button>
+        </div>
+      </div>
+
+      <div class="barsGrid">
+        <!-- Amor: abierta y seleccionada → alimenta el atril -->
+        <div class="bar barSel">
+          <div class="barHead"><span class="barLabel">Amor</span><span class="barScore">62</span></div>
+          <div class="track"><span class="fill tone_mixed" style="width:62%"></span></div>
+          <div class="why">
+            <div class="driver tense driverSel">
+              <span class="driverGlyphs">♄︎ <span class="asp">□</span> ♀︎</span>
+              <span>Saturno Cuadratura tu Venus</span>
+              <span class="dockCue">En el atril →</span>
+            </div>
+            <div class="driver fav">
+              <span class="driverGlyphs">♆︎ <span class="asp">△</span> ♀︎</span>
+              <span>Neptuno Trígono tu Venus</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bar">
+          <div class="barHead"><span class="barLabel">Dinero</span><span class="barScore">48</span></div>
+          <div class="track"><span class="fill tone_low" style="width:48%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="barHead"><span class="barLabel">Trabajo</span><span class="barScore">71</span></div>
+          <div class="track"><span class="fill tone_high" style="width:71%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="barHead"><span class="barLabel">Salud</span><span class="barScore">55</span></div>
+          <div class="track"><span class="fill tone_mixed" style="width:55%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="barHead"><span class="barLabel">Ánimo</span><span class="barScore">67</span></div>
+          <div class="track"><span class="fill tone_high" style="width:67%"></span></div>
+        </div>
+        <div class="bar">
+          <div class="barHead"><span class="barLabel">Suerte</span><span class="barScore">59</span></div>
+          <div class="track"><span class="fill tone_mixed" style="width:59%"></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- atril: el clima de hoy, leído -->
+  <aside class="dock" aria-label="Atril de lectura">
+    <div class="dockTop">
+      <span class="eyebrow">Atril de lectura</span>
+      <span class="enso" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 34 34" fill="none"><path d="M17 3.4a13.6 13.6 0 1 0 9.9 4.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+    <p class="dockCrumb">Desde <b>Tu energía · Amor</b></p>
+    <h2 class="dockTitle">Tu clima de hoy</h2>
+    <p class="dockSub">Lunes 13 de julio · 3 tránsitos tocan tu carta</p>
+
+    <div class="transits" role="tablist" aria-label="Tránsitos de hoy">
+      <div class="tRow tense sel" role="tab" aria-selected="true">
+        <span class="pair">♄︎ <span class="asp">□</span> ♀︎</span>
+        <span class="txt">Saturno Cuadratura tu Venus</span>
+        <span class="orb">0.2° · Aplicativo</span>
+      </div>
+      <div class="tRow tense" role="tab">
+        <span class="pair">☽︎ <span class="asp">☍</span> ♅︎</span>
+        <span class="txt">Luna Oposición tu Urano</span>
+        <span class="orb">1.4° · Separativo</span>
+      </div>
+      <div class="tRow fluid" role="tab">
+        <span class="pair">♂︎ <span class="asp">△</span> ☉︎</span>
+        <span class="txt">Marte Trígono tu Sol</span>
+        <span class="orb">2.1° · Aplicativo</span>
+      </div>
+    </div>
+
+    <div class="dockHero">
+      <div class="heroRow">
+        <span class="heroGlyphs">♄︎<span class="asp">□</span>♀︎</span>
+        <span style="font-family:var(--font-display);font-style:italic;font-size:15px;color:var(--soft)">exacta</span>
+      </div>
+      <div class="heroKicker">El tránsito más nítido de tu cielo</div>
+    </div>
+
+    <div class="chips">
+      <span class="tag tagWarn">Tenso</span>
+      <span class="tag">Orbe 0.2°</span>
+      <span class="tag">Aplicativo</span>
+    </div>
+
+    <p class="readEssence">Saturno, tu maestro interior, toca hoy en ángulo exacto a tu Venus: tu forma de amar, de disfrutar y de reconocer tu propio valor. No susurra — pregunta.</p>
+    <p class="readP">Los cuadrados de Saturno no vienen a quitarte nada: vienen a pesar lo que amas. Tu alma eligió este pulso para distinguir el vínculo que sostiene del que solo acompaña, el placer que nutre del que distrae. Si hoy el afecto se siente más lento, más serio, no es castigo: es el maestro pidiendo forma.</p>
+    <p class="readP">No fuerces calidez; ofrece presencia. Un compromiso pequeño y real — la conversación pendiente, un límite dicho con ternura — vale hoy más que cualquier gesto grande. Lo que ordenes en el amor bajo esta luz, se queda.</p>
+
+    <p class="dockFoot">☉ Abre tu <b>Venus natal</b> en la Carta para leer la raíz de este pulso.</p>
+  </aside>
+</section>
+
+<!-- divisor sutil etiquetado -->
+<div class="divider" role="separator" aria-label="Pantalla 2: Carta">
+  <span class="rule"></span>
+  <span class="lbl">pantalla 2 · carta — mismo shell, el atril lee ahora al sol seleccionado</span>
+  <span class="rule"></span>
+</div>
+
+<!-- ══════════════════════ PANTALLA 2 · CARTA ══════════════════════ -->
+<section class="screen" id="scrCarta">
+  <div class="sky" aria-hidden="true"></div>
+
+  <aside class="rail">
+    <div class="brandMark" title="Aluna">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <path d="M17 3.4a13.6 13.6 0 1 0 9.9 4.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <circle cx="21.5" cy="12.5" r="2.1" fill="currentColor"/>
+      </svg>
+    </div>
+    <nav class="railNav" aria-label="Mundos">
+      <button class="navBtn" title="Hoy">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+      </button>
+      <button class="navBtn" title="Números">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><g><circle cx="5.4" cy="5.4" r="1.7"/><circle cx="12" cy="5.4" r="1.7"/><circle cx="18.6" cy="5.4" r="1.7"/><circle cx="5.4" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.6" cy="12" r="1.7"/><circle cx="5.4" cy="18.6" r="1.7"/><circle cx="12" cy="18.6" r="1.7"/><circle cx="18.6" cy="18.6" r="1.7"/></g></svg>
+      </button>
+      <button class="navBtn on" title="Carta" aria-current="page">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M5.6 5.6l2.3 2.3M16.1 16.1l2.3 2.3M18.4 5.6l-2.3 2.3M7.9 16.1l-2.3 2.3"/></svg>
+      </button>
+      <button class="navBtn" title="Pilares">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.6" y="6" width="3.6" height="13" rx="1.6"/><rect x="10.2" y="3.4" width="3.6" height="17.2" rx="1.6"/><rect x="16.8" y="6" width="3.6" height="13" rx="1.6"/></svg>
+      </button>
+    </nav>
+    <div class="avatar" title="Gio">G</div>
+  </aside>
+
+  <main class="center">
+    <div class="cartaHead">
+      <div>
+        <div class="eyeRow">
+          <span class="eyebrow">Carta Astral</span>
+          <span class="enso" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 34 34" fill="none"><path d="M17 3.4a13.6 13.6 0 1 0 9.9 4.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        </div>
+        <h1 class="cartaH1">Tu cielo de nacimiento</h1>
+      </div>
+      <div class="seg" role="tablist" aria-label="Tipo de carta">
+        <button class="on" role="tab" aria-selected="true">Natal</button>
+        <button role="tab">Tu Clima</button>
+        <button role="tab">Rev. Solar</button>
+        <button role="tab">Progresiones</button>
+      </div>
+    </div>
+
+    <div class="ctrlRow" aria-label="Sistema de casas y zodiaco">
+      <button class="chipCtl on">Placidus</button>
+      <button class="chipCtl">Koch</button>
+      <button class="chipCtl">Iguales</button>
+      <button class="chipCtl">Signo entero</button>
+      <button class="chipCtl">Regiomontano</button>
+      <button class="chipCtl">Porfirio</button>
+      <span class="ctrlDot" aria-hidden="true">·</span>
+      <button class="chipCtl on">Tropical</button>
+      <button class="chipCtl">Sideral</button>
+    </div>
+
+    <div class="cartaGrid">
+      <div>
+        <div class="wheelWrap" id="wheelMount"><!-- SVG real, generado con la geometría de @aluna/core --></div>
+        <p class="wheelHint">Elige un cuerpo en la rueda — su lectura se abre en el atril. <b>El Sol te espera ahí.</b></p>
+      </div>
+
+      <div class="sideStack">
+        <!-- núcleo -->
+        <div class="coreRow coreSel">
+          <span class="coreGlyph">☉︎</span>
+          <span class="coreBody">
+            <span class="coreName">Sol</span>
+            <span class="coreSign">♒︎ Acuario 15°57′</span>
+          </span>
+          <span class="coreSub">Casa 11<br>En exilio</span>
+        </div>
+        <div class="coreRow">
+          <span class="coreGlyph">☽︎</span>
+          <span class="coreBody">
+            <span class="coreName">Luna</span>
+            <span class="coreSign">♏︎ Escorpio 8°00′</span>
+          </span>
+          <span class="coreSub">Casa 8</span>
+        </div>
+        <div class="coreRow">
+          <span class="coreGlyph" style="font-size:13px">Asc</span>
+          <span class="coreBody">
+            <span class="coreName">Ascendente</span>
+            <span class="coreSign">♓︎ Piscis 26°06′</span>
+          </span>
+          <span class="coreSub">26°</span>
+        </div>
+        <div class="coreRow">
+          <span class="coreGlyph" style="font-size:13px">MC</span>
+          <span class="coreBody">
+            <span class="coreName">Medio Cielo</span>
+            <span class="coreSign">♐︎ Sagitario 26°06′</span>
+          </span>
+          <span class="coreSub">Casa 10</span>
+        </div>
+
+        <span class="stellium">✦ Stellium <span class="g">☽︎ ♂︎ ♇︎</span> en Escorpio · Casa 8</span>
+
+        <div class="balance">
+          <h4 class="balanceH">Elementos</h4>
+          <div class="balRow"><span class="balLabel">Agua <i>· Dominante</i></span><span class="balTrack"><span class="balFill balDom" style="width:100%"></span></span><span class="balN">3</span></div>
+          <div class="balRow"><span class="balLabel">Tierra</span><span class="balTrack"><span class="balFill" style="width:66%"></span></span><span class="balN">2</span></div>
+          <div class="balRow"><span class="balLabel">Aire</span><span class="balTrack"><span class="balFill" style="width:33%"></span></span><span class="balN">1</span></div>
+          <div class="balRow"><span class="balLabel">Fuego</span><span class="balTrack"><span class="balFill" style="width:0%"></span></span><span class="balN">0</span></div>
+        </div>
+        <div class="balance">
+          <h4 class="balanceH">Modalidades</h4>
+          <div class="balRow"><span class="balLabel">Fija <i>· Dominante</i></span><span class="balTrack"><span class="balFill balDom" style="width:100%"></span></span><span class="balN">4</span></div>
+          <div class="balRow"><span class="balLabel">Cardinal</span><span class="balTrack"><span class="balFill" style="width:50%"></span></span><span class="balN">2</span></div>
+          <div class="balRow"><span class="balLabel">Mutable</span><span class="balTrack"><span class="balFill" style="width:0%"></span></span><span class="balN">0</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- atril: el Sol seleccionado, leído -->
+  <aside class="dock" aria-label="Atril de lectura">
+    <div class="dockTop">
+      <span class="eyebrow">Atril de lectura</span>
+      <span class="enso" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 34 34" fill="none"><path d="M17 3.4a13.6 13.6 0 1 0 9.9 4.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+    <p class="dockCrumb">Desde <b>la rueda · cuerpo seleccionado</b></p>
+    <h2 class="dockTitle">☉︎ Sol</h2>
+    <p class="dockSub">Tu identidad esencial, leída desde tu cielo</p>
+
+    <div class="dockHero air">
+      <div class="heroRow">
+        <span class="heroBig">♒︎ 15°57′</span>
+        <span class="heroGlyphs" style="font-size:26px"><span class="asp">☉︎</span></span>
+      </div>
+      <div class="heroKicker">Acuario · Casa 11 · Aire</div>
+    </div>
+
+    <div class="chips">
+      <span class="tag tagWarn">En exilio</span>
+      <span class="tag">Velocidad 1.01°/d</span>
+      <span class="tag">Casa 11</span>
+    </div>
+
+    <div class="tiers" role="tablist" aria-label="Profundidad de lectura">
+      <button class="chipCtl on" role="tab" aria-selected="true">Esencia</button>
+      <button class="chipCtl" role="tab">Profunda</button>
+      <button class="chipCtl" role="tab">Completa</button>
+    </div>
+    <p class="tierHint">Lo esencial, en pocas líneas.</p>
+
+    <p class="readEssence">Tu Sol es tu identidad esencial, tu propósito y el centro desde donde estás llamado a brillar. Aquí lo vives con originalidad, mirada al futuro y sentido de lo colectivo, en el terreno de los grupos, las amistades, los sueños colectivos y el futuro. Está en exilio: su energía rema a contracorriente, y madura al aprender a integrarla.</p>
+
+    <div class="readBlock">
+      <span class="readH">✦ Su don</span>
+      <p>Cuando lo habitas, irradias presencia, voluntad y un sentido claro de quién eres.</p>
+    </div>
+    <div class="readBlock">
+      <span class="readH">◐ Su sombra</span>
+      <p>En sombra, el ego brilla para ser aprobado, busca afuera lo que ya es y olvida su propia luz.</p>
+    </div>
+
+    <p class="dockFoot">La rueda responde: <b>tu Sol brilla en oro</b> mientras lo lees. Elige otro cuerpo para cambiar la lectura.</p>
+  </aside>
+</section>
+
+</div>
+
+<script>
+/* ---------- Starfield liviano (twinkle, --stars 0.5 del tema) ---------- */
+(function(){
+  var seed = 7;
+  function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  document.querySelectorAll(".sky").forEach(function(sky){
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < 130; i++){
+      var s = document.createElement("span");
+      s.className = "star";
+      var size = rnd() < 0.82 ? 1 : 2;
+      s.style.width = size + "px"; s.style.height = size + "px";
+      s.style.left = (rnd() * 100).toFixed(2) + "%";
+      s.style.top = (rnd() * 100).toFixed(2) + "%";
+      s.style.setProperty("--o", (0.15 + rnd() * 0.5).toFixed(2));
+      s.style.setProperty("--tw", (2.6 + rnd() * 4).toFixed(2) + "s");
+      s.style.setProperty("--td", (-rnd() * 6).toFixed(2) + "s");
+      frag.appendChild(s);
+    }
+    sky.appendChild(frag);
+  });
+})();
+
+/* ---------- La rueda: geometría REAL de @aluna/core (wheel-geometry.ts) ---------- */
+(function(){
+  var W = { CX:180, CY:180, R_SIGN_OUT:166, R_SIGN_IN:136, R_SIGN_GLYPH:151,
+            R_HOUSE_IN:58, R_HOUSE_NUM:66, R_BODY:114, R_ASPECT:94 };
+  function pointAt(r, lon, asc){
+    var a = ((180 + (lon - asc)) * Math.PI) / 180;
+    return [W.CX + r * Math.cos(a), W.CY - r * Math.sin(a)];
+  }
+  function annularSector(rOut, rIn, lonA, lonB, asc){
+    var p1o = pointAt(rOut, lonA, asc), p2o = pointAt(rOut, lonB, asc);
+    var p2i = pointAt(rIn, lonB, asc), p1i = pointAt(rIn, lonA, asc);
+    return "M " + p1o[0] + " " + p1o[1] + " A " + rOut + " " + rOut + " 0 0 0 " + p2o[0] + " " + p2o[1] +
+           " L " + p2i[0] + " " + p2i[1] + " A " + rIn + " " + rIn + " 0 0 1 " + p1i[0] + " " + p1i[1] + " Z";
+  }
+  function spreadBodies(bodies, gap){
+    var sorted = bodies.slice().sort(function(a,b){ return a.lon - b.lon; });
+    var out = {}, last = -1000;
+    sorted.forEach(function(b){
+      var a = (b.lon - last < gap) ? last + gap : b.lon;
+      out[b.key] = a; last = a;
+    });
+    return out;
+  }
+
+  /* colores de dominio (packages/core/src/constants/colors.ts, byte-idénticos) */
+  var ELEMENT_INK = { fire:"#e0795a", earth:"#7fb069", air:"#7aaae0", water:"#9b8fd6" };
+  var ELEMENT_FILL = { fire:"rgba(224,121,90,0.12)", earth:"rgba(127,176,105,0.12)",
+                       air:"rgba(122,170,224,0.12)", water:"rgba(150,140,214,0.12)" };
+  var ASPECT_COLORS = { hard:"rgba(224,121,90,0.55)", soft:"rgba(122,170,224,0.5)", neutral:"rgba(231,201,134,0.4)" };
+  var VS = "︎";
+  var SIGNS = [
+    ["♈","fire"],["♉","earth"],["♊","air"],["♋","water"],
+    ["♌","fire"],["♍","earth"],["♎","air"],["♏","water"],
+    ["♐","fire"],["♑","earth"],["♒","air"],["♓","water"]
+  ];
+
+  /* la carta de Gio: Asc ♓ 26°06′ = 356.1 · Sol ♒ 15°57′ c11 (SELECCIONADO) ·
+     stellium ♏ (☽ ♂ ♇, c8) · Venus ♑ c10 · Urano ♑ c10 · MC ♐ 26° */
+  var ASC = 356.1;
+  var BODIES = [
+    { key:"sun",    glyph:"☉", lon:315.95, deg:"15°", sel:true },
+    { key:"moon",   glyph:"☽", lon:218.0,  deg:"8°"  },
+    { key:"venus",  glyph:"♀", lon:295.4,  deg:"25°" },
+    { key:"mars",   glyph:"♂", lon:224.0,  deg:"14°" },
+    { key:"uranus", glyph:"♅", lon:282.0,  deg:"12°" },
+    { key:"pluto",  glyph:"♇", lon:230.0,  deg:"20°" }
+  ];
+  var ASPECTS = [
+    { a:"sun",   b:"mars",   h:"hard"    },   /* ☉ □ ♂ */
+    { a:"venus", b:"pluto",  h:"soft"    },   /* ♀ ⚹ ♇ */
+    { a:"mars",  b:"pluto",  h:"neutral" },   /* ♂ ☌ ♇ */
+    { a:"moon",  b:"uranus", h:"soft"    }    /* ☽ ⚹ ♅ */
+  ];
+  var ANGLES = [["AC",0],["IC",3],["DC",6],["MC",9]];
+
+  var cusps = [];
+  for (var i = 0; i < 12; i++) cusps.push((ASC + i * 30) % 360);
+  var disp = spreadBodies(BODIES, 7);
+  var lonOf = {};
+  BODIES.forEach(function(b){ lonOf[b.key] = disp[b.key] != null ? disp[b.key] : b.lon; });
+
+  var s = '<svg viewBox="0 0 360 360" class="wheel" role="img" aria-label="Rueda de la carta astral — Sol seleccionado">';
+
+  /* anillos base */
+  [W.R_SIGN_OUT, W.R_SIGN_IN].forEach(function(r){
+    s += '<circle cx="180" cy="180" r="' + r + '" class="ring"/>';
+  });
+  s += '<circle cx="180" cy="180" r="' + W.R_HOUSE_IN + '" class="ringFaint"/>';
+
+  /* sectores de signos tintados por elemento + glifos */
+  SIGNS.forEach(function(sg, idx){
+    var lonA = idx * 30;
+    var g = pointAt(W.R_SIGN_GLYPH, lonA + 15, ASC);
+    s += '<path d="' + annularSector(W.R_SIGN_OUT, W.R_SIGN_IN, lonA, lonA + 30, ASC) + '" fill="' + ELEMENT_FILL[sg[1]] + '"/>';
+    s += '<text x="' + g[0].toFixed(1) + '" y="' + g[1].toFixed(1) + '" class="signGlyph" fill="' + ELEMENT_INK[sg[1]] + '">' + sg[0] + VS + '</text>';
+  });
+  /* divisiones cada 30° */
+  for (var d = 0; d < 12; d++){
+    var po = pointAt(W.R_SIGN_OUT, d * 30, ASC), pi = pointAt(W.R_SIGN_IN, d * 30, ASC);
+    s += '<line x1="' + po[0].toFixed(1) + '" y1="' + po[1].toFixed(1) + '" x2="' + pi[0].toFixed(1) + '" y2="' + pi[1].toFixed(1) + '" class="ring"/>';
+  }
+
+  /* cúspides + números de casa */
+  cusps.forEach(function(c, idx){
+    var p1 = pointAt(W.R_HOUSE_IN, c, ASC), p2 = pointAt(W.R_SIGN_IN, c, ASC);
+    var isAngle = idx === 0 || idx === 3 || idx === 6 || idx === 9;
+    var next = cusps[(idx + 1) % 12];
+    var span = (next - c + 360) % 360;
+    var pn = pointAt(W.R_HOUSE_NUM, c + span / 2, ASC);
+    s += '<line x1="' + p1[0].toFixed(1) + '" y1="' + p1[1].toFixed(1) + '" x2="' + p2[0].toFixed(1) + '" y2="' + p2[1].toFixed(1) + '" class="' + (isAngle ? "cuspAngle" : "cusp") + '"/>';
+    s += '<text x="' + pn[0].toFixed(1) + '" y="' + pn[1].toFixed(1) + '" class="houseNum">' + (idx + 1) + '</text>';
+  });
+  ANGLES.forEach(function(m){
+    var p = pointAt(W.R_SIGN_OUT + 9, cusps[m[1]], ASC);
+    s += '<text x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" class="angleMark">' + m[0] + '</text>';
+  });
+
+  /* líneas de aspecto */
+  ASPECTS.forEach(function(a){
+    var p1 = pointAt(W.R_ASPECT, lonOf[a.a], ASC), p2 = pointAt(W.R_ASPECT, lonOf[a.b], ASC);
+    s += '<line x1="' + p1[0].toFixed(1) + '" y1="' + p1[1].toFixed(1) + '" x2="' + p2[0].toFixed(1) + '" y2="' + p2[1].toFixed(1) + '" stroke="' + ASPECT_COLORS[a.h] + '" stroke-width="1"/>';
+  });
+
+  /* cuerpos — el Sol en estado seleccionado (halo + aro + glow) */
+  BODIES.forEach(function(b){
+    var g = pointAt(W.R_BODY, lonOf[b.key], ASC);
+    var t = pointAt(W.R_BODY + 16, lonOf[b.key], ASC);
+    s += '<g class="' + (b.sel ? "bodySel" : "") + '" role="button" aria-label="' + b.key + '">';
+    if (b.sel){
+      s += '<circle cx="' + g[0].toFixed(1) + '" cy="' + g[1].toFixed(1) + '" r="19" class="selHalo"/>';
+      s += '<circle cx="' + g[0].toFixed(1) + '" cy="' + g[1].toFixed(1) + '" r="12.5" class="selRing"/>';
+    } else {
+      s += '<circle cx="' + g[0].toFixed(1) + '" cy="' + g[1].toFixed(1) + '" r="11" class="bodyHit"/>';
+    }
+    s += '<text x="' + g[0].toFixed(1) + '" y="' + g[1].toFixed(1) + '" class="bodyGlyph">' + b.glyph + VS + '</text>';
+    s += '<text x="' + t[0].toFixed(1) + '" y="' + t[1].toFixed(1) + '" class="bodyDeg">' + b.deg + '</text>';
+    s += '</g>';
+  });
+
+  s += '</svg>';
+  document.getElementById("wheelMount").innerHTML = s;
+})();
+</script>
+</body>
+</html>

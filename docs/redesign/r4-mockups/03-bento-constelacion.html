@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="es" data-theme="observatory" data-mode="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aluna — R4 · 03 Bento constelación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ================================================================
+   R4 · Dirección 03 — "Bento constelación"
+   Identidad BLOQUEADA (observatory dark): tokens copiados 1:1 de
+   apps/web/lib/theme/tokens.css. Aquí solo cambia el LAYOUT.
+================================================================ */
+:root {
+  --font-ui: "Quicksand", system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --radius: 16px;
+  --radius-lg: 22px;
+
+  --bg: radial-gradient(125% 85% at 50% -8%, #28316b 0%, #121737 46%, #0a0d24 100%);
+  --surface: rgba(150, 150, 190, 0.07);
+  --surface-2: rgba(231, 201, 134, 0.06);
+  --ink: #ece7f6;
+  --soft: rgba(233, 228, 245, 0.6);
+  --line: rgba(231, 201, 134, 0.2);
+  --acc: #e7c986;
+  --acc-rgb: 231, 201, 134;
+  --ink-on-acc: #1a1305;
+  --stars: 0.5;
+
+  --tone-warm: #e0795a;
+  --tone-cool: #7aaae0;
+
+  /* dominios (mismos ejes que @aluna/core ELEMENT_INK / tonos del tema) */
+  --dom-oro: 231, 201, 134;      /* energía */
+  --dom-noche: 122, 170, 224;    /* clima — azul noche más claro (--tone-cool) */
+  --dom-violeta: 155, 143, 214;  /* números — violeta agua del core */
+  --dom-verde: 127, 176, 105;    /* mantra — verde tierra del core */
+
+  --el-fire: #e0795a;
+  --el-earth: #7fb069;
+  --el-air: #7aaae0;
+  --el-water: #9b8fd6;
+
+  --glow: 0 0 24px rgba(var(--acc-rgb), 0.42);
+  --glow-soft: 0 0 14px rgba(var(--acc-rgb), 0.28);
+  --elev: 0 18px 50px rgba(6, 8, 24, 0.45);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 0.55s;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { background: #0a0d24; }
+body {
+  min-width: 1200px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; margin: 0; }
+::selection { background: rgba(var(--acc-rgb), 0.28); }
+
+@keyframes aluna-reveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes aluna-twinkle {
+  0%, 100% { opacity: calc(var(--stars) * 0.55); }
+  50%      { opacity: calc(var(--stars) * 1); }
+}
+@keyframes aluna-glow {
+  0%, 100% { text-shadow: 0 0 18px rgba(var(--acc-rgb), 0.35); }
+  50%      { text-shadow: 0 0 30px rgba(var(--acc-rgb), 0.6); }
+}
+.reveal { opacity: 0; animation: aluna-reveal var(--dur) var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 70ms); }
+
+/* ---------- marco de las pantallas (captura real: sin bisel) ---------- */
+.divider {
+  max-width: 1680px; min-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 32px;
+  color: var(--soft); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase;
+}
+.divider::before, .divider::after {
+  content: ""; height: 1px; flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(var(--acc-rgb), 0.35), transparent);
+}
+.divider b { color: var(--acc); font-weight: 700; }
+
+.screen {
+  position: relative;
+  height: 900px;
+  max-width: 1680px; min-width: 1200px;
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  border-top: 1px solid rgba(var(--acc-rgb), 0.14);
+  border-bottom: 1px solid rgba(var(--acc-rgb), 0.14);
+}
+.sky { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.sky i {
+  position: absolute; border-radius: 50%;
+  background: #fff;
+  animation: aluna-twinkle var(--tw, 5s) ease-in-out infinite;
+  animation-delay: var(--td, 0s);
+}
+.screen > :not(.sky) { position: relative; z-index: 1; }
+
+/* ---------- barra superior fina ---------- */
+.topbar {
+  flex: 0 0 56px;
+  display: flex; align-items: center; gap: 28px;
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(var(--acc-rgb), 0.14);
+  background: rgba(10, 13, 36, 0.35);
+  backdrop-filter: blur(8px);
+}
+.wordmark {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display); font-size: 24px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--ink);
+}
+.wordmark svg { color: var(--acc); filter: drop-shadow(0 0 6px rgba(var(--acc-rgb), 0.5)); }
+.worlds { display: flex; gap: 6px; margin-left: 18px; }
+.world {
+  position: relative;
+  padding: 8px 16px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; color: var(--soft);
+  text-decoration: none; transition: color 0.22s var(--ease);
+}
+.world:hover { color: var(--ink); }
+.world[data-on] {
+  color: var(--acc);
+}
+.world[data-on]::after {
+  content: ""; position: absolute; left: 50%; bottom: -1px;
+  width: 26px; height: 2px; transform: translateX(-50%);
+  background: var(--acc); border-radius: 2px;
+  box-shadow: var(--glow-soft);
+}
+.topbar .spacer { flex: 1; }
+.datechip {
+  font-size: 12px; color: var(--soft); font-weight: 500;
+  padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, rgba(var(--acc-rgb), 0.9), rgba(var(--acc-rgb), 0.6));
+  color: var(--ink-on-acc); font-weight: 700; font-size: 14px;
+  box-shadow: var(--glow-soft);
+}
+
+/* ---------- saludo compacto ---------- */
+.greet {
+  flex: 0 0 auto;
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 16px 32px 10px;
+}
+.greet .hello { margin: 0; font-size: 14px; color: var(--soft); font-weight: 500; }
+.greet h1 {
+  font-size: 42px; line-height: 1; font-weight: 600;
+  animation: aluna-glow 6s ease-in-out infinite;
+}
+.greet .sub {
+  margin: 0 0 2px auto; font-size: 13px; color: var(--soft); font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+}
+.greet .sub b { color: var(--acc); font-weight: 700; }
+.greet .sub .sep { opacity: 0.4; }
+
+/* ---------- bento ---------- */
+.bento {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+  padding: 0 32px 26px;
+}
+.bcard {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 20px 22px;
+  min-height: 0; min-width: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+/* tintes por dominio — color en superficies grandes, armonizado con la noche */
+.bcard[data-dom="oro"] {
+  background: linear-gradient(145deg, rgba(var(--dom-oro), 0.12), rgba(var(--dom-oro), 0.035) 58%, rgba(150,150,190,0.05));
+  border-color: rgba(var(--dom-oro), 0.32);
+}
+.bcard[data-dom="noche"] {
+  background: linear-gradient(160deg, rgba(var(--dom-noche), 0.13), rgba(var(--dom-noche), 0.04) 62%, rgba(150,150,190,0.05));
+  border-color: rgba(var(--dom-noche), 0.3);
+}
+.bcard[data-dom="violeta"] {
+  background: linear-gradient(150deg, rgba(var(--dom-violeta), 0.14), rgba(var(--dom-violeta), 0.045) 60%, rgba(150,150,190,0.05));
+  border-color: rgba(var(--dom-violeta), 0.32);
+}
+.bcard[data-dom="verde"] {
+  background: linear-gradient(155deg, rgba(var(--dom-verde), 0.12), rgba(var(--dom-verde), 0.035) 62%, rgba(150,150,190,0.05));
+  border-color: rgba(var(--dom-verde), 0.28);
+}
+.eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--acc);
+}
+.bcard[data-dom="noche"] .eyebrow { color: var(--tone-cool); }
+.bcard[data-dom="violeta"] .eyebrow { color: var(--el-water); }
+.bcard[data-dom="verde"] .eyebrow { color: var(--el-earth); }
+
+/* ===================== HOY ===================== */
+/* energía — 2×2, la más grande */
+.energy { grid-column: 1 / 7; grid-row: 1 / 3; }
+.energy .head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+.energy .head h2 { font-size: 26px; font-weight: 600; }
+.seg {
+  margin-left: auto;
+  display: flex; gap: 4px; padding: 4px;
+  background: rgba(10, 13, 36, 0.35); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.seg button {
+  border: 0; border-radius: 11px; padding: 6px 14px;
+  background: transparent; color: var(--soft);
+  font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.seg button[data-on] {
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  color: var(--ink-on-acc); box-shadow: var(--glow-soft); font-weight: 700;
+}
+.bars {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr);
+  column-gap: 28px; row-gap: 4px;
+  align-items: center;
+}
+.bar { display: flex; flex-direction: column; gap: 7px; }
+.bar .lrow { display: flex; align-items: baseline; }
+.bar .lbl { font-size: 15px; font-weight: 700; }
+.bar .score {
+  margin-left: auto; font-family: var(--font-display);
+  font-size: 27px; font-weight: 700; color: var(--acc); line-height: 1;
+}
+.bar[data-tone="low"] .score { color: var(--tone-warm); }
+.bar[data-tone="mixed"] .score { color: var(--ink); }
+.track {
+  height: 10px; border-radius: 999px;
+  background: rgba(10, 13, 36, 0.5);
+  border: 1px solid rgba(var(--acc-rgb), 0.12);
+  overflow: hidden;
+}
+.fill { display: block; height: 100%; border-radius: 999px; }
+.bar[data-tone="high"] .fill {
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 0.65), var(--acc));
+  box-shadow: 0 0 10px rgba(var(--acc-rgb), 0.45);
+}
+.bar[data-tone="mixed"] .fill {
+  background: linear-gradient(90deg, rgba(122, 170, 224, 0.5), var(--tone-cool));
+}
+.bar[data-tone="low"] .fill {
+  background: linear-gradient(90deg, rgba(224, 121, 90, 0.5), var(--tone-warm));
+}
+.bar .why { font-size: 12.5px; color: var(--soft); font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar .why .g { color: var(--acc); font-weight: 600; }
+
+/* clima — 1×2 vertical */
+.weather { grid-column: 7 / 10; grid-row: 1 / 3; }
+.weather .head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.weather .head h2 { font-size: 22px; font-weight: 600; }
+.weather .count {
+  margin-left: auto; font-size: 11px; font-weight: 700; color: var(--tone-cool);
+  border: 1px solid rgba(var(--dom-noche), 0.4); border-radius: 999px; padding: 3px 10px;
+}
+.transits { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+.transit { display: flex; flex-direction: column; gap: 4px; padding: 9px 0; }
+.transit + .transit { border-top: 1px dashed rgba(var(--dom-noche), 0.25); }
+.transit .pair { display: flex; align-items: center; gap: 10px; }
+.transit .glyphs { font-size: 19px; letter-spacing: 0.12em; color: var(--ink); white-space: nowrap; }
+.transit[data-harm="tense"] .glyphs { color: var(--tone-warm); }
+.transit[data-harm="soft"]  .glyphs { color: var(--tone-cool); }
+.transit .orb {
+  margin-left: auto; font-size: 11px; font-weight: 600; color: var(--soft);
+  border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; white-space: nowrap;
+}
+.transit .name { font-size: 14.5px; font-weight: 700; }
+.transit .read { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--soft); font-weight: 500; }
+.weather .foot {
+  margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--tone-cool);
+  letter-spacing: 0.04em;
+}
+
+/* numerología — 1×1 */
+.numday { grid-column: 10 / 13; grid-row: 1 / 2; flex-direction: row; align-items: center; gap: 20px; }
+.numday .n {
+  font-family: var(--font-display); font-size: 96px; font-weight: 700; line-height: 0.9;
+  color: var(--el-water);
+  text-shadow: 0 0 28px rgba(var(--dom-violeta), 0.55);
+}
+.numday .body { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.numday .meaning { font-size: 14px; line-height: 1.4; font-weight: 500; }
+.numday .cycles { display: flex; gap: 8px; font-size: 11px; color: var(--soft); font-weight: 600; }
+.numday .cycles span { border: 1px solid rgba(var(--dom-violeta), 0.3); border-radius: 999px; padding: 3px 9px; }
+.numday .cycles b { color: var(--el-water); }
+
+/* mantra — 1×1 */
+.mantra { grid-column: 10 / 13; grid-row: 2 / 3; justify-content: center; gap: 10px; }
+.mantra q {
+  quotes: "\201C" "\201D";
+  font-family: var(--font-display); font-size: 24px; line-height: 1.28;
+  font-weight: 600; color: var(--ink);
+}
+.mantra q::before, .mantra q::after { color: var(--el-earth); }
+.mantra .src { font-size: 12px; color: var(--soft); font-weight: 500; }
+
+/* CTA preguntar — 2×1 horizontal */
+.ask {
+  grid-column: 1 / 7; grid-row: 3 / 4;
+  flex-direction: row; align-items: center; gap: 18px;
+  background: linear-gradient(120deg, rgba(var(--dom-oro), 0.14), rgba(150,150,190,0.05) 70%);
+  border-color: rgba(var(--dom-oro), 0.4);
+  box-shadow: inset 0 0 40px rgba(var(--dom-oro), 0.05);
+}
+.ask .moon { font-size: 30px; color: var(--acc); text-shadow: 0 0 16px rgba(var(--acc-rgb), 0.6); }
+.ask .body { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+.ask .fakein {
+  display: flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(var(--acc-rgb), 0.3); border-radius: 999px;
+  background: rgba(10, 13, 36, 0.45);
+  padding: 10px 18px; font-size: 14px; color: var(--soft); font-weight: 500;
+}
+.ask .fakein .caret { width: 1px; height: 16px; background: var(--acc); }
+.ask .btn {
+  flex: 0 0 auto;
+  border: 0; border-radius: 999px; padding: 12px 26px;
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.78));
+  color: var(--ink-on-acc); font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer; box-shadow: var(--glow-soft);
+}
+
+/* lentes — 3 tiles 1×⅔ */
+.lens { flex-direction: row; align-items: center; gap: 14px; text-decoration: none; color: inherit;
+  transition: transform 0.22s var(--ease), border-color 0.22s var(--ease), box-shadow 0.22s var(--ease); }
+.lens:hover { transform: translateY(-3px); border-color: rgba(var(--acc-rgb), 0.45); box-shadow: var(--glow-soft); }
+.lens.l1 { grid-column: 7 / 9; grid-row: 3 / 4; }
+.lens.l2 { grid-column: 9 / 11; grid-row: 3 / 4; }
+.lens.l3 { grid-column: 11 / 13; grid-row: 3 / 4; }
+.lens .ic {
+  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 14px;
+  display: grid; place-items: center;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--acc);
+}
+.lens .t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.lens .t b { font-size: 15px; font-weight: 700; }
+.lens .t span { font-size: 11.5px; color: var(--soft); font-weight: 500; white-space: nowrap; }
+
+/* ===================== CARTA ===================== */
+.charthead {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 18px;
+  padding: 18px 32px 14px;
+}
+.charthead .tt { display: flex; flex-direction: column; gap: 3px; }
+.charthead h1 { font-size: 34px; line-height: 1.05; }
+.charthead .ctrls { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 12px; font-size: 12px; color: var(--soft); font-weight: 600;
+}
+.chip b { color: var(--ink); font-weight: 700; }
+
+.bento.carta { grid-template-rows: 1fr 1fr 0.72fr; }
+
+/* rueda — protagonista 2×2 (span total) */
+.wheelcard {
+  grid-column: 1 / 6; grid-row: 1 / 4;
+  background:
+    radial-gradient(90% 70% at 50% 38%, rgba(40, 49, 107, 0.55), rgba(150,150,190,0.04) 75%);
+  border-color: rgba(var(--acc-rgb), 0.32);
+  box-shadow: inset 0 0 60px rgba(var(--acc-rgb), 0.04);
+}
+.wheelcard .head { display: flex; align-items: center; gap: 10px; }
+.wheelcard .head h2 { font-size: 24px; }
+.wheelcard .head .chips { margin-left: auto; display: flex; gap: 7px; }
+.wheelbox { flex: 1; min-height: 0; display: grid; place-items: center; padding: 6px 0 0; }
+.wheelbox svg { height: 100%; max-height: 590px; aspect-ratio: 1; overflow: visible; }
+.wheelcard .hint { text-align: center; font-size: 12px; color: var(--soft); font-weight: 500; padding-top: 6px; }
+.wheelcard .hint .g { color: var(--acc); }
+
+/* posiciones — vertical */
+.positions { grid-column: 6 / 10; grid-row: 1 / 3; }
+.positions .head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.positions .head h2 { font-size: 22px; }
+.positions .head span { margin-left: auto; font-size: 11.5px; color: var(--soft); font-weight: 600; }
+.poslist { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: space-evenly; }
+.posrow {
+  display: grid; grid-template-columns: 1.35fr 1.15fr 0.62fr 0.88fr;
+  align-items: center; gap: 8px;
+  padding: 5px 0; font-size: 13.5px;
+}
+.posrow + .posrow { border-top: 1px solid rgba(236, 231, 246, 0.07); }
+.posrow .b { display: flex; align-items: center; gap: 9px; font-weight: 600; }
+.posrow .b .g { width: 20px; text-align: center; font-size: 16px; }
+.posrow .s { color: var(--soft); font-weight: 500; font-variant-numeric: tabular-nums; }
+.posrow .s .g { margin-right: 4px; }
+.posrow .h { color: var(--soft); font-size: 12px; font-weight: 600; }
+.posrow .d { text-align: right; }
+.tag {
+  display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+  border-radius: 999px; padding: 2.5px 9px;
+  border: 1px solid var(--line); color: var(--acc);
+}
+.tag.warn { color: #e0a07a; border-color: rgba(224, 160, 122, 0.45); }
+.tag.dom  { color: var(--el-water); border-color: rgba(155, 143, 214, 0.45); }
+.el-fire  { color: var(--el-fire); }
+.el-earth { color: var(--el-earth); }
+.el-air   { color: var(--el-air); }
+.el-water { color: var(--el-water); }
+
+/* balance de elementos — chica, barras tintadas por elemento */
+.balance { grid-column: 10 / 13; grid-row: 1 / 2; }
+.balance .head { display: flex; align-items: center; margin-bottom: 6px; }
+.balance .head h2 { font-size: 20px; }
+.balance .head .tag { margin-left: auto; }
+.ebars { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+.ebar { display: grid; grid-template-columns: 62px 1fr 18px; align-items: center; gap: 12px; }
+.ebar .l { font-size: 13px; font-weight: 600; }
+.ebar .n { font-family: var(--font-display); font-size: 19px; font-weight: 700; text-align: right; }
+.ebar .track { height: 9px; }
+.ebar[data-el="fire"]  .fill { background: linear-gradient(90deg, rgba(224,121,90,0.45), var(--el-fire)); }
+.ebar[data-el="earth"] .fill { background: linear-gradient(90deg, rgba(127,176,105,0.45), var(--el-earth)); }
+.ebar[data-el="air"]   .fill { background: linear-gradient(90deg, rgba(122,170,224,0.45), var(--el-air)); }
+.ebar[data-el="water"] .fill { background: linear-gradient(90deg, rgba(155,143,214,0.45), var(--el-water));
+  box-shadow: 0 0 10px rgba(155, 143, 214, 0.5); }
+
+/* núcleo Sol/Luna/Asc — chica */
+.core { grid-column: 10 / 13; grid-row: 2 / 3; }
+.core .head h2 { font-size: 20px; margin-bottom: 4px; }
+.corelist { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+.corerow { display: flex; align-items: center; gap: 12px; }
+.corerow .g {
+  width: 38px; height: 38px; flex: 0 0 auto; border-radius: 12px;
+  display: grid; place-items: center; font-size: 19px;
+  border: 1px solid rgba(var(--acc-rgb), 0.3); background: var(--surface-2); color: var(--acc);
+}
+.corerow .t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.corerow .t b { font-size: 14.5px; font-weight: 700; }
+.corerow .t span { font-size: 12px; color: var(--soft); font-weight: 500; }
+.corerow .tag { margin-left: auto; }
+
+/* aspectario — ancha, celdas en columnas */
+.aspects { grid-column: 6 / 13; grid-row: 3 / 4; }
+.aspects .head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.aspects .head h2 { font-size: 20px; }
+.legend { margin-left: auto; display: flex; gap: 14px; font-size: 11.5px; color: var(--soft); font-weight: 600; }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.legend .hard i { background: var(--tone-warm); }
+.legend .soft i { background: var(--tone-cool); }
+.legend .neut i { background: var(--acc); }
+.asplist { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.asp {
+  border: 1px solid rgba(236, 231, 246, 0.09); border-radius: var(--radius);
+  background: rgba(10, 13, 36, 0.28);
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 4px; justify-content: center; min-width: 0;
+}
+.asp .pair { font-size: 19px; letter-spacing: 0.1em; font-weight: 600; }
+.asp[data-harm="hard"] .pair .a { color: var(--tone-warm); }
+.asp[data-harm="soft"] .pair .a { color: var(--tone-cool); }
+.asp[data-harm="neutral"] .pair .a { color: var(--acc); }
+.asp .name { font-size: 13px; font-weight: 600; }
+.asp .orb { font-size: 11.5px; color: var(--soft); font-weight: 500; }
+
+/* ---------- rueda SVG ---------- */
+.ring       { fill: none; stroke: rgba(231, 201, 134, 0.28); stroke-width: 1; }
+.ringFaint  { fill: none; stroke: rgba(231, 201, 134, 0.14); stroke-width: 1; }
+.signGlyph  { font-size: 13px; text-anchor: middle; dominant-baseline: central; font-family: var(--font-ui); }
+.cusp       { stroke: rgba(236, 231, 246, 0.14); stroke-width: 1; }
+.cuspAngle  { stroke: rgba(231, 201, 134, 0.45); stroke-width: 1.4; }
+.houseNum   { font-size: 7.5px; fill: rgba(233, 228, 245, 0.45); text-anchor: middle; dominant-baseline: central; }
+.angleMark  { font-size: 8.5px; font-weight: 700; fill: var(--acc); text-anchor: middle; dominant-baseline: central; letter-spacing: 0.08em; }
+.bodyGlyph  { font-size: 15px; fill: var(--ink); text-anchor: middle; dominant-baseline: central;
+  paint-order: stroke; stroke: rgba(10, 13, 36, 0.85); stroke-width: 3px; }
+.bodyDeg    { font-size: 7px; fill: rgba(233, 228, 245, 0.55); text-anchor: middle; dominant-baseline: central; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal { opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="divider">R4 · dirección <b>03 — Bento constelación</b> · desktop 1440×900 · fluido 1200–1680</div>
+
+<!-- ============================== PANTALLA 1 · HOY ============================== -->
+<section class="screen" id="hoy">
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="wordmark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 3a9 9 0 1 0 8.4 12.2A9 9 0 0 1 12 3z"></path>
+      </svg>
+      Aluna
+    </span>
+    <nav class="worlds" aria-label="Mundos">
+      <a class="world" data-on href="#hoy">Hoy</a>
+      <a class="world" href="#">Números</a>
+      <a class="world" href="#carta">Carta</a>
+      <a class="world" href="#">Pilares</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="datechip">Lunes, 13 de julio</span>
+    <span class="avatar" aria-label="Perfil de Gio">G</span>
+  </header>
+
+  <div class="greet">
+    <p class="hello">La noche te estaba esperando,</p>
+    <h1>Gio</h1>
+    <p class="sub">
+      <span>Día personal <b>7</b></span><span class="sep">·</span>
+      <span>Luna en Escorpio</span><span class="sep">·</span>
+      <span>tu clima trae <b>2 tensiones</b> y <b>1 regalo</b></span>
+    </p>
+  </div>
+
+  <div class="bento" style="grid-template-rows: 1fr 1fr 0.55fr;">
+
+    <!-- energía · oro · 2×2 -->
+    <article class="bcard energy reveal" data-dom="oro" style="--i:1">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Tu energía</span>
+          <h2>Seis áreas, un mismo cielo</h2>
+        </div>
+        <div class="seg" role="tablist" aria-label="Periodo">
+          <button data-on role="tab" aria-selected="true">Hoy</button>
+          <button role="tab" aria-selected="false">Semana</button>
+          <button role="tab" aria-selected="false">Mes</button>
+          <button role="tab" aria-selected="false">Año</button>
+        </div>
+      </div>
+      <div class="bars">
+        <div class="bar" data-tone="mixed">
+          <div class="lrow"><span class="lbl">Amor</span><span class="score">62</span></div>
+          <span class="track"><span class="fill" style="width:62%"></span></span>
+          <span class="why"><span class="g">♄&#xFE0E; □ ♀&#xFE0E;</span> · el deber pesa sobre el vínculo</span>
+        </div>
+        <div class="bar" data-tone="low">
+          <div class="lrow"><span class="lbl">Dinero</span><span class="score">48</span></div>
+          <span class="track"><span class="fill" style="width:48%"></span></span>
+          <span class="why"><span class="g">♄&#xFE0E; □ ♀&#xFE0E;</span> 0.2° aprieta lo material</span>
+        </div>
+        <div class="bar" data-tone="high">
+          <div class="lrow"><span class="lbl">Trabajo</span><span class="score">71</span></div>
+          <span class="track"><span class="fill" style="width:71%"></span></span>
+          <span class="why"><span class="g">♃&#xFE0E; △ ☉&#xFE0E;</span> · viento a favor en lo que construyes</span>
+        </div>
+        <div class="bar" data-tone="mixed">
+          <div class="lrow"><span class="lbl">Salud</span><span class="score">55</span></div>
+          <span class="track"><span class="fill" style="width:55%"></span></span>
+          <span class="why">sin tránsitos fuertes · terreno neutro</span>
+        </div>
+        <div class="bar" data-tone="high">
+          <div class="lrow"><span class="lbl">Ánimo</span><span class="score">67</span></div>
+          <span class="track"><span class="fill" style="width:67%"></span></span>
+          <span class="why"><span class="g">☽&#xFE0E; ☍ ♅&#xFE0E;</span> · picos, sorpresas, chispa</span>
+        </div>
+        <div class="bar" data-tone="mixed">
+          <div class="lrow"><span class="lbl">Suerte</span><span class="score">59</span></div>
+          <span class="track"><span class="fill" style="width:59%"></span></span>
+          <span class="why"><span class="g">♃&#xFE0E; △ ☉&#xFE0E;</span> suaviza el azar</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- clima · azul noche · 1×2 vertical -->
+    <article class="bcard weather reveal" data-dom="noche" style="--i:2">
+      <div class="head">
+        <div>
+          <span class="eyebrow">☾&#xFE0E; Tu clima de hoy</span>
+          <h2>El cielo en tránsito</h2>
+        </div>
+        <span class="count">3 tránsitos</span>
+      </div>
+      <div class="transits">
+        <div class="transit" data-harm="tense">
+          <div class="pair">
+            <span class="glyphs">♄&#xFE0E; □ ♀&#xFE0E;</span>
+            <span class="orb">0.2° · aplicativo</span>
+          </div>
+          <span class="name">Saturno cuadratura tu Venus</span>
+          <p class="read">El deber toca tu manera de amar: menos promesas hoy, más presencia real.</p>
+        </div>
+        <div class="transit" data-harm="tense">
+          <div class="pair">
+            <span class="glyphs">☽&#xFE0E; ☍ ♅&#xFE0E;</span>
+            <span class="orb">1.4° · separativo</span>
+          </div>
+          <span class="name">Luna oposición tu Urano</span>
+          <p class="read">Un tirón entre lo que sientes y lo que quieres romper. No decidas en el pico.</p>
+        </div>
+        <div class="transit" data-harm="soft">
+          <div class="pair">
+            <span class="glyphs">♃&#xFE0E; △ ☉&#xFE0E;</span>
+            <span class="orb">2.8° · aplicativo</span>
+          </div>
+          <span class="name">Júpiter trígono tu Sol</span>
+          <p class="read">El regalo del día: lo que empieces con calma tiende a crecer solo.</p>
+        </div>
+      </div>
+      <span class="foot">Ver estos tránsitos en tu carta →</span>
+    </article>
+
+    <!-- numerología · violeta · 1×1 -->
+    <article class="bcard numday reveal" data-dom="violeta" style="--i:3">
+      <span class="n" aria-hidden="true">7</span>
+      <div class="body">
+        <span class="eyebrow">Numerología de hoy</span>
+        <p class="meaning" style="margin:0">Día de silencio fértil: hoy se escucha más adentro que afuera.</p>
+        <div class="cycles">
+          <span>Mes personal <b>4</b></span>
+          <span>Año personal <b>8</b></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- mantra · verde · 1×1 -->
+    <article class="bcard mantra reveal" data-dom="verde" style="--i:4">
+      <span class="eyebrow">Mantra del día</span>
+      <q>Lo que hoy calla en ti también está hablando.</q>
+      <span class="src">Nace de tu día 7 · para leer despacio</span>
+    </article>
+
+    <!-- CTA preguntar · 2×1 horizontal -->
+    <article class="bcard ask reveal" style="--i:5">
+      <span class="moon" aria-hidden="true">☽&#xFE0E;</span>
+      <div class="body">
+        <span class="eyebrow">Pregúntale a Aluna</span>
+        <div class="fakein"><span class="caret"></span>¿Por qué mi energía de dinero está a 48 hoy?</div>
+      </div>
+      <button class="btn" type="button">Preguntar ✶&#xFE0E;</button>
+    </article>
+
+    <!-- lentes · 3 tiles chicas -->
+    <a class="bcard lens l1 reveal" href="#" style="--i:6">
+      <span class="ic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 9h16M4 15h16M9 4v16M15 4v16"></path>
+        </svg>
+      </span>
+      <span class="t"><b>Números</b><span>ciclos y vibraciones</span></span>
+    </a>
+    <a class="bcard lens l2 reveal" href="#carta" style="--i:7">
+      <span class="ic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3.5"></circle>
+          <path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21"></path>
+        </svg>
+      </span>
+      <span class="t"><b>Carta</b><span>tu cielo natal</span></span>
+    </a>
+    <a class="bcard lens l3 reveal" href="#" style="--i:8">
+      <span class="ic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M5 4v16M10 4v16M14 4v16M19 4v16M3 4h18M3 20h18"></path>
+        </svg>
+      </span>
+      <span class="t"><b>Pilares</b><span>Ba Zi · Saju</span></span>
+    </a>
+  </div>
+</section>
+
+<div class="divider">pantalla 2 — <b>Carta</b> · mismo shell, bento con la rueda de protagonista</div>
+
+<!-- ============================== PANTALLA 2 · CARTA ============================== -->
+<section class="screen" id="carta">
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="wordmark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 3a9 9 0 1 0 8.4 12.2A9 9 0 0 1 12 3z"></path>
+      </svg>
+      Aluna
+    </span>
+    <nav class="worlds" aria-label="Mundos">
+      <a class="world" href="#hoy">Hoy</a>
+      <a class="world" href="#">Números</a>
+      <a class="world" data-on href="#carta">Carta</a>
+      <a class="world" href="#">Pilares</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="datechip">Lunes, 13 de julio</span>
+    <span class="avatar" aria-label="Perfil de Gio">G</span>
+  </header>
+
+  <div class="charthead">
+    <div class="tt">
+      <span class="eyebrow">Carta astral</span>
+      <h1 class="reveal" style="--i:0">El cielo de tu nacimiento</h1>
+    </div>
+    <div class="ctrls">
+      <div class="seg" role="tablist" aria-label="Tipo de carta">
+        <button data-on role="tab" aria-selected="true">Natal</button>
+        <button role="tab" aria-selected="false">Tránsitos</button>
+        <button role="tab" aria-selected="false">Rev. solar</button>
+        <button role="tab" aria-selected="false">Progresada</button>
+      </div>
+      <span class="chip">Casas <b>Placidus</b></span>
+      <span class="chip">Zodiaco <b>Tropical</b></span>
+    </div>
+  </div>
+
+  <div class="bento carta">
+
+    <!-- rueda · protagonista -->
+    <article class="bcard wheelcard reveal" style="--i:1">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Tu rueda</span>
+          <h2>Asc Piscis 26°06′ · MC Sagitario</h2>
+        </div>
+        <div class="chips">
+          <span class="chip"><b>Stellium</b>&nbsp;en Escorpio</span>
+        </div>
+      </div>
+      <div class="wheelbox">
+        <svg id="wheel" viewBox="0 0 360 360" role="img" aria-label="Rueda de la carta astral de Gio"></svg>
+      </div>
+      <p class="hint">Toca un planeta para leer qué hace en tu vida · <span class="g">☉&#xFE0E; ☽&#xFE0E; ☿&#xFE0E; ♀&#xFE0E; ♂&#xFE0E; ♇&#xFE0E;</span></p>
+    </article>
+
+    <!-- posiciones · vertical -->
+    <article class="bcard positions reveal" style="--i:2">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Posiciones</span>
+          <h2>Dónde vive cada cuerpo</h2>
+        </div>
+        <span>8 cuerpos · 2 ángulos</span>
+      </div>
+      <div class="poslist">
+        <div class="posrow">
+          <span class="b"><span class="g el-air">☉&#xFE0E;</span>Sol</span>
+          <span class="s"><span class="g el-air">♒&#xFE0E;</span>15°57′08″</span>
+          <span class="h">Casa 11</span>
+          <span class="d"><span class="tag warn">Exilio</span></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-water">☽&#xFE0E;</span>Luna</span>
+          <span class="s"><span class="g el-water">♏&#xFE0E;</span>8°14′33″</span>
+          <span class="h">Casa 8</span>
+          <span class="d"><span class="tag warn">Caída</span></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-air">☿&#xFE0E;</span>Mercurio</span>
+          <span class="s"><span class="g el-air">♒&#xFE0E;</span>2°21′47″</span>
+          <span class="h">Casa 11</span>
+          <span class="d"></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-earth">♀&#xFE0E;</span>Venus</span>
+          <span class="s"><span class="g el-earth">♑&#xFE0E;</span>10°12′55″</span>
+          <span class="h">Casa 10</span>
+          <span class="d"></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-water">♂&#xFE0E;</span>Marte</span>
+          <span class="s"><span class="g el-water">♏&#xFE0E;</span>19°03′21″</span>
+          <span class="h">Casa 8</span>
+          <span class="d"><span class="tag dom">Domicilio</span></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-fire">♃&#xFE0E;</span>Júpiter</span>
+          <span class="s"><span class="g el-fire">♌&#xFE0E;</span>3°47′10″ ℞</span>
+          <span class="h">Casa 5</span>
+          <span class="d"></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-fire">♄&#xFE0E;</span>Saturno</span>
+          <span class="s"><span class="g el-fire">♐&#xFE0E;</span>12°30′02″</span>
+          <span class="h">Casa 9</span>
+          <span class="d"></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g el-water">♇&#xFE0E;</span>Plutón</span>
+          <span class="s"><span class="g el-water">♏&#xFE0E;</span>24°55′39″ ℞</span>
+          <span class="h">Casa 8</span>
+          <span class="d"><span class="tag dom">Domicilio</span></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g" style="font-size:11px;color:var(--acc)">AC</span>Ascendente</span>
+          <span class="s"><span class="g el-water">♓&#xFE0E;</span>26°06′12″</span>
+          <span class="h">—</span>
+          <span class="d"></span>
+        </div>
+        <div class="posrow">
+          <span class="b"><span class="g" style="font-size:11px;color:var(--acc)">MC</span>Medio Cielo</span>
+          <span class="s"><span class="g el-fire">♐&#xFE0E;</span>22°41′05″</span>
+          <span class="h">—</span>
+          <span class="d"></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- balance de elementos -->
+    <article class="bcard balance reveal" style="--i:3">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Elementos</span>
+          <h2>Tu balance</h2>
+        </div>
+        <span class="tag dom">Agua dominante</span>
+      </div>
+      <div class="ebars">
+        <div class="ebar" data-el="water">
+          <span class="l el-water">Agua</span>
+          <span class="track"><span class="fill" style="width:100%"></span></span>
+          <span class="n el-water">4</span>
+        </div>
+        <div class="ebar" data-el="fire">
+          <span class="l el-fire">Fuego</span>
+          <span class="track"><span class="fill" style="width:50%"></span></span>
+          <span class="n el-fire">2</span>
+        </div>
+        <div class="ebar" data-el="air">
+          <span class="l el-air">Aire</span>
+          <span class="track"><span class="fill" style="width:50%"></span></span>
+          <span class="n el-air">2</span>
+        </div>
+        <div class="ebar" data-el="earth">
+          <span class="l el-earth">Tierra</span>
+          <span class="track"><span class="fill" style="width:25%"></span></span>
+          <span class="n el-earth">1</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- núcleo Sol / Luna / Asc -->
+    <article class="bcard core reveal" style="--i:4">
+      <div class="head">
+        <span class="eyebrow">Tu núcleo</span>
+        <h2>Sol · Luna · Ascendente</h2>
+      </div>
+      <div class="corelist">
+        <div class="corerow">
+          <span class="g">☉&#xFE0E;</span>
+          <span class="t"><b>Sol en Acuario</b><span>♒&#xFE0E; 15°57′ · Casa 11</span></span>
+          <span class="tag warn">Exilio</span>
+        </div>
+        <div class="corerow">
+          <span class="g">☽&#xFE0E;</span>
+          <span class="t"><b>Luna en Escorpio</b><span>♏&#xFE0E; 8°14′ · Casa 8</span></span>
+          <span class="tag warn">Caída</span>
+        </div>
+        <div class="corerow">
+          <span class="g" style="font-size:12px;font-weight:700">AC</span>
+          <span class="t"><b>Ascendente Piscis</b><span>♓&#xFE0E; 26°06′ · tu umbral</span></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- aspectario · ancho -->
+    <article class="bcard aspects reveal" style="--i:5">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Aspectario</span>
+          <h2>Las conversaciones de tu cielo</h2>
+        </div>
+        <div class="legend">
+          <span class="hard"><i></i>tenso</span>
+          <span class="soft"><i></i>fluido</span>
+          <span class="neut"><i></i>neutro</span>
+        </div>
+      </div>
+      <div class="asplist">
+        <div class="asp" data-harm="hard">
+          <span class="pair">☉&#xFE0E; <span class="a">□</span> ♂&#xFE0E;</span>
+          <span class="name">Sol cuadratura Marte</span>
+          <span class="orb">orb 3.1° · aplicativo</span>
+        </div>
+        <div class="asp" data-harm="soft">
+          <span class="pair">☽&#xFE0E; <span class="a">✶</span> ♀&#xFE0E;</span>
+          <span class="name">Luna sextil Venus</span>
+          <span class="orb">orb 2.0° · separativo</span>
+        </div>
+        <div class="asp" data-harm="neutral">
+          <span class="pair">♂&#xFE0E; <span class="a">☌</span> ♇&#xFE0E;</span>
+          <span class="name">Marte conjunción Plutón</span>
+          <span class="orb">orb 5.9° · aplicativo</span>
+        </div>
+        <div class="asp" data-harm="hard">
+          <span class="pair">☉&#xFE0E; <span class="a">□</span> ☽&#xFE0E;</span>
+          <span class="name">Sol cuadratura Luna</span>
+          <span class="orb">orb 7.7° · separativo</span>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="divider">fin · R4 mockup <b>03 — Bento constelacion</b></div>
+
+<script>
+/* ---------- starfield liviano (determinista) ---------- */
+(function () {
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var skies = document.querySelectorAll(".sky");
+  for (var s = 0; s < skies.length; s++) {
+    var rnd = mulberry32(77 + s * 13);
+    for (var i = 0; i < 70; i++) {
+      var star = document.createElement("i");
+      var size = 0.8 + rnd() * 1.6;
+      star.style.width = size + "px";
+      star.style.height = size + "px";
+      star.style.left = (rnd() * 100).toFixed(2) + "%";
+      star.style.top = (rnd() * 100).toFixed(2) + "%";
+      star.style.setProperty("--tw", (3 + rnd() * 4).toFixed(2) + "s");
+      star.style.setProperty("--td", (-rnd() * 6).toFixed(2) + "s");
+      if (rnd() > 0.82) star.style.background = "#e7c986";
+      skies[s].appendChild(star);
+    }
+  }
+})();
+
+/* ---------- rueda: SVG real simplificado ----------
+   Misma geometria que apps/web chart-wheel.tsx: Ascendente a la
+   IZQUIERDA (9 en punto), longitud creciente en sentido ANTIHORARIO,
+   MC arriba. Colores = ELEMENT_FILL / ELEMENT_INK / ASPECT_COLORS
+   de @aluna/core, byte-identicos. */
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var VS = "︎"; /* presentacion de texto en los glifos */
+  var CX = 180, CY = 180;
+  var R_SIGN_OUT = 166, R_SIGN_IN = 140, R_SIGN_GLYPH = 153;
+  var R_HOUSE_IN = 76, R_HOUSE_NUM = 88, R_BODY = 114, R_ASPECT = 76;
+
+  var ASC = 356.1; /* Piscis 26°06′ */
+  var ELEMENT_INK = { fire: "#e0795a", earth: "#7fb069", air: "#7aaae0", water: "#9b8fd6" };
+  var ELEMENT_FILL = {
+    fire: "rgba(224,121,90,0.12)", earth: "rgba(127,176,105,0.12)",
+    air: "rgba(122,170,224,0.12)", water: "rgba(150,140,214,0.12)"
+  };
+  var HARMONY_STROKE = {
+    hard: "rgba(224,121,90,0.55)", soft: "rgba(122,170,224,0.5)", neutral: "rgba(231,201,134,0.4)"
+  };
+  var SIGN_GLYPHS = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
+  var ELEMENTS = ["fire", "earth", "air", "water"];
+
+  /* carta de Gio (simplificada): stellium Escorpio, Sol Acuario casa 11 */
+  var BODIES = [
+    { key: "sun",     glyph: "☉", lon: 315.95, deg: "15°", retro: false },
+    { key: "moon",    glyph: "☽", lon: 218.24, deg: "8°",  retro: false },
+    { key: "mercury", glyph: "☿", lon: 302.36, deg: "2°",  retro: false },
+    { key: "venus",   glyph: "♀", lon: 280.21, deg: "10°", retro: false },
+    { key: "mars",    glyph: "♂", lon: 229.06, deg: "19°", retro: false },
+    { key: "pluto",   glyph: "♇", lon: 234.93, deg: "24°", retro: true }
+  ];
+  var CUSPS = [356.1, 32, 58, 82, 108, 142, 176.1, 212, 238, 262, 288, 322];
+  var ANGLE_MARKS = [ { k: "AC", c: 0 }, { k: "IC", c: 3 }, { k: "DC", c: 6 }, { k: "MC", c: 9 } ];
+  var ASPECTS = [
+    { a: "sun",  b: "mars",  harm: "hard" },
+    { a: "moon", b: "venus", harm: "soft" },
+    { a: "mars", b: "pluto", harm: "neutral" },
+    { a: "sun",  b: "moon",  harm: "hard" }
+  ];
+
+  function pt(r, lon) {
+    var d = ((lon - ASC) * Math.PI) / 180;
+    return [CX - r * Math.cos(d), CY + r * Math.sin(d)];
+  }
+  function el(name, attrs, text) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text) n.textContent = text;
+    return n;
+  }
+  function sector(rOut, rIn, a, b) {
+    var oa = pt(rOut, a), ob = pt(rOut, b), ib = pt(rIn, b), ia = pt(rIn, a);
+    return "M" + oa[0] + " " + oa[1] +
+      " A" + rOut + " " + rOut + " 0 0 0 " + ob[0] + " " + ob[1] +
+      " L" + ib[0] + " " + ib[1] +
+      " A" + rIn + " " + rIn + " 0 0 1 " + ia[0] + " " + ia[1] + " Z";
+  }
+
+  var svg = document.getElementById("wheel");
+
+  /* anillos base */
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_SIGN_OUT, "class": "ring" }));
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_SIGN_IN, "class": "ring" }));
+  svg.appendChild(el("circle", { cx: CX, cy: CY, r: R_HOUSE_IN, "class": "ringFaint" }));
+
+  /* sectores de signos tintados por elemento + glifos */
+  for (var i = 0; i < 12; i++) {
+    var elem = ELEMENTS[i % 4];
+    svg.appendChild(el("path", { d: sector(R_SIGN_OUT, R_SIGN_IN, i * 30, i * 30 + 30), fill: ELEMENT_FILL[elem] }));
+    var g = pt(R_SIGN_GLYPH, i * 30 + 15);
+    svg.appendChild(el("text", { x: g[0], y: g[1], "class": "signGlyph", fill: ELEMENT_INK[elem] }, SIGN_GLYPHS[i] + VS));
+    var o = pt(R_SIGN_OUT, i * 30), n = pt(R_SIGN_IN, i * 30);
+    svg.appendChild(el("line", { x1: o[0], y1: o[1], x2: n[0], y2: n[1], "class": "ring" }));
+  }
+
+  /* cuspides de casas + numeros + angulos */
+  for (var h = 0; h < 12; h++) {
+    var c = CUSPS[h];
+    var p1 = pt(R_HOUSE_IN, c), p2 = pt(R_SIGN_IN, c);
+    var isAngle = h === 0 || h === 3 || h === 6 || h === 9;
+    svg.appendChild(el("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], "class": isAngle ? "cuspAngle" : "cusp" }));
+    var next = CUSPS[(h + 1) % 12];
+    var span = (next - c + 360) % 360;
+    var np = pt(R_HOUSE_NUM, c + span / 2);
+    svg.appendChild(el("text", { x: np[0], y: np[1], "class": "houseNum" }, String(h + 1)));
+  }
+  for (var m = 0; m < ANGLE_MARKS.length; m++) {
+    var ap = pt(R_SIGN_OUT + 10, CUSPS[ANGLE_MARKS[m].c]);
+    svg.appendChild(el("text", { x: ap[0], y: ap[1], "class": "angleMark" }, ANGLE_MARKS[m].k));
+  }
+
+  /* lineas de aspecto */
+  var byKey = {};
+  for (var b1 = 0; b1 < BODIES.length; b1++) byKey[BODIES[b1].key] = BODIES[b1];
+  for (var a1 = 0; a1 < ASPECTS.length; a1++) {
+    var asp = ASPECTS[a1];
+    var pa = pt(R_ASPECT, byKey[asp.a].lon), pb = pt(R_ASPECT, byKey[asp.b].lon);
+    svg.appendChild(el("line", {
+      x1: pa[0], y1: pa[1], x2: pb[0], y2: pb[1],
+      stroke: HARMONY_STROKE[asp.harm], "stroke-width": 1.3
+    }));
+  }
+
+  /* cuerpos */
+  for (var b2 = 0; b2 < BODIES.length; b2++) {
+    var body = BODIES[b2];
+    var gp = pt(R_BODY, body.lon);
+    var tp = pt(R_BODY + 16, body.lon);
+    svg.appendChild(el("circle", { cx: gp[0], cy: gp[1], r: 11, fill: "transparent" }));
+    svg.appendChild(el("text", { x: gp[0], y: gp[1], "class": "bodyGlyph" }, body.glyph + VS));
+    svg.appendChild(el("text", { x: tp[0], y: tp[1], "class": "bodyDeg" }, body.deg + (body.retro ? "℞" : "")));
+  }
+})();
+</script>
+</body>
+</html>
