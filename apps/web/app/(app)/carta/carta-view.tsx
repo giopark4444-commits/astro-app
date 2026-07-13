@@ -92,6 +92,10 @@ export function CartaView() {
   }, [active, houseSystem, zodiac, kind]);
 
   const ready = state.s === "ready" ? state : null;
+  // Ceremonia de dibujo (R5): solo en el PRIMER chart listo — togglear casas/
+  // zodiaco/kind re-renderiza la misma rueda pero no la re-dibuja.
+  const ceremonyPlayed = useRef(false);
+  const playCeremony = ready !== null && !ceremonyPlayed.current;
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
   const ascSign = ascPos?.sign ?? "";
   const ascDeg = ascPos?.degree ?? 0;
@@ -99,6 +103,9 @@ export function CartaView() {
     const m = new Map<string, BodyPosition>();
     if (ready) for (const b of ready.chart.bodies) m.set(b.body, b);
     return m;
+  }, [ready]);
+  useEffect(() => {
+    if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
 
   if (!active) return null;
@@ -157,8 +164,8 @@ export function CartaView() {
         <>
           {ready.solar && <p className={styles.solar}>☉ {t("solarNotice")}</p>}
 
-          <div className={`${styles.wheelWrap} reveal`} style={{ ["--i" as string]: 1 }}>
-            <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} />
+          <div className={`${styles.wheelWrap} ${playCeremony ? "" : "reveal"}`} style={{ ["--i" as string]: 1 }}>
+            <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} animated={playCeremony} />
           </div>
           <p className={styles.tapHint}>{t("tapHint")}</p>
 
