@@ -513,6 +513,105 @@ export default async function AjustesRedirect({ searchParams }: { searchParams: 
 
 ---
 
+### Task 5: Subida de avatar por ruta server-side (service-role) — decisión de Gio tras Fase 5
+
+**Contexto (hallazgo de la Fase 5):** la subida client-side directa a Storage da 403 RLS
+porque el servicio de Storage de este proyecto NO resuelve `auth.uid()` de los tokens ES256
+(llaves de firma asimétricas): PostgREST sí los verifica (probado: 200 + fila propia), Storage
+no. No es bug del código; es config de plataforma. Gio eligió el refactor a ruta server-side
+con service-role (patrón estándar y seguro), robusto sin importar el problema de Storage.
+
+**Files:**
+- Create: `apps/web/app/api/avatar/route.ts`
+- Create: `apps/web/app/api/avatar/__tests__/route.test.ts`
+- Modify: `apps/web/components/avatar-upload.tsx` (subir vía `fetch("/api/avatar")` en vez del cliente storage)
+- Modify: `apps/web/messages/es.json`, `apps/web/messages/en.json` (opcional: `profile.photoUnavailable` si se quiere distinguir el 503; si no, reusar `photoError`)
+
+**Interfaces:**
+- Consumes: `authenticateRoute` (`@/lib/supabase/route-auth`, devuelve `{ supabase, user }`), `createServiceSupabaseClient` (`@aluna/supabase/server`), `validateAvatarFile`/`avatarPath` (`@/lib/avatar`).
+- Produces: `POST /api/avatar` (multipart `file`) → `{ url }` | error; `AvatarUpload` ahora sube por la ruta.
+
+**SEGURIDAD (el corazón de la tarea):** el path SIEMPRE se deriva de `user.id` de la sesión
+verificada (`authenticateRoute`), NUNCA de un campo del cliente. El único input del cliente es
+el archivo. La validación de tipo/tamaño se REPITE en el server (la del cliente es solo UX; el
+server es el límite de confianza). service-role SOLO en el server, tras verificar identidad.
+
+- [ ] **Step 1: Test que falla** — `apps/web/app/api/avatar/__tests__/route.test.ts`. Mockea `@/lib/supabase/route-auth` (authenticateRoute), `@aluna/supabase/server` (createServiceSupabaseClient con un doble que registra el path del upload) y `process.env.SUPABASE_SERVICE_ROLE_KEY`. Casos:
+  - sin user (`authenticateRoute` → `{user:null}`) → 401, no toca storage.
+  - sin `SUPABASE_SERVICE_ROLE_KEY` → 503 (latente), no toca storage.
+  - archivo inválido (pdf / >5MB) → 400.
+  - éxito: sube al path `${user.id}/avatar` (asertar que el upload recibió EXACTAMENTE ese path, aunque el FormData intente colar otro) + actualiza `profiles_user.avatar_url=path` con `.eq("id", user.id)` + responde `{url}`.
+
+- [ ] **Step 2: Verlo fallar** — `cd apps/web && npx vitest run app/api/avatar/__tests__/route.test.ts` → FAIL.
+
+- [ ] **Step 3: La ruta** — `apps/web/app/api/avatar/route.ts`:
+
+```ts
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
+import { createServiceSupabaseClient } from "@aluna/supabase/server";
+import { validateAvatarFile, avatarPath } from "@/lib/avatar";
+import type { TablesUpdate } from "@aluna/supabase";
+
+// Subida de avatar server-side. El path se deriva de la sesión verificada (NUNCA
+// del cliente) → service-role puede subir sin RLS de storage con seguridad. Nace
+// de la Fase 5: Storage no valida los tokens ES256 del proyecto, así que la
+// subida client-side no es viable; esta ruta es robusta a ese problema.
+export async function POST(req: NextRequest) {
+  const { user } = await authenticateRoute(req);
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return NextResponse.json({ error: "unavailable" }, { status: 503 });
+
+  const form = await req.formData();
+  const file = form.get("file");
+  if (!(file instanceof File)) return NextResponse.json({ error: "nofile" }, { status: 400 });
+
+  const check = validateAvatarFile({ type: file.type, size: file.size });
+  if (!check.ok) return NextResponse.json({ error: check.error }, { status: 400 });
+
+  const path = avatarPath(user.id); // ← de la sesión, no del cliente
+  const svc = createServiceSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey);
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  const up = await svc.storage.from("avatars").upload(path, bytes, { upsert: true, contentType: file.type });
+  if (up.error) return NextResponse.json({ error: "upload" }, { status: 500 });
+
+  const builder = svc.from("profiles_user") as unknown as {
+    update: (v: TablesUpdate<"profiles_user">) => { eq: (c: string, val: string) => Promise<{ error: unknown }> };
+  };
+  const { error: dbErr } = await builder.update({ avatar_url: path }).eq("id", user.id);
+  if (dbErr) return NextResponse.json({ error: "db" }, { status: 500 });
+
+  const { data } = svc.storage.from("avatars").getPublicUrl(path);
+  return NextResponse.json({ url: data.publicUrl });
+}
+```
+
+Verificar la firma real de `createServiceSupabaseClient` y `TablesUpdate` en `@aluna/supabase` (lib/reports/request.ts:51 la usa — copiar su forma). El shim de `.update()` espeja el de `components/avatar-upload.tsx`/`onboarding/actions.ts`.
+
+- [ ] **Step 4: Verlo pasar** — el test de la ruta en verde.
+
+- [ ] **Step 5: Refactor del cliente** — en `components/avatar-upload.tsx`, reemplazar el bloque de subida (storage.upload + getPublicUrl + profiles_user.update) por:
+
+```tsx
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/avatar", { method: "POST", body: fd });
+      if (!res.ok) throw new Error(String(res.status));
+      const { url } = (await res.json()) as { url: string };
+      setUrl(`${url}?v=${Date.now()}`);
+```
+
+Quitar los imports/uso del cliente supabase y de `avatarPath` en el componente si quedan sin uso (la validación client-side con `validateAvatarFile` se queda para feedback instantáneo). No cambia la UI ni los estados busy/error.
+
+- [ ] **Step 6: Gate** — `cd apps/web && npx tsc --noEmit && npx vitest run && rm -rf .next && npx next build`. La suite sube con los tests nuevos de la ruta.
+
+- [ ] **Step 7: Commit** — `git commit -m "feat(r4b1): subida de avatar por ruta server-side (service-role, path de la sesión)"`.
+
+---
+
 ## Self-Review
 
 1. **Cobertura del spec:** avatar Storage + RLS (T1) · subida validada (T2) · página /perfil hero+personas (T3) · preferencias mudadas + /ajustes jubilado + nav/return_url (T4). Las **manifestaciones y el diario son R4b-2** (decisión de Gio: lunar de verdad, motor de efemérides) — fuera de este plan, anotado.
