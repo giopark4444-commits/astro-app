@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/locale";
+import { THEME_COOKIE, MODE_COOKIE } from "@/lib/theme/fouc-script";
 import type { TablesUpdate } from "@aluna/supabase";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
@@ -14,12 +15,20 @@ function settingsBuilder(supabase: Awaited<ReturnType<typeof createClient>>): Se
   return supabase.from("settings") as unknown as SettingsBuilder;
 }
 
-/** Persiste tema/modo (lo llama el ThemeProvider). Fire-and-forget. */
+/**
+ * Persiste tema/modo (lo llama el ThemeProvider). Fire-and-forget.
+ * Además fija las cookies de tema/modo (igual que setLanguage con el locale)
+ * para que el script anti-FOUC del <head> pueda aplicar el tema correcto
+ * antes del primer paint en la próxima carga.
+ */
 export async function persistSettings(patch: SettingsPatch) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await settingsBuilder(supabase).update(patch).eq("user_id", user.id);
+  if (user) await settingsBuilder(supabase).update(patch).eq("user_id", user.id);
+
+  const store = await cookies();
+  if (patch.theme) store.set(THEME_COOKIE, patch.theme);
+  if (patch.light_mode) store.set(MODE_COOKIE, patch.light_mode);
 }
 
 /** Cambia el idioma: persiste en settings + fija la cookie de locale. */
