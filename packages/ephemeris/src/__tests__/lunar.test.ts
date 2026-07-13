@@ -39,6 +39,17 @@ describe("nextLunarPhase", () => {
     expect(days).toBeGreaterThan(29);
     expect(days).toBeLessThan(30);
   });
+
+  // Regresión (review T1): sembrar POCO antes de un cruce real NO debe saltarse
+  // la luna inminente y dar la del mes siguiente. La nueva de 2026-07-14 cae
+  // ~09:44 UTC; desde 09:00 del mismo día el resultado debe ser ESE 14, no agosto.
+  it("no se salta un cruce inminente (from a minutos del cruce)", () => {
+    const iso = nextLunarPhase("new", "2026-07-14T09:00:00Z");
+    expect(iso > "2026-07-14T09:00:00Z").toBe(true);
+    expect(iso.slice(0, 10)).toBe("2026-07-14");
+    const e = elongationAt(iso);
+    expect(Math.min(e, 360 - e)).toBeLessThan(0.05);
+  });
 });
 
 describe("solarReturnDate", () => {
@@ -70,5 +81,16 @@ describe("solarReturnDate", () => {
   it("busca hacia adelante: la fecha devuelta es posterior a 'from'", () => {
     const iso = solarReturnDate(natal, FROM);
     expect(iso > FROM).toBe(true);
+  });
+
+  // Regresión (review T1): la revolución real se desvía ~12h del cumpleaños civil;
+  // desde justo antes de ese candidato NO debe devolver una fecha ANTES de 'from'.
+  it("nunca devuelve una fecha anterior a 'from' (sierra bisiesta)", () => {
+    for (const y of [2024, 2025, 2026, 2027, 2028]) {
+      // 'from' pegado al candidato civil (mediodía UTC del 4 de feb de cada año)
+      const from = `${y}-02-04T12:00:00Z`;
+      const iso = solarReturnDate(natal, from);
+      expect(iso >= from).toBe(true);
+    }
   });
 });
