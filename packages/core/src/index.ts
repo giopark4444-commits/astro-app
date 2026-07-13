@@ -79,3 +79,6 @@ export { STEM_LABELS, BRANCH_LABELS, TEN_GOD_KO, type ScriptLabel } from "./bazi
 
 // Facturación (Aluna Plus / Dodo Payments) — puro, compartido web+móvil
 export { isPlusActive, type SubscriptionStatus, type SubscriptionRow } from "./billing/subscription";
+
+// Manifestaciones — fase derivada del tiempo, puro, RN-safe (sin efemérides)
+export { manifestationPhase, HORIZONS, type Horizon } from "./manifestations/phase";

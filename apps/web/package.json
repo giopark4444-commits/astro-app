@@ -20,6 +20,7 @@
     "@anthropic-ai/sdk": "^0.104.1",
     "@supabase/ssr": "^0.5.2",
     "dodopayments": "^2.42.2",
+    "luxon": "^3.7.2",
     "next": "^15.1.0",
     "next-intl": "^3.26.0",
     "react": "^19.0.0",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
+    "@types/luxon": "^3.7.1",
     "@types/node": "^25.9.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
