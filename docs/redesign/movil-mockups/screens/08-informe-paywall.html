@@ -1,0 +1,130 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe — Aluna Plus</title>
+<script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||'dark';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);padding:24px}
+
+  .header-push{
+    flex:none; display:flex; align-items:center; gap: var(--sp-3);
+    padding: 4px 20px 8px;
+  }
+  .back-btn{
+    width:44px; height:44px; margin-left:-10px; border:0; background:transparent;
+    color:var(--text); display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .back-btn svg{ display:block; }
+
+  .content{ flex:1; display:flex; flex-direction:column; padding: 4px 20px 14px; gap: 16px; overflow:hidden; }
+
+  /* ——— Hero invitación ——— */
+  .hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:26px 22px; }
+  .hero-glyph{ color:var(--acc-text); opacity:.7; }
+  .hero .voice{ font-size:23px; line-height:1.35; }
+  .hero .voice b{ color:var(--acc-text); font-style:normal; }
+  .hero .ui-sm{ max-width:280px; }
+  .badge-pill{
+    display:inline-flex; align-items:center; min-height:auto; padding:6px 14px;
+    border-radius:var(--r-pill); background:var(--acc-faint); color:var(--acc-text);
+    font:600 12px/1 var(--sans); letter-spacing:.2px; margin-top:2px;
+  }
+
+  /* ——— Planes ——— */
+  .plans{ display:flex; flex-direction:column; gap:12px; }
+
+  .plan{
+    display:flex; align-items:center; justify-content:space-between;
+    min-height:72px; padding:16px 18px; border-radius:var(--r-lg);
+  }
+  .plan--mensual{ background:var(--glass); border:1px solid var(--acc-hair); }
+  .plan-name{ font:600 15px/1 var(--sans); color:var(--text); }
+  .plan-price-row{ display:flex; align-items:baseline; gap:4px; }
+  .plan-price{ font-variant-numeric: tabular-nums lining-nums; }
+  .plan--mensual .plan-price{ font:600 28px/1 var(--serif); color:var(--text); }
+
+  .plan--anual{
+    flex-direction:column; align-items:stretch; gap:6px;
+    background:var(--acc-faint); border:1.5px solid var(--acc);
+  }
+  .plan--anual .plan-top-row{ display:flex; align-items:center; justify-content:space-between; }
+  .plan--anual .plan-name-row{ display:flex; align-items:center; gap:8px; }
+  .plan--anual .plan-name{ font-weight:700; }
+  .plan-mini-pill{
+    display:inline-flex; align-items:center; padding:4px 9px; border-radius:var(--r-pill);
+    background:var(--acc); color:var(--on-acc); font:700 11px/1 var(--sans);
+  }
+  .plan--anual .plan-price{ font:600 32px/1 var(--serif); color:var(--acc-text); }
+  .plan-equiv{ align-self:flex-end; }
+
+  /* ——— CTA + legal ——— */
+  .cta-row{ margin-top:4px; }
+  .cta-row .cta{ width:100%; }
+  .legal{ text-align:center; padding:0 14px; margin-top:8px; }
+</style>
+</head><body>
+<div class="phone">
+  <div class="stars">
+    <i style="top:4%;left:12%"></i><i style="top:8%;left:78%"></i><i style="top:14%;left:34%"></i>
+    <i style="top:6%;left:58%"></i><i style="top:18%;left:88%"></i><i style="top:22%;left:6%"></i>
+    <i style="top:26%;left:46%"></i><i style="top:11%;left:22%"></i><i style="top:30%;left:70%"></i>
+    <i style="top:34%;left:16%"></i><i style="top:16%;left:64%"></i><i style="top:38%;left:92%"></i>
+    <i style="top:9%;left:44%"></i><i style="top:41%;left:28%"></i><i style="top:20%;left:8%"></i>
+    <i style="top:44%;left:54%"></i><i style="top:2%;left:66%"></i><i style="top:28%;left:96%"></i>
+    <i style="top:12%;left:52%"></i><i style="top:36%;left:38%"></i>
+  </div>
+
+  <div class="statusbar"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 9v1.5M5.5 7v3.5M9.5 5v5.5M13.5 3v7.5"/></svg><svg width="16" height="12" viewBox="0 0 16 12" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5a10 10 0 0 1 13 0M4 7a6.5 6.5 0 0 1 8 0M6.5 9.5a3 3 0 0 1 3 0"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor" stroke-width="1"><rect x="1" y="1.5" width="20" height="9" rx="2.5"/><rect x="3" y="3.5" width="16" height="5" rx="1" fill="currentColor" stroke="none"/><path d="M23 4.5v3" stroke-linecap="round"/></svg></span></div>
+
+  <div class="header-push">
+    <button class="back-btn" aria-label="Volver">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <span class="eyebrow">INFORMES</span>
+  </div>
+
+  <div class="content">
+    <!-- HERO invitación -->
+    <div class="card card--dashed hero">
+      <svg class="hero-glyph" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a1 1 0 0 1 1 1v17l-5-3-5 3V4a1 1 0 0 1 1-1z"/><path d="M9 8h6M9 11.5h6"/></svg>
+      <p class="voice">Los informes evolutivos son parte de <b>Aluna Plus</b></p>
+      <p class="ui-sm">Tu carta natal y tu Revolución Solar completas, capítulo por capítulo, cada año que cumplas. Escritas desde tu cielo, para releer toda la vida.</p>
+      <span class="badge-pill">14 días de prueba gratis</span>
+    </div>
+
+    <!-- PLANES -->
+    <div class="plans">
+      <div class="plan plan--mensual">
+        <span class="plan-name">Mensual</span>
+        <div class="plan-price-row">
+          <span class="plan-price">$4.99</span>
+          <span class="ui-xs">/mes</span>
+        </div>
+      </div>
+
+      <div class="plan plan--anual">
+        <div class="plan-top-row">
+          <div class="plan-name-row">
+            <span class="plan-name">Anual</span>
+            <span class="plan-mini-pill">2 meses gratis</span>
+          </div>
+        </div>
+        <div class="plan-top-row">
+          <div class="plan-price-row">
+            <span class="plan-price">$39.99</span>
+            <span class="ui-xs">/año</span>
+          </div>
+        </div>
+        <span class="ui-xs plan-equiv">= $3.33 al mes</span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <button class="cta">Comenzar mi prueba</button>
+    </div>
+    <p class="ui-xs legal">Cancela cuando quieras. Numerología y Carta siguen siendo gratis para siempre.</p>
+  </div>
+
+  <div class="homebar"></div>
+</div>
+</body></html>

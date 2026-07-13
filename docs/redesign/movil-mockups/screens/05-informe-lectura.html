@@ -1,0 +1,117 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe — lectura</title>
+<script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||'dark';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);padding:24px}
+
+.rosario-wrap{
+  flex:none; display:flex; align-items:center; gap:12px; padding:6px 20px 14px;
+}
+.rosario-back{
+  width:44px; height:44px; flex:none; margin-left:-10px; display:flex; align-items:center; justify-content:center;
+  background:none; border:0; color:var(--text); padding:0;
+}
+.rosario{
+  flex:1; position:relative; height:5px; display:flex; align-items:center; justify-content:space-between;
+}
+.rosario::before{
+  content:""; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%);
+  height:2px; background:var(--acc-hair); border-radius:2px;
+}
+.rosario::after{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:28%; height:2px; background:var(--acc); border-radius:2px;
+}
+.rosario b{
+  position:relative; width:5px; height:5px; border-radius:50%; background:var(--acc-hair); flex:none;
+}
+.rosario b.on{ background:var(--acc); }
+
+.lectura-cab{
+  flex:none; padding:2px 28px 18px; display:flex; flex-direction:column; gap:8px;
+}
+.lectura-cab .h-serif--lg{ font-style:italic; }
+
+.lectura-scroll{
+  flex:1; overflow:hidden; padding:0 0 8px; display:flex; flex-direction:column;
+}
+
+.intro-block{ padding:0 28px; display:flex; flex-direction:column; gap:14px; }
+
+.franja-capitulo{
+  margin:20px 0 18px; background:var(--acc-faint); padding:14px 0;
+}
+.franja-capitulo .separador{ margin:0 28px; }
+.franja-capitulo .roman{ white-space:nowrap; padding:0 4px; }
+
+.cap-block{ padding:0 28px; display:flex; flex-direction:column; gap:14px; }
+.cap-block .h-serif{ font-style:italic; }
+
+.cap-block.corta{ position:relative; max-height:96px; overflow:hidden; }
+.cap-block.corta::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:64px;
+  background:linear-gradient(180deg, transparent, var(--bg) 88%);
+}
+</style>
+</head><body>
+<div class="phone">
+
+  <div class="stars">
+    <i style="top:5%;left:15%;opacity:.16"></i><i style="top:9%;left:80%;opacity:.14"></i>
+    <i style="top:3%;left:48%;opacity:.12"></i><i style="top:12%;left:28%;opacity:.15"></i>
+    <i style="top:7%;left:64%;opacity:.13"></i><i style="top:16%;left:90%;opacity:.14"></i>
+    <i style="top:20%;left:8%;opacity:.12"></i><i style="top:2%;left:35%;opacity:.15"></i>
+    <i style="top:14%;left:55%;opacity:.13"></i><i style="top:23%;left:72%;opacity:.11"></i>
+    <i style="top:18%;left:40%;opacity:.14"></i><i style="top:10%;left:97%;opacity:.12"></i>
+  </div>
+
+  <div class="statusbar"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 9v1.5M5.5 7v3.5M9.5 5v5.5M13.5 3v7.5"/></svg><svg width="16" height="12" viewBox="0 0 16 12" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5a10 10 0 0 1 13 0M4 7a6.5 6.5 0 0 1 8 0M6.5 9.5a3 3 0 0 1 3 0"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor" stroke-width="1"><rect x="1" y="1.5" width="20" height="9" rx="2.5"/><rect x="3" y="3.5" width="16" height="5" rx="1" fill="currentColor" stroke="none"/><path d="M23 4.5v3" stroke-linecap="round"/></svg></span></div>
+
+  <div class="rosario-wrap">
+    <button class="rosario-back" aria-label="Volver">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>
+    </button>
+    <div class="rosario">
+      <b class="on"></b><b class="on"></b><b></b><b></b><b></b><b></b>
+    </div>
+  </div>
+
+  <div class="lectura-scroll">
+
+    <div class="lectura-cab">
+      <span class="eyebrow">INFORME NATAL</span>
+      <h1 class="h-serif--lg">El mapa con el que llegaste</h1>
+    </div>
+
+    <div class="intro-block">
+      <p class="body-read dropcap">Naciste una noche de Acuario con la Luna sumergida en Escorpio: una mente hecha para el futuro y un corazón que no sabe amar a medias. Este informe no viene a decirte quién eres — viene a recordártelo.</p>
+      <p class="body-read">Léelo despacio. Vuelve a él cuando la vida apriete.</p>
+    </div>
+
+    <div class="franja-capitulo">
+      <div class="separador"><b></b><span class="roman">I · ESENCIA</span><b></b></div>
+    </div>
+
+    <div class="cap-block">
+      <h2 class="h-serif">Quién eres cuando nadie mira</h2>
+      <p class="body-read">Tu Sol en Acuario te pide una vida que se parezca a tus ideas, no a las expectativas que heredaste. Hay en ti una lealtad feroz a lo auténtico: puedes perdonar casi todo, menos tener que fingir.</p>
+      <p class="body-read">El ascendente en Virgo templa ese vuelo: aterrizas las visiones en gestos concretos, en cuidado, en trabajo bien hecho. Cuando esas dos fuerzas se alían, eres imparable; cuando pelean, te exiges perfección hasta en la rebeldía.</p>
+    </div>
+
+    <div class="franja-capitulo">
+      <div class="separador"><b></b><span class="roman">II · CAMINO EMOCIONAL</span><b></b></div>
+    </div>
+
+    <div class="cap-block corta">
+      <h2 class="h-serif">Cómo sientes lo que sientes</h2>
+      <p class="body-read">Tu Luna en Escorpio no siente a medias: o le entrega el alma a algo, o no le interesa…</p>
+    </div>
+
+  </div>
+
+  <div class="homebar"></div>
+
+</div>
+</body></html>

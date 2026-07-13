@@ -1,0 +1,110 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Informe — portada</title>
+<script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||'dark';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+  body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);padding:24px}
+
+  .header-push{
+    flex:none; display:flex; align-items:center; gap: var(--sp-3);
+    padding: 4px 20px 8px;
+  }
+  .back-btn{
+    width:44px; height:44px; margin-left:-10px; border:0; background:transparent;
+    color:var(--text); display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .back-btn svg{ display:block; }
+
+  .content{ flex:1; display:flex; flex-direction:column; padding: 4px 20px 14px; gap: 20px; overflow:hidden; }
+
+  .titlewrap{ display:flex; flex-direction:column; gap:6px; }
+  .titlewrap .h-serif{ font-size:28px; }
+
+  .card-glyph{ position:absolute; top:20px; right:20px; color:var(--acc-text); }
+
+  .card-eyebrow-row{ display:flex; flex-direction:column; gap:8px; padding-right:40px; }
+
+  .card1 .h-serif--lg{ color:var(--text); margin-top:2px; }
+  .card1 .preview{
+    margin-top:12px; font-size:16px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  .actions-row{ display:flex; gap:10px; margin-top:16px; }
+  .actions-row .cta, .actions-row .cta--ghost{ min-height:48px; }
+  .actions-row .cta{ flex:1; }
+  .actions-row .cta--ghost{ padding: 0 20px; }
+
+  .gen-note{ margin-top:10px; }
+
+  .card2 .h-serif--lg{ color:var(--text); margin-top:2px; }
+  .halo-row{ display:flex; align-items:center; gap:12px; margin-top:16px; }
+  .halo-dot{ width:10px; height:10px; border-radius:50%; background:var(--acc); flex:none; }
+  .halo-row .voice{ font-size:15px; }
+  .card2 .cta--ghost{ width:100%; min-height:48px; margin-top:16px; }
+
+  .closing-note{ text-align:center; padding: 0 12px; }
+</style>
+</head><body>
+<div class="phone">
+  <div class="stars">
+    <i style="top:4%;left:12%"></i><i style="top:8%;left:78%"></i><i style="top:14%;left:34%"></i>
+    <i style="top:6%;left:58%"></i><i style="top:18%;left:88%"></i><i style="top:22%;left:6%"></i>
+    <i style="top:26%;left:46%"></i><i style="top:11%;left:22%"></i><i style="top:30%;left:70%"></i>
+    <i style="top:34%;left:16%"></i><i style="top:16%;left:64%"></i><i style="top:38%;left:92%"></i>
+    <i style="top:9%;left:44%"></i><i style="top:41%;left:28%"></i><i style="top:20%;left:8%"></i>
+    <i style="top:44%;left:54%"></i><i style="top:2%;left:66%"></i><i style="top:28%;left:96%"></i>
+    <i style="top:12%;left:52%"></i><i style="top:36%;left:38%"></i>
+  </div>
+
+  <div class="statusbar"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 9v1.5M5.5 7v3.5M9.5 5v5.5M13.5 3v7.5"/></svg><svg width="16" height="12" viewBox="0 0 16 12" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M1.5 4.5a10 10 0 0 1 13 0M4 7a6.5 6.5 0 0 1 8 0M6.5 9.5a3 3 0 0 1 3 0"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor" stroke-width="1"><rect x="1" y="1.5" width="20" height="9" rx="2.5"/><rect x="3" y="3.5" width="16" height="5" rx="1" fill="currentColor" stroke="none"/><path d="M23 4.5v3" stroke-linecap="round"/></svg></span></div>
+
+  <div class="header-push">
+    <button class="back-btn" aria-label="Volver">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <span class="eyebrow">INFORMES</span>
+  </div>
+
+  <div class="content">
+    <div class="titlewrap">
+      <h1 class="h-serif">Informes evolutivos</h1>
+      <p class="ui-sm">Lecturas largas nacidas de tu cielo, escritas para releer.</p>
+    </div>
+
+    <!-- CARD 1 — Carta natal (ready) -->
+    <div class="card card--tinted card1">
+      <svg class="card-glyph" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a1 1 0 0 1 1 1v17l-5-3-5 3V4a1 1 0 0 1 1-1z"/></svg>
+      <div class="card-eyebrow-row">
+        <span class="eyebrow">INFORME NATAL</span>
+        <h2 class="h-serif--lg">Carta natal</h2>
+      </div>
+      <p class="voice preview">Naciste con el Sol en Acuario y la Luna en Escorpio: una mente que vuela y un corazón que bucea…</p>
+      <div class="actions-row">
+        <button class="cta">Leer</button>
+        <button class="cta cta--ghost">Regenerar</button>
+      </div>
+      <p class="ui-xs gen-note">Generado con Hermes · hace 2 días</p>
+    </div>
+
+    <!-- CARD 2 — Revolución solar (generating) -->
+    <div class="card card--dashed card2">
+      <svg class="card-glyph" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="opacity:.4"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke-linecap="round"/></svg>
+      <div class="card-eyebrow-row">
+        <span class="eyebrow">REVOLUCIÓN SOLAR 2026</span>
+        <h2 class="h-serif--lg">Tu año que empieza</h2>
+      </div>
+      <div class="halo-row">
+        <span class="halo"><span class="halo-dot"></span></span>
+        <p class="voice">Aluna está tejiendo tu historia entre los astros. Lo profundo no se apura.</p>
+      </div>
+      <button class="cta cta--ghost">Actualizar</button>
+    </div>
+
+    <p class="ui-xs closing-note">Cada informe se escribe una vez y queda contigo. Puedes regenerarlo cuando cambies.</p>
+  </div>
+
+  <div class="homebar"></div>
+</div>
+</body></html>
