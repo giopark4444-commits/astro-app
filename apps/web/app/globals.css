@@ -12,7 +12,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; }
-a { color: inherit; }
+/* sin subrayado UA: la afordancia la dan el oro/las cards/las flechas (como ya
+   hacían informe/compat/auth/profile-menu localmente; cazado en la Fase 5 de R4a
+   — en modo claro el subrayado default gritaba en hoy/nav) */
+a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }
 ::selection { background: rgba(var(--acc-rgb), 0.28); }
 
