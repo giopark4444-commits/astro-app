@@ -98,18 +98,21 @@ export type Database = {
       };
       profiles_user: {
         Row: {
+          avatar_url: string | null;
           created_at: string;
           display_name: string | null;
           id: string;
           locale: string;
         };
         Insert: {
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id: string;
           locale?: string;
         };
         Update: {
+          avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id?: string;
