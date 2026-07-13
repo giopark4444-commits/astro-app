@@ -173,6 +173,9 @@
 .pro:not([data-pro]) { display: none; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
+  /* sin bottom-nav en desktop: sobra el clearance de 96px (paridad con hoy,
+     hallazgo de la review final) */
+  .wrap { padding-bottom: var(--sp-7); }
   .deskCols {
     display: grid;
     grid-template-columns: 11fr 9fr; /* mockup: rueda 55% / panel 45% */

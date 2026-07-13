@@ -155,3 +155,10 @@
 /* .gatedNote migrado al primitivo global card+card--dashed — ver numerology-view.tsx:
    className="card card--dashed ..." */
 .gatedNote { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); padding: var(--sp-3) var(--sp-4); }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  /* cap intermedio: esta pantalla aún no tiene diseño desktop propio (R4b+);
+     sin esto se estira a los 1280px del shell y la línea de lectura se rompe.
+     Hallazgo de la review final de R4a. */
+  .wrap { max-width: 760px; margin-left: auto; margin-right: auto; }
+}
