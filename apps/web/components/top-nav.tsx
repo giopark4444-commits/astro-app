@@ -6,11 +6,11 @@ import { Icon } from "./icon";
 import styles from "./top-nav.module.css";
 
 // Orden definitivo de Gio (2026-07-13). Perfil → /ajustes hasta que R4b
-// construya el santuario; Horóscopo es sección futura (solo el botón, "pronto").
+// construya el santuario; Horóscopo ya no es "pronto" (T8): página completa.
 const ITEMS = [
   { href: "/hoy", icon: "sun", key: "hoy", soon: false },
   { href: "/carta", icon: "wheel", key: "carta", soon: false },
-  { href: "/horoscopo", icon: "aries", key: "horoscopo", soon: true },
+  { href: "/horoscopo", icon: "aries", key: "horoscopo", soon: false },
   { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
   { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
   { href: "/ajustes", icon: "person", key: "perfil", soon: false },
