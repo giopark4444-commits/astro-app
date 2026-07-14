@@ -8,6 +8,7 @@ import {
   type AreaDriver,
 } from "@aluna/core";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
+import { AreaBars, type BarArea } from "@/components/area-bars";
 import styles from "./energy.module.css";
 
 type Period = "today" | "week" | "month" | "year";
@@ -53,7 +54,6 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
   const L = astroLabels(locale);
   const [period, setPeriod] = useState<Period>("today");
   const [areas, setAreas] = useState<AreaScore[] | null>(null);
-  const [open, setOpen] = useState<LifeArea | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -99,54 +99,21 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
       {areas === null ? (
         <p className={styles.loading}>{t("hoy.energyLoading")}</p>
       ) : areas.length > 0 ? (
-        <div className={styles.bars}>
-          {areas.map((a, i) => {
-            const expanded = open === a.area;
-            return (
-              <div key={a.area} className={`${styles.bar} reveal`} style={{ ["--i" as string]: i }}>
-                <button
-                  type="button"
-                  className={styles.barHead}
-                  onClick={() => setOpen(expanded ? null : a.area)}
-                  aria-expanded={expanded}
-                >
-                  <span className={styles.barLabel}>{t(`hoy.${AREA_KEY[a.area]}`)}</span>
-                  <span className={styles.barScore}>{a.score}</span>
-                </button>
-                <div className={styles.track}>
-                  <span
-                    className={`${styles.fill} ${styles[`tone_${a.tone}`] ?? ""}`}
-                    style={{ width: `${a.score}%` }}
-                    role="img"
-                    aria-label={t(`hoy.${TONE_KEY[a.tone]}`)}
-                  />
-                </div>
-                {expanded && (
-                  <div className={styles.why}>
-                    {a.drivers.length === 0 ? (
-                      <span className={styles.calm}>{t("hoy.calm")}</span>
-                    ) : (
-                      a.drivers.map((d, j) => (
-                        <span
-                          key={j}
-                          className={`${styles.driver} ${d.favorable ? styles.fav : styles.tense}`}
-                        >
-                          <span className={styles.driverGlyphs}>
-                            {PLANET_GLYPH[d.transit]} {ASPECT_GLYPHS[d.aspect]} {PLANET_GLYPH[d.natal]}
-                          </span>
-                          <span className={styles.driverText}>
-                            {L.bodies[d.transit]} {L.aspects[d.aspect]} {t("carta.yourPossessive")}{" "}
-                            {L.bodies[d.natal]}
-                          </span>
-                        </span>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <AreaBars
+          calmText={t("hoy.calm")}
+          areas={areas.map((a): BarArea => ({
+            key: a.area,
+            label: t(`hoy.${AREA_KEY[a.area]}`),
+            score: a.score,
+            tone: a.tone,
+            toneLabel: t(`hoy.${TONE_KEY[a.tone]}`),
+            drivers: a.drivers.map((d) => ({
+              glyphs: `${PLANET_GLYPH[d.transit]} ${ASPECT_GLYPHS[d.aspect]} ${PLANET_GLYPH[d.natal]}`,
+              text: `${L.bodies[d.transit]} ${L.aspects[d.aspect]} ${t("carta.yourPossessive")} ${L.bodies[d.natal]}`,
+              favorable: d.favorable,
+            })),
+          }))}
+        />
       ) : null}
     </section>
   );
