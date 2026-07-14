@@ -70,3 +70,18 @@ export async function insertRemoteProfile(
   if (error || !data) throw new Error(error?.message ?? "No se pudo crear el perfil");
   return rowToProfile(data);
 }
+
+/** Todos los birth_profiles del usuario (RLS ya limita a los suyos), más viejo primero
+ *  — el índice 0 es el perfil "activo" por convención de creación. Para el picker de
+ *  Compatibilidad (elegir entre TÚ + las demás personas guardadas). */
+export async function fetchAllProfiles(
+  supabase: AlunaSupabaseClient,
+  userId: string,
+): Promise<Profile[]> {
+  const { data } = await supabase
+    .from("birth_profiles")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+  return (data ?? []).map(rowToProfile);
+}

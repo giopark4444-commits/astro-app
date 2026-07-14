@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { rowToProfile, profileToInsert } from "../profile-sync";
+import { describe, it, expect, vi } from "vitest";
+import { rowToProfile, profileToInsert, fetchAllProfiles } from "../profile-sync";
 import type { Profile } from "../profile";
-import type { Tables } from "@aluna/supabase";
+import type { Tables, AlunaSupabaseClient } from "@aluna/supabase";
 
 const row: Tables<"birth_profiles"> = {
   id: "row-1",
@@ -101,5 +101,31 @@ describe("profileToInsert", () => {
     expect(roundTrip.birthDate).toBe(profile.birthDate);
     expect(roundTrip.birthTime).toBe(profile.birthTime);
     expect(roundTrip.gender).toBe(profile.gender);
+  });
+});
+
+describe("fetchAllProfiles", () => {
+  it("mapea todas las filas del usuario a Profile, ordenadas por created_at", async () => {
+    const rowB = { ...row, id: "row-2", name: "Segunda Persona", created_at: "2026-02-01T00:00:00Z" };
+    const orderMock = vi.fn().mockResolvedValue({ data: [row, rowB] });
+    const eqMock = vi.fn(() => ({ order: orderMock }));
+    const selectMock = vi.fn(() => ({ eq: eqMock }));
+    const supabase = { from: vi.fn(() => ({ select: selectMock })) } as unknown as AlunaSupabaseClient;
+
+    const result = await fetchAllProfiles(supabase, "user-1");
+
+    expect(supabase.from).toHaveBeenCalledWith("birth_profiles");
+    expect(eqMock).toHaveBeenCalledWith("user_id", "user-1");
+    expect(orderMock).toHaveBeenCalledWith("created_at", { ascending: true });
+    expect(result).toEqual([{ ...profile, id: "row-1" }, { ...profile, id: "row-2", name: "Segunda Persona" }]);
+  });
+
+  it("lista vacía si el usuario no tiene perfiles", async () => {
+    const orderMock = vi.fn().mockResolvedValue({ data: null });
+    const eqMock = vi.fn(() => ({ order: orderMock }));
+    const selectMock = vi.fn(() => ({ eq: eqMock }));
+    const supabase = { from: vi.fn(() => ({ select: selectMock })) } as unknown as AlunaSupabaseClient;
+
+    expect(await fetchAllProfiles(supabase, "user-1")).toEqual([]);
   });
 });
