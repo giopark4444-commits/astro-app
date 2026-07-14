@@ -11,18 +11,13 @@ export interface SolarHousePlacement { body: string; sign: string; house: number
 export interface SignAspect { body: string; sign: string; aspect: string; harmony: "hard" | "soft" | "neutral" }
 export interface SolarHouseDriver { body: string; house: number; favorable: boolean }
 export interface SolarLifeAreaScore { area: LifeArea; score: number; tone: ScoreTone; drivers: SolarHouseDriver[] }
-export interface SkyEventJson {
-  kind: "lunation" | "station" | "ingress";
-  atIso: string;
-  phase?: "new" | "full";
-  sign?: string;
-  longitude?: number;
-  eclipse?: "solar" | "lunar" | null;
-  body?: string;
-  direction?: "retrograde" | "direct";
-  fromSign?: string;
-  toSign?: string;
-}
+// Espejo exacto de SkyEvent en packages/ephemeris/src/events.ts — el endpoint
+// serializa ese discriminated union directo a JSON, así que cada variante trae
+// SOLO sus campos (nunca los de las otras dos).
+export type SkyEventJson =
+  | { kind: "lunation"; atIso: string; phase: "new" | "full"; sign: string; longitude: number; eclipse: "solar" | "lunar" | null }
+  | { kind: "station"; atIso: string; body: string; direction: "retrograde" | "direct"; sign: string }
+  | { kind: "ingress"; atIso: string; body: string; fromSign: string; toSign: string };
 export interface NatalHit {
   a: string; b: string; aspect: string; orb: number; harmony: "hard" | "soft" | "neutral";
   exactIso: string | null;
