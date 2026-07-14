@@ -64,6 +64,15 @@ describe("computeWesternHoroscope", () => {
   it("signo inválido lanza", () => {
     expect(() => computeWesternHoroscope("dragon", "today", "utc", NOW)).toThrow();
   });
+  it("los drivers de las barras SIEMPRE coinciden con la casa que muestra la tabla Pro (anti-funa: nunca contradice)", () => {
+    const p = computeWesternHoroscope("aquarius", "year", "America/Bogota", NOW);
+    const houseByBody = new Map(p.houses.map((h) => [h.body, h.house]));
+    for (const area of p.areas) {
+      for (const d of area.drivers) {
+        expect(houseByBody.get(d.body)).toBe(d.house);
+      }
+    }
+  });
 });
 
 describe("cachedWesternHoroscope", () => {
