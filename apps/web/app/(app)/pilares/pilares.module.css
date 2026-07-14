@@ -200,6 +200,17 @@
 .scriptRow:not([data-pro]) { display: none; }
 
 .deskCols { display: contents; }
+/* Riel de tabs verticales (PilaresTabs): feature 100% desktop, sin condición
+   de Modo Pro — se monta siempre en el JSX (a diferencia de .col/.lamina/
+   .scriptRow arriba, que dependen de `pro`). Sin este `display:none`, el
+   componente (nuevo en este Task 4, nunca antes montado) aparecería en móvil
+   como una lista de 7 botones sin estilo. Mismo mecanismo que `.dtabs` en
+   carta.module.css (línea 170): oculto por defecto, visible solo dentro del
+   `@media` desktop de abajo. Hallazgo de auto-revisión, no viene del brief
+   literal — el propio `pilares-tabs.tsx` documenta esta expectativa
+   ("En móvil está oculto por CSS (Task 4)") pero el Step 3 del brief no
+   incluía la regla. */
+.vtabs { display: none; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy */
