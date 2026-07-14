@@ -172,12 +172,18 @@ export function Chip({
   tint,
   dim = false,
   bold = false,
+  disabled = false,
 }: {
   label: string;
   kind: "control" | "tag";
   selected?: boolean;
   onPress?: () => void;
   icon?: ReactNode;
+  /** NEW — "control" únicamente: la persona ya está elegida en el OTRO picker
+   *  (p.ej. compatibilidad.tsx). Atenúa (opacity 0.5) y marca
+   *  accessibilityState.disabled — a diferencia de solo omitir `onPress`, que
+   *  dejaba el chip con el mismo aspecto que uno interactivo. */
+  disabled?: boolean;
   /** NEW — "tag" únicamente: color dinámico por instancia (Wu Xing u otro).
    *  `bg`/`border` pintan la pill, `fg` el texto. Omitido = look de siempre. */
   tint?: { bg: string; border: string; fg: string };
@@ -213,10 +219,10 @@ export function Chip({
   const c = chipColors(t, selected);
   return (
     <Pressable
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
-      style={[s.control, { backgroundColor: c.bg, borderColor: c.border }, selected && s.controlGlow]}
+      accessibilityState={{ selected, disabled }}
+      style={[s.control, { backgroundColor: c.bg, borderColor: c.border }, selected && s.controlGlow, disabled && s.controlDisabled]}
     >
       {icon}
       <Text style={[s.controlText, { color: c.fg }, selected && s.controlTextSelected]}>{label}</Text>
@@ -244,6 +250,9 @@ function makeChip(t: ThemeTokens) {
       shadowOpacity: 0.28,
       shadowRadius: 14,
       elevation: 3,
+    },
+    controlDisabled: {
+      opacity: 0.5,
     },
     controlText: {
       fontSize: typeScale.xs,

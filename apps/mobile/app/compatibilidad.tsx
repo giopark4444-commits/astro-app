@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -37,6 +37,13 @@ export default function CompatibilidadScreen() {
   const [state, setState] = useState<State>({ s: "picking" });
   const [expanded, setExpanded] = useState<SynastryTheme | null>(null);
 
+  // Invalida cualquier fetch en vuelo: cada compare() captura el valor actual;
+  // si cambia la selección (pick) o el componente se desmonta antes de que
+  // resuelva, el setState de esa respuesta vieja se descarta (review Fase 5 —
+  // sin esto, cambiar de persona mientras carga podía mostrar un resultado que
+  // ya no correspondía a lo seleccionado en pantalla).
+  const requestRef = useRef(0);
+
   useEffect(() => {
     if (!session?.user.id) return;
     let alive = true;
@@ -48,21 +55,33 @@ export default function CompatibilidadScreen() {
     };
   }, [session?.user.id]);
 
-  // cambiar cualquier selección invalida un resultado ya mostrado
+  useEffect(() => {
+    return () => {
+      requestRef.current += 1; // desmontado: invalida cualquier compare() en vuelo
+    };
+  }, []);
+
+  // cambiar cualquier selección invalida un resultado ya mostrado (y cualquier
+  // fetch de synastry todavía en vuelo, vía requestRef).
   function pick(which: "A" | "B", id: string) {
+    requestRef.current += 1;
     if (which === "A") setIdA(id === idB ? idA : id);
     else setIdB(id === idA ? idB : id);
     if (state.s !== "picking") setState({ s: "picking" });
   }
 
   async function compare() {
-    if (!idA || !idB || !session?.access_token) return;
+    if (!idA || !idB || !session?.access_token) {
+      setState({ s: "error" });
+      return;
+    }
+    const myRequest = ++requestRef.current;
     setState({ s: "loading" });
     try {
       const report = await fetchSynastry({ accessToken: session.access_token, profileIdA: idA, profileIdB: idB });
-      setState({ s: "ready", report });
+      if (requestRef.current === myRequest) setState({ s: "ready", report });
     } catch (e) {
-      setState({ s: "error" });
+      if (requestRef.current === myRequest) setState({ s: "error" });
     }
   }
 
@@ -119,8 +138,8 @@ export default function CompatibilidadScreen() {
 
         <Pressable
           onPress={compare}
-          disabled={!idA || !idB || state.s === "loading"}
-          style={[styles.cta, (!idA || !idB || state.s === "loading") && styles.ctaDisabled]}
+          disabled={!idA || !idB || !session?.access_token || state.s === "loading"}
+          style={[styles.cta, (!idA || !idB || !session?.access_token || state.s === "loading") && styles.ctaDisabled]}
           accessibilityRole="button"
         >
           <Text style={styles.ctaText}>{state.s === "loading" ? t("compat.loading") : t("compat.cta")}</Text>
@@ -169,6 +188,7 @@ function Picker({
               label={p.name}
               kind="control"
               selected={p.id === selectedId}
+              disabled={disabled}
               onPress={disabled ? undefined : () => onPick(p.id!)}
             />
           );
