@@ -43,10 +43,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="pilares"
+        name="horoscopo"
         options={{
-          title: t("nav.pilares"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="pilares" color={color} focused={focused} />,
+          title: t("nav.horoscopo"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="horoscopo" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -54,6 +54,13 @@ export default function TabsLayout() {
         options={{
           title: t("nav.numeros"),
           tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="pilares"
+        options={{
+          title: t("nav.pilares"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="pilares" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen

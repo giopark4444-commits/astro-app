@@ -3,13 +3,13 @@ import Svg, { Circle, G, Path } from "react-native-svg";
 
 /**
  * Iconos de línea fina para las tabs (reemplazan los glifos Unicode ☾☉八✦◷).
- * Los trazos de hoy/carta/numeros/pilares son VERBATIM del set canónico web
- * (apps/web/components/icon.tsx: sun/wheel/grid3/pillars) para mantener
- * paridad conceptual entre plataformas. "ajustes" no tiene equivalente en la
- * web: se diseñó un engrane de línea simple (más literal para "Ajustes" que
- * el enso, que ya representa la marca en otro lugar de la UI).
+ * Los trazos de hoy/carta/horoscopo/numeros/pilares son VERBATIM del set
+ * canónico web (apps/web/components/icon.tsx: sun/wheel/aries/grid3/pillars)
+ * para mantener paridad conceptual entre plataformas. "ajustes" no tiene
+ * equivalente en la web: se diseñó un engrane de línea simple (más literal
+ * para "Ajustes" que el enso, que ya representa la marca en otro lugar de la UI).
  */
-type TabIconName = "hoy" | "carta" | "numeros" | "pilares" | "ajustes";
+type TabIconName = "hoy" | "carta" | "horoscopo" | "numeros" | "pilares" | "ajustes";
 
 const STROKE_WIDTH = 1.5;
 
@@ -30,6 +30,11 @@ function IconWheel() {
       <Path d="M12 3v3.4M12 17.6V21M3 12h3.4M17.6 12H21" />
     </>
   );
+}
+
+/** Carnero de Aries — VERBATIM del glifo "aries" de apps/web/components/icon.tsx. */
+function IconAries() {
+  return <Path d="M4 19.5C4 9.5 6 5.5 8.6 5.5c2.1 0 3.4 2.4 3.4 6 0-3.6 1.3-6 3.4-6C18 5.5 20 9.5 20 19.5" />;
 }
 
 function IconGrid3() {
@@ -59,6 +64,7 @@ function IconGear() {
 const ICONS: Record<TabIconName, () => React.ReactNode> = {
   hoy: IconSun,
   carta: IconWheel,
+  horoscopo: IconAries,
   numeros: IconGrid3,
   pilares: IconPillars,
   ajustes: IconGear,
