@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
@@ -46,6 +46,13 @@ export function HoroscopoView() {
   // Sin perfil arrancamos en Aries; con perfil, el backend resuelve el Sol natal
   // en la PRIMERA carga (sign=null) y de ahí en adelante mandamos el elegido.
   const [sign, setSign] = useState<string | null>(active ? null : "aries");
+  // Ref (no useState: no debe disparar re-render ni ser dep del efecto) para
+  // detectar la transición "el signo se acaba de resolver desde null" (fix de
+  // T8 review: sin esto, setSign(p.sign) cambia `sign` en las deps del efecto,
+  // el efecto se re-ejecuta y su primera línea vuelve a poner "loading",
+  // produciendo un parpadeo loading→ready→loading→ready en la primera carga
+  // de todo usuario con perfil).
+  const prevSignRef = useRef<string | null>(sign);
   const [period, setPeriod] = useState<HoroscopePeriod>("today");
   const [pro, setPro] = useState(false);
   // AreaBars es un componente CONTROLADO (fix de T6 review: el estado de expansión
@@ -58,7 +65,14 @@ export function HoroscopoView() {
   useEffect(() => {
     if (trad !== "occidental") return;
     let alive = true;
-    setState({ s: "loading" });
+    // El signo se acababa de resolver desde null (perfil recién cargado): no
+    // reseteamos a "loading" para no tapar el ready recién pintado con un
+    // refetch rápido y cacheado en servidor. Cualquier otro cambio (signo
+    // elegido a mano, periodo, tz, perfil activo) sí muestra "loading" como
+    // siempre.
+    const resolvingFromNull = prevSignRef.current === null && sign !== null;
+    prevSignRef.current = sign;
+    if (!resolvingFromNull) setState({ s: "loading" });
     void (async () => {
       try {
         const res = await fetch("/api/horoscope/western", {
@@ -120,7 +134,7 @@ export function HoroscopoView() {
                 </button>
               ))}
             </div>
-            <div className={styles.periods} role="tablist" aria-label={t("areasTitle")}>
+            <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
               {PERIODS.map((p) => (
                 <button key={p} type="button" role="tab" aria-selected={p === period}
                   className={`seg__item ${p === period ? "seg__item--active" : ""}`}
