@@ -14,7 +14,7 @@ import styles from "./informe.module.css";
 type ReportKind = "natal" | "solar_return";
 
 /** Estado de un informe (uno por tipo: natal / solar del año actual). */
-type ViewState =
+export type ViewState =
   | { s: "loading" }
   | { s: "none" }
   | { s: "dormant" } // available:false — sin llave de proveedor IA, como el chat "dormido"
@@ -250,21 +250,88 @@ function ReportCard({
   );
 }
 
-function NatalContent({ content }: { content: NatalReport }) {
+/** Una entrada del riel de índice: ancla + etiqueta visible. */
+export type TocEntry = { id: string; label: string };
+/** Un grupo del riel (un informe = un grupo, con su propio encabezado). */
+export type TocGroup = { heading: string; entries: TocEntry[] };
+
+/** ids de ancla del informe natal — MISMA fuente que los `id` que
+ * NatalContent pone en cada `.section` más abajo: si uno cambia sin el otro,
+ * el riel deja de saltar a la sección correcta. */
+export function natalTocEntries(
+  content: NatalReport,
+  labels: { intro: string; outro: string },
+): TocEntry[] {
+  return [
+    { id: "report-natal-intro", label: labels.intro },
+    ...content.sections.map((sec) => ({ id: `report-natal-${sec.key}`, label: sec.title })),
+    { id: "report-natal-outro", label: labels.outro },
+  ];
+}
+
+/** ids de ancla del informe solar — misma fuente que los `id` de SolarContent. */
+export function solarTocEntries(
+  content: SolarReport,
+  labels: { essay: string; mantra: string },
+): TocEntry[] {
+  return [
+    { id: "report-solar-essay", label: labels.essay },
+    ...content.themes.map((theme, i) => ({ id: `report-solar-theme-${i}`, label: theme.title })),
+    { id: "report-solar-mantra", label: labels.mantra },
+  ];
+}
+
+/** Arma los grupos del riel a partir del estado de ambos informes: un grupo
+ * por informe que esté `ready` (0, 1 o 2 grupos). El riel entero se oculta
+ * cuando esto devuelve `[]` (InformeView decide con `groups.length > 0`,
+ * Task 5). */
+export function buildTocGroups(params: {
+  natal: ViewState;
+  solar: ViewState;
+  natalHeading: string;
+  solarHeading: string;
+  introLabel: string;
+  outroLabel: string;
+  essayLabel: string;
+  mantraLabel: string;
+}): TocGroup[] {
+  const groups: TocGroup[] = [];
+  if (params.natal.s === "ready") {
+    groups.push({
+      heading: params.natalHeading,
+      entries: natalTocEntries(params.natal.content as NatalReport, {
+        intro: params.introLabel,
+        outro: params.outroLabel,
+      }),
+    });
+  }
+  if (params.solar.s === "ready") {
+    groups.push({
+      heading: params.solarHeading,
+      entries: solarTocEntries(params.solar.content as SolarReport, {
+        essay: params.essayLabel,
+        mantra: params.mantraLabel,
+      }),
+    });
+  }
+  return groups;
+}
+
+export function NatalContent({ content }: { content: NatalReport }) {
   const t = useTranslations("reports");
   return (
     <>
-      <div className={styles.section}>
+      <div id="report-natal-intro" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("introLabel")}</h3>
         <p className={styles.sectionBody}>{content.intro}</p>
       </div>
       {content.sections.map((sec) => (
-        <div key={sec.key} className={styles.section}>
+        <div key={sec.key} id={`report-natal-${sec.key}`} className={styles.section}>
           <h3 className={styles.sectionTitle}>{sec.title}</h3>
           <p className={styles.sectionBody}>{sec.body}</p>
         </div>
       ))}
-      <div className={styles.section}>
+      <div id="report-natal-outro" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("outroLabel")}</h3>
         <p className={styles.sectionBody}>{content.outro}</p>
       </div>
@@ -272,16 +339,16 @@ function NatalContent({ content }: { content: NatalReport }) {
   );
 }
 
-function SolarContent({ content }: { content: SolarReport }) {
+export function SolarContent({ content }: { content: SolarReport }) {
   const t = useTranslations("reports");
   return (
     <>
-      <div className={styles.section}>
+      <div id="report-solar-essay" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("essayLabel")}</h3>
         <p className={styles.sectionBody}>{content.essay}</p>
       </div>
       {content.themes.map((theme, i) => (
-        <div key={i} className={styles.section}>
+        <div key={i} id={`report-solar-theme-${i}`} className={styles.section}>
           <h3 className={styles.sectionTitle}>
             {i + 1}. {theme.title}
           </h3>
@@ -293,7 +360,7 @@ function SolarContent({ content }: { content: SolarReport }) {
           </p>
         </div>
       ))}
-      <div className={styles.section}>
+      <div id="report-solar-mantra" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("mantraLabel")}</h3>
         <p className={styles.sectionBody}>{content.mantra}</p>
       </div>

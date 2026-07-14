@@ -48,7 +48,7 @@
 /* Contenido del informe listo: texto plano legible, sin markdown. */
 .body { display: grid; gap: var(--sp-4); }
 .lead { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--ink); }
-.section { display: grid; gap: var(--sp-1); }
+.section { display: grid; gap: var(--sp-1); scroll-margin-top: 84px; } /* header 66px + respiro — mismo valor que carta.module.css .wheelCol; evita que el salto de ancla esconda el título tras el header fijo */
 .sectionTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
 .sectionBody { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--soft); white-space: pre-wrap; }
 .modelUsed { margin: 0; font-size: var(--text-2xs); color: var(--soft); opacity: 0.7; }
