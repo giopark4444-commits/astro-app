@@ -7,7 +7,7 @@
 <script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'dark';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tokens.css?v=3">
 <style>
   body { background: var(--bg-deep); min-height: 100vh; font-family: var(--sans); color: var(--text); padding: 40px 28px 64px; }
   header { max-width: 1280px; margin: 0 auto 8px; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
@@ -30,12 +30,18 @@
 <body>
 <header>
   <h1>Aluna móvil — <em>Libro Nocturno</em></h1>
-  <div class="toggle" role="group" aria-label="Tema">
-    <button id="btn-dark" class="on" onclick="setTheme('dark')">Oscuro</button>
-    <button id="btn-light" onclick="setTheme('light')">Claro</button>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <div class="toggle" role="group" aria-label="Propuesta">
+      <button id="btn-a" onclick="setVariant('a')">A · Aire</button>
+      <button id="btn-b" class="on" onclick="setVariant('b')">B · Compacta</button>
+    </div>
+    <div class="toggle" role="group" aria-label="Tema">
+      <button id="btn-dark" class="on" onclick="setTheme('dark')">Oscuro</button>
+      <button id="btn-light" onclick="setTheme('light')">Claro</button>
+    </div>
   </div>
 </header>
-<p class="sub">Paridad de features web→móvil: <b>Compatibilidad · Informe · Preguntar</b>. Dirección ganadora del panel: Libro Nocturno (editorial, ceremonial) con 3 injertos de Observatorio Vivo (dial, chips-glifo, constelación de drivers). iPhone 390×844, tema observatory.</p>
+<p class="sub">Paridad de features web→móvil: <b>Compatibilidad · Informe · Preguntar</b>. Dirección: Libro Nocturno con injertos de Observatorio Vivo. Dos propuestas: <b>A "Aire"</b> (espaciosa, ceremonial) y <b>B "Compacta"</b> (densa, funcional — feedback de Gio 2026-07-13). iPhone 390×844, tema observatory.</p>
 <div class="grid" id="grid"></div>
 <script>
 const SCREENS = [
@@ -49,14 +55,22 @@ const SCREENS = [
   ["07-preguntar-conversacion", "Preguntar — conversación", "flujo 3"],
 ];
 let theme = new URLSearchParams(location.search).get('theme') || 'dark';
+let variant = new URLSearchParams(location.search).get('v') || 'b';
+function dir() { return variant === 'b' ? 'screens-compacta' : 'screens'; }
 function render() {
   document.getElementById('grid').innerHTML = SCREENS.map(([f, title, tag]) => `
     <div class="item">
       <div class="cap"><b>${title}</b><span>${tag}</span></div>
-      <div class="frame"><iframe src="screens/${f}.html?theme=${theme}" scrolling="no" title="${title}"></iframe></div>
-      <a class="open" href="screens/${f}.html?theme=${theme}" target="_blank">Abrir a tamaño real →</a>
+      <div class="frame"><iframe src="${dir()}/${f}.html?theme=${theme}" scrolling="no" title="${title}"></iframe></div>
+      <a class="open" href="${dir()}/${f}.html?theme=${theme}" target="_blank">Abrir a tamaño real →</a>
     </div>`).join('');
   scale();
+}
+function setVariant(v) {
+  variant = v;
+  document.getElementById('btn-a').classList.toggle('on', v === 'a');
+  document.getElementById('btn-b').classList.toggle('on', v === 'b');
+  render();
 }
 function scale() {
   document.querySelectorAll('.frame').forEach(fr => {

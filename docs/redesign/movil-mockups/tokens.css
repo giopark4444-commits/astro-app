@@ -33,9 +33,10 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-/* Cormorant trae cifras oldstyle por defecto y el shorthand `font:` resetea
-   font-variant-numeric — font-feature-settings sobrevive al shorthand: */
-.phone, .phone * { font-feature-settings: "lnum" 1; }
+/* Cormorant trae cifras oldstyle por defecto y el shorthand `font:` (usado en todas
+   las pantallas) resetea font-variant-numeric Y font-feature-settings (CSS Fonts 4),
+   ganando por orden de fuente — de ahí el !important (licencia de mockup): */
+.phone, .phone * { font-feature-settings: "lnum" 1 !important; }
 html, body { background: transparent; }
 
 /* ——— Marco captura-real (390×844, sin carcasa ilustrada) ——— */

@@ -21,25 +21,38 @@ body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);
   background:radial-gradient(70% 100% at 50% 0%, var(--acc-faint), transparent 75%);
 }
 
-.centro{
-  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:24px; padding:0 30px; margin-top:-18px;
+.contenido{
+  flex:1; display:flex; flex-direction:column; justify-content:flex-start;
+  gap:30px; padding:18px 16px 12px;
 }
 
-.luna-vigilia{ display:flex; align-items:center; justify-content:center; }
-.luna-vigilia svg{ display:block; color:var(--acc-text); }
+.luna-row{ display:flex; align-items:center; gap:14px; }
+.luna-vigilia{ display:flex; align-items:center; justify-content:center; flex:none; }
+.luna-vigilia svg{ display:block; color:var(--acc-text); width:40px; height:40px; }
 
-.saludo{ text-align:center; max-width:290px; }
+.saludo{ flex:1; }
 
 .sugerencias{
-  display:flex; flex-direction:column; align-items:center; gap:12px; width:100%;
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%;
 }
 .sugerencias .chip{
-  justify-content:center; width:auto; max-width:100%;
+  justify-content:flex-start; width:auto; max-width:100%; min-height:48px;
+  font-size:13px; padding:10px 14px;
 }
 .sugerencias .glifo{
-  font:16px/1 var(--serif); color:var(--acc-text); flex:none;
+  font:15px/1 var(--serif); color:var(--acc-text); flex:none;
 }
+
+.cielo{ display:flex; flex-direction:column; gap:10px; }
+.cielo-card{ display:flex; flex-direction:column; padding:8px 16px; }
+.cielo-fila{
+  display:flex; align-items:center; gap:12px; min-height:56px;
+}
+.cielo-fila + .cielo-fila{ border-top:1px solid var(--acc-hair); }
+.cielo-fila .glifo{ font:16px/1 var(--serif); color:var(--acc-text); flex:none; width:18px; text-align:center; }
+.cielo-fila span:last-child{ flex:1; }
+
+.privacidad{ text-align:center; }
 
 .composer{
   flex:none; display:flex; align-items:center; gap:10px;
@@ -85,26 +98,39 @@ body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);
     <span class="eyebrow">PREGÚNTALE A ALUNA</span>
   </div>
 
-  <div class="centro">
+  <div class="contenido">
 
-    <span class="halo">
-      <span class="luna-vigilia">
-        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M25 9a15 15 0 1 0 0 26 12 12 0 0 1 0-26Z"/>
-          <path d="M35 8v4M33 10h4" stroke-width="1.3"/>
-          <path d="M9 30v3.5M7.3 31.75h3.4" stroke-width="1.3"/>
-          <path d="M38 22v2.6M36.7 23.3h2.6" stroke-width="1.1"/>
-        </svg>
+    <div class="luna-row">
+      <span class="halo">
+        <span class="luna-vigilia">
+          <svg width="36" height="36" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M25 9a15 15 0 1 0 0 26 12 12 0 0 1 0-26Z"/>
+            <path d="M35 8v4M33 10h4" stroke-width="1.3"/>
+            <path d="M9 30v3.5M7.3 31.75h3.4" stroke-width="1.3"/>
+            <path d="M38 22v2.6M36.7 23.3h2.6" stroke-width="1.1"/>
+          </svg>
+        </span>
       </span>
-    </span>
-
-    <p class="voice saludo">Aquí estoy. Pregúntame lo que sea — de tu día, de tu carta, de lo que te inquieta esta noche.</p>
+      <p class="voice saludo">Aquí estoy. Pregúntame lo que sea — de tu día, de tu carta, de lo que te inquieta esta noche.</p>
+    </div>
 
     <div class="sugerencias">
       <span class="chip"><span class="glifo">&#9789;&#xFE0E;</span>¿Por qué siento tanto?</span>
       <span class="chip"><span class="glifo">&#9792;&#xFE0E;</span>¿Cómo amo yo?</span>
       <span class="chip"><span class="glifo">&#9796;&#xFE0E;</span>¿Qué me pide este año?</span>
+      <span class="chip"><span class="glifo">&#9737;&#xFE0E;</span>¿Cuál es mi propósito?</span>
     </div>
+
+    <div class="cielo">
+      <span class="eyebrow">TU CIELO AHORA</span>
+      <div class="card cielo-card">
+        <div class="cielo-fila"><span class="glifo">&#9789;&#xFE0E;</span><span class="ui-sm">Luna en Virgo — orden y raíz</span></div>
+        <div class="cielo-fila"><span class="glifo">&#9791;&#xFE0E;</span><span class="ui-sm">Mercurio directo — buen momento para hablar</span></div>
+        <div class="cielo-fila"><span class="glifo">&#9737;&#xFE0E;</span><span class="ui-sm">Sol en Cáncer — el hogar pide atención</span></div>
+      </div>
+    </div>
+
+    <p class="ui-xs privacidad">Tus preguntas no se guardan en la nube — son tuyas.</p>
 
   </div>
 

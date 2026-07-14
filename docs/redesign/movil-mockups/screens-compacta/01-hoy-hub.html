@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hoy — hub Tu universo</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hoy — hub Tu universo (compacta)</title>
 <script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get('theme')||'dark';</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&family=Quicksand:wght@400..700&display=swap" rel="stylesheet">
@@ -6,21 +6,22 @@
 <style>
   body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);padding:24px}
 
-  /* ——— contenido de Hoy (no scroll: compone para 844px) ——— */
-  .content{ flex:1; display:flex; flex-direction:column; padding:6px 20px 0; gap:18px; overflow:hidden; }
+  /* ——— contenido de Hoy: compacto, todo visible sin scroll ——— */
+  .content{ flex:1; display:flex; flex-direction:column; padding:6px 16px 0; gap:12px; overflow:hidden; }
 
   .brand-row{ display:flex; align-items:flex-start; justify-content:space-between; }
   .enso{
-    width:22px; height:22px; border-radius:50%; flex:none; margin-top:1px;
+    width:20px; height:20px; border-radius:50%; flex:none; margin-top:1px;
     border:2px solid var(--acc); border-right-color:transparent; transform:rotate(38deg);
   }
-  .greet{ margin-top:10px; }
-  .greet .ui-xs{ display:block; margin-bottom:6px; }
-  .greet h1{ font:600 28px/1.15 var(--serif); color:var(--text); }
-  .greet .voice{ display:block; margin-top:6px; font-size:16px; color:var(--text-dim); }
 
-  /* mini-card de contexto (Hoy sigue siendo Hoy) */
-  .card-mini{ padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  /* saludo compacto */
+  .greet{ margin-top:2px; display:flex; flex-direction:column; gap:2px; }
+  .greet h1{ font:600 24px/1.15 var(--serif); color:var(--text); }
+  .greet .voice{ display:block; font-size:14px; line-height:1.3; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* mini-card de contexto lunar */
+  .card-mini{ padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .card-mini .roman{ letter-spacing:1.5px; }
   .mini-chips{ display:flex; gap:8px; flex:none; }
   .mini-chip{
@@ -30,26 +31,36 @@
   }
   .mini-chip b{ color:var(--acc-text); font-weight:700; }
 
-  /* sección Tu universo */
-  .universo{ display:flex; flex-direction:column; gap:12px; flex:1; }
+  /* ——— Tu energía de hoy ——— */
+  .energy-sec{ display:flex; flex-direction:column; gap:8px; }
+  .energy-card{ padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+  .energy-row{ display:flex; align-items:center; gap:10px; min-height:16px; }
+  .energy-label{ width:52px; flex:none; font:600 11px/1 var(--sans); letter-spacing:.4px; text-transform:uppercase; color:var(--text-faint); }
+  .energy-track{ flex:1; height:5px; border-radius:var(--r-pill); background:var(--acc-hair); position:relative; overflow:hidden; }
+  .energy-fill{ position:absolute; inset:0 auto 0 0; height:100%; border-radius:var(--r-pill); background:linear-gradient(90deg, var(--acc-soft), var(--acc)); }
+  .energy-num{ width:24px; flex:none; text-align:right; font:600 15px/1 var(--serif); color:var(--acc-text); }
+
+  /* fila-evento */
+  .card-event{ min-height:48px; padding:0 14px; display:flex; align-items:center; gap:7px; }
+  .card-event .glyph{ color:var(--acc-text); font-size:15px; line-height:1; flex:none; }
+  .card-event .txt{ font:500 13px/1.3 var(--sans); color:var(--text-dim); }
+  .card-event .txt b{ color:var(--text); font-weight:600; }
+
+  /* ——— Tu universo: lista ——— */
+  .universo{ display:flex; flex-direction:column; gap:10px; }
   .universo > .eyebrow{ display:block; }
+  .uni-list{ display:flex; flex-direction:column; gap:9px; }
 
-  .glifo{ color:var(--acc-text); display:block; }
+  .glifo{ color:var(--acc-text); display:block; flex:none; }
 
-  .card-hero{
-    position:relative; min-height:150px; flex:1.35; display:flex; flex-direction:column;
-    justify-content:center; gap:7px; padding:22px 46px 22px 22px;
-  }
-  .card-hero .halo{ display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; margin-bottom:2px; }
-  .card-hero h2{ font:600 24px/1.15 var(--serif); color:var(--text); }
-  .card-hero .chev{
-    position:absolute; right:18px; top:50%; transform:translateY(-50%);
-    font:600 22px/1 var(--serif); color:var(--acc-text); opacity:.85;
-  }
-
-  .row-2{ display:flex; gap:12px; flex:1; }
-  .card-entry{ flex:1; display:flex; flex-direction:column; gap:9px; padding:18px; min-height:112px; justify-content:center; }
-  .card-entry h3{ font:600 20px/1.15 var(--serif); color:var(--text); }
+  .uni-row{ display:flex; align-items:center; gap:12px; padding:0 14px; border-radius:16px; }
+  .uni-row.ask{ min-height:72px; }
+  .uni-row.entry{ min-height:60px; }
+  .uni-row .halo-wrap{ position:relative; display:flex; align-items:center; justify-content:center; flex:none; }
+  .uni-row .stack{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .uni-row h3{ font:600 17px/1.15 var(--serif); color:var(--text); }
+  .uni-row.ask h3{ font-size:19px; }
+  .uni-row .chev{ font:600 20px/1 var(--serif); color:var(--acc-text); opacity:.85; flex:none; }
 
   /* ——— tab bar ——— */
   .tabbar{
@@ -105,39 +116,78 @@
       </div>
     </div>
 
+    <div class="energy-sec">
+      <span class="eyebrow">TU ENERGÍA DE HOY</span>
+      <div class="card energy-card">
+        <div class="energy-row">
+          <span class="energy-label">Amor</span>
+          <span class="energy-track"><span class="energy-fill" style="width:72%"></span></span>
+          <span class="energy-num">72</span>
+        </div>
+        <div class="energy-row">
+          <span class="energy-label">Trabajo</span>
+          <span class="energy-track"><span class="energy-fill" style="width:81%"></span></span>
+          <span class="energy-num">81</span>
+        </div>
+        <div class="energy-row">
+          <span class="energy-label">Salud</span>
+          <span class="energy-track"><span class="energy-fill" style="width:64%"></span></span>
+          <span class="energy-num">64</span>
+        </div>
+        <div class="energy-row">
+          <span class="energy-label">Suerte</span>
+          <span class="energy-track"><span class="energy-fill" style="width:77%"></span></span>
+          <span class="energy-num">77</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card--tinted card-event">
+      <span class="glyph">☽</span>
+      <span class="txt"><b>Luna nueva mañana</b> · buen día para sembrar intención</span>
+    </div>
+
     <div class="universo">
       <span class="eyebrow">TU UNIVERSO</span>
 
-      <div class="card card--tinted card-hero">
-        <span class="halo">
-          <svg class="glifo" width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 8a11 11 0 1 0 0 18 8.5 8.5 0 0 1 0-18z"/>
-            <path d="M27 6l.9 2.1L30 9l-2.1.9L27 12l-.9-2.1L24 9l2.1-.9z"/>
-            <path d="M9 20l.6 1.4L11 22l-1.4.6L9 24l-.6-1.4L7 22l1.4-.6z"/>
-          </svg>
-        </span>
-        <span class="eyebrow">PREGÚNTALE A ALUNA</span>
-        <h2>¿Qué quieres saber hoy?</h2>
-        <span class="ui-sm">Te respondo desde tu cielo.</span>
-        <span class="chev">›</span>
-      </div>
+      <div class="uni-list">
+        <div class="card card--tinted uni-row ask">
+          <span class="halo-wrap halo">
+            <svg class="glifo" width="28" height="28" viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 8a11 11 0 1 0 0 18 8.5 8.5 0 0 1 0-18z"/>
+              <path d="M27 6l.9 2.1L30 9l-2.1.9L27 12l-.9-2.1L24 9l2.1-.9z"/>
+              <path d="M9 20l.6 1.4L11 22l-1.4.6L9 24l-.6-1.4L7 22l1.4-.6z"/>
+            </svg>
+          </span>
+          <div class="stack">
+            <h3>Pregúntale a Aluna</h3>
+            <span class="ui-xs">Te respondo desde tu cielo</span>
+          </div>
+          <span class="chev">›</span>
+        </div>
 
-      <div class="row-2">
-        <div class="card card-entry">
-          <svg class="glifo" width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <div class="card uni-row entry">
+          <svg class="glifo" width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <circle cx="6" cy="18" r="2.4"/><circle cx="20" cy="8" r="2.4"/>
             <path d="M8 16.5C11 11 15 9 18.5 9.3"/>
           </svg>
-          <h3>Compatibilidad</h3>
-          <span class="ui-xs">El cielo entre dos</span>
+          <div class="stack">
+            <h3>Compatibilidad</h3>
+            <span class="ui-xs">El cielo entre dos</span>
+          </div>
+          <span class="chev">›</span>
         </div>
-        <div class="card card-entry">
-          <svg class="glifo" width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+
+        <div class="card uni-row entry">
+          <svg class="glifo" width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 3.5h12l4 4v15H5z"/><path d="M17 3.5v4h4"/>
             <path d="M15 12v9l-2.5-1.8L10 21v-9"/>
           </svg>
-          <h3>Informes</h3>
-          <span class="ui-xs">Tu carta en profundidad</span>
+          <div class="stack">
+            <h3>Informes</h3>
+            <span class="ui-xs">Tu carta en profundidad</span>
+          </div>
+          <span class="chev">›</span>
         </div>
       </div>
     </div>
