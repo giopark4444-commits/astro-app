@@ -127,4 +127,22 @@ describe("buildTocGroups", () => {
     });
     expect(groups.map((g) => g.heading)).toEqual(["Carta natal", "Revolución Solar 2026"]);
   });
+
+  it("no crashea ni arma el grupo natal si el content 'ready' trae themes en vez de sections (kind desalineado)", () => {
+    const groups = buildTocGroups({
+      natal: { s: "ready", content: fixtureSolar as unknown as NatalReport, modelUsed: null } as ViewState,
+      solar: { s: "dormant" } as ViewState,
+      ...labels,
+    });
+    expect(groups).toEqual([]);
+  });
+
+  it("no crashea ni arma el grupo solar si el content 'ready' trae sections en vez de themes (kind desalineado)", () => {
+    const groups = buildTocGroups({
+      natal: { s: "none" } as ViewState,
+      solar: { s: "ready", content: fixtureNatal as unknown as SolarReport, modelUsed: null } as ViewState,
+      ...labels,
+    });
+    expect(groups).toEqual([]);
+  });
 });

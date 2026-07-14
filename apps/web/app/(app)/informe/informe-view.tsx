@@ -296,6 +296,18 @@ export function solarTocEntries(
   ];
 }
 
+/** `isRenderableReport` (arriba) es un OR laxo (sections O themes): un
+ * informe `ready` del kind natal cuyo `content` trajera solo `themes` (o
+ * viceversa) lo pasaría igual. Estos guards por kind confirman la forma
+ * exacta que `natalTocEntries`/`solarTocEntries` necesitan antes de castear,
+ * para no crashear en `.sections`/`.themes` inexistente. */
+function hasNatalShape(content: NatalReport | SolarReport): content is NatalReport {
+  return Array.isArray((content as NatalReport).sections);
+}
+function hasSolarShape(content: NatalReport | SolarReport): content is SolarReport {
+  return Array.isArray((content as SolarReport).themes);
+}
+
 /** Arma los grupos del riel a partir del estado de ambos informes: un grupo
  * por informe que esté `ready` (0, 1 o 2 grupos). El riel entero se oculta
  * cuando esto devuelve `[]` (InformeView decide con `groups.length > 0`,
@@ -311,19 +323,19 @@ export function buildTocGroups(params: {
   mantraLabel: string;
 }): TocGroup[] {
   const groups: TocGroup[] = [];
-  if (params.natal.s === "ready") {
+  if (params.natal.s === "ready" && hasNatalShape(params.natal.content)) {
     groups.push({
       heading: params.natalHeading,
-      entries: natalTocEntries(params.natal.content as NatalReport, {
+      entries: natalTocEntries(params.natal.content, {
         intro: params.introLabel,
         outro: params.outroLabel,
       }),
     });
   }
-  if (params.solar.s === "ready") {
+  if (params.solar.s === "ready" && hasSolarShape(params.solar.content)) {
     groups.push({
       heading: params.solarHeading,
-      entries: solarTocEntries(params.solar.content as SolarReport, {
+      entries: solarTocEntries(params.solar.content, {
         essay: params.essayLabel,
         mantra: params.mantraLabel,
       }),

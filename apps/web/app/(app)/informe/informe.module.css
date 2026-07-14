@@ -87,7 +87,13 @@
   .page[data-toc] { max-width: min(868px, calc(100% - 112px)); }
   .page[data-toc] .layout {
     display: grid;
-    grid-template-columns: 640px 200px;
+    /* Track de lectura flexible (no 640px fijo): con box-sizing: border-box +
+       el padding horizontal de .page, el ancho de contenido real es a lo sumo
+       868 - 40 = 828px, que ya no alcanza para 640 + 200 + gap(28) = 868px
+       fijos — el grid desbordaba su propio contenedor. minmax(0, 1fr) deja
+       que la columna de lectura ocupe el espacio realmente disponible
+       (~600px en el caso de 828px reales) sin exigir más de lo que hay. */
+    grid-template-columns: minmax(0, 1fr) 200px;
     gap: var(--sp-6);
     align-items: start;
   }
