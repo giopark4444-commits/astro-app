@@ -43,6 +43,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="horoscopo"
+        options={{
+          title: t("nav.horoscopo"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="horoscopo" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="pilares"
         options={{
           title: t("nav.pilares"),
