@@ -6,6 +6,7 @@
   cursor: pointer; color: inherit; text-align: left;
 }
 .barLabel { font-family: var(--font-display); font-size: var(--text-md); /* 16: empate 15/17 → apoyo dentro de card → menor */ color: var(--ink); }
+.barTone { font-family: var(--font-ui); font-size: var(--text-xs); font-style: italic; color: var(--soft); }
 .barScore {
   font-family: var(--font-ui); font-size: var(--text-sm); color: var(--soft);
   font-variant-numeric: tabular-nums; letter-spacing: 0.5px;

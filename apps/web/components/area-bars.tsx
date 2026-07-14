@@ -41,15 +41,17 @@ export function AreaBars({
               onClick={() => onToggle(a.key)}
               aria-expanded={expanded}
             >
-              <span className={styles.barLabel}>{a.label}</span>
+              <span className={styles.barLabel}>
+                {a.label}
+                <span className={styles.barTone}> · {a.toneLabel}</span>
+              </span>
               <span className={styles.barScore}>{a.score}</span>
             </button>
             <div className={styles.track}>
               <span
                 className={`${styles.fill} ${styles[`tone_${a.tone}`] ?? ""}`}
                 style={{ width: `${a.score}%` }}
-                role="img"
-                aria-label={a.toneLabel}
+                aria-hidden="true"
               />
             </div>
             {expanded && (
