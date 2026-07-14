@@ -4,7 +4,7 @@
 // derived.ts/jie.ts, pero con bracket garantizado). Server-only (sweph).
 import { DateTime } from "luxon";
 import sweph from "sweph";
-import { normalizeAngle, signOfLongitude, angularSeparation } from "@aluna/core";
+import { normalizeAngle, signOfLongitude } from "@aluna/core";
 import { computeBodies, type RawBody } from "./bodies";
 import { localToJulianDay } from "./time";
 import { initEphemeris } from "./init";
@@ -187,7 +187,11 @@ export function ingresses(fromIso: string, toIso: string, opts: { includeMoon?: 
   return out.sort((a, b) => a.atIso.localeCompare(b.atIso));
 }
 
-/** Instante (ISO) en que `body` perfecciona `aspectAngle` con un punto fijo, cerca de nearIso. */
+/** Instante (ISO) en que `body` perfecciona `aspectAngle` con un punto fijo, cerca de nearIso.
+ *  Usa delta CON SIGNO al target longitudinal más cercano (no separación angular
+ *  clamped [0,180]): para conjunción/oposición, angularSeparation-aspectAngle NUNCA
+ *  cambia de signo (toca cero en un extremo, no lo cruza) → findCrossings jamás lo
+ *  detecta. El delta con signo sí cruza cero en el instante exacto. */
 export function exactAspectAt(
   body: string, fixedLongitude: number, aspectAngle: number,
   nearIso: string, windowDays = 20,
@@ -195,7 +199,13 @@ export function exactAspectAt(
   const center = DateTime.fromISO(nearIso, { zone: "utc" });
   const from = center.minus({ days: windowDays });
   const to = center.plus({ days: windowDays });
-  const f = (dt: DateTime) => angularSeparation(bodyAt(dt, body).longitude, fixedLongitude) - aspectAngle;
+  const candidates = aspectAngle === 0 || aspectAngle === 180
+    ? [normalizeAngle(fixedLongitude + aspectAngle)]
+    : [normalizeAngle(fixedLongitude + aspectAngle), normalizeAngle(fixedLongitude - aspectAngle)];
+  const nowLon = bodyAt(center, body).longitude;
+  const target = candidates.reduce((best, c) =>
+    Math.abs(signedDelta(c, nowLon)) < Math.abs(signedDelta(best, nowLon)) ? c : best);
+  const f = (dt: DateTime) => signedDelta(target, bodyAt(dt, body).longitude);
   const roots = findCrossings(from, to, 0.5, f, 90);
   if (roots.length === 0) return null;
   const nearest = roots.reduce((best, r) =>
