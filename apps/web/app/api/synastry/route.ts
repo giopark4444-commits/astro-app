@@ -2,7 +2,7 @@ import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
 import { synastryReport } from "@aluna/core";
-import { createClient } from "@/lib/supabase/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput, type ChartProfileFields } from "@/lib/chart";
 
 // Sinastría / Compatibilidad: compara dos perfiles del MISMO usuario. Server-only
@@ -33,10 +33,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   // RLS limita el SELECT al dueño: si vuelven ambas filas, los dos perfiles son
