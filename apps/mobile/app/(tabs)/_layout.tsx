@@ -50,17 +50,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="pilares"
-        options={{
-          title: t("nav.pilares"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="pilares" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
         name="numeros"
         options={{
           title: t("nav.numeros"),
           tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="pilares"
+        options={{
+          title: t("nav.pilares"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="pilares" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
