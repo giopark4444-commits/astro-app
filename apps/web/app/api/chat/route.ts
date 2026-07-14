@@ -2,7 +2,7 @@ import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
 import { computeNumerology, signOfLongitude } from "@aluna/core";
-import { createClient } from "@/lib/supabase/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
@@ -81,10 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ available: false, error: "unauthorized" }, { status: 401 });
 
   const { data: profile } = await supabase
