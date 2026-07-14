@@ -2,7 +2,7 @@
 // don y sombra, sin fatalismo) + etiquetas de casas solares + composición.
 // La prosa del periodo SE COMPONE desde el payload calculado: nunca puede
 // contradecir la lámina Pro (regla anti-funa).
-import { ZODIAC_SIGNS } from "@aluna/core";
+import { solarHouseOf } from "@aluna/core";
 import { astroLabels } from "./astrology-labels";
 import type { WesternPayload } from "@/lib/horoscope/western";
 import { DICTS_EN } from "./horoscope-en";
@@ -140,7 +140,7 @@ export function composeWith(locale: "es" | "en", payload: WesternPayload, dicts:
 
   const lun = payload.events.find((e) => e.kind === "lunation");
   if (lun && lun.kind === "lunation") {
-    const evHouse = solarHouseOfEvent(payload, lun.longitude);
+    const evHouse = solarHouseOf(payload.sign, lun.longitude);
     let line = dicts.t.lunationIn(dicts.lunation[lun.phase], dicts.houseLabels[evHouse]!);
     if (lun.eclipse) line += ` ${dicts.t.eclipse}`;
     parts.push(line);
@@ -154,11 +154,4 @@ export function composeWith(locale: "es" | "en", payload: WesternPayload, dicts:
     ? sign?.flow : sign?.shadow;
   if (closing) parts.push(closing);
   return parts;
-}
-
-/** Casa solar de una longitud del payload (mismo whole-sign, sin recomputar motor). */
-function solarHouseOfEvent(payload: WesternPayload, longitude: number): number {
-  const base = ZODIAC_SIGNS.findIndex((s) => s.key === payload.sign);
-  const idx = Math.floor(((longitude % 360) + 360) % 360 / 30);
-  return ((idx - base + 12) % 12) + 1;
 }
