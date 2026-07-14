@@ -68,10 +68,11 @@
      header móvil + el clearance del bottom-nav fijo (96px) que en desktop NO
      existe (mismo hallazgo que carta/hoy en la review de R4a). En desktop el
      chat debe reclamar el resto del viewport bajo el header real de
-     escritorio, cuya altura fija es 66px (app-shell.module.css:34 `.header
-     { height: 66px; }` dentro del mismo breakpoint; confirmado también por
-     carta.module.css:185 `top: 84px; /* header 66px + respiro */`) — no una
-     resta derivada del valor móvil (150-96), que por coincidencia numérica
-     da un resultado parecido pero no es la cantidad correcta. */
+     escritorio, cuya altura fija es 66px (app-shell.module.css:34 .header
+     con height: 66px, dentro del mismo breakpoint; confirmado también por
+     el offset sticky de carta.module.css:185, top: 84px = header 66px +
+     respiro) — no una resta derivada del valor móvil (150-96), que por
+     coincidencia numérica da un resultado parecido pero no es la cantidad
+     correcta. */
   .wrap { min-height: calc(100dvh - 66px); }
 }
