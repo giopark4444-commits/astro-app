@@ -66,9 +66,12 @@
 
   /* .wrap usa `min-height: calc(100dvh - 150px)` en móvil: esos 150px son
      header móvil + el clearance del bottom-nav fijo (96px) que en desktop NO
-     existe (mismo hallazgo que carta/hoy en la review de R4a — ver
-     carta.module.css `.wrap { padding-bottom: var(--sp-7); }`). Aquí el
-     clearance vive en el min-height, no en un padding, así que el ajuste
-     puntual equivalente es restar solo la diferencia: 150 - 96 = 54px. */
-  .wrap { min-height: calc(100dvh - 54px); }
+     existe (mismo hallazgo que carta/hoy en la review de R4a). En desktop el
+     chat debe reclamar el resto del viewport bajo el header real de
+     escritorio, cuya altura fija es 66px (app-shell.module.css:34 `.header
+     { height: 66px; }` dentro del mismo breakpoint; confirmado también por
+     carta.module.css:185 `top: 84px; /* header 66px + respiro */`) — no una
+     resta derivada del valor móvil (150-96), que por coincidencia numérica
+     da un resultado parecido pero no es la cantidad correcta. */
+  .wrap { min-height: calc(100dvh - 66px); }
 }
