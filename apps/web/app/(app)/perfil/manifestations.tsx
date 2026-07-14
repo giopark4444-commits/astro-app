@@ -35,7 +35,13 @@ const HORIZON_META: Record<Horizon, { labelKey: string; glyph: string; tint: str
 type ListState = { s: "loading" } | { s: "error" } | { s: "ready"; items: Manifestation[] };
 
 function formatDay(iso: string, locale: string): string {
-  return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short" });
+  // date-only ("YYYY-MM-DD", p.ej. target_date lunar) → parsear como medianoche
+  // LOCAL. Si no, new Date lo toma como medianoche UTC y en zonas UTC- (Bogotá)
+  // renderiza el día ANTERIOR — justo lo contrario del punto de la feature: la
+  // fecha lunar REAL (patrón del repo, ver perfil-hero.tsx). created_at/preview
+  // son ISO completos (con "T") → se parsean como instante, correcto tal cual.
+  const d = iso.length === 10 ? new Date(iso + "T00:00:00") : new Date(iso);
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
 
 // Preview de fecha para el picker del formulario: solo los horizontes
