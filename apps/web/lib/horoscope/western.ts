@@ -120,7 +120,8 @@ export function computeWesternHoroscope(
   return { sign, period, tz: isValidTz(tz) ? tz : "utc", range: { fromIso: range.fromIso, toIso: range.toIso }, houses, signAspects, events, areas };
 }
 
-// LRU mínima universal: 12 signos × 4 periodos × pocos offsets/día.
+// Caché FIFO acotada (no LRU estricto: un hit no reordena) — suficiente dado el
+// espacio pequeño de claves (12 signos × 4 periodos × pocos offsets/día).
 const CACHE_MAX = 512;
 const cache = new Map<string, WesternPayload>();
 
