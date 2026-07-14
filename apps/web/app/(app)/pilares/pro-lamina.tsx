@@ -67,7 +67,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
     (e): e is { key: (typeof POS_KEYS)[number]; pillar: Pillar } => !!e.pillar,
   );
   const elName = (el: string) => t(`pilares.el${el[0]!.toUpperCase()}${el.slice(1)}`);
-  const pane = (key: PilaresTab) => `${styles.pane} ${tab === key ? styles.paneOn : ""}`;
+  const pane = (key: PilaresTab) => `${styles.pane ?? ""} ${tab === key ? (styles.paneOn ?? "") : ""}`;
 
   return (
     <div className={styles.lamina} data-pro={pro || undefined}>
