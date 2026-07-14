@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import type { NatalReport, SolarReport } from "@/lib/reports/types";
+import { ReportToc } from "./report-toc";
 import styles from "./informe.module.css";
 
 // Vista MÍNIMA de verificación de la Fase 4b (Task 6): NO es la UI de lujo
@@ -136,26 +137,40 @@ export function InformeView() {
     );
   }
 
+  const groups = buildTocGroups({
+    natal,
+    solar,
+    natalHeading: t("natalTitle"),
+    solarHeading: t("solarTitle", { year: currentYear }),
+    introLabel: t("introLabel"),
+    outroLabel: t("outroLabel"),
+    essayLabel: t("essayLabel"),
+    mantraLabel: t("mantraLabel"),
+  });
+
   return (
-    <main className={styles.page}>
+    <main className={styles.page} data-toc={groups.length > 0 || undefined}>
       <h1 className={styles.title}>{t("title")}</h1>
-      <div className={styles.list}>
-        <ReportCard
-          kind="natal"
-          heading={t("natalTitle")}
-          state={natal}
-          onGenerate={() => void runAction("natal", "generate")}
-          onRegenerate={() => void runAction("natal", "regenerate")}
-          onRefresh={() => void refresh("natal")}
-        />
-        <ReportCard
-          kind="solar_return"
-          heading={t("solarTitle", { year: currentYear })}
-          state={solar}
-          onGenerate={() => void runAction("solar_return", "generate")}
-          onRegenerate={() => void runAction("solar_return", "regenerate")}
-          onRefresh={() => void refresh("solar_return")}
-        />
+      <div className={styles.layout}>
+        <div className={styles.list}>
+          <ReportCard
+            kind="natal"
+            heading={t("natalTitle")}
+            state={natal}
+            onGenerate={() => void runAction("natal", "generate")}
+            onRegenerate={() => void runAction("natal", "regenerate")}
+            onRefresh={() => void refresh("natal")}
+          />
+          <ReportCard
+            kind="solar_return"
+            heading={t("solarTitle", { year: currentYear })}
+            state={solar}
+            onGenerate={() => void runAction("solar_return", "generate")}
+            onRegenerate={() => void runAction("solar_return", "regenerate")}
+            onRefresh={() => void refresh("solar_return")}
+          />
+        </div>
+        {groups.length > 0 && <ReportToc groups={groups} ariaLabel={t("tocLabel")} />}
       </div>
     </main>
   );
