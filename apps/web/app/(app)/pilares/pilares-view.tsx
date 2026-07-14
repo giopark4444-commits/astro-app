@@ -10,7 +10,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
-import { type PilaresTab } from "./pilares-tabs";
+import { PilaresTabs, type PilaresTab } from "./pilares-tabs";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
@@ -32,9 +32,6 @@ export function PilaresView() {
   const [error, setError] = useState(false);
   const [pro, setPro] = useState(false);
   const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
-  // `setTab` queda sin uso hasta que Task 4 monte `PilaresTabs` (que la
-  // llamará vía `onSelect`); `tab` ya se pasa a `ProLamina` más abajo.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tab, setTab] = useState<PilaresTab>("nayin");
 
   useEffect(() => {
@@ -96,45 +93,52 @@ export function PilaresView() {
       ) : !data ? (
         <p className={styles.note}>{t("pilares.loading")}</p>
       ) : (
-        <>
-          <div className={styles.grid}>
-            {pillars.map(({ key, pillar }, i) => {
-              if (!pillar) {
+        <div className={styles.deskCols}>
+          <div className={styles.pillarsCol}>
+            <div className={styles.grid}>
+              {pillars.map(({ key, pillar }, i) => {
+                if (!pillar) {
+                  return (
+                    <div key={key} className={styles.col}>
+                      <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
+                      <span className={styles.empty}>—</span>
+                    </div>
+                  );
+                }
+                const isDay = key === "day";
                 return (
-                  <div key={key} className={styles.col}>
-                    <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
-                    <span className={styles.empty}>—</span>
-                  </div>
+                  <PillarColumn
+                    key={key}
+                    posKey={key}
+                    pillar={pillar}
+                    isDay={isDay}
+                    dayMaster={data.day.stem}
+                    pro={pro}
+                    script={script}
+                    index={i}
+                  />
                 );
-              }
-              const isDay = key === "day";
-              return (
-                <PillarColumn
-                  key={key}
-                  posKey={key}
-                  pillar={pillar}
-                  isDay={isDay}
-                  dayMaster={data.day.stem}
-                  pro={pro}
-                  script={script}
-                  index={i}
-                />
-              );
-            })}
+              })}
+            </div>
           </div>
 
-          <button
-            type="button"
-            className={styles.proToggle}
-            onClick={() => setPro((v) => !v)}
-            aria-pressed={pro}
-          >
-            <span className={styles.proDot} data-on={pro || undefined} />
-            {t("pilares.modePro")}
-          </button>
-          {pro && <p className={styles.proHint}>{t("pilares.modeProHint")}</p>}
-          {pro && (
-            <div className={styles.scriptRow} role="tablist" aria-label="Ba Zi / Saju">
+          <div className={styles.controlsGlobal}>
+            <button
+              type="button"
+              className={styles.proToggle}
+              onClick={() => setPro((v) => !v)}
+              aria-pressed={pro}
+            >
+              <span className={styles.proDot} data-on={pro || undefined} />
+              {t("pilares.modePro")}
+            </button>
+            {pro && <p className={styles.proHint}>{t("pilares.modeProHint")}</p>}
+            <div
+              className={styles.scriptRow}
+              data-pro={pro || undefined}
+              role="tablist"
+              aria-label="Ba Zi / Saju"
+            >
               {(["hanzi", "hangul"] as const).map((s) => (
                 <button
                   key={s}
@@ -148,28 +152,33 @@ export function PilaresView() {
                 </button>
               ))}
             </div>
-          )}
-
-          {!data.timeKnown && <p className={styles.note}>{t("pilares.noTime")}</p>}
-
-          <h2 className={styles.section}>{t("pilares.balance")}</h2>
-          <div className={styles.balance}>
-            {ELEMENTS.map((el) => (
-              <div key={el} className={styles.elRow}>
-                <span className={styles.elName}>{t(`pilares.${ELEMENT_KEY[el]}`)}</span>
-                <span className={styles.elTrack}>
-                  <span
-                    className={`${styles.elBar} ${styles[`elBg_${el}`] ?? ""}`}
-                    style={{ width: `${((counts[el] ?? 0) / totalEls) * 100}%` }}
-                  />
-                </span>
-                <span className={styles.elCount}>{counts[el] ?? 0}</span>
-              </div>
-            ))}
           </div>
 
-          <ProLamina data={data} script={script} pro={pro} tab={tab} />
-        </>
+          <div className={styles.readCol}>
+            {!data.timeKnown && <p className={styles.note}>{t("pilares.noTime")}</p>}
+
+            <h2 className={styles.section}>{t("pilares.balance")}</h2>
+            <div className={styles.balance}>
+              {ELEMENTS.map((el) => (
+                <div key={el} className={styles.elRow}>
+                  <span className={styles.elName}>{t(`pilares.${ELEMENT_KEY[el]}`)}</span>
+                  <span className={styles.elTrack}>
+                    <span
+                      className={`${styles.elBar} ${styles[`elBg_${el}`] ?? ""}`}
+                      style={{ width: `${((counts[el] ?? 0) / totalEls) * 100}%` }}
+                    />
+                  </span>
+                  <span className={styles.elCount}>{counts[el] ?? 0}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.tabsRow}>
+              <PilaresTabs active={tab} onSelect={setTab} />
+              <ProLamina data={data} script={script} pro={pro} tab={tab} />
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
