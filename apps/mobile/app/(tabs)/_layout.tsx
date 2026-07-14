@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { Platform } from "react-native";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
 import { fonts, type as typeScale } from "../../theme/tokens";
@@ -25,7 +26,12 @@ export default function TabsLayout() {
         // Sin esto, cada escena se envuelve en el `Background` de react-navigation
         // (colors.background del DefaultTheme = rgb(242,242,242) gris opaco), que
         // tapa el gradiente radial + Starfield de ThemedBackground en _layout.tsx raíz.
-        sceneStyle: { backgroundColor: "transparent" },
+        // SOLO en web: react-navigation-web no oculta (display:none) la escena
+        // anterior al cambiar de tab (sí lo hace en iOS/Android) — con fondo
+        // transparente ahí, el contenido de la pestaña previa queda visible detrás
+        // de la nueva ("doble exposición"). Fondo sólido en web evita ese sangrado;
+        // nativo sigue transparente para que el Starfield compartido se vea a través.
+        sceneStyle: { backgroundColor: Platform.OS === "web" ? tk.bg : "transparent" },
       }}
     >
       <Tabs.Screen
