@@ -97,9 +97,14 @@ html, body { background: transparent; }
 }
 .card--dashed::before { display: none; }
 
-/* ——— Tipos ——— */
+/* ——— Tipos ———
+   ESTÁNDAR DE LEGIBILIDAD (regla de Gio 2026-07-13): un solo tamaño base legible
+   para toda la app. Base sans 15px · secundario 13px (mínimo absoluto) · etiqueta
+   de categoría 12px uppercase con tracking (única excepción, justificada).
+   Los títulos justifican su tamaño por jerarquía; NUNCA se encoge letra para
+   ganar espacio — se recorta aire o contenido. */
 .eyebrow {
-  font: 600 11px/1 var(--sans); letter-spacing: 3px; text-transform: uppercase;
+  font: 600 12px/1 var(--sans); letter-spacing: 2.5px; text-transform: uppercase;
   color: var(--acc-text);
 }
 .roman { font: 600 12px/1 var(--sans); letter-spacing: 2px; color: var(--acc-text); }
@@ -107,15 +112,15 @@ html, body { background: transparent; }
 .h-serif--lg { font: 600 32px/1.1 var(--serif); }
 .voice { font: italic 500 17px/1.45 var(--serif); color: var(--text); }
 .body-read { font: 500 17px/1.6 var(--serif); color: var(--text); }
-.ui-sm { font: 500 13px/1.4 var(--sans); color: var(--text-dim); }
-.ui-xs { font: 500 12px/1.4 var(--sans); color: var(--text-faint); }
+.ui-sm { font: 500 15px/1.4 var(--sans); color: var(--text-dim); }
+.ui-xs { font: 500 13px/1.4 var(--sans); color: var(--text-faint); }
 
 /* ——— Chips ——— */
 .chip {
   display: inline-flex; align-items: center; gap: 7px; min-height: 44px;
   padding: 10px 16px; border-radius: var(--r-pill);
   border: 1px solid var(--acc-hair); background: var(--panel-soft);
-  font: 500 14px/1 var(--sans); color: var(--text);
+  font: 500 15px/1 var(--sans); color: var(--text);
 }
 .chip--on {
   background: linear-gradient(135deg, var(--acc), var(--acc-soft));

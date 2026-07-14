@@ -54,16 +54,25 @@ const SCREENS = [
   ["06-preguntar-vacio", "Preguntar — inicio", "flujo 3"],
   ["07-preguntar-conversacion", "Preguntar — conversación", "flujo 3"],
 ];
+// pantallas del app existente (siempre desde screens-compacta, en ambas propuestas)
+const APP_SCREENS = [
+  ["09-carta", "Carta astral — la rueda", "app actual"],
+  ["10-numeros", "Números — numerología", "app actual"],
+  ["11-pilares", "Pilares — Ba Zi", "app actual"],
+];
 let theme = new URLSearchParams(location.search).get('theme') || 'dark';
 let variant = new URLSearchParams(location.search).get('v') || 'b';
 function dir() { return variant === 'b' ? 'screens-compacta' : 'screens'; }
 function render() {
-  document.getElementById('grid').innerHTML = SCREENS.map(([f, title, tag]) => `
+  const card = (folder) => ([f, title, tag]) => `
     <div class="item">
       <div class="cap"><b>${title}</b><span>${tag}</span></div>
-      <div class="frame"><iframe src="${dir()}/${f}.html?theme=${theme}" scrolling="no" title="${title}"></iframe></div>
-      <a class="open" href="${dir()}/${f}.html?theme=${theme}" target="_blank">Abrir a tamaño real →</a>
-    </div>`).join('');
+      <div class="frame"><iframe src="${folder}/${f}.html?theme=${theme}" scrolling="no" title="${title}"></iframe></div>
+      <a class="open" href="${folder}/${f}.html?theme=${theme}" target="_blank">Abrir a tamaño real →</a>
+    </div>`;
+  document.getElementById('grid').innerHTML =
+    SCREENS.map(card(dir())).join('') +
+    APP_SCREENS.map(card('screens-compacta')).join('');
   scale();
 }
 function setVariant(v) {
