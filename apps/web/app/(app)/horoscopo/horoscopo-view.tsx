@@ -11,6 +11,7 @@ import { SOLAR_HOUSE_LABELS_EN } from "@/lib/content/horoscope-en";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Starfield } from "@/components/starfield";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
+import { HoroscopeReading } from "./horoscope-reading";
 import styles from "./horoscopo.module.css";
 
 const TEXT_VS = "︎";
@@ -179,7 +180,7 @@ export function HoroscopoView() {
 
                 <section className={`card ${styles.section}`}>
                   <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
-                  {prose.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)}
+                  <HoroscopeReading sign={ready.sign} period={period} tz={tz} essence={prose} />
                 </section>
 
                 {ready.natalHits && ready.natalHits.length > 0 && (
