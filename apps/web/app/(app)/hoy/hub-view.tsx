@@ -13,10 +13,11 @@ import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
 
-type IconName = "grid3" | "wheel" | "pillars" | "sun";
+type IconName = "grid3" | "wheel" | "pillars" | "sun" | "aries";
 const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }> = [
   { key: "numeros", icon: "grid3", href: "/numeros", soon: false },
   { key: "carta", icon: "wheel", href: "/carta", soon: false },
+  { key: "horoscopo", icon: "aries", href: "/horoscopo", soon: false },
   { key: "pilares", icon: "pillars", href: "/pilares", soon: false },
 ];
 

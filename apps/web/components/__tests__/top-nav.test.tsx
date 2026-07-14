@@ -22,9 +22,9 @@ describe("TopNav", () => {
   it("renderiza los 6 botones en el orden de Gio", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    // horóscopo NO es link (está 'pronto'), así que sale aparte
-    expect(labels).toEqual([es.nav.hoy, es.nav.carta, es.nav.numeros, es.nav.pilares, es.nav.perfil]);
-    expect(screen.getByText(es.nav.horoscopo).closest("[aria-disabled]")).toBeInTheDocument();
+    // horóscopo ya es un link activo (T8): entra en su lugar en el orden
+    expect(labels).toEqual([es.nav.hoy, es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares, es.nav.perfil]);
+    expect(screen.getByRole("link", { name: new RegExp(es.nav.horoscopo) })).toHaveAttribute("href", "/horoscopo");
   });
 
   it("marca activo el mundo actual (y subrutas)", () => {

@@ -26,6 +26,14 @@ export { computeDistribution, quadrantOfHouse } from "./astrology/distribution";
 export { detectPatterns } from "./astrology/patterns";
 export { scoreLifeAreas, scoreTone, LIFE_AREAS } from "./astrology/life-areas";
 export type { LifeArea, LifeAreaScore, ScoreTone, AreaDriver } from "./astrology/life-areas";
+export {
+  solarHouseOf, solarPlacements, signAspectsToSign, scoreLifeAreasBySolarHouse,
+  SOLAR_HOUSE_AREAS,
+} from "./astrology/solar-houses";
+export type {
+  SolarBodyInput, SolarHousePlacement, SignAspect, SolarHouseDriver, SolarLifeAreaScore,
+} from "./astrology/solar-houses";
+export { TRANSIT_WEIGHT, BENEFIC, MALEFIC } from "./astrology/life-areas";
 export { synastryReport, SYNASTRY_THEMES } from "./astrology/synastry";
 export type {
   SynastryReport,
