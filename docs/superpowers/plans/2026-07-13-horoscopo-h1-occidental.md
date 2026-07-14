@@ -1120,7 +1120,16 @@ git commit -m "feat(horoscopo): ruta /api/horoscope/western — payload universa
 - Produces (T8 consume):
   - `type BarDriver = { glyphs: string; text: string; favorable: boolean }`
   - `type BarArea = { key: string; label: string; score: number; tone: "low" | "mixed" | "high"; toneLabel: string; drivers: BarDriver[] }`
-  - `function AreaBars({ areas, calmText }: { areas: BarArea[]; calmText: string }): JSX.Element`
+  - `function AreaBars({ areas, calmText, open, onToggle }: { areas: BarArea[]; calmText: string; open: string | null; onToggle: (key: string) => void }): JSX.Element`
+    (⚠️ POST-REVIEW FIX: la primera versión de este componente traía su propio
+    `useState` interno para `open`. La revisión de T6 cazó que eso perdía el
+    estado de expansión cada vez que el padre desmonta `<AreaBars>` durante un
+    fetch — pasa en Tu Energía al cambiar de periodo. Fix aplicado en el commit
+    `5c3268c` (`fix(horoscopo): AreaBars — estado de expansión controlado por el
+    padre`): el componente quedó CONTROLADO — `open`/`onToggle` son props
+    obligatorias, el padre los declara. Cualquier consumidor nuevo de
+    `<AreaBars>` (como T8) DEBE declarar su propio `[open, setOpen]`/`onToggle`
+    y pasarlos — ya reflejado en el código de T8 más abajo.)
 - El componente NO trae fetch, ni periodo, ni i18n propios: todo llega resuelto por props (por eso sirve igual para drivers "tránsito→natal" que para "planeta en casa solar").
 
 - [ ] **Step 1: Test que falla**
@@ -1885,6 +1894,10 @@ export function HoroscopoView() {
   const [sign, setSign] = useState<string | null>(active ? null : "aries");
   const [period, setPeriod] = useState<HoroscopePeriod>("today");
   const [pro, setPro] = useState(false);
+  // AreaBars es un componente CONTROLADO (fix de T6 review: el estado de expansión
+  // vive en el padre para que sobreviva un cambio de periodo sin perderse al
+  // desmontarse); cada consumidor de <AreaBars> declara su propio open/onToggle.
+  const [openArea, setOpenArea] = useState<string | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
   const tz = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone ?? "utc", []);
 
@@ -1966,6 +1979,8 @@ export function HoroscopoView() {
                 <h2 className={styles.sectionH}>{t("areasTitle")}</h2>
                 <AreaBars
                   calmText={th("calm")}
+                  open={openArea}
+                  onToggle={(key) => setOpenArea((prev) => (prev === key ? null : key))}
                   areas={ready.areas.map((a): BarArea => ({
                     key: a.area,
                     label: th(AREA_KEY[a.area] ?? a.area),
