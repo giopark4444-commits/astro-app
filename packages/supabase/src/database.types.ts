@@ -15,6 +15,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      manifestations: {
+        Row: {
+          created_at: string;
+          horizon: string;
+          id: string;
+          intention: string;
+          target_date: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          horizon: string;
+          id?: string;
+          intention: string;
+          target_date: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          horizon?: string;
+          id?: string;
+          intention?: string;
+          target_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      journal_notes: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          user_id: string;
+        };
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       birth_profiles: {
         Row: {
           birth_date: string;

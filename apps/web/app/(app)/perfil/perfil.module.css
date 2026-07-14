@@ -26,6 +26,164 @@
 .prefs { display: flex; flex-direction: column; gap: var(--sp-4); }
 .prefsTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 0; }
 
+/* — manifestaciones (la joya) — mockup docs/redesign/r4-mockups/06-cupula-topnav.html, screen 3 (.pf-manif) */
+.manifSection {} /* card global */
+.manifHead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); }
+.manifTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 2px 0 0; }
+.manifSub { margin: 3px 0 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-sm); color: var(--soft); }
+.manifAdd {
+  flex: none; height: 38px; padding: 0 var(--sp-4); border-radius: 999px; border: 0; cursor: pointer; margin-top: 4px;
+  background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 700; box-shadow: var(--glow-soft);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.manifAdd:hover { opacity: 0.92; }
+.manifAdd:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+.manifForm { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.manifLabel { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.manifHorizons { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.manifHzChip { font-size: var(--text-xs); }
+.manifTextarea {
+  padding: var(--sp-3) var(--sp-4); font-family: inherit; font-size: var(--text-md); resize: vertical; min-height: 72px;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; outline: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.manifTextarea::placeholder { color: var(--soft); }
+.manifTextarea:focus { border-color: rgba(var(--acc-rgb), 0.5); }
+.manifCount { align-self: flex-end; font-size: var(--text-2xs); color: var(--soft); }
+.manifFormActions { display: flex; justify-content: flex-end; gap: var(--sp-2); }
+.manifCancel {
+  height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 1px solid var(--line); cursor: pointer;
+  background: transparent; color: var(--soft); font-family: inherit; font-size: var(--text-xs); font-weight: 600;
+}
+.manifSubmit {
+  height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 700; box-shadow: var(--glow-soft);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.manifSubmit:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.manifFormError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
+
+.manifLoading, .manifError { font-size: var(--text-sm); color: var(--soft); margin: 0; }
+.manifError { color: var(--tone-caution); }
+.manifEmpty { display: flex; flex-direction: column; gap: 4px; text-align: center; padding: var(--sp-5); }
+.manifEmptyTitle { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--ink); }
+.manifEmptyHint { margin: 0; font-size: var(--text-xs); color: var(--soft); }
+
+.manifGrid { display: flex; flex-direction: column; gap: var(--sp-4); }
+/* Colores de dominio (fijos, no dependen del tema) — mismos hex que el mockup:
+   solar=azul .pf-card.solar, llena=oro (no var(--acc-rgb): la cosecha dorada es
+   invariante entre temas), nueva=violeta noche .pf-card.nueva, tres=terracota
+   .pf-card.tres. Tinte por encima del glass del tema (--surface), ~6-14%. */
+.manifCard { position: relative; display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+.manifCard.feat { padding: var(--sp-5) var(--sp-5); }
+.manifCard.feat .manifIntention { font-size: var(--text-lg); }
+.manifCard.slim { flex-direction: row; align-items: center; gap: var(--sp-4); }
+.manifCard.slim .manifFoot { margin: 0; padding: 0; border: 0; flex: none; }
+.manifCard.slim .manifIntention { flex: 1; font-size: var(--text-sm); }
+.hzSolar { background: linear-gradient(155deg, rgba(122, 170, 224, 0.14), rgba(122, 170, 224, 0.04) 55%, transparent), var(--surface); border-color: rgba(122, 170, 224, 0.38); }
+.hzFull { background: linear-gradient(155deg, rgba(231, 201, 134, 0.16), rgba(231, 201, 134, 0.04) 60%, transparent), var(--surface); border-color: rgba(231, 201, 134, 0.4); }
+.hzNew { background: linear-gradient(155deg, rgba(124, 110, 196, 0.18), rgba(124, 110, 196, 0.05) 60%, transparent), var(--surface); border-color: rgba(150, 140, 214, 0.4); }
+.hzThree { background: linear-gradient(120deg, rgba(224, 121, 90, 0.13), rgba(224, 121, 90, 0.03) 55%, transparent), var(--surface); border-color: rgba(224, 121, 90, 0.36); }
+.hzYear { background: linear-gradient(120deg, rgba(122, 178, 140, 0.13), rgba(122, 178, 140, 0.03) 55%, transparent), var(--surface); border-color: rgba(122, 178, 140, 0.36); }
+
+.manifDelete {
+  position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface-2);
+  color: var(--soft); font-size: 10px; line-height: 1; cursor: pointer; opacity: 0.5;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.manifDelete:hover { opacity: 1; color: var(--ink); }
+.manifDelete:disabled { opacity: 0.2; cursor: default; }
+.manifHz { display: inline-flex; align-items: center; gap: 7px; font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft); padding-right: 26px; }
+.manifIntention { font-family: var(--font-display); font-weight: 600; font-size: var(--text-md); line-height: 1.3; color: var(--ink); margin: 0; }
+.manifFoot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); padding-top: var(--sp-2); border-top: 1px solid var(--line); flex-wrap: wrap; }
+.manifPhase { display: inline-flex; align-items: center; gap: 9px; }
+.manifDots { display: inline-flex; align-items: center; gap: 5px; }
+.dot, .dotDone, .dotNow { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--line); }
+.dotDone { background: var(--soft); border-color: transparent; opacity: 0.65; }
+.dotNow { background: var(--acc); border-color: transparent; box-shadow: 0 0 8px rgba(var(--acc-rgb), 0.7); }
+.manifPhaseLbl { font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+.manifPhaseLbl.gold { color: var(--acc-text); }
+.manifSown { font-size: var(--text-2xs); color: var(--soft); }
+
+/* — diario / cuaderno nocturno — mockup docs/redesign/r4-mockups/06-cupula-topnav.html, screen 3 (.pf-notes) */
+.diarioGrid { display: flex; flex-direction: column; gap: var(--sp-5); }
+.notesSection { display: flex; flex-direction: column; } /* card global */
+.notesHead { margin-bottom: var(--sp-2); }
+.notesTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 2px 0 0; }
+
+.notesLoading, .notesError { font-size: var(--text-sm); color: var(--soft); margin: 0; }
+.notesError { color: var(--tone-caution); }
+.notesEmpty { display: flex; flex-direction: column; gap: 4px; text-align: center; padding: var(--sp-5); margin-bottom: var(--sp-3); }
+.notesEmptyTitle { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--ink); }
+.notesEmptyHint { margin: 0; font-size: var(--text-xs); color: var(--soft); }
+
+.notesList { display: flex; flex-direction: column; }
+/* Hairline: var(--line) en vez del rgba literal del mockup — mismo token que
+   .manifFoot, se mantiene sutil en los 5 temas sin hardcodear un solo modo. */
+.noteRow { position: relative; display: flex; gap: var(--sp-3); padding: 13px var(--sp-6) 13px 2px; border-bottom: 1px solid var(--line); }
+.noteRow:first-child { padding-top: 4px; }
+.noteGlyph {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px;
+  font-size: var(--text-xs); color: var(--acc-text); background: rgba(var(--acc-rgb), 0.08); border: 1px solid rgba(var(--acc-rgb), 0.28);
+}
+/* Colores de dominio (fijos, no dependen del tema) — mismos triples RGB que el
+   mockup: dream=frío .pf-note-g.cool, transit=cálido/tenso .pf-note-g.warm.
+   idea/note quedan sin override arriba: idea usa el acento por defecto del
+   tema (igual que el mockup); note (•) es la variante muda de journal.tsx. */
+.noteCool { color: var(--tone-cool); border-color: rgba(122, 170, 224, 0.32); background: rgba(122, 170, 224, 0.08); }
+.noteWarm { color: var(--tone-caution); border-color: rgba(224, 160, 122, 0.32); background: rgba(224, 160, 122, 0.08); }
+.noteMuted { color: var(--soft); border-color: var(--line); background: var(--surface-2); }
+.noteBody { flex: 1; min-width: 0; }
+.noteDate { font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); margin-bottom: 4px; }
+.noteText { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); line-height: 1.55; color: var(--soft); white-space: pre-wrap; overflow-wrap: anywhere; }
+.noteDelete {
+  position: absolute; top: 50%; right: 2px; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface-2);
+  color: var(--soft); font-size: 10px; line-height: 1; cursor: pointer; opacity: 0.5;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.noteDelete:hover { opacity: 1; color: var(--ink); }
+.noteDelete:disabled { opacity: 0.2; cursor: default; }
+
+.notesGhost {
+  margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; width: 100%;
+  border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 12px; background: var(--surface-2);
+  color: var(--acc-text); font-family: inherit; font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+  transition: box-shadow var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+.notesGhost:hover { box-shadow: var(--glow-soft); }
+.notesGhost:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+.notesForm { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-2); }
+.notesLabel { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.notesKinds { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.notesKindChip { font-size: var(--text-xs); }
+.notesTextarea {
+  padding: var(--sp-3) var(--sp-4); font-family: inherit; font-size: var(--text-md); resize: vertical; min-height: 72px;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; outline: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.notesTextarea::placeholder { color: var(--soft); }
+.notesTextarea:focus { border-color: rgba(var(--acc-rgb), 0.5); }
+.notesCount { align-self: flex-end; font-size: var(--text-2xs); color: var(--soft); }
+.notesFormActions { display: flex; justify-content: flex-end; gap: var(--sp-2); }
+.notesCancel {
+  height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 1px solid var(--line); cursor: pointer;
+  background: transparent; color: var(--soft); font-family: inherit; font-size: var(--text-xs); font-weight: 600;
+}
+.notesSubmit {
+  height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 700; box-shadow: var(--glow-soft);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.notesSubmit:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.notesFormError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   .page { max-width: min(1080px, calc(100% - 112px)); }
   .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); }
@@ -33,4 +191,12 @@
   .name { font-size: 44px; }
   .sig { justify-content: flex-start; }
   .birth { width: auto; min-width: 260px; align-self: stretch; justify-content: center; }
+
+  .manifGrid { display: grid; grid-template-columns: 1.18fr 1fr; gap: var(--sp-4); align-items: stretch; }
+  .manifCard.feat { grid-row: span 2; }
+  .manifCard.slim { grid-column: 1 / -1; }
+
+  /* Diario junto a manifestaciones, 2:1 — mismo ratio que el mockup
+     (.pf-manif span 8 / .pf-notes span 4 sobre una grilla de 12). */
+  .diarioGrid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-4); align-items: start; }
 }
