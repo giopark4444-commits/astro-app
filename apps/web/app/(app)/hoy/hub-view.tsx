@@ -9,6 +9,7 @@ import { Icon } from "@/components/icon";
 import { Starfield } from "@/components/starfield";
 import { EnergyPanel } from "./energy-panel";
 import { DayNumberCard } from "./day-number-card";
+import { DayHeader } from "./day-header";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
@@ -56,8 +57,11 @@ export function HubView() {
       </div>
 
       <div className={styles.greet}>
-        <p className={styles.hello}>{t("hoy.greeting")}</p>
-        <h1 className={`${styles.name} reveal`} style={{ ["--i" as string]: 0 }}>{active?.name ?? "Aluna"}</h1>
+        <div>
+          <p className={styles.hello}>{t("hoy.greeting")}</p>
+          <h1 className={`${styles.name} reveal`} style={{ ["--i" as string]: 0 }}>{active?.name ?? "Aluna"}</h1>
+        </div>
+        {active && <DayHeader profileId={active.id} birthDate={active.birth_date} />}
       </div>
 
       <div className={styles.deskGrid}>

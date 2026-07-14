@@ -18,6 +18,7 @@ export * from "./constants/colors";
 // Dominio de carta astral (puro)
 export * from "./astrology/types";
 export { normalizeAngle, signOfLongitude, angularSeparation } from "./astrology/signs";
+export { moonPhase, type MoonPhase } from "./astrology/moon-phase";
 export { houseOfLongitude } from "./astrology/houses";
 export { dignityOf } from "./astrology/dignity";
 export { detectAspects, detectAspectsBetween } from "./astrology/aspects";

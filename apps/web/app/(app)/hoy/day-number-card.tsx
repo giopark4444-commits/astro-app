@@ -2,23 +2,11 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { personalCycles, type BirthDate } from "@aluna/core";
+import { personalCycles } from "@aluna/core";
 import { PERSONAL_DAY_ES } from "@/lib/content/personal-day-es";
 import { PERSONAL_DAY_EN } from "@/lib/content/personal-day-en";
+import { parseBirth, todayCivil } from "@/lib/hoy/today-birth";
 import styles from "./day-number.module.css";
-
-/** Parsea "YYYY-MM-DD" (fecha civil de nacimiento) a BirthDate, o null si no cuadra. */
-function parseBirth(date: string): BirthDate | null {
-  const [y, m, d] = date.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return { year: y, month: m, day: d };
-}
-
-/** Hoy como fecha civil local (la numerología usa la fecha del calendario, sin TZ). */
-function todayCivil(): BirthDate {
-  const now = new Date();
-  return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
-}
 
 /**
  * "Numerología de hoy": el día personal del perfil activo (cómputo en cliente con

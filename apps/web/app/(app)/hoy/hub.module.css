@@ -2,9 +2,24 @@
 .wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px: clearance del bottom-nav (excepción del plan); 24→sp-6 por precedente pilares */
 .sky { position: absolute; inset: 0 0 auto; height: 280px; pointer-events: none; z-index: 0; }
 
-.greet { position: relative; z-index: 1; margin-bottom: var(--sp-6); } /* 26→28: paso más cercano */
+.greet {
+  position: relative; z-index: 1; margin-bottom: var(--sp-6); /* 26→28: paso más cercano */
+  display: flex; flex-direction: column; gap: var(--sp-2);
+}
 .hello { font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
 .name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; } /* clamp responsivo: excepción (no es un paso fijo) */
+
+/* DayHeader: fecha + fase lunar/signo + día personal (mockup 06). Apilado bajo
+   el saludo en móvil; a la derecha de la fila en desktop. */
+.dateMeta { font-size: var(--text-xs); color: var(--soft); line-height: 1.6; }
+.dateLine { margin: 0; }
+.moonLine { margin: 0; }
+.moonGlyph { color: var(--acc-text); }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .greet { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
+  .dateMeta { text-align: right; }
+}
 
 .section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }
 .lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); } /* 11→12: paso más cercano */

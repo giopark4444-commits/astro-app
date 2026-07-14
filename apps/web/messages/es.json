@@ -29,7 +29,17 @@
     "toneMixed": "mixta",
     "toneLow": "en reto",
     "askAluna": "Pregúntale a Aluna",
-    "askHint": "Tu carta, tus números y el cielo de hoy, en la respuesta."
+    "askHint": "Tu carta, tus números y el cielo de hoy, en la respuesta.",
+    "moonNew": "Luna nueva",
+    "moonWaxingCrescent": "Luna creciente",
+    "moonFirstQuarter": "Cuarto creciente",
+    "moonWaxingGibbous": "Luna gibosa creciente",
+    "moonFull": "Luna llena",
+    "moonWaningGibbous": "Luna gibosa menguante",
+    "moonLastQuarter": "Cuarto menguante",
+    "moonWaningCrescent": "Luna menguante",
+    "moonInSign": "{phase} en {sign}",
+    "headerPersonalDay": "tu día personal es {n}"
   },
   "onboarding": {
     "progress": "Paso {n} de {total}",

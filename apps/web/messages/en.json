@@ -29,7 +29,17 @@
     "toneMixed": "mixed",
     "toneLow": "challenged",
     "askAluna": "Ask Aluna",
-    "askHint": "Your chart, your numbers and today's sky — in the answer."
+    "askHint": "Your chart, your numbers and today's sky — in the answer.",
+    "moonNew": "New Moon",
+    "moonWaxingCrescent": "Waxing Moon",
+    "moonFirstQuarter": "First Quarter",
+    "moonWaxingGibbous": "Waxing Gibbous",
+    "moonFull": "Full Moon",
+    "moonWaningGibbous": "Waning Gibbous",
+    "moonLastQuarter": "Last Quarter",
+    "moonWaningCrescent": "Waning Moon",
+    "moonInSign": "{phase} in {sign}",
+    "headerPersonalDay": "your personal day is {n}"
   },
   "onboarding": {
     "progress": "Step {n} of {total}",
