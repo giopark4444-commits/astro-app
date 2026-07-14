@@ -136,11 +136,12 @@ export default function HomeScreen() {
               <Text style={styles.soonBody}>{t("universo.informesBody")}</Text>
             </Card>
           </Pressable>
-          <Card>
-            <Text style={styles.soonTitle}>{t("universo.preguntarTitle")}</Text>
-            <Text style={styles.soonBody}>{t("universo.preguntarBody")}</Text>
-            <SoonBadge label={t("settings.soon")} />
-          </Card>
+          <Pressable onPress={() => router.push("/preguntar")}>
+            <Card>
+              <Text style={styles.soonTitle}>{t("universo.preguntarTitle")}</Text>
+              <Text style={styles.soonBody}>{t("universo.preguntarBody")}</Text>
+            </Card>
+          </Pressable>
         </FadeIn>
 
         <Text style={styles.sectionLabel}>{t("hoy.soon")}</Text>
