@@ -187,6 +187,11 @@
 .col:not([data-pro]) .god,
 .col:not([data-pro]) .hidden { display: none; }
 
+/* ProLamina completa (R4b-3, spec §7 — segundo de los DOS lugares con
+   {pro && ...}): mismo mecanismo. El override "siempre visible" en desktop
+   llega en Task 4. */
+.lamina:not([data-pro]) { display: none; }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* cap intermedio: esta pantalla aún no tiene diseño desktop propio (R4b+);
      sin esto se estira a los 1280px del shell y la línea de lectura se rompe.

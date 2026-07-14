@@ -10,6 +10,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
+import { type PilaresTab } from "./pilares-tabs";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
@@ -31,6 +32,10 @@ export function PilaresView() {
   const [error, setError] = useState(false);
   const [pro, setPro] = useState(false);
   const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
+  // `setTab` queda sin uso hasta que Task 4 monte `PilaresTabs` (que la
+  // llamará vía `onSelect`); `tab` ya se pasa a `ProLamina` más abajo.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [tab, setTab] = useState<PilaresTab>("nayin");
 
   useEffect(() => {
     if (!active) return;
@@ -163,7 +168,7 @@ export function PilaresView() {
             ))}
           </div>
 
-          {pro && data && <ProLamina data={data} script={script} />}
+          <ProLamina data={data} script={script} pro={pro} tab={tab} />
         </>
       )}
     </main>
