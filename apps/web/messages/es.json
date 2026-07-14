@@ -344,7 +344,8 @@
     "themeInvitationLabel": "Invitación",
     "noProfileTitle": "Crea tu perfil primero",
     "noProfileBody": "Necesitas un perfil con fecha y lugar de nacimiento para generar tus informes.",
-    "noProfileCta": "Crear perfil"
+    "noProfileCta": "Crear perfil",
+    "tocLabel": "Índice"
   },
   "errors": {
     "notFoundTitle": "Esta constelación no existe",

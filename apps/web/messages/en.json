@@ -344,7 +344,8 @@
     "themeInvitationLabel": "Invitation",
     "noProfileTitle": "Create your profile first",
     "noProfileBody": "You need a profile with a birth date and place to generate your reports.",
-    "noProfileCta": "Create profile"
+    "noProfileCta": "Create profile",
+    "tocLabel": "Contents"
   },
   "errors": {
     "notFoundTitle": "This constellation isn't on the map",

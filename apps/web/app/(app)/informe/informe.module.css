@@ -48,14 +48,57 @@
 /* Contenido del informe listo: texto plano legible, sin markdown. */
 .body { display: grid; gap: var(--sp-4); }
 .lead { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--ink); }
-.section { display: grid; gap: var(--sp-1); }
+.section { display: grid; gap: var(--sp-1); scroll-margin-top: 84px; } /* header 66px + respiro — mismo valor que carta.module.css .wheelCol; evita que el salto de ancla esconda el título tras el header fijo */
 .sectionTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
 .sectionBody { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--soft); white-space: pre-wrap; }
 .modelUsed { margin: 0; font-size: var(--text-2xs); color: var(--soft); opacity: 0.7; }
 
+.layout { display: contents; }
+
+/* Riel de índice — oculto en móvil por defecto (no hay espacio lateral en
+   una columna de teléfono); se muestra solo dentro del media query. */
+.toc { display: none; }
+.tocGroup { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tocHeading { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.tocList { display: flex; flex-direction: column; gap: var(--sp-1); list-style: none; margin: 0; padding: 0; }
+.tocLink {
+  display: block; padding: var(--sp-1) 0 var(--sp-1) var(--sp-3);
+  border-left: 2px solid var(--line); font-size: var(--text-xs); color: var(--soft);
+  text-decoration: none; line-height: 1.4;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.tocLink:hover { color: var(--ink); }
+.tocLink[data-on] {
+  color: var(--acc-text);
+  border-left-color: var(--acc);
+  /* glow vertical — versión del subrayado dorado de .dtab[data-on]::after
+     (carta.module.css) orientada al borde izquierdo, spec §4.4. */
+  box-shadow: -1px 0 8px rgba(var(--acc-rgb), 0.45);
+}
+
 @media (min-width: 1080px) { /* bp desktop R4a */
-  /* cap intermedio: esta pantalla aún no tiene diseño desktop propio (R4b+);
-     sin esto se estira a los 1280px del shell y la línea de lectura se rompe.
-     Hallazgo de la review final de R4a. */
-  .page { max-width: 760px; margin-left: auto; margin-right: auto; }
+  /* R4b-3 (patrón C, spec §4.4): sin riel (ningún informe ready), columna de
+     lectura angosta — reemplaza el cap intermedio de 760px (stopgap de R4a). */
+  .page { max-width: min(640px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
+
+  /* Con riel (≥1 informe ready): la página se ensancha para hospedar lectura
+     (640) + riel (200) + separación (sp-6 = 28) = 868, punto de partida a
+     calibrar cuando se vea en navegador. */
+  .page[data-toc] { max-width: min(868px, calc(100% - 112px)); }
+  .page[data-toc] .layout {
+    display: grid;
+    /* Track de lectura flexible (no 640px fijo): con box-sizing: border-box +
+       el padding horizontal de .page, el ancho de contenido real es a lo sumo
+       868 - 40 = 828px, que ya no alcanza para 640 + 200 + gap(28) = 868px
+       fijos — el grid desbordaba su propio contenedor. minmax(0, 1fr) deja
+       que la columna de lectura ocupe el espacio realmente disponible
+       (~600px en el caso de 828px reales) sin exigir más de lo que hay. */
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .toc {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px; /* header 66px + respiro — mismo valor que carta .wheelCol */
+  }
 }

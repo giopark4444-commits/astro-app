@@ -119,8 +119,21 @@
 }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
-  /* cap intermedio: esta pantalla aún no tiene diseño desktop propio (R4b+);
-     sin esto se estira a los 1280px del shell y la línea de lectura se rompe.
-     Hallazgo de la review final de R4a. */
-  .wrap { max-width: 760px; margin-left: auto; margin-right: auto; }
+  /* R4b-3 (patrón B, spec §4.3): columna ancha centrada — reemplaza el cap
+     intermedio de 760px (stopgap de R4a). 960px es punto de partida (algo
+     más que numerología: hospeda 2 columnas de picker + una grilla 2×2 de
+     barras), a calibrar cuando se vea en navegador. */
+  .wrap { max-width: min(960px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
+
+  /* Los 2 PersonPicker, de apilados a fila de 2 columnas (son dos entidades
+     independientes; no hace falta reordenar nada, el JSX ya los pone en el
+     orden A/B deseado). */
+  .pickers { display: grid; grid-template-columns: 1fr 1fr; }
+
+  /* Las 4 barras de tema, de lista vertical a grilla 2×2. El acordeón de
+     expansión in-place NO cambia (spec §4.3): solo el contenedor pasa de
+     flex-column a grid; si una barra se expande, su fila crece y la barra
+     vecina de esa misma fila queda con espacio vacío debajo — comportamiento
+     aceptado explícitamente por el spec, no se resuelve aparte. */
+  .bars { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
 }

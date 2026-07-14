@@ -25,6 +25,7 @@ import {
 } from "@aluna/core";
 import { baziLabels } from "@/lib/content/bazi-labels";
 import type { BaZiData } from "./types";
+import type { PilaresTab } from "./pilares-tabs";
 import styles from "./pilares.module.css";
 
 type Script = "hanzi" | "hangul";
@@ -36,7 +37,7 @@ const godName = (t: ReturnType<typeof useTranslations>, key: TenGod) =>
 
 /** Lámina Pro de Cuatro Pilares: las 8 secciones (Na Yin, fuerza del DM, 喜用神,
  *  大運/流年, 12 etapas, interacciones, estrellas) sobre los pilares ya calculados. */
-export function ProLamina({ data, script }: { data: BaZiData; script: Script }) {
+export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: Script; pro: boolean; tab: PilaresTab }) {
   const t = useTranslations();
   const locale = useLocale();
   const L = baziLabels(locale);
@@ -66,13 +67,14 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
     (e): e is { key: (typeof POS_KEYS)[number]; pillar: Pillar } => !!e.pillar,
   );
   const elName = (el: string) => t(`pilares.el${el[0]!.toUpperCase()}${el.slice(1)}`);
+  const pane = (key: PilaresTab) => `${styles.pane ?? ""} ${tab === key ? (styles.paneOn ?? "") : ""}`;
 
   return (
-    <div className={styles.lamina}>
+    <div className={styles.lamina} data-pro={pro || undefined}>
       {!data.timeKnown && <p className={styles.note}>{t("pilares.threePillarsNote")}</p>}
 
       {/* Na Yin */}
-      <section className="card">
+      <section className={`card ${pane("nayin")}`}>
         <h3 className={styles.cardH}>{t("pilares.nayinTitle")}</h3>
         {entries.map((e) => {
           const n = nayin(e.pillar);
@@ -89,7 +91,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* Fuerza del DM */}
-      <section className="card">
+      <section className={`card ${pane("strength")}`}>
         <h3 className={styles.cardH}>{t("pilares.strengthTitle")}</h3>
         <div className={styles.meterRow}>
           <span className={styles.verdict}>{L.verdicts[strength.verdict]}</span>
@@ -111,7 +113,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* Favorables */}
-      <section className="card">
+      <section className={`card ${pane("favor")}`}>
         <h3 className={styles.cardH}>{t("pilares.favorTitle")}</h3>
         {strength.verdict === "balanced" ? (
           <p className={styles.note}>{t("pilares.balancedNote")}</p>
@@ -129,7 +131,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* 大運 */}
-      <section className="card">
+      <section className={`card ${pane("luck")}`}>
         <h3 className={styles.cardH}>{t("pilares.luckTitle")}</h3>
         {data.gender === "neutral" && <p className={styles.note}>{t("pilares.luckNeutralNote")}</p>}
         {!data.timeKnown && <p className={styles.note}>{t("pilares.luckNoTimeNote")}</p>}
@@ -141,7 +143,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* 12 etapas */}
-      <section className="card">
+      <section className={`card ${pane("stages")}`}>
         <h3 className={styles.cardH}>{t("pilares.stagesTitle")}</h3>
         {entries.map((e) => {
           const st = lifeStage(data.day.stem, e.pillar.branch);
@@ -157,7 +159,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* Interacciones */}
-      <section className="card">
+      <section className={`card ${pane("interactions")}`}>
         <h3 className={styles.cardH}>{t("pilares.interactionsTitle")}</h3>
         {interactions.length === 0 ? (
           <p className={styles.note}>{t("pilares.interactionsEmpty")}</p>
@@ -174,7 +176,7 @@ export function ProLamina({ data, script }: { data: BaZiData; script: Script }) 
       </section>
 
       {/* Estrellas */}
-      <section className="card">
+      <section className={`card ${pane("stars")}`}>
         <h3 className={styles.cardH}>{t("pilares.starsTitle")}</h3>
         {stars.length === 0 ? (
           <p className={styles.note}>—</p>
