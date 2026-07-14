@@ -284,7 +284,6 @@
     "proseTitle": "Your reading",
     "pro": "Pro Mode",
     "proPositions": "Transits by solar house",
-    "proEvents": "Events with exact time",
     "proMethod": "Whole-sign solar houses from {sign}. Sign-to-sign aspects. Period sampled at local noon. Time zone: {tz}.",
     "loading": "Reading the sky…",
     "error": "The sky did not answer. Try again.",

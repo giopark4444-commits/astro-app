@@ -284,7 +284,6 @@
     "proseTitle": "Tu lectura",
     "pro": "Modo Pro",
     "proPositions": "Tránsitos por casa solar",
-    "proEvents": "Eventos con hora exacta",
     "proMethod": "Casas solares whole-sign desde {sign}. Aspectos por signo (whole-sign). Muestras del periodo a mediodía local. Zona horaria: {tz}.",
     "loading": "Leyendo el cielo…",
     "error": "El cielo no respondió. Intenta de nuevo.",
