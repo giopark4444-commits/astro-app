@@ -89,7 +89,12 @@ function ManifCard({
   const t = useTranslations("manifest");
   const locale = useLocale();
   const meta = HORIZON_META[m.horizon as Horizon] ?? HORIZON_META.one_year;
-  const { phase, daysToTarget } = manifestationPhase(m.created_at, m.target_date, new Date().toISOString());
+  // target_date es date-only ("YYYY-MM-DD"): se pasa como medianoche LOCAL (sufijo
+  // sin "Z") para que la fase compare en la MISMA zona que se muestra. Si no, el
+  // Date.parse lo toma como medianoche UTC y en zonas UTC- (Bogotá) una siembra a
+  // luna nueva de mañana aparece "cosechada" apenas UTC cruza el día (cazado en
+  // la verificación en navegador). created_at ya es ISO completo → instante real.
+  const { phase, daysToTarget } = manifestationPhase(m.created_at, `${m.target_date}T00:00:00`, new Date().toISOString());
   const nearHarvest = phase !== "cosechada" && daysToTarget <= NEAR_HARVEST_DAYS;
   const phaseLabel =
     phase === "cosechada"
