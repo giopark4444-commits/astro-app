@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +27,25 @@ export default function PreguntarScreen() {
   const [status, setStatus] = useState<Status>("idle");
   const requestRef = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
+
+  // Fase 5 (review Fable 5): mismo guard de unmount que compatibilidad.tsx —
+  // si el usuario sale mientras send() está en vuelo, la respuesta tardía no
+  // debe aplicar setState sobre una pantalla ya desmontada.
+  useEffect(() => {
+    return () => {
+      requestRef.current += 1;
+    };
+  }, []);
+
+  // Cambiar de perfil activo a mitad de conversación mezclaba el hilo viejo
+  // (anclado al perfil anterior) con el contexto del nuevo perfil en el
+  // siguiente mensaje — el hilo visible ya no correspondía a con quién se
+  // estaba "hablando". Reinicia limpio cuando cambia profile.id.
+  useEffect(() => {
+    requestRef.current += 1;
+    setTurns([]);
+    setStatus("idle");
+  }, [profile?.id]);
 
   const back = () => router.back();
 

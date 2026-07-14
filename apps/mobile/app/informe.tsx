@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card, FadeIn } from "../components/ui";
@@ -43,31 +43,41 @@ export default function InformeScreen() {
   const [natal, setNatal] = useState<CardState>({ s: "loading" });
   const [solar, setSolar] = useState<CardState>({ s: "loading" });
 
+  // Fase 5 (review Fable 5): igual patrón que compatibilidad.tsx — una
+  // mutación lenta (regenerate) no debe pisar un estado más nuevo (un refresh
+  // rápido que ya trajo "ready") cuando resuelve tarde. Un ref por tarjeta.
+  const natalRequestRef = useRef(0);
+  const solarRequestRef = useRef(0);
+
   const accessToken = session?.access_token;
   const profileId = profile?.id;
 
   async function loadNatal() {
     if (!accessToken) return;
+    // Bump: invalida cualquier generate/regenerate en vuelo — un refresh manual
+    // (o el efecto inicial) siempre gana sobre una mutación previa más lenta.
+    const myRequest = ++natalRequestRef.current;
     try {
       const res = await fetchReport({ accessToken, kind: "natal", locale, year: null });
       setGate("ok");
-      setNatal(toCardState(res));
+      if (natalRequestRef.current === myRequest) setNatal(toCardState(res));
     } catch (e) {
       if (e instanceof ReportsApiError && e.status === 403) {
         setGate("plusRequired");
         return;
       }
-      setNatal({ s: "error" });
+      if (natalRequestRef.current === myRequest) setNatal({ s: "error" });
     }
   }
 
   async function loadSolar() {
     if (!accessToken) return;
+    const myRequest = ++solarRequestRef.current;
     try {
       const res = await fetchReport({ accessToken, kind: "solar_return", locale, year: CURRENT_YEAR });
-      setSolar(toCardState(res));
+      if (solarRequestRef.current === myRequest) setSolar(toCardState(res));
     } catch (e) {
-      if (!(e instanceof ReportsApiError && e.status === 403)) setSolar({ s: "error" });
+      if (solarRequestRef.current === myRequest && !(e instanceof ReportsApiError && e.status === 403)) setSolar({ s: "error" });
     }
   }
 
@@ -80,24 +90,35 @@ export default function InformeScreen() {
   async function onGenerate(kind: ReportKind) {
     if (!accessToken || !profileId) return;
     const setState = kind === "natal" ? setNatal : setSolar;
+    const requestRef = kind === "natal" ? natalRequestRef : solarRequestRef;
+    const myRequest = ++requestRef.current;
     setState({ s: "generating" });
     try {
       const res = await generateReport({ accessToken, profileId, kind, locale, year: kind === "solar_return" ? CURRENT_YEAR : null });
-      setState(toCardState(res));
-    } catch {
-      setState({ s: "error" });
+      if (requestRef.current === myRequest) setState(toCardState(res));
+    } catch (e) {
+      if (requestRef.current !== myRequest) return;
+      // 409 = ya hay una generación en curso (doble-tap, u otro dispositivo) —
+      // NO es un error real, la generación real sigue viva; refleja eso en vez
+      // de mandar al usuario a un loop de "Reintentar" → 409 → "Reintentar".
+      if (e instanceof ReportsApiError && e.status === 409) setState({ s: "generating" });
+      else setState({ s: "error" });
     }
   }
 
   async function onRegenerate(kind: ReportKind) {
     if (!accessToken || !profileId) return;
     const setState = kind === "natal" ? setNatal : setSolar;
+    const requestRef = kind === "natal" ? natalRequestRef : solarRequestRef;
+    const myRequest = ++requestRef.current;
     setState({ s: "generating" });
     try {
       const res = await regenerateReport({ accessToken, profileId, kind, locale, year: kind === "solar_return" ? CURRENT_YEAR : null });
-      setState(toCardState(res));
-    } catch {
-      setState({ s: "error" });
+      if (requestRef.current === myRequest) setState(toCardState(res));
+    } catch (e) {
+      if (requestRef.current !== myRequest) return;
+      if (e instanceof ReportsApiError && e.status === 409) setState({ s: "generating" });
+      else setState({ s: "error" });
     }
   }
 
@@ -131,7 +152,15 @@ export default function InformeScreen() {
               {t("informe.paywallTitle")} <Text style={styles.paywallBrand}>{t("informe.paywallBrand")}</Text>
             </Text>
             <Text style={styles.paywallBody}>{t("informe.paywallBody")}</Text>
-            <Pressable style={styles.cta} accessibilityRole="button">
+            <Pressable
+              style={styles.cta}
+              accessibilityRole="button"
+              onPress={() =>
+                // Compra real de Plus (checkout/IAP) es alcance aparte (fuera
+                // de este plan) — placeholder honesto en vez de un botón mudo.
+                Alert.alert(t("informe.paywallBrand"), t("informe.paywallBody"))
+              }
+            >
               <Text style={styles.ctaText}>{t("informe.paywallCta")}</Text>
             </Pressable>
           </Card>

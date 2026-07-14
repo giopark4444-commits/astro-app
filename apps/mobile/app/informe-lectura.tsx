@@ -18,7 +18,7 @@ export default function InformeLecturaScreen() {
   const year = params.year ? Number(params.year) : null;
   const { session } = useAuth();
   const { t: tk } = useTheme();
-  const { t } = useT();
+  const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
 
   const [state, setState] = useState<State>({ s: "loading" });
@@ -26,7 +26,10 @@ export default function InformeLecturaScreen() {
   useEffect(() => {
     if (!session?.access_token) return;
     let alive = true;
-    fetchReport({ accessToken: session.access_token, kind, locale: "es", year })
+    // Fase 5 (review Fable 5): sin `locale` real, un usuario en inglés generaba
+    // la fila con locale="en" pero la lectura pedía "es" — 0 filas → error
+    // siempre. Debe usar el MISMO locale con que se generó/consultó la portada.
+    fetchReport({ accessToken: session.access_token, kind, locale, year })
       .then((res) => {
         if (!alive) return;
         if ("status" in res && res.status === "ready") {
@@ -42,7 +45,7 @@ export default function InformeLecturaScreen() {
     return () => {
       alive = false;
     };
-  }, [session?.access_token, kind, year]);
+  }, [session?.access_token, kind, year, locale]);
 
   const back = () => router.back();
 
