@@ -17,7 +17,7 @@
   .toggle { display: inline-flex; border: 1px solid var(--acc-hair); border-radius: 999px; overflow: hidden; }
   .toggle button { min-height: 44px; padding: 0 20px; border: 0; background: transparent; color: var(--text-dim); font: 600 13px var(--sans); cursor: pointer; }
   .toggle button.on { background: var(--acc); color: var(--on-acc); }
-  .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 28px; }
+  .grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px; }
   .item { display: flex; flex-direction: column; gap: 12px; }
   .frame { width: 100%; aspect-ratio: 390/844; position: relative; border-radius: 28px; overflow: hidden; border: 1px solid var(--acc-hair); background: var(--bg); }
   .frame iframe { width: 390px; height: 844px; border: 0; transform-origin: top left; position: absolute; top: 0; left: 0; }
@@ -67,7 +67,7 @@ function render() {
   const card = (folder) => ([f, title, tag]) => `
     <div class="item">
       <div class="cap"><b>${title}</b><span>${tag}</span></div>
-      <div class="frame"><iframe src="${folder}/${f}.html?theme=${theme}" scrolling="no" title="${title}"></iframe></div>
+      <div class="frame"><iframe src="${folder}/${f}.html?theme=${theme}" scrolling="no" title="${title}" onload="stripEmbedPadding(this)"></iframe></div>
       <a class="open" href="${folder}/${f}.html?theme=${theme}" target="_blank">Abrir a tamaño real →</a>
     </div>`;
   document.getElementById('grid').innerHTML =
@@ -80,6 +80,18 @@ function setVariant(v) {
   document.getElementById('btn-a').classList.toggle('on', v === 'a');
   document.getElementById('btn-b').classList.toggle('on', v === 'b');
   render();
+}
+function stripEmbedPadding(iframe) {
+  // cada mockup trae body{padding:24px} pensado para verse standalone; dentro
+  // del iframe de 390px de la galería ese padding empuja el .phone (390px)
+  // fuera de la ventana y se come ~24px de cada lado — lo neutralizamos aquí
+  // en vez de tocar los 11 archivos.
+  try {
+    const doc = iframe.contentDocument;
+    const style = doc.createElement('style');
+    style.textContent = 'body{padding:0!important;min-height:0!important}';
+    doc.head.appendChild(style);
+  } catch (e) {}
 }
 function scale() {
   document.querySelectorAll('.frame').forEach(fr => {

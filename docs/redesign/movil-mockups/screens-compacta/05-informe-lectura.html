@@ -33,7 +33,7 @@ body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);
   flex:none; padding:0 20px 12px; display:flex; flex-direction:column; gap:3px;
 }
 .lectura-cab .h-serif--lg{
-  font-style:italic; font-size:20px; line-height:1.15; font-weight:600;
+  font-style:italic; line-height:1.15; font-weight:600;
 }
 
 .lectura-scroll{
@@ -46,10 +46,10 @@ body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);
   margin:12px 0; background:var(--acc-faint); padding:8px 0;
 }
 .franja-capitulo .separador{ margin:0 20px; }
-.franja-capitulo .roman{ white-space:nowrap; padding:0 4px; font-size:12px; }
+.franja-capitulo .roman{ white-space:nowrap; padding:0 4px; }
 
 .cap-block{ padding:0 20px; display:flex; flex-direction:column; gap:12px; }
-.cap-block .h-serif{ font-style:italic; font-size:20px; }
+.cap-block .h-serif{ font-style:italic; }
 
 .cap-block.corta{ position:relative; max-height:90px; overflow:hidden; }
 .cap-block.corta::after{
@@ -57,7 +57,6 @@ body{min-height:100vh;display:grid;place-items:center;background:var(--bg-deep);
   background:linear-gradient(180deg, transparent, var(--bg) 88%);
 }
 
-.body-read{ font:500 17px/1.55 var(--serif); color:var(--text); }
 .dropcap::first-letter{
   font:700 44px/0.82 var(--serif); color:var(--acc-text);
   float:left; padding:4px 8px 0 0;
