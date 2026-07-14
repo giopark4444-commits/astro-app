@@ -54,6 +54,7 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
   const L = astroLabels(locale);
   const [period, setPeriod] = useState<Period>("today");
   const [areas, setAreas] = useState<AreaScore[] | null>(null);
+  const [open, setOpen] = useState<LifeArea | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -101,6 +102,8 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
       ) : areas.length > 0 ? (
         <AreaBars
           calmText={t("hoy.calm")}
+          open={open}
+          onToggle={(key) => setOpen((prev) => (prev === key ? null : (key as LifeArea)))}
           areas={areas.map((a): BarArea => ({
             key: a.area,
             label: t(`hoy.${AREA_KEY[a.area]}`),

@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import styles from "./area-bars.module.css";
 
 export interface BarDriver {
@@ -17,9 +16,19 @@ export interface BarArea {
 }
 
 /** Barras de áreas puramente presentacionales (Hoy y Horóscopo las comparten).
- *  Sin fetch ni i18n: labels y drivers llegan ya resueltos. */
-export function AreaBars({ areas, calmText }: { areas: BarArea[]; calmText: string }) {
-  const [open, setOpen] = useState<string | null>(null);
+ *  Componente CONTROLADO: qué área está expandida vive en el padre (que no se
+ *  desmonta entre fetches), para que el estado sobreviva un cambio de periodo. */
+export function AreaBars({
+  areas,
+  calmText,
+  open,
+  onToggle,
+}: {
+  areas: BarArea[];
+  calmText: string;
+  open: string | null;
+  onToggle: (key: string) => void;
+}) {
   return (
     <div className={styles.bars}>
       {areas.map((a, i) => {
@@ -29,7 +38,7 @@ export function AreaBars({ areas, calmText }: { areas: BarArea[]; calmText: stri
             <button
               type="button"
               className={styles.barHead}
-              onClick={() => setOpen(expanded ? null : a.key)}
+              onClick={() => onToggle(a.key)}
               aria-expanded={expanded}
             >
               <span className={styles.barLabel}>{a.label}</span>
