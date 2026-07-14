@@ -122,6 +122,28 @@ export default function HomeScreen() {
           </Card>
         </Pressable>
 
+        <FadeIn delay={150} style={styles.cardGapMd}>
+          <Text style={styles.sectionLabel}>{t("universo.eyebrow")}</Text>
+          <Pressable onPress={() => router.push("/compatibilidad")} style={styles.cardGapMd}>
+            <Card accent>
+              <Text style={styles.soonTitle}>{t("universo.compatTitle")}</Text>
+              <Text style={styles.soonBody}>{t("universo.compatBody")}</Text>
+            </Card>
+          </Pressable>
+          <View style={styles.cardGapMd}>
+            <Card>
+              <Text style={styles.soonTitle}>{t("universo.informesTitle")}</Text>
+              <Text style={styles.soonBody}>{t("universo.informesBody")}</Text>
+              <SoonBadge label={t("settings.soon")} />
+            </Card>
+          </View>
+          <Card>
+            <Text style={styles.soonTitle}>{t("universo.preguntarTitle")}</Text>
+            <Text style={styles.soonBody}>{t("universo.preguntarBody")}</Text>
+            <SoonBadge label={t("settings.soon")} />
+          </Card>
+        </FadeIn>
+
         <Text style={styles.sectionLabel}>{t("hoy.soon")}</Text>
 
         <SoonCard styles={styles} title={t("hoy.climateTitle")} body={t("hoy.climateBody")} soon={t("settings.soon")} />
