@@ -227,10 +227,13 @@ next-intl, Vitest + React Testing Library.
     /* .wrap usa `min-height: calc(100dvh - 150px)` en móvil: esos 150px son
        header móvil + el clearance del bottom-nav fijo (96px) que en desktop NO
        existe (mismo hallazgo que carta/hoy en la review de R4a — ver
-       carta.module.css `.wrap { padding-bottom: var(--sp-7); }`). Aquí el
-       clearance vive en el min-height, no en un padding, así que el ajuste
-       puntual equivalente es restar solo la diferencia: 150 - 96 = 54px. */
-    .wrap { min-height: calc(100dvh - 54px); }
+       carta.module.css `.wrap { padding-bottom: var(--sp-7); }`). CORRECCIÓN
+       (hallazgo de task-review, Task 3): 150-96=54 resta la contribución del
+       header MÓVIL, no la del header de desktop — el header de desktop tiene
+       su propia altura fija de 66px (`app-shell.module.css` `.header { height:
+       66px; }`, mismo valor que usa `carta.module.css` `top: 84px; /* header
+       66px + respiro */`). El valor correcto es restar esos 66px reales. */
+    .wrap { min-height: calc(100dvh - 66px); }
   }
   ```
 
@@ -945,7 +948,7 @@ next-intl, Vitest + React Testing Library.
    §4.3 compatibilidad (Task 2: 960px, pickers en fila, barras 2×2, acordeón intacto) ·
    §4.4 informe (Tasks 4-5: anclas `id`, `ReportToc` con scrollspy, riel condicional a
    `ready`, columna 640 + riel 200) · §4.5 preguntar (Task 3: 720px, ajuste del clearance
-   96px→54px derivado, sin riel, cero componentes nuevos) · §7 riesgos: los dos `{pro && ...}`
+   ajuste del header real de desktop 66px, sin riel, cero componentes nuevos) · §7 riesgos: los dos `{pro && ...}`
    de pilares NO aplican aquí (pilares fuera de alcance); anclas `id` de informe cubiertas en
    Task 4 tal como pedía el riesgo señalado; anchos "a calibrar" documentados en cada tarea
    y en Global Constraints, no fijados en piedra. Fuera de alcance respetado: sin capitular
