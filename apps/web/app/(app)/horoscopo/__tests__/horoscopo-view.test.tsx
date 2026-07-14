@@ -95,4 +95,11 @@ describe("HoroscopoView", () => {
 
     void second; // nunca se resuelve a propósito; ver comentario arriba.
   });
+
+  it("renderiza 'Aspectos por signo' cuando signAspects no está vacío (dato ya calculado, antes sin UI)", async () => {
+    renderView();
+    await waitFor(() => expect(screen.getByText("Aspectos por signo")).toBeInTheDocument());
+    // PAYLOAD.signAspects = [{ body: "saturn", sign: "aries", aspect: "sextile", harmony: "soft" }]
+    expect(screen.getByText(/Sextil/)).toBeInTheDocument();
+  });
 });

@@ -4,7 +4,7 @@
 import { DateTime } from "luxon";
 import {
   ZODIAC_SIGNS, solarPlacements, signAspectsToSign, scoreLifeAreasBySolarHouse,
-  type SolarHousePlacement, type SignAspect, type SolarLifeAreaScore, type SolarHouseDriver,
+  type SolarHousePlacement, type SignAspect, type SolarLifeAreaScore,
   LIFE_AREAS, scoreTone, type LifeArea,
 } from "@aluna/core";
 import {
@@ -95,35 +95,33 @@ export function computeWesternHoroscope(
     ...ingresses(range.fromIso, range.toIso, { includeMoon }),
   ].sort((a, b) => a.atIso.localeCompare(b.atIso));
 
-  // Barras: promedio de las muestras + drivers por frecuencia (patrón /api/scores).
+  // Drivers SIEMPRE desde la muestra representativa (la misma que llena la
+  // tabla de Modo Pro) — nunca agregados de otra muestra, para que la prosa/
+  // barras JAMÁS puedan mostrar una casa distinta a la que el profesional ve
+  // en la lámina Pro (regla anti-funa: "la prosa nunca contradice la tabla
+  // Pro"). El SCORE numérico sí promedia todo el periodo (da el "clima" del
+  // rango; un número no afirma ninguna casa/posición concreta).
+  const repScores = scoreLifeAreasBySolarHouse(houses);
+  const repDriversByArea = new Map(repScores.map((s) => [s.area, s.drivers]));
+
   const totals: Record<LifeArea, number> = { love: 0, money: 0, work: 0, health: 0, mood: 0, luck: 0 };
-  const driverCount = new Map<string, { area: LifeArea; driver: SolarHouseDriver; count: number }>();
   for (const iso of range.sampleIsos) {
     const placements = solarPlacements(sign, bodiesAtIso(iso));
     for (const s of scoreLifeAreasBySolarHouse(placements)) {
       totals[s.area] += s.score;
-      for (const d of s.drivers) {
-        const key = `${s.area}:${d.body}:${d.house}`;
-        const prev = driverCount.get(key);
-        if (prev) prev.count += 1;
-        else driverCount.set(key, { area: s.area, driver: d, count: 1 });
-      }
     }
   }
   const n = range.sampleIsos.length;
-  const all = [...driverCount.values()];
   const areas: SolarLifeAreaScore[] = LIFE_AREAS.map((area) => {
     const score = Math.round(totals[area] / n);
-    return {
-      area, score, tone: scoreTone(score),
-      drivers: all.filter((x) => x.area === area).sort((a, b) => b.count - a.count).slice(0, 3).map((x) => x.driver),
-    };
+    return { area, score, tone: scoreTone(score), drivers: repDriversByArea.get(area) ?? [] };
   });
 
   return { sign, period, tz: isValidTz(tz) ? tz : "utc", range: { fromIso: range.fromIso, toIso: range.toIso }, houses, signAspects, events, areas };
 }
 
-// LRU mínima universal: 12 signos × 4 periodos × pocos offsets/día.
+// Caché FIFO acotada (no LRU estricto: un hit no reordena) — suficiente dado el
+// espacio pequeño de claves (12 signos × 4 periodos × pocos offsets/día).
 const CACHE_MAX = 512;
 const cache = new Map<string, WesternPayload>();
 

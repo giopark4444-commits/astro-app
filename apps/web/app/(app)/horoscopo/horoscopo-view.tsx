@@ -178,6 +178,20 @@ export function HoroscopoView() {
                   <SkyEvents events={ready.events} baseSign={ready.sign} tz={tz} />
                 </section>
 
+                {ready.signAspects.length > 0 && (
+                  <section className={`card ${styles.section}`}>
+                    <h2 className={styles.sectionH}>{t("aspectsTitle")}</h2>
+                    {ready.signAspects.map((a, i) => (
+                      <p key={i} className={`${styles.hitRow} ${a.harmony === "hard" ? styles.hitHard : a.harmony === "soft" ? styles.hitSoft : ""}`}>
+                        <span className={styles.hitGlyphs}>
+                          {PLANET_GLYPH[a.body] ?? "•"} {ASPECT_GLYPHS[a.aspect] ?? "·"}
+                        </span>
+                        {L.bodies[a.body] ?? a.body} {L.aspects[a.aspect] ?? a.aspect} {L.signs[a.sign] ?? a.sign}
+                      </p>
+                    ))}
+                  </section>
+                )}
+
                 <section className={`card ${styles.section}`}>
                   <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
                   <HoroscopeReading sign={ready.sign} period={period} tz={tz} essence={prose} />

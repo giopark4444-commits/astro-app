@@ -121,4 +121,32 @@ describe("exactAspectAt", () => {
     // jul-2026 (Aries ~29-30°, separación ~30°) no hay cruce de 90° posible.
     expect(exactAspectAt("saturn", 0, 90, "2026-07-01T12:00:00Z", 1)).toBeNull();
   });
+
+  it("encuentra conjunciones (0°) y oposiciones (180°) — antes NUNCA se detectaban (bug: angularSeparation clamped nunca cruza cero en estos dos ángulos)", () => {
+    const anchorIso = "2026-07-01T12:00:00Z";
+    const d = DateTime.fromISO(anchorIso, { zone: "utc" });
+    const { julianDayEt } = localToJulianDay({ year: d.year, month: d.month, day: d.day, hour: d.hour, minute: d.minute, timeZone: "utc" });
+    const sunLon = computeBodies(julianDayEt).find((b) => b.body === "sun")!.longitude;
+
+    // Conjunción: el Sol llegará a un punto fijo ~3° adelante en ~3 días.
+    const conjTarget = (sunLon + 3 + 360) % 360;
+    const conjIso = exactAspectAt("sun", conjTarget, 0, anchorIso, 10);
+    expect(conjIso).not.toBeNull();
+    const conjJd = localToJulianDay({
+      year: DateTime.fromISO(conjIso!, { zone: "utc" }).year,
+      month: DateTime.fromISO(conjIso!, { zone: "utc" }).month,
+      day: DateTime.fromISO(conjIso!, { zone: "utc" }).day,
+      hour: DateTime.fromISO(conjIso!, { zone: "utc" }).hour,
+      minute: DateTime.fromISO(conjIso!, { zone: "utc" }).minute,
+      timeZone: "utc",
+    }).julianDayEt;
+    expect(Math.abs(angularSeparation(computeBodies(conjJd).find((b) => b.body === "sun")!.longitude, conjTarget))).toBeLessThan(0.01);
+
+    // Oposición: punto fijo a 180° del target de conjunción de arriba → el Sol
+    // llegará a esa oposición en el mismo momento aproximado (mismo target real).
+    const oppFixed = (conjTarget + 180) % 360;
+    const oppIso = exactAspectAt("sun", oppFixed, 180, anchorIso, 10);
+    expect(oppIso).not.toBeNull();
+    expect(Math.abs(DateTime.fromISO(oppIso!, { zone: "utc" }).diff(DateTime.fromISO(conjIso!, { zone: "utc" }), "hours").hours)).toBeLessThan(6);
+  });
 });
