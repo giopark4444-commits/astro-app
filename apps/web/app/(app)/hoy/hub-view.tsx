@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { PLANETS, type Aspect } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
@@ -29,7 +30,9 @@ export function HubView() {
   const locale = useLocale();
   const L = astroLabels(locale);
   const { active } = useProfiles();
+  const router = useRouter();
   const [weather, setWeather] = useState<Aspect[] | null>(null);
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     if (!active) return;
@@ -105,11 +108,37 @@ export function HubView() {
 
         <h2 className={`${styles.section} ${styles.gridFull}`}>{t("hoy.lenses")}</h2>
 
-        {/* CTA desktop (mockup 06): en móvil no existe (display:none) */}
-        <Link href="/preguntar" className={`card card--interactive ${styles.askCta}`}>
-          <span className={styles.askTitle}>{t("hoy.askAluna")}</span>
-          <span className={styles.askHint}>{t("hoy.askHint")}</span>
-        </Link>
+        {/* CTA desktop (mockup 06 §3.3): en móvil no existe (display:none) */}
+        <section className={`card ${styles.askCta}`}>
+          <span className={styles.askHead}>
+            <span className={styles.askTitle}>{t("hoy.askAluna")}</span>
+            <span className={styles.askHint}>{t("hoy.askHint")}</span>
+          </span>
+          <form
+            className={styles.askRow}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (q.trim()) router.push(`/preguntar?q=${encodeURIComponent(q.trim())}`);
+            }}
+          >
+            <input
+              className={styles.askInput}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={t("hoy.askPlaceholder")}
+            />
+            <button type="submit" className={styles.askBtn}>
+              {t("hoy.askButton")}
+            </button>
+          </form>
+          <span className={styles.askSug}>
+            {[t("hoy.askSug1"), t("hoy.askSug2")].map((s) => (
+              <button key={s} type="button" className={styles.askSugChip} onClick={() => router.push(`/preguntar?q=${encodeURIComponent(s)}`)}>
+                {s}
+              </button>
+            ))}
+          </span>
+        </section>
 
         <div className={styles.lenses}>
           {LENSES.map((l, i) => {
@@ -119,6 +148,7 @@ export function HubView() {
                   <Icon name={l.icon} size={26} />
                 </span>
                 <span className={styles.tileName}>{t(`nav.${l.key}`)}</span>
+                <span className={styles.tileSub}>{t(`hoy.lensSub.${l.key}`)}</span>
                 {l.soon && <span className={`chip ${styles.badge}`}>{t("hoy.soon")}</span>}
               </span>
             );

@@ -32,6 +32,16 @@
     "toneLow": "en reto",
     "askAluna": "Pregúntale a Aluna",
     "askHint": "Tu carta, tus números y el cielo de hoy, en la respuesta.",
+    "askPlaceholder": "¿Por qué me cuesta decidir hoy?",
+    "askButton": "Preguntar ✦︎",
+    "askSug1": "¿Cómo aprovecho el cielo de hoy?",
+    "askSug2": "¿Qué me pide mi día personal?",
+    "lensSub": {
+      "numeros": "Tus ciclos y vibraciones personales",
+      "carta": "Tu cielo de nacimiento, vivo",
+      "horoscopo": "Tu signo, hoy y esta semana",
+      "pilares": "Ba Zi · los Cuatro Pilares"
+    },
     "moonNew": "Luna nueva",
     "moonWaxingCrescent": "Luna creciente",
     "moonFirstQuarter": "Cuarto creciente",

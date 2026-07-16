@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
@@ -13,8 +14,11 @@ export function ChatView() {
   const t = useTranslations("chat");
   const locale = useLocale();
   const { active } = useProfiles();
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState("");
+  // Precarga del input desde /hoy vía ?q= (mockup 06 §3.3): solo el valor
+  // inicial — NO auto-envía la pregunta.
+  const [input, setInput] = useState(() => searchParams.get("q") ?? "");
   const [st, setSt] = useState<St>("idle");
   const endRef = useRef<HTMLDivElement>(null);
 

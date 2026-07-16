@@ -32,6 +32,16 @@
     "toneLow": "challenged",
     "askAluna": "Ask Aluna",
     "askHint": "Your chart, your numbers and today's sky — in the answer.",
+    "askPlaceholder": "Why is it hard to decide today?",
+    "askButton": "Ask ✦︎",
+    "askSug1": "How do I make the most of today's sky?",
+    "askSug2": "What does my personal day ask of me?",
+    "lensSub": {
+      "numeros": "Your personal cycles and vibrations",
+      "carta": "Your birth sky, alive",
+      "horoscopo": "Your sign, today and this week",
+      "pilares": "Ba Zi · the Four Pillars"
+    },
     "moonNew": "New Moon",
     "moonWaxingCrescent": "Waxing Moon",
     "moonFirstQuarter": "First Quarter",

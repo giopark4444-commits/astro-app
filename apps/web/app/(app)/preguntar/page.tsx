@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { ChatView } from "./chat-view";
 
 export default function PreguntarPage() {
-  return <ChatView />;
+  return (
+    <Suspense fallback={null}>
+      <ChatView />
+    </Suspense>
+  );
 }

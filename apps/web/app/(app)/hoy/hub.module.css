@@ -39,6 +39,7 @@
 }
 .tileIcon { color: var(--acc-text); display: inline-flex; }
 .tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
+.tileSub { display: none; } /* móvil intacto (mockup 06 §3.3): el subtítulo es solo desktop */
 .soon { opacity: 0.55; }
 /* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
 .badge {
@@ -99,9 +100,38 @@
     background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
     border-color: rgba(var(--acc-rgb), 0.34);
   }
+  .askHead { display: flex; align-items: baseline; gap: var(--sp-3); }
   .askTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
   .askHint { font-size: var(--text-xs); color: var(--soft); }
-  .lenses { grid-column: span 6; order: 6; grid-template-columns: repeat(3, 1fr); }
+  .askRow { display: flex; gap: 10px; } /* mockup .ask-row */
+  .askInput {
+    flex: 1; height: 44px; border-radius: 999px; padding: 0 18px; /* mockup .ask-input */
+    border: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 62%, transparent);
+    color: var(--ink); font-family: inherit; font-size: var(--text-sm); outline: none;
+    transition: border-color var(--dur-fast) var(--ease);
+  }
+  .askInput::placeholder { color: var(--soft); }
+  .askInput:focus { border-color: rgba(var(--acc-rgb), 0.5); }
+  .askBtn {
+    height: 44px; padding: 0 24px; border-radius: 999px; border: 0; cursor: pointer; /* mockup .ask-btn */
+    background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+    font-family: inherit; font-size: var(--text-sm); font-weight: 700; box-shadow: var(--glow-soft);
+  }
+  .askSug { display: flex; gap: 8px; } /* mockup .ask-sug */
+  .askSugChip {
+    border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer;
+    background: var(--surface-2); color: var(--soft); font-family: inherit; font-size: var(--text-2xs);
+    transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  }
+  .askSugChip:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+  .lenses { grid-column: span 6; order: 6; grid-template-columns: repeat(4, 1fr); } /* adaptación: mockup trae 3 tiles, el producto tiene 4 lentes */
+  .tileIcon {
+    width: 40px; height: 40px; border-radius: 12px; /* mockup .tile-ic */
+    background: rgba(var(--acc-rgb), 0.1); border: 1px solid rgba(var(--acc-rgb), 0.3);
+    display: grid; place-items: center;
+  }
+  .tileName { font-family: var(--font-ui); font-size: 15px; font-weight: 700; margin-top: auto; }
+  .tileSub { display: block; font-size: var(--text-2xs); color: var(--soft); line-height: 1.45; }
 
   /* tintes por dominio (mockup: energía oro / clima azul / numerología violeta).
      .wrap .heroEnergy > * = especificidad (0,2,0): gana al .panel del módulo del
