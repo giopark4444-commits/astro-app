@@ -223,8 +223,19 @@ export default function CartaScreen() {
               </FadeIn>
             )}
 
-            {/* Modo Pro */}
-            <ToggleRow label={t("carta.pro")} on={pro} onPress={() => setPro(!pro)} style={{ marginTop: space.lg }} />
+            {/* Modo Pro. Al APAGARLO con un kind avanzado activo (Rev. Solar /
+                Progresiones — solo seleccionables dentro de Pro), volvemos a Natal:
+                sin esto la pantalla queda mostrando datos avanzados bajo el header
+                "Carta natal" y con el segmentado sin selección (review T4). */}
+            <ToggleRow
+              label={t("carta.pro")}
+              on={pro}
+              onPress={() => {
+                if (pro && kind !== "natal" && kind !== "transits") setKind("natal");
+                setPro(!pro);
+              }}
+              style={{ marginTop: space.lg }}
+            />
 
             {pro && (
               <View style={styles.proBody}>
