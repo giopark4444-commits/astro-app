@@ -205,6 +205,7 @@ export type Database = {
           card_style: string;
           detail_level: string;
           house_system: string;
+          intent: Json | null;
           language: string;
           light_mode: string;
           reading_style: string;
@@ -217,6 +218,7 @@ export type Database = {
           card_style?: string;
           detail_level?: string;
           house_system?: string;
+          intent?: Json | null;
           language?: string;
           light_mode?: string;
           reading_style?: string;
@@ -229,6 +231,7 @@ export type Database = {
           card_style?: string;
           detail_level?: string;
           house_system?: string;
+          intent?: Json | null;
           language?: string;
           light_mode?: string;
           reading_style?: string;
