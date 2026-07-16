@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   STEPS, EMPTY_ANSWERS, isStepComplete,
-  type OnboardingAnswers, type Gender, type OnboardingStep,
+  type OnboardingAnswers, type Gender, type BirthStep,
 } from "@/lib/onboarding";
 import { createBirthProfile } from "./actions";
 import { PlaceAutocomplete } from "./place-autocomplete";
@@ -11,10 +11,10 @@ import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import styles from "./onboarding.module.css";
 
-const EYEBROW: Record<OnboardingStep, string> = {
+const EYEBROW: Record<BirthStep, string> = {
   name: "nameEyebrow", date: "dateEyebrow", time: "timeEyebrow", place: "placeEyebrow", gender: "genderEyebrow",
 };
-const TITLE: Record<OnboardingStep, string> = {
+const TITLE: Record<BirthStep, string> = {
   name: "nameTitle", date: "dateTitle", time: "timeTitle", place: "placeTitle", gender: "genderTitle",
 };
 const GENDER_KEY: Record<Gender, string> = {
