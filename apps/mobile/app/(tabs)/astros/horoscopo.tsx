@@ -11,7 +11,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
-import { Enso } from "../../../components/Enso";
 import { AreaBars, type BarArea } from "../../../components/AreaBars";
 import { SkyEvents } from "../../../components/SkyEvents";
 import { HoroscopeReading } from "../../../components/HoroscopeReading";
@@ -135,11 +134,15 @@ export default function HoroscopoScreen() {
         contentContainerStyle={[styles.scroll, { paddingTop: space.lg, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Cabecera: eyebrow + h1 apilados, mismo patrón que carta.tsx/numeros.tsx/
+            pilares.tsx (T4-T6) — escala 13/24, sin Enso (solo vive en Hoy). El
+            eyebrow/h1 de arriba (chip "Horóscopo" del switch de Astros) ya da el
+            contexto "Astros > Horóscopo", así que el copy interno usa strings
+            propios (headEyebrow/headTitle) en vez de repetir horoscopo.title. */}
         <View style={styles.head}>
-          <Text style={styles.eyebrow}>{t("horoscopo.title")}</Text>
-          <Enso size={22} />
+          <Text style={styles.eyebrow}>{t("horoscopo.headEyebrow")}</Text>
+          <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("horoscopo.headTitle")}</Text>
         </View>
-        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("horoscopo.subtitle")}</Text>
 
         {/* Occidental/Oriental — mismo patrón de tabs de 2 opciones */}
         <View style={styles.optionsRow}>
@@ -305,12 +308,14 @@ function PosRow({
   return (
     <View style={[styles.posRow, last && styles.rowLast]}>
       <Text style={styles.posGlyph}>{PLANET_GLYPH[h.body] ?? "•"}</Text>
-      <View style={styles.posMain}>
+      {/* Combinado en una sola línea a 15px — mismo patrón que el previewRow
+          "POSICIONES" de carta.tsx (T4), en vez del posName/posDetail de dos
+          líneas a 13/11 de antes (§D). */}
+      <Text style={styles.posTxt} numberOfLines={1}>
         <Text style={styles.posName}>{L.bodies[h.body] ?? h.body}</Text>
-        <Text style={styles.posDetail}>
-          {SIGN_GLYPH[h.sign]} {L.signs[h.sign]} · {t("horoscopo.houseShort", { n: h.house })}
-        </Text>
-      </View>
+        {` — ${SIGN_GLYPH[h.sign]} ${L.signs[h.sign]} `}
+        <Text style={styles.posFaint}>{`· ${t("horoscopo.houseShort", { n: h.house })}`}</Text>
+      </Text>
       {h.retrograde && <Text style={styles.tagWarn}>℞</Text>}
     </View>
   );
@@ -321,9 +326,11 @@ function makeStyles(t: ThemeTokens) {
     root: { flex: 1 },
     scroll: { paddingHorizontal: space.xl, alignItems: "center" },
 
-    head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
+    // Cabecera: eyebrow + h1, apilados a la izquierda — receta "eyebrow"+"h-serif"
+    // idéntica a la de carta.tsx/numeros.tsx/pilares.tsx (T4-T6).
+    head: { width: "100%", gap: 2, marginBottom: space.xl },
+    eyebrow: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi },
 
     // Contenedor de cualquier fila de chips (tradición / signo / periodo): los
     // chips en sí son <Chip kind="control">, este solo los reparte en fila.
@@ -337,19 +344,23 @@ function makeStyles(t: ThemeTokens) {
     fadeFull: { width: "100%" },
 
     card: { width: "100%", marginBottom: space.lg },
-    cardH: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
+    cardH: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
 
+    // Fila de posición combinada en una sola línea a 15px (glifo + nombre en
+    // negrita + signo · casa en tenue) — mismo patrón que el previewRow
+    // "POSICIONES" de carta.tsx (T4), reemplaza el posName/posDetail de dos
+    // líneas de antes (§D).
     posRow: {
-      flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: space.sm + 2,
+      flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 44, paddingVertical: space.sm,
       borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    posGlyph: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.serif, width: 22 },
-    posMain: { flex: 1 },
-    posName: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
-    posDetail: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 1, fontFamily: fonts.sans },
+    posGlyph: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serif, width: 18, textAlign: "center" },
+    posTxt: { flex: 1, color: t.text, fontSize: typeScale.md, fontFamily: fonts.sansMedium },
+    posName: { fontFamily: fonts.sansBold },
+    posFaint: { color: t.textFaint },
     tagWarn: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     hitRow: {
@@ -358,9 +369,9 @@ function makeStyles(t: ThemeTokens) {
     },
     hitGlyphs: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.serif },
     hitHard: { color: t.warn },
-    hitSoft: { color: t.acc },
-    hitText: { flex: 1, color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans },
+    hitSoft: { color: t.accText },
+    hitText: { flex: 1, color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
-    footNote: { color: t.textFaint, fontSize: typeScale.xs2, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
+    footNote: { color: t.textFaint, fontSize: typeScale.sm, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
   });
 }

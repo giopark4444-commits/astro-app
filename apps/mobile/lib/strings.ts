@@ -287,6 +287,12 @@ export const STRINGS = {
     horoscopo: {
       title: "Horóscopo",
       subtitle: "El cielo del periodo, leído para tu signo",
+      // Copy propio de la cabecera compacta (T7): distinto del switch "Astros"
+      // de arriba, que ya usa `title` ("Horóscopo") como label del chip — evita
+      // repetir el mismo texto dos veces en ~60px de alto. Mismo criterio que
+      // carta.headEyebrow/headTitle (T4), que tampoco repiten el label de su chip.
+      headEyebrow: "Tu horóscopo",
+      headTitle: "Leído para tu signo",
       tabWestern: "Occidental",
       tabEastern: "Oriental",
       easternSoon: "La lectura oriental (animales y pilares) llega pronto.",
@@ -679,6 +685,8 @@ export const STRINGS = {
     horoscopo: {
       title: "Horoscope",
       subtitle: "The sky of the period, read for your sign",
+      headEyebrow: "Your horoscope",
+      headTitle: "Read for your sign",
       tabWestern: "Western",
       tabEastern: "Eastern",
       easternSoon: "The Eastern reading (animals and pillars) is coming soon.",
