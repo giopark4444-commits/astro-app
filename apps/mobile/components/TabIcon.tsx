@@ -1,4 +1,4 @@
-import type { ColorValue } from "react-native";
+import { View, type ColorValue } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
 /**
@@ -82,14 +82,33 @@ export function TabIcon({
   size?: number;
 }) {
   const Glyph = ICONS[name];
+  // Halo del activo (mockup: ::before con inset:-7px sobre la caja de 24 = Ø38).
+  // FUERA del <Svg>: el Svg raíz recorta a su width×height (review T1 — un Circle
+  // r=19 dentro del viewBox 24 se clipea a un cuadrado sólido, no al círculo
+  // expandido). Un View absoluto hermano no sufre ese clip (overflow visible).
+  const halo = size + 14;
+  const overhang = -(halo - size) / 2;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      {/* Halo detrás del trazo cuando la tab está activa — radio 19 (mockup: caja de
-          ícono 24×24 expandida inset:-7px en las 4 direcciones = diámetro 38). */}
-      {focused && <Circle cx={12} cy={12} r={19} fill={color} opacity={0.12} />}
-      <G stroke={color} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
-        <Glyph />
-      </G>
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      {focused && (
+        <View
+          style={{
+            position: "absolute",
+            top: overhang,
+            left: overhang,
+            width: halo,
+            height: halo,
+            borderRadius: halo / 2,
+            backgroundColor: color,
+            opacity: 0.12,
+          }}
+        />
+      )}
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <G stroke={color} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
+          <Glyph />
+        </G>
+      </Svg>
+    </View>
   );
 }
