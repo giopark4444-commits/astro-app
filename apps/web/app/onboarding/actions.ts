@@ -21,9 +21,13 @@ export async function createBirthProfile(answers: OnboardingAnswers, intentDraft
   if (intentDraft) {
     const intent = draftToIntent(intentDraft, new Date().toISOString());
     if (intent) {
-      type SettingsIntent = { update: (v: { intent: UserIntent }) => { eq: (c: string, v: string) => Promise<unknown> } };
+      type SettingsIntent = { update: (v: { intent: UserIntent }) => { eq: (c: string, v: string) => PromiseLike<unknown> } };
       const sb = supabase.from("settings") as unknown as SettingsIntent;
-      await sb.update({ intent }).eq("user_id", user.id).catch(() => {}); // best effort: la intención nunca bloquea crear el perfil
+      try {
+        await sb.update({ intent }).eq("user_id", user.id);
+      } catch {
+        // best effort: la intención nunca bloquea crear el perfil
+      }
     }
   }
 
