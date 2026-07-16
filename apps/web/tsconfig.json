@@ -10,6 +10,10 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
+    // App (no librería): sin d.ts. Anula el declaration:true del base — con dos
+    // @types/react en el lockfile (web 19.2 / móvil-Expo 19.1) el chequeo de
+    // portabilidad de declaraciones (TS2742) rompía tsc/build en installs frescos.
+    "declaration": false,
     "allowJs": true,
     "incremental": true,
     "types": [
