@@ -44,7 +44,9 @@ function makeBadge(t: ThemeTokens) {
     },
     text: {
       color: t.acc,
-      fontSize: 10,
+      // Barrido T8: literal 10 fuera de escala → typeScale.sm (13), la misma
+      // que usan las demás etiquetas-pill pequeñas (tagPillText).
+      fontSize: typeScale.sm,
       letterSpacing: 2,
       textTransform: "uppercase",
       fontFamily: fonts.sans,
@@ -74,7 +76,9 @@ function makeHeading(t: ThemeTokens) {
     wrap: { marginBottom: space.lg },
     eyebrow: {
       color: t.acc,
-      fontSize: typeScale.xs2,
+      // Barrido T8: xs2 fuera de escala → sm, igual que los demás "eyebrow"
+      // uppercase de las pantallas tocadas (numeros.tsx, pilares.tsx colLabel).
+      fontSize: typeScale.sm,
       letterSpacing: 3,
       textTransform: "uppercase",
       fontFamily: fonts.sansSemi,
@@ -270,7 +274,9 @@ function makeChip(t: ThemeTokens) {
     },
     tagText: {
       color: t.acc,
-      fontSize: typeScale.xs2,
+      // Barrido T8: xs2 fuera de escala → sm, igual que tagPillText (la variante
+      // con tint de este mismo componente).
+      fontSize: typeScale.sm,
       letterSpacing: 2,
       textTransform: "uppercase",
       fontFamily: fonts.sansSemi,
