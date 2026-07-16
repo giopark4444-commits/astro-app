@@ -94,6 +94,28 @@
 .check input { width: 16px; height: 16px; accent-color: var(--acc); }
 .hint { font-size: var(--text-xs); line-height: 1.5; color: var(--soft); margin: var(--sp-1) 2px 0; }
 
+/* --- Pasos de intención: chips + afirmación --- */
+/* R3: `.chip` global (tag) como base + este override local vuelve el tag
+   clickeable/seleccionable (borde/tinte de --acc), sin duplicar el primitivo. */
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.intentChip {
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  background: var(--surface);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.intentChip:hover { color: var(--ink); }
+.intentChipOn {
+  color: var(--acc-text);
+  border-color: rgba(var(--acc-rgb), 0.7);
+  background: var(--surface-2);
+  box-shadow: var(--glow-soft);
+}
+.affirmList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
+.affirmLine { font-size: var(--text-md); line-height: 1.5; color: var(--ink); }
+.affirmMark { color: var(--acc-text); font-weight: 700; }
+
 /* --- Género --- */
 .genders { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); } /* 9→8 */
 .gender {
