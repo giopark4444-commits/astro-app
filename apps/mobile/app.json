@@ -18,8 +18,6 @@
           "imageWidth": 200
         }
       ],
-      "expo-font",
-      "expo-status-bar"
     ],
     "ios": {
       "supportsTablet": true
