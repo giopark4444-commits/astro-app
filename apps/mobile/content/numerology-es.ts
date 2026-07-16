@@ -173,3 +173,44 @@ export const PERSONAL_DAY_ES: Record<number, string> = {
   11: "Día luminoso. Tu intuición habla claro: confía en lo que sientes.",
   22: "Día de construir en grande. Aterriza un sueño en un acto concreto.",
 };
+
+/**
+ * Apodo/arquetipo de cada número (ES) — mismo valor sin importar la posición
+ * (Camino de Vida, Expresión, Alma...). Nuevo contenido, requerido por el
+ * rediseño (mockup 10-numeros.html: hero + celdas del núcleo llevan un apodo
+ * de una línea junto al número). Cubre 1–9 y los maestros 11/22/33.
+ */
+export const NICKNAMES_ES: Record<number, string> = {
+  1: "El pionero",
+  2: "El diplomático",
+  3: "El comunicador",
+  4: "El constructor",
+  5: "El aventurero",
+  6: "El guardián",
+  7: "El buscador",
+  8: "El realizador",
+  9: "El compasivo",
+  11: "El visionario",
+  22: "El maestro constructor",
+  33: "El sanador",
+};
+
+/**
+ * Voz del "año personal" (ES): una línea por número, mismo registro y cobertura
+ * que PERSONAL_DAY_ES (1–9, 11, 22 — el 33 no es alcanzable por esta fórmula:
+ * mes+día+año se reducen antes de poder llegar a 33). Nuevo contenido para la
+ * fila "Año personal" del rediseño de Números (siempre visible, fuera de Modo Pro).
+ */
+export const PERSONAL_YEAR_ES: Record<number, string> = {
+  1: "Año de comienzos — planta la semilla, aunque el fruto tarde.",
+  2: "Año de vínculos y paciencia — construye de a dos, no a solas.",
+  3: "Año de expresión y brillo — deja que tu voz ocupe el espacio.",
+  4: "Año de cimientos — ordena, trabaja, siembra raíz firme.",
+  5: "Año de cambio y movimiento — suelta el mapa, sigue la brújula.",
+  6: "Año de hogar y cuidado — atiende lo que amas, empezando por ti.",
+  7: "Año de introspección — baja el ritmo y escucha lo que sabes por dentro.",
+  8: "Año de poder y cosecha — reclama lo que construiste con integridad.",
+  9: "Año de cierre — suelta lo cumplido para dejar sitio a lo nuevo.",
+  11: "Año luminoso — confía en la intuición que te guía sin pruebas.",
+  22: "Año de construir en grande — aterriza el sueño en actos concretos.",
+};
