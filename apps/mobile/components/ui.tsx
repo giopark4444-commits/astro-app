@@ -235,11 +235,13 @@ function makeChip(t: ThemeTokens) {
     control: {
       flexDirection: "row",
       alignItems: "center",
+      justifyContent: "center",
       gap: space.xs,
       borderWidth: 1,
       borderRadius: radius.pill,
       paddingHorizontal: space.lg,
       paddingVertical: 9,
+      minHeight: 44,
     },
     // Glow sutil del chip seleccionado — equivalente RN de --glow-soft del SPEC
     // (0 0 14px rgba(acc,0.28)); shadow* solo pinta en iOS, elevation cubre Android
@@ -255,7 +257,7 @@ function makeChip(t: ThemeTokens) {
       opacity: 0.5,
     },
     controlText: {
-      fontSize: typeScale.xs,
+      fontSize: typeScale.md,
       fontFamily: fonts.sansMedium,
     },
     controlTextSelected: {

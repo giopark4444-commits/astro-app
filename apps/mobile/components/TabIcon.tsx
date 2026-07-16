@@ -84,8 +84,9 @@ export function TabIcon({
   const Glyph = ICONS[name];
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      {/* Halo detrás del trazo cuando la tab está activa */}
-      {focused && <Circle cx={12} cy={12} r={11} fill={color} opacity={0.12} />}
+      {/* Halo detrás del trazo cuando la tab está activa — radio 19 (mockup: caja de
+          ícono 24×24 expandida inset:-7px en las 4 direcciones = diámetro 38). */}
+      {focused && <Circle cx={12} cy={12} r={19} fill={color} opacity={0.12} />}
       <G stroke={color} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
         <Glyph />
       </G>

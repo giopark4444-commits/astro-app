@@ -20,9 +20,12 @@ export default function TabsLayout() {
           borderTopColor: tk.accHair,
           borderTopWidth: 1,
           height: 84,
-          paddingTop: 8,
+          // §C del gap analysis: contenedor "padding: 10px 6px 4px" (arriba/lados/abajo).
+          paddingTop: 10,
+          paddingHorizontal: 6,
+          paddingBottom: 4,
         },
-        tabBarLabelStyle: { fontSize: typeScale.xs2, letterSpacing: 0.5, fontFamily: fonts.sansMedium },
+        tabBarLabelStyle: { fontSize: typeScale.sm, fontFamily: fonts.sansSemi, letterSpacing: 0.3 },
         // Sin esto, cada escena se envuelve en el `Background` de react-navigation
         // (colors.background del DefaultTheme = rgb(242,242,242) gris opaco), que
         // tapa el gradiente radial + Starfield de ThemedBackground en _layout.tsx raíz.
