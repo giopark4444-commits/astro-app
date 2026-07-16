@@ -45,24 +45,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="carta"
+        name="astros"
         options={{
-          title: t("nav.carta"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="carta" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="horoscopo"
-        options={{
-          title: t("nav.horoscopo"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="horoscopo" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="numeros"
-        options={{
-          title: t("nav.numeros"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+          title: t("nav.astros"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="astros" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -73,12 +59,27 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="numeros"
+        options={{
+          title: t("nav.numeros"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="ajustes"
         options={{
           title: t("nav.ajustes"),
           tabBarIcon: ({ color, focused }) => <TabIcon name="ajustes" color={color} focused={focused} />,
         }}
       />
+      {/* Rutas legacy (stubs de <Redirect>, ver app/(tabs)/carta.tsx y
+          horoscopo.tsx): href:null las mantiene registradas y navegables
+          (deep links viejos) SIN mostrarlas como botón en la barra. Omitir
+          por completo el Tabs.Screen las re-aparecería como tab fantasma
+          (verificado contra expo-router 6) — hay que declararlas ocultas,
+          no dejarlas fuera. */}
+      <Tabs.Screen name="carta" options={{ href: null }} />
+      <Tabs.Screen name="horoscopo" options={{ href: null }} />
     </Tabs>
   );
 }

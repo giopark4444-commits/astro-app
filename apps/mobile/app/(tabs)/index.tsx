@@ -107,7 +107,7 @@ export default function HomeScreen() {
         )}
 
         <FadeIn delay={120} style={styles.cardGapMd}>
-          <Pressable onPress={() => router.push("/(tabs)/carta")}>
+          <Pressable onPress={() => router.push("/(tabs)/astros/carta")}>
             <Card>
               <Text style={styles.soonTitle}>{t("hoy.cartaTitle")}</Text>
               <Text style={styles.soonBody}>{t("hoy.cartaBody")}</Text>

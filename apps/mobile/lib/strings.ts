@@ -40,10 +40,9 @@ export const STRINGS = {
     },
     nav: {
       hoy: "Hoy",
-      carta: "Carta",
+      astros: "Astros",
       pilares: "Pilares",
       numeros: "Números",
-      horoscopo: "Horóscopo",
       ajustes: "Ajustes",
     },
     universo: {
@@ -407,10 +406,9 @@ export const STRINGS = {
     },
     nav: {
       hoy: "Today",
-      carta: "Chart",
+      astros: "Astros",
       pilares: "Pillars",
       numeros: "Numbers",
-      horoscopo: "Horoscope",
       ajustes: "Settings",
     },
     universo: {
