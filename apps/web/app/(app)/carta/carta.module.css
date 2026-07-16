@@ -172,6 +172,9 @@
 .brH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→2xs piso (sub-11) */
 .tierHint { margin: -4px 0 var(--sp-1); text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); } /* -4px excepción (ajuste de línea base negativo); 2→sp-1 piso */
 
+/* ---- Núcleo narrativo (mockup 06 §4.4): lectura, balance compacto, patrones, pie ---- */
+.coreExtra, .reading, .balPair, .balCap, .coreHint { display: none; } /* móvil: Núcleo queda como hoy */
+
 /* ===== R4a desktop (mockup 06): 2 columnas 55/45, rueda sticky, tabs ===== */
 .deskCols { display: contents; }
 .dtabs { display: none; }
@@ -251,4 +254,19 @@
   }
   .wheel { max-width: 566px; margin: 0 auto; } /* mockup: max-width 566px */
   .proToggle { display: inline-flex; margin: 0; } /* reactivado en el pie de rueda */
+
+  /* Núcleo narrativo (mockup 06 §4.4) */
+  .coreExtra { display: block; } /* wrapper del bloque de patrones dentro de Núcleo — sin clase .reading/.balPair/.balCap/.coreHint propia */
+  .reading {
+    display: block; border: 1px solid rgba(var(--acc-rgb), 0.22); border-radius: var(--radius);
+    background: color-mix(in oklab, var(--bg) 65%, transparent); padding: 14px 17px; /* mockup .reading */
+  }
+  .readingP { margin: 6px 0 0; font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.55; color: var(--ink); font-feature-settings: "lnum" 1; } /* mockup .reading p */
+  .readingP b { color: var(--acc-text); font-weight: 600; }
+  .balPair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); } /* mockup .bal */
+  .balCap { display: block; margin: -6px 0 0; font-size: var(--text-2xs); color: var(--soft); } /* mockup .bal-cap */
+  .coreHint { display: block; margin: auto 0 0; text-align: center; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); } /* mockup .d-hint */
+  .bigSub { font-variant-numeric: tabular-nums; }
+  .bigTag { font-size: var(--text-2xs); padding: 1px 8px; border-radius: 999px; color: var(--tone-caution); border-color: rgba(var(--tone-caution-rgb), 0.4); margin-left: 4px; } /* mockup .warn */
+  .bigTagGood { color: var(--acc-text); border-color: rgba(var(--acc-rgb), 0.4); } /* domicilio/exaltación: dorado suave en vez de tono-caution */
 }

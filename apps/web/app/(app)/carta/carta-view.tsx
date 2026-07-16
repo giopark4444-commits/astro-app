@@ -9,6 +9,8 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeBodyReading as composeReadingEs } from "@/lib/content/astrology-readings-es";
 import { composeBodyReading as composeReadingEn } from "@/lib/content/astrology-readings-en";
+import { composeCoreReading as composeCoreEs } from "@/lib/content/core-reading-es";
+import { composeCoreReading as composeCoreEn } from "@/lib/content/core-reading-en";
 import { ChartWheel } from "./chart-wheel";
 import { BodyReadingView } from "./body-reading";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -100,7 +102,6 @@ export function CartaView() {
   const playCeremony = ready !== null && !ceremonyPlayed.current;
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
   const ascSign = ascPos?.sign ?? "";
-  const ascDeg = ascPos?.degree ?? 0;
   const pane = (key: ChartTab) => `${styles.pane} ${tab === key ? styles.paneOn : ""}`;
   const byKey = useMemo(() => {
     const m = new Map<string, BodyPosition>();
@@ -110,6 +111,19 @@ export function CartaView() {
   useEffect(() => {
     if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
+
+  // Núcleo narrativo (mockup 06 §4.4): teje sol+luna+ascendente en un párrafo.
+  const coreSegs = useMemo(() => {
+    const sun = byKey.get("sun");
+    const moon = byKey.get("moon");
+    if (!sun || !moon || !ascSign) return null;
+    const compose = locale === "en" ? composeCoreEn : composeCoreEs;
+    return compose({
+      sun: { sign: sun.sign, house: sun.house, dignity: sun.dignity ?? undefined },
+      moon: { sign: moon.sign, house: moon.house, dignity: moon.dignity ?? undefined },
+      ascSign,
+    });
+  }, [byKey, ascSign, locale]);
 
   if (!active) return null;
 
@@ -188,16 +202,51 @@ export function CartaView() {
                 {byKey.get("sun") && (
                   <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
                     sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                    sub={`${t("house")} ${byKey.get("sun")!.house}`} />
+                    sub={`${byKey.get("sun")!.degree}°${pad(byKey.get("sun")!.minute)}′ · ${t("house")} ${byKey.get("sun")!.house}`}
+                    dignity={byKey.get("sun")!.dignity ? L.dignities[byKey.get("sun")!.dignity!] : undefined}
+                    dignityKey={byKey.get("sun")!.dignity} />
                 )}
                 {byKey.get("moon") && (
                   <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
                     sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                    sub={`${t("house")} ${byKey.get("moon")!.house}`} />
+                    sub={`${byKey.get("moon")!.degree}°${pad(byKey.get("moon")!.minute)}′ · ${t("house")} ${byKey.get("moon")!.house}`}
+                    dignity={byKey.get("moon")!.dignity ? L.dignities[byKey.get("moon")!.dignity!] : undefined}
+                    dignityKey={byKey.get("moon")!.dignity} />
                 )}
                 <BigCard glyph="Asc" name={t("ascendant")} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
-                  sub={`${ascDeg}°`} dim={ready.solar} />
+                  sub={`${ascPos?.degree ?? 0}°${pad(ascPos?.minute ?? 0)}′`} dim={ready.solar} />
               </div>
+
+              {coreSegs && (
+                <section className={styles.reading}>
+                  <span className={styles.cardH}>{t("coreReadingTitle")}</span>
+                  <p className={styles.readingP}>
+                    {coreSegs.map((s, i) => (s.b ? <b key={i}>{s.b}</b> : <span key={i}>{s.t}</span>))}
+                  </p>
+                </section>
+              )}
+
+              <div className={styles.balPair}>
+                <Balance title={t("elements")} entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                  dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
+                <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                  dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+              </div>
+              <p className={styles.balCap}>
+                {t("dominantsCaption")} — {L.elements[ready.chart.distribution.dominantElement]} {L.modalities[ready.chart.distribution.dominantModality]}.
+              </p>
+
+              {ready.chart.patterns.length > 0 && (
+                <div className={`${styles.chips} ${styles.coreExtra}`}>
+                  {ready.chart.patterns.map((p, i) => (
+                    <span key={i} className={`chip ${styles.chip}`}>
+                      {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <p className={styles.coreHint}>{t("coreHint")}</p>
             </div>
 
             {/* balance de elementos y modalidades */}
@@ -355,15 +404,20 @@ export function CartaView() {
 const ELEMENTS = ["fire", "earth", "air", "water"] as const;
 const MODALITIES = ["cardinal", "fixed", "mutable"] as const;
 
-function BigCard({ glyph, name, sign, signGlyph, sub, dim }: {
-  glyph: string; name: string; sign: string; signGlyph: string; sub: string; dim?: boolean;
+function BigCard({ glyph, name, sign, signGlyph, sub, dignity, dignityKey, dim }: {
+  glyph: string; name: string; sign: string; signGlyph: string; sub: string;
+  dignity?: string | undefined; dignityKey?: string | null | undefined; dim?: boolean;
 }) {
+  const good = dignityKey === "domicile" || dignityKey === "exaltation";
   return (
     <div className={`card card--tight ${styles.big} ${dim ? styles.bigDim : ""}`}>
       <span className={styles.bigGlyph}>{glyph}</span>
       <span className={styles.bigName}>{name}</span>
       <span className={styles.bigSign}>{signGlyph} {sign}</span>
-      <span className={styles.bigSub}>{sub}</span>
+      <span className={styles.bigSub}>
+        {sub}
+        {dignity && <span className={`chip ${styles.bigTag} ${good ? styles.bigTagGood : ""}`}>{dignity}</span>}
+      </span>
     </div>
   );
 }
