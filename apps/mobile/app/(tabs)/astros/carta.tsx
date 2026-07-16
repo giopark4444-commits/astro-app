@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
@@ -16,17 +16,23 @@ import { useTheme } from "../../../lib/theme-context";
 import { useT } from "../../../lib/i18n-context";
 import { astroLabels, ASPECT_GLYPHS } from "../../../content/astrology";
 import { fetchChart, type ChartKind } from "../../../lib/chart-api";
-import { fonts, space, type as typeScale, type ThemeTokens } from "../../../theme/tokens";
+import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
-const KINDS: ChartKind[] = ["natal", "transits", "solar_return", "progressed"];
+// El mockup 09 solo expone Natal/Tránsitos como control primario (segmentado, en la
+// cabecera). Rev. Solar y Progresiones no tienen lugar visible ahí — se conservan
+// alcanzables desde Modo Pro (decisión del implementador, el gap file la deja abierta;
+// ver report de Task 4) para no perder alcance funcional silenciosamente.
+const EXTRA_KINDS: ChartKind[] = ["solar_return", "progressed"];
 const KIND_KEY: Record<ChartKind, string> = {
   natal: "Natal", transits: "Transits", solar_return: "SolarReturn", progressed: "Progressed",
 };
 const ELEMENTS = ["fire", "earth", "air", "water"] as const;
 const MODALITIES = ["cardinal", "fixed", "mutable"] as const;
+// Preview "POSICIONES" siempre visible bajo la rueda (mockup 09 §3): 4 filas fijas.
+const PREVIEW_BODIES = ["sun", "moon", "mercury", "venus"] as const;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
@@ -93,6 +99,10 @@ export default function CartaScreen() {
     if (ready) for (const b of ready.chart.bodies) m.set(b.body, b);
     return m;
   }, [ready]);
+  const previewBodies = useMemo(
+    () => PREVIEW_BODIES.map((k) => byKey.get(k)).filter((b): b is BodyPosition => !!b),
+    [byKey],
+  );
   useEffect(() => {
     if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
@@ -116,53 +126,31 @@ export default function CartaScreen() {
         contentContainerStyle={[styles.scroll, { paddingTop: space.lg, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.head}>
-          <Text style={styles.eyebrow}>{t("carta.title")}</Text>
-          <Enso size={22} />
-        </View>
-        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("carta.subtitle")}</Text>
-
-        {/* Tipo de carta — chips canónicos del rediseño */}
-        <View style={styles.kindRow}>
-          {KINDS.map((k) => {
-            const on = kind === k;
-            return (
-              <Chip
-                key={k}
-                kind="control"
-                label={t(`carta.kind${KIND_KEY[k]}`)}
-                selected={on}
-                onPress={() => setKind(k)}
-              />
-            );
-          })}
-        </View>
-        <Text style={styles.kindHint}>{t(`carta.kind${KIND_KEY[kind]}Hint`)}</Text>
-
-        {/* Sistema de casas */}
-        <View style={styles.kindRow}>
-          {(["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"] as HouseSystem[]).map((h) => {
-            const on = houseSystem === h;
-            return (
-              <Chip key={h} kind="control" label={L.houses[h]} selected={on} onPress={() => setHouseSystem(h)} />
-            );
-          })}
-        </View>
-
-        {/* Zodiaco */}
-        <View style={styles.kindRow}>
-          {(["tropical", "sidereal"] as Zodiac[]).map((z) => {
-            const on = zodiac === z;
-            return (
-              <Chip
-                key={z}
-                kind="control"
-                label={t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
-                selected={on}
-                onPress={() => setZodiac(z)}
-              />
-            );
-          })}
+        {/* Cabecera del mockup 09: stack{eyebrow + h1} a la izquierda, control
+            segmentado Natal|Tránsitos a la derecha. Sin Enso (solo vive en Hoy). */}
+        <View style={styles.headRow}>
+          <View style={styles.headStack}>
+            <Text style={styles.eyebrow}>{t("carta.headEyebrow")}</Text>
+            <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("carta.headTitle")}</Text>
+          </View>
+          <View style={styles.segmented}>
+            <Pressable
+              style={[styles.seg, kind === "natal" && styles.segOn]}
+              onPress={() => setKind("natal")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: kind === "natal" }}
+            >
+              <Text style={[styles.segText, kind === "natal" && styles.segTextOn]}>{t("carta.segNatal")}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.seg, kind === "transits" && styles.segOn]}
+              onPress={() => setKind("transits")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: kind === "transits" }}
+            >
+              <Text style={[styles.segText, kind === "transits" && styles.segTextOn]}>{t("carta.segTransits")}</Text>
+            </Pressable>
+          </View>
         </View>
 
         {state.s === "loading" && <Text style={styles.note}>{t("carta.loadingChart")}</Text>}
@@ -172,72 +160,67 @@ export default function CartaScreen() {
           <>
             {ready.solar && <Text style={styles.solar}>☉ {t("carta.solarNotice")}</Text>}
 
-            {/* Rueda interactiva */}
-            <FadeIn delay={0}>
-              <ChartWheel chart={ready.chart} solar={ready.solar} selected={sheet?.body ?? null} onSelect={setSheet} animated={playCeremony} />
-              <Text style={styles.kindHint}>{t("carta.tapHint")}</Text>
-            </FadeIn>
-
-            {/* Núcleo: Sol / Luna / Ascendente */}
-            <FadeIn delay={60} style={styles.fadeFull}>
-              <View style={styles.core}>
-                {byKey.get("sun") && (
-                  <CoreCard
-                    styles={styles}
-                    glyph={PLANET_GLYPH.sun!}
-                    name={L.bodies.sun!}
-                    sign={L.signs[byKey.get("sun")!.sign]!}
-                    signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                    sub={`${t("carta.house")} ${byKey.get("sun")!.house}`}
-                  />
-                )}
-                {byKey.get("moon") && (
-                  <CoreCard
-                    styles={styles}
-                    glyph={PLANET_GLYPH.moon!}
-                    name={L.bodies.moon!}
-                    sign={L.signs[byKey.get("moon")!.sign]!}
-                    signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                    sub={`${t("carta.house")} ${byKey.get("moon")!.house}`}
-                  />
-                )}
-                <CoreCard
-                  styles={styles}
-                  glyph="Asc"
-                  name={t("carta.ascendant")}
-                  sign={L.signs[ascPos.sign]!}
-                  signGlyph={SIGN_GLYPH[ascPos.sign]!}
-                  sub={`${ascPos.degree}°`}
-                  dim={ready.solar}
-                />
+            {/* Rueda interactiva + chips de posiciones clave (mockup §2) */}
+            <FadeIn delay={0} style={styles.fadeFull}>
+              <View style={styles.wheelWrap}>
+                <ChartWheel chart={ready.chart} solar={ready.solar} selected={sheet?.body ?? null} onSelect={setSheet} animated={playCeremony} />
+                <View style={styles.dataChipsRow}>
+                  {byKey.get("sun") && (
+                    <DataChip
+                      styles={styles}
+                      glyph={PLANET_GLYPH.sun!}
+                      text={`${L.signs[byKey.get("sun")!.sign]} · ${t("carta.house")} ${byKey.get("sun")!.house}`}
+                    />
+                  )}
+                  {byKey.get("moon") && (
+                    <DataChip
+                      styles={styles}
+                      glyph={PLANET_GLYPH.moon!}
+                      text={`${L.signs[byKey.get("moon")!.sign]} · ${t("carta.house")} ${byKey.get("moon")!.house}`}
+                    />
+                  )}
+                  <DataChip styles={styles} glyph="ASC" text={L.signs[ascPos.sign]!} />
+                </View>
               </View>
             </FadeIn>
 
-            {/* Balance de elementos y modalidades */}
-            <FadeIn delay={120} style={styles.fadeFull}>
-              <Balance
-                styles={styles}
-                title={t("carta.elements")}
-                entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
-                dominant={ready.chart.distribution.dominantElement}
-                dominantLabel={t("carta.dominant")}
-              />
-              <Balance
-                styles={styles}
-                title={t("carta.modalities")}
-                entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
-                dominant={ready.chart.distribution.dominantModality}
-                dominantLabel={t("carta.dominant")}
-              />
-            </FadeIn>
+            {/* POSICIONES — preview de 4 filas SIEMPRE visible (mockup §3), fuera de Modo Pro */}
+            {previewBodies.length > 0 && (
+              <FadeIn delay={60} style={styles.fadeFull}>
+                <View style={styles.posSec}>
+                  <Text style={styles.cardH}>{t("carta.positions")}</Text>
+                  <Card style={styles.previewCard}>
+                    {previewBodies.map((b, i) => (
+                      <Pressable
+                        key={b.body}
+                        style={[styles.previewRow, i === previewBodies.length - 1 && styles.rowLast]}
+                        onPress={() => setSheet(b)}
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.previewGlyph}>{PLANET_GLYPH[b.body] ?? "•"}</Text>
+                        <Text style={styles.previewTxt} numberOfLines={1}>
+                          <Text style={styles.previewName}>{L.bodies[b.body] ?? b.body}</Text>
+                          {` — ${L.signs[b.sign]} ${b.degree}° `}
+                          <Text style={styles.previewFaint}>{`· ${t("carta.house")} ${b.house}`}</Text>
+                        </Text>
+                        <Text style={styles.previewChev}>›</Text>
+                      </Pressable>
+                    ))}
+                  </Card>
+                </View>
+              </FadeIn>
+            )}
 
-            {/* Tu Clima: aspectos tránsito-a-natal */}
+            {/* Tu Clima: aspectos tránsito-a-natal — funcionalidad central de "Tránsitos",
+                no está detrás de Modo Pro (sin referencia visual propia en el mockup). */}
             {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-              <SectionCard styles={styles} title={t("carta.weatherTitle")}>
-                {ready.transitAspects.map((a, i) => (
-                  <AspectRow key={i} styles={styles} a={a} L={L} t={t} last={i === ready.transitAspects!.length - 1} />
-                ))}
-              </SectionCard>
+              <FadeIn delay={100} style={styles.fadeFull}>
+                <SectionCard styles={styles} title={t("carta.weatherTitle")}>
+                  {ready.transitAspects.map((a, i) => (
+                    <AspectRow key={i} styles={styles} a={a} L={L} t={t} last={i === ready.transitAspects!.length - 1} />
+                  ))}
+                </SectionCard>
+              </FadeIn>
             )}
 
             {/* Modo Pro */}
@@ -245,6 +228,75 @@ export default function CartaScreen() {
 
             {pro && (
               <View style={styles.proBody}>
+                {/* Opciones avanzadas: sin lugar visible en el mockup compacto — se
+                    conservan aquí, alcanzables, en vez de perder su funcionalidad. */}
+                <View style={styles.advancedGroup}>
+                  <Text style={styles.cardH}>{t("carta.moreCharts")}</Text>
+                  <View style={styles.kindRow}>
+                    {EXTRA_KINDS.map((k) => {
+                      const on = kind === k;
+                      return (
+                        <Chip
+                          key={k}
+                          kind="control"
+                          label={t(`carta.kind${KIND_KEY[k]}`)}
+                          selected={on}
+                          onPress={() => setKind(k)}
+                        />
+                      );
+                    })}
+                  </View>
+                  {(kind === "solar_return" || kind === "progressed") && (
+                    <Text style={styles.kindHint}>{t(`carta.kind${KIND_KEY[kind]}Hint`)}</Text>
+                  )}
+                </View>
+
+                <View style={styles.advancedGroup}>
+                  <Text style={styles.cardH}>{t("carta.houses")}</Text>
+                  <View style={styles.kindRow}>
+                    {(["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"] as HouseSystem[]).map((h) => {
+                      const on = houseSystem === h;
+                      return (
+                        <Chip key={h} kind="control" label={L.houses[h]!} selected={on} onPress={() => setHouseSystem(h)} />
+                      );
+                    })}
+                  </View>
+                </View>
+
+                <View style={styles.advancedGroup}>
+                  <Text style={styles.cardH}>{t("carta.zodiac")}</Text>
+                  <View style={styles.kindRow}>
+                    {(["tropical", "sidereal"] as Zodiac[]).map((z) => {
+                      const on = zodiac === z;
+                      return (
+                        <Chip
+                          key={z}
+                          kind="control"
+                          label={t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
+                          selected={on}
+                          onPress={() => setZodiac(z)}
+                        />
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* Balance de elementos y modalidades — sin lugar en el mockup compacto */}
+                <Balance
+                  styles={styles}
+                  title={t("carta.elements")}
+                  entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                  dominant={ready.chart.distribution.dominantElement}
+                  dominantLabel={t("carta.dominant")}
+                />
+                <Balance
+                  styles={styles}
+                  title={t("carta.modalities")}
+                  entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                  dominant={ready.chart.distribution.dominantModality}
+                  dominantLabel={t("carta.dominant")}
+                />
+
                 <SectionCard styles={styles} title={t("carta.positions")}>
                   {ready.chart.bodies.map((b, i) => (
                     <View key={b.body} style={[styles.posRow, i === ready.chart.bodies.length - 1 && styles.rowLast]}>
@@ -257,7 +309,7 @@ export default function CartaScreen() {
                       </View>
                       <View style={styles.posTags}>
                         {b.retrograde && <Text style={styles.tagWarn}>℞</Text>}
-                        {b.dignity && <Chip kind="tag" label={L.dignities[b.dignity]} />}
+                        {b.dignity && <Chip kind="tag" label={L.dignities[b.dignity]!} />}
                       </View>
                     </View>
                   ))}
@@ -306,26 +358,13 @@ export default function CartaScreen() {
   );
 }
 
-function CoreCard({
-  styles, glyph, name, sign, signGlyph, sub, dim,
-}: {
-  styles: ReturnType<typeof makeStyles>;
-  glyph: string;
-  name: string;
-  sign: string;
-  signGlyph: string;
-  sub: string;
-  dim?: boolean;
-}) {
+/** Data-chip compacto del mockup §2 (glifo + texto combinado, p.ej. "☉ Acuario · Casa 11"). */
+function DataChip({ styles, glyph, text }: { styles: ReturnType<typeof makeStyles>; glyph: string; text: string }) {
   return (
-    <Card style={[styles.coreCard, dim && styles.coreCardDim]}>
-      <Text style={styles.coreGlyph}>{glyph}</Text>
-      <Text style={styles.coreName}>{name}</Text>
-      <Text style={styles.coreSign}>
-        {signGlyph} {sign}
-      </Text>
-      <Text style={styles.coreSub}>{sub}</Text>
-    </Card>
+    <View style={styles.dataChip}>
+      <Text style={styles.dataChipGlyph}>{glyph}</Text>
+      <Text style={styles.dataChipText}>{text}</Text>
+    </View>
   );
 }
 
@@ -409,17 +448,26 @@ function makeStyles(t: ThemeTokens) {
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
     emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
-    head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
+    // Cabecera del mockup: stack{eyebrow+h1} a la izquierda, segmentado a la derecha.
+    headRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: space.md, width: "100%", marginBottom: space.xl },
+    headStack: { flexDirection: "column", gap: 2, flexShrink: 1 },
+    eyebrow: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi },
 
-    // Contenedor de cualquier fila de chips (tipo de carta / casas / zodiaco):
-    // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
-    kindRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%" },
-    kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.md, marginBottom: space.xl },
+    // Control segmentado Natal|Tránsitos (`.segmented`/`.seg` del mockup). RN no anima
+    // gradientes sin librería: el estado "on" usa `acc` sólido (misma convención que
+    // el resto del repo para aproximar el gradiente acc→acc-soft del SPEC web).
+    segmented: {
+      flexDirection: "row", flexShrink: 0, padding: 3, gap: 2, borderRadius: radius.pill,
+      borderWidth: 1, borderColor: t.accHair, backgroundColor: t.panelSoft,
+    },
+    seg: { alignItems: "center", justifyContent: "center", minHeight: 38, paddingHorizontal: space.md, borderRadius: radius.pill },
+    segOn: { backgroundColor: t.acc },
+    segText: { color: t.textFaint, fontSize: typeScale.sm, letterSpacing: 0.3, fontFamily: fonts.sansSemi },
+    segTextOn: { color: t.onAcc },
 
     note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.xxl },
-    solar: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.lg, lineHeight: 19 },
+    solar: { color: t.accText, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginBottom: space.lg, lineHeight: 19 },
 
     // <FadeIn> envuelve secciones que ya declaraban width:"100%" (necesario
     // porque `scroll` centra sus hijos con alignItems — sin este ancho
@@ -427,29 +475,55 @@ function makeStyles(t: ThemeTokens) {
     // qué resolverse).
     fadeFull: { width: "100%" },
 
-    core: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%", marginBottom: space.xl },
-    // Ya no lleva borde/fondo propios — eso lo da <Card>; acá solo el layout
-    // de mini-tarjeta (crece, encoge, centra su contenido).
-    coreCard: { flexGrow: 1, minWidth: 100, alignItems: "center", paddingVertical: space.lg, paddingHorizontal: space.md },
-    coreCardDim: { opacity: 0.7 },
-    coreGlyph: { color: t.acc, fontSize: typeScale.xl, fontFamily: fonts.serif, marginBottom: space.xs },
-    coreName: { color: t.textFaint, fontSize: typeScale.xs2, letterSpacing: 1.5, textTransform: "uppercase", fontFamily: fonts.sans },
-    coreSign: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.serif, marginTop: space.xs },
-    coreSub: { color: t.textDim, fontSize: typeScale.xs2, marginTop: 2, fontFamily: fonts.sans },
+    wheelWrap: { alignItems: "center", gap: space.sm, width: "100%" },
+
+    // `.chips-row` de 3 data-chips (Sol/Luna/ASC) bajo la rueda — reemplaza al
+    // bloque CoreCard pesado de antes de este repintado.
+    dataChipsRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%" },
+    dataChip: {
+      flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+      minHeight: 34, paddingHorizontal: space.lg, paddingVertical: 7,
+      borderRadius: radius.pill, borderWidth: 1, borderColor: t.accHair, backgroundColor: t.panelSoft,
+    },
+    dataChipGlyph: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serif },
+    dataChipText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sansSemi },
+
+    // "POSICIONES" preview siempre-visible (mockup §3) — card sin padding propio,
+    // cada fila trae su propio padding horizontal + alto mínimo.
+    posSec: { width: "100%", marginTop: space.xl, gap: space.sm },
+    previewCard: { width: "100%", padding: 0 },
+    previewRow: {
+      flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 44, paddingHorizontal: space.lg,
+      borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair,
+    },
+    previewGlyph: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serif, width: 18, textAlign: "center" },
+    previewTxt: { flex: 1, color: t.text, fontSize: typeScale.md, fontFamily: fonts.sansMedium },
+    previewName: { fontFamily: fonts.sansBold },
+    previewFaint: { color: t.textFaint },
+    previewChev: { color: t.accText, opacity: 0.85, fontSize: typeScale.md, fontFamily: fonts.serifSemi },
+
+    // Grupo de controles avanzados dentro de Modo Pro (kind extra / casas / zodiaco):
+    // sin lugar visible en el mockup compacto — se conservan aquí para no perder
+    // alcance funcional.
+    advancedGroup: { width: "100%", marginBottom: space.lg },
+    // Contenedor de cualquier fila de chips (tipo de carta extra / casas / zodiaco):
+    // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
+    kindRow: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, width: "100%" },
+    kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, marginTop: space.sm },
 
     // Ídem: fondo/borde ahora los da <Card accent> (variante --surface-2 del SPEC).
     balanceCard: { width: "100%", marginBottom: space.lg },
     balRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.sm },
-    balLabel: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 88 },
+    balLabel: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, width: 88 },
     balTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.accHair, overflow: "hidden" },
     balFill: { height: "100%", backgroundColor: t.accSoft, borderRadius: 4 },
     balFillOn: { backgroundColor: t.acc },
-    balN: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans, width: 18, textAlign: "right" },
+    balN: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans, width: 18, textAlign: "right" },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
     // Fondo/borde/radio ahora los da <Card>; queda solo el ancho (mismo motivo que fadeFull).
     card: { width: "100%" },
-    cardH: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
+    cardH: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
     muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     posRow: {
@@ -457,23 +531,23 @@ function makeStyles(t: ThemeTokens) {
       borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    posGlyph: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.serif, width: 22 },
+    posGlyph: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serif, width: 22 },
     posMain: { flex: 1 },
     posName: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
-    posDetail: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 1, fontFamily: fonts.sans },
+    posDetail: { color: t.textFaint, fontSize: typeScale.sm, marginTop: 1, fontFamily: fonts.sans },
     posTags: { flexDirection: "row", alignItems: "center", gap: space.xs },
     tagWarn: { color: t.warn, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     aspRow: { paddingVertical: space.sm + 2, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: t.accHair },
     aspGlyphs: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.serif },
     aspHard: { color: t.warn },
-    aspSoft: { color: t.acc },
+    aspSoft: { color: t.accText },
     aspMain: { marginTop: 2 },
-    aspName: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans },
-    aspSub: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 1, fontFamily: fonts.sans },
+    aspName: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    aspSub: { color: t.textFaint, fontSize: typeScale.sm, marginTop: 1, fontFamily: fonts.sans },
 
     patternRow: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, marginTop: space.xs },
 
-    footNote: { color: t.textFaint, fontSize: typeScale.xs2, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
+    footNote: { color: t.textFaint, fontSize: typeScale.sm, textAlign: "center", marginTop: space.sm, fontFamily: fonts.sans },
   });
 }
