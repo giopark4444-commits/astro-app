@@ -247,6 +247,8 @@ export const STRINGS = {
     pilares: {
       title: "Cuatro Pilares",
       subtitle: "Ba Zi · Saju — tu mapa oriental",
+      headEyebrow: "Ba Zi · Cuatro Pilares",
+      headTitle: "Tus cuatro pilares",
       dayMaster: "Maestro del Día",
       balance: "Balance de elementos",
       noTime: "Sin hora de nacimiento: el pilar de hora queda oculto.",
@@ -637,6 +639,8 @@ export const STRINGS = {
     pilares: {
       title: "Four Pillars",
       subtitle: "Ba Zi · Saju — your Eastern map",
+      headEyebrow: "Ba Zi · Four Pillars",
+      headTitle: "Your four pillars",
       dayMaster: "Day Master",
       balance: "Element balance",
       noTime: "No birth time: the hour pillar is hidden.",
