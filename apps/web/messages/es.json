@@ -6,6 +6,8 @@
   "settings": { "title": "Ajustes", "lightMode": "Modo de luz", "light": "Claro", "dark": "Oscuro", "auto": "Auto", "theme": "Tema", "language": "Idioma", "observatory": "Observatorio", "aurora": "Aurora", "cosmic": "Cósmico" },
   "hoy": {
     "greeting": "Hola",
+    "weatherSub": "El cielo de hoy sobre ti — tu clima del alma.",
+    "weatherLink": "Verlo en la carta",
     "lenses": "Tus lentes",
     "soon": "Próximamente",
     "energyTitle": "Tu energía",

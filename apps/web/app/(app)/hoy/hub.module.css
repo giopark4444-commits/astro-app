@@ -55,12 +55,19 @@
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
   padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
 }
+.weatherHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
 .weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.weatherLink { display: none; } /* móvil intacto: sin link visible (la tarjeta ya no es Link; carta accesible por lentes) */
+.weatherSub { display: none; margin: 0; } /* móvil intacto: el subtítulo es solo desktop (mockup .w-sub) */
 .weatherList { display: flex; flex-direction: column; gap: var(--sp-2); } /* 7→sp-2 (8): paso más cercano */
-.weatherRow { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */
+/* .aspCard móvil = la fila .weatherRow de siempre: sin borde, sin fondo, orbe y frase ocultos */
+.aspCard { display: flex; flex-direction: column; }
+.aspTop { display: flex; align-items: baseline; gap: var(--sp-2); } /* = .weatherRow (9→8) */
 .weatherGlyphs { font-size: var(--text-md); color: var(--ink); flex-shrink: 0; }
 .weatherAsp { color: var(--acc-text); }
-.weatherText { color: var(--soft); font-size: var(--text-xs); line-height: 1.4; } /* 12.5: empate 12/13 → apoyo → menor */
+.aspName { color: var(--soft); font-size: var(--text-xs); line-height: 1.4; } /* = .weatherText (12.5: empate 12/13 → apoyo → menor) */
+.aspOrb { display: none; } /* móvil intacto */
+.aspWhy { display: none; } /* móvil intacto */
 .harm_hard .weatherAsp { color: var(--tone-warm); }
 .harm_soft .weatherAsp { color: var(--tone-cool); }
 
@@ -104,6 +111,20 @@
     background: linear-gradient(155deg, rgba(122, 170, 224, 0.14), rgba(122, 170, 224, 0.04) 55%, var(--surface)); /* mockup: --tone-cool 7aaae0 */
     border-color: rgba(122, 170, 224, 0.34);
   }
+
+  /* ── clima rico desktop (mockup 06 §3.2): subtítulo + tarjetas .asp con orbe y frase ── */
+  .weatherLink { display: inline; font-size: var(--text-2xs); color: var(--soft); } /* mockup .p-head a */
+  .weatherLink:hover { color: var(--ink); }
+  .weatherSub { display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); margin: -8px 0 0; } /* mockup .w-sub (-8px: pega el subtítulo a la cabecera) */
+  .aspCard {
+    gap: 4px; /* mockup .asp: aire fino entre fila y frase */
+    padding: 12px 14px 11px; border-radius: 12px; /* mockup .asp */
+    background: color-mix(in oklab, var(--bg) 60%, transparent);
+    border-left: 2px solid var(--tone-warm);
+  }
+  .aspCard[data-harm="soft"] { border-left-color: var(--tone-cool); }
+  .aspOrb { display: inline; font-size: var(--text-2xs); color: var(--soft); margin-left: auto; } /* mockup .asp-meta */
+  .aspWhy { display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); line-height: 1.45; color: var(--soft); } /* mockup .asp-why */
   .wrap .heroDay > * {
     background: linear-gradient(160deg, rgba(150, 140, 214, 0.14), rgba(150, 140, 214, 0.04) 60%, var(--surface)); /* mockup: violeta numerología */
     border-color: rgba(150, 140, 214, 0.34);

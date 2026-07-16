@@ -6,6 +6,8 @@
   "settings": { "title": "Settings", "lightMode": "Light mode", "light": "Light", "dark": "Dark", "auto": "Auto", "theme": "Theme", "language": "Language", "observatory": "Observatory", "aurora": "Aurora", "cosmic": "Cosmic" },
   "hoy": {
     "greeting": "Hi",
+    "weatherSub": "Today's sky over you — your soul's weather.",
+    "weatherLink": "See it on the chart",
     "lenses": "Your lenses",
     "soon": "Coming soon",
     "energyTitle": "Your energy",

@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { PLANETS, type Aspect } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
+import { transitPhrase as phraseEs } from "@/lib/content/transit-phrases-es";
+import { transitPhrase as phraseEn } from "@/lib/content/transit-phrases-en";
 import { Icon } from "@/components/icon";
 import { Starfield } from "@/components/starfield";
 import { EnergyPanel } from "./energy-panel";
@@ -66,22 +68,35 @@ export function HubView() {
 
       <div className={styles.deskGrid}>
         {weather && weather.length > 0 && (
-          <Link href="/carta" className={`card card--interactive ${styles.weatherCard} ${styles.heroWeather} reveal`} style={{ ["--i" as string]: 1 }}>
-            <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
-            <span className={styles.weatherList}>
+          <section className={`card ${styles.weatherCard} ${styles.heroWeather} reveal`} style={{ ["--i" as string]: 1 }}>
+            <div className={styles.weatherHead}>
+              <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
+              {/* mockup 06 §3.2: link en cabecera — la tarjeta deja de ser un Link gigante */}
+              <Link href="/carta" className={styles.weatherLink}>
+                {t("hoy.weatherLink")} →
+              </Link>
+            </div>
+            <p className={styles.weatherSub}>{t("hoy.weatherSub")}</p>
+            <div className={styles.weatherList}>
               {weather.map((a, i) => (
-                <span key={i} className={`${styles.weatherRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
-                  <span className={styles.weatherGlyphs}>
-                    {PLANET_GLYPH[a.a]} <span className={styles.weatherAsp}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                    {PLANET_GLYPH[a.b]}
+                <div key={i} className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`} data-harm={a.harmony}>
+                  <span className={styles.aspTop}>
+                    <span className={styles.weatherGlyphs}>
+                      {PLANET_GLYPH[a.a]} <span className={styles.weatherAsp}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
+                      {PLANET_GLYPH[a.b]}
+                    </span>
+                    <span className={styles.aspName}>
+                      {L.bodies[a.a]} {L.aspects[a.aspect]} {t("carta.yourPossessive")} {L.bodies[a.b]}
+                    </span>
+                    <span className={styles.aspOrb}>
+                      {a.orb.toFixed(1)}° · {a.applying ? t("carta.applying") : t("carta.separating")}
+                    </span>
                   </span>
-                  <span className={styles.weatherText}>
-                    {L.bodies[a.a]} {L.aspects[a.aspect]} {t("carta.yourPossessive")} {L.bodies[a.b]}
-                  </span>
-                </span>
+                  <span className={styles.aspWhy}>{(locale === "en" ? phraseEn : phraseEs)(a.aspect, a.a)}</span>
+                </div>
               ))}
-            </span>
-          </Link>
+            </div>
+          </section>
         )}
 
         <div className={styles.heroDay}>{active && <DayNumberCard birthDate={active.birth_date} />}</div>
