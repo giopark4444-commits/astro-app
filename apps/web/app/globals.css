@@ -10,6 +10,19 @@ body {
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+/* R4c mockup 06 §6.1: en desktop la cúpula cubre TODA la página (el mockup pinta
+   el radial sobre el alto completo de cada pantalla) + halo dorado cenital
+   (.screen::before del mockup). En móvil (<1080) se conserva el fixed actual. */
+@media (min-width: 1080px) { /* bp desktop R4a */
+  body { background-attachment: scroll; }
+  body::before {
+    content: ""; position: absolute; left: 15%; right: 15%; top: -6%; height: 42%;
+    background: radial-gradient(55% 70% at 50% 0%, rgba(var(--acc-rgb), 0.09), transparent 72%);
+    pointer-events: none; z-index: 0; /* mockup 06 .screen::before */
+  }
 }
 h1, h2, h3, .display { font-family: var(--font-display); font-weight: 600; }
 /* sin subrayado UA: la afordancia la dan el oro/las cards/las flechas (como ya
