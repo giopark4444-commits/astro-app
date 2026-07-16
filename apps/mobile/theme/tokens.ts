@@ -44,6 +44,10 @@ export interface ThemeTokens {
   accHair: string;
   /** Acento al ~12% — rellenos muy suaves. */
   accFaint: string;
+  /** Acento para texto (eyebrows, glifos, cifras): igual a `acc` en modo
+   * oscuro; en modo claro es una versión OSCURECIDA de `acc` para legibilidad
+   * de texto dorado/acento sobre fondo claro (spec de mockups aprobados). */
+  accText: string;
   /** Color del texto que va SOBRE el acento (CTA llena). */
   onAcc: string;
   /** Tinte de las estrellas del cielo. */
@@ -83,6 +87,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(180,138,63,0.42)",
             accHair: "rgba(142,124,195,0.26)",
             accFaint: "rgba(202,168,95,0.12)",
+            accText: "#8a6a2f",
             onAcc: "#fffaf2",
             star: "#8e7cc3",
             scrim: "rgba(120,100,160,0.32)",
@@ -105,6 +110,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(231,201,134,0.45)",
             accHair: "rgba(231,201,134,0.2)",
             accFaint: "rgba(231,201,134,0.12)",
+            accText: "#e7c986",
             onAcc: "#070a1c",
             star: "#ece7f6",
             scrim: "rgba(4,6,18,0.72)",
@@ -131,6 +137,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(125,111,174,0.4)",
             accHair: "rgba(155,143,192,0.26)",
             accFaint: "rgba(155,143,192,0.12)",
+            accText: "#5f5484",
             onAcc: "#ffffff",
             star: "#9b8fc0",
             scrim: "rgba(120,100,160,0.3)",
@@ -153,6 +160,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(201,184,242,0.45)",
             accHair: "rgba(180,160,230,0.22)",
             accFaint: "rgba(201,184,242,0.12)",
+            accText: "#c9b8f2",
             onAcc: "#1c1730",
             star: "#d6ccf2",
             scrim: "rgba(8,6,22,0.72)",
@@ -178,6 +186,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(161,78,224,0.4)",
             accHair: "rgba(154,107,255,0.24)",
             accFaint: "rgba(184,107,255,0.1)",
+            accText: "#7a3baa",
             onAcc: "#ffffff",
             star: "#b86bff",
             scrim: "rgba(60,20,70,0.34)",
@@ -200,6 +209,7 @@ export function makeTokens(theme: ThemeName, mode: Mode): ThemeTokens {
             accSoft: "rgba(255,138,224,0.5)",
             accHair: "rgba(255,138,224,0.28)",
             accFaint: "rgba(255,138,224,0.12)",
+            accText: "#ff8ae0",
             onAcc: "#1c0529",
             star: "#ffb3ee",
             scrim: "rgba(10,2,20,0.74)",
@@ -252,7 +262,7 @@ export const radius = {
 
 /** Escala tipográfica del rediseño (SPEC de mockups aprobados). */
 export const type = {
-  xs2: 11, xs: 12, sm: 13, md: 15, lg: 17, xl: 20, xl2: 24, xl3: 32,
+  xs2: 11, xs: 12, sm: 13, md: 15, lg: 17, lg2: 19, xl: 20, xl2: 24, xl3: 32,
   displaySm: 44, display: 60,
 } as const;
 

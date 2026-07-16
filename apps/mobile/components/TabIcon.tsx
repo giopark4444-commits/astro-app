@@ -1,15 +1,17 @@
-import type { ColorValue } from "react-native";
+import { View, type ColorValue } from "react-native";
 import Svg, { Circle, G, Path } from "react-native-svg";
 
 /**
  * Iconos de línea fina para las tabs (reemplazan los glifos Unicode ☾☉八✦◷).
- * Los trazos de hoy/carta/horoscopo/numeros/pilares son VERBATIM del set
- * canónico web (apps/web/components/icon.tsx: sun/wheel/aries/grid3/pillars)
- * para mantener paridad conceptual entre plataformas. "ajustes" no tiene
- * equivalente en la web: se diseñó un engrane de línea simple (más literal
- * para "Ajustes" que el enso, que ya representa la marca en otro lugar de la UI).
+ * Los trazos de hoy/astros/numeros/pilares son VERBATIM del set canónico web
+ * (apps/web/components/icon.tsx: sun/wheel/grid3/pillars) para mantener
+ * paridad conceptual entre plataformas. "ajustes" no tiene equivalente en la
+ * web: se diseñó un engrane de línea simple (más literal para "Ajustes" que
+ * el enso, que ya representa la marca en otro lugar de la UI).
+ * "astros" (tab que hospeda Carta+Horóscopo, T2) reusa la rueda de "carta" —
+ * ya es el ícono conceptual correcto para "astros/carta astral".
  */
-type TabIconName = "hoy" | "carta" | "horoscopo" | "numeros" | "pilares" | "ajustes";
+type TabIconName = "hoy" | "astros" | "numeros" | "pilares" | "ajustes";
 
 const STROKE_WIDTH = 1.5;
 
@@ -30,11 +32,6 @@ function IconWheel() {
       <Path d="M12 3v3.4M12 17.6V21M3 12h3.4M17.6 12H21" />
     </>
   );
-}
-
-/** Carnero de Aries — VERBATIM del glifo "aries" de apps/web/components/icon.tsx. */
-function IconAries() {
-  return <Path d="M4 19.5C4 9.5 6 5.5 8.6 5.5c2.1 0 3.4 2.4 3.4 6 0-3.6 1.3-6 3.4-6C18 5.5 20 9.5 20 19.5" />;
 }
 
 function IconGrid3() {
@@ -63,8 +60,7 @@ function IconGear() {
 
 const ICONS: Record<TabIconName, () => React.ReactNode> = {
   hoy: IconSun,
-  carta: IconWheel,
-  horoscopo: IconAries,
+  astros: IconWheel,
   numeros: IconGrid3,
   pilares: IconPillars,
   ajustes: IconGear,
@@ -82,13 +78,33 @@ export function TabIcon({
   size?: number;
 }) {
   const Glyph = ICONS[name];
+  // Halo del activo (mockup: ::before con inset:-7px sobre la caja de 24 = Ø38).
+  // FUERA del <Svg>: el Svg raíz recorta a su width×height (review T1 — un Circle
+  // r=19 dentro del viewBox 24 se clipea a un cuadrado sólido, no al círculo
+  // expandido). Un View absoluto hermano no sufre ese clip (overflow visible).
+  const halo = size + 14;
+  const overhang = -(halo - size) / 2;
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      {/* Halo detrás del trazo cuando la tab está activa */}
-      {focused && <Circle cx={12} cy={12} r={11} fill={color} opacity={0.12} />}
-      <G stroke={color} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
-        <Glyph />
-      </G>
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      {focused && (
+        <View
+          style={{
+            position: "absolute",
+            top: overhang,
+            left: overhang,
+            width: halo,
+            height: halo,
+            borderRadius: halo / 2,
+            backgroundColor: color,
+            opacity: 0.12,
+          }}
+        />
+      )}
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <G stroke={color} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round">
+          <Glyph />
+        </G>
+      </Svg>
+    </View>
   );
 }

@@ -20,9 +20,12 @@ export default function TabsLayout() {
           borderTopColor: tk.accHair,
           borderTopWidth: 1,
           height: 84,
-          paddingTop: 8,
+          // §C del gap analysis: contenedor "padding: 10px 6px 4px" (arriba/lados/abajo).
+          paddingTop: 10,
+          paddingHorizontal: 6,
+          paddingBottom: 4,
         },
-        tabBarLabelStyle: { fontSize: typeScale.xs2, letterSpacing: 0.5, fontFamily: fonts.sansMedium },
+        tabBarLabelStyle: { fontSize: typeScale.sm, fontFamily: fonts.sansSemi, letterSpacing: 0.3 },
         // Sin esto, cada escena se envuelve en el `Background` de react-navigation
         // (colors.background del DefaultTheme = rgb(242,242,242) gris opaco), que
         // tapa el gradiente radial + Starfield de ThemedBackground en _layout.tsx raíz.
@@ -42,24 +45,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="carta"
+        name="astros"
         options={{
-          title: t("nav.carta"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="carta" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="horoscopo"
-        options={{
-          title: t("nav.horoscopo"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="horoscopo" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="numeros"
-        options={{
-          title: t("nav.numeros"),
-          tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+          title: t("nav.astros"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="astros" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -70,12 +59,27 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="numeros"
+        options={{
+          title: t("nav.numeros"),
+          tabBarIcon: ({ color, focused }) => <TabIcon name="numeros" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="ajustes"
         options={{
           title: t("nav.ajustes"),
           tabBarIcon: ({ color, focused }) => <TabIcon name="ajustes" color={color} focused={focused} />,
         }}
       />
+      {/* Rutas legacy (stubs de <Redirect>, ver app/(tabs)/carta.tsx y
+          horoscopo.tsx): href:null las mantiene registradas y navegables
+          (deep links viejos) SIN mostrarlas como botón en la barra. Omitir
+          por completo el Tabs.Screen las re-aparecería como tab fantasma
+          (verificado contra expo-router 6) — hay que declararlas ocultas,
+          no dejarlas fuera. */}
+      <Tabs.Screen name="carta" options={{ href: null }} />
+      <Tabs.Screen name="horoscopo" options={{ href: null }} />
     </Tabs>
   );
 }

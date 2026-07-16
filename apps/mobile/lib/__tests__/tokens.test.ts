@@ -13,14 +13,17 @@ describe("tokens del rediseño R1", () => {
     expect(fonts.sansBold).toBe("Quicksand_700Bold");
   });
   it("expone la escala tipográfica del SPEC", () => {
-    expect(typeScale).toEqual({ xs2: 11, xs: 12, sm: 13, md: 15, lg: 17, xl: 20, xl2: 24, xl3: 32, displaySm: 44, display: 60 });
+    // lg2:19 = el paso de "énfasis/voz/lectura" de la regla de 4 tamaños de Gio
+    // (13/15/19/24), añadido por el build movil-astros-mockups (T1).
+    expect(typeScale).toEqual({ xs2: 11, xs: 12, sm: 13, md: 15, lg: 17, lg2: 19, xl: 20, xl2: 24, xl3: 32, displaySm: 44, display: 60 });
   });
-  it("bgGlow y glass existen en las 6 paletas", () => {
+  it("bgGlow, glass y accText existen en las 6 paletas", () => {
     for (const theme of THEMES) {
       for (const mode of ["light", "dark"] as const) {
         const t = makeTokens(theme, mode);
         expect(t.bgGlow, `${theme}/${mode}`).toBeTruthy();
         expect(t.glass, `${theme}/${mode}`).toBeTruthy();
+        expect(t.accText, `${theme}/${mode}`).toMatch(/^#[0-9a-f]{6}$/i);
       }
     }
   });

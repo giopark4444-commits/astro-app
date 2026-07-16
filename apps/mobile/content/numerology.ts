@@ -6,15 +6,19 @@ import type { NumberMeaning } from "./numerology-es";
 import {
   GLOSS as GLOSS_ES,
   LABELS as LABELS_ES,
+  NICKNAMES_ES,
   NUMBER_MEANINGS_ES,
   PERSONAL_DAY_ES,
+  PERSONAL_YEAR_ES,
   POSITION_LENS_ES,
 } from "./numerology-es";
 import {
   GLOSS_EN,
   LABELS_EN,
+  NICKNAMES_EN,
   NUMBER_MEANINGS_EN,
   PERSONAL_DAY_EN,
+  PERSONAL_YEAR_EN,
   POSITION_LENS_EN,
 } from "./numerology-en";
 
@@ -28,6 +32,10 @@ interface NumerologyContent {
   labels: Record<string, string>;
   gloss: Record<string, string>;
   personalDay: Record<number, string>;
+  /** Apodo/arquetipo por VALOR de número (no por posición) — rediseño Task 5. */
+  nicknames: Record<number, string>;
+  /** Verso del "año personal" por valor — rediseño Task 5 (fila siempre visible). */
+  personalYear: Record<number, string>;
 }
 
 const ES: NumerologyContent = {
@@ -36,6 +44,8 @@ const ES: NumerologyContent = {
   labels: LABELS_ES,
   gloss: GLOSS_ES,
   personalDay: PERSONAL_DAY_ES,
+  nicknames: NICKNAMES_ES,
+  personalYear: PERSONAL_YEAR_ES,
 };
 
 const EN: NumerologyContent = {
@@ -44,6 +54,8 @@ const EN: NumerologyContent = {
   labels: LABELS_EN,
   gloss: GLOSS_EN,
   personalDay: PERSONAL_DAY_EN,
+  nicknames: NICKNAMES_EN,
+  personalYear: PERSONAL_YEAR_EN,
 };
 
 /** Devuelve la voz de numerología para el locale dado. */

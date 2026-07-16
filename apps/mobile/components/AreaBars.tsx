@@ -99,16 +99,18 @@ function makeStyles(t: ThemeTokens) {
     bar: { gap: space.xs },
     barHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" },
     barLabel: { color: t.text, fontFamily: fonts.serif, fontSize: typeScale.md },
-    barTone: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.xs, fontStyle: "italic" },
+    barTone: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.sm, fontStyle: "italic" },
     barScore: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.sm },
     track: { height: 7, borderRadius: radius.pill, backgroundColor: t.panel, overflow: "hidden" },
     fill: { height: "100%", borderRadius: radius.pill },
     why: { gap: space.sm, paddingTop: space.sm },
     driverRow: { flexDirection: "row", alignItems: "baseline", gap: space.sm },
     driverGlyphs: { color: t.text, fontFamily: fonts.sans, fontSize: typeScale.md },
+    // Tone-colors (t.warn/t.acc) sin tocar — mismo esquema semántico low/mixed/
+    // high que toneStyle() de arriba, fuera de alcance de T7.
     favGlyph: { color: t.acc },
     tenseGlyph: { color: t.warn },
-    driverText: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.xs, flex: 1 },
-    calm: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.xs, fontStyle: "italic" },
+    driverText: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.sm, flex: 1 },
+    calm: { color: t.textDim, fontFamily: fonts.sans, fontSize: typeScale.sm, fontStyle: "italic" },
   });
 }

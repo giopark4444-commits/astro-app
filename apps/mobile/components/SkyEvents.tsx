@@ -90,8 +90,11 @@ function makeStyles(t: ThemeTokens) {
       borderBottomColor: t.accHair,
     },
     rowLast: { borderBottomWidth: 0 },
-    glyph: { color: t.acc, fontSize: typeScale.lg, fontFamily: fonts.serif, width: 22, textAlign: "center" },
+    // Glifo a 15px (md), color accText — mismo tamaño/color que el resto de
+    // glifos planetarios de la app (AreaBars driverGlyphs, carta.tsx posGlyph/
+    // dataChipGlyph), en vez del 17px/acc suelto de antes.
+    glyph: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serif, width: 22, textAlign: "center" },
     label: { flex: 1, color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
-    date: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans },
+    date: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans },
   });
 }

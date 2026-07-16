@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   HEAVENLY_STEMS,
@@ -32,12 +32,14 @@ import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
-import { baziContent, type BaziContent } from "../../content/bazi";
+import { baziContent, DAY_MASTER_VOICE, type BaziContent } from "../../content/bazi";
 import { fetchBaZi, type BaZiData } from "../../lib/bazi-api";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
 const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
-const POS_KEYS = ["year", "month", "day", "hour"] as const;
+// Orden del mockup 11 (§B.4): HORA · DÍA · MES · AÑO — invertido respecto al orden
+// cronológico ["year","month","day","hour"] de antes.
+const POS_KEYS = ["hour", "day", "month", "year"] as const;
 type PosKey = (typeof POS_KEYS)[number];
 
 type State = { s: "loading" } | { s: "error" } | { s: "ready"; data: BaZiData };
@@ -122,6 +124,12 @@ export default function PilaresScreen() {
   const glyphGod = (g: TenGod) => (script === "hangul" ? TEN_GOD_KO[g] : TEN_GODS.find((x) => x.key === g)!.hanzi);
   const glyphPillar = (p: Pillar) => `${glyphStem(p.stem)}${glyphBranch(p.branch)}`;
   const elName = (el: string) => content.ui.element[el] ?? el;
+  // "Tierra yin"/"Fuego yang" — nombre del tronco (mockup 11 §B.4: reemplaza la línea de
+  // pinyin/romanización que el mockup no muestra).
+  const stemName = (i: number) => {
+    const s = HEAVENLY_STEMS[i]!;
+    return `${elName(s.element)} ${content.ui.polarity[s.yin ? "yin" : "yang"]}`;
+  };
 
   const counts: Record<string, number> = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
   if (data) {
@@ -156,21 +164,46 @@ export default function PilaresScreen() {
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Cabecera del mockup 11: eyebrow + h1 apilados + control segmentado Ba Zi|Saju
+            integrado debajo, SIEMPRE visible (antes vivía como 2 chips sueltos, Pro-only,
+            muy abajo en la pantalla — mismo dato/estado `script`, solo reubicado y
+            restilado; ver gap file §B.4 punto 2/5). Sin Enso (solo vive en Hoy). */}
         <View style={styles.head}>
-          <Text style={styles.eyebrow}>{t("pilares.subtitle")}</Text>
-          <Enso size={22} />
+          <Text style={styles.eyebrow}>{t("pilares.headEyebrow")}</Text>
+          <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("pilares.headTitle")}</Text>
+          <View style={styles.segmented}>
+            <Pressable
+              style={[styles.seg, script === "hanzi" && styles.segOn]}
+              onPress={() => setScript("hanzi")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: script === "hanzi" }}
+            >
+              <Text style={[styles.segText, script === "hanzi" && styles.segTextOn]}>{t("pilares.scriptBazi")}</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.seg, script === "hangul" && styles.segOn]}
+              onPress={() => setScript("hangul")}
+              accessibilityRole="button"
+              accessibilityState={{ selected: script === "hangul" }}
+            >
+              <Text style={[styles.segText, script === "hangul" && styles.segTextOn]}>{t("pilares.scriptSaju")}</Text>
+            </Pressable>
+          </View>
         </View>
-        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("pilares.title")}</Text>
 
         {state.s === "loading" && <Text style={styles.note}>{t("pilares.loading")}</Text>}
         {state.s === "error" && <Text style={styles.note}>{t("pilares.error")}</Text>}
 
         {data && laminaData && (
           <>
-            {/* Rejilla de los 4 pilares — cada uno es ahora un <Card>; el pilar del DÍA
-                se destaca con borde t.accSoft más grueso + badge 日主 · Maestro del Día como
-                pill flotante fuera de flujo (position:absolute, receta `.pillar-badge` del
-                mockup) para no forzar el ancho de la columna. Vara: movil-pilares-despues.html */}
+            {/* Rejilla de los 4 pilares — cada uno es un <Card>; el pilar del DÍA se
+                destaca con fondo teñido (`accent`, receta `.card--tinted` del mockup) +
+                borde t.accSoft más grueso + glifos en accText (el mockup NO colorea los
+                troncos/ramas por elemento Wu Xing en la rejilla compacta — ese dato ya
+                lo dice la línea "nombre" en palabras, p.ej. "Tierra yin"; el color Wu
+                Xing por elemento se conserva solo en Modo Pro, troncos ocultos). Altura
+                uniforme (minHeight 180, no fija: Modo Pro añade contenido y necesita
+                crecer). Vara: docs/redesign/movil-mockups/screens-compacta/11-pilares.html */}
             <FadeIn delay={0} style={styles.fadeFull}>
               <View style={styles.grid}>
                 {POS_KEYS.map((key) => {
@@ -190,39 +223,20 @@ export default function PilaresScreen() {
                   // de todos los Diez Dioses. Él mismo no tiene Dios (sería 比肩 trivial).
                   const dayMaster = data.day.stem;
                   return (
-                    <Card key={key} style={[styles.col, isDay && styles.dayCol]}>
-                      {isDay && (
-                        <View style={styles.dayBadge}>
-                          <Text style={styles.dayBadgeText} numberOfLines={1}>
-                            {t("pilares.dayMasterHanzi")} · {t("pilares.dayMaster")}
-                          </Text>
-                        </View>
-                      )}
+                    <Card key={key} accent={isDay} style={[styles.col, isDay && styles.dayCol]}>
                       {pro && (
                         <View style={[styles.godBadge, isDay && styles.godBadgeSelf]}>
-                          <Text style={[styles.godText, isDay && styles.godTextSelf]}>
+                          <Text style={styles.godText}>
                             {isDay ? t("pilares.dayMasterHanzi") : content.ui.god[tenGod(dayMaster, pillar.stem)]}
                           </Text>
                         </View>
                       )}
                       <Text style={styles.colLabel}>{content.ui.position[key]}</Text>
-                      <Text style={[styles.char, { color: EL_COLOR[stem.element] }]}>
-                        {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
-                      </Text>
-                      <Text style={styles.roman}>
-                        {script === "hangul"
-                          ? STEM_LABELS[pillar.stem]!.romanKo
-                          : STEM_LABELS[pillar.stem]!.pinyin}
-                      </Text>
-                      <Text style={[styles.char, { color: EL_COLOR[branch.element] }]}>
-                        {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
-                      </Text>
-                      <Text style={styles.roman}>
-                        {script === "hangul"
-                          ? BRANCH_LABELS[pillar.branch]!.romanKo
-                          : BRANCH_LABELS[pillar.branch]!.pinyin}
-                      </Text>
-                      <Text style={styles.animal}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
+                      <Text style={[styles.char, isDay && styles.charDay]}>{glyphStem(pillar.stem)}</Text>
+                      <Text style={styles.nombre}>{stemName(pillar.stem)}</Text>
+                      <View style={styles.hr} />
+                      <Text style={[styles.char, isDay && styles.charDay]}>{glyphBranch(pillar.branch)}</Text>
+                      <Text style={styles.nombre}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
                       {pro && (
                         <View style={styles.hiddenWrap}>
                           <Text style={styles.hiddenLabel}>{t("pilares.hiddenStems")}</Text>
@@ -245,7 +259,53 @@ export default function PilaresScreen() {
               </View>
             </FadeIn>
 
-            {/* Modo Pro */}
+            {!data.timeKnown && <Text style={styles.note}>{t("pilares.noTime")}</Text>}
+
+            {/* Maestro del Día — card nueva del mockup (§B.4 punto 3/6): tronco del
+                pilar de DÍA + su nombre + 1 línea poética curada por combinación
+                (DAY_MASTER_VOICE, content/bazi.ts). Respeta el toggle Ba Zi/Saju del
+                encabezado para el glifo (hanzi↔hangul); el texto es contenido de
+                locale, no cambia con el script. */}
+            <FadeIn delay={60} style={styles.fadeFull}>
+              <Card accent style={styles.maestro}>
+                <Text style={styles.maestroNombre}>
+                  {glyphStem(data.day.stem)} {stemName(data.day.stem)}
+                </Text>
+                <Text style={styles.maestroDesc}>
+                  {DAY_MASTER_VOICE[HEAVENLY_STEMS[data.day.stem]!.key]?.[locale] ?? ""}
+                </Text>
+              </Card>
+            </FadeIn>
+
+            {/* Balance de elementos — eyebrow FUERA de la card (receta `.balance` del
+                mockup, igual patrón que "POSICIONES" en carta.tsx), no el título-dentro
+                de <SectionCard> que usa el resto de Modo Pro. Relleno de barra uniforme
+                acc (el mockup usa el mismo gradiente acc-soft→acc en las 5 filas, sin
+                colorear por elemento Wu Xing — antes cada barra tomaba EL_COLOR[el]). */}
+            <FadeIn delay={120} style={styles.fadeFull}>
+              <View style={styles.balanceSec}>
+                <Text style={styles.cardH}>{t("pilares.balance")}</Text>
+                <Card style={styles.balCard}>
+                  {ELEMENTS.map((el) => {
+                    const n = counts[el] ?? 0;
+                    const empty = n === 0;
+                    return (
+                      <View key={el} style={styles.balRow}>
+                        <Text style={styles.balLabel}>{elName(el)}</Text>
+                        <View style={[styles.balTrack, empty && styles.balTrackEmpty]}>
+                          {!empty && <View style={[styles.balFill, { width: `${(n / totalEls) * 100}%` }]} />}
+                        </View>
+                        <Text style={styles.balN}>{n}</Text>
+                      </View>
+                    );
+                  })}
+                </Card>
+              </View>
+            </FadeIn>
+
+            {/* Modo Pro — sin referencia visual en el mockup compacto (E.16); se
+                conserva al final del contenido siempre-visible, mismo patrón que
+                carta.tsx/numeros.tsx (T4/T5). */}
             <ToggleRow
               label={t("pilares.modePro")}
               on={pro}
@@ -253,52 +313,6 @@ export default function PilaresScreen() {
               style={{ marginTop: space.lg, alignSelf: "center" }}
             />
             {pro && <Text style={styles.proHint}>{t("pilares.modeProHint")}</Text>}
-
-            {/* Conmutador de escritura (漢字 ↔ 한글) — chips canónicos del rediseño */}
-            {pro && (
-              <View style={styles.scriptRow}>
-                {(["hanzi", "hangul"] as const).map((s) => {
-                  const on = script === s;
-                  return (
-                    <Chip
-                      key={s}
-                      kind="control"
-                      label={t(s === "hanzi" ? "pilares.scriptBazi" : "pilares.scriptSaju")}
-                      selected={on}
-                      onPress={() => setScript(s)}
-                    />
-                  );
-                })}
-              </View>
-            )}
-
-            {!data.timeKnown && <Text style={styles.note}>{t("pilares.noTime")}</Text>}
-
-            {/* Balance de elementos */}
-            <FadeIn delay={60} style={styles.fadeFull}>
-              <SectionCard styles={styles} title={t("pilares.balance")}>
-                {ELEMENTS.map((el) => {
-                  const n = counts[el] ?? 0;
-                  const empty = n === 0;
-                  return (
-                    <View key={el} style={styles.balRow}>
-                      <Text style={styles.balLabel}>{elName(el)}</Text>
-                      <View style={[styles.balTrack, empty && styles.balTrackEmpty]}>
-                        {!empty && (
-                          <View
-                            style={[
-                              styles.balFill,
-                              { width: `${(n / totalEls) * 100}%`, backgroundColor: EL_COLOR[el] },
-                            ]}
-                          />
-                        )}
-                      </View>
-                      <Text style={styles.balN}>{n}</Text>
-                    </View>
-                  );
-                })}
-              </SectionCard>
-            </FadeIn>
 
             {/* Lámina Pro: las 8 secciones */}
             {pro && (
@@ -364,7 +378,9 @@ export default function PilaresScreen() {
 
 /** Tarjeta con título "eyebrow" (BALANCE/NAYIN/...) sobre el primitivo <Card>.
  * Renombrada de "Card" a "SectionCard" para no chocar con el primitivo importado
- * (misma convención que carta.tsx/numeros.tsx). */
+ * (misma convención que carta.tsx/numeros.tsx). Solo la usan las secciones de Modo
+ * Pro — Balance (siempre visible) usa el patrón "eyebrow fuera de la card" del
+ * mockup, ver arriba. */
 function SectionCard({
   styles,
   title,
@@ -763,9 +779,23 @@ function makeStyles(t: ThemeTokens) {
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
     emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
-    head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center", marginBottom: space.xl },
+    // Cabecera del mockup 11: eyebrow + h1 apilados + segmentado Ba Zi|Saju debajo,
+    // a todo el ancho (a diferencia de carta.tsx, donde el segmentado va al costado
+    // del eyebrow+h1 — acá el mockup lo apila, ver `.head{flex-direction:column}`).
+    head: { width: "100%", gap: space.xs, marginBottom: space.xl },
+    eyebrow: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi },
+
+    // Control segmentado Ba Zi|Saju (`.seg`/`.seg-opt` del mockup): a diferencia del de
+    // carta.tsx, acá cada opción reparte el ancho total a partes iguales (flex:1).
+    segmented: {
+      flexDirection: "row", width: "100%", marginTop: space.xs, padding: 3, gap: 2, borderRadius: radius.pill,
+      borderWidth: 1, borderColor: t.accHair, backgroundColor: t.panelSoft,
+    },
+    seg: { flex: 1, alignItems: "center", justifyContent: "center", minHeight: 38, borderRadius: radius.pill },
+    segOn: { backgroundColor: t.acc },
+    segText: { color: t.textFaint, fontSize: typeScale.sm, letterSpacing: 0.3, fontFamily: fonts.sansSemi },
+    segTextOn: { color: t.onAcc },
 
     note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.md, lineHeight: 19 },
 
@@ -773,90 +803,82 @@ function makeStyles(t: ThemeTokens) {
     // centra sus hijos con alignItems — mismo motivo que carta.tsx/numeros.tsx).
     fadeFull: { width: "100%" },
 
-    // Rejilla de los 4 pilares — cada columna es ahora un <Card>.
+    // Rejilla de los 4 pilares — cada columna es un <Card>.
     grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%", marginBottom: space.lg },
-    // Ancho/alineación del ítem de grilla; borde/fondo/radio los da <Card>. El padding
-    // vertical/horizontal más ajustado que el de <Card> (space.xl) SÍ pisa el default:
-    // mismo mecanismo que `cell` en numeros.tsx — paddingVertical/Horizontal explícitos
-    // ganan sobre el `padding` general de la tarjeta en la resolución de bordes de Yoga.
+    // Alto uniforme ~180 (mockup), padding/gap ajustados a la receta `.pilar` (10px/4px/
+    // 9px, gap 3) — minHeight, no height fija: Modo Pro añade contenido (badge de Dios,
+    // troncos ocultos) que necesita poder crecer más allá del baseline compacto.
     col: {
-      flexBasis: "22%", flexGrow: 1, minWidth: 72, alignItems: "center", gap: 4,
-      paddingVertical: space.md, paddingHorizontal: space.xs,
+      flexBasis: "22%", flexGrow: 1, minWidth: 72, minHeight: 180, alignItems: "center", gap: 3,
+      paddingTop: 10, paddingBottom: 9, paddingHorizontal: space.xs,
     },
-    // Pilar del DÍA destacado (日主): cambia el borde (más grueso, en el acento del tema)
-    // — mismo fondo que sus hermanos, igual que `.pillar.day` en el mockup. overflow:
-    // "visible" explícito (defensivo): la pill del badge vive fuera del cuadro de la
-    // card (top negativo) y esta Card tiene borderRadius — RN 0.85/Expo 56 corre sobre
-    // New Architecture (Fabric), donde el viejo bug de Android que recortaba hijos
-    // absolutos negativos contra padres con radius+clipping ya no aplica, pero se deja
-    // explícito por las dudas (no tiene costo).
-    dayCol: { borderColor: t.accSoft, borderWidth: 1.5, overflow: "visible" },
-    colLabel: { color: t.textDim, fontSize: typeScale.xs2, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sansBold },
-    // Hanzi grandes de la rejilla: fonts.serifSemi a type.xl3 (política de esta tarea).
-    char: { fontSize: typeScale.xl3, fontFamily: fonts.serifSemi, marginTop: 2 },
-    // Pinyin/romanización: type.xs fonts.sans (política de esta tarea).
-    roman: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.sans, marginTop: -2 },
-    animal: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans, marginTop: 2 },
+    // Pilar del DÍA: fondo teñido (`accent` en el <Card>, aproxima `.card--tinted`) +
+    // borde más grueso en el acento del tema (mismo mecanismo que antes, el mockup solo
+    // pide el color; el grosor 1.5 es una licencia ya sancionada por el gap file).
+    dayCol: { borderColor: t.accSoft, borderWidth: 1.5 },
+    // El eyebrow de posición usa accText SIEMPRE (los 4 pilares, no solo el del día) —
+    // así lo define `.eyebrow` global del mockup; `.pilar.dia .eyebrow` solo repite el
+    // mismo color, no lo cambia.
+    colLabel: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 1.5, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    // Hanzi/hangul grandes de la rejilla: 34px literal (hero-exento, lo dicta el
+    // mockup — no es parte de la escala {13,15,19,24}). Color plano `text` por defecto;
+    // el pilar del DÍA lo tiñe a `accText` (`charDay`) — el mockup NO colorea por
+    // elemento Wu Xing en esta rejilla compacta (ver comentario en el JSX).
+    char: { fontSize: 34, fontFamily: fonts.serifSemi, color: t.text, marginTop: 2 },
+    charDay: { color: t.accText },
+    // "nombre" — reemplaza la línea de pinyin/romanización que el mockup no muestra:
+    // para el tronco es elemento+polaridad ("Tierra yin"), para la rama es el animal
+    // ("Cerdo") — mismo estilo para ambas, como en el mockup (una sola clase `.nombre`).
+    nombre: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sansMedium, lineHeight: 16, textAlign: "center" },
+    // Separador entre el bloque del tronco y el de la rama (`.hr` del mockup).
+    hr: { width: "60%", height: 1, backgroundColor: t.accHair, marginVertical: 6 },
     // Guion de pilar ausente (sin hora de nacimiento): a la misma escala que los hanzi
     // de sus hermanos para no desentonar en la fila.
-    empty: { color: t.textFaint, fontSize: typeScale.xl3, opacity: 0.5, marginTop: space.md },
-
-    // Badge 日主 · Maestro del Día del pilar del día — pill flotante ABSOLUTA (receta
-    // `.pillar-badge` del mockup: position:absolute, top:-11, centrada), no hijo en flujo
-    // normal. Motivo (hallazgo Important del review de b29457c): el texto completo
-    // ("日主 · Maestro del Día", ~20 chars) no cabe en el presupuesto real de una columna
-    // de ~80pt a fontSize xs2 — como hijo en flujo envolvía a 2-3 líneas, crecía el alto
-    // de la columna del día y, al no declarar `grid.alignItems` (stretch por defecto de
-    // RN), estiraba las otras 3 Cards de la fila. Al sacarla del flujo con position:
-    // absolute vive fuera del constraint de ancho de la card, igual que en el mockup.
-    // alignSelf:"center" sigue funcionando para centrar un hijo absoluto sin left/right/
-    // transform: Yoga respeta alignSelf (o el alignItems del padre) en el eje no
-    // restringido por top/bottom de un nodo absoluto. numberOfLines={1} en el Text es
-    // cinturón extra por si el dispositivo tiene fuente accesible más grande.
-    dayBadge: {
-      position: "absolute", top: -11, alignSelf: "center", zIndex: 1,
-      borderWidth: 1, borderColor: t.accSoft, borderRadius: radius.pill,
-      backgroundColor: t.accFaint, paddingHorizontal: space.sm, paddingVertical: 3,
-    },
-    dayBadgeText: { color: t.acc, fontSize: typeScale.xs2, fontFamily: fonts.sansBold, letterSpacing: 0.3 },
+    empty: { color: t.textFaint, fontSize: 34, opacity: 0.5, marginTop: space.md },
 
     godBadge: {
       borderWidth: 1, borderColor: t.accHair, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2,
       minHeight: 22, alignItems: "center", justifyContent: "center", marginTop: 2,
     },
     godBadgeSelf: { borderColor: "transparent", backgroundColor: t.accFaint },
-    godText: { color: t.acc, fontSize: typeScale.xs2, fontFamily: fonts.sansBold, letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center" },
-    godTextSelf: { fontSize: typeScale.xs },
+    godText: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sansBold, letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center" },
 
     hiddenWrap: {
       width: "100%", marginTop: 4, paddingTop: space.sm,
       borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.accHair, gap: 4, alignItems: "center",
     },
-    hiddenLabel: { color: t.textFaint, fontSize: typeScale.xs2, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: fonts.sansBold, textAlign: "center", opacity: 0.85 },
+    hiddenLabel: { color: t.textFaint, fontSize: typeScale.sm, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: fonts.sansBold, textAlign: "center", opacity: 0.85 },
     hiddenRow: { alignItems: "center", gap: 1 },
     hiddenChar: { fontSize: typeScale.sm, fontFamily: fonts.serifSemi },
-    hiddenGod: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans, textAlign: "center" },
+    hiddenGod: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center" },
 
-    proHint: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.sm },
+    proHint: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, textAlign: "center", marginTop: space.sm },
 
-    // Conmutador 漢字/한글 — ahora <Chip kind="control"> (patrón de carta.tsx); esta fila
-    // solo reparte los chips, ya no lleva estilos propios de chip.
-    scriptRow: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginTop: space.md },
+    // Card "Maestro del Día" (mockup §B.4 punto 3) — tronco+nombre en serifSemi accText,
+    // línea poética debajo en sans medium text-dim. `accent` aproxima `.card--tinted`.
+    maestro: { width: "100%", minHeight: 72, paddingVertical: space.md, paddingHorizontal: space.lg, justifyContent: "center", gap: 3 },
+    maestroNombre: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serifSemi },
+    maestroDesc: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sansMedium, lineHeight: 20, marginTop: 2 },
 
-    balRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xs },
-    balLabel: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 64 },
-    balTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: t.accHair, overflow: "hidden" },
+    // "BALANCE DE ELEMENTOS" — eyebrow FUERA de la card (mismo patrón que `posSec` en
+    // carta.tsx: la card no lleva título dentro, a diferencia de <SectionCard>).
+    balanceSec: { width: "100%", marginTop: space.xl, gap: space.sm },
+    balCard: { width: "100%", gap: space.sm, paddingVertical: 14, paddingHorizontal: space.lg },
+    balRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 16 },
+    balLabel: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sansSemi, width: 58 },
+    balTrack: { flex: 1, height: 5, borderRadius: 3, backgroundColor: t.accHair, overflow: "hidden" },
     // Elemento ausente (count 0): pista vacía con borde punteado, sin relleno — igual
     // que `.bal-track.empty` del mockup (la barra de Agua "visiblemente vacía").
     balTrackEmpty: { borderStyle: "dashed", backgroundColor: "transparent" },
-    balFill: { height: "100%", borderRadius: 4 },
-    balN: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.sans, width: 18, textAlign: "right" },
+    // Relleno UNIFORME acc (el mockup usa el mismo gradiente acc-soft→acc en las 5
+    // filas — no colorea por elemento Wu Xing, a diferencia de antes).
+    balFill: { height: "100%", borderRadius: 3, backgroundColor: t.acc },
+    balN: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.serifSemi, width: 16, textAlign: "right" },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
-    // Fondo/borde/radio/padding ahora los da <Card>; queda solo el ancho (mismo motivo
-    // que carta.tsx/numeros.tsx SectionCard).
+    // Fondo/borde/radio/padding ahora los da <Card>; queda solo el ancho.
     card: { width: "100%" },
-    cardH: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
+    cardH: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2, textTransform: "uppercase", marginBottom: space.md, fontFamily: fonts.sansSemi },
 
     row: {
       flexDirection: "row", alignItems: "baseline", gap: space.md, paddingVertical: space.sm,
@@ -864,10 +886,10 @@ function makeStyles(t: ThemeTokens) {
     },
     rowLast: { borderBottomWidth: 0 },
     rowLabel: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, width: 64 },
-    rowGlyph: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif },
+    rowGlyph: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.serif },
     rowValue: { flex: 1, color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
     subRow: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, marginTop: space.md, marginBottom: space.xs },
-    method: { color: t.textFaint, fontSize: typeScale.xs, fontFamily: fonts.serifItalic, marginTop: space.md },
+    method: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, marginTop: space.md },
 
     meterRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.sm },
     // Verdicto en pill bordeada (receta "tag-chip" del mockup) en vez del texto suelto
@@ -883,7 +905,7 @@ function makeStyles(t: ThemeTokens) {
     // Etiquetas del eje del medidor (Débil/Equilibrado/Fuerte) — mismas claves i18n que
     // ya consume `content.verdicts[strength.verdict]` arriba: cero contenido nuevo.
     meterLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: space.xs },
-    meterLabelText: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans, textTransform: "uppercase", letterSpacing: 0.5 },
+    meterLabelText: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans, textTransform: "uppercase", letterSpacing: 0.5 },
 
     drivers: { marginTop: space.md, gap: 4 },
     driver: { flexDirection: "row", justifyContent: "space-between" },
@@ -895,7 +917,7 @@ function makeStyles(t: ThemeTokens) {
     // <Chip kind="tag" tint={...}> (pill bordeada/rellena, color dinámico Wu Xing
     // vía `tint`). Las locales `chip`/`chipDim`/`chipText`/`chipTextOn` de arriba
     // quedaron obsoletas y se borraron.
-    mark: { color: t.acc, fontSize: typeScale.xs, fontFamily: fonts.sans },
+    mark: { color: t.acc, fontSize: typeScale.sm, fontFamily: fonts.sans },
 
     luckBlock: { marginTop: space.sm },
     luckScroll: { marginTop: space.sm },
@@ -913,11 +935,11 @@ function makeStyles(t: ThemeTokens) {
     },
     luckNow: { borderColor: t.acc },
     luckOpen: { backgroundColor: t.panel },
-    luckAge: { color: t.textDim, fontSize: typeScale.xs2, fontFamily: fonts.sans },
-    luckGlyph: { color: t.text, fontSize: typeScale.xl, fontFamily: fonts.serif },
-    luckGod: { color: t.text, fontSize: typeScale.xs2, fontFamily: fonts.sans },
-    luckNayin: { color: t.textFaint, fontSize: typeScale.xs2, fontFamily: fonts.sans },
-    luckTag: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, marginTop: 2 },
+    luckAge: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    luckGlyph: { color: t.text, fontSize: typeScale.lg2, fontFamily: fonts.serif },
+    luckGod: { color: t.text, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    luckNayin: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    luckTag: { color: t.acc, fontSize: typeScale.sm, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans, marginTop: 2 },
     annual: { marginTop: space.md },
   });
 }
