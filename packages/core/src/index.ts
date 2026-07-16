@@ -91,3 +91,7 @@ export { isPlusActive, type SubscriptionStatus, type SubscriptionRow } from "./b
 
 // Manifestaciones — fase derivada del tiempo, puro, RN-safe (sin efemérides)
 export { manifestationPhase, HORIZONS, type Horizon } from "./manifestations/phase";
+
+// Intención del usuario (cuestionario de primera entrada)
+export { parseIntent, orderAreasByFocus, INTENT_GOALS, RELATIONSHIP_STATUSES } from "./intent";
+export type { UserIntent, IntentGoal, RelationshipStatus } from "./intent";
