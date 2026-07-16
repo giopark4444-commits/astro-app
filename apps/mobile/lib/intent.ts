@@ -38,9 +38,9 @@ export function draftToIntent(d: IntentDraft, now: string): UserIntent | null {
   };
 }
 
-// El builder tipado de supabase-js colapsa a `never` para el update de
-// `settings` (mismo problema que en apps/web/app/(app)/actions.ts); cast
-// local mínimo acotado a la única columna que tocamos.
+// `UserIntent` (interfaz con campos nombrados) no calza estructuralmente
+// con el tipo recursivo `Json` generado por supabase-js, que exige un
+// index signature; cast local mínimo acotado a la única columna que tocamos.
 type SettingsBuilder = {
   update: (v: { intent: UserIntent }) => { eq: (col: string, val: string) => Promise<{ error: { message: string } | null }> };
   select: (cols: string) => { eq: (col: string, val: string) => { maybeSingle: () => Promise<{ data: { intent: unknown } | null; error: unknown }> } };
