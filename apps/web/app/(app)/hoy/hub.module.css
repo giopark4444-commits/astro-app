@@ -48,16 +48,20 @@
   border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
 }
 
-/* Tu clima de hoy (tránsitos al abrir) — migrado al primitivo global
-   card+card--interactive — ver hub-view.tsx: className="card card--interactive ..."
-   (el hover ahora sale de .card--interactive:hover) */
+/* Tu clima de hoy (tránsitos al abrir) — ya no es un <Link> completo, es un
+   <section> con un Link de cabecera (.weatherLink). En móvil ese link se
+   estira sobre toda la tarjeta (stretched-link, invisible) para restaurar el
+   tap completo; en desktop vuelve a ser el link de texto visible de la
+   cabecera (mockup .p-head a). */
 .weatherCard {
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
   padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
 }
 .weatherHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
 .weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
-.weatherLink { display: none; } /* móvil intacto: sin link visible (la tarjeta ya no es Link; carta accesible por lentes) */
+/* móvil: stretched-link — cubre toda la tarjeta, texto oculto visualmente
+   (pero accesible a lectores de pantalla vía text-indent), tap → /carta */
+.weatherLink { position: absolute; inset: 0; z-index: 1; overflow: hidden; text-indent: -9999px; }
 .weatherSub { display: none; margin: 0; } /* móvil intacto: el subtítulo es solo desktop (mockup .w-sub) */
 .weatherList { display: flex; flex-direction: column; gap: var(--sp-2); } /* 7→sp-2 (8): paso más cercano */
 /* .aspCard móvil = la fila .weatherRow de siempre: sin borde, sin fondo, orbe y frase ocultos */
@@ -113,7 +117,8 @@
   }
 
   /* ── clima rico desktop (mockup 06 §3.2): subtítulo + tarjetas .asp con orbe y frase ── */
-  .weatherLink { display: inline; font-size: var(--text-2xs); color: var(--soft); } /* mockup .p-head a */
+  /* desktop: vuelve a ser el link de texto normal de la cabecera (mockup .p-head a) */
+  .weatherLink { position: static; inset: auto; z-index: auto; overflow: visible; text-indent: 0; display: inline; font-size: var(--text-2xs); color: var(--soft); }
   .weatherLink:hover { color: var(--ink); }
   .weatherSub { display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); margin: -8px 0 0; } /* mockup .w-sub (-8px: pega el subtítulo a la cabecera) */
   .aspCard {
