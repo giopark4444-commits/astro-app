@@ -12,6 +12,7 @@
   grid-template-columns: 58px 1fr;
   grid-template-areas: "num eyebrow" "num body";
   column-gap: var(--sp-4); /* 18→16: gap interno → sp-4 (regla calibrada) */
+  row-gap: var(--sp-1); /* conserva el aire eyebrow→meaning que daba el gap del .body (móvil idéntico, review T3) */
   align-items: center;
   padding: var(--sp-4) var(--sp-5); /* 18 padding de tarjeta → sp-5 (regla calibrada) */
   margin-bottom: var(--sp-6); /* 24→28: empate → mayor (separación de sección, como hub) */
@@ -92,6 +93,7 @@
     align-items: center;
     height: 100%;
     margin-bottom: 0;
+    row-gap: 0; /* el row-gap es solo del grid móvil; aquí el ritmo lo dan los márgenes del mockup */
   }
   .eyebrow { color: #b3a6e8; } /* mockup: eyebrow violeta del panel numerología */
   .num {
