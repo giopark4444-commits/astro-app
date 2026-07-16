@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Enso } from "../components/Enso";
+import { ZodiacGauge } from "../components/ZodiacGauge";
 import { Card, Chip } from "../components/ui";
 import { PlaceAutocomplete } from "../components/PlaceAutocomplete";
 import { type Gender, EMPTY_PROFILE, type Profile, isProfileComplete } from "../lib/profile";
@@ -310,6 +311,7 @@ export default function Onboarding() {
 
               {step === "date" && (
                 <View style={styles.center}>
+                  <ZodiacGauge date={a.birthDate} locale={locale} />
                   {Platform.OS === "android" && (
                     <Pressable style={styles.input} onPress={() => setShowDate(true)}>
                       <Text style={[styles.inputText, !a.birthDate && styles.placeholder]}>

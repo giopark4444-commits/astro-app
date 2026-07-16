@@ -359,6 +359,7 @@ export const STRINGS = {
       intentRelComplicated: "Es complicado",
       intentRelPrivate: "Prefiero no decirlo",
       intentSkip: "Omitir",
+      intentCuspHint: "El límite exacto lo dirá tu carta",
     },
     settings: {
       title: "Ajustes",
@@ -763,6 +764,7 @@ export const STRINGS = {
       intentRelComplicated: "It's complicated",
       intentRelPrivate: "I'd rather not say",
       intentSkip: "Skip",
+      intentCuspHint: "Your chart will tell the exact boundary",
     },
     settings: {
       title: "Settings",
