@@ -8,15 +8,18 @@
 .card {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  grid-template-areas: "num eyebrow" "num body";
+  column-gap: var(--sp-4); /* 18→16: gap interno → sp-4 (regla calibrada) */
   align-items: center;
-  gap: var(--sp-4); /* 18→16: gap interno → sp-4 (regla calibrada) */
   padding: var(--sp-4) var(--sp-5); /* 18 padding de tarjeta → sp-5 (regla calibrada) */
   margin-bottom: var(--sp-6); /* 24→28: empate → mayor (separación de sección, como hub) */
 }
 
 /* El héroe: el número del día en la serif del nombre. */
 .num {
+  grid-area: num;
   flex-shrink: 0;
   width: 58px;
   text-align: center;
@@ -35,12 +38,15 @@
 }
 
 .body {
+  grid-area: body;
   display: flex;
   flex-direction: column;
   gap: var(--sp-1); /* 5→4: paso más cercano */
   min-width: 0;
 }
 .eyebrow {
+  grid-area: eyebrow;
+  align-self: end;
   font-family: var(--font-ui);
   font-size: var(--text-2xs);
   letter-spacing: 1.2px;
@@ -76,4 +82,36 @@
 .dot {
   color: var(--soft);
   opacity: 0.6;
+}
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .card {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    height: 100%;
+    margin-bottom: 0;
+  }
+  .eyebrow { color: #b3a6e8; } /* mockup: eyebrow violeta del panel numerología */
+  .num {
+    width: auto;
+    font-style: normal;
+    font-size: 146px; /* mockup .big-num */
+    line-height: 1;
+    margin: 4px 0 10px;
+    color: var(--acc-text);
+    text-shadow: 0 0 34px rgba(var(--acc-rgb), 0.4); /* mockup .big-num glow */
+    font-feature-settings: "lnum" 1;
+  }
+  .body { align-items: center; }
+  .meaning { font-size: var(--text-sm); line-height: 1.6; }
+  .context { margin-top: auto; padding-top: 14px; gap: var(--sp-2); } /* mockup .day-ctx */
+  .dot { display: none; }
+  .stat {
+    border: 1px solid rgba(150, 140, 214, 0.35); /* mockup .day-ctx span */
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+  .stat b { color: #c9bdf0; } /* mockup: número violeta claro */
 }

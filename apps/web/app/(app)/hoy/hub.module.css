@@ -19,6 +19,11 @@
 @media (min-width: 1080px) { /* bp desktop R4a */
   .greet { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
   .dateMeta { text-align: right; }
+  .hello { font-size: 15px; letter-spacing: 0; text-transform: none; color: var(--soft); } /* mockup .hello */
+  .name {
+    font-size: 52px; line-height: 1.02; color: var(--acc-text); /* mockup .greet h1 em: itálica dorada */
+    text-shadow: 0 0 24px rgba(var(--acc-rgb), 0.35);
+  }
 }
 
 .section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }

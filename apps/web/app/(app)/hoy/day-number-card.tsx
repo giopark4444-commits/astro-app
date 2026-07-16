@@ -40,11 +40,11 @@ export function DayNumberCard({ birthDate }: { birthDate: string }) {
       style={{ ["--i" as string]: 1 }}
       aria-label={t("dayNumberAria", { n: day })}
     >
+      <span className={styles.eyebrow}>{t("dayNumberTitle")}</span>
       <span className={`${styles.num} ${isMaster ? styles.master : ""}`} aria-hidden>
         {day}
       </span>
       <span className={styles.body}>
-        <span className={styles.eyebrow}>{t("dayNumberTitle")}</span>
         <span className={styles.meaning}>{meaning}</span>
         <span className={styles.context}>
           <span className={styles.stat}>
