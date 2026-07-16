@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { ProfilesProvider, type BirthProfile } from "@/lib/profiles/profiles-provider";
 import { BottomNav } from "@/components/bottom-nav";
 import { TopNav } from "@/components/top-nav";
+import { ThemeChip } from "@/components/theme-chip";
 import { ProfileMenu } from "@/components/profile-menu";
 import { persistSettings } from "./actions";
 import styles from "./app-shell.module.css";
@@ -37,7 +38,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 condicional) — sin esto, al abrir el sheet el backdrop se vuelve
                 el :last-child del header y el avatar pierde su alineación en el
                 grid desktop (hallazgo de la review de T1) */}
-            <div className={styles.menuSlot}><ProfileMenu /></div>
+            <div className={styles.menuSlot}><ThemeChip /><ProfileMenu /></div>
           </header>
           <div className={styles.main}>{children}</div>
           <BottomNav />

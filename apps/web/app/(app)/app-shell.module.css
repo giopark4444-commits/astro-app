@@ -37,7 +37,7 @@
   /* slot del perfil: clase estable, NO :last-child — el BottomSheet del
      ProfileMenu renderiza un backdrop hermano al abrirse y robaba el match
      estructural (el avatar saltaba a la izquierda). Hallazgo review T1. */
-  .menuSlot { justify-self: end; }
+  .menuSlot { justify-self: end; display: flex; align-items: center; gap: 12px; } /* mockup .nav-right gap 12px */
   /* la columna de teléfono se vuelve lienzo (mockup: min(1280px, 100% - 112px)) */
   .main { max-width: min(1280px, calc(100% - 112px)); }
 }

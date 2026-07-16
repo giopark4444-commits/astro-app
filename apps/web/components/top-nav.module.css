@@ -21,3 +21,16 @@
   }
   .soon { opacity: 0.45; cursor: default; }
 }
+
+/* mockup 06 §2 .mode-chip — solo desktop */
+.modeChip { display: none; }
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .modeChip {
+    display: inline-flex; align-items: center; gap: 7px; /* mockup: gap 7px */
+    padding: 7px 14px; border-radius: 999px; /* mockup: 7px 14px */
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--soft); font-size: var(--text-2xs); font-weight: 600;
+    transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  }
+  .modeChip:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+}
