@@ -83,3 +83,15 @@ export async function loadLocalIntent(): Promise<UserIntent | null> {
 export async function storeLocalIntent(intent: UserIntent): Promise<void> {
   await setRaw(INTENT_STORAGE_KEY, JSON.stringify(intent));
 }
+
+// Pasos del cuestionario de intención en el onboarding móvil. "affirm" solo
+// aparece si el usuario eligió al menos una meta — no tiene sentido afirmar
+// un camino sobre metas vacías.
+export type IntentStep = "goals" | "affirm" | "focus" | "relationship";
+
+export function intentSteps(d: IntentDraft): IntentStep[] {
+  const steps: IntentStep[] = ["goals"];
+  if (d.goals.length > 0) steps.push("affirm");
+  steps.push("focus", "relationship");
+  return steps;
+}

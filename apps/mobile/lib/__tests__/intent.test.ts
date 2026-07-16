@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { draftToIntent, EMPTY_INTENT_DRAFT, saveRemoteIntent, fetchRemoteIntent } from "../intent";
+import { draftToIntent, EMPTY_INTENT_DRAFT, saveRemoteIntent, fetchRemoteIntent, intentSteps } from "../intent";
 
 const NOW = "2026-07-16T12:00:00Z";
 
@@ -37,5 +37,15 @@ describe("saveRemoteIntent / fetchRemoteIntent", () => {
     const out = await fetchRemoteIntent(fakeSupabase({ intent: { goals: ["self"], focus: [] } }), "u1");
     expect(out?.goals).toEqual(["self"]);
     expect(await fetchRemoteIntent(fakeSupabase({ intent: null }), "u1")).toBeNull();
+  });
+});
+
+describe("intentSteps", () => {
+  it("sin metas no hay afirmación", () => {
+    expect(intentSteps(EMPTY_INTENT_DRAFT)).toEqual(["goals", "focus", "relationship"]);
+  });
+  it("con metas aparece la afirmación tras metas", () => {
+    expect(intentSteps({ ...EMPTY_INTENT_DRAFT, goals: ["self"] }))
+      .toEqual(["goals", "affirm", "focus", "relationship"]);
   });
 });
