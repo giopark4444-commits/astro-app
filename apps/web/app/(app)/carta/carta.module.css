@@ -222,8 +222,9 @@
      La lámina .pro es ahora un contenedor simple, siempre visible. */
   .pro:not([data-pro]) { display: block; }
   /* el toggle móvil (posición original en readCol) cede el lugar al del pie
-     de rueda (ChartControls.proToggle dentro de .ctrlRows) */
-  .proToggleMobile { display: none; }
+     de rueda (ChartControls.proToggle dentro de .ctrlRows). Doble clase:
+     debe ganarle a `.proToggle { display: inline-flex }` de más abajo. */
+  .proToggle.proToggleMobile { display: none; }
 
   .controlsMobile { display: none; }
   .ctrlRows {
