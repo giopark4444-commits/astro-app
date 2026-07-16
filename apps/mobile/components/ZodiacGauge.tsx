@@ -73,7 +73,7 @@ export function ZodiacGauge({ date, locale }: { date: string; locale: Locale }) 
         })}
       </Svg>
       {active && (
-        <Text style={[styles.signName, { color: tk.text }]}>{labels.signs[active.key] ?? active.key}</Text>
+        <Text style={[styles.signName, { color: tk.text }]}>{(labels.signs[active.key] ?? active.key) + (active.cusp ? " ≈" : "")}</Text>
       )}
       {active?.cusp && (
         <Text style={[styles.cuspHint, { color: tk.textDim }]}>{t("onboarding.intentCuspHint")}</Text>
