@@ -5,18 +5,18 @@ import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
   type ChartResult, type BodyPosition, type Aspect, type HouseSystem, type Zodiac,
 } from "@aluna/core";
-import { Enso } from "../../components/Enso";
-import { ChartWheel } from "../../components/ChartWheel";
-import { BodyReadingReader } from "../../components/BodyReading";
-import { BottomSheet } from "../../components/BottomSheet";
-import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
-import { useProfile } from "../../lib/profile-context";
-import { useAuth } from "../../lib/auth-context";
-import { useTheme } from "../../lib/theme-context";
-import { useT } from "../../lib/i18n-context";
-import { astroLabels, ASPECT_GLYPHS } from "../../content/astrology";
-import { fetchChart, type ChartKind } from "../../lib/chart-api";
-import { fonts, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
+import { Enso } from "../../../components/Enso";
+import { ChartWheel } from "../../../components/ChartWheel";
+import { BodyReadingReader } from "../../../components/BodyReading";
+import { BottomSheet } from "../../../components/BottomSheet";
+import { Card, Chip, FadeIn, ToggleRow } from "../../../components/ui";
+import { useProfile } from "../../../lib/profile-context";
+import { useAuth } from "../../../lib/auth-context";
+import { useTheme } from "../../../lib/theme-context";
+import { useT } from "../../../lib/i18n-context";
+import { astroLabels, ASPECT_GLYPHS } from "../../../content/astrology";
+import { fetchChart, type ChartKind } from "../../../lib/chart-api";
+import { fonts, space, type as typeScale, type ThemeTokens } from "../../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -113,7 +113,7 @@ export default function CartaScreen() {
     // ya viven en ThemedBackground (capa raíz, Task 2) — esta pantalla queda transparente.
     <View style={styles.root}>
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
+        contentContainerStyle={[styles.scroll, { paddingTop: space.lg, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.head}>

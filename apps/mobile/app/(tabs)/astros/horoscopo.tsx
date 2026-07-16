@@ -11,25 +11,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
-import { Enso } from "../../components/Enso";
-import { AreaBars, type BarArea } from "../../components/AreaBars";
-import { SkyEvents } from "../../components/SkyEvents";
-import { HoroscopeReading } from "../../components/HoroscopeReading";
-import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
-import { useProfile } from "../../lib/profile-context";
-import { useAuth } from "../../lib/auth-context";
-import { useTheme } from "../../lib/theme-context";
-import { useT } from "../../lib/i18n-context";
-import { astroLabels, ASPECT_GLYPHS } from "../../content/astrology";
-import { SOLAR_HOUSE_LABELS_ES, SOLAR_HOUSE_LABELS_EN, composeWesternProse } from "../../content/horoscope";
+import { Enso } from "../../../components/Enso";
+import { AreaBars, type BarArea } from "../../../components/AreaBars";
+import { SkyEvents } from "../../../components/SkyEvents";
+import { HoroscopeReading } from "../../../components/HoroscopeReading";
+import { Card, Chip, FadeIn, ToggleRow } from "../../../components/ui";
+import { useProfile } from "../../../lib/profile-context";
+import { useAuth } from "../../../lib/auth-context";
+import { useTheme } from "../../../lib/theme-context";
+import { useT } from "../../../lib/i18n-context";
+import { astroLabels, ASPECT_GLYPHS } from "../../../content/astrology";
+import { SOLAR_HOUSE_LABELS_ES, SOLAR_HOUSE_LABELS_EN, composeWesternProse } from "../../../content/horoscope";
 import {
   fetchWesternHoroscope,
   type HoroscopePeriod,
   type NatalHit,
   type SolarHousePlacement,
   type WesternHoroscopePayload,
-} from "../../lib/horoscope-api";
-import { fonts, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
+} from "../../../lib/horoscope-api";
+import { fonts, space, type as typeScale, type ThemeTokens } from "../../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -132,7 +132,7 @@ export default function HoroscopoScreen() {
     // queda transparente, igual que carta.tsx/pilares.tsx.
     <View style={styles.root}>
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xxxl }]}
+        contentContainerStyle={[styles.scroll, { paddingTop: space.lg, paddingBottom: insets.bottom + space.xxxl }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.head}>
