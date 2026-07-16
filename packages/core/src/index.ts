@@ -95,3 +95,6 @@ export { manifestationPhase, HORIZONS, type Horizon } from "./manifestations/pha
 // Intención del usuario (cuestionario de primera entrada)
 export { parseIntent, orderAreasByFocus, INTENT_GOALS, RELATIONSHIP_STATUSES } from "./intent";
 export type { UserIntent, IntentGoal, RelationshipStatus } from "./intent";
+
+// Signo solar aproximado por fecha (gauge zodiacal del cuestionario de primera entrada)
+export { sunSignFromDate } from "./astrology/sun-sign";
