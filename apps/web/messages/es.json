@@ -148,6 +148,8 @@
     "solarNotice": "Sin hora de nacimiento: carta solar. Casas y Ascendente son aproximados.",
     "houseSystem": "Casas",
     "zodiac": "Zodiaco",
+    "housesLabel": "Casas",
+    "zodiacLabel": "Zodiaco",
     "tropical": "Tropical",
     "sidereal": "Sideral",
     "houseSystems": {

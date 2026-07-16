@@ -29,6 +29,13 @@
    visual señalado en el plan, ver carta-view.tsx houseSystem/zodiac y
    body-reading.tsx tier tabs: className="chip--control ...on? chip--control-on"). */
 
+/* fila de controles del pie de rueda (mockup .ctrl-rows) — solo desktop */
+.ctrlRows { display: none; }
+.ctrlLab {
+  flex: none; width: 64px; font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); /* mockup .ctrl-row .lab */
+}
+
 .note { position: relative; z-index: 1; text-align: center; font-style: italic; color: var(--soft); font-size: var(--text-sm); padding: var(--sp-7) 0; }
 .solar { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); font-style: italic; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 12px; background: var(--surface-2); } /* 11.5→2xs empate, misma regla que .kindHint */
 
@@ -209,8 +216,38 @@
   .readCol .pane { display: none; }
   .readCol .paneOn { display: block; }
 
-  /* en desktop la lámina pro vive en las tabs: el toggle sobra y la lámina
-     se muestra siempre (sus secciones ya se filtran por pane) */
-  .proToggle { display: none; }
+  /* en desktop las secciones grandes de las tabs (posTable/aspectario/Balance)
+     se muestran SIEMPRE; solo tech/distGrid quedan detrás de Modo Pro (ver
+     carta-view.tsx: esas dos secciones pasaron a render condicional {pro &&}).
+     La lámina .pro es ahora un contenedor simple, siempre visible. */
   .pro:not([data-pro]) { display: block; }
+  /* el toggle móvil (posición original en readCol) cede el lugar al del pie
+     de rueda (ChartControls.proToggle dentro de .ctrlRows) */
+  .proToggleMobile { display: none; }
+
+  .controlsMobile { display: none; }
+  .ctrlRows {
+    display: flex; flex-direction: column; gap: 9px; /* mockup .ctrl-rows */
+    border-top: 1px solid rgba(var(--acc-rgb), 0.14); padding-top: 14px; margin-top: 0;
+  }
+  .ctrlRows .ctrlRow { align-items: center; }
+  .ctrlRows .ctrlRow:last-child .proToggle { margin-left: auto; }
+  /* cabecera centrada (mockup .carta-head) */
+  .head { justify-content: center; }
+  .enso { display: none; }
+  .h1 { text-align: center; font-style: normal; font-size: 38px; margin-top: 6px; } /* mockup 38px/600 */
+  .eyebrow { display: block; text-align: center; }
+  .kindRow { display: inline-flex; margin: 14px auto var(--sp-4); } /* mockup .seg centrado */
+  .kindBtn { font-family: var(--font-ui); font-size: var(--text-sm); padding: 9px 24px; } /* mockup .seg button */
+  .kindHint { display: none; } /* el mockup no lleva hint bajo el seg */
+  .wrapKind { display: flex; justify-content: center; } /* wrapper para centrar el inline-flex */
+  /* rueda dentro de panel (mockup .wheel-card) */
+  .wheelCol {
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    background: var(--surface); backdrop-filter: blur(10px);
+    padding: 22px 28px 16px; /* mockup .wheel-card */
+    display: flex; flex-direction: column;
+  }
+  .wheel { max-width: 566px; margin: 0 auto; } /* mockup: max-width 566px */
+  .proToggle { display: inline-flex; margin: 0; } /* reactivado en el pie de rueda */
 }

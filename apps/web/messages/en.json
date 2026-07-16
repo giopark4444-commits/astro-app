@@ -148,6 +148,8 @@
     "solarNotice": "No birth time: solar chart. Houses and Ascendant are approximate.",
     "houseSystem": "Houses",
     "zodiac": "Zodiac",
+    "housesLabel": "Houses",
+    "zodiacLabel": "Zodiac",
     "tropical": "Tropical",
     "sidereal": "Sidereal",
     "houseSystems": {

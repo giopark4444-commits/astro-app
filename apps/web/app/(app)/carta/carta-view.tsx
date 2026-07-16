@@ -15,12 +15,12 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
+import { ChartControls } from "./chart-controls";
 import styles from "./carta.module.css";
 
 const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
-const HOUSE_SYSTEMS: HouseSystem[] = ["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"];
 type ChartKind = "natal" | "transits" | "solar_return" | "progressed";
 const CHART_KINDS: ChartKind[] = ["natal", "transits", "solar_return", "progressed"];
 const KIND_KEY: Record<ChartKind, string> = {
@@ -124,40 +124,30 @@ export function CartaView() {
       <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
 
       {/* tipo de carta */}
-      <div className={`seg seg--gradient ${styles.kindRow}`} role="tablist" aria-label={t("title")}>
-        {CHART_KINDS.map((k) => (
-          <button
-            key={k}
-            type="button"
-            role="tab"
-            aria-selected={kind === k}
-            className={`seg__item ${styles.kindBtn} ${kind === k ? "seg__item--active" : ""}`}
-            onClick={() => setKind(k)}
-          >
-            {t(`kind${KIND_KEY[k]}`)}
-          </button>
-        ))}
+      <div className={styles.wrapKind}>
+        <div className={`seg seg--gradient ${styles.kindRow}`} role="tablist" aria-label={t("title")}>
+          {CHART_KINDS.map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="tab"
+              aria-selected={kind === k}
+              className={`seg__item ${styles.kindBtn} ${kind === k ? "seg__item--active" : ""}`}
+              onClick={() => setKind(k)}
+            >
+              {t(`kind${KIND_KEY[k]}`)}
+            </button>
+          ))}
+        </div>
       </div>
       <p className={styles.kindHint}>{t(`kind${KIND_KEY[kind]}Hint`)}</p>
 
-      {/* controles */}
-      <div className={styles.controls}>
-        <div className={styles.ctrlRow} role="tablist" aria-label={t("houseSystem")}>
-          {HOUSE_SYSTEMS.map((h) => (
-            <button key={h} className={`chip--control ${houseSystem === h ? "chip--control-on" : ""}`}
-              aria-selected={houseSystem === h} role="tab" onClick={() => setHouseSystem(h)}>
-              {t(`houseSystems.${h}`)}
-            </button>
-          ))}
-        </div>
-        <div className={styles.ctrlRow} role="tablist" aria-label={t("zodiac")}>
-          {(["tropical", "sidereal"] as Zodiac[]).map((z) => (
-            <button key={z} className={`chip--control ${zodiac === z ? "chip--control-on" : ""}`}
-              aria-selected={zodiac === z} role="tab" onClick={() => setZodiac(z)}>
-              {t(z)}
-            </button>
-          ))}
-        </div>
+      {/* controles (móvil: visible <1080; oculto ≥1080 vía .controlsMobile) */}
+      <div className={`${styles.controls} ${styles.controlsMobile}`}>
+        <ChartControls
+          houseSystem={houseSystem} onHouseSystem={setHouseSystem}
+          zodiac={zodiac} onZodiac={setZodiac}
+        />
       </div>
 
       {state.s === "loading" && <p className={styles.note}>{t("loadingChart")}</p>}
@@ -172,6 +162,21 @@ export function CartaView() {
               <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} animated={playCeremony} />
             </div>
             <p className={styles.tapHint}>{t("tapHint")}</p>
+
+            {/* controles al pie de la rueda (desktop, mockup .ctrl-rows) */}
+            <div className={styles.ctrlRows}>
+              <ChartControls
+                houseSystem={houseSystem} onHouseSystem={setHouseSystem}
+                zodiac={zodiac} onZodiac={setZodiac}
+                labeled
+                proToggle={
+                  <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
+                    <span className={styles.proDot} data-on={pro || undefined} />
+                    {t("pro")}
+                  </button>
+                }
+              />
+            </div>
           </div>
 
           <div className={styles.readCol}>
@@ -226,8 +231,9 @@ export function CartaView() {
               </section>
             )}
 
-            {/* Modo Pro */}
-            <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
+            {/* Modo Pro (móvil: posición original, oculto ≥1080 — el pie de
+                rueda toma el relevo ahí vía ChartControls.proToggle) */}
+            <button className={`${styles.proToggle} ${styles.proToggleMobile}`} onClick={() => setPro(!pro)} aria-pressed={pro}>
               <span className={styles.proDot} data-on={pro || undefined} />
               {t("pro")}
             </button>
@@ -250,18 +256,20 @@ export function CartaView() {
                 </div>
               </section>
 
-              {/* distribución */}
-              <section className={`card card--tight fade-in ${pane("balance")}`}>
-                <h3 className={styles.cardH}>{t("distribution")}</h3>
-                <div className={styles.distGrid}>
-                  {ELEMENTS.map((k) => (
-                    <span key={k} className={styles.distCell}>{L.elements[k]}: <b>{ready.chart.distribution.elements[k]}</b></span>
-                  ))}
-                  {MODALITIES.map((k) => (
-                    <span key={k} className={styles.distCell}>{L.modalities[k]}: <b>{ready.chart.distribution.modalities[k]}</b></span>
-                  ))}
-                </div>
-              </section>
+              {/* distribución (extra técnico: solo con Modo Pro) */}
+              {pro && (
+                <section className={`card card--tight fade-in ${pane("balance")}`}>
+                  <h3 className={styles.cardH}>{t("distribution")}</h3>
+                  <div className={styles.distGrid}>
+                    {ELEMENTS.map((k) => (
+                      <span key={k} className={styles.distCell}>{L.elements[k]}: <b>{ready.chart.distribution.elements[k]}</b></span>
+                    ))}
+                    {MODALITIES.map((k) => (
+                      <span key={k} className={styles.distCell}>{L.modalities[k]}: <b>{ready.chart.distribution.modalities[k]}</b></span>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* aspectario */}
               <section className={`card card--tight fade-in ${pane("aspectos")}`}>
@@ -295,15 +303,17 @@ export function CartaView() {
                 )}
               </section>
 
-              {/* cabecera técnica */}
-              <section className={`card card--tight fade-in ${pane("posiciones")}`}>
-                <div className={styles.tech}>
-                  <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
-                  <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
-                  <span>{t(ready.chart.meta.zodiac)}</span>
-                  <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
-                </div>
-              </section>
+              {/* cabecera técnica (extra técnico: solo con Modo Pro) */}
+              {pro && (
+                <section className={`card card--tight fade-in ${pane("posiciones")}`}>
+                  <div className={styles.tech}>
+                    <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
+                    <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
+                    <span>{t(ready.chart.meta.zodiac)}</span>
+                    <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
+                  </div>
+                </section>
+              )}
             </div>
           </div>
         </div>
