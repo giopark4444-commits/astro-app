@@ -188,7 +188,7 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
       expect(state.rpcCalls).toEqual([{ fn: "admin_referral_summary", args: undefined }]);
     });
 
-    it("si admin_referral_summary falla (p.ej. migración 0016 sin aplicar), devuelve el error tal cual", async () => {
+    it("si admin_referral_summary falla (p.ej. migración 0017 sin aplicar), devuelve el error tal cual", async () => {
       state.role = "superadmin";
       state.rpcError = { message: "function public.admin_referral_summary() does not exist" };
       const res = await listReferralSummary();

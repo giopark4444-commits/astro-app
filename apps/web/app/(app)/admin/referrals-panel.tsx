@@ -25,7 +25,7 @@ function suggestCode(email: string): string {
 
 /** Sección «Referidos» del panel /admin (brief referidos-brief T4): tabla de
  * admin_referral_summary + form crear/editar + Marcar pagado/Desactivar. Si
- * la migración 0016 no está aplicada, banner de migración pendiente (mismo
+ * la migración 0017 no está aplicada, banner de migración pendiente (mismo
  * patrón que CollaboratorsPanel). */
 export function ReferralsPanel() {
   const t = useTranslations("admin");

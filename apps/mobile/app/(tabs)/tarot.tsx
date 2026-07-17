@@ -7,7 +7,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { dailyCard, cardById, TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingProse } from "@aluna/core";
+import {
+  dailyCard,
+  cardById,
+  TAROT_CARDS_ES,
+  TAROT_CARDS_EN,
+  composeReadingProse,
+  cardImageUrl,
+  cardBackUrl,
+} from "@aluna/core";
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { TarotFlipCard } from "../../components/TarotFlipCard";
@@ -17,7 +25,7 @@ import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
-import { apiUrl } from "../../lib/config";
+import { useDeckAssets } from "../../lib/use-deck-assets";
 import { getRaw, setRaw } from "../../lib/storage";
 import {
   dailyRevealedKey,
@@ -49,6 +57,7 @@ export default function TarotScreen() {
 
   const userId = session?.user.id ?? null;
   const accessToken = session?.access_token ?? null;
+  const deckCtx = useDeckAssets(accessToken);
 
   // tz/localDate calculados al montar — mismo trade-off documentado que la
   // web (tarot-view.tsx:63-67): quedan stale si la pantalla sigue abierta
@@ -127,7 +136,7 @@ export default function TarotScreen() {
     postedDailyRef.current = true;
     saveTarotReading(accessToken, {
       spread: "daily",
-      deck: "rws",
+      deck: deckCtx.activeDeck,
       cards: [{ cardId: daily.card.id, reversed: daily.reversed, position: "day" }],
     })
       .then(() => {
@@ -138,7 +147,7 @@ export default function TarotScreen() {
       .catch(() => {
         postedDailyRef.current = false;
       });
-  }, [accessToken, daily, userId, localDate, loadDiary]);
+  }, [accessToken, daily, userId, localDate, loadDiary, deckCtx]);
 
   // Storage local al montar: si ya estaba revelada visualmente pero el diario
   // (arriba) no la encontró en el servidor, respeta esa revelación y, si
@@ -218,8 +227,6 @@ export default function TarotScreen() {
     );
   }, [openReading, locale, openReadingMainCards, openReadingJumperCards]);
 
-  const rwsBase = `${apiUrl()}/tarot/rws`;
-
   return (
     <View style={styles.root}>
       <ScrollView
@@ -244,8 +251,8 @@ export default function TarotScreen() {
               <TarotFlipCard
                 revealed={revealed}
                 onFlip={handleFlip}
-                frontUri={`${rwsBase}/${daily.card.id}.webp`}
-                backUri={`${rwsBase}/back.webp`}
+                frontUri={cardImageUrl(daily.card.id, deckCtx)}
+                backUri={cardBackUrl(deckCtx)}
                 reversed={daily.reversed}
                 frontLabel={dailyContent.name}
                 backLabel={t("tarot.dailyFlipCta")}
@@ -354,13 +361,13 @@ export default function TarotScreen() {
           el umbral — el umbral queda montado debajo (conserva revealed/diario)
           y al guardar la lectura loadDiary refresca el diario de fondo. */}
       {ceremonyOpen && (
-        <TarotCeremony onClose={() => setCeremonyOpen(false)} onSaved={loadDiary} />
+        <TarotCeremony deckCtx={deckCtx} onClose={() => setCeremonyOpen(false)} onSaved={loadDiary} />
       )}
 
       {/* Modo manual (T3): mismo criterio de overlay efímero de pantalla
           completa que la ceremonia digital. */}
       {manualOpen && (
-        <TarotManualEntry onClose={() => setManualOpen(false)} onSaved={loadDiary} />
+        <TarotManualEntry deckCtx={deckCtx} onClose={() => setManualOpen(false)} onSaved={loadDiary} />
       )}
 
       <BottomSheet open={dailySheetOpen} onClose={() => setDailySheetOpen(false)} title={dailyContent?.name}>

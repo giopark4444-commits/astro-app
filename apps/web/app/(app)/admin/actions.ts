@@ -127,7 +127,7 @@ export type ReferralSummaryRow = {
 };
 export type ListReferralSummaryResult = { ok: true; rows: ReferralSummaryRow[] } | { ok: false; error: string };
 
-/** Tabla del panel (rpc admin_referral_summary). Si la migración 0016 no está
+/** Tabla del panel (rpc admin_referral_summary). Si la migración 0017 no está
  * aplicada, la UI muestra el mismo banner de migración pendiente que ya usa
  * la sección Colaboradores. */
 export async function listReferralSummary(): Promise<ListReferralSummaryResult> {

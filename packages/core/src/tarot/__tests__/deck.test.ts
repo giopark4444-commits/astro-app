@@ -29,8 +29,9 @@ describe("TAROT_DECK", () => {
       expect(n, c.id).toBe(c.arcana === "major" ? 1 : 0);
     }
   });
-  it("registro de mazos: rws activo, aluna registrado pero apagado", () => {
+  it("registro de mazos: rws activo, aluna registrado pero apagado, custom activo", () => {
     expect(TAROT_DECKS.find((d) => d.id === "rws")!.enabled).toBe(true);
     expect(TAROT_DECKS.find((d) => d.id === "aluna")!.enabled).toBe(false);
+    expect(TAROT_DECKS.find((d) => d.id === "custom")!.enabled).toBe(true);
   });
 });

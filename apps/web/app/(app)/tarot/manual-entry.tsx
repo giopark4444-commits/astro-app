@@ -9,7 +9,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { TAROT_DECK, spreadById, type TarotCard } from "@aluna/core";
+import { TAROT_DECK, spreadById, type TarotCard, type DeckAssetCtx, cardImageUrl, rwsCtx } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ReadingChat } from "./reading-chat";
@@ -54,7 +54,15 @@ function cardMatchesSuit(card: TarotCard, suit: SuitTab): boolean {
   return card.suit === suit;
 }
 
-export function ManualEntry({ onClose }: { onClose: () => void }) {
+export function ManualEntry({
+  deckCtx = rwsCtx(""),
+  onClose,
+}: {
+  /** Ctx del resolver de assets (Task 7); default rws — preserva el
+   *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
+  deckCtx?: DeckAssetCtx;
+  onClose: () => void;
+}) {
   const t = useTranslations("tarot");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
@@ -146,7 +154,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
     void fetch("/api/tarot/readings", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ spread: template, deck: "rws", cards }),
+      body: JSON.stringify({ spread: template, deck: deckCtx.activeDeck, cards }),
     })
       .then(async (res) => {
         if (res.status === 201) return setSave("saved");
@@ -171,7 +179,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
                 <li key={c.cardId} className={styles.pickedItem}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/tarot/rws/${c.cardId}.webp`}
+                    src={cardImageUrl(c.cardId, deckCtx)}
                     alt={content?.name ?? c.cardId}
                     className={`${styles.pickedThumb} ${c.reversed ? tarot.reversedImg : ""}`}
                   />
@@ -234,7 +242,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
                       onClick={() => onPick(card.id)}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`/tarot/rws/${card.id}.webp`} alt={content?.name ?? card.id} className={styles.gridThumb} />
+                      <img src={cardImageUrl(card.id, deckCtx)} alt={content?.name ?? card.id} className={styles.gridThumb} />
                       <span className={styles.gridName}>{content?.name ?? card.id}</span>
                     </button>
                   );
@@ -360,7 +368,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
                 <article key={c.cardId} className={`card card--tight ${styles.readingCard}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/tarot/rws/${c.cardId}.webp`}
+                    src={cardImageUrl(c.cardId, deckCtx)}
                     alt={content?.name ?? c.cardId}
                     className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
                   />
@@ -387,7 +395,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
                     <article key={c.cardId} className={`card card--dashed ${styles.readingCard}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/tarot/rws/${c.cardId}.webp`}
+                        src={cardImageUrl(c.cardId, deckCtx)}
                         alt={content?.name ?? c.cardId}
                         className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
                       />

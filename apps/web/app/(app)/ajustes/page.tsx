@@ -11,6 +11,7 @@ import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
+import { DeckManager } from "./deck-manager";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -68,9 +69,9 @@ export default async function AjustesPage({
 
   const visibleSocialLinks = SOCIAL_LINKS.filter((s) => s.href);
 
-  // Código de referido ya aplicado (si lo hay) — RLS de referred_users (0016)
+  // Código de referido ya aplicado (si lo hay) — RLS de referred_users (0017)
   // ya acota el select a la fila propia, así que se puede leer directo acá.
-  // try/catch: la migración 0016 puede no estar aplicada todavía (dev) y eso
+  // try/catch: la migración 0017 puede no estar aplicada todavía (dev) y eso
   // nunca debe tumbar /ajustes (mismo patrón que subRow/intentRow arriba).
   let referredCode: string | null = null;
   try {
@@ -93,6 +94,11 @@ export default async function AjustesPage({
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
+      </section>
+
+      <section className="card">
+        <h2 className={styles.eyebrow}>{t("deckTitle")}</h2>
+        <DeckManager />
       </section>
 
       <section className="card">
