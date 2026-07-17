@@ -109,7 +109,8 @@
       "numeros": "Tus ciclos y vibraciones personales",
       "carta": "Tu cielo de nacimiento, vivo",
       "horoscopo": "Tu signo, hoy y esta semana",
-      "pilares": "Ba Zi · los Cuatro Pilares"
+      "pilares": "Ba Zi · los Cuatro Pilares",
+      "tarot": "Tu carta y tus tiradas"
     },
     "moonNew": "Luna nueva",
     "moonWaxingCrescent": "Luna creciente",
@@ -601,6 +602,9 @@
     "spreadCelticSoon": "Pronto · Plus",
     "diaryTitle": "Tu diario",
     "diaryEmpty": "Todavía no guardaste ninguna lectura.",
+    "diaryLoading": "Cargando tu diario…",
+    "diaryError": "No pudimos cargar tu diario.",
+    "diaryRetry": "Reintentar",
     "diaryClose": "Cerrar",
     "diaryQuestionLabel": "Tu pregunta",
     "diaryCardsLabel": "Cartas",

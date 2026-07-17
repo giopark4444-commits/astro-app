@@ -109,7 +109,8 @@
       "numeros": "Your personal cycles and vibrations",
       "carta": "Your birth sky, alive",
       "horoscopo": "Your sign, today and this week",
-      "pilares": "Ba Zi · the Four Pillars"
+      "pilares": "Ba Zi · the Four Pillars",
+      "tarot": "Your card and your spreads"
     },
     "moonNew": "New Moon",
     "moonWaxingCrescent": "Waxing Moon",
@@ -601,6 +602,9 @@
     "spreadCelticSoon": "Coming soon · Plus",
     "diaryTitle": "Your journal",
     "diaryEmpty": "You haven't saved any readings yet.",
+    "diaryLoading": "Loading your journal…",
+    "diaryError": "We couldn't load your journal.",
+    "diaryRetry": "Retry",
     "diaryClose": "Close",
     "diaryQuestionLabel": "Your question",
     "diaryCardsLabel": "Cards",

@@ -42,13 +42,17 @@ const DIARY_SPREAD_KEY: Record<string, string> = {
  *  formateada directo a "YYYY-MM-DD" con el locale en-CA (produce ese orden
  *  sin parsear a mano). Es la clave de la semilla determinista del día
  *  (dailyCard, @aluna/core) y de la key de localStorage. */
-function localDateKey(tz: string): string {
+function localDateKeyFromDate(d: Date, tz: string): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: tz,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(d);
+}
+
+function localDateKey(tz: string): string {
+  return localDateKeyFromDate(new Date(), tz);
 }
 
 export function TarotView({ userId }: { userId: string }) {
@@ -79,6 +83,60 @@ export function TarotView({ userId }: { userId: string }) {
   const [ceremony, setCeremony] = useState<"three" | null>(null);
   const postedDailyRef = useRef(false);
 
+  const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
+  const [openReadingId, setOpenReadingId] = useState<string | null>(null);
+
+  const aliveRef = useRef(true);
+  // Servidor-como-verdad para el daily (review final, fix Important): el GET
+  // del diario ya corre al montar. Si trae una lectura spread:"daily" cuya
+  // fecha local (derivada de created_at con la MISMA tz del cliente) es la de
+  // HOY, el usuario ya reveló y guardó esta carta -- probablemente en otro
+  // dispositivo, o con localStorage vacío/borrado -- y no hay que mostrarla
+  // boca abajo de nuevo ni volver a postear un duplicado. Si el GET llega
+  // después del render inicial es aceptable que la carta se vea boca abajo un
+  // instante y luego se voltee sin animación al confirmarse.
+  // Edge case documentado y aceptado: el GET solo devuelve las 7 lecturas más
+  // recientes en el plan free (`total` puede ser mayor). Como el daily de hoy
+  // sería la más reciente si existe, en la práctica casi siempre viene dentro
+  // de esas 7 -- pero un usuario free con 7+ lecturas MÁS RECIENTES que el
+  // daily de hoy (p.ej. varias tiradas de tres cartas después) no lo vería
+  // aquí y podría postear un duplicado al voltear. Este duplicado en el borde
+  // se cierra definitivamente con el índice único parcial de T3 (server-side);
+  // esta mitigación de cliente cubre el caso común.
+  const loadDiary = useCallback(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/tarot/readings", { method: "GET" });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as { readings: TarotReadingRow[]; total: number };
+        if (!aliveRef.current) return;
+        setDiary({ s: "ready", readings: data.readings, total: data.total });
+
+        const todayDaily = data.readings.find(
+          (r) => r.spread === "daily" && localDateKeyFromDate(new Date(r.created_at), tz) === localDate,
+        );
+        if (todayDaily) {
+          postedDailyRef.current = true;
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(storageKey, "1");
+            window.localStorage.setItem(savedKey, "1");
+          }
+          setRevealed(true);
+        }
+      } catch {
+        if (aliveRef.current) setDiary({ s: "error" });
+      }
+    })();
+  }, [tz, localDate, storageKey, savedKey]);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    loadDiary();
+    return () => {
+      aliveRef.current = false;
+    };
+  }, [loadDiary]);
+
   const postDaily = useCallback(() => {
     // Guarda el daily en el servidor. `postedDailyRef` evita el doble POST
     // dentro de un mismo montaje; `savedKey` solo se marca cuando el servidor
@@ -97,12 +155,17 @@ export function TarotView({ userId }: { userId: string }) {
       }),
     })
       .then((res) => {
-        if (res.ok) window.localStorage.setItem(savedKey, "1");
+        if (res.ok) {
+          window.localStorage.setItem(savedKey, "1");
+          // Fix Minor (review final): el daily recién guardado debe aparecer
+          // en el diario sin recargar la página.
+          loadDiary();
+        }
       })
       .catch(() => {
         /* sin red: reintento en el próximo montaje (revelada sin savedKey) */
       });
-  }, [daily, savedKey]);
+  }, [daily, savedKey, loadDiary]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -127,32 +190,6 @@ export function TarotView({ userId }: { userId: string }) {
       ]),
     [locale, daily],
   );
-
-  const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
-  const [openReadingId, setOpenReadingId] = useState<string | null>(null);
-
-  const aliveRef = useRef(true);
-  const loadDiary = useCallback(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/tarot/readings", { method: "GET" });
-        if (!res.ok) throw new Error(String(res.status));
-        const data = (await res.json()) as { readings: TarotReadingRow[]; total: number };
-        if (!aliveRef.current) return;
-        setDiary({ s: "ready", readings: data.readings, total: data.total });
-      } catch {
-        if (aliveRef.current) setDiary({ s: "error" });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    aliveRef.current = true;
-    loadDiary();
-    return () => {
-      aliveRef.current = false;
-    };
-  }, [loadDiary]);
 
   const dateFmt = useMemo(
     () => new Intl.DateTimeFormat(locale === "en" ? "en" : "es", { day: "numeric", month: "short", year: "numeric" }),
@@ -262,7 +299,18 @@ export function TarotView({ userId }: { userId: string }) {
 
       <section className={styles.diarySection}>
         <h2 className={styles.sectionTitle}>{t("diaryTitle")}</h2>
-        {diary.s !== "ready" || diary.readings.length === 0 ? (
+        {diary.s === "loading" ? (
+          <div className={`card card--dashed ${styles.diaryEmpty}`}>
+            <p>{t("diaryLoading")}</p>
+          </div>
+        ) : diary.s === "error" ? (
+          <div className={`card card--dashed ${styles.diaryEmpty}`}>
+            <p>{t("diaryError")}</p>
+            <button type="button" className={styles.dailyRevealBtn} onClick={loadDiary}>
+              {t("diaryRetry")}
+            </button>
+          </div>
+        ) : diary.readings.length === 0 ? (
           <div className={`card card--dashed ${styles.diaryEmpty}`}>
             <p>{t("diaryEmpty")}</p>
           </div>

@@ -166,6 +166,19 @@ describe("TarotView", () => {
     expect(calls.filter((c) => c.init?.method === "POST").length).toBe(1);
   });
 
+  it("al confirmarse el POST del daily, el diario se recarga sin recargar la página", async () => {
+    const { calls } = mockFetch([], 0);
+    renderView();
+    await screen.findByText(es.tarot.diaryEmpty);
+    const getsBeforeFlip = calls.filter((c) => c.init?.method === "GET").length;
+
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.dailyFlipCta }));
+
+    await waitFor(() =>
+      expect(calls.filter((c) => c.init?.method === "GET").length).toBeGreaterThan(getsBeforeFlip),
+    );
+  });
+
   it("'Cruz celta' está deshabilitada con el chip 'Pronto · Plus' y no hace nada al tocarla", async () => {
     mockFetch();
     renderView();
@@ -205,6 +218,61 @@ describe("TarotView", () => {
     mockFetch([], 0);
     renderView();
     expect(await screen.findByText(es.tarot.diaryEmpty)).toBeInTheDocument();
+  });
+
+  it("el diario en error muestra el mensaje de error con botón reintentar", async () => {
+    global.fetch = vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) })) as unknown as typeof fetch;
+    renderView();
+    expect(await screen.findByText(es.tarot.diaryError)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: es.tarot.diaryRetry })).toBeInTheDocument();
+    expect(screen.queryByText(es.tarot.diaryEmpty)).not.toBeInTheDocument();
+  });
+
+  it("servidor-como-verdad: si el GET trae un daily de HOY, monta revelada y no re-postea", async () => {
+    const localDate = localDateKey();
+    const drawn = dailyCard(USER_ID, localDate, { reversals: true });
+    const content = TAROT_CARDS_ES[drawn.card.id]!;
+    const { calls } = mockFetch(
+      [
+        {
+          id: "r-today", user_id: USER_ID, profile_id: null, spread: "daily", question: null,
+          cards: [{ cardId: drawn.card.id, reversed: drawn.reversed, position: "day" }],
+          notes: null, deck: "rws", created_at: new Date().toISOString(),
+        },
+      ],
+      1,
+    );
+    renderView();
+
+    expect(await screen.findByText(content.name)).toBeInTheDocument();
+    await waitFor(() => expect(localStorage.getItem(`tarot-daily-${USER_ID}-${localDate}`)).toBe("1"));
+    expect(localStorage.getItem(`tarot-daily-saved-${USER_ID}-${localDate}`)).toBe("1");
+    expect(calls.some((c) => c.init?.method === "POST")).toBe(false);
+  });
+
+  it("servidor-como-verdad: si el GET trae un daily de AYER, monta boca abajo y el flip postea normal", async () => {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { calls } = mockFetch(
+      [
+        {
+          id: "r-yesterday", user_id: USER_ID, profile_id: null, spread: "daily", question: null,
+          cards: [{ cardId: "fool", reversed: false, position: "day" }],
+          notes: null, deck: "rws", created_at: yesterday,
+        },
+      ],
+      1,
+    );
+    renderView();
+
+    const back = await screen.findByAltText(es.tarot.dailyFlipCta);
+    expect((back as HTMLImageElement).src).toContain("/tarot/rws/back.webp");
+
+    const flipBtn = screen.getByRole("button", { name: es.tarot.dailyFlipCta });
+    fireEvent.click(flipBtn);
+    await waitFor(() => {
+      const post = calls.find((c) => c.init?.method === "POST");
+      expect(post).toBeDefined();
+    });
   });
 
   it("con más lecturas guardadas que las visibles (free), muestra freeLimitNote", async () => {
