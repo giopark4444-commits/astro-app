@@ -75,6 +75,26 @@
 }
 .grantBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
+/* — Referidos — */
+.referralList { list-style: none; margin: 0 0 var(--sp-4); padding: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.referralRow {
+  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3);
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2);
+}
+.referralRowHead { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.referralRowStats { display: flex; gap: var(--sp-3); flex-wrap: wrap; font-size: var(--text-xs); color: var(--soft); }
+.referralRowActions { display: flex; gap: var(--sp-2); }
+
+.referralCodeRow { display: flex; gap: var(--sp-2); }
+.referralCodeRow .grantEmail { flex: 1; text-transform: uppercase; }
+.referralPctRow { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+.referralPctLabel { display: flex; flex-direction: column; gap: 4px; font-size: var(--text-2xs); color: var(--soft); font-weight: 600; }
+.referralPctInput {
+  width: 84px; padding: var(--sp-2) var(--sp-3); font-family: inherit; font-size: var(--text-sm);
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; outline: none;
+}
+.referralPctInput:focus { border-color: rgba(var(--acc-rgb), 0.5); }
+
 @media (min-width: 1080px) { /* bp desktop R4a, mismo cap intermedio que ajustes.module.css */
   .page { max-width: 640px; margin-left: auto; margin-right: auto; }
 }

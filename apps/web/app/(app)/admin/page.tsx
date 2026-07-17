@@ -5,6 +5,7 @@ import { getRole } from "@/lib/admin/roles";
 import { DEFAULT_NAV_ORDER, sanitizeNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import { NavOrderEditor } from "./nav-order-editor";
 import { CollaboratorsPanel } from "./collaborators-panel";
+import { ReferralsPanel } from "./referrals-panel";
 import styles from "./admin.module.css";
 
 // Panel de superusuario (brief admin-panel T4): SOLO superadmin. No aparece
@@ -35,6 +36,7 @@ export default async function AdminPage() {
 
       <NavOrderEditor initialOrder={initialOrder} />
       <CollaboratorsPanel />
+      <ReferralsPanel />
     </main>
   );
 }

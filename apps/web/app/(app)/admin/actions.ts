@@ -109,3 +109,104 @@ export async function revokeRole(email: string): Promise<ActionResult> {
     return { ok: false, error: e instanceof Error ? e.message : "No se pudo quitar el rol." };
   }
 }
+
+// — Referidos (brief referidos-brief T4) — mismo patrón que arriba: guard de
+// rol server-side SIEMPRE, RPCs guardadas por is_superadmin() en la propia
+// función de BD, mensajes de EXCEPTION propagados tal cual.
+
+export type ReferralSummaryRow = {
+  code: string;
+  owner_email: string;
+  discount_pct: number;
+  commission_pct: number;
+  active: boolean;
+  referred_count: number;
+  pending_cents: number;
+  paid_cents: number;
+};
+export type ListReferralSummaryResult = { ok: true; rows: ReferralSummaryRow[] } | { ok: false; error: string };
+
+/** Tabla del panel (rpc admin_referral_summary). Si la migración 0016 no está
+ * aplicada, la UI muestra el mismo banner de migración pendiente que ya usa
+ * la sección Colaboradores. */
+export async function listReferralSummary(): Promise<ListReferralSummaryResult> {
+  const supabase = await createClient();
+  const denied = await requireSuperadmin(supabase);
+  if (denied) return denied;
+
+  try {
+    const { data, error } = await rpcClient(supabase).rpc("admin_referral_summary");
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, rows: (data ?? []) as ReferralSummaryRow[] };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "No se pudo cargar el resumen de referidos." };
+  }
+}
+
+/** Crea/edita el código de un colaborador (rpc admin_set_referral_code,
+ * upsert por email — v1 es 1 código por colaborador). Valida los porcentajes
+ * server-side ANTES de llamar al rpc (defensa en profundidad, mismo espíritu
+ * que grantRole con el rol); la función de BD igual los revalida. */
+export async function setReferralCode(
+  email: string,
+  code: string,
+  discountPct: number,
+  commissionPct: number,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const denied = await requireSuperadmin(supabase);
+  if (denied) return denied;
+
+  if (!Number.isInteger(discountPct) || discountPct < 0 || discountPct > 100) {
+    return { ok: false, error: "Descuento inválido: debe estar entre 0 y 100." };
+  }
+  if (!Number.isInteger(commissionPct) || commissionPct < 0 || commissionPct > 100) {
+    return { ok: false, error: "Comisión inválida: debe estar entre 0 y 100." };
+  }
+
+  try {
+    const { error } = await rpcClient(supabase).rpc("admin_set_referral_code", {
+      target_email: email,
+      p_code: code,
+      p_discount_pct: discountPct,
+      p_commission_pct: commissionPct,
+    });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "No se pudo guardar el código de referido." };
+  }
+}
+
+/** Desactiva un código (rpc admin_deactivate_referral_code) — no borra
+ * histórico de referidos/ganancias, solo deja de aceptar canjes nuevos. */
+export async function deactivateReferralCode(code: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const denied = await requireSuperadmin(supabase);
+  if (denied) return denied;
+
+  try {
+    const { error } = await rpcClient(supabase).rpc("admin_deactivate_referral_code", { p_code: code });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "No se pudo desactivar el código." };
+  }
+}
+
+/** «Marcar pagado» (rpc admin_mark_earnings_paid) — Gio ya le pagó al
+ * colaborador POR FUERA de Dodo; esto marca todo lo pendiente de ese código
+ * como pagado (pending -> paid, paid_at = now()). */
+export async function markReferralEarningsPaid(code: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const denied = await requireSuperadmin(supabase);
+  if (denied) return denied;
+
+  try {
+    const { error } = await rpcClient(supabase).rpc("admin_mark_earnings_paid", { p_code: code });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "No se pudo marcar la comisión como pagada." };
+  }
+}

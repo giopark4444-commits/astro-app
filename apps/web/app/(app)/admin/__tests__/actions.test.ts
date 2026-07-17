@@ -32,7 +32,16 @@ vi.mock("@/lib/admin/roles", () => ({
   getRole: async () => state.role,
 }));
 
-import { saveNavOrder, listRoles, grantRole, revokeRole } from "../actions";
+import {
+  saveNavOrder,
+  listRoles,
+  grantRole,
+  revokeRole,
+  listReferralSummary,
+  setReferralCode,
+  deactivateReferralCode,
+  markReferralEarningsPaid,
+} from "../actions";
 
 describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)", () => {
   beforeEach(() => {
@@ -160,6 +169,101 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
       state.rpcError = { message: "no puedes quitarte a ti mismo el rol de superadmin" };
       const res = await revokeRole("yo@aluna.com");
       expect(res).toEqual({ ok: false, error: "no puedes quitarte a ti mismo el rol de superadmin" });
+    });
+  });
+
+  describe("listReferralSummary", () => {
+    it("rechaza sin rol superadmin y nunca llama al rpc", async () => {
+      state.role = "collaborator";
+      const res = await listReferralSummary();
+      expect(res).toEqual({ ok: false, error: "No autorizado." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("devuelve las filas del rpc admin_referral_summary como superadmin", async () => {
+      state.role = "superadmin";
+      state.rpcData = [{ code: "GIO1234", owner_email: "a@b.com", discount_pct: 10, commission_pct: 30, active: true, referred_count: 2, pending_cents: 500, paid_cents: 0 }];
+      const res = await listReferralSummary();
+      expect(res).toEqual({ ok: true, rows: state.rpcData });
+      expect(state.rpcCalls).toEqual([{ fn: "admin_referral_summary", args: undefined }]);
+    });
+
+    it("si admin_referral_summary falla (p.ej. migración 0016 sin aplicar), devuelve el error tal cual", async () => {
+      state.role = "superadmin";
+      state.rpcError = { message: "function public.admin_referral_summary() does not exist" };
+      const res = await listReferralSummary();
+      expect(res).toEqual({ ok: false, error: "function public.admin_referral_summary() does not exist" });
+    });
+  });
+
+  describe("setReferralCode", () => {
+    it("rechaza sin rol superadmin y nunca llama al rpc", async () => {
+      state.role = "collaborator";
+      const res = await setReferralCode("a@b.com", "GIO1234", 10, 30);
+      expect(res).toEqual({ ok: false, error: "No autorizado." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("valida el % de descuento server-side ANTES de llamar al rpc", async () => {
+      state.role = "superadmin";
+      const res = await setReferralCode("a@b.com", "GIO1234", 150, 30);
+      expect(res).toEqual({ ok: false, error: "Descuento inválido: debe estar entre 0 y 100." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("valida el % de comisión server-side ANTES de llamar al rpc", async () => {
+      state.role = "superadmin";
+      const res = await setReferralCode("a@b.com", "GIO1234", 10, -1);
+      expect(res).toEqual({ ok: false, error: "Comisión inválida: debe estar entre 0 y 100." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("llama a admin_set_referral_code con los datos como superadmin", async () => {
+      state.role = "superadmin";
+      const res = await setReferralCode("a@b.com", "GIO1234", 10, 30);
+      expect(res).toEqual({ ok: true });
+      expect(state.rpcCalls).toEqual([
+        { fn: "admin_set_referral_code", args: { target_email: "a@b.com", p_code: "GIO1234", p_discount_pct: 10, p_commission_pct: 30 } },
+      ]);
+    });
+
+    it("muestra el mensaje de la EXCEPTION de BD tal cual (p.ej. código ya de otro colaborador)", async () => {
+      state.role = "superadmin";
+      state.rpcError = { message: "el código GIO1234 ya pertenece a otro colaborador" };
+      const res = await setReferralCode("a@b.com", "GIO1234", 10, 30);
+      expect(res).toEqual({ ok: false, error: "el código GIO1234 ya pertenece a otro colaborador" });
+    });
+  });
+
+  describe("deactivateReferralCode", () => {
+    it("rechaza sin rol superadmin y nunca llama al rpc", async () => {
+      state.role = "collaborator";
+      const res = await deactivateReferralCode("GIO1234");
+      expect(res).toEqual({ ok: false, error: "No autorizado." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("llama a admin_deactivate_referral_code con el código como superadmin", async () => {
+      state.role = "superadmin";
+      const res = await deactivateReferralCode("GIO1234");
+      expect(res).toEqual({ ok: true });
+      expect(state.rpcCalls).toEqual([{ fn: "admin_deactivate_referral_code", args: { p_code: "GIO1234" } }]);
+    });
+  });
+
+  describe("markReferralEarningsPaid", () => {
+    it("rechaza sin rol superadmin y nunca llama al rpc", async () => {
+      state.role = "collaborator";
+      const res = await markReferralEarningsPaid("GIO1234");
+      expect(res).toEqual({ ok: false, error: "No autorizado." });
+      expect(state.rpcCalls).toHaveLength(0);
+    });
+
+    it("llama a admin_mark_earnings_paid con el código como superadmin", async () => {
+      state.role = "superadmin";
+      const res = await markReferralEarningsPaid("GIO1234");
+      expect(res).toEqual({ ok: true });
+      expect(state.rpcCalls).toEqual([{ fn: "admin_mark_earnings_paid", args: { p_code: "GIO1234" } }]);
     });
   });
 });
