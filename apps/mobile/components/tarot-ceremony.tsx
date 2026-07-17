@@ -130,6 +130,7 @@ function GhostOrbit({ index, uri, tint }: { index: number; uri: string; tint: st
     >
       <Image
         source={{ uri }}
+        resizeMode="contain"
         style={{
           width: FAN_W,
           height: FAN_H,
@@ -180,6 +181,7 @@ function CutPile({
       <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} testID="cut-pile">
         <Image
           source={{ uri }}
+      resizeMode="contain"
           style={{
             width: PILE_W,
             height: PILE_H,
@@ -412,7 +414,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                     }
                     onResponderTerminate={() => dispatch({ type: "holdAbort" })}
                   >
-                    <Image source={{ uri: backUri }} style={styles.deckImg} />
+                    <Image source={{ uri: backUri }} resizeMode="contain" style={styles.deckImg} />
                   </Animated.View>
                 </View>
                 <Text style={styles.stepHint}>{t("tarot.shuffleHint")}</Text>
@@ -486,6 +488,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                   >
                     <Image
                       source={{ uri: backUri }}
+                      resizeMode="contain"
                       style={[styles.fanImg, picked && styles.fanImgPicked]}
                     />
                   </Pressable>
@@ -501,7 +504,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                   <View style={[styles.slotBox, i < state.picked.length && styles.slotBoxFilled]}>
                     {i < state.picked.length && (
                       <SlotAppear reduced={reducedMotion}>
-                        <Image source={{ uri: backUri }} style={styles.slotImg} />
+                        <Image source={{ uri: backUri }} resizeMode="contain" style={styles.slotImg} />
                       </SlotAppear>
                     )}
                   </View>
@@ -583,6 +586,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                   <View key={d.card.id} style={styles.readingCard}>
                     <Image
                       source={{ uri: `${rwsBase}/${d.card.id}.webp` }}
+                      resizeMode="contain"
                       style={[
                         styles.readingImg,
                         d.reversed && { transform: [{ rotate: "180deg" }] },

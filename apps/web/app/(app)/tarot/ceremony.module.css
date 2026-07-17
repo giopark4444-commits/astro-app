@@ -246,8 +246,8 @@
 .readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
 .readingImg {
   width: 64px;
-  height: 104px;
-  object-fit: cover;
+  height: 106px; /* 0.6 ratio, igual que el lienzo normalizado 372×620 */
+  object-fit: contain;
   border-radius: 8px;
   border: 1px solid var(--line);
   flex-shrink: 0;

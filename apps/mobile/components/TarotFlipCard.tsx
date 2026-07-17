@@ -98,7 +98,7 @@ export function TarotFlipCard({
             <Text style={styles.fallbackGlyph}>✶</Text>
           </View>
         ) : (
-          <Image source={{ uri: backUri }} style={{ width, height, borderRadius: radius.md }} onError={() => setBackFailed(true)} />
+          <Image source={{ uri: backUri }} resizeMode="contain" style={{ width, height, borderRadius: radius.md }} onError={() => setBackFailed(true)} />
         )}
       </Animated.View>
       <Animated.View
@@ -121,7 +121,7 @@ export function TarotFlipCard({
             <Text style={styles.fallbackName} numberOfLines={3}>{frontLabel}</Text>
           </View>
         ) : (
-          <Image source={{ uri: frontUri }} style={{ width, height, borderRadius: radius.md }} onError={() => setFrontFailed(true)} />
+          <Image source={{ uri: frontUri }} resizeMode="contain" style={{ width, height, borderRadius: radius.md }} onError={() => setFrontFailed(true)} />
         )}
       </Animated.View>
     </Pressable>

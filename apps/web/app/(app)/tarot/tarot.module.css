@@ -35,7 +35,12 @@
 .faceFront { transform: rotateY(180deg); }
 .flipped .faceBack { transform: rotateY(-180deg); }
 .flipped .faceFront { transform: rotateY(0deg); }
-.cardImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* contain (no cover): las 79 webp están normalizadas a un lienzo uniforme
+   372×620 con matte índigo #12142e horneado (script tarot-normalize), así que
+   la carta entera SIEMPRE se ve — nada recortado — y el matte se funde con la
+   superficie oscura de la app. cover recortaba números/nombres por los ratios
+   dispares (0.56–0.59) de los escaneos originales de Wikimedia. */
+.cardImg { width: 100%; height: 100%; object-fit: contain; display: block; }
 .reversedImg { transform: rotate(180deg); }
 
 .dailyRevealBody { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; max-width: 440px; }
