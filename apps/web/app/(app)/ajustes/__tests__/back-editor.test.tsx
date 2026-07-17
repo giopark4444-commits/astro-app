@@ -26,7 +26,9 @@ describe("BackEditor", () => {
     fireEvent.click(screen.getByRole("button", { name: es.settings.deckBackSymbolMoon }));
 
     expect(preview.src).not.toBe(initialSrc);
-    expect(decodeURIComponent(preview.src)).toContain("path"); // símbolo luna = <path> relleno
+    // La luna se dibuja con círculos (disco + mordisco), no con <path> —
+    // ver fix del creciente que se renderizaba vacío en back-svg.ts.
+    expect(decodeURIComponent(preview.src)).toContain("<circle");
   });
 
   it("el preview cambia al elegir otro color de borde", () => {
