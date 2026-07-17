@@ -133,7 +133,7 @@ export default function Onboarding() {
   function skip() {
     if (step === "goals") setDraft((d) => ({ ...d, goals: [], goalNote: "" }));
     if (step === "focus") setDraft((d) => ({ ...d, focus: [] }));
-    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null }));
+    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null, heartNote: "" }));
     setI((idx) => idx + 1);
   }
 
@@ -293,6 +293,13 @@ export default function Onboarding() {
                       />
                     ))}
                   </View>
+                  <TextInput
+                    style={[styles.input, styles.noteInput]}
+                    value={draft.heartNote}
+                    onChangeText={(v) => setDraft((d) => ({ ...d, heartNote: v }))}
+                    placeholder={t("onboarding.intentHeartNotePlaceholder")}
+                    placeholderTextColor={tk.textFaint}
+                  />
                 </View>
               )}
 

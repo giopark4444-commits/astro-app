@@ -171,6 +171,7 @@
     "intentRelWidowed": "En viudez",
     "intentRelComplicated": "Es complicado",
     "intentRelPrivate": "Prefiero no decirlo",
+    "intentHeartNotePlaceholder": "¿Algo que quieras compartir? (opcional)",
     "intentSkip": "Omitir",
     "cuspHint": "El límite exacto lo dirá tu carta"
   },
