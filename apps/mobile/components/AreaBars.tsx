@@ -9,6 +9,7 @@
 // desde el día uno — no se replica el bug.
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { LIFE_AREA_COLORS, type LifeArea } from "@aluna/core";
 import { useTheme } from "../lib/theme-context";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
 
@@ -18,12 +19,18 @@ export interface BarDriver {
   favorable: boolean;
 }
 export interface BarArea {
-  key: string;
+  /** LifeArea de core cuando el dato lo trae (Hoy/Horóscopo) — habilita el
+   *  tinte de modo Colorido; `string` suelto queda como fallback tipado. */
+  key: LifeArea | (string & {});
   label: string;
   score: number;
   tone: "low" | "mixed" | "high";
   toneLabel: string;
   drivers: BarDriver[];
+}
+
+function isLifeArea(k: string): k is LifeArea {
+  return k in LIFE_AREA_COLORS;
 }
 
 export function AreaBars({
@@ -37,13 +44,14 @@ export function AreaBars({
   open: string | null;
   onToggle: (key: string) => void;
 }) {
-  const { t } = useTheme();
+  const { t, paletteMode } = useTheme();
   const s = useMemo(() => makeStyles(t), [t]);
 
   return (
     <View style={s.bars}>
       {areas.map((a) => {
         const expanded = open === a.key;
+        const domainColor = paletteMode === "colorful" && isLifeArea(a.key) ? LIFE_AREA_COLORS[a.key] : null;
         return (
           <View key={a.key} style={s.bar}>
             <Pressable
@@ -56,10 +64,16 @@ export function AreaBars({
                 {a.label}
                 <Text style={s.barTone}> · {a.toneLabel}</Text>
               </Text>
-              <Text style={s.barScore}>{a.score}</Text>
+              <Text style={[s.barScore, domainColor && { color: domainColor }]}>{a.score}</Text>
             </Pressable>
             <View style={s.track}>
-              <View style={[s.fill, toneStyle(t, a.tone), { width: `${a.score}%` }]} />
+              <View
+                style={[
+                  s.fill,
+                  domainColor ? { backgroundColor: domainColor } : toneStyle(t, a.tone),
+                  { width: `${a.score}%` },
+                ]}
+              />
             </View>
             {expanded && (
               <View style={s.why}>
