@@ -343,7 +343,7 @@ export default function AjustesScreen() {
             <LinkRow
               styles={styles}
               label={SUPPORT_EMAIL}
-              onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+              onPress={() => { Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => {}); /* sin cliente de correo: silencioso */ }}
             />
             <LinkRow
               styles={styles}
@@ -364,7 +364,7 @@ export default function AjustesScreen() {
                   key={s.key}
                   styles={styles}
                   label={s.label}
-                  onPress={() => Linking.openURL(s.href)}
+                  onPress={() => { Linking.openURL(s.href).catch(() => {}); /* href malformado: silencioso */ }}
                   last={i === VISIBLE_SOCIAL_LINKS.length - 1}
                 />
               ))}

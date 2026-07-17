@@ -418,8 +418,6 @@ export const STRINGS = {
       userId: "ID de usuario",
       loginMethod: "Método de acceso",
       loginEmail: "Correo y contraseña",
-      copyId: "Copiar",
-      copied: "¡Copiado!",
       help: "Ayuda y soporte",
       askAluna: "Pregúntale a Aluna",
       followUs: "Síguenos",
@@ -433,7 +431,6 @@ export const STRINGS = {
     billing: {
       title: "Tu plan",
       freeBody: "Numerología y Carta completas, gratis para siempre.",
-      upsell: "Hazte Plus en aluna.app",
       planTrialing: "En prueba gratis",
       planActive: "Aluna Plus",
       planPastDue: "Pago pendiente",
@@ -855,8 +852,6 @@ export const STRINGS = {
       userId: "User ID",
       loginMethod: "Login method",
       loginEmail: "Email and password",
-      copyId: "Copy",
-      copied: "Copied!",
       help: "Help & support",
       askAluna: "Ask Aluna",
       followUs: "Follow us",
@@ -870,7 +865,6 @@ export const STRINGS = {
     billing: {
       title: "Your plan",
       freeBody: "Full Numerology and Birth Chart, free forever.",
-      upsell: "Go Plus at aluna.app",
       planTrialing: "Free trial",
       planActive: "Aluna Plus",
       planPastDue: "Payment overdue",
