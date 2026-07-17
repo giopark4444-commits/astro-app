@@ -15,7 +15,11 @@ import { parseBearerToken } from "./bearer";
 //    depende de la sesión. Se usa la ruta EXACTA (no el prefijo genérico
 //    "/api/webhooks") a propósito: cualquier webhook futuro bajo ese prefijo
 //    debe optar explícitamente por ser público, no heredarlo por accidente.
-const PUBLIC_PREFIXES = ["/login", "/signup", "/auth", "/api/webhooks/dodo"];
+//  - "/legal" es pública a propósito: Términos/Privacidad/Descargo deben
+//    poder leerse sin cuenta (antes de crearla, o compartidos por un enlace),
+//    mismo patrón que el webhook de arriba — la ruta declara explícitamente
+//    que quiere ser pública, no lo hereda por accidente.
+const PUBLIC_PREFIXES = ["/login", "/signup", "/auth", "/api/webhooks/dodo", "/legal"];
 
 /** True si la ruta es pública (no requiere sesión). */
 export function isPublicPath(path: string): boolean {

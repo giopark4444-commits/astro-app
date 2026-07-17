@@ -30,16 +30,6 @@
 .personaAdd { border-style: dashed; color: var(--soft); }
 .personaName { font-size: var(--text-2xs); color: var(--soft); }
 
-.prefs { display: flex; flex-direction: column; gap: var(--sp-4); order: 4; }
-.prefsTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 0; }
-
-/* "Tu plan" (billing) — no está en el mockup 06, se conserva como fila propia
-   (brief T8, adaptación consciente). Mobile: order 3 pone Plan ANTES de
-   Preferencias, restaurando el orden visual previo a R4c T8 (Plan vivía
-   dentro de la misma card, antes de los controles de tema/modo/idioma); ver
-   nota de page.tsx y el override de grid en la media query desktop. */
-.plan { order: 3; }
-
 /* — manifestaciones (la joya) — mockup docs/redesign/r4-mockups/06-cupula-topnav.html, screen 3 (.pf-manif) */
 .manifSection {} /* card global */
 .manifHead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); }
@@ -200,17 +190,13 @@
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* Retícula del mockup 06 §5: 12 columnas; hero y diario ocupan la fila
-     completa, personas(7)+preferencias(5) la siguiente, plan al fondo (T8). */
+     completa; personas (ex 7 cols) pasa a fila completa propia al perder a
+     su vecina Preferencias (ésta y Plan se mudaron a /ajustes, brief T2/T4). */
   .page {
     display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-5);
     max-width: min(1280px, calc(100% - 112px));
   }
   .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); grid-column: 1 / -1; order: 1; }
-  /* mockup 06 §5.3: la cabecera de Preferencias es eyebrow uppercase, no serif (barrido T9) */
-  .prefsTitle {
-    font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc-text);
-  }
   .identity { align-items: flex-start; flex: 1; }
   .name { font-size: 44px; }
   .sig { justify-content: flex-start; }
@@ -235,15 +221,5 @@
      (.pf-manif span 8 / .pf-notes span 4 sobre una grilla de 12). */
   .diarioGrid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-4); align-items: start; grid-column: 1 / -1; order: 2; }
 
-  .people { grid-column: span 7; order: 3; }
-
-  /* Preferencias como card compacta — bordes/fondo del .card global copiados
-     aquí a propósito (NO se añade la clase global en el markup, ver brief T8
-     Step 2) para no arrastrar el estilo de card a móvil. */
-  .prefs {
-    grid-column: span 5; order: 4;
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--sp-5);
-  }
-
-  .plan { grid-column: 1 / -1; order: 5; }
+  .people { grid-column: 1 / -1; order: 3; }
 }
