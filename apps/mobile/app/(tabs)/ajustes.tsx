@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Enso } from "../../components/Enso";
 import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
+import { DeckManager } from "../../components/deck-manager";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme, type ModePref } from "../../lib/theme-context";
@@ -320,6 +321,20 @@ export default function AjustesScreen() {
             )}
           </Card>
         </FadeIn>
+
+        {/* Tu mazo (Tarot T4, Task 6): espejo móvil de la sección homónima de
+           Ajustes web (Task 5) — grid de 78 cartas + editor de reverso. Solo
+           tiene sentido con sesión (los 5 endpoints piden Bearer); sin
+           sesión (no debería ocurrir en esta pantalla, pero por si acaso)
+           se omite entera, mismo criterio que la tarjeta de Cuenta. */}
+        {session && (
+          <FadeIn delay={135} style={styles.cardGap}>
+            <Card>
+              <Text style={styles.cardEyebrow}>{t("settings.deckTitle")}</Text>
+              <DeckManager />
+            </Card>
+          </FadeIn>
+        )}
 
         {/* Cuenta: correo, ID de usuario y método de acceso (brief ajustes-movil T2) —
            sin botón "Copiar": ni expo-clipboard ni el Clipboard viejo de react-native
