@@ -12,6 +12,7 @@ import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { TarotFlipCard } from "../../components/TarotFlipCard";
 import { TarotCeremony } from "../../components/tarot-ceremony";
+import { TarotManualEntry } from "../../components/tarot-manual-entry";
 import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
@@ -31,6 +32,7 @@ const DIARY_SPREAD_KEY: Record<string, string> = {
   daily: "tarot.diarySpreadDaily",
   three: "tarot.diarySpreadThree",
   "celtic-cross": "tarot.diarySpreadCeltic",
+  free: "tarot.diarySpreadFree",
 };
 
 type DiaryState =
@@ -67,6 +69,9 @@ export default function TarotScreen() {
   // Ceremonia "Tres cartas" (Task 4): overlay efímero — cerrarlo lo desmonta
   // y la máquina vuelve a cero, como recargar la página en la web.
   const [ceremonyOpen, setCeremonyOpen] = useState(false);
+  // Modo manual (T3): mismo criterio de overlay efímero que la ceremonia —
+  // cerrarlo lo desmonta y todo vuelve a cero.
+  const [manualOpen, setManualOpen] = useState(false);
 
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
   const [openReadingId, setOpenReadingId] = useState<string | null>(null);
@@ -187,15 +192,31 @@ export default function TarotScreen() {
   );
 
   const openReading = diary.s === "ready" ? diary.readings.find((r) => r.id === openReadingId) ?? null : null;
+  // Las lecturas guardadas (T3) pueden traer jumpers mezclados en `cards`
+  // (position "jumper-N", flag jumper:true) — el composer v2 espera la
+  // tirada principal en `cards` y los jumpers aparte en `opts.jumpers`
+  // (sin eso, labelForPosition no reconoce "jumper-N" y los muestra crudos).
+  // Espejo de apps/web/app/(app)/tarot/tarot-view.tsx:205-228.
+  const openReadingMainCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => !c.jumper) : []),
+    [openReading],
+  );
+  const openReadingJumperCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => c.jumper) : []),
+    [openReading],
+  );
   const openReadingProse = useMemo(() => {
     if (!openReading) return [];
     return composeReadingProse(
       locale === "en" ? "en" : "es",
       openReading.spread,
-      openReading.cards,
+      openReadingMainCards,
       openReading.question ?? undefined,
+      openReadingJumperCards.length > 0
+        ? { jumpers: openReadingJumperCards.map(({ cardId, reversed }) => ({ cardId, reversed })) }
+        : undefined,
     );
-  }, [openReading, locale]);
+  }, [openReading, locale, openReadingMainCards, openReadingJumperCards]);
 
   const rwsBase = `${apiUrl()}/tarot/rws`;
 
@@ -276,6 +297,15 @@ export default function TarotScreen() {
               </Card>
             </View>
           </View>
+
+          {/* Modo manual (T3): mazo físico — la persona baraja y elige ella
+              misma, en vez de la ceremonia táctil digital. */}
+          <Pressable testID="tarot-manual-entry-cta" onPress={() => setManualOpen(true)}>
+            <Card style={styles.manualCard}>
+              <Text style={styles.spreadName}>{t("tarot.manualEntry")}</Text>
+              <Text style={styles.spreadDesc}>{t("tarot.manualEntryDesc")}</Text>
+            </Card>
+          </Pressable>
         </FadeIn>
 
         {/* Diario */}
@@ -327,6 +357,12 @@ export default function TarotScreen() {
         <TarotCeremony onClose={() => setCeremonyOpen(false)} onSaved={loadDiary} />
       )}
 
+      {/* Modo manual (T3): mismo criterio de overlay efímero de pantalla
+          completa que la ceremonia digital. */}
+      {manualOpen && (
+        <TarotManualEntry onClose={() => setManualOpen(false)} onSaved={loadDiary} />
+      )}
+
       <BottomSheet open={dailySheetOpen} onClose={() => setDailySheetOpen(false)} title={dailyContent?.name}>
         {dailyProse.map((p, i) => (
           <Text key={i} style={styles.sheetParagraph}>
@@ -355,6 +391,7 @@ export default function TarotScreen() {
                 <Text key={`${c.cardId}-${c.position}`} style={styles.sheetCardLine}>
                   {content?.name ?? c.cardId}
                   {c.reversed ? ` · ${t("tarot.reversed")}` : ""}
+                  {c.jumper ? ` · ${t("tarot.manualJumpersReadingLabel")}` : ""}
                 </Text>
               );
             })}
@@ -412,6 +449,7 @@ function makeStyles(t: ThemeTokens) {
     dailyRevealBtnText: { color: t.accText, fontSize: typeScale.sm, fontFamily: fonts.sansSemi },
 
     spreadsGrid: { flexDirection: "row", gap: space.sm, width: "100%" },
+    manualCard: { gap: space.xs, alignItems: "flex-start", marginTop: space.sm, width: "100%" },
     spreadCard: { flex: 1 },
     spreadCardInner: { gap: space.xs, alignItems: "flex-start" },
     spreadDisabled: { opacity: 0.6 },

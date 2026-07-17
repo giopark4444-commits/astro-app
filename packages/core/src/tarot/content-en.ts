@@ -1343,7 +1343,10 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
 
 // composeReadingProse's fixed EN phrases and position labels. The engine
 // (composeReadingProse / composeReadingWith) lives in content-es.ts; this file
-// only exports data, same direction as the rest of this module.
+// only exports data, same direction as the rest of this module. v2 (T3): the
+// EN connective text below is written with its own sentence architecture —
+// different clause order and sentence counts from the ES originals — per the
+// lesson from T1 (Sonnet mirrors structure when it merely translates).
 const READING_POSITION_LABELS_EN: Record<string, string> = {
   day: "today",
   past: "the past",
@@ -1359,21 +1362,78 @@ const READING_POSITION_LABELS_EN: Record<string, string> = {
   outcome: "the possible outcome",
 };
 
+const READING_ORDINALS_EN: readonly string[] = [
+  "the first card",
+  "the second card",
+  "the third card",
+  "the fourth card",
+  "the fifth card",
+  "the sixth card",
+  "the seventh card",
+  "the eighth card",
+  "the ninth card",
+  "the tenth card",
+];
+
 export const DICTS_READING_EN: ReadingComposeDicts = {
   positionLabels: READING_POSITION_LABELS_EN,
+  ordinals: READING_ORDINALS_EN,
+  elementLabels: { fire: "fire", water: "water", air: "air", earth: "earth" },
   t: {
     openingWithQuestion: (question) =>
-      `You carry a question with you — "${question}" — and the cards answer not with certainty, but with mirrors.`,
-    openingDefault: () => "The cards open to show you what your soul already senses, even without words for it yet.",
-    cardParagraphs: [
-      (cardName, positionLabel, ambitText) => `In ${positionLabel}, ${cardName} speaks: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `${cardName} settles over ${positionLabel}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `Turning toward ${positionLabel}, you find ${cardName}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `${cardName} sheds its light on ${positionLabel}: ${ambitText}`,
+      `Before we begin, hold your question lightly: "${question}". What follows won't hand you a verdict — it will show you where you already stand.`,
+    openingDefault: () => "Something in you already knows why you're here. The cards simply give it a shape you can look at.",
+    climate: ({ dominantElementLabel, reversedCount, total, majorsCount }) => {
+      const sentences: string[] = [];
+      if (dominantElementLabel) {
+        sentences.push(
+          `${dominantElementLabel[0]!.toUpperCase()}${dominantElementLabel.slice(1)} runs through this spread more than any other force.`,
+        );
+      } else if (majorsCount === total) {
+        sentences.push("Major arcana carry the whole spread today.");
+      } else {
+        sentences.push("No single force leads here — the spread mixes its currents.");
+      }
+      if (reversedCount === 0) sentences.push("Not one card fell reversed.");
+      else if (reversedCount === total) sentences.push("Every card fell reversed.");
+      else sentences.push(`${reversedCount} of ${total} cards fell reversed.`);
+      return sentences.join(" ");
+    },
+    sceneParagraphs: [
+      (cardName, positionLabel, essence) => `Where ${positionLabel} sits, ${cardName} has settled in. ${essence}`,
+      (cardName, positionLabel, essence) => `For ${positionLabel}, the deck offers ${cardName}. ${essence}`,
+      (cardName, positionLabel, essence) => `${essence} That's the scene ${cardName} sets over ${positionLabel}.`,
+      (cardName, positionLabel, essence) => `${positionLabel} belongs to ${cardName} right now. ${essence}`,
     ],
+    ambitParagraphs: [
+      (ambitText, question) => (question ? `${ambitText} Hold that next to "${question}" and see how it lands.` : ambitText),
+      (ambitText, question) =>
+        question ? `${ambitText} That's already an answer to "${question}", even if it isn't the one you expected.` : ambitText,
+      (ambitText, question) =>
+        question ? `${ambitText} If "${question}" has an answer at all, this is where it starts.` : ambitText,
+    ],
+    bridgeParagraphs: [
+      (bridge) => `Astrology tells the same story from a different angle: ${bridge}`,
+      (bridge) => `${bridge} That's what holds this card up from underneath.`,
+      (bridge) => `This isn't just poetry — ${bridge}`,
+      (bridge) => `And stripped of all symbolism, it comes down to this: ${bridge}`,
+    ],
+    jumpersIntro: () =>
+      "Before the spread was even laid, a card or two jumped out of the deck on their own. Set them apart and hear them out — they came uninvited for a reason.",
+    jumperParagraphs: [
+      (cardName, essence, ambitText) =>
+        `Of everything in the deck, it was ${cardName} that couldn't stay put. ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) =>
+        `${cardName} came out before you ever reached for it — take that as insistence. ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) => `And then there's ${cardName}, arriving off-script. ${essence} ${ambitText}`,
+    ],
+    closingSuitRepeat: (elementLabel) =>
+      `One more thing before you go: count how often ${elementLabel} appeared tonight. When a single element leans on a reading this hard, it's naming the season you're in.`,
+    closingAllMajors: () =>
+      "And notice what didn't appear: not one minor card. When the majors take the whole table, life isn't asking about logistics — it's asking who you're becoming.",
     closingMostlyReversed: () =>
-      "Most of the cards landed reversed: the sky asks you to review before you advance — not as punishment, but as care.",
+      "With this many reversals on the table, take the message as \"slow down and look again\" — the cards aren't blocking your path, they're checking your footing before the climb.",
     closingNormal: () =>
-      "Weave these voices calmly: the spread doesn't decide for you, it hands back the mirror so you can decide with more clarity.",
+      "Sit with all of this a moment before you act on any of it. A spread is a conversation, not a sentence handed down — the last word is still yours.",
   },
 };

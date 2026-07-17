@@ -10,12 +10,17 @@
 // mismo criterio que EasternPayload en eastern-api.ts:4-8.
 import { apiUrl } from "./config";
 
-export type TarotSpreadId = "daily" | "three";
+// T3: extendido a celtic-cross (Plus, aún no construible desde el móvil) y
+// free (modo manual, tirada libre 1-10) — el server ya los acepta.
+export type TarotSpreadId = "daily" | "three" | "celtic-cross" | "free";
 
 export interface TarotReadingCardInput {
   cardId: string;
   reversed: boolean;
   position: string;
+  /** Cartas que saltaron del mazo al barajar (modo manual): opcional, el
+   *  server valida. Espeja TarotChatCardInput de tarot-chat-api.ts. */
+  jumper?: boolean;
 }
 
 export interface TarotReadingRow {
@@ -44,9 +49,24 @@ export interface FetchTarotDiaryResult {
 
 export class TarotApiError extends Error {
   status: number;
-  constructor(status: number) {
+  // El código del body del error (p.ej. "free_limit"), cuando la respuesta
+  // trae un JSON parseable con {error}. undefined si el body no es JSON o no
+  // trae ese shape — el llamador NUNCA debe asumir un código por el status
+  // solo (mismo 403 puede tener otras causas a futuro).
+  code: string | undefined;
+  constructor(status: number, code: string | undefined) {
     super(`tarot_${status}`);
     this.status = status;
+    this.code = code;
+  }
+}
+
+async function readErrorCode(res: Response): Promise<string | undefined> {
+  try {
+    const data = (await res.json()) as { error?: unknown };
+    return typeof data.error === "string" ? data.error : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -64,7 +84,7 @@ export async function saveTarotReading(
       deck: params.deck,
     }),
   });
-  if (!res.ok) throw new TarotApiError(res.status);
+  if (!res.ok) throw new TarotApiError(res.status, await readErrorCode(res));
   const data = (await res.json()) as { reading: TarotReadingRow };
   return data.reading;
 }
@@ -74,6 +94,6 @@ export async function fetchTarotDiary(accessToken: string): Promise<FetchTarotDi
     method: "GET",
     headers: { authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) throw new TarotApiError(res.status);
+  if (!res.ok) throw new TarotApiError(res.status, await readErrorCode(res));
   return (await res.json()) as FetchTarotDiaryResult;
 }

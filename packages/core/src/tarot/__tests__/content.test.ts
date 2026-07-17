@@ -25,7 +25,7 @@ describe("contenido tarot", () => {
   });
 });
 
-describe("composeReadingProse", () => {
+describe("composeReadingProse (v2: prosa de sesión real)", () => {
   const threeCards = [
     { cardId: "fool", reversed: false, position: "past" },
     { cardId: "magician", reversed: false, position: "present" },
@@ -65,21 +65,116 @@ describe("composeReadingProse", () => {
     expect(closing).toMatch(/revisar/i);
   });
 
-  it("conectores variados: los 3 párrafos de carta de una tirada three no comparten arranque (ES y EN)", () => {
+  it("por carta: cada carta aporta al menos 2 párrafos propios (escena + ámbito, con puente) — three sin opts = 12 párrafos", () => {
+    const paras = composeReadingProse("es", "three", threeCards);
+    // [apertura, clima, (escena,ámbito,puente)x3, cierre] = 2 + 9 + 1
+    expect(paras.length).toBe(12);
+  });
+
+  it("los párrafos de escena de una tirada three no comparten arranque (ES y EN)", () => {
     for (const locale of ["es", "en"] as const) {
       const paras = composeReadingProse(locale, "three", threeCards);
-      // paras = [apertura, carta1, carta2, carta3, cierre]
-      expect(paras.length).toBe(5);
-      const cardParas = paras.slice(1, 4);
-      const starts = cardParas.map((p) => p.slice(0, 10));
-      expect(new Set(starts).size, `${locale}: ${starts.join(" | ")}`).toBe(3);
+      // índices de escena: 2 (apertura+clima), luego cada carta ocupa 3 slots
+      const sceneStarts = [paras[2]!.slice(0, 12), paras[5]!.slice(0, 12), paras[8]!.slice(0, 12)];
+      expect(new Set(sceneStarts).size, `${locale}: ${sceneStarts.join(" | ")}`).toBe(3);
     }
   });
 
-  it("daily produce al menos 2 párrafos", () => {
-    const paras = composeReadingProse("es", "daily", [
-      { cardId: "sun", reversed: false, position: "day" },
-    ]);
+  it("daily produce al menos 2 párrafos y NO trae clima (una sola carta no tiene mayoría que leer)", () => {
+    const paras = composeReadingProse("es", "daily", [{ cardId: "sun", reversed: false, position: "day" }]);
     expect(paras.length).toBeGreaterThanOrEqual(2);
+    expect(paras.some((p) => /domina|mayoría/i.test(p))).toBe(false);
+  });
+
+  it("clima: 3 bastos concentrados en una tirada de 3 cartas → 'domina el fuego' (ES)", () => {
+    const allWands = [
+      { cardId: "wands-01", reversed: false, position: "past" },
+      { cardId: "wands-05", reversed: false, position: "present" },
+      { cardId: "wands-king", reversed: false, position: "future" },
+    ];
+    const paras = composeReadingProse("es", "three", allWands);
+    expect(paras.join(" ")).toMatch(/domina el fuego/i);
+  });
+
+  it("clima: 3 copas concentradas → menciona 'water' en EN con estructura propia (2 oraciones, no espejo de ES)", () => {
+    const allCups = [
+      { cardId: "cups-01", reversed: false, position: "past" },
+      { cardId: "cups-05", reversed: false, position: "present" },
+      { cardId: "cups-king", reversed: false, position: "future" },
+    ];
+    const parasEs = composeReadingProse("es", "three", allCups);
+    const parasEn = composeReadingProse("en", "three", allCups);
+    const climateEs = parasEs[1]!;
+    const climateEn = parasEn[1]!;
+    expect(climateEn).toMatch(/water/i);
+    // ES compone el clima en 1 sola oración (todo antes del único punto final);
+    // EN lo compone en 2 oraciones — arquitecturas distintas, no traducción espejo.
+    expect((climateEs.match(/\./g) ?? []).length).toBe(1);
+    expect((climateEn.match(/\./g) ?? []).length).toBe(2);
+  });
+
+  it("sin mayoría de menores del mismo palo (mezcla), el clima no menciona un elemento dominante", () => {
+    const mixed = [
+      { cardId: "wands-01", reversed: false, position: "past" },
+      { cardId: "cups-01", reversed: false, position: "present" },
+      { cardId: "swords-01", reversed: false, position: "future" },
+    ];
+    const paras = composeReadingProse("es", "three", mixed);
+    expect(paras[1]).not.toMatch(/domina el/i);
+  });
+
+  it("jumpers: solo aparecen si vienen en opts — con jumper, sección propia con el nombre del jumper", () => {
+    const withJumper = composeReadingProse("es", "three", threeCards, undefined, {
+      jumpers: [{ cardId: "tower", reversed: false }],
+    });
+    const joined = withJumper.join(" ");
+    expect(joined).toContain(TAROT_CARDS_ES.tower!.name);
+    expect(joined).toMatch(/saltaron/i);
+  });
+
+  it("jumpers: sin opts (retrocompat), no aparece ninguna sección de jumpers", () => {
+    const noOpts = composeReadingProse("es", "three", threeCards);
+    expect(noOpts.join(" ")).not.toMatch(/saltaron/i);
+    const emptyJumpers = composeReadingProse("es", "three", threeCards, undefined, { jumpers: [] });
+    expect(emptyJumpers.join(" ")).not.toMatch(/saltaron/i);
+  });
+
+  it("jumpers en EN: sección propia con estructura distinta a ES (spot: frase distinta, no traducción)", () => {
+    const withJumper = composeReadingProse("en", "three", threeCards, undefined, {
+      jumpers: [{ cardId: "tower", reversed: true }],
+    });
+    const joined = withJumper.join(" ");
+    expect(joined).toContain(TAROT_CARDS_EN.tower!.name);
+    expect(joined).toMatch(/jumped/i);
+  });
+
+  it("tirada libre (positions free-N): usa ordinales, no roles ni la clave cruda", () => {
+    const free = [
+      { cardId: "fool", reversed: false, position: "free-1" },
+      { cardId: "magician", reversed: false, position: "free-2" },
+    ];
+    const parasEs = composeReadingProse("es", "free", free);
+    const parasEn = composeReadingProse("en", "free", free);
+    expect(parasEs.join(" ")).toMatch(/primera carta/i);
+    expect(parasEs.join(" ")).not.toMatch(/free-1/);
+    expect(parasEn.join(" ")).toMatch(/first card/i);
+    expect(parasEn.join(" ")).not.toMatch(/free-1/);
+  });
+
+  it("todas mayores (2+): el cierre lo señala", () => {
+    const allMajors = [
+      { cardId: "fool", reversed: false, position: "past" },
+      { cardId: "magician", reversed: false, position: "present" },
+    ];
+    const paras = composeReadingProse("es", "three", allMajors);
+    expect(paras[paras.length - 1]).toMatch(/arcanos mayores/i);
+  });
+
+  it("EN no es calco estructural de ES: al menos una plantilla de escena EN invierte el orden (essence antes que la atribución de carta+posición)", () => {
+    // ES siempre antepone posición+nombre a la escena (essence al final). La
+    // 3ª plantilla EN hace lo opuesto: essence primero, "That's the scene…"
+    // como cierre — una estructura de oración que ES no usa en ningún índice.
+    const paras = composeReadingProse("en", "three", threeCards);
+    expect(paras.join(" ")).toMatch(/That's the scene/);
   });
 });
