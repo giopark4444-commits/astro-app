@@ -64,6 +64,11 @@
     "loginEmail": "Email & password",
     "copyId": "Copy",
     "copied": "Copied!",
+    "referralPrompt": "Have a referral code?",
+    "referralPlaceholder": "CODE",
+    "referralApply": "Apply",
+    "referralApplying": "Applying…",
+    "referralAppliedLabel": "Referral code applied",
     "help": "Help & support",
     "followUs": "Follow us",
     "legal": "Legal"

@@ -10,6 +10,7 @@ import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
 import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
+import { ReferralRedeem } from "./referral-redeem";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -67,6 +68,18 @@ export default async function AjustesPage({
 
   const visibleSocialLinks = SOCIAL_LINKS.filter((s) => s.href);
 
+  // Código de referido ya aplicado (si lo hay) — RLS de referred_users (0016)
+  // ya acota el select a la fila propia, así que se puede leer directo acá.
+  // try/catch: la migración 0016 puede no estar aplicada todavía (dev) y eso
+  // nunca debe tumbar /ajustes (mismo patrón que subRow/intentRow arriba).
+  let referredCode: string | null = null;
+  try {
+    const { data: referredRow } = await supabase.from("referred_users").select("code").eq("user_id", user.id).maybeSingle();
+    referredCode = (referredRow as { code: string } | null)?.code ?? null;
+  } catch {
+    // tabla sin aplicar todavía: referredCode queda null (input visible).
+  }
+
   return (
     <main className={styles.page}>
       <section className="card">
@@ -99,6 +112,7 @@ export default async function AjustesPage({
           <span className={styles.rowLabel}>{t("loginMethod")}</span>
           <span className={styles.rowValue}>{loginMethodLabel}</span>
         </div>
+        <ReferralRedeem appliedCode={referredCode} />
       </section>
 
       <section className="card">

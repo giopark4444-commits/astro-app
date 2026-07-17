@@ -64,6 +64,11 @@
     "loginEmail": "Correo y contraseña",
     "copyId": "Copiar",
     "copied": "¡Copiado!",
+    "referralPrompt": "¿Tienes un código de referido?",
+    "referralPlaceholder": "CÓDIGO",
+    "referralApply": "Aplicar",
+    "referralApplying": "Aplicando…",
+    "referralAppliedLabel": "Código de referido aplicado",
     "help": "Ayuda y soporte",
     "followUs": "Síguenos",
     "legal": "Legal"
