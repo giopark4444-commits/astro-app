@@ -80,8 +80,15 @@
   animation: wheelBloom var(--bodies-dur) var(--ease-spring) both;
   animation-delay: calc(var(--bodies-delay) + var(--i, 0) * var(--bodies-stagger));
 }
-[data-ceremony] .aspects {
-  animation: wheelBloom var(--aspects-dur) var(--ease) both; animation-delay: var(--aspects-delay);
+/* Aspectos: cada línea usa el .draw-in global (pathLength=1 + stroke-dashoffset,
+   ver globals.css) en vez del bloom grupal que había antes — así se ven
+   TRAZADAS una a una, no todas encendiéndose a la vez. El delay base
+   (--aspects-delay) lo calcula chart-wheel.tsx a partir del ritmo real de
+   "bodies" para que arranquen cuando el último planeta ya apareció; el
+   stagger por línea (--aspects-stagger) es más denso que el default de
+   .draw-in (45ms) porque puede haber 20-30 aspectos. */
+[data-ceremony] .aspects :global(.draw-in) {
+  animation-delay: calc(var(--aspects-delay, 0ms) + var(--i, 0) * var(--aspects-stagger, 18ms));
 }
 
 .tapHint { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); margin: var(--sp-1) 0 var(--sp-4); } /* 6→sp-1 empate (apoyo) */
@@ -105,9 +112,14 @@
 .barRow { display: grid; grid-template-columns: 92px 1fr 18px; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-1); } /* 5→sp-1 nearest */
 .barLabel { font-size: var(--text-2xs); color: var(--ink); }
 .barTrack { height: 8px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+/* transition (width) sigue viva para cambios POSTERIORES (cambiar de carta) —
+   la entrada inicial la maneja .bar-fill-in (global, aluna-bar-fill 0→width,
+   ver globals.css). No se pisan: la animación de montaje termina y le
+   devuelve el control a la cascada, ahí la transition toma los cambios
+   siguientes. Sin doble efecto. */
 .barFill { display: block; height: 100%; border-radius: 5px; background: rgba(var(--acc-rgb), 0.4); transition: width var(--dur) var(--ease); }
 .barDom { background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.7)); }
-.barN { font-size: var(--text-2xs); color: var(--soft); text-align: right; }
+.barN { font-size: var(--text-2xs); color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ---- Toggle Modo Pro ---- */
 .proToggle {
