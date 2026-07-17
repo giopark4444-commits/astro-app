@@ -206,6 +206,11 @@
     max-width: min(1280px, calc(100% - 112px));
   }
   .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); grid-column: 1 / -1; order: 1; }
+  /* mockup 06 §5.3: la cabecera de Preferencias es eyebrow uppercase, no serif (barrido T9) */
+  .prefsTitle {
+    font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc-text);
+  }
   .identity { align-items: flex-start; flex: 1; }
   .name { font-size: 44px; }
   .sig { justify-content: flex-start; }

@@ -242,7 +242,7 @@
   .h1 { text-align: center; font-style: normal; font-size: 38px; margin-top: 6px; } /* mockup 38px/600 */
   .eyebrow { display: block; text-align: center; }
   .kindRow { display: inline-flex; margin: 14px auto var(--sp-4); } /* mockup .seg centrado */
-  .kindBtn { font-family: var(--font-ui); font-size: var(--text-sm); padding: 9px 24px; } /* mockup .seg button */
+  .kindBtn { font-family: var(--font-ui); font-size: var(--text-sm); padding: 9px 24px; white-space: nowrap; } /* mockup .seg button — nowrap: "Rev. Solar" partía en 2 líneas (barrido T9) */
   .kindHint { display: none; } /* el mockup no lleva hint bajo el seg */
   .wrapKind { display: flex; justify-content: center; } /* wrapper para centrar el inline-flex */
   /* rueda dentro de panel (mockup .wheel-card) */

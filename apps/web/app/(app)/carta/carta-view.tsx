@@ -237,13 +237,17 @@ export function CartaView() {
               </p>
 
               {ready.chart.patterns.length > 0 && (
-                <div className={`${styles.chips} ${styles.coreExtra}`}>
-                  {ready.chart.patterns.map((p, i) => (
-                    <span key={i} className={`chip ${styles.chip}`}>
-                      {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
-                    </span>
-                  ))}
-                </div>
+                <>
+                  {/* mockup 06 §4.4: los patrones llevan su rótulo PATRONES (barrido T9) */}
+                  <h3 className={`${styles.cardH} ${styles.coreExtra}`}>{t("patterns")}</h3>
+                  <div className={`${styles.chips} ${styles.coreExtra}`}>
+                    {ready.chart.patterns.map((p, i) => (
+                      <span key={i} className={`chip ${styles.chip}`}>
+                        {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
+                      </span>
+                    ))}
+                  </div>
+                </>
               )}
 
               <p className={styles.coreHint}>{t("coreHint")}</p>

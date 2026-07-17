@@ -5,7 +5,7 @@
   "auth": { "login": "Log in", "signup": "Sign up", "email": "Email", "password": "Password", "logout": "Log out", "noAccount": "No account yet?", "haveAccount": "Already have an account?", "errEmail": "Invalid email", "errPassword": "Password must be at least 8 characters", "errAuth": "Incorrect email or password", "confirmEmail": "Check your email to confirm your account", "forgotPassword": "Forgot your password?", "forgotTitle": "Let's find your way back", "forgotBody": "Tell us your email and we'll send you a link to set a new password.", "sendResetLink": "Send reset link", "resetLinkSent": "If that email has an account, a link is on its way. Check your inbox.", "resetTitle": "Set a new password", "newPassword": "New password", "confirmPassword": "Confirm password", "updatePassword": "Update password", "resetSuccess": "Your password is updated. Log in with your new key.", "errResetLink": "This link is invalid or has expired. Ask for a new one.", "errPasswordMatch": "Passwords don't match", "backToLogin": "Back to log in" },
   "settings": { "title": "Settings", "lightMode": "Light mode", "light": "Light", "dark": "Dark", "auto": "Auto", "theme": "Theme", "language": "Language", "observatory": "Observatory", "aurora": "Aurora", "cosmic": "Cosmic" },
   "hoy": {
-    "greeting": "Hi",
+    "greeting": "Hi,",
     "weatherSub": "Today's sky over you — your soul's weather.",
     "weatherLink": "See it on the chart",
     "lenses": "Your lenses",
