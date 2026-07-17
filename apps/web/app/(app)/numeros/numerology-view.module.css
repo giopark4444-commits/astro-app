@@ -29,9 +29,29 @@
   box-shadow: 0 0 36px rgba(var(--acc-rgb), 0.16), inset 0 0 28px rgba(var(--acc-rgb), 0.08);
 }
 .ring::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; border: 1px dashed rgba(var(--acc-rgb), 0.35); }
+/* El alma es lenta y suave: el anillo entra con un fade+escala sutil, mismos
+   1200ms que la ignición del héroe adentro — un solo gesto coordinado.
+   Solo transform/opacity (regla global de globals.css §Movimiento de Aluna). */
+@keyframes numRingIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+.ringIn { animation: numRingIn 1200ms var(--ease-soft) both; }
+@media (prefers-reduced-motion: reduce) {
+  .ringIn { opacity: 1; transform: none; }
+}
 .heroN {
   font-family: var(--font-display); font-weight: 600; font-size: var(--display); line-height: 1; /* héroe 66→60 (tabla del plan; vara mockup web-numeros) */
   color: var(--acc-text); animation: aluna-glow 4.5s var(--ease-soft) infinite;
+}
+/* Ignición del héroe: mayor especificidad que .heroN y .ignite solos (ambos
+   0,1,0; el módulo carga después de globals.css así que .heroN ganaría el
+   shorthand `animation` completo y mataría la ignición). Se encadenan los
+   dos keyframes en un solo shorthand: ignite corre una vez (0→1200ms) y el
+   glow ambiental arranca justo después via animation-delay, ya instalado.
+   :global(.ignite) porque la clase viene de globals.css — sin él, CSS Modules
+   escala `.ignite` al módulo y el selector jamás matchea (bug cazado en la
+   verificación en vivo). */
+.heroN:global(.ignite) {
+  animation: aluna-ignite 1200ms var(--ease-soft) both,
+    aluna-glow 4.5s var(--ease-soft) 1200ms infinite;
 }
 .pill {
   margin-top: var(--sp-3); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; /* 9.5→11 piso */

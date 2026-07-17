@@ -1,6 +1,18 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AreaBars, type BarArea } from "../area-bars";
+
+// El score usa useCountUp (0→valor animado por rAF); en jsdom sin frames
+// reales lo simple y honesto es forzar prefers-reduced-motion, con lo que el
+// hook devuelve el target de inmediato (mismo patrón que
+// lib/motion/__tests__/use-count-up.test.tsx).
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (q: string) => ({
+    matches: q.includes("prefers-reduced-motion"),
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+});
 
 const AREAS: BarArea[] = [
   {
@@ -38,5 +50,13 @@ describe("AreaBars", () => {
     // re-render with a NEW areas array reference (simulating fresh fetched data) but same `open` prop
     rerender(<AreaBars areas={[...AREAS]} calmText="Cielo en calma" open="money" onToggle={() => {}} />);
     expect(screen.getByText(/Júpiter recorre tu casa 2 solar/)).toBeInTheDocument();
+  });
+  it("cada fill lleva la clase global bar-fill-in (llenado animado al montar)", () => {
+    render(<AreaBars areas={AREAS} calmText="Cielo en calma" open={null} onToggle={() => {}} />);
+    const fills = document.querySelectorAll(".bar-fill-in");
+    expect(fills).toHaveLength(AREAS.length);
+    fills.forEach((el, i) => {
+      expect((el as HTMLElement).style.width).toBe(`${AREAS[i]!.score}%`);
+    });
   });
 });

@@ -60,10 +60,44 @@ button { font-family: inherit; }
 }
 @keyframes aluna-spin-slow { to { transform: rotate(360deg); } }
 
+/* --- Animaciones de carga (2026-07-17) ---------------------------------
+   Excepción documentada a "solo transform/opacity": aluna-bar-fill anima
+   width porque scaleX deforma el border-radius de las barras durante el
+   tramo — y el repo ya aceptó transition de width en .barFill (carta).
+   Corre UNA vez al montar sobre elementos pequeños; costo negligible. */
+@keyframes aluna-bar-fill { from { width: 0; } }
+
+/* Ignición: un número que se enciende de menor a mayor brillo y se
+   estabiliza — pasa por un pico de glow y asienta en su estado normal.
+   El VALOR nunca cambia (no es un contador); solo la luz. */
+@keyframes aluna-ignite {
+  from { opacity: 0.18; text-shadow: 0 0 0 rgba(var(--acc-rgb), 0); }
+  55%  { opacity: 0.75; text-shadow: 0 0 26px rgba(var(--acc-rgb), 0.65); }
+  80%  { opacity: 1; text-shadow: 0 0 34px rgba(var(--acc-rgb), 0.75); }
+  to   { opacity: 1; text-shadow: 0 0 14px rgba(var(--acc-rgb), 0.3); }
+}
+
+/* Trazo SVG que se dibuja (aspectos de la carta): requiere pathLength="1"
+   en el elemento para que el dash sea independiente de la longitud real. */
+@keyframes aluna-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Duración compartida barra+contador: el fill de la barra y el count-up del
+   número usan EL MISMO reloj para leerse como un solo gesto (useCountUp
+   exporta COUNT_UP_MS = 900ms — mantener en sync a mano). */
+:root { --dur-count: 900ms; }
+
 /* Reveal escalonado: pon style={{ "--i": n }} en cada hijo. */
 .reveal { opacity: 0; animation: aluna-reveal var(--dur) var(--ease) both;
   animation-delay: calc(var(--i, 0) * 70ms); }
 .fade-in { animation: aluna-fade var(--dur) var(--ease-soft) both; }
+/* Barra que se llena al montar (el width final viene del style inline). */
+.bar-fill-in { animation: aluna-bar-fill var(--dur-count) var(--ease) both; }
+/* Número que se enciende: --i escalona igual que .reveal. */
+.ignite { animation: aluna-ignite 1200ms var(--ease-soft) both;
+  animation-delay: calc(var(--i, 0) * 90ms); }
+/* Trazo que se dibuja: --i escalona; requiere pathLength="1" (ver arriba). */
+.draw-in { stroke-dasharray: 1; animation: aluna-draw 700ms var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 45ms); }
 
 /* ----------------------------------------------------------------
    R3: primitivo .card — base + 4 modificadores. Semilla: la antigua
@@ -186,4 +220,6 @@ button { font-family: inherit; }
     transition-delay: 0s !important;
   }
   .reveal { opacity: 1; }
+  .ignite { opacity: 1; }
+  .draw-in { stroke-dasharray: none; }
 }

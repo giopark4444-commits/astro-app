@@ -4,7 +4,6 @@ import {
   PLANETS,
   WHEEL,
   WHEEL_CEREMONY,
-  WHEEL_CEREMONY_ASPECTS,
   pointAt,
   annularSector,
   spreadBodies,
@@ -48,9 +47,11 @@ const CEREMONY_STYLE = {
   ["--bodies-delay" as string]: `${CEREMONY_BODIES.delayMs}ms`,
   ["--bodies-dur" as string]: `${CEREMONY_BODIES.durationMs}ms`,
   ["--bodies-stagger" as string]: `${CEREMONY_BODIES.staggerMs}ms`,
-  ["--aspects-delay" as string]: `${WHEEL_CEREMONY_ASPECTS.delayMs}ms`,
-  ["--aspects-dur" as string]: `${WHEEL_CEREMONY_ASPECTS.durationMs}ms`,
 };
+// ms extra por línea de aspecto al TRAZARSE (draw-in global, ver globals.css)
+// — más denso que el 45ms por defecto de .draw-in porque puede haber 20-30
+// aspectos y no queremos que el barrido se sienta interminable.
+const ASPECT_DRAW_STAGGER_MS = 18;
 
 export function ChartWheel({
   chart,
@@ -69,6 +70,19 @@ export function ChartWheel({
   const houseOpacity = solar ? 0.28 : 1;
   // style con --i solo bajo ceremonia: en estático no debe cambiar el markup.
   const iVar = (i: number) => (animated ? { ["--i" as string]: i } : undefined);
+  // Los aspectos se DIBUJAN (trazo progresivo) recién cuando el último cuerpo
+  // termina de aparecer — calculado del propio ritmo de "bodies" en vez de
+  // WHEEL_CEREMONY_ASPECTS.delayMs (que los sincroniza CON los cuerpos): así
+  // el ojo primero ve los planetas y luego las líneas que los conectan.
+  const bodiesEndMs =
+    CEREMONY_BODIES.delayMs + Math.max(0, chart.bodies.length - 1) * CEREMONY_BODIES.staggerMs + CEREMONY_BODIES.durationMs;
+  const wheelStyle = animated
+    ? {
+        ...CEREMONY_STYLE,
+        ["--aspects-delay" as string]: `${bodiesEndMs}ms`,
+        ["--aspects-stagger" as string]: `${ASPECT_DRAW_STAGGER_MS}ms`,
+      }
+    : undefined;
 
   return (
     <svg
@@ -77,7 +91,7 @@ export function ChartWheel({
       role="img"
       aria-label="Rueda de la carta astral"
       data-ceremony={animated ? "" : undefined}
-      style={animated ? CEREMONY_STYLE : undefined}
+      style={wheelStyle}
     >
       {/* anillos base */}
       <circle cx={CX} cy={CY} r={R_SIGN_OUT} className={styles.ring} pathLength={1} />
@@ -153,7 +167,17 @@ export function ChartWheel({
           const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
           const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
           return (
-            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} pathLength={1} />
+            <line
+              key={i}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke={HARMONY_STROKE[asp.harmony]}
+              pathLength={1}
+              className={animated ? "draw-in" : undefined}
+              style={iVar(i)}
+            />
           );
         })}
       </g>

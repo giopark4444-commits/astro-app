@@ -6,6 +6,7 @@ import {
   type ChartResult, type BodyPosition, type HouseSystem, type Zodiac, type Aspect,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
+import { useCountUp } from "@/lib/motion/use-count-up";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeBodyReading as composeReadingEs } from "@/lib/content/astrology-readings-es";
 import { composeBodyReading as composeReadingEn } from "@/lib/content/astrology-readings-en";
@@ -426,7 +427,8 @@ function BigCard({ glyph, name, sign, signGlyph, sub, dignity, dignityKey, dim }
   );
 }
 
-function Balance({ title, entries, dominant, dominantLabel }: {
+// exportado para test unitario aislado (ver __tests__/carta-balance.test.tsx)
+export function Balance({ title, entries, dominant, dominantLabel }: {
   title: string; entries: Array<{ k: string; label: string; n: number }>;
   dominant: string; dominantLabel: string;
 }) {
@@ -435,14 +437,33 @@ function Balance({ title, entries, dominant, dominantLabel }: {
     <div className={styles.balance}>
       <h4 className={styles.balanceH}>{title}</h4>
       {entries.map((e) => (
-        <div key={e.k} className={styles.barRow}>
-          <span className={styles.barLabel}>{e.label}{e.k === dominant ? ` · ${dominantLabel}` : ""}</span>
-          <span className={styles.barTrack}>
-            <span className={`${styles.barFill} ${e.k === dominant ? styles.barDom : ""}`} style={{ width: `${(e.n / max) * 100}%` }} />
-          </span>
-          <span className={styles.barN}>{e.n}</span>
-        </div>
+        <BalanceRow key={e.k} entry={e} max={max} dominant={dominant} dominantLabel={dominantLabel} />
       ))}
+    </div>
+  );
+}
+
+// Fila propia: useCountUp vive por entrada (Sol/Luna aparte no aplica acá,
+// pero cada elemento/modalidad cuenta de forma independiente). El fill de la
+// barra (.bar-fill-in, global) y el conteo del número comparten reloj
+// (--dur-count / COUNT_UP_MS, ambos 900ms) para leerse como un solo gesto —
+// arrancan juntos, sin escalonar entre filas: son 4 barras chicas, no la
+// rueda; escalonarlas se sentía más "carga en progreso" que "el alma
+// respira", así que quedan sincronizadas (decisión propia, documentada).
+function BalanceRow({ entry: e, max, dominant, dominantLabel }: {
+  entry: { k: string; label: string; n: number }; max: number; dominant: string; dominantLabel: string;
+}) {
+  const count = useCountUp(e.n);
+  return (
+    <div className={styles.barRow}>
+      <span className={styles.barLabel}>{e.label}{e.k === dominant ? ` · ${dominantLabel}` : ""}</span>
+      <span className={styles.barTrack}>
+        <span
+          className={`${styles.barFill} bar-fill-in ${e.k === dominant ? styles.barDom : ""}`}
+          style={{ width: `${(e.n / max) * 100}%` }}
+        />
+      </span>
+      <span className={styles.barN}>{count}</span>
     </div>
   );
 }

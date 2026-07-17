@@ -25,6 +25,22 @@
   color: var(--soft); font-weight: 700;
 }
 .char { font-size: var(--text-3xl); line-height: 1.1; font-weight: 600; }
+/* Ignición local de los hanzi grandes: el global `.ignite` (globals.css) usa
+   glow DORADO fijo (--acc-rgb), que pelea con el color propio de cada
+   elemento Wu Xing (.el_wood/.el_fire/… arriba, dominio intocable) — un
+   fuego rojo brillando en dorado se lee sucio. Variante local: mismos 4
+   pasos y timing que aluna-ignite, pero el glow usa currentColor (hereda
+   el color Wu Xing del span). Stagger vía --i, mismo mecanismo (90ms/paso). */
+@keyframes charIgnite {
+  from { opacity: 0.18; text-shadow: 0 0 0 transparent; }
+  55%  { opacity: 0.75; text-shadow: 0 0 26px currentColor; }
+  80%  { opacity: 1; text-shadow: 0 0 34px currentColor; }
+  to   { opacity: 1; text-shadow: 0 0 14px currentColor; }
+}
+.charIgnite {
+  animation: charIgnite 1200ms var(--ease-soft) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
 .roman {
   font-family: var(--font-ui); font-size: var(--text-2xs); line-height: 1.1;
   color: var(--soft); opacity: 0.85; margin-top: -3px; /* excepción: ajuste fino negativo de línea base, sin token negativo en la escala */
@@ -49,7 +65,11 @@
 .elRow { display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: var(--sp-3); } /* 10→sp-3 empate, vara: mockup .bal-row gap */
 .elName { font-size: var(--text-sm); color: var(--ink); }
 .elTrack { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
-.elBar { display: block; height: 100%; border-radius: 999px; transition: width var(--dur) var(--ease-spring); }
+/* Sin `transition: width`: el fill entra vía `.bar-fill-in` (globals.css,
+   anima width 0→target al montar en el MISMO reloj que el useCountUp del
+   número — --dur-count) — una transition en paralelo produciría doble
+   animación (jank al final del fill). */
+.elBar { display: block; height: 100%; border-radius: 999px; }
 .elCount { font-size: var(--text-xs); color: var(--soft); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ---- Modo Pro: interruptor (consistente con la carta) ---- */
@@ -265,4 +285,16 @@
      del media) todas se ven apiladas, igual que hoy. */
   .readCol .pane { display: none; }
   .readCol .paneOn { display: block; }
+}
+
+/* Entrada sobria al montar (Task 4): la lámina Pro y el riel de tabs verticales
+   usan el `.reveal` global (globals.css) directo en el JSX — sin --i explícito
+   caen en el default (--i: 0, sin delay), que es lo pedido ("simple", sin
+   escalonar más que los pilares/hanzi de arriba). */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Extra safety para la variante local de ignición (mismo criterio que
+     `.ignite` en globals.css: con animation-duration casi cero la keyframe
+     "to" ya deja opacity:1, pero fijarlo explícito evita cualquier flash). */
+  .charIgnite { opacity: 1; }
 }

@@ -70,7 +70,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
   const pane = (key: PilaresTab) => `${styles.pane ?? ""} ${tab === key ? (styles.paneOn ?? "") : ""}`;
 
   return (
-    <div className={styles.lamina} data-pro={pro || undefined}>
+    <div className={`${styles.lamina} reveal`} data-pro={pro || undefined}>
       {!data.timeKnown && <p className={styles.note}>{t("pilares.threePillarsNote")}</p>}
 
       {/* Na Yin */}

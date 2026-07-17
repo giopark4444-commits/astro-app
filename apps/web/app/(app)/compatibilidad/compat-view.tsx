@@ -13,6 +13,7 @@ import { useProfiles, type BirthProfile } from "@/lib/profiles/profiles-provider
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { useCountUp } from "@/lib/motion/use-count-up";
 import styles from "./compat.module.css";
 
 const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifos
@@ -83,6 +84,11 @@ export function CompatView() {
   const personA = profiles.find((p) => p.id === idA);
   const personB = profiles.find((p) => p.id === idB);
   const canCompare = !!idA && !!idB && idA !== idB;
+
+  // Hook llamado SIEMPRE (nunca condicional, aunque el JSX de abajo tenga un
+  // early return) — target 0 mientras no hay resultado; al llegar `ready`
+  // cuenta 0→overall sincronizado con el fill de las barras.
+  const displayOverall = useCountUp(state.s === "ready" ? state.data.overall : 0);
 
   // Cambiar la selección invalida el resultado mostrado (evita leer un vínculo viejo).
   function pick(which: "a" | "b", id: string) {
@@ -216,7 +222,7 @@ export function CompatView() {
                 {initial(personB?.name ?? "")}
               </span>
             </div>
-            <span className={styles.score}>{state.data.overall}</span>
+            <span className={styles.score}>{displayOverall}</span>
             <span className={styles.scoreSub}>{t(OVERALL_KEY[state.data.tone])}</span>
           </section>
 
@@ -224,62 +230,17 @@ export function CompatView() {
             {THEME_ORDER.map((key, i) => {
               const theme = state.data.themes.find((x) => x.key === key);
               if (!theme) return null;
-              const expanded = open === key;
-              const isGrowth = key === "growth";
-              const fillClass = isGrowth
-                ? styles[`growth_${theme.tone}`]
-                : styles[`tone_${theme.tone}`];
               return (
-                <div
+                <ThemeBarRow
                   key={key}
-                  className={`${styles.bar} reveal`}
-                  style={{ ["--i" as string]: 1 + i }}
-                >
-                  <button
-                    type="button"
-                    className={styles.barHead}
-                    onClick={() => setOpen(expanded ? null : key)}
-                    aria-expanded={expanded}
-                  >
-                    <span className={styles.barLabel}>{t(THEME_LABEL[key])}</span>
-                    <span className={styles.barScore}>{theme.score}</span>
-                  </button>
-                  <div className={styles.track}>
-                    <span
-                      className={`${styles.fill} ${fillClass ?? ""}`}
-                      style={{ width: `${theme.score}%` }}
-                      role="img"
-                      aria-label={t(TONE_KEY[theme.tone])}
-                    />
-                  </div>
-                  {expanded && (
-                    <div className={styles.why}>
-                      <p className={styles.barHint}>{t(THEME_HINT[key])}</p>
-                      {theme.drivers.length === 0 ? (
-                        <span className={styles.calm}>{t("noDrivers")}</span>
-                      ) : (
-                        theme.drivers.map((d, j) => {
-                          const cls = isGrowth
-                            ? styles.growthDriver
-                            : d.favorable
-                              ? styles.fav
-                              : styles.tense;
-                          return (
-                            <span key={j} className={`${styles.driver} ${cls}`}>
-                              <span className={styles.driverGlyphs}>
-                                {PLANET_GLYPH[d.a]} {ASPECT_GLYPHS[d.aspect]} {PLANET_GLYPH[d.b]}
-                              </span>
-                              <span className={styles.driverText}>
-                                {L.bodies[d.a]} {L.aspects[d.aspect]} {t("aspectBridge")}{" "}
-                                {L.bodies[d.b]}
-                              </span>
-                            </span>
-                          );
-                        })
-                      )}
-                    </div>
-                  )}
-                </div>
+                  themeKey={key}
+                  theme={theme}
+                  index={i}
+                  expanded={open === key}
+                  onToggle={() => setOpen(open === key ? null : key)}
+                  t={t}
+                  L={L}
+                />
               );
             })}
           </div>
@@ -290,6 +251,68 @@ export function CompatView() {
         </>
       )}
     </main>
+  );
+}
+
+/** Fila de barra de tema — separada de CompatView porque useCountUp es un
+ *  hook y no puede llamarse dentro del .map() del padre (reglas de hooks). */
+function ThemeBarRow({
+  themeKey,
+  theme,
+  index,
+  expanded,
+  onToggle,
+  t,
+  L,
+}: {
+  themeKey: SynastryTheme;
+  theme: SynastryThemeScore;
+  index: number;
+  expanded: boolean;
+  onToggle: () => void;
+  t: ReturnType<typeof useTranslations>;
+  L: ReturnType<typeof astroLabels>;
+}) {
+  const displayScore = useCountUp(theme.score);
+  const isGrowth = themeKey === "growth";
+  const fillClass = isGrowth ? styles[`growth_${theme.tone}`] : styles[`tone_${theme.tone}`];
+  return (
+    <div className={`${styles.bar} reveal`} style={{ ["--i" as string]: 1 + index }}>
+      <button type="button" className={styles.barHead} onClick={onToggle} aria-expanded={expanded}>
+        <span className={styles.barLabel}>{t(THEME_LABEL[themeKey])}</span>
+        <span className={styles.barScore}>{displayScore}</span>
+      </button>
+      <div className={styles.track}>
+        <span
+          className={`${styles.fill} bar-fill-in ${fillClass ?? ""}`}
+          style={{ width: `${theme.score}%` }}
+          role="img"
+          aria-label={t(TONE_KEY[theme.tone])}
+        />
+      </div>
+      {expanded && (
+        <div className={styles.why}>
+          <p className={styles.barHint}>{t(THEME_HINT[themeKey])}</p>
+          {theme.drivers.length === 0 ? (
+            <span className={styles.calm}>{t("noDrivers")}</span>
+          ) : (
+            theme.drivers.map((d, j) => {
+              const cls = isGrowth ? styles.growthDriver : d.favorable ? styles.fav : styles.tense;
+              return (
+                <span key={j} className={`${styles.driver} ${cls}`}>
+                  <span className={styles.driverGlyphs}>
+                    {PLANET_GLYPH[d.a]} {ASPECT_GLYPHS[d.aspect]} {PLANET_GLYPH[d.b]}
+                  </span>
+                  <span className={styles.driverText}>
+                    {L.bodies[d.a]} {L.aspects[d.aspect]} {t("aspectBridge")} {L.bodies[d.b]}
+                  </span>
+                </span>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

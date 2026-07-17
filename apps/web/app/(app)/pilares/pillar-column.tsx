@@ -65,13 +65,19 @@ export function PillarColumn({
           ? t("pilares.dayMasterHanzi")
           : t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
       </span>
-      <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
+      <span
+        className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""} ${styles.charIgnite}`}
+        style={{ ["--i" as string]: index + 4 }}
+      >
         {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
       </span>
       <span className={styles.roman}>
         {script === "hangul" ? STEM_LABELS[pillar.stem]!.romanKo : STEM_LABELS[pillar.stem]!.pinyin}
       </span>
-      <span className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""}`}>
+      <span
+        className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""} ${styles.charIgnite}`}
+        style={{ ["--i" as string]: index + 4.35 }}
+      >
         {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
       </span>
       <span className={styles.roman}>
