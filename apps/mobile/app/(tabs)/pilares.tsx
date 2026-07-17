@@ -21,6 +21,8 @@ import {
   luckPillars,
   annualPillars,
   WU_XING_COLORS as EL_COLOR,
+  composeBaziReading,
+  DAY_MASTER_VOICE,
   type Pillar,
   type PillarSet,
   type TenGod,
@@ -33,7 +35,7 @@ import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
 import { useT } from "../../lib/i18n-context";
-import { baziContent, DAY_MASTER_VOICE, type BaziContent } from "../../content/bazi";
+import { baziContent, type BaziContent } from "../../content/bazi";
 import { fetchBaZi, type BaZiData } from "../../lib/bazi-api";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
@@ -307,6 +309,31 @@ export default function PilaresScreen() {
                 </Text>
               </Card>
             </FadeIn>
+
+            {/* Lectura de tus pilares — esencia compuesta compartida con la web
+                (composeBaziReading, @aluna/core/bazi/reading.ts): 3 párrafos deterministas
+                (esencia/fuerza/favorables) tejidos desde el mismo motor que ya calcula
+                dayMasterStrength y favorableElements arriba. Sin niveles IA (esos quedan
+                solo en web, ver informe). */}
+            {laminaData && (
+              <FadeIn delay={90} style={styles.fadeFull}>
+                <View style={styles.readingSec}>
+                  <Text style={styles.cardH}>{t("pilares.readingTitle")}</Text>
+                  <Card style={styles.readingCard}>
+                    {(() => {
+                      const reading = composeBaziReading(laminaData.set, locale);
+                      return (
+                        <>
+                          <Text style={styles.readingP}>{reading.essence}</Text>
+                          <Text style={styles.readingP}>{reading.strength}</Text>
+                          <Text style={styles.readingP}>{reading.favorable}</Text>
+                        </>
+                      );
+                    })()}
+                  </Card>
+                </View>
+              </FadeIn>
+            )}
 
             {/* Balance de elementos — eyebrow FUERA de la card (receta `.balance` del
                 mockup, igual patrón que "POSICIONES" en carta.tsx), no el título-dentro
@@ -901,6 +928,9 @@ function makeStyles(t: ThemeTokens) {
 
     // "BALANCE DE ELEMENTOS" — eyebrow FUERA de la card (mismo patrón que `posSec` en
     // carta.tsx: la card no lleva título dentro, a diferencia de <SectionCard>).
+    readingSec: { width: "100%", marginTop: space.xl, gap: space.sm },
+    readingCard: { width: "100%", gap: space.sm, paddingVertical: 14, paddingHorizontal: space.lg },
+    readingP: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sans, lineHeight: 20 },
     balanceSec: { width: "100%", marginTop: space.xl, gap: space.sm },
     balCard: { width: "100%", gap: space.sm, paddingVertical: 14, paddingHorizontal: space.lg },
     balRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 16 },

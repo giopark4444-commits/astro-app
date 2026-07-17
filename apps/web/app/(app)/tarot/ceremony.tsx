@@ -10,6 +10,7 @@ import { drawCards, spreadById, type DrawnCard } from "@aluna/core";
 import { gestureRng } from "@/lib/tarot/rng";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
+import { ReadingChat } from "./reading-chat";
 import tarot from "./tarot.module.css";
 import styles from "./ceremony.module.css";
 
@@ -395,6 +396,8 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
               </p>
             ))}
           </div>
+
+          <ReadingChat spreadId={SPREAD_ID} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
 
           {state.save === "free_limit" ? (
             // Nota suave, sin modal: el límite free no interrumpe el rito.

@@ -31,18 +31,33 @@ interface FetchCall {
 function mockFetch(postStatus = 201): { calls: FetchCall[] } {
   const calls: FetchCall[] = [];
   global.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
-    calls.push({ url: String(url), init });
+    const u = String(url);
+    calls.push({ url: u, init });
+    // La ceremonia (T3) monta ReadingChat al llegar a "reading", que dispara
+    // su propio POST a /api/tarot/reading-chat (turno-0) — se responde
+    // dormido (sin llaves en el test), como el latente real. Se distingue
+    // por URL para no confundirse con el POST de guardado (mismo método).
+    if (u === "/api/tarot/reading-chat") {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "application/json" },
+        json: async () => ({ available: false }),
+      } as unknown as Response;
+    }
     if (postStatus === 201) {
       const body = JSON.parse(String(init?.body));
       return {
         ok: true,
         status: 201,
+        headers: { get: () => "application/json" },
         json: async () => ({ reading: { id: "r-new", ...body } }),
       } as unknown as Response;
     }
     return {
       ok: false,
       status: postStatus,
+      headers: { get: () => "application/json" },
       json: async () => ({ error: postStatus === 403 ? "free_limit" : "db" }),
     } as unknown as Response;
   }) as unknown as typeof fetch;
@@ -109,9 +124,9 @@ describe("Ceremony (tirada de tres)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: es.tarot.saveReading }));
     await waitFor(() => {
-      expect(calls.some((c) => c.init?.method === "POST")).toBe(true);
+      expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
     });
-    const post = calls.find((c) => c.init?.method === "POST")!;
+    const post = calls.find((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")!;
     expect(post.url).toBe("/api/tarot/readings");
     const body = JSON.parse(String(post.init?.body));
     expect(body.spread).toBe("three");
@@ -137,10 +152,21 @@ describe("Ceremony (tirada de tres)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: es.tarot.saveReading }));
     await waitFor(() => {
-      expect(calls.some((c) => c.init?.method === "POST")).toBe(true);
+      expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
     });
-    const body = JSON.parse(String(calls.find((c) => c.init?.method === "POST")!.init?.body));
+    const body = JSON.parse(
+      String(calls.find((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")!.init?.body),
+    );
     expect(body.question).toBeUndefined();
+  });
+
+  it("muestra el chat de la tirada al final de la lectura, dormido sin llaves", async () => {
+    mockFetch();
+    renderCeremony();
+    await advanceToReading();
+
+    expect(await screen.findByText(es.tarot.chatSectionTitle)).toBeInTheDocument();
+    expect(await screen.findByText(es.tarot.chatDormantTitle)).toBeInTheDocument();
   });
 
   it("el contador del fan avanza (1 de 3) y las elegidas dejan de ser elegibles", async () => {

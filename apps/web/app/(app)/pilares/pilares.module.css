@@ -60,6 +60,24 @@
   color: var(--soft); font-weight: 700;
 }
 
+/* Lectura de tus pilares (esencia compuesta + niveles profundos IA) — mismo patrón
+   visual que .reading/.readingP de carta.module.css (LECTURA DEL NÚCLEO). */
+.reading {
+  position: relative; z-index: 1; display: block; border: 1px solid rgba(var(--acc-rgb), 0.22);
+  border-radius: var(--radius); background: color-mix(in oklab, var(--bg) 65%, transparent);
+  padding: 14px 17px;
+}
+.readingP { margin: 6px 0 0; font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.55; color: var(--ink); }
+.readingP:first-child { margin-top: 0; }
+.bodyReading { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--line); text-align: left; }
+.brEssence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.5; color: var(--ink); }
+.brBlock { display: flex; flex-direction: column; gap: var(--sp-1); }
+.brBlock p { margin: 0; font-size: var(--text-sm); line-height: 1.6; color: var(--soft); }
+.brH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.tierHint { margin: -4px 0 var(--sp-1); text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); }
+.ctrlRow { position: relative; z-index: 1; display: flex; gap: var(--sp-1); flex-wrap: wrap; }
+.solar { position: relative; z-index: 1; text-align: center; font-size: var(--text-2xs); color: var(--soft); font-style: italic; margin: 0 0 var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px dashed rgba(var(--acc-rgb), 0.35); border-radius: 12px; background: var(--surface-2); }
+
 /* Balance de elementos */
 .balance { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); }
 .elRow { display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: var(--sp-3); } /* 10→sp-3 empate, vara: mockup .bal-row gap */
