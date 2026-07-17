@@ -9,6 +9,8 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeWesternProse, SOLAR_HOUSE_LABELS_ES } from "@/lib/content/horoscope-es";
 import { SOLAR_HOUSE_LABELS_EN } from "@/lib/content/horoscope-en";
 import { AreaBars, type BarArea } from "@/components/area-bars";
+import { Meaning } from "@/components/meaning";
+import { planetMeaningKey } from "@/lib/meaning-keys";
 import { Starfield } from "@/components/starfield";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
 import { HoroscopeReading } from "./horoscope-reading";
@@ -128,11 +130,19 @@ export function HoroscopoView() {
           <div className={styles.side}>
             <div className={styles.signs} role="radiogroup" aria-label={t("signAria")}>
               {ZODIAC_SIGNS.map((s) => (
-                <button key={s.key} type="button" role="radio" aria-checked={sign === s.key}
-                  className={`chip--control ${sign === s.key ? "chip--control-on" : ""}`}
-                  onClick={() => setSign(s.key)}>
-                  {SIGN_GLYPH[s.key]} {L.signs[s.key]}
-                </button>
+                // role="radio" — envolver el botón entero anidaría un <button>
+                // del <Meaning> dentro de otro <button> (mismo problema que
+                // housesystem/zodiac en /carta): afijo ⓘ envuelto aparte.
+                <span key={s.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                  <button type="button" role="radio" aria-checked={sign === s.key}
+                    className={`chip--control ${sign === s.key ? "chip--control-on" : ""}`}
+                    onClick={() => setSign(s.key)}>
+                    {SIGN_GLYPH[s.key]} {L.signs[s.key]}
+                  </button>
+                  <Meaning k={`sign.${s.key}`}>
+                    <span aria-label={L.signs[s.key]} style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
+                  </Meaning>
+                </span>
               ))}
             </div>
             <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
@@ -157,7 +167,12 @@ export function HoroscopoView() {
                     tone: a.tone,
                     toneLabel: th(TONE_KEY[a.tone] ?? a.tone),
                     drivers: a.drivers.map((d) => ({
-                      glyphs: `${PLANET_GLYPH[d.body] ?? "•"} · ${t("houseShort", { n: d.house })}`,
+                      glyphs: (
+                        <>
+                          <Meaning k={planetMeaningKey(d.body)}>{PLANET_GLYPH[d.body] ?? "•"}</Meaning>{" · "}
+                          <Meaning k={`house.${d.house}`}>{t("houseShort", { n: d.house })}</Meaning>
+                        </>
+                      ),
                       text: `${L.bodies[d.body] ?? d.body} — ${HOUSES[d.house]}`,
                       favorable: d.favorable,
                     })),
@@ -184,9 +199,11 @@ export function HoroscopoView() {
                     {ready.signAspects.map((a, i) => (
                       <p key={i} className={`${styles.hitRow} ${a.harmony === "hard" ? styles.hitHard : a.harmony === "soft" ? styles.hitSoft : ""}`}>
                         <span className={styles.hitGlyphs}>
-                          {PLANET_GLYPH[a.body] ?? "•"} {ASPECT_GLYPHS[a.aspect] ?? "·"}
+                          <Meaning k={planetMeaningKey(a.body)}>{PLANET_GLYPH[a.body] ?? "•"}</Meaning>{" "}
+                          <Meaning k={`aspect.${a.aspect}`}>{ASPECT_GLYPHS[a.aspect] ?? "·"}</Meaning>
                         </span>
-                        {L.bodies[a.body] ?? a.body} {L.aspects[a.aspect] ?? a.aspect} {L.signs[a.sign] ?? a.sign}
+                        {L.bodies[a.body] ?? a.body} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect] ?? a.aspect}</Meaning>{" "}
+                        <Meaning k={`sign.${a.sign}`}>{L.signs[a.sign] ?? a.sign}</Meaning>
                       </p>
                     ))}
                   </section>
@@ -203,9 +220,11 @@ export function HoroscopoView() {
                     {ready.natalHits.map((h, i) => (
                       <p key={i} className={`${styles.hitRow} ${h.harmony === "hard" ? styles.hitHard : styles.hitSoft}`}>
                         <span className={styles.hitGlyphs}>
-                          {PLANET_GLYPH[h.a]} {ASPECT_GLYPHS[h.aspect]} {PLANET_GLYPH[h.b]}
+                          <Meaning k={planetMeaningKey(h.a)}>{PLANET_GLYPH[h.a]}</Meaning>{" "}
+                          <Meaning k={`aspect.${h.aspect}`}>{ASPECT_GLYPHS[h.aspect]}</Meaning>{" "}
+                          <Meaning k={planetMeaningKey(h.b)}>{PLANET_GLYPH[h.b]}</Meaning>
                         </span>
-                        {L.bodies[h.a]} {L.aspects[h.aspect]} {L.bodies[h.b]}
+                        {L.bodies[h.a]} <Meaning k={`aspect.${h.aspect}`}>{L.aspects[h.aspect]}</Meaning> {L.bodies[h.b]}
                         {h.exactIso ? ` · ${t("exactOn", { date: fmtExact.format(new Date(h.exactIso)) })}` : ""}
                       </p>
                     ))}
@@ -223,11 +242,13 @@ export function HoroscopoView() {
                         <tbody>
                           {ready.houses.map((h) => (
                             <tr key={h.body}>
-                              <td className={styles.proGlyph}>{PLANET_GLYPH[h.body] ?? "•"}</td>
+                              <td className={styles.proGlyph}>
+                                <Meaning k={planetMeaningKey(h.body)}>{PLANET_GLYPH[h.body] ?? "•"}</Meaning>
+                              </td>
                               <td>{L.bodies[h.body] ?? h.body}</td>
-                              <td>{SIGN_GLYPH[h.sign]} {L.signs[h.sign]}</td>
-                              <td>{t("houseShort", { n: h.house })}</td>
-                              <td>{h.retrograde ? "℞" : ""}</td>
+                              <td><Meaning k={`sign.${h.sign}`}>{SIGN_GLYPH[h.sign]}</Meaning> {L.signs[h.sign]}</td>
+                              <td><Meaning k={`house.${h.house}`}>{t("houseShort", { n: h.house })}</Meaning></td>
+                              <td>{h.retrograde ? <Meaning k="term.retrograde">℞</Meaning> : ""}</td>
                             </tr>
                           ))}
                         </tbody>

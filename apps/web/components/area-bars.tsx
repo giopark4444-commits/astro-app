@@ -1,8 +1,9 @@
 "use client";
+import type { ReactNode } from "react";
 import styles from "./area-bars.module.css";
 
 export interface BarDriver {
-  glyphs: string;
+  glyphs: ReactNode;
   text: string;
   favorable: boolean;
 }

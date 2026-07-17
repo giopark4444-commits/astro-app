@@ -9,6 +9,8 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { transitPhrase as phraseEs } from "@/lib/content/transit-phrases-es";
 import { transitPhrase as phraseEn } from "@/lib/content/transit-phrases-en";
 import { Icon } from "@/components/icon";
+import { Meaning } from "@/components/meaning";
+import { planetMeaningKey } from "@/lib/meaning-keys";
 import { Starfield } from "@/components/starfield";
 import { EnergyPanel } from "./energy-panel";
 import { DayNumberCard } from "./day-number-card";
@@ -88,14 +90,21 @@ export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
                 <div key={i} className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`} data-harm={a.harmony}>
                   <span className={styles.aspTop}>
                     <span className={styles.weatherGlyphs}>
-                      {PLANET_GLYPH[a.a]} <span className={styles.weatherAsp}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                      {PLANET_GLYPH[a.b]}
+                      <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
+                      <span className={styles.weatherAsp}>
+                        <Meaning k={`aspect.${a.aspect}`}>{ASPECT_GLYPHS[a.aspect]}</Meaning>
+                      </span>{" "}
+                      <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
                     </span>
                     <span className={styles.aspName}>
-                      {L.bodies[a.a]} {L.aspects[a.aspect]} {t("carta.yourPossessive")} {L.bodies[a.b]}
+                      {L.bodies[a.a]} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>{" "}
+                      {t("carta.yourPossessive")} {L.bodies[a.b]}
                     </span>
                     <span className={styles.aspOrb}>
-                      {a.orb.toFixed(1)}° · {a.applying ? t("carta.applying") : t("carta.separating")}
+                      {a.orb.toFixed(1)}° ·{" "}
+                      <Meaning k={a.applying ? "term.applying" : "term.separating"}>
+                        {a.applying ? t("carta.applying") : t("carta.separating")}
+                      </Meaning>
                     </span>
                   </span>
                   <span className={styles.aspWhy}>{(locale === "en" ? phraseEn : phraseEs)(a.aspect, a.a)}</span>

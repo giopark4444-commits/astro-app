@@ -17,6 +17,7 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
+import { planetMeaningKey, dignityMeaningKey, patternMeaningKey } from "@/lib/meaning-keys";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
 import styles from "./carta.module.css";
@@ -34,13 +35,6 @@ const KIND_KEY: Record<ChartKind, string> = {
 };
 const pad = (n: number) => String(n).padStart(2, "0");
 const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
-
-// Capa de significados: la clave del glosario SIEMPRE se arma desde la clave
-// INTERNA (planet/sign/aspect/pattern/dignity keys de core), nunca desde el
-// label traducido. Unos pocos internos difieren del glosario — se mapean acá.
-const planetMeaningKey = (k: string) => `planet.${k.replace("_", "")}`;
-const dignityMeaningKey = (d: string) => `dignity.${d === "exile" ? "detriment" : d}`;
-const patternMeaningKey = (t: string) => `pattern.${t.replace(/_/g, "")}`;
 
 type State =
   | { s: "loading" }
@@ -331,7 +325,7 @@ export function CartaView() {
                       </span>
                       <span className={styles.posDign}>
                         {b.dignity && <Meaning k={dignityMeaningKey(b.dignity)}>{L.dignities[b.dignity]}</Meaning>}
-                        {b.retrograde ? " ℞" : ""}
+                        {b.retrograde ? <Meaning k="term.retrograde"> ℞</Meaning> : ""}
                       </span>
                     </div>
                   ))}
@@ -428,7 +422,7 @@ export function CartaView() {
             <div className={styles.sheetSign}>{L.signs[sheet.sign]} · {t("house")} {sheet.house}</div>
             <div className={styles.sheetMeta}>
               {sheet.dignity && <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>}
-              {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}>{t("retrograde")} ℞</span>}
+              {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}><Meaning k="term.retrograde">{t("retrograde")} ℞</Meaning></span>}
               <span className={`chip ${styles.tag}`}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
             </div>
             {(() => {

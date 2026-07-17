@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import type { HouseSystem, Zodiac } from "@aluna/core";
 import { Meaning } from "@/components/meaning";
+import { houseSystemMeaningKey } from "@/lib/meaning-keys";
 import styles from "./carta.module.css";
 
 const HOUSE_SYSTEMS: HouseSystem[] = ["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"];
@@ -11,7 +12,6 @@ const ZODIACS: Zodiac[] = ["tropical", "sidereal"];
 // housesystem/zodiac son role="tab" — envolver el botón entero anidaría un
 // <button> del <Meaning> dentro de otro <button> (HTML inválido, rompe la
 // selección). Salida del brief: afijo ⓘ pequeño al lado, envuelto aparte.
-const houseSystemMeaningKey = (h: HouseSystem) => `housesystem.${h === "whole" ? "wholesign" : h}`;
 
 /** Filas de chips casas/zodiaco de la carta (mockup 06 .ctrl-rows). Se monta
  *  DOS veces en CartaView: sin `labeled` arriba (móvil, oculta ≥1080px vía

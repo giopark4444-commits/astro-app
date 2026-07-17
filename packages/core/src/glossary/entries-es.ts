@@ -197,6 +197,18 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
     title: "Semisextil", glyph: "⚺",
     body: "Dos planetas a 30°, en signos vecinos: tan cerca que se rozan, tan distintos que no se entienden. Es un aspecto sutil — un leve roce de fondo más que un conflicto abierto. Te pide notar la diferencia entre dos partes tuyas que viven puerta con puerta pero llevan vidas separadas.",
   },
+  "aspect.semisquare": {
+    title: "Semicuadratura", glyph: "∠",
+    body: "Medio paso de la cuadratura: 45° de fricción fina, más roce que choque. Es una incomodidad de bajo volumen que se acumula — el tipo de tensión que ignoras hasta que un día aprieta. Atendida a tiempo, es un ajuste; ignorada, se vuelve callo.",
+  },
+  "aspect.sesquisquare": {
+    title: "Sesquicuadratura", glyph: "⚼",
+    body: "Cuadratura y media: 135° de tensión que aparece a destiempo, cuando creías que ya habías resuelto el tema. Suele hablar de impaciencia — el impulso de forzar lo que pedía otro ritmo. Su regalo es enseñarte a corregir el rumbo sin drama.",
+  },
+  "aspect.quintile": {
+    title: "Quintil", glyph: "Q",
+    body: "72°: el aspecto del talento fino. Une dos planetas con una destreza casi artesanal — un don específico, a veces tan natural que no lo reconoces como don. Búscalo donde haces fácil lo que a otros les cuesta explicar.",
+  },
 
   // ——— Términos ———
   "term.orb": {
@@ -506,6 +518,10 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
   "bazi.term.strength": {
     title: "Fuerza del Maestro del Día", glyph: "強弱",
     body: "El diagnóstico central de la carta: cuánto apoyo recibe tu Maestro del Día de la estación, de sus raíces y de los troncos visibles. Fuerte no significa mejor ni débil peor — significan estrategias distintas: el fuerte prospera con desafío y salida; el débil, con nutrición y respaldo. De este veredicto salen tus elementos favorables.",
+  },
+  "bazi.term.interactions": {
+    title: "Interacciones",
+    body: "Los pilares no viven aislados: sus troncos y ramas se combinan, chocan o se castigan entre sí. Estas interacciones son la trama fina de la carta — donde dos energías se funden en algo nuevo o se restan fuerza. Leerlas es ver el mapa en movimiento, no como foto.",
   },
 
   // ——— BaZi: Cinco Elementos (wuxing) ———

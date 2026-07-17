@@ -196,6 +196,18 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
     title: "Semisextile", glyph: "⚺",
     body: "Two planets at 30°, in neighboring signs: close enough to brush shoulders, different enough not to understand each other. It's a subtle aspect — a faint background rub rather than open conflict. It asks you to notice the difference between two parts of you that live next door but lead separate lives.",
   },
+  "aspect.semisquare": {
+    title: "Semisquare", glyph: "∠",
+    body: "Half a square: 45° of fine friction — more chafe than collision. It's low-volume discomfort that accumulates, the kind of tension you ignore until the day it pinches. Tended early, it's an adjustment; ignored, it hardens.",
+  },
+  "aspect.sesquisquare": {
+    title: "Sesquisquare", glyph: "⚼",
+    body: "A square and a half: 135° of tension that shows up off-beat, just when you thought the matter was settled. It often speaks of impatience — forcing what asked for another rhythm. Its gift is teaching you to correct course without drama.",
+  },
+  "aspect.quintile": {
+    title: "Quintile", glyph: "Q",
+    body: "72°: the aspect of fine talent. It joins two planets with an almost artisanal skill — a specific gift, sometimes so natural you don't recognize it as one. Look for it where you make easy what others struggle to explain.",
+  },
 
   // ——— Terms ———
   "term.orb": {
@@ -501,6 +513,10 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
   "bazi.term.favorable": {
     title: "Favorable Elements", glyph: "用神",
     body: "The elements your chart needs to come into balance: if your Day Master is weak, whatever feeds and accompanies it; if strong, whatever drains it or gives it work. Knowing them makes the whole reading practical — colors, seasons, activities, even entire decades line up with what serves you, or don't.",
+  },
+  "bazi.term.interactions": {
+    title: "Interactions",
+    body: "Pillars don't live in isolation: their stems and branches combine, clash or punish one another. These interactions are the chart's fine weave — where two energies merge into something new or drain each other. Reading them is seeing the map in motion, not as a photograph.",
   },
   "bazi.term.strength": {
     title: "Day Master Strength", glyph: "強弱",
