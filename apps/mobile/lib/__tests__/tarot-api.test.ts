@@ -111,7 +111,7 @@ describe("saveTarotReading", () => {
     );
   });
 
-  it("403 free_limit lanza TarotApiError distinguible por .status", async () => {
+  it("403 free_limit lanza TarotApiError distinguible por .code (no solo .status)", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: false,
       status: 403,
@@ -126,13 +126,31 @@ describe("saveTarotReading", () => {
 
     expect(err).toBeInstanceOf(TarotApiError);
     expect((err as InstanceType<typeof TarotApiError>).status).toBe(403);
+    expect((err as InstanceType<typeof TarotApiError>).code).toBe("free_limit");
   });
 
-  it("otros errores no-ok también lanzan TarotApiError con su status", async () => {
+  it("otros errores no-ok también lanzan TarotApiError con su status y .code undefined si el body no trae error", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
-    await expect(
-      saveTarotReading("t", { spread: "daily", cards: [], deck: "rws" }),
-    ).rejects.toMatchObject({ status: 401 });
+    const err = await saveTarotReading("t", { spread: "daily", cards: [], deck: "rws" }).catch((e) => e);
+    expect(err).toMatchObject({ status: 401, code: undefined });
+  });
+
+  it("403 con body JSON malformado: .code queda undefined en vez de romper", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => {
+        throw new SyntaxError("bad json");
+      },
+    });
+    const err = await saveTarotReading("t", {
+      spread: "three",
+      cards: [{ cardId: "fool", reversed: false, position: "past" }],
+      deck: "rws",
+    }).catch((e) => e);
+    expect(err).toBeInstanceOf(TarotApiError);
+    expect((err as InstanceType<typeof TarotApiError>).status).toBe(403);
+    expect((err as InstanceType<typeof TarotApiError>).code).toBeUndefined();
   });
 });
 

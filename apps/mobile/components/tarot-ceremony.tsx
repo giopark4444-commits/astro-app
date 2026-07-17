@@ -323,9 +323,9 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
         onSaved(); // el diario del umbral (montado debajo) se refresca ya
       })
       .catch((e) => {
-        // En este endpoint el único 403 es el límite free (la web además leía
-        // el body error==="free_limit"; TarotApiError solo trae el status).
-        const status = e instanceof TarotApiError && e.status === 403 ? "free_limit" : "error";
+        // Mismo criterio que la web (ceremony.tsx): el 403 free_limit se
+        // distingue por el body (.code), no por asumir que todo 403 lo es.
+        const status = e instanceof TarotApiError && e.code === "free_limit" ? "free_limit" : "error";
         dispatch({ type: "save", status });
       });
   }
