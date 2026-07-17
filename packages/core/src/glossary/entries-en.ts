@@ -518,6 +518,36 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
     title: "Interactions",
     body: "Pillars don't live in isolation: their stems and branches combine, clash or punish one another. These interactions are the chart's fine weave — where two energies merge into something new or drain each other. Reading them is seeing the map in motion, not as a photograph.",
   },
+
+  // ——— BaZi: Branch interactions (eastern horoscope) ———
+  "bazi.interaction.clash": {
+    title: "Clash", glyph: "冲",
+    body: "Two branches face to face: opposing energies pushing at each other. A clash isn't punishment — it's forced motion: something asks to change place, plan or rhythm. Clash periods are uncomfortable, and that's exactly how they unstick things.",
+  },
+  "bazi.interaction.punishment": {
+    title: "Punishment", glyph: "刑",
+    body: "An internal friction between branches you don't see coming: rubs of ingratitude, excess or impatience depending on the trio that forms it. It speaks less of enemies outside and more of your own habits tripping over themselves. Its medicine is self-awareness.",
+  },
+  "bazi.interaction.po": {
+    title: "Destruction", glyph: "破",
+    body: "Two branches quietly taking each other apart: plans that fray, agreements that lose their shape. Not catastrophe — fine wear. It asks you to check the details before signing, promising or assuming.",
+  },
+  "bazi.interaction.harm": {
+    title: "Harm", glyph: "害",
+    body: "Friction arriving through where you trusted: misunderstandings, favors gone sideways, closeness that hurts without meaning to. It doesn't ask you to close off — it asks for clarity when you speak and explicit agreements while it lasts.",
+  },
+  "bazi.interaction.sixcombo": {
+    title: "Combination", glyph: "合",
+    body: "Two branches attracting and merging into a new element: alliances, chemistry, doors opening on their own. It's the sky cooperating — but what combines also binds: choose what you merge with.",
+  },
+  "bazi.interaction.selfpunishment": {
+    title: "Self-punishment", glyph: "自刑",
+    body: "A branch punishing itself when doubled: self-demand, rumination, quiet sabotage. The period isn't attacking you — it's mirroring you. Its practice is treating yourself the way you'd treat someone you love.",
+  },
+  "bazi.term.wuxing": {
+    title: "Wu Xing", glyph: "五行",
+    body: "The five movements — Wood, Fire, Earth, Metal and Water — generating and controlling one another in cycle. They're not substances: they're phases of energy. All oriental reading is, at heart, watching how these five dance with you.",
+  },
   "bazi.term.strength": {
     title: "Day Master Strength", glyph: "強弱",
     body: "The chart's central diagnosis: how much support your Day Master receives from the season, from its roots, and from the visible stems. Strong doesn't mean better and weak doesn't mean worse — they mean different strategies: the strong thrives on challenge and outlet, the weak on nourishment and backing. Your favorable elements follow from this verdict.",

@@ -12,6 +12,7 @@ import {
   planetMeaningKey,
   dignityMeaningKey,
   patternMeaningKey,
+  interactionKey,
   PLANETS,
   ZODIAC_SIGNS,
   TEN_GODS,
@@ -84,5 +85,15 @@ describe("claves del glosario usadas en el wiring móvil (carta/pilares/horósco
     ]) {
       expectResolves(`bazi.term.${k}`);
     }
+  });
+
+  it("interactionKey resuelve los 6 tipos de interacción de rama del horóscopo oriental (six_combo/self_punishment sin guion bajo, po tal cual)", () => {
+    for (const t of ["clash", "punishment", "po", "harm", "six_combo", "self_punishment"]) {
+      expectResolves(interactionKey(t));
+    }
+  });
+
+  it("bazi.term.wuxing resuelve (Wu Xing del periodo, horóscopo oriental)", () => {
+    expectResolves("bazi.term.wuxing");
   });
 });

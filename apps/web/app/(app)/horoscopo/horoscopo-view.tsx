@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { PLANETS, ZODIAC_SIGNS, EARTHLY_BRANCHES, planetMeaningKey } from "@aluna/core";
+import { PLANETS, ZODIAC_SIGNS, EARTHLY_BRANCHES, planetMeaningKey, interactionKey } from "@aluna/core";
 import type { WesternPayload, HoroscopePeriod } from "@/lib/horoscope/western";
 import type { EasternPayload, EasternAnimal, EasternInteractionType } from "@/lib/horoscope/eastern";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
@@ -202,12 +202,20 @@ export function HoroscopoView() {
           <div className={styles.side}>
             <div className={styles.signs} role="radiogroup" aria-label={t("animalAria")}>
               {EASTERN_ANIMALS.map((a, i) => (
-                <button key={a} type="button" role="radio" aria-checked={animal === a}
-                  className={`chip--control ${animal === a ? "chip--control-on" : ""} ${styles.chipReveal}`}
-                  style={{ ["--i" as string]: i }}
-                  onClick={() => setAnimal(a)}>
-                  {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
-                </button>
+                // role="radio" — mismo motivo que el picker de signos occidental:
+                // el afijo ⓘ del <Meaning> se envuelve aparte para no anidar un
+                // <button> dentro de otro <button>.
+                <span key={a} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                  <button type="button" role="radio" aria-checked={animal === a}
+                    className={`chip--control ${animal === a ? "chip--control-on" : ""} ${styles.chipReveal}`}
+                    style={{ ["--i" as string]: i }}
+                    onClick={() => setAnimal(a)}>
+                    {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
+                  </button>
+                  <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[i]!.key}`} ariaLabel={`Qué significa ${tp(`animal${cap(a)}`)}`}>
+                    <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
+                  </Meaning>
+                </span>
               ))}
             </div>
             <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
@@ -266,9 +274,11 @@ export function HoroscopoView() {
                     {readyEastern.natalHits.map((h, i) => (
                       <p key={i} className={`${styles.hitRow} ${h.favorable ? styles.hitSoft : styles.hitHard}`}>
                         <span className={styles.hitGlyphs}>
-                          {EARTHLY_BRANCHES[h.natalBranch]!.hanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                          <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[h.natalBranch]!.key}`}>{EARTHLY_BRANCHES[h.natalBranch]!.hanzi}</Meaning>{" "}
+                          <Meaning k={interactionKey(h.type)}>{INTERACTION_GLYPH[h.type]}</Meaning>{" "}
+                          <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[h.withBranch]!.key}`}>{EARTHLY_BRANCHES[h.withBranch]!.hanzi}</Meaning>
                         </span>
-                        {interactionLabel(h.type)} · {t("natalVsPeriod", { natal: tp(h.natalPillar), period: tp(h.periodPillar) })}
+                        <Meaning k={interactionKey(h.type)}>{interactionLabel(h.type)}</Meaning> · {t("natalVsPeriod", { natal: tp(h.natalPillar), period: tp(h.periodPillar) })}
                       </p>
                     ))}
                   </section>
