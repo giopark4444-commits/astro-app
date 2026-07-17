@@ -396,6 +396,96 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0016_referidos.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      referral_codes: {
+        Row: {
+          active: boolean;
+          code: string;
+          commission_pct: number;
+          created_at: string;
+          discount_pct: number;
+          owner_user_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          code: string;
+          commission_pct?: number;
+          created_at?: string;
+          discount_pct?: number;
+          owner_user_id: string;
+        };
+        Update: {
+          active?: boolean;
+          code?: string;
+          commission_pct?: number;
+          created_at?: string;
+          discount_pct?: number;
+          owner_user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0016_referidos.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      referred_users: {
+        Row: {
+          code: string;
+          created_at: string;
+          user_id: string;
+        };
+        Insert: {
+          code: string;
+          created_at?: string;
+          user_id: string;
+        };
+        Update: {
+          code?: string;
+          created_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0016_referidos.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      referral_earnings: {
+        Row: {
+          amount_cents: number;
+          code: string;
+          commission_cents: number;
+          created_at: string;
+          currency: string;
+          id: number;
+          paid_at: string | null;
+          payment_ref: string;
+          referred_user_id: string;
+          status: string;
+        };
+        Insert: {
+          amount_cents: number;
+          code: string;
+          commission_cents: number;
+          created_at?: string;
+          currency?: string;
+          id?: number;
+          paid_at?: string | null;
+          payment_ref: string;
+          referred_user_id: string;
+          status?: string;
+        };
+        Update: {
+          amount_cents?: number;
+          code?: string;
+          commission_cents?: number;
+          created_at?: string;
+          currency?: string;
+          id?: number;
+          paid_at?: string | null;
+          payment_ref?: string;
+          referred_user_id?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
@@ -437,6 +527,48 @@ export type Database = {
       admin_revoke_role: {
         Args: { target_email: string };
         Returns: undefined;
+      };
+      // Añadidas a mano junto con supabase/migrations/0016_referidos.sql:
+      // sistema de referidos con comisión (regenerar cuando se aplique).
+      redeem_referral_code: {
+        Args: { p_code: string };
+        Returns: undefined;
+      };
+      admin_set_referral_code: {
+        Args: { target_email: string; p_code: string; p_discount_pct: number; p_commission_pct: number };
+        Returns: undefined;
+      };
+      admin_deactivate_referral_code: {
+        Args: { p_code: string };
+        Returns: undefined;
+      };
+      admin_mark_earnings_paid: {
+        Args: { p_code: string };
+        Returns: undefined;
+      };
+      admin_referral_summary: {
+        Args: Record<string, never>;
+        Returns: {
+          code: string;
+          owner_email: string;
+          discount_pct: number;
+          commission_pct: number;
+          active: boolean;
+          referred_count: number;
+          pending_cents: number;
+          paid_cents: number;
+        }[];
+      };
+      my_referral_summary: {
+        Args: Record<string, never>;
+        Returns: {
+          code: string;
+          discount_pct: number;
+          commission_pct: number;
+          referred_count: number;
+          pending_cents: number;
+          paid_cents: number;
+        }[];
       };
     };
     Enums: Record<string, never>;
