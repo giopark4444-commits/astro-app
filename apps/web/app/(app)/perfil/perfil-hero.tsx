@@ -10,7 +10,7 @@ import styles from "./perfil.module.css";
 
 type Core = { sunSign: string; moonSign: string; ascSign: string } | null;
 
-export function PerfilHero({ userId, avatarUrl }: { userId: string; avatarUrl: string | null }) {
+export function PerfilHero({ userId, avatarUrl, since }: { userId: string; avatarUrl: string | null; since: string }) {
   const t = useTranslations("profile");
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -60,10 +60,17 @@ export function PerfilHero({ userId, avatarUrl }: { userId: string; avatarUrl: s
         <p className={styles.eyebrow}>{t("sanctuary")}</p>
         <h1 className={styles.name}>{active?.name ?? "Aluna"}</h1>
         <div className={styles.sig}>
-          {core && <span className={`chip ${styles.sigChip}`}>☉ {L.signs[core.sunSign]}</span>}
-          {core && <span className={`chip ${styles.sigChip}`}>☽ {L.signs[core.moonSign]}</span>}
-          {core && <span className={`chip ${styles.sigChip}`}>AC {L.signs[core.ascSign]}</span>}
-          {lifePath != null && <span className={`chip ${styles.sigChip}`}>{t("lifePath")} {lifePath}</span>}
+          {/* Circulito de glifo: <i>.sigG</i> sin estilo en móvil (mismo glifo
+              en línea que antes); se convierte en el círculo dorado del
+              mockup 06 §5.1 (.pf-sig .g) solo en desktop — ver perfil.module.css. */}
+          {core && <span className={`chip ${styles.sigChip}`}><i className={styles.sigG} aria-hidden>☉︎</i> {L.signs[core.sunSign]}</span>}
+          {core && <span className={`chip ${styles.sigChip}`}><i className={styles.sigG} aria-hidden>☽︎</i> {L.signs[core.moonSign]}</span>}
+          {core && <span className={`chip ${styles.sigChip}`}><i className={styles.sigG} aria-hidden>AC</i> {L.signs[core.ascSign]}</span>}
+          {/* Orden label→número conservado (era así antes de R4c T8) para no
+              alterar el texto móvil; el mockup muestra número→label, pero eso
+              es solo desktop-visual vía el círculo, no una razón para tocar
+              el orden del contenido en pantallas <1080px. */}
+          {lifePath != null && <span className={`chip ${styles.sigChip}`}>{t("lifePath")} <i className={styles.sigG} aria-hidden>{lifePath}</i></span>}
         </div>
       </div>
       {active && (
@@ -80,6 +87,9 @@ export function PerfilHero({ userId, avatarUrl }: { userId: string; avatarUrl: s
             {active.birth_time ? active.birth_time.slice(0, 5) + " · " : ""}
             {active.place_name}
           </p>
+          {/* Solo desktop (mockup 06 §5.1, .pf-since) — oculto en móvil por CSS,
+              ver perfil.module.css. */}
+          <p className={styles.since}>{t("sinceAluna", { date: since })}</p>
         </div>
       )}
     </section>

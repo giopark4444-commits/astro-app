@@ -6,10 +6,17 @@
 .name { font-family: var(--font-display); font-size: clamp(30px, 8vw, 40px); font-style: italic; color: var(--ink); margin: 0; }
 .sig { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: center; }
 .sigChip { font-size: var(--text-xs); }
+/* Sin estilo en móvil: <i> inline, mismo glifo en línea que antes de R4c T8.
+   Se convierte en el circulito dorado del mockup 06 §5.1 solo en desktop
+   (ver media query abajo). */
+.sigG {}
 .birth { display: flex; flex-direction: column; gap: 2px; text-align: left; width: 100%; }
 .birthH { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); margin: 0; }
 .birthMain { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); margin: 0; }
 .birthSub { font-size: var(--text-xs); color: var(--soft); margin: 0; }
+/* "En Aluna desde…" — solo desktop (mockup 06 §5.1, .pf-since); oculto en
+   móvil, ese diseño no lo tenía (R4c T8, mobile intacto). */
+.since { display: none; }
 
 .people {} /* card global */
 .peopleHead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); }
@@ -23,8 +30,15 @@
 .personaAdd { border-style: dashed; color: var(--soft); }
 .personaName { font-size: var(--text-2xs); color: var(--soft); }
 
-.prefs { display: flex; flex-direction: column; gap: var(--sp-4); }
+.prefs { display: flex; flex-direction: column; gap: var(--sp-4); order: 4; }
 .prefsTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); margin: 0; }
+
+/* "Tu plan" (billing) — no está en el mockup 06, se conserva como fila propia
+   (brief T8, adaptación consciente). Mobile: order 3 pone Plan ANTES de
+   Preferencias, restaurando el orden visual previo a R4c T8 (Plan vivía
+   dentro de la misma card, antes de los controles de tema/modo/idioma); ver
+   nota de page.tsx y el override de grid en la media query desktop. */
+.plan { order: 3; }
 
 /* — manifestaciones (la joya) — mockup docs/redesign/r4-mockups/06-cupula-topnav.html, screen 3 (.pf-manif) */
 .manifSection {} /* card global */
@@ -185,12 +199,28 @@
 .notesFormError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
-  .page { max-width: min(1080px, calc(100% - 112px)); }
-  .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); }
+  /* Retícula del mockup 06 §5: 12 columnas; hero y diario ocupan la fila
+     completa, personas(7)+preferencias(5) la siguiente, plan al fondo (T8). */
+  .page {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-5);
+    max-width: min(1280px, calc(100% - 112px));
+  }
+  .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); grid-column: 1 / -1; order: 1; }
   .identity { align-items: flex-start; flex: 1; }
   .name { font-size: 44px; }
   .sig { justify-content: flex-start; }
-  .birth { width: auto; min-width: 260px; align-self: stretch; justify-content: center; }
+  .birth {
+    width: auto; min-width: 260px; align-self: stretch; justify-content: center;
+    border: 1px dashed rgba(var(--acc-rgb), 0.38); border-radius: var(--radius-lg); /* mockup 06: .pf-birth */
+  }
+  /* Circulito de glifo dorado (mockup 06 §5.1, .pf-sig .g) */
+  .sigChip { padding: 5px 15px 5px 6px; border-radius: 999px; display: inline-flex; align-items: center; gap: 9px; } /* mockup 06: .pf-sig>span */
+  .sigG {
+    display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 50%;
+    border: 1px solid rgba(var(--acc-rgb), 0.42); background: rgba(var(--acc-rgb), 0.08);
+    color: var(--acc-text); font-family: var(--font-display); font-size: 13.5px; font-weight: 600; /* mockup 06: .pf-sig .g */
+  }
+  .since { display: block; margin: 11px 0 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-sm); color: var(--soft); } /* mockup 06: .pf-since (13.5px → --text-sm) */
 
   .manifGrid { display: grid; grid-template-columns: 1.18fr 1fr; gap: var(--sp-4); align-items: stretch; }
   .manifCard.feat { grid-row: span 2; }
@@ -198,5 +228,17 @@
 
   /* Diario junto a manifestaciones, 2:1 — mismo ratio que el mockup
      (.pf-manif span 8 / .pf-notes span 4 sobre una grilla de 12). */
-  .diarioGrid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-4); align-items: start; }
+  .diarioGrid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-4); align-items: start; grid-column: 1 / -1; order: 2; }
+
+  .people { grid-column: span 7; order: 3; }
+
+  /* Preferencias como card compacta — bordes/fondo del .card global copiados
+     aquí a propósito (NO se añade la clase global en el markup, ver brief T8
+     Step 2) para no arrastrar el estilo de card a móvil. */
+  .prefs {
+    grid-column: span 5; order: 4;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--sp-5);
+  }
+
+  .plan { grid-column: 1 / -1; order: 5; }
 }

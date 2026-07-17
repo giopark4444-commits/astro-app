@@ -35,9 +35,37 @@
 .tcOn { border-color: var(--acc); box-shadow: var(--glow-soft); }
 .sw { display: block; height: 26px; border-radius: 9px; margin-bottom: var(--sp-2); } /* 7→8 */
 
+/* Preferencias compactas (mockup 06 §5.3) — solo desktop. Media queries
+   espejo con .wrap (swatch-cards de arriba): cada bloque se oculta en la
+   anchura que no le corresponde, así el móvil queda intacto (brief T8 Step 2). */
+.compact { display: none; }
+.prow { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.plab { flex: none; width: 64px; font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); } /* mockup 06: .pf-plab */
+.sws { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.psw { display: inline-flex; align-items: center; gap: 7px; padding: 5px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--soft); font-family: inherit; font-size: var(--text-2xs); font-weight: 600; cursor: pointer; transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); } /* mockup 06: .pf-sw */
+.pswOn { border-color: rgba(var(--acc-rgb), 0.55); color: var(--ink); box-shadow: var(--glow-soft); }
+.pswDot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); } /* mockup 06: .pf-sw i */
+.pswDot[data-theme-dot="observatory"] { background: radial-gradient(circle at 32% 28%, #2b3570, #0a0d24 72%); border-color: rgba(231, 201, 134, 0.7); } /* mockup 06: .obs */
+.pswDot[data-theme-dot="aurora"] { background: linear-gradient(140deg, #f3ecff, #cdb9f2 60%, #f7d9c4); } /* mockup 06: .aur */
+.pswDot[data-theme-dot="cosmic"] { background: linear-gradient(140deg, #3d1d63, #7a2f8f 55%, #e56ca4); } /* mockup 06: .cos */
+.acct { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 13px; border-top: 1px solid rgba(var(--acc-rgb), 0.14); font-size: var(--text-xs); color: var(--soft); } /* mockup 06: .pf-acct */
+.out { color: var(--soft); background: none; border: 0; cursor: pointer; font-family: inherit; font-size: var(--text-xs); transition: color var(--dur-fast) var(--ease); }
+.out:hover { color: var(--tone-warm); } /* mockup 06: .pf-out:hover */
+/* Modo/idioma reusan el .seg global — en la fila compacta es "pill al
+   contenido", no full-width (brief T8 Step 2). */
+.segCompactWrap { width: auto; }
+.segCompact { flex: none; padding: 5px 13px; font-size: var(--text-2xs); }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* cap intermedio: esta pantalla aún no tiene diseño desktop propio (R4b+);
      sin esto se estira a los 1280px del shell y la línea de lectura se rompe.
      Hallazgo de la review final de R4a. */
   .page { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+  /* T8: preferencias pasan a las filas compactas del mockup — las
+     swatch-cards de móvil se ocultan (media queries espejo). */
+  .wrap { display: none; }
+  /* flex:1 para que .acct (margin-top:auto) se asiente al fondo real de la
+     card cuando la fila del grid la estira a la altura de "Personas". */
+  .compact { display: flex; flex-direction: column; gap: var(--sp-4); flex: 1; }
 }

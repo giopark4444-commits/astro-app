@@ -45,9 +45,13 @@ export default async function PerfilPage({
     .maybeSingle();
   const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
 
+  // "En Aluna desde {mes} {año}" (mockup 06 §5.1, .pf-since) — created_at es un
+  // timestamp de Supabase Auth, siempre presente para un usuario ya logueado.
+  const since = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(new Date(user.created_at));
+
   return (
     <main className={styles.page}>
-      <PerfilHero userId={user.id} avatarUrl={publicUrl} />
+      <PerfilHero userId={user.id} avatarUrl={publicUrl} since={since} />
       <Personas />
       <div className={styles.diarioGrid}>
         <Manifestations />
@@ -55,8 +59,12 @@ export default async function PerfilPage({
       </div>
       <section className={styles.prefs}>
         <h2 className={styles.prefsTitle}>{t("preferences")}</h2>
+        <SettingsControls currentLocale={locale} email={user.email ?? ""} />
+      </section>
+      {/* "Tu plan" no está en el mockup 06 (que no modela billing) — se conserva
+          como fila propia, adaptación consciente (brief T8, no eliminar). */}
+      <section className={styles.plan}>
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
-        <SettingsControls currentLocale={locale} />
       </section>
     </main>
   );

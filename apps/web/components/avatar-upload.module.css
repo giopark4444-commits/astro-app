@@ -16,3 +16,17 @@
 }
 .changeBtn:hover { color: var(--ink); }
 .err { color: var(--tone-caution); font-size: var(--text-xs); margin: 0; }
+
+@media (min-width: 1080px) { /* bp desktop R4a — mockup 06 §5.1 .pf-photo/.pf-chg */
+  .ring {
+    width: 118px; height: 118px;
+    box-shadow: 0 0 0 7px rgba(var(--acc-rgb), 0.06), var(--glow-soft); /* mockup 06: .pf-photo */
+  }
+  .fallback { font-size: 56px; } /* mockup 06: .pf-photo b */
+  .enso { top: 8px; right: 10px; width: 9px; height: 9px; box-shadow: 0 0 12px rgba(var(--acc-rgb), 0.9); } /* mockup 06: .pf-photo i */
+  .changeBtn {
+    padding: 6px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+    text-transform: none; letter-spacing: normal; font-size: 11.5px; /* mockup 06: .pf-chg */
+  }
+  .changeBtn:hover { border-color: rgba(var(--acc-rgb), 0.5); }
+}
