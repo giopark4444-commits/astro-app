@@ -7,6 +7,10 @@ import { AspectList } from "../aspect-list";
 
 const SUN = { body: "sun", sign: "aquarius", degree: 15, minute: 57, second: 0, house: 11, dignity: "exile", retrograde: false, speed: 1.01, longitude: 315.95 } as never;
 const TRINE = { a: "sun", b: "moon", aspect: "trine", orb: 1.2, applying: true, harmony: "soft" } as never;
+// Aspecto a un ángulo (el motor los incluye como "ascendant"/"midheaven", ver
+// packages/core/src/astrology/aspects.ts): PLANET_GLYPH no lo cubre, debe
+// caer al fallback de pointGlyph (glyphs.ts) — "Asc", no un hueco vacío.
+const SQUARE_TO_ASC = { a: "sun", b: "ascendant", aspect: "square", orb: 2.0, applying: false, harmony: "hard" } as never;
 
 const wrap = (ui: React.ReactElement) =>
   render(<NextIntlClientProvider locale="es" messages={es}>{ui}</NextIntlClientProvider>);
@@ -46,5 +50,13 @@ describe("AspectList", () => {
       <AspectList aspects={[TRINE]} pro={true} onSelect={onSelect} />
     </NextIntlClientProvider>);
     expect(screen.getByText(/1\.2°/)).toBeTruthy();
+  });
+
+  it("aspecto a un ángulo (AC) sin glifo propio: usa el fallback 'Asc' y selecciona igual", () => {
+    const onSelect = vi.fn();
+    wrap(<AspectList aspects={[SQUARE_TO_ASC]} pro={false} onSelect={onSelect} />);
+    expect(screen.getByText(/Asc/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Asc/ }));
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "aspect", aspect: SQUARE_TO_ASC });
   });
 });

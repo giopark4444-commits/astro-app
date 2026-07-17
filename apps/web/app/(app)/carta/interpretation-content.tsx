@@ -9,11 +9,18 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeBodyReading as composeEs } from "@/lib/content/astrology-readings-es";
 import { composeBodyReading as composeEn } from "@/lib/content/astrology-readings-en";
 import { BodyReadingView } from "./body-reading";
-import { PLANET_GLYPH, SIGN_GLYPH, TEXT_VS } from "./glyphs";
+import { PLANET_GLYPH, pointGlyph, SIGN_GLYPH, TEXT_VS } from "./glyphs";
 import type { Selection } from "./selection";
 import styles from "./carta.module.css";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+// L.bodies (astrology-labels) solo cubre planetas: los aspectos a los ángulos
+// AC/MC (claves "ascendant"/"midheaven", ver glyphs.ts:pointGlyph) necesitan
+// su nombre aparte — ya existe como clave i18n `carta.ascendant`/`carta.midheaven`.
+function pointName(k: string, L: ReturnType<typeof astroLabels>, t: (k: string) => string): string {
+  return L.bodies[k] ?? (k === "ascendant" ? t("ascendant") : k === "midheaven" ? t("midheaven") : k);
+}
 
 export function InterpretationContent({ selected, pro, coreSegs, profileName }: {
   selected: Selection;
@@ -72,7 +79,7 @@ export function InterpretationContent({ selected, pro, coreSegs, profileName }: 
             <div>
               <div className={styles.interpName}>{entry?.title ?? L.aspects[a.aspect]}</div>
               <div className={styles.interpSub}>
-                {PLANET_GLYPH[a.a]} {L.bodies[a.a]} {t("interpAspectOf")} {PLANET_GLYPH[a.b]} {L.bodies[a.b]}
+                {pointGlyph(a.a)} {pointName(a.a, L, t)} {t("interpAspectOf")} {pointGlyph(a.b)} {pointName(a.b, L, t)}
               </div>
             </div>
           </div>
@@ -150,7 +157,7 @@ export function selectionTitle(
   switch (selected.kind) {
     case "core": return t("interpTitle");
     case "body": return `${PLANET_GLYPH[selected.body.body] ?? ""} ${L.bodies[selected.body.body] ?? selected.body.body}`.trim();
-    case "aspect": return `${L.bodies[selected.aspect.a]} ${(ASPECT_GLYPHS[selected.aspect.aspect] ?? "")}${TEXT_VS} ${L.bodies[selected.aspect.b]}`;
+    case "aspect": return `${pointName(selected.aspect.a, L, t)} ${(ASPECT_GLYPHS[selected.aspect.aspect] ?? "")}${TEXT_VS} ${pointName(selected.aspect.b, L, t)}`;
     case "house": return `${t("house")} ${selected.house}`;
     case "sign": return L.signs[selected.sign] ?? selected.sign;
     case "pattern": return L.patterns[selected.pattern.type] ?? selected.pattern.type;

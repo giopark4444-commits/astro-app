@@ -5,7 +5,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import type { Aspect } from "@aluna/core";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
-import { PLANET_GLYPH, TEXT_VS } from "./glyphs";
+import { pointGlyph, TEXT_VS } from "./glyphs";
 import type { Selection } from "./selection";
 import styles from "./carta.module.css";
 
@@ -21,7 +21,7 @@ export function AspectList({ aspects, pro, onSelect, transit }: {
           className={`${styles.aspRow} ${styles.selRow} ${styles[`harm_${a.harmony}`] ?? ""}`}
           onClick={() => onSelect({ kind: "aspect", aspect: a })}>
           <span className={styles.aspPair}>
-            {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{(ASPECT_GLYPHS[a.aspect] ?? "") + TEXT_VS}</span> {PLANET_GLYPH[a.b]}
+            {pointGlyph(a.a)} <span className={styles.aspGlyph}>{(ASPECT_GLYPHS[a.aspect] ?? "") + TEXT_VS}</span> {pointGlyph(a.b)}
           </span>
           <span className={styles.aspName}>
             {transit

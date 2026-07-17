@@ -10,3 +10,10 @@ export const SIGN_GLYPH: Record<string, string> = Object.fromEntries(
 export const PLANET_GLYPH: Record<string, string> = Object.fromEntries(
   PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]),
 );
+
+// Los aspectos del motor (detectAspects, packages/core/src/astrology/aspects.ts)
+// incluyen los ángulos AC/MC como participantes (claves "ascendant"/"midheaven",
+// ver packages/ephemeris/src/chart.ts) — PLANET_GLYPH no los cubre.
+/** Glifo de cualquier participante de un aspecto (planetas + ángulos AC/MC). */
+export const pointGlyph = (k: string): string =>
+  PLANET_GLYPH[k] ?? (k === "ascendant" ? "Asc" : k === "midheaven" ? "MC" : "•");

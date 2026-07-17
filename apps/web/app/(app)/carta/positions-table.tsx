@@ -3,8 +3,7 @@
 // celda es un disparador de selección: cuerpo → body, signo → sign, casa →
 // house. Reemplaza los <Meaning> celda-a-celda: el significado ahora vive en
 // el panel derecho (o el sheet móvil), no en un mini-sheet por término.
-import { useTranslations } from "next-intl";
-import { useLocale } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { BodyPosition } from "@aluna/core";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { PLANET_GLYPH, SIGN_GLYPH } from "./glyphs";
@@ -36,8 +35,8 @@ export function PositionsTable({ bodies, pro, onSelect }: {
             <span className={styles.posDign}>
               {b.dignity ? L.dignities[b.dignity] : ""}
               {b.retrograde ? " ℞" : ""}
-              {(b.dignity || b.retrograde) && b.speed !== undefined ? " · " : ""}
-              {b.speed !== undefined ? `${b.speed.toFixed(2)}°/d` : ""}
+              {(b.dignity || b.retrograde) ? " · " : ""}
+              {`${b.speed.toFixed(2)}°/d`}
             </span>
           )}
         </div>
