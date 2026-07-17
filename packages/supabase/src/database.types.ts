@@ -570,6 +570,10 @@ export type Database = {
           paid_cents: number;
         }[];
       };
+      my_referral_code_for_checkout: {
+        Args: Record<string, never>;
+        Returns: string | null;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

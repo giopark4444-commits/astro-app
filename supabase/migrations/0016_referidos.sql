@@ -341,3 +341,43 @@ $$;
 
 revoke execute on function public.my_referral_summary() from anon, authenticated, public;
 grant execute on function public.my_referral_summary() to authenticated;
+
+-- my_referral_code_for_checkout(): lo mínimo que necesita /api/billing/checkout
+-- (T6, preparado/latente) para decidir si adjunta metadata de atribución.
+-- SIN esta función, un usuario referido no podría enterarse de si SU código
+-- sigue activo/con descuento: referral_codes solo es legible por su owner o
+-- superadmin (RLS de arriba), y referred_users.code por sí solo no dice si el
+-- código sigue activo. Devuelve el código SOLO si sigue activo y
+-- discount_pct > 0; null en cualquier otro caso (no referido, código
+-- desactivado, o sin descuento). No expone owner_email/commission_pct/etc. —
+-- el usuario solo recibe de vuelta el código que él mismo ya conoce.
+create or replace function public.my_referral_code_for_checkout()
+returns text
+language plpgsql
+security definer
+stable
+set search_path = public, pg_temp
+as $$
+declare
+  v_code text;
+  v_discount_pct int;
+  v_active boolean;
+begin
+  select code into v_code from public.referred_users where user_id = auth.uid();
+  if v_code is null then
+    return null;
+  end if;
+
+  select discount_pct, active into v_discount_pct, v_active
+  from public.referral_codes where code = v_code;
+
+  if v_active is not true or coalesce(v_discount_pct, 0) <= 0 then
+    return null;
+  end if;
+
+  return v_code;
+end;
+$$;
+
+revoke execute on function public.my_referral_code_for_checkout() from anon, authenticated, public;
+grant execute on function public.my_referral_code_for_checkout() to authenticated;
