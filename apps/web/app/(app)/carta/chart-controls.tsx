@@ -1,9 +1,8 @@
 "use client";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import type { HouseSystem, Zodiac } from "@aluna/core";
+import { houseSystemMeaningKey, type HouseSystem, type Zodiac } from "@aluna/core";
 import { Meaning } from "@/components/meaning";
-import { houseSystemMeaningKey } from "@/lib/meaning-keys";
 import styles from "./carta.module.css";
 
 const HOUSE_SYSTEMS: HouseSystem[] = ["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"];

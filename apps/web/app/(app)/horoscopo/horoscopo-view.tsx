@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
+import { PLANETS, ZODIAC_SIGNS, planetMeaningKey } from "@aluna/core";
 import type { WesternPayload, HoroscopePeriod } from "@/lib/horoscope/western";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
@@ -10,7 +10,6 @@ import { composeWesternProse, SOLAR_HOUSE_LABELS_ES } from "@/lib/content/horosc
 import { SOLAR_HOUSE_LABELS_EN } from "@/lib/content/horoscope-en";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
-import { planetMeaningKey } from "@/lib/meaning-keys";
 import { Starfield } from "@/components/starfield";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
 import { HoroscopeReading } from "./horoscope-reading";

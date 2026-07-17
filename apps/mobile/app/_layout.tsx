@@ -12,6 +12,7 @@ import { I18nProvider } from "../lib/i18n-context";
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { getSupabase } from "../lib/supabase";
 import { fetchRemoteProfile } from "../lib/profile-sync";
+import { MeaningProvider } from "../lib/meaning-context";
 import { ThemedBackground } from "../components/ThemedBackground";
 
 // Retiene el splash hasta que las fuentes de marca estén listas (evita FOUT).
@@ -90,7 +91,12 @@ function RootGate() {
           fallback bajo el radial. */}
       <ThemedBackground />
       <StatusBar style={t.isLight ? "dark" : "light"} />
-      <Slot />
+      {/* Capa de significados ("toca y entiende"): host único de la hoja
+          compartido por toda la app — ver nota en lib/meaning-context.tsx
+          sobre por qué <Meaning/> no puede montar su propio <BottomSheet/>. */}
+      <MeaningProvider>
+        <Slot />
+      </MeaningProvider>
     </View>
   );
 }

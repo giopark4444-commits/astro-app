@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   PLANETS,
   orderAreasByFocus,
+  planetMeaningKey,
   type LifeArea,
   type ScoreTone,
   type AreaDriver,
@@ -11,7 +12,6 @@ import {
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
-import { planetMeaningKey } from "@/lib/meaning-keys";
 import styles from "./energy.module.css";
 
 type Period = "today" | "week" | "month" | "year";

@@ -10,10 +10,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
+import { PLANETS, ZODIAC_SIGNS, planetMeaningKey } from "@aluna/core";
 import { AreaBars, type BarArea } from "../../../components/AreaBars";
 import { SkyEvents } from "../../../components/SkyEvents";
 import { HoroscopeReading } from "../../../components/HoroscopeReading";
+import { Meaning } from "../../../components/Meaning";
 import { Card, Chip, FadeIn, ToggleRow } from "../../../components/ui";
 import { useProfile } from "../../../lib/profile-context";
 import { useAuth } from "../../../lib/auth-context";
@@ -118,7 +119,12 @@ export default function HoroscopoScreen() {
         tone: a.tone,
         toneLabel: t(`hoy.${TONE_KEY[a.tone] ?? a.tone}`),
         drivers: a.drivers.map((d) => ({
-          glyphs: `${PLANET_GLYPH[d.body] ?? "•"} · ${t("horoscopo.houseShort", { n: d.house })}`,
+          glyphs: (
+            <>
+              <Meaning k={planetMeaningKey(d.body)}>{PLANET_GLYPH[d.body] ?? "•"}</Meaning>{" · "}
+              <Meaning k={`house.${d.house}`}>{t("horoscopo.houseShort", { n: d.house })}</Meaning>
+            </>
+          ),
           text: `${L.bodies[d.body] ?? d.body} — ${HOUSES[d.house]}`,
           favorable: d.favorable,
         })),
@@ -286,10 +292,12 @@ function HitRow({
   return (
     <View style={[styles.hitRow, last && styles.rowLast]}>
       <Text style={[styles.hitGlyphs, color]}>
-        {PLANET_GLYPH[h.a] ?? h.a} {ASPECT_GLYPHS[h.aspect] ?? "·"} {PLANET_GLYPH[h.b] ?? h.b}
+        <Meaning k={planetMeaningKey(h.a)}>{PLANET_GLYPH[h.a] ?? h.a}</Meaning>{" "}
+        {ASPECT_GLYPHS[h.aspect] ?? "·"}{" "}
+        <Meaning k={planetMeaningKey(h.b)}>{PLANET_GLYPH[h.b] ?? h.b}</Meaning>
       </Text>
       <Text style={styles.hitText}>
-        {L.bodies[h.a] ?? h.a} {L.aspects[h.aspect] ?? h.aspect} {L.bodies[h.b] ?? h.b}
+        {L.bodies[h.a] ?? h.a} <Meaning k={`aspect.${h.aspect}`}>{L.aspects[h.aspect] ?? h.aspect}</Meaning> {L.bodies[h.b] ?? h.b}
         {h.exactIso ? ` · ${t("horoscopo.exactOn", { date: fmtExact.format(new Date(h.exactIso)) })}` : ""}
       </Text>
     </View>
@@ -307,16 +315,21 @@ function PosRow({
 }) {
   return (
     <View style={[styles.posRow, last && styles.rowLast]}>
-      <Text style={styles.posGlyph}>{PLANET_GLYPH[h.body] ?? "•"}</Text>
+      <Text style={styles.posGlyph}>
+        <Meaning k={planetMeaningKey(h.body)}>{PLANET_GLYPH[h.body] ?? "•"}</Meaning>
+      </Text>
       {/* Combinado en una sola línea a 15px — mismo patrón que el previewRow
           "POSICIONES" de carta.tsx (T4), en vez del posName/posDetail de dos
           líneas a 13/11 de antes (§D). */}
       <Text style={styles.posTxt} numberOfLines={1}>
         <Text style={styles.posName}>{L.bodies[h.body] ?? h.body}</Text>
-        {` — ${SIGN_GLYPH[h.sign]} ${L.signs[h.sign]} `}
-        <Text style={styles.posFaint}>{`· ${t("horoscopo.houseShort", { n: h.house })}`}</Text>
+        {" — "}
+        <Meaning k={`sign.${h.sign}`}>{SIGN_GLYPH[h.sign]} {L.signs[h.sign]}</Meaning>{" "}
+        <Text style={styles.posFaint}>
+          · <Meaning k={`house.${h.house}`}>{t("horoscopo.houseShort", { n: h.house })}</Meaning>
+        </Text>
       </Text>
-      {h.retrograde && <Text style={styles.tagWarn}>℞</Text>}
+      {h.retrograde && <Text style={styles.tagWarn}><Meaning k="term.retrograde">℞</Meaning></Text>}
     </View>
   );
 }

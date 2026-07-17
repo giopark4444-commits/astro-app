@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
+  planetMeaningKey, dignityMeaningKey, patternMeaningKey,
   type ChartResult, type BodyPosition, type HouseSystem, type Zodiac, type Aspect,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
@@ -17,7 +18,6 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
-import { planetMeaningKey, dignityMeaningKey, patternMeaningKey } from "@/lib/meaning-keys";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
 import styles from "./carta.module.css";
