@@ -20,7 +20,7 @@ vi.mock("@/app/auth/actions", () => ({
 function renderControls() {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <SettingsControls currentLocale="es" email="gio@example.com" />
+      <SettingsControls currentLocale="es" email="gio@example.com" hasIntent intentUseInAI={false} />
     </NextIntlClientProvider>,
   );
 }

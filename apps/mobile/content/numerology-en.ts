@@ -166,3 +166,34 @@ export const PERSONAL_DAY_EN: Record<number, string> = {
   11: "A luminous day. Your intuition speaks clearly: trust what you feel.",
   22: "A day to build big. Land a dream in one concrete act.",
 };
+
+/** Port of NICKNAMES_ES — see that file for scope/rationale. */
+export const NICKNAMES_EN: Record<number, string> = {
+  1: "The pioneer",
+  2: "The diplomat",
+  3: "The communicator",
+  4: "The builder",
+  5: "The adventurer",
+  6: "The guardian",
+  7: "The seeker",
+  8: "The achiever",
+  9: "The compassionate",
+  11: "The visionary",
+  22: "The master builder",
+  33: "The healer",
+};
+
+/** Port of PERSONAL_YEAR_ES — see that file for scope/rationale. */
+export const PERSONAL_YEAR_EN: Record<number, string> = {
+  1: "A year of beginnings — plant the seed, even if the fruit takes time.",
+  2: "A year of bonds and patience — build in twos, not alone.",
+  3: "A year of expression and shine — let your voice take up space.",
+  4: "A year of foundations — order, work, and put down a firm root.",
+  5: "A year of change and movement — drop the map, follow the compass.",
+  6: "A year of home and care — tend what you love, starting with yourself.",
+  7: "A year of introspection — slow down and listen to what you already know.",
+  8: "A year of power and harvest — claim what you built with integrity.",
+  9: "A year of closure — release what's done to make room for what's new.",
+  11: "A luminous year — trust the intuition that guides you without proof.",
+  22: "A year of building big — land the dream in concrete acts.",
+};

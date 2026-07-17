@@ -13,8 +13,11 @@ import { profileToNumerologyInput } from "../../lib/profile";
 import { numerologyContent } from "../../content/numerology";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../theme/tokens";
 
-type CoreKey = "expression" | "soulUrge" | "personality" | "birthday" | "maturity";
-const formatReduction = (tr: Pick<ReductionTrace, "steps">) => tr.steps.join("  →  ");
+// Solo los 4 números de "núcleo" del mockup 10 (Expresión/Alma/Personalidad/
+// Madurez). "birthday" (Día de Nacimiento) no tiene celda en el grid compacto
+// — se reubica dentro de Modo Pro (ver abajo) en vez de perderse (mismo
+// principio que T4 en carta.tsx: no borrar funcionalidad visible, reubicarla).
+type CoreKey = "expression" | "soulUrge" | "personality" | "maturity";
 const ageLabel = (from: number, to: number | null) => (to === null ? `${from}+` : `${from}–${to}`);
 
 interface SheetState {
@@ -28,10 +31,13 @@ export default function NumerosScreen() {
   const { t: tk } = useTheme();
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
-  const labels = numerologyContent(locale).labels;
-  const gloss = numerologyContent(locale).gloss;
+  const content = numerologyContent(locale);
+  const { labels, gloss, lens, nicknames, personalYear: personalYearVoice } = content;
   const [pro, setPro] = useState(false);
   const [sheet, setSheet] = useState<SheetState | null>(null);
+  // Año civil actual — el mismo "asOf" implícito que usa computeNumerology
+  // cuando no se le pasa uno explícito (ver packages/core/numerology/compute.ts).
+  const currentYear = new Date().getFullYear();
 
   const result = useMemo<NumerologyResult | null>(() => {
     if (!profile) return null;
@@ -58,7 +64,6 @@ export default function NumerosScreen() {
     { key: "expression", trace: core.expression },
     { key: "soulUrge", trace: core.soulUrge },
     { key: "personality", trace: core.personality },
-    { key: "birthday", trace: core.birthday },
     { key: "maturity", trace: core.maturity },
   ];
   const maxIncl = Math.max(1, ...Object.values(karmic.inclusion));
@@ -74,42 +79,45 @@ export default function NumerosScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Cabecera del mockup 10: eyebrow + h1 con el nombre interpolado, apilados.
+            Sin Enso (solo vive en Hoy) y sin control alguno (numeros.html no trae uno). */}
         <View style={styles.head}>
           <Text style={styles.eyebrow}>{t("numerology.title")}</Text>
-          <Enso size={22} />
+          <Text style={styles.h1} maxFontSizeMultiplier={1.2}>
+            {t("numerology.headTitle", { name: profile.name })}
+          </Text>
         </View>
-        <Text style={styles.h1} maxFontSizeMultiplier={1.2}>{t("numerology.subtitle")}</Text>
-        <Text style={styles.who}>{profile.name}</Text>
 
-        {/* HERO — Camino de Vida: tarjeta acentuada (receta "hero" de Hoy), número
-            libre en fonts.serifSemi a type.display, la insignia de número maestro
-            ahora es el chip canónico "tag". */}
-        <FadeIn delay={0} style={styles.heroGap}>
+        {/* HERO — Camino de Vida: fila horizontal (número 64px a la izquierda +
+            stack de texto), receta card--tinted. Reemplaza el anillo circular
+            vertical de antes. La fórmula de reducción inline se quita: ya vive,
+            sin duplicarla, dentro de la hoja de lectura (NumberReading) que se
+            abre al tocar la tarjeta. El badge de número maestro se conserva como
+            chip discreto junto al eyebrow (el mockup no lo muestra porque su
+            ejemplo — 7 — no es maestro, pero es funcionalidad visible hoy que no
+            debe perderse silenciosamente cuando SÍ aplica). */}
+        <FadeIn delay={0} style={styles.fadeFull}>
           <Pressable onPress={() => setSheet({ positionKey: "lifePath", trace: core.lifePath })}>
             <Card accent style={styles.hero}>
-              <View style={styles.ringOuter}>
-                <View style={styles.ring}>
-                  <Text style={styles.heroN} maxFontSizeMultiplier={1.2}>
-                    {core.lifePath.value}
-                  </Text>
+              <Text style={styles.heroN} maxFontSizeMultiplier={1.2}>
+                {core.lifePath.value}
+              </Text>
+              <View style={styles.heroStack}>
+                <View style={styles.heroEyebrowRow}>
+                  <Text style={styles.eyebrow}>{labels.lifePath}</Text>
+                  {core.lifePath.isMaster && <Chip kind="tag" label={t("numerology.master")} />}
                 </View>
+                <Text style={styles.heroSub}>{nicknames[core.lifePath.value]}</Text>
+                <Text style={styles.heroTxt}>{lens.lifePath}</Text>
               </View>
-              {core.lifePath.isMaster && (
-                <View style={styles.masterBadge}>
-                  <Chip kind="tag" label={t("numerology.master")} />
-                </View>
-              )}
-              <Text style={styles.heroLabel}>{labels.lifePath}</Text>
-              <Text style={styles.heroGloss}>{gloss.lifePath}</Text>
-              <Text style={styles.calc}>{formatReduction(core.lifePath)}</Text>
             </Card>
           </Pressable>
         </FadeIn>
 
-        {/* Núcleo: los 5 números conviven en la MISMA escala (type.xl3) — antes
-            tenían tamaños sueltos (34px), justo la inconsistencia que mata el rediseño. */}
+        {/* Núcleo — grid 2×2 estricto (mockup §3): número (32px, exento de la
+            escala) + etiqueta-eyebrow + apodo. */}
         <FadeIn delay={60} style={styles.fadeFull}>
-          <View style={styles.grid}>
+          <View style={styles.grid2}>
             {coreItems.map((it) => (
               <Pressable
                 key={it.key}
@@ -119,18 +127,59 @@ export default function NumerosScreen() {
                 <Card style={styles.cell}>
                   <Text style={styles.cellN}>{it.trace.value}</Text>
                   <Text style={styles.cellL}>{labels[it.key]}</Text>
-                  <Text style={styles.cellSub}>{gloss[it.key]}</Text>
+                  <Text style={styles.cellSub}>{nicknames[it.trace.value]}</Text>
                 </Card>
               </Pressable>
             ))}
           </View>
         </FadeIn>
 
+        {/* Año personal — fila destacada SIEMPRE visible (mockup §4), fuera de
+            Modo Pro. Antes vivía como 1 de 3 columnas iguales dentro de Pro junto
+            a mes/día personal (que se quedan en Pro, ver abajo). */}
+        <FadeIn delay={100} style={styles.fadeFull}>
+          <Card style={styles.yearRow}>
+            <Text style={styles.yearNum}>{cycles.personalYear.value}</Text>
+            <Text style={styles.yearTxt}>
+              <Text style={styles.yearLead}>
+                {t("numerology.personalYear")} {currentYear}
+              </Text>
+              {" · "}
+              {personalYearVoice[cycles.personalYear.value] ?? ""}
+            </Text>
+          </Card>
+        </FadeIn>
+
+        {/* CTA "lectura completa" (mockup §5): no existe una pantalla nueva de
+            "todos tus números" — reutiliza la misma hoja de lectura que abre el
+            héroe (Camino de Vida es la lectura central/representativa), sin
+            inventar navegación nueva. */}
+        <FadeIn delay={140} style={styles.fadeFull}>
+          <Pressable onPress={() => setSheet({ positionKey: "lifePath", trace: core.lifePath })}>
+            <Card style={styles.linkRow}>
+              <Text style={styles.linkText}>{t("numerology.ctaFull")}</Text>
+            </Card>
+          </Pressable>
+        </FadeIn>
+
         {/* Toggle Modo Pro */}
-        <ToggleRow label={t("numerology.pro")} on={pro} onPress={() => setPro(!pro)} style={{ marginTop: space.xxl }} />
+        <ToggleRow label={t("numerology.pro")} on={pro} onPress={() => setPro(!pro)} style={{ marginTop: space.lg }} />
 
         {pro && (
           <View style={styles.proBody}>
+            {/* Día de Nacimiento: 5ª celda del grid viejo, sin lugar en el grid
+                compacto del mockup — reubicada aquí en vez de eliminada. */}
+            <SectionCard styles={styles} title={t("numerology.birthdayTitle")}>
+              <Pressable
+                style={styles.birthdayRow}
+                onPress={() => setSheet({ positionKey: "birthday", trace: core.birthday })}
+              >
+                <Text style={styles.birthdayN}>{core.birthday.value}</Text>
+                <Text style={styles.birthdaySub}>{gloss.birthday}</Text>
+                <Text style={styles.birthdayChev}>›</Text>
+              </Pressable>
+            </SectionCard>
+
             {/* Lecciones y deudas kármicas */}
             <SectionCard styles={styles} title={t("numerology.karmicLessons")}>
               <View style={styles.chips}>
@@ -187,18 +236,16 @@ export default function NumerosScreen() {
               <Timeline styles={styles} items={challenges.map((c) => ({ value: c.value, age: ageLabel(c.startAge, c.endAge) }))} />
             </SectionCard>
 
-            {/* Ciclos del momento */}
+            {/* Ciclos del momento — el año personal ya se sacó a la fila
+                siempre-visible de arriba; aquí solo quedan mes y día. */}
             <SectionCard styles={styles} title={t("numerology.cycles")}>
               <View style={styles.cycles}>
-                <Cyc styles={styles} value={cycles.personalYear.value} label={t("numerology.personalYear")} />
                 <Cyc styles={styles} value={cycles.personalMonth.value} label={t("numerology.personalMonth")} />
                 <Cyc styles={styles} value={cycles.personalDay.value} label={t("numerology.personalDay")} />
               </View>
             </SectionCard>
           </View>
         )}
-
-        <Text style={styles.tapHint}>{t("numerology.tapHint")}</Text>
       </ScrollView>
 
       <BottomSheet
@@ -275,80 +322,59 @@ function makeStyles(t: ThemeTokens) {
     emptyWrap: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.lg },
     emptyText: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
 
-    head: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.sm },
-    eyebrow: { color: t.acc, fontSize: typeScale.xs2, letterSpacing: 3, textTransform: "uppercase", fontFamily: fonts.sansSemi },
-    h1: { color: t.text, fontSize: typeScale.displaySm, fontFamily: fonts.serifSemi, textAlign: "center" },
-    who: {
-      color: t.textDim,
-      fontSize: typeScale.md,
-      marginTop: space.xs,
-      marginBottom: space.xxl,
-      fontFamily: fonts.serifItalic,
-    },
+    // Cabecera: eyebrow + h1, apilados a la izquierda — receta "eyebrow"+"h-serif"
+    // del mockup, idéntica a la de carta.tsx (T4).
+    head: { width: "100%", gap: 2, marginBottom: space.xl },
+    eyebrow: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", fontFamily: fonts.sansSemi },
+    h1: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi },
 
-    // FadeIn del hero: el marginBottom que antes vivía en el propio Pressable/hero
-    // ahora vive en el wrapper de entrada (misma convención que Hoy/Carta).
-    heroGap: { marginBottom: space.xxl },
-    // Tarjeta acentuada (--surface-2 del SPEC): fondo/borde/radio/padding los da
-    // <Card accent>; acá solo el centrado de los hijos.
-    hero: { alignItems: "center" },
-    ringOuter: {
-      width: 188,
-      height: 188,
-      borderRadius: 94,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: t.accFaint,
-    },
-    ring: {
-      width: 156,
-      height: 156,
-      borderRadius: 78,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1.5,
-      borderColor: t.accSoft,
-      backgroundColor: t.panelSoft,
-    },
-    // Número héroe: fonts.serifSemi a type.display (política de la pasada de pantalla).
-    heroN: { color: t.acc, fontSize: typeScale.display, fontFamily: fonts.serifSemi, lineHeight: 64 },
-    masterBadge: { marginTop: space.lg },
-    // Serif semibold sin cursiva, type.xl — receta "heroLabel" del mockup web de Números.
-    heroLabel: { color: t.text, fontSize: typeScale.xl, marginTop: space.lg, fontFamily: fonts.serifSemi },
-    heroGloss: {
-      color: t.textDim,
-      fontSize: typeScale.sm,
-      lineHeight: 20,
-      marginTop: space.xs,
-      fontFamily: fonts.sans,
-    },
-    calc: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.sm, fontFamily: fonts.serifItalic },
+    // <FadeIn> envuelve secciones que ya declaraban width:"100%" (necesario
+    // porque `scroll` centra sus hijos con alignItems).
+    fadeFull: { width: "100%" },
 
-    grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.md, width: "100%" },
-    // Ancho de grilla en el Pressable (participa del flex-wrap 2 columnas); el resto
-    // del look de la celda (borde/fondo/radio) lo da <Card>.
+    // HERO Camino de Vida: fila horizontal, número 64px (hero-exento) a la
+    // izquierda + stack de texto a la derecha. Card `accent` aproxima el
+    // gradiente dorado de `.card--tinted`.
+    hero: { width: "100%", flexDirection: "row", alignItems: "center", gap: 14, minHeight: 150, padding: space.lg },
+    heroN: { color: t.accText, fontSize: 64, lineHeight: 64, fontFamily: fonts.serifSemi, flexShrink: 0 },
+    heroStack: { flex: 1, gap: 5 },
+    heroEyebrowRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
+    heroSub: { color: t.text, fontSize: typeScale.lg2, fontFamily: fonts.serifItalic },
+    heroTxt: { color: t.textDim, fontSize: typeScale.md, lineHeight: 21, fontFamily: fonts.sansMedium },
+
+    // Grid 2×2 núcleo — 2 columnas via flex-wrap (mismo mecanismo probado que la
+    // versión anterior, solo con el gap del mockup).
+    grid2: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%" },
     cellPress: { width: "47%", minWidth: 150 },
-    cell: { alignItems: "center", paddingVertical: space.lg, paddingHorizontal: space.md },
-    // Serif semibold, type.xl3 — TODOS los números del núcleo a la misma escala.
-    cellN: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
-    cellL: { color: t.text, fontSize: typeScale.sm, marginTop: space.xs, fontFamily: fonts.sansMedium },
-    cellSub: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 2, textAlign: "center", fontFamily: fonts.sans },
+    cell: { paddingVertical: space.md, paddingHorizontal: 14, minHeight: 106, justifyContent: "center", gap: 2 },
+    cellN: { color: t.accText, fontSize: typeScale.xl3, fontFamily: fonts.serifSemi },
+    cellL: { color: t.accText, fontSize: typeScale.sm, letterSpacing: 2.5, textTransform: "uppercase", marginTop: 2, fontFamily: fonts.sansSemi },
+    cellSub: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sansMedium },
+
+    // Año personal: fila destacada, siempre visible. Número 28px (hero-exento).
+    yearRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 14, minHeight: 64, paddingVertical: 0, paddingHorizontal: space.lg },
+    yearNum: { color: t.accText, fontSize: 28, lineHeight: 28, fontFamily: fonts.serifSemi, flexShrink: 0 },
+    yearTxt: { flex: 1, color: t.textDim, fontSize: typeScale.md, lineHeight: 20, fontFamily: fonts.sansMedium },
+    yearLead: { color: t.text, fontFamily: fonts.sansSemi },
+
+    // CTA-fantasma "Ver la lectura completa" — fila tipo link, centrada.
+    linkRow: { width: "100%", minHeight: 48, paddingVertical: 0, paddingHorizontal: space.lg, alignItems: "center", justifyContent: "center" },
+    linkText: { color: t.accText, fontSize: typeScale.md, fontFamily: fonts.sansSemi },
 
     proBody: { width: "100%", marginTop: space.xl, gap: space.lg },
     // Fondo/borde/radio ahora los da <Card>; queda solo el ancho.
     card: { width: "100%" },
     cardH: {
-      color: t.acc,
+      color: t.accText,
       fontSize: typeScale.sm,
-      letterSpacing: 2,
+      letterSpacing: 2.5,
       textTransform: "uppercase",
       marginBottom: space.md,
       fontFamily: fonts.sansSemi,
     },
     cardSub: {
       color: t.textDim,
-      fontSize: typeScale.xs,
+      fontSize: typeScale.sm,
       letterSpacing: 1,
       textTransform: "uppercase",
       marginTop: space.lg,
@@ -356,6 +382,13 @@ function makeStyles(t: ThemeTokens) {
       fontFamily: fonts.sansSemi,
     },
     muted: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.sans },
+
+    // Día de Nacimiento (reubicado desde el grid principal): fila tocable, mismo
+    // lenguaje que las filas de "posiciones" de carta.tsx.
+    birthdayRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+    birthdayN: { color: t.accText, fontSize: typeScale.xl2, fontFamily: fonts.serifSemi, width: 30 },
+    birthdaySub: { flex: 1, color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans },
+    birthdayChev: { color: t.accText, opacity: 0.85, fontSize: typeScale.md, fontFamily: fonts.serifSemi },
 
     // Chips de dígito kármico: badge circular fijo, no una pill de <Chip> (la data
     // solo trae dígitos sueltos, no el texto descriptivo del mockup web) — local
@@ -371,7 +404,7 @@ function makeStyles(t: ThemeTokens) {
       borderColor: t.accSoft,
       backgroundColor: t.accFaint,
     },
-    chipText: { color: t.acc, fontSize: typeScale.lg, fontFamily: fonts.serif },
+    chipText: { color: t.accText, fontSize: typeScale.xl2, fontFamily: fonts.serif },
     chipWarn: { borderColor: t.warn, backgroundColor: t.warnSoft },
     chipWarnText: { color: t.warn },
 
@@ -389,9 +422,9 @@ function makeStyles(t: ThemeTokens) {
     },
     inclHot: { borderColor: t.acc, backgroundColor: t.accFaint },
     inclMiss: { opacity: 0.45 },
-    inclD: { color: t.text, fontSize: typeScale.lg, fontFamily: fonts.serif },
-    inclDHot: { color: t.acc },
-    inclC: { color: t.textDim, fontSize: typeScale.xs, marginTop: 2, fontFamily: fonts.sans },
+    inclD: { color: t.text, fontSize: typeScale.xl2, fontFamily: fonts.serif },
+    inclDHot: { color: t.accText },
+    inclC: { color: t.textDim, fontSize: typeScale.sm, marginTop: 2, fontFamily: fonts.sans },
 
     timeline: { flexDirection: "row", justifyContent: "space-between", gap: space.sm },
     tcell: {
@@ -403,19 +436,12 @@ function makeStyles(t: ThemeTokens) {
       borderRadius: radius.sm,
       backgroundColor: t.panel,
     },
-    tN: { color: t.acc, fontSize: typeScale.xl, fontFamily: fonts.serif },
-    tAge: { color: t.textFaint, fontSize: typeScale.xs2, marginTop: 2, fontFamily: fonts.sans },
+    tN: { color: t.accText, fontSize: typeScale.xl2, fontFamily: fonts.serif },
+    tAge: { color: t.textFaint, fontSize: typeScale.sm, marginTop: 2, fontFamily: fonts.sans },
 
     cycles: { flexDirection: "row", justifyContent: "space-between", gap: space.md },
     cyc: { flex: 1, alignItems: "center" },
-    cycN: { color: t.acc, fontSize: typeScale.xl3, fontFamily: fonts.serif },
-    cycL: { color: t.textDim, fontSize: typeScale.xs, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
-
-    // <FadeIn> envuelve la grilla del núcleo, que ya declara width:"100%" (mismo
-    // motivo que carta.tsx: sin este ancho explícito en el propio wrapper de
-    // FadeIn, el % interno no tendría contra qué resolverse).
-    fadeFull: { width: "100%" },
-
-    tapHint: { color: t.textFaint, fontSize: typeScale.sm, marginTop: space.xxl, textAlign: "center", fontFamily: fonts.sans },
+    cycN: { color: t.accText, fontSize: typeScale.xl2, fontFamily: fonts.serif },
+    cycL: { color: t.textDim, fontSize: typeScale.sm, marginTop: space.xs, textAlign: "center", fontFamily: fonts.sans },
   });
 }

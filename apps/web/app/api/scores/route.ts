@@ -9,7 +9,7 @@ import {
   type LifeArea,
   type AreaDriver,
 } from "@aluna/core";
-import { createClient } from "@/lib/supabase/server";
+import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 
 // "Tu energía de hoy" (Fase 2): puntúa 6 áreas de vida (0..100) a partir de los
@@ -62,10 +62,7 @@ export async function POST(request: NextRequest) {
     ? (body.period as Period)
     : "today";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   // RLS limita el SELECT al dueño: si vuelve fila, el perfil es de este usuario.

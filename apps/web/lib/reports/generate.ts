@@ -13,13 +13,15 @@
 // trivial de testear en vitest sin arrastrar ese binding nativo — la ruta
 // (Task 5) es quien computa las cartas y se las inyecta.
 
-import type { ChartResult } from "@aluna/core";
+import type { ChartResult, UserIntent } from "@aluna/core";
+import { parseIntent } from "@aluna/core";
 import type { AlunaSupabaseClient, Json, TablesUpdate } from "@aluna/supabase";
 import { resolveReportCascade, completeWithCascade, type ReadingProvider } from "../reading/provider";
 import { gatherNatalGrounding } from "./grounding";
 import { buildNatalReportPrompt, buildSolarReportPrompt, type ReportPromptSpec } from "./prompts";
 import { parseNatalReport, parseSolarReport } from "./parse";
 import { astroLabels } from "../content/astrology-labels";
+import { buildIntentLine } from "../intent-line";
 import type { NatalReport, SolarReport } from "./types";
 
 export interface RunReportArgs {
@@ -51,19 +53,49 @@ function requireYear(year: number | null): number {
   return year;
 }
 
+/**
+ * Trae `settings.intent` del usuario y arma la línea de contexto opcional
+ * (Task 13). NUNCA lanza: si la lectura falla por lo que sea, se sigue el
+ * informe sin línea de intención en vez de tumbar la generación entera por
+ * un detalle opcional — ver la nota de diseño de este módulo (todo error
+ * cae a status:'error', pero eso es demasiado castigo por esto).
+ */
+async function fetchIntentLine(
+  supabase: AlunaSupabaseClient,
+  userId: string,
+  locale: RunReportArgs["locale"],
+): Promise<string | null> {
+  try {
+    const { data } = await supabase.from("settings").select("intent").eq("user_id", userId).maybeSingle();
+    const intent = parseIntent((data as { intent: unknown } | null)?.intent) as UserIntent | null;
+    return buildIntentLine(intent, locale);
+  } catch {
+    return null;
+  }
+}
+
 /** Arma el prompt (system+prompt+maxTokens) según el tipo de informe. */
-function buildPrompt(args: RunReportArgs): ReportPromptSpec {
+async function buildPrompt(args: RunReportArgs): Promise<ReportPromptSpec> {
   const labels = astroLabels(args.locale);
+  const intentLine = await fetchIntentLine(args.supabase, args.userId, args.locale);
 
   if (args.kind === "natal") {
-    const grounding = gatherNatalGrounding(args.natalChart, labels, args.locale);
+    let grounding = gatherNatalGrounding(args.natalChart, labels, args.locale);
+    if (intentLine) grounding = `${grounding}\n\n${intentLine}`;
     return buildNatalReportPrompt(args.natalChart, grounding, labels, args.locale);
   }
 
   if (!args.solarChart) {
     throw new Error("runReportGeneration: kind='solar_return' requiere solarChart");
   }
-  return buildSolarReportPrompt(args.solarChart, args.natalChart, labels, args.locale, requireYear(args.year));
+  return buildSolarReportPrompt(
+    args.solarChart,
+    args.natalChart,
+    labels,
+    args.locale,
+    requireYear(args.year),
+    intentLine,
+  );
 }
 
 /** Parsea el texto crudo del modelo según el tipo de informe. Lanza
@@ -135,7 +167,7 @@ export async function runReportGeneration(args: RunReportArgs): Promise<void> {
   const match = { userId: args.userId, kind: args.kind, year: args.year, locale: args.locale };
 
   try {
-    const spec = buildPrompt(args);
+    const spec = await buildPrompt(args);
     const cascade = args.providers ?? resolveReportCascade();
     // `validate` hace que la cascada trate un JSON malformado del proveedor
     // igual que un error/texto vacío: cae al siguiente en vez de quedarse con

@@ -174,6 +174,7 @@ export function buildSolarReportPrompt(
   labels: AstroLabelMaps,
   locale: string,
   year: number,
+  intentLine?: string | null,
 ): ReportPromptSpec {
   const loc = localeOf(locale);
 
@@ -187,7 +188,12 @@ You write the SOLAR REPORT for one year of someone's life: the year's weather ov
 Escribes el INFORME SOLAR de un año en la vida de alguien: el clima del año sobre su naturaleza inmutable. Te ANCLAS en el material fuente de abajo —el ancla natal de la persona y la carta de revolución solar de este año— nunca inventes posiciones que no estén ahí.`;
 
   const natalGrounding = gatherNatalGrounding(natalChart, labels, loc);
-  const solarSummary = summarizeSolarChart(solarChart, labels, loc);
+  // La línea de intención (Task 13, opcional) se anexa al final del bloque de
+  // grounding solar (natalGrounding + solarSummary) cuando existe — mismo
+  // criterio que el informe natal: byte-idéntico al actual si no aplica.
+  const solarSummary = intentLine
+    ? `${summarizeSolarChart(solarChart, labels, loc)}\n\n${intentLine}`
+    : summarizeSolarChart(solarChart, labels, loc);
 
   const prompt =
     loc === "en"

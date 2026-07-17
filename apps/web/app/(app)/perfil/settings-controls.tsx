@@ -1,10 +1,11 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { THEMES, MODES, type Theme } from "@/lib/theme/themes";
 import { signOut } from "@/app/auth/actions";
-import { setLanguage } from "../actions";
+import { setLanguage, setIntentUseInAI } from "../actions";
 import styles from "./settings.module.css";
 
 const SWATCH: Record<Theme, string> = {
@@ -13,11 +14,25 @@ const SWATCH: Record<Theme, string> = {
   cosmic: "linear-gradient(135deg, #2a0f4a, #b86bff)",
 };
 
-export function SettingsControls({ currentLocale, email }: { currentLocale: string; email: string }) {
+export function SettingsControls({
+  currentLocale,
+  email,
+  hasIntent,
+  intentUseInAI,
+}: {
+  currentLocale: string;
+  email: string;
+  hasIntent: boolean;
+  intentUseInAI: boolean;
+}) {
   const t = useTranslations("settings");
   const tAuth = useTranslations("auth");
   const router = useRouter();
   const { theme, setTheme, mode, setMode } = useTheme();
+  // Estado local optimista: el toggle no depende de router.refresh() para
+  // sentirse instantáneo (setIntentUseInAI es fire-and-forget del lado
+  // servidor, igual que setTheme/setMode arriba).
+  const [useInAI, setUseInAI] = useState(intentUseInAI);
 
   return (
     <>
@@ -57,6 +72,27 @@ export function SettingsControls({ currentLocale, email }: { currentLocale: stri
             ))}
           </div>
         </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.label}>{t("intentAI")}</h3>
+          <p>{t("intentAIHint")}</p>
+          <div className="seg" role="group" aria-label={t("intentAI")}>
+            {([true, false] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`seg__item ${styles.segItem} ${useInAI === on ? "seg__item--active" : ""}`}
+                aria-pressed={useInAI === on}
+                disabled={!hasIntent}
+                onClick={async () => {
+                  setUseInAI(on);
+                  await setIntentUseInAI(on);
+                }}
+              >
+                {t(on ? "intentAIOn" : "intentAIOff")}
+              </button>
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* Desktop (≥1080px): filas compactas — mockup 06 §5.3 (.pf-prow).
@@ -91,6 +127,28 @@ export function SettingsControls({ currentLocale, email }: { currentLocale: stri
               <button key={loc} className={`seg__item ${styles.segItem} ${styles.segCompact} ${currentLocale === loc ? "seg__item--active" : ""}`}
                 aria-pressed={currentLocale === loc}
                 onClick={async () => { await setLanguage(loc); router.refresh(); }}>{loc.toUpperCase()}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Toggle de intención (cuestionario): misma fila compacta que el resto;
+            el hint largo vive solo en móvil — en desktop lo lleva el title. */}
+        <div className={styles.prow} title={t("intentAIHint")}>
+          <span className={styles.plab}>{t("intentAI")}</span>
+          <div className={`seg ${styles.segCompactWrap}`} role="group" aria-label={t("intentAI")}>
+            {([true, false] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`seg__item ${styles.segItem} ${styles.segCompact} ${useInAI === on ? "seg__item--active" : ""}`}
+                aria-pressed={useInAI === on}
+                disabled={!hasIntent}
+                onClick={async () => {
+                  setUseInAI(on);
+                  await setIntentUseInAI(on);
+                }}
+              >
+                {t(on ? "intentAIOn" : "intentAIOff")}
+              </button>
             ))}
           </div>
         </div>

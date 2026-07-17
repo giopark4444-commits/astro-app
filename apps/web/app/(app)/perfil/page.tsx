@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import type { SubscriptionStatus } from "@aluna/core";
+import { parseIntent } from "@aluna/core";
 import { PerfilHero } from "./perfil-hero";
 import { Personas } from "./personas";
 import { Manifestations } from "./manifestations";
@@ -49,6 +50,18 @@ export default async function PerfilPage({
   // timestamp de Supabase Auth, siempre presente para un usuario ya logueado.
   const since = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(new Date(user.created_at));
 
+  // Intención del cuestionario de primera entrada (Task 13): se lee aquí
+  // (server component que ya carga los demás datos de la página) para pasar
+  // el estado inicial del toggle "Aluna te conoce" — el control se muestra
+  // igual aunque no haya intent (parseIntent null), pero entonces no tiene
+  // efecto real (ver setIntentUseInAI).
+  const { data: intentRow } = await supabase
+    .from("settings")
+    .select("intent")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const intent = parseIntent((intentRow as { intent: unknown } | null)?.intent);
+
   return (
     <main className={styles.page}>
       <PerfilHero userId={user.id} avatarUrl={publicUrl} since={since} />
@@ -59,7 +72,7 @@ export default async function PerfilPage({
       </div>
       <section className={styles.prefs}>
         <h2 className={styles.prefsTitle}>{t("preferences")}</h2>
-        <SettingsControls currentLocale={locale} email={user.email ?? ""} />
+        <SettingsControls currentLocale={locale} email={user.email ?? ""} hasIntent={intent !== null} intentUseInAI={intent?.useInAI ?? false} />
       </section>
       {/* "Tu plan" no está en el mockup 06 (que no modela billing) — se conserva
           como fila propia, adaptación consciente (brief T8, no eliminar). */}
