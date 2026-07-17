@@ -53,7 +53,9 @@ export function NumerologyView() {
       {/* HERO — Camino de Vida */}
       <button className={`${styles.hero} reveal`} style={{ ["--i" as string]: 1 }}
         onClick={() => setSheet({ labelKey: "lifePath", glossKey: "glossLifePath", trace: core.lifePath })}>
-        <span className={styles.ring}><span className={styles.heroN}>{core.lifePath.value}</span></span>
+        <span className={`${styles.ring} ${styles.ringIn}`}>
+          <span className={`${styles.heroN} ignite`} style={{ ["--i" as string]: 0 }}>{core.lifePath.value}</span>
+        </span>
         {core.lifePath.isMaster && <span className={styles.pill}>★ {t("master")}</span>}
         <span className={styles.heroLabel}>{t("lifePath")}</span>
         <span className={styles.calc}>
@@ -67,7 +69,7 @@ export function NumerologyView() {
         {coreItems.map((it, idx) => (
           <button key={it.key} className={`${styles.lz} reveal`} style={{ ["--i" as string]: 2 + idx }}
             onClick={() => setSheet({ labelKey: it.key, glossKey: `gloss${cap(it.key)}`, trace: it.trace })}>
-            <span className={styles.lzN}>{it.trace.value}</span>
+            <span className={`${styles.lzN} ignite`} style={{ ["--i" as string]: idx + 1 }}>{it.trace.value}</span>
             <span className={styles.lzL}>{t(it.key)}</span>
             <span className={styles.lzSub}>{t(`gloss${cap(it.key)}`)}</span>
           </button>
@@ -85,13 +87,19 @@ export function NumerologyView() {
             <h3 className={styles.cardH}>{t("karmicLessons")}</h3>
             <div className={styles.chips}>
               {karmic.lessons.length
-                ? karmic.lessons.map((n) => <span key={n} className={`chip ${styles.chip}`}>{n}</span>)
+                ? karmic.lessons.map((n, idx) => (
+                    <span key={n} className={`chip ${styles.chip} ignite`} style={{ ["--i" as string]: idx }}>{n}</span>
+                  ))
                 : <span className={styles.muted}>{t("none")}</span>}
             </div>
             {karmic.debts.length > 0 && (
               <>
                 <h4 className={styles.cardSub}>{t("debts")}</h4>
-                <div className={styles.chips}>{karmic.debts.map((n) => <span key={n} className={`chip ${styles.chip} ${styles.chipWarn}`}>{n}</span>)}</div>
+                <div className={styles.chips}>
+                  {karmic.debts.map((n, idx) => (
+                    <span key={n} className={`chip ${styles.chip} ${styles.chipWarn} ignite`} style={{ ["--i" as string]: idx }}>{n}</span>
+                  ))}
+                </div>
               </>
             )}
           </section>
@@ -99,13 +107,13 @@ export function NumerologyView() {
           <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("inclusion")}</h3>
             <div className={styles.incl}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => {
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d, idx) => {
                 const c = karmic.inclusion[d] ?? 0;
                 const hot = c === maxIncl && c > 0;
                 return (
                   <div key={d} className={`${styles.cell} ${hot ? styles.cellHot : ""} ${c === 0 ? styles.cellMiss : ""}`}>
                     <span className={styles.cellD}>{d}</span>
-                    <span className={styles.cellC}>{c === 0 ? "—" : `×${c}`}</span>
+                    <span className={`${styles.cellC} ignite`} style={{ ["--i" as string]: idx }}>{c === 0 ? "—" : `×${c}`}</span>
                   </div>
                 );
               })}
@@ -120,7 +128,7 @@ export function NumerologyView() {
             <div className={styles.timeline}>
               {pinnacles.map((p, k) => (
                 <div key={k} className={styles.tcell}>
-                  <span className={styles.tN}>{p.value}</span>
+                  <span className={`${styles.tN} ignite`} style={{ ["--i" as string]: k }}>{p.value}</span>
                   <span className={styles.tAge}>{ageLabel(p.startAge, p.endAge)}</span>
                 </div>
               ))}
@@ -129,7 +137,7 @@ export function NumerologyView() {
             <div className={styles.timeline}>
               {challenges.map((c, k) => (
                 <div key={k} className={styles.tcell}>
-                  <span className={styles.tN}>{c.value}</span>
+                  <span className={`${styles.tN} ignite`} style={{ ["--i" as string]: k }}>{c.value}</span>
                   <span className={styles.tAge}>{ageLabel(c.startAge, c.endAge)}</span>
                 </div>
               ))}
@@ -139,9 +147,9 @@ export function NumerologyView() {
           <section className="card card--tight fade-in">
             <h3 className={styles.cardH}>{t("cycles")}</h3>
             <div className={styles.cycles}>
-              <div className={styles.cyc}><span className={styles.cycN}>{cycles.personalYear.value}</span><span className={styles.cycL}>{t("personalYear")}</span></div>
-              <div className={styles.cyc}><span className={styles.cycN}>{cycles.personalMonth.value}</span><span className={styles.cycL}>{t("personalMonth")}</span></div>
-              <div className={styles.cyc}><span className={styles.cycN}>{cycles.personalDay.value}</span><span className={styles.cycL}>{t("personalDay")}</span></div>
+              <div className={styles.cyc}><span className={`${styles.cycN} ignite`} style={{ ["--i" as string]: 0 }}>{cycles.personalYear.value}</span><span className={styles.cycL}>{t("personalYear")}</span></div>
+              <div className={styles.cyc}><span className={`${styles.cycN} ignite`} style={{ ["--i" as string]: 1 }}>{cycles.personalMonth.value}</span><span className={styles.cycL}>{t("personalMonth")}</span></div>
+              <div className={styles.cyc}><span className={`${styles.cycN} ignite`} style={{ ["--i" as string]: 2 }}>{cycles.personalDay.value}</span><span className={styles.cycL}>{t("personalDay")}</span></div>
             </div>
           </section>
         </div>
