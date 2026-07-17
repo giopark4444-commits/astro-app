@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createElement, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -57,6 +57,34 @@ const prettyDate = (iso: string, locale: Locale) => {
   const MON_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   return locale === "en" ? `${MON_EN[(m ?? 1) - 1]} ${d}, ${y}` : `${d} de ${MES_ES[(m ?? 1) - 1]} de ${y}`;
 };
+
+/** Solo web: el DateTimePicker nativo no renderiza bajo react-native-web —
+ *  el paso de fecha/hora quedaba sin control y no se podía avanzar. En web
+ *  usamos el <input type="date|time"> del navegador, vestido con los tokens
+ *  del tema (createElement esquiva el JSX intrínseco que react-native no tipa). */
+function WebDateTimeInput({
+  kind, value, onValue, tk,
+}: { kind: "date" | "time"; value: string; onValue: (v: string) => void; tk: ThemeTokens }) {
+  return createElement("input", {
+    type: kind,
+    value,
+    ...(kind === "date" ? { min: "1900-01-01", max: new Date().toISOString().slice(0, 10) } : {}),
+    onChange: (e: { target: { value: string } }) => onValue(e.target.value),
+    style: {
+      width: "100%",
+      boxSizing: "border-box",
+      backgroundColor: tk.panelSoft,
+      border: `1px solid ${tk.accHair}`,
+      borderRadius: radius.md,
+      padding: `${space.md + 4}px ${space.lg}px`,
+      color: tk.text,
+      fontSize: typeScale.xl,
+      fontFamily: "inherit",
+      outline: "none",
+      colorScheme: tk.isLight ? "light" : "dark",
+    },
+  });
+}
 
 function stepComplete(step: Step, a: Profile): boolean {
   switch (step) {
@@ -319,6 +347,10 @@ export default function Onboarding() {
               {step === "date" && (
                 <View style={styles.center}>
                   <ZodiacGauge date={a.birthDate} locale={locale} />
+                  {Platform.OS === "web" && (
+                    <WebDateTimeInput kind="date" value={a.birthDate} tk={tk}
+                      onValue={(v) => setA((s) => ({ ...s, birthDate: v }))} />
+                  )}
                   {Platform.OS === "android" && (
                     <Pressable style={styles.input} onPress={() => setShowDate(true)}>
                       <Text style={[styles.inputText, !a.birthDate && styles.placeholder]}>
@@ -326,7 +358,7 @@ export default function Onboarding() {
                       </Text>
                     </Pressable>
                   )}
-                  {showDate && (
+                  {showDate && Platform.OS !== "web" && (
                     <DateTimePicker
                       value={dateValue}
                       mode="date"
@@ -343,6 +375,10 @@ export default function Onboarding() {
 
               {step === "time" && (
                 <View style={styles.center}>
+                  {Platform.OS === "web" && a.timeKnown && (
+                    <WebDateTimeInput kind="time" value={a.birthTime} tk={tk}
+                      onValue={(v) => setA((s) => ({ ...s, birthTime: v }))} />
+                  )}
                   {Platform.OS === "android" && a.timeKnown && (
                     <Pressable style={styles.input} onPress={() => setShowTime(true)}>
                       <Text style={[styles.inputText, !a.birthTime && styles.placeholder]}>
@@ -350,7 +386,7 @@ export default function Onboarding() {
                       </Text>
                     </Pressable>
                   )}
-                  {showTime && a.timeKnown && (
+                  {showTime && a.timeKnown && Platform.OS !== "web" && (
                     <DateTimePicker
                       value={timeValue}
                       mode="time"
