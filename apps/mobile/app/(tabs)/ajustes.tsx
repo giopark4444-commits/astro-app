@@ -10,7 +10,8 @@ import { useTheme, type ModePref } from "../../lib/theme-context";
 import { useT, type Locale } from "../../lib/i18n-context";
 import { formatPlace } from "../../lib/geocode";
 import { getSupabase } from "../../lib/supabase";
-import type { SubscriptionStatus } from "@aluna/core";
+import type { SubscriptionStatus, UserIntent } from "@aluna/core";
+import { fetchRemoteIntent, saveRemoteIntent } from "../../lib/intent";
 import { THEMES, THEME_LABELS, fonts, radius, space, type as typeScale, type ThemeName, type ThemeTokens } from "../../theme/tokens";
 
 const prettyDate = (iso: string, locale: Locale) => {
@@ -46,6 +47,33 @@ export default function AjustesScreen() {
       alive = false;
     };
   }, [session]);
+
+  // Intención del cuestionario de primera entrada (Task 13): trae el intent
+  // remoto para saber si hay algo que togglear y el estado inicial de
+  // useInAI. Si no respondió el cuestionario, `intent` queda null y el
+  // control se muestra igual pero sin efecto (ver onToggleIntentAI).
+  const [intent, setIntent] = useState<UserIntent | null>(null);
+  useEffect(() => {
+    if (!session) return;
+    let alive = true;
+    fetchRemoteIntent(getSupabase(), session.user.id).then((i) => {
+      if (alive) setIntent(i);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [session]);
+
+  async function onToggleIntentAI(on: boolean) {
+    if (!intent || !session) return;
+    const next = { ...intent, useInAI: on };
+    setIntent(next);
+    try {
+      await saveRemoteIntent(getSupabase(), session.user.id, next);
+    } catch {
+      /* fire-and-forget: el toggle ya refleja la intención local del usuario */
+    }
+  }
   // NO uses isPlusActive aquí para decidir qué rama pintar: esa función
   // devuelve false para "past_due" a propósito (¿tiene acceso Plus AHORA?),
   // y un usuario con pago fallido SÍ debe ver la rama de gestión (con el
@@ -191,6 +219,31 @@ export default function AjustesScreen() {
                   onPress={() => setLocale(o.id)}
                 />
               ))}
+            </View>
+          </Card>
+        </FadeIn>
+
+        {/* Aluna te conoce (Task 13): toggle de si la intención del cuestionario
+           se usa como contexto en el chat/informes de IA. Se muestra siempre
+           (aunque no haya intent) — sin intent el toggle no tiene efecto real,
+           ver onToggleIntentAI. */}
+        <FadeIn delay={90} style={styles.cardGap}>
+          <Card>
+            <Text style={styles.cardEyebrow}>{t("settings.intentAI")}</Text>
+            <Text style={styles.muted}>{t("settings.intentAIHint")}</Text>
+            <View style={[styles.chipRow, styles.fieldLabelGap]}>
+              <Chip
+                kind="control"
+                label={t("settings.intentAIOn")}
+                selected={!!intent?.useInAI}
+                onPress={() => onToggleIntentAI(true)}
+              />
+              <Chip
+                kind="control"
+                label={t("settings.intentAIOff")}
+                selected={!intent?.useInAI}
+                onPress={() => onToggleIntentAI(false)}
+              />
             </View>
           </Card>
         </FadeIn>

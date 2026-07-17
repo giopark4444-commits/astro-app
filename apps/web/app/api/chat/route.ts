@@ -1,12 +1,13 @@
 import path from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
-import { computeNumerology, signOfLongitude } from "@aluna/core";
+import { computeNumerology, signOfLongitude, parseIntent, type UserIntent } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
+import { buildIntentLine } from "@/lib/intent-line";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -105,6 +106,18 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
+
+  // Línea de intención opcional (Task 13): solo se anexa si la persona
+  // respondió el cuestionario Y activó useInAI. `settings.intent` viaja como
+  // Json; `parseIntent` lo lee tolerante y devuelve null si no hay señal útil.
+  const { data: settingsRow } = await supabase
+    .from("settings")
+    .select("intent")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
+  const intentLine = buildIntentLine(intent, locale);
+  if (intentLine) system = `${system}\n\n${intentLine}`;
 
   // Streaming token a token (efecto de tecleo). El proveedor emite trozos de texto;
   // los reenviamos como text/plain en streaming. Si el proveedor no soporta streaming,

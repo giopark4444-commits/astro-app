@@ -1,9 +1,10 @@
 "use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { THEMES, MODES, type Theme } from "@/lib/theme/themes";
-import { setLanguage } from "../actions";
+import { setLanguage, setIntentUseInAI } from "../actions";
 import styles from "./settings.module.css";
 
 const SWATCH: Record<Theme, string> = {
@@ -12,10 +13,22 @@ const SWATCH: Record<Theme, string> = {
   cosmic: "linear-gradient(135deg, #2a0f4a, #b86bff)",
 };
 
-export function SettingsControls({ currentLocale }: { currentLocale: string }) {
+export function SettingsControls({
+  currentLocale,
+  hasIntent,
+  intentUseInAI,
+}: {
+  currentLocale: string;
+  hasIntent: boolean;
+  intentUseInAI: boolean;
+}) {
   const t = useTranslations("settings");
   const router = useRouter();
   const { theme, setTheme, mode, setMode } = useTheme();
+  // Estado local optimista: el toggle no depende de router.refresh() para
+  // sentirse instantáneo (setIntentUseInAI es fire-and-forget del lado
+  // servidor, igual que setTheme/setMode arriba).
+  const [useInAI, setUseInAI] = useState(intentUseInAI);
 
   return (
     <div className={styles.wrap}>
@@ -49,6 +62,27 @@ export function SettingsControls({ currentLocale }: { currentLocale: string }) {
             <button key={loc} className={`seg__item ${styles.segItem} ${currentLocale === loc ? "seg__item--active" : ""}`}
               aria-pressed={currentLocale === loc}
               onClick={async () => { await setLanguage(loc); router.refresh(); }}>{loc.toUpperCase()}</button>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h3 className={styles.label}>{t("intentAI")}</h3>
+        <p>{t("intentAIHint")}</p>
+        <div className="seg" role="group" aria-label={t("intentAI")}>
+          {([true, false] as const).map((on) => (
+            <button
+              key={String(on)}
+              className={`seg__item ${styles.segItem} ${useInAI === on ? "seg__item--active" : ""}`}
+              aria-pressed={useInAI === on}
+              disabled={!hasIntent}
+              onClick={async () => {
+                setUseInAI(on);
+                await setIntentUseInAI(on);
+              }}
+            >
+              {t(on ? "intentAIOn" : "intentAIOff")}
+            </button>
           ))}
         </div>
       </section>

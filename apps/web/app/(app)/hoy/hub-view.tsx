@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { PLANETS, type Aspect } from "@aluna/core";
+import { PLANETS, type Aspect, type LifeArea } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { Icon } from "@/components/icon";
@@ -13,6 +13,9 @@ import { DayHeader } from "./day-header";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
+// Referencia estable, ver nota en energy-panel.tsx (NO_FOCUS): un default `= []`
+// inline recrea el array en cada render y rompería la memoización aguas abajo.
+const NO_FOCUS: LifeArea[] = [];
 
 type IconName = "grid3" | "wheel" | "pillars" | "sun" | "aries";
 const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }> = [
@@ -22,7 +25,7 @@ const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }
   { key: "pilares", icon: "pillars", href: "/pilares", soon: false },
 ];
 
-export function HubView() {
+export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
   const t = useTranslations();
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -86,7 +89,7 @@ export function HubView() {
 
         <div className={styles.heroDay}>{active && <DayNumberCard birthDate={active.birth_date} />}</div>
 
-        <div className={styles.heroEnergy}>{active && <EnergyPanel profileId={active.id} />}</div>
+        <div className={styles.heroEnergy}>{active && <EnergyPanel profileId={active.id} focus={focus} />}</div>
 
         <h2 className={`${styles.section} ${styles.gridFull}`}>{t("hoy.lenses")}</h2>
 

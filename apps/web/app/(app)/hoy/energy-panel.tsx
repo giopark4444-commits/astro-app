@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   PLANETS,
+  orderAreasByFocus,
   type LifeArea,
   type ScoreTone,
   type AreaDriver,
@@ -13,6 +14,9 @@ import styles from "./energy.module.css";
 
 type Period = "today" | "week" | "month" | "year";
 const PERIODS: readonly Period[] = ["today", "week", "month", "year"];
+// Referencia estable: un default `= []` inline crearía un array nuevo en cada
+// render y el useEffect de abajo (que depende de `focus`) reentraría en loop.
+const NO_FOCUS: LifeArea[] = [];
 
 interface AreaScore {
   area: LifeArea;
@@ -48,7 +52,13 @@ const TONE_KEY: Record<ScoreTone, string> = {
 /** "Tu energía": barras de 6 áreas de vida por periodo, alimentadas por /api/scores
  *  (clima de tránsitos al natal). Cada barra abre el "por qué" (los tránsitos que la
  *  mueven) para que nunca se sienta arbitraria. */
-export function EnergyPanel({ profileId }: { profileId: string }) {
+export function EnergyPanel({
+  profileId,
+  focus = NO_FOCUS,
+}: {
+  profileId: string;
+  focus?: LifeArea[];
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -67,7 +77,7 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
           body: JSON.stringify({ profileId, period }),
         });
         const data = (await res.json()) as { areas?: AreaScore[] };
-        if (alive) setAreas(data.areas ?? []);
+        if (alive) setAreas(orderAreasByFocus(data.areas ?? [], focus));
       } catch {
         if (alive) setAreas([]);
       }
@@ -75,7 +85,7 @@ export function EnergyPanel({ profileId }: { profileId: string }) {
     return () => {
       alive = false;
     };
-  }, [profileId, period]);
+  }, [profileId, period, focus]);
 
   return (
     <section className={styles.panel}>

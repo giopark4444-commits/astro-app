@@ -15,7 +15,8 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Enso } from "../components/Enso";
-import { Card } from "../components/ui";
+import { ZodiacGauge } from "../components/ZodiacGauge";
+import { Card, Chip } from "../components/ui";
 import { PlaceAutocomplete } from "../components/PlaceAutocomplete";
 import { type Gender, EMPTY_PROFILE, type Profile, isProfileComplete } from "../lib/profile";
 import { useProfile } from "../lib/profile-context";
@@ -25,10 +26,28 @@ import { insertRemoteProfile } from "../lib/profile-sync";
 import { useTheme } from "../lib/theme-context";
 import { useT, type Locale } from "../lib/i18n-context";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
+import {
+  EMPTY_INTENT_DRAFT,
+  intentSteps,
+  draftToIntent,
+  storeLocalIntent,
+  saveRemoteIntent,
+  type IntentDraft,
+  type IntentStep,
+} from "../lib/intent";
+import { INTENT_GOALS, LIFE_AREAS, RELATIONSHIP_STATUSES } from "@aluna/core";
 
-type Step = "name" | "date" | "time" | "place" | "gender";
-const STEPS: Step[] = ["name", "date", "time", "place", "gender"];
+type BirthStep = "name" | "date" | "time" | "place" | "gender";
+type Step = IntentStep | BirthStep;
+const BIRTH_STEPS: BirthStep[] = ["name", "date", "time", "place", "gender"];
 const GENDER_IDS: Gender[] = ["feminine", "masculine", "neutral"];
+
+// Todos los ids de meta/foco/estado son una sola palabra en inglés — capitalizar
+// la primera letra basta para calzar exacto con las claves de strings.ts
+// (p.ej. "spirituality" → "intentGoalSpirituality", "partnered" → "intentRelPartnered").
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const toISO = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -41,6 +60,11 @@ const prettyDate = (iso: string, locale: Locale) => {
 
 function stepComplete(step: Step, a: Profile): boolean {
   switch (step) {
+    case "goals":
+    case "affirm":
+    case "focus":
+    case "relationship":
+      return true;
     case "name":
       return a.name.trim().length > 0;
     case "date":
@@ -63,6 +87,7 @@ export default function Onboarding() {
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const [a, setA] = useState<Profile>(EMPTY_PROFILE);
+  const [draft, setDraft] = useState<IntentDraft>(EMPTY_INTENT_DRAFT);
   const [i, setI] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,11 +95,20 @@ export default function Onboarding() {
   const [showTime, setShowTime] = useState(Platform.OS === "ios");
 
   const reveal = useRef(new Animated.Value(0)).current;
-  const step = STEPS[i]!;
-  const last = i === STEPS.length - 1;
+  // "affirm" aparece/desaparece según `draft.goals`; el índice `i` se mantiene
+  // estable porque ese paso solo se inserta/quita justo después de "goals",
+  // que siempre queda detrás del índice actual cuando se recalcula.
+  const steps = useMemo(() => [...intentSteps(draft), ...BIRTH_STEPS], [draft]);
+  const step = steps[i]!;
+  const last = i === steps.length - 1;
   const canNext = stepComplete(step, a);
+  const isIntentStep = step === "goals" || step === "affirm" || step === "focus" || step === "relationship";
 
   const EYEBROW: Record<Step, string> = {
+    goals: t("onboarding.intentGoalsEyebrow"),
+    affirm: t("onboarding.intentAffirmEyebrow"),
+    focus: t("onboarding.intentFocusEyebrow"),
+    relationship: t("onboarding.intentRelEyebrow"),
     name: t("onboarding.nameEyebrow"),
     date: t("onboarding.dateEyebrow"),
     time: t("onboarding.timeEyebrow"),
@@ -82,12 +116,26 @@ export default function Onboarding() {
     gender: t("onboarding.genderEyebrow"),
   };
   const TITLE: Record<Step, string> = {
+    goals: t("onboarding.intentGoalsTitle"),
+    affirm: t("onboarding.intentAffirmTitle"),
+    focus: t("onboarding.intentFocusTitle"),
+    relationship: t("onboarding.intentRelTitle"),
     name: t("onboarding.nameTitle"),
     date: t("onboarding.dateTitle"),
     time: t("onboarding.timeTitle"),
     place: t("onboarding.placeTitle"),
     gender: t("onboarding.genderTitle"),
   };
+
+  // Omitir: limpia solo la respuesta del paso actual y avanza. Para "goals"
+  // esto vacía metas + nota, con lo cual `steps` recalcula sin "affirm" y el
+  // próximo índice cae naturalmente en "focus".
+  function skip() {
+    if (step === "goals") setDraft((d) => ({ ...d, goals: [], goalNote: "" }));
+    if (step === "focus") setDraft((d) => ({ ...d, focus: [] }));
+    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null }));
+    setI((idx) => idx + 1);
+  }
 
   // Reanima el revelado al cambiar de paso.
   useEffect(() => {
@@ -124,6 +172,15 @@ export default function Onboarding() {
     setError(null);
     try {
       const withId = await insertRemoteProfile(getSupabase(), a, session.user.id);
+      const intent = draftToIntent(draft, new Date().toISOString());
+      if (intent) {
+        await storeLocalIntent(intent);
+        try {
+          await saveRemoteIntent(getSupabase(), session.user.id, intent);
+        } catch {
+          // best effort: el espejo local queda; la intención nunca bloquea el onboarding
+        }
+      }
       await setProfile(withId);
       router.replace("/(tabs)");
     } catch {
@@ -162,6 +219,83 @@ export default function Onboarding() {
             <Text style={styles.question}>{TITLE[step]}</Text>
 
             <View style={styles.field}>
+              {step === "goals" && (
+                <View style={styles.center}>
+                  <View style={styles.chipsWrap}>
+                    {INTENT_GOALS.map((g) => (
+                      <Chip
+                        key={g}
+                        kind="control"
+                        label={t(`onboarding.intentGoal${capitalize(g)}`)}
+                        selected={draft.goals.includes(g)}
+                        onPress={() =>
+                          setDraft((d) => ({
+                            ...d,
+                            goals: d.goals.includes(g) ? d.goals.filter((x) => x !== g) : [...d.goals, g],
+                          }))
+                        }
+                      />
+                    ))}
+                  </View>
+                  <TextInput
+                    style={[styles.input, styles.noteInput]}
+                    value={draft.goalNote}
+                    onChangeText={(v) => setDraft((d) => ({ ...d, goalNote: v }))}
+                    placeholder={t("onboarding.intentGoalNotePlaceholder")}
+                    placeholderTextColor={tk.textFaint}
+                  />
+                  <Text style={styles.hint}>{t("onboarding.intentGoalsHint")}</Text>
+                </View>
+              )}
+
+              {step === "affirm" && (
+                <View style={styles.center}>
+                  {draft.goals.map((g) => (
+                    <Text key={g} style={styles.affirmLine}>
+                      ✦ {t(`onboarding.intentAffirm${capitalize(g)}`)}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              {step === "focus" && (
+                <View style={styles.center}>
+                  <View style={styles.chipsWrap}>
+                    {LIFE_AREAS.map((area) => (
+                      <Chip
+                        key={area}
+                        kind="control"
+                        label={t(`onboarding.intentFocus${capitalize(area)}`)}
+                        selected={draft.focus.includes(area)}
+                        onPress={() =>
+                          setDraft((d) => ({
+                            ...d,
+                            focus: d.focus.includes(area) ? d.focus.filter((x) => x !== area) : [...d.focus, area],
+                          }))
+                        }
+                      />
+                    ))}
+                  </View>
+                  <Text style={styles.hint}>{t("onboarding.intentFocusHint")}</Text>
+                </View>
+              )}
+
+              {step === "relationship" && (
+                <View style={styles.center}>
+                  <View style={styles.chipsWrap}>
+                    {RELATIONSHIP_STATUSES.map((rel) => (
+                      <Chip
+                        key={rel}
+                        kind="control"
+                        label={t(`onboarding.intentRel${capitalize(rel)}`)}
+                        selected={draft.relationship === rel}
+                        onPress={() => setDraft((d) => ({ ...d, relationship: d.relationship === rel ? null : rel }))}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+
               {step === "name" && (
                 <TextInput
                   style={styles.input}
@@ -177,6 +311,7 @@ export default function Onboarding() {
 
               {step === "date" && (
                 <View style={styles.center}>
+                  <ZodiacGauge date={a.birthDate} locale={locale} />
                   {Platform.OS === "android" && (
                     <Pressable style={styles.input} onPress={() => setShowDate(true)}>
                       <Text style={[styles.inputText, !a.birthDate && styles.placeholder]}>
@@ -265,7 +400,7 @@ export default function Onboarding() {
       <View style={[styles.foot, { paddingBottom: insets.bottom + space.lg }]}>
         {error && <Text style={styles.errorText}>{error}</Text>}
         <View style={styles.dots}>
-          {STEPS.map((_, k) => (
+          {steps.map((_, k) => (
             <View key={k} style={[styles.dot, k === i && styles.dotOn, k < i && styles.dotPast]} />
           ))}
         </View>
@@ -276,6 +411,11 @@ export default function Onboarding() {
             </Pressable>
           ) : (
             <View style={styles.backSpacer} />
+          )}
+          {isIntentStep && step !== "affirm" && (
+            <Pressable style={styles.back} onPress={skip} disabled={busy}>
+              <Text style={styles.backText}>{t("onboarding.intentSkip")}</Text>
+            </Pressable>
           )}
           <Pressable style={[styles.cta, !canNext && styles.ctaOff]} onPress={next} disabled={!canNext || busy}>
             <Text style={styles.ctaText}>
@@ -339,6 +479,15 @@ function makeStyles(t: ThemeTokens) {
     toggleRow: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl },
     toggleLabel: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sans },
     hint: { color: t.textDim, fontSize: typeScale.sm, textAlign: "center", marginTop: space.lg, lineHeight: 20, fontFamily: fonts.sans },
+    chipsWrap: { width: "100%", flexDirection: "row", flexWrap: "wrap", gap: space.sm, justifyContent: "center" },
+    noteInput: { marginTop: space.lg },
+    affirmLine: {
+      color: t.text,
+      fontSize: typeScale.md,
+      fontFamily: fonts.sans,
+      textAlign: "center",
+      marginBottom: space.sm,
+    },
     genders: { width: "100%", gap: space.md },
     // Fondo/borde/radio ahora los da <Card>; queda el layout (ancho, centrado,
     // padding vertical más compacto que el default xl de <Card> — mismo mecanismo
