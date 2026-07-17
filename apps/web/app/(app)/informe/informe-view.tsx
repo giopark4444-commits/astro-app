@@ -350,7 +350,10 @@ export function NatalContent({ content }: { content: NatalReport }) {
     <>
       <div id="report-natal-intro" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("introLabel")}</h3>
-        <p className={styles.sectionBody}>{content.intro}</p>
+        {/* capitular (spec §4.4, aprobado 2026-07-16): solo el primer párrafo de la
+            apertura lleva styles.lead — hoy content.intro es un único bloque, sin
+            split en varios <p>. */}
+        <p className={`${styles.sectionBody} ${styles.lead}`}>{content.intro}</p>
       </div>
       {content.sections.map((sec) => (
         <div key={sec.key} id={`report-natal-${sec.key}`} className={styles.section}>
@@ -372,7 +375,10 @@ export function SolarContent({ content }: { content: SolarReport }) {
     <>
       <div id="report-solar-essay" className={styles.section}>
         <h3 className={styles.sectionTitle}>{t("essayLabel")}</h3>
-        <p className={styles.sectionBody}>{content.essay}</p>
+        {/* capitular (spec §4.4, aprobado 2026-07-16): solo el primer párrafo del
+            ensayo lleva styles.lead — hoy content.essay es un único bloque, sin
+            split en varios <p>. */}
+        <p className={`${styles.sectionBody} ${styles.lead}`}>{content.essay}</p>
       </div>
       {content.themes.map((theme, i) => (
         <div key={i} id={`report-solar-theme-${i}`} className={styles.section}>

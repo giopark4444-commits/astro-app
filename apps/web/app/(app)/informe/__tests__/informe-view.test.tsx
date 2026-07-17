@@ -11,6 +11,7 @@ import {
   buildTocGroups,
   type ViewState,
 } from "../informe-view";
+import styles from "../informe.module.css";
 
 const fixtureNatal: NatalReport = {
   intro: "Intro de prueba",
@@ -60,6 +61,38 @@ describe("SolarContent", () => {
     expect(container.querySelector("#report-solar-theme-0")).not.toBeNull();
     expect(container.querySelector("#report-solar-theme-1")).not.toBeNull();
     expect(container.querySelector("#report-solar-mantra")).not.toBeNull();
+  });
+});
+
+describe("capitular (spec §4.4)", () => {
+  it("NatalContent: el primer párrafo de la intro lleva styles.lead, ninguna otra sección lo lleva", () => {
+    const { container } = renderWithIntl(<NatalContent content={fixtureNatal} />);
+    const introP = container.querySelector("#report-natal-intro p");
+    expect(introP).not.toBeNull();
+    expect(introP!.classList.contains(styles.lead!)).toBe(true);
+
+    const otherParagraphs = container.querySelectorAll(
+      "#report-natal-essence p, #report-natal-emotional p, #report-natal-path p, #report-natal-challenges p, #report-natal-outro p",
+    );
+    expect(otherParagraphs.length).toBeGreaterThan(0);
+    otherParagraphs.forEach((p) => {
+      expect(p.classList.contains(styles.lead!)).toBe(false);
+    });
+  });
+
+  it("SolarContent: el primer párrafo del ensayo lleva styles.lead, ninguna otra sección lo lleva", () => {
+    const { container } = renderWithIntl(<SolarContent content={fixtureSolar} />);
+    const essayP = container.querySelector("#report-solar-essay p");
+    expect(essayP).not.toBeNull();
+    expect(essayP!.classList.contains(styles.lead!)).toBe(true);
+
+    const otherParagraphs = container.querySelectorAll(
+      "#report-solar-theme-0 p, #report-solar-theme-1 p, #report-solar-mantra p",
+    );
+    expect(otherParagraphs.length).toBeGreaterThan(0);
+    otherParagraphs.forEach((p) => {
+      expect(p.classList.contains(styles.lead!)).toBe(false);
+    });
   });
 });
 
