@@ -49,9 +49,10 @@ import { fonts, space, type as typeScale, type ThemeTokens } from "../../../them
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
-const PERIODS: HoroscopePeriod[] = ["today", "week", "month", "year"];
+const PERIODS: HoroscopePeriod[] = ["yesterday", "today", "tomorrow", "week", "month", "year"];
 const PERIOD_KEY: Record<HoroscopePeriod, string> = {
-  today: "periodToday", week: "periodWeek", month: "periodMonth", year: "periodYear",
+  yesterday: "periodYesterday", today: "periodToday", tomorrow: "periodTomorrow",
+  week: "periodWeek", month: "periodMonth", year: "periodYear",
 };
 const AREA_KEY: Record<string, string> = {
   love: "areaLove", money: "areaMoney", work: "areaWork",

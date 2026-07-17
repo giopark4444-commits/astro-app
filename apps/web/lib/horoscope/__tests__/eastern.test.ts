@@ -116,6 +116,27 @@ describe("pilares por periodo (period-aware, spec §6: día solo en today)", () 
   });
 });
 
+describe("pilares ayer/mañana (día corrido -1/+1, como western)", () => {
+  it("yesterday/tomorrow traen year+month+day, igual que today", () => {
+    for (const period of ["yesterday", "tomorrow"] as const) {
+      const p = computeEasternHoroscope("horse", period, "America/Bogota", NOW);
+      expect(p.pillars.year).not.toBeNull();
+      expect(p.pillars.month).not.toBeNull();
+      expect(p.pillars.day).not.toBeNull();
+    }
+  });
+  it("el pilar de día de ayer/hoy/mañana coincide con dayPillar(12/13/14-jul) — tres días distintos", () => {
+    const y = computeEasternHoroscope("horse", "yesterday", "America/Bogota", NOW);
+    const t = computeEasternHoroscope("horse", "today", "America/Bogota", NOW);
+    const m = computeEasternHoroscope("horse", "tomorrow", "America/Bogota", NOW);
+    expect(t.pillars.day!.branch).toBe(dayPillar(2026, 7, 13).branch);
+    expect(y.pillars.day!.branch).toBe(dayPillar(2026, 7, 12).branch);
+    expect(m.pillars.day!.branch).toBe(dayPillar(2026, 7, 14).branch);
+    expect(y.pillars.day!.branch).not.toBe(t.pillars.day!.branch);
+    expect(m.pillars.day!.branch).not.toBe(t.pillars.day!.branch);
+  });
+});
+
 describe("choque del día", () => {
   it("13-jul-2026 (día 戊子): el caballo está en 冲 con la rama del día", () => {
     const day = dayPillar(2026, 7, 13);

@@ -224,7 +224,8 @@ export interface EasternComposeDicts {
 }
 
 const EASTERN_PERIOD_LABELS_ES: Record<string, string> = {
-  today: "hoy", week: "esta semana", month: "este mes", year: "este ciclo anual",
+  yesterday: "ayer", today: "hoy", tomorrow: "mañana",
+  week: "esta semana", month: "este mes", year: "este ciclo anual",
 };
 
 const TAI_SUI_LABELS_ES: Record<string, string> = {

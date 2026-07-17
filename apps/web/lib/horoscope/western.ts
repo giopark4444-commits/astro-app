@@ -11,8 +11,9 @@ import {
   computeBodies, localToJulianDay, lunations, stations, ingresses, type SkyEvent,
 } from "@aluna/ephemeris";
 
-export type HoroscopePeriod = "today" | "week" | "month" | "year";
-export const HOROSCOPE_PERIODS: readonly HoroscopePeriod[] = ["today", "week", "month", "year"];
+export type HoroscopePeriod = "yesterday" | "today" | "tomorrow" | "week" | "month" | "year";
+export const HOROSCOPE_PERIODS: readonly HoroscopePeriod[] =
+  ["yesterday", "today", "tomorrow", "week", "month", "year"];
 
 export interface PeriodRange {
   fromIso: string;
@@ -45,8 +46,15 @@ export function resolvePeriodRange(period: HoroscopePeriod, tz: string, nowIso?:
   const now = (nowIso ? DateTime.fromISO(nowIso, { zone: "utc" }) : DateTime.utc()).setZone(zone);
   const noon = (d: DateTime) => d.set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
   let from: DateTime, to: DateTime, samples: DateTime[];
-  if (period === "today") {
-    from = now.startOf("day"); to = now.endOf("day"); samples = [noon(now)];
+  // Ayer/Mañana: mismo tratamiento que "today" pero anclado al día vecino —
+  // el día que se corre es también el que fija localDate (clave de caché) y
+  // de ahí baja al pilar del día en eastern.ts (el Saju de ESE día, no el de hoy).
+  let day = now;
+  if (period === "yesterday" || period === "tomorrow") {
+    day = period === "yesterday" ? now.minus({ days: 1 }) : now.plus({ days: 1 });
+  }
+  if (period === "today" || period === "yesterday" || period === "tomorrow") {
+    from = day.startOf("day"); to = day.endOf("day"); samples = [noon(day)];
   } else if (period === "week") {
     from = now.startOf("week"); to = now.endOf("week"); // luxon: lunes-domingo
     samples = Array.from({ length: 7 }, (_, i) => noon(from.plus({ days: i })));
@@ -61,8 +69,8 @@ export function resolvePeriodRange(period: HoroscopePeriod, tz: string, nowIso?:
     fromIso: from.toUTC().toISO()!,
     toIso: to.toUTC().toISO()!,
     sampleIsos: samples.map((s) => s.toUTC().toISO()!),
-    localDate: now.toISODate()!,
-    offsetMinutes: now.offset,
+    localDate: day.toISODate()!,
+    offsetMinutes: day.offset,
   };
 }
 
@@ -88,7 +96,7 @@ export function computeWesternHoroscope(
   const signAspects = signAspectsToSign(sign, rep);
 
   // Eventos del rango: Luna solo en vistas cortas (en mes/año es ruido).
-  const includeMoon = period === "today" || period === "week";
+  const includeMoon = period === "yesterday" || period === "today" || period === "tomorrow" || period === "week";
   const events = [
     ...lunations(range.fromIso, range.toIso),
     ...stations(range.fromIso, range.toIso),

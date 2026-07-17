@@ -57,11 +57,12 @@ export interface EasternPillar {
 }
 
 /**
- * Pilares presentes según el periodo (spec §6: "día solo en period=today"):
- *   today → year + month + day; week/month → year + month (el mes = pilar
- *   vigente en el PUNTO MEDIO del rango, que en semana puede cruzar un 節);
- *   year → SOLO year (Lichun→Lichun; el Tai Sui ya captura lo anual).
- * month es null solo en la vista año; day es null fuera de today.
+ * Pilares presentes según el periodo (spec §6, extendido a ayer/mañana):
+ *   yesterday/today/tomorrow → year + month + day (día = el de ESE día,
+ *   corrido -1/+1 igual que en western.ts); week/month → year + month (el mes
+ *   = pilar vigente en el PUNTO MEDIO del rango, que en semana puede cruzar un
+ *   節); year → SOLO year (Lichun→Lichun; el Tai Sui ya captura lo anual).
+ * month es null solo en la vista año; day es null fuera de yesterday/today/tomorrow.
  */
 export interface EasternPeriodPillars {
   year: EasternPillar;
@@ -356,8 +357,14 @@ export function computeEasternHoroscope(
   const animalBranch = EASTERN_ANIMALS.indexOf(animal);
   const range = resolveEasternPeriodRange(period, tz, nowIso);
 
+  const isDayPeriod = period === "yesterday" || period === "today" || period === "tomorrow";
+
   // Instante de referencia de los pilares por periodo:
-  //   today/year → mediodía local de la fecha vigente (determinismo western);
+  //   yesterday/today/tomorrow/year → mediodía local del día vigente
+  //   (determinismo western; para ayer/mañana ese día ya viene corrido -1/+1
+  //   dentro de range.fromIso, así que se reconstruye DESDE el rango en vez de
+  //   volver a llamar localNoon con el `now` sin correr — mismo día que el
+  //   pilar de día debe reflejar);
   //   week/month → PUNTO MEDIO del rango (el mes vigente en el centro del
   //   periodo; en semana puede cruzar un 節 y difiere del mes de "hoy").
   const zone = isValidTz(tz) ? tz : "utc";
@@ -366,16 +373,20 @@ export function computeEasternHoroscope(
         (DateTime.fromISO(range.fromIso).toMillis() + DateTime.fromISO(range.toIso).toMillis()) / 2,
         { zone: "utc" },
       ).setZone(zone)
-    : localNoon(tz, nowIso);
+    : period === "year"
+      ? localNoon(tz, nowIso)
+      : DateTime.fromISO(range.fromIso, { zone: "utc" }).setZone(zone)
+          .set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
   const sunLon = sunLongitudeAt(ref.toUTC().toISO()!);
   const solarYear = resolveSolarYear(ref.year, ref.month, sunLon);
   const yp = yearPillar(solarYear);
-  // Pilares presentes según el periodo (spec §6: día solo en today; la vista
-  // año lee SOLO el pilar del año — el Tai Sui captura las aflicciones anuales).
+  // Pilares presentes según el periodo (spec §6 extendido: día en
+  // yesterday/today/tomorrow; la vista año lee SOLO el pilar del año — el Tai
+  // Sui captura las aflicciones anuales).
   const pillars: EasternPeriodPillars = {
     year: toEasternPillar(yp),
     month: period === "year" ? null : toEasternPillar(monthPillar(yp.stem, sunLon)),
-    day: period === "today" ? toEasternPillar(dayPillar(ref.year, ref.month, ref.day)) : null,
+    day: isDayPeriod ? toEasternPillar(dayPillar(ref.year, ref.month, ref.day)) : null,
   };
 
   // Tabla de interacciones (fuente de verdad de barras y prosa), día → mes → año.
@@ -424,10 +435,10 @@ export function computeEasternHoroscope(
   const toneBalance: EasternPayload["toneBalance"] =
     favorable > 0 && tense === 0 ? "favorable" : tense > 0 && favorable === 0 ? "tense" : "mixed";
 
-  // Wu Xing del periodo: elemento del TRONCO del pilar focal (hoy → día,
-  // semana/mes → mes, año → año) frente al elemento de la rama del animal.
+  // Wu Xing del periodo: elemento del TRONCO del pilar focal (ayer/hoy/mañana
+  // → día, semana/mes → mes, año → año) frente al elemento de la rama del animal.
   // El focal SIEMPRE existe para su periodo (ver EasternPeriodPillars).
-  const focal = (period === "today" ? pillars.day : period === "year" ? pillars.year : pillars.month)!;
+  const focal = (isDayPeriod ? pillars.day : period === "year" ? pillars.year : pillars.month)!;
   const periodElement = HEAVENLY_STEMS[focal.stem]!.element;
   const animalElement = EARTHLY_BRANCHES[animalBranch]!.element;
   const wuXing: EasternWuXing = {

@@ -154,7 +154,8 @@ const EASTERN_ANIMAL_NAMES_EN: Record<string, string> = {
 };
 
 const EASTERN_PERIOD_LABELS_EN: Record<string, string> = {
-  today: "today", week: "this week", month: "this month", year: "this yearly cycle",
+  yesterday: "yesterday", today: "today", tomorrow: "tomorrow",
+  week: "this week", month: "this month", year: "this yearly cycle",
 };
 
 export const DICTS_EASTERN_EN: EasternComposeDicts = {

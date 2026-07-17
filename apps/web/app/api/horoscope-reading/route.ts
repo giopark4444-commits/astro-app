@@ -48,8 +48,14 @@ const LENGTH_GUIDE: Record<"es" | "en", Record<"profunda" | "completa", string>>
 };
 
 const PERIOD_LABEL: Record<"es" | "en", Record<HoroscopePeriod, string>> = {
-  es: { today: "hoy", week: "esta semana", month: "este mes", year: "este año" },
-  en: { today: "today", week: "this week", month: "this month", year: "this year" },
+  es: {
+    yesterday: "ayer", today: "hoy", tomorrow: "mañana",
+    week: "esta semana", month: "este mes", year: "este año",
+  },
+  en: {
+    yesterday: "yesterday", today: "today", tomorrow: "tomorrow",
+    week: "this week", month: "this month", year: "this year",
+  },
 };
 
 const SYSTEM: Record<"es" | "en", string> = {

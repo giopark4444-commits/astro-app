@@ -3,7 +3,7 @@
 // de la sesión Supabase (Authorization header), no cookies.
 import { apiUrl } from "./config";
 
-export type HoroscopePeriod = "today" | "week" | "month" | "year";
+export type HoroscopePeriod = "yesterday" | "today" | "tomorrow" | "week" | "month" | "year";
 export type LifeArea = "love" | "money" | "work" | "health" | "mood" | "luck";
 export type ScoreTone = "low" | "mixed" | "high";
 

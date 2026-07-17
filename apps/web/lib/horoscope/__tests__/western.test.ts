@@ -36,6 +36,23 @@ describe("resolvePeriodRange", () => {
     const r = resolvePeriodRange("today", "No/Existe", NOW);
     expect(r.offsetMinutes).toBe(0);
   });
+  it("ayer/mañana = today corrido -1/+1 día, con localDate del día corrido (clave de caché aparte)", () => {
+    const y = resolvePeriodRange("yesterday", "America/Bogota", NOW);
+    const t = resolvePeriodRange("today", "America/Bogota", NOW);
+    const m = resolvePeriodRange("tomorrow", "America/Bogota", NOW);
+    expect(t.localDate).toBe("2026-07-13");
+    expect(y.localDate).toBe("2026-07-12");
+    expect(m.localDate).toBe("2026-07-14");
+    // Un solo sample a mediodía local, igual que "today".
+    expect(y.sampleIsos).toHaveLength(1);
+    expect(m.sampleIsos).toHaveLength(1);
+    // El rango entero (from→to) es el día completo corrido, no solo el sample.
+    expect(y.fromIso.slice(0, 10)).toBe("2026-07-12");
+    expect(m.fromIso.slice(0, 10)).toBe("2026-07-14");
+    // Las tres claves son distintas entre sí (ninguna colisiona con "today").
+    expect(y.localDate).not.toBe(t.localDate);
+    expect(m.localDate).not.toBe(t.localDate);
+  });
 });
 
 describe("computeWesternHoroscope", () => {

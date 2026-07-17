@@ -122,7 +122,9 @@ export const STRINGS = {
     hoy: {
       traveler: "viajera",
       calm: "Cielo en calma, sin tránsitos marcados.",
+      periodYesterday: "Ayer",
       periodToday: "Hoy",
+      periodTomorrow: "Mañana",
       periodWeek: "Semana",
       periodMonth: "Mes",
       periodYear: "Año",
@@ -648,7 +650,9 @@ export const STRINGS = {
     hoy: {
       traveler: "traveler",
       calm: "Calm skies, no marked transits.",
+      periodYesterday: "Yesterday",
       periodToday: "Today",
+      periodTomorrow: "Tomorrow",
       periodWeek: "Week",
       periodMonth: "Month",
       periodYear: "Year",
