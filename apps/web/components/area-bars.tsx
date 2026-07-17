@@ -49,7 +49,7 @@ export function AreaBars({
             </button>
             <div className={styles.track}>
               <span
-                className={`${styles.fill} ${styles[`tone_${a.tone}`] ?? ""}`}
+                className={`${styles.fill} ${styles[`tone_${a.tone}`] ?? ""} ${styles[`area_${a.key}`] ?? ""}`}
                 style={{ width: `${a.score}%` }}
                 aria-hidden="true"
               />

@@ -69,12 +69,24 @@ export function OnboardingFlow() {
   function skip() {
     if (step === "goals") setDraft((d) => ({ ...d, goals: [], goalNote: "" }));
     if (step === "focus") setDraft((d) => ({ ...d, focus: [] }));
-    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null }));
+    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null, heartNote: "" }));
     setI((idx) => idx + 1);
   }
 
+  // Enter avanza al siguiente paso cuando el actual está completo. Se ignora
+  // sobre botones (los chips ya usan Enter para activarse) y sobre las opciones
+  // del autocomplete de lugar (Enter ahí selecciona, no avanza).
+  function onEnter(e: React.KeyboardEvent) {
+    if (e.key !== "Enter") return;
+    const el = e.target as HTMLElement;
+    if (el.tagName === "BUTTON" || el.getAttribute("role") === "option") return;
+    if (!canNext || busy) return;
+    e.preventDefault();
+    next();
+  }
+
   return (
-    <main className={styles.shell}>
+    <main className={styles.shell} onKeyDown={onEnter}>
       <div className={styles.aura}>
         <Starfield />
         <span className={styles.glyph} aria-hidden><Icon name="enso" size={44} /></span>
@@ -133,15 +145,20 @@ export function OnboardingFlow() {
             </>
           )}
           {step === "relationship" && (
-            <div className={styles.chips}>
-              {RELATIONSHIP_STATUSES.map((rel) => (
-                <button key={rel} type="button" className={`chip ${styles.intentChip} ${draft.relationship === rel ? styles.intentChipOn : ""}`}
-                  aria-pressed={draft.relationship === rel}
-                  onClick={() => setDraft((d) => ({ ...d, relationship: d.relationship === rel ? null : rel }))}>
-                  {t(`intentRel${capitalize(rel)}`)}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className={styles.chips}>
+                {RELATIONSHIP_STATUSES.map((rel) => (
+                  <button key={rel} type="button" className={`chip ${styles.intentChip} ${draft.relationship === rel ? styles.intentChipOn : ""}`}
+                    aria-pressed={draft.relationship === rel}
+                    onClick={() => setDraft((d) => ({ ...d, relationship: d.relationship === rel ? null : rel }))}>
+                    {t(`intentRel${capitalize(rel)}`)}
+                  </button>
+                ))}
+              </div>
+              <input className={styles.input} value={draft.heartNote}
+                onChange={(e) => setDraft((d) => ({ ...d, heartNote: e.target.value }))}
+                placeholder={t("intentHeartNotePlaceholder")} />
+            </>
           )}
           {step === "name" && (
             <input className={styles.input} autoFocus value={a.name}

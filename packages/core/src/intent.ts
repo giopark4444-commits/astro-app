@@ -6,14 +6,36 @@ import { LIFE_AREAS, type LifeArea } from "./astrology/life-areas";
 export type IntentGoal = "self" | "bonds" | "purpose" | "future" | "spirituality" | "others" | "decisions";
 export const INTENT_GOALS: readonly IntentGoal[] = ["self", "bonds", "purpose", "future", "spirituality", "others", "decisions"];
 
-export type RelationshipStatus = "single" | "partnered" | "married" | "complicated" | "private";
-export const RELATIONSHIP_STATUSES: readonly RelationshipStatus[] = ["single", "partnered", "married", "complicated", "private"];
+export type RelationshipStatus =
+  | "single"
+  | "partnered"
+  | "situationship"
+  | "engaged"
+  | "married"
+  | "separated"
+  | "divorced"
+  | "widowed"
+  | "complicated"
+  | "private";
+export const RELATIONSHIP_STATUSES: readonly RelationshipStatus[] = [
+  "single",
+  "partnered",
+  "situationship",
+  "engaged",
+  "married",
+  "separated",
+  "divorced",
+  "widowed",
+  "complicated",
+  "private",
+];
 
 export interface UserIntent {
   goals: IntentGoal[];
   goalNote?: string;
   focus: LifeArea[];
   relationship?: RelationshipStatus;
+  heartNote?: string;
   useInAI: boolean;
   answeredAt: string;
 }
@@ -32,12 +54,14 @@ export function parseIntent(raw: unknown): UserIntent | null {
   const relationship = (RELATIONSHIP_STATUSES as readonly string[]).includes(r.relationship as string)
     ? (r.relationship as RelationshipStatus) : undefined;
   const goalNote = typeof r.goalNote === "string" && r.goalNote.trim() ? r.goalNote.trim() : undefined;
-  if (goals.length === 0 && focus.length === 0 && !relationship && !goalNote) return null;
+  const heartNote = typeof r.heartNote === "string" && r.heartNote.trim() ? r.heartNote.trim() : undefined;
+  if (goals.length === 0 && focus.length === 0 && !relationship && !goalNote && !heartNote) return null;
   return {
     goals,
     focus,
     ...(goalNote !== undefined && { goalNote }),
     ...(relationship !== undefined && { relationship }),
+    ...(heartNote !== undefined && { heartNote }),
     useInAI: typeof r.useInAI === "boolean" ? r.useInAI : true,
     answeredAt: typeof r.answeredAt === "string" ? r.answeredAt : "",
   };

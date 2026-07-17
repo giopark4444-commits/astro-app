@@ -88,7 +88,7 @@ export function EnergyPanel({
   }, [profileId, period, focus]);
 
   return (
-    <section className={styles.panel}>
+    <section className={`card ${styles.panel}`}>
       <div className={styles.head}>
         <h2 className={styles.title}>{t("hoy.energyTitle")}</h2>
         <div className={styles.periods} role="tablist" aria-label={t("hoy.energyTitle")}>

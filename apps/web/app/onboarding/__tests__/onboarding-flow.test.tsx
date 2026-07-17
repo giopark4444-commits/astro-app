@@ -41,4 +41,20 @@ describe("OnboardingFlow — pasos de intención", () => {
     expect(screen.getByText(es.onboarding.intentAffirmTitle)).toBeInTheDocument();
     expect(screen.getByText(es.onboarding.intentAffirmSelf)).toBeInTheDocument();
   });
+
+  it("Enter en un input avanza al siguiente paso cuando el actual está completo", () => {
+    renderFlow();
+
+    fireEvent.keyDown(screen.getByPlaceholderText(es.onboarding.intentGoalNotePlaceholder), { key: "Enter" });
+
+    expect(screen.getByText(es.onboarding.intentFocusTitle)).toBeInTheDocument();
+  });
+
+  it("Enter sobre un chip no avanza (el chip usa Enter para activarse)", () => {
+    renderFlow();
+
+    fireEvent.keyDown(screen.getByText(es.onboarding.intentGoalSelf), { key: "Enter" });
+
+    expect(screen.getByText(es.onboarding.intentGoalsTitle)).toBeInTheDocument();
+  });
 });

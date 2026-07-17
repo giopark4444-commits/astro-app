@@ -23,6 +23,18 @@
 .tone_mixed { background: rgba(var(--acc-rgb), 0.4); }
 .tone_low { background: var(--tone-warm); }
 
+/* Color por área (pedido de Gio 2026-07-17): cada barra lleva el color de lo que
+   representa; el tono del clima sigue hablando en la etiqueta itálica y el glow
+   de tone_high (el box-shadow sobrevive porque aquí solo pisamos background).
+   Azul trabajo = --tone-cool del clima; lila suerte = violeta de numerología —
+   misma familia que los tintes por dominio del hub (R4c). */
+.area_love { background: #d47f9d; }
+.area_money { background: #5cb885; }
+.area_work { background: #7aaae0; }
+.area_health { background: #4fbdae; }
+.area_mood { background: #d9a95c; }
+.area_luck { background: #a58fd8; }
+
 /* El "por qué": los tránsitos que mueven el área */
 .why { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) 0 var(--sp-1); } /* gap 6px→sp-2; pad 2px→sp-1: pasos más cercanos; 11→12 */
 .driver { display: flex; align-items: baseline; gap: var(--sp-2); } /* 9→8 */

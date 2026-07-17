@@ -8,12 +8,20 @@ describe("draftToIntent", () => {
     expect(draftToIntent(EMPTY_INTENT_DRAFT, NOW)).toBeNull();
   });
   it("arma el UserIntent con useInAI true y answeredAt", () => {
-    expect(draftToIntent({ goals: ["self"], goalNote: " x ", focus: ["love"], relationship: "single" }, NOW))
-      .toEqual({ goals: ["self"], goalNote: "x", focus: ["love"], relationship: "single", useInAI: true, answeredAt: NOW });
+    expect(draftToIntent({ goals: ["self"], goalNote: " x ", focus: ["love"], relationship: "single", heartNote: " y " }, NOW))
+      .toEqual({ goals: ["self"], goalNote: "x", focus: ["love"], relationship: "single", heartNote: "y", useInAI: true, answeredAt: NOW });
   });
   it("goalNote vacía no viaja", () => {
-    const i = draftToIntent({ goals: ["self"], goalNote: "  ", focus: [], relationship: null }, NOW);
+    const i = draftToIntent({ goals: ["self"], goalNote: "  ", focus: [], relationship: null, heartNote: "" }, NOW);
     expect(i && "goalNote" in i && i.goalNote).toBeUndefined();
+  });
+  it("heartNote vacía no viaja", () => {
+    const i = draftToIntent({ goals: ["self"], goalNote: "", focus: [], relationship: null, heartNote: "  " }, NOW);
+    expect(i && "heartNote" in i && i.heartNote).toBeUndefined();
+  });
+  it("heartNote se recorta y viaja", () => {
+    const i = draftToIntent({ goals: [], goalNote: "", focus: [], relationship: null, heartNote: "  hola  " }, NOW);
+    expect(i?.heartNote).toBe("hola");
   });
 });
 
@@ -29,7 +37,7 @@ function fakeSupabase(row: unknown, capture: { patch?: unknown } = {}) {
 describe("saveRemoteIntent / fetchRemoteIntent", () => {
   it("guarda el intent como patch de settings", async () => {
     const cap: { patch?: unknown } = {};
-    const intent = draftToIntent({ goals: ["self"], goalNote: "", focus: [], relationship: null }, NOW)!;
+    const intent = draftToIntent({ goals: ["self"], goalNote: "", focus: [], relationship: null, heartNote: "" }, NOW)!;
     await saveRemoteIntent(fakeSupabase(null, cap), "u1", intent);
     expect(cap.patch).toEqual({ intent });
   });

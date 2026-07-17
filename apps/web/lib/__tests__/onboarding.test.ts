@@ -78,15 +78,26 @@ describe("draftToIntent", () => {
   });
 
   it("arma el UserIntent con useInAI true y answeredAt", () => {
-    const d: IntentDraft = { goals: ["self"], goalNote: " x ", focus: ["love"], relationship: "single" };
+    const d: IntentDraft = { goals: ["self"], goalNote: " x ", focus: ["love"], relationship: "single", heartNote: " y " };
     expect(draftToIntent(d, NOW)).toEqual({
-      goals: ["self"], goalNote: "x", focus: ["love"], relationship: "single", useInAI: true, answeredAt: NOW,
+      goals: ["self"], goalNote: "x", focus: ["love"], relationship: "single", heartNote: "y", useInAI: true, answeredAt: NOW,
     });
   });
 
   it("goalNote vacía no viaja", () => {
-    const d: IntentDraft = { goals: ["self"], goalNote: "  ", focus: [], relationship: null };
+    const d: IntentDraft = { goals: ["self"], goalNote: "  ", focus: [], relationship: null, heartNote: "" };
     const i = draftToIntent(d, NOW);
     expect(i?.goalNote).toBeUndefined();
+  });
+
+  it("heartNote vacía no viaja", () => {
+    const d: IntentDraft = { goals: ["self"], goalNote: "", focus: [], relationship: null, heartNote: "   " };
+    const i = draftToIntent(d, NOW);
+    expect(i?.heartNote).toBeUndefined();
+  });
+
+  it("heartNote se recorta y viaja", () => {
+    const d: IntentDraft = { goals: [], goalNote: "", focus: [], relationship: null, heartNote: "  hola  " };
+    expect(draftToIntent(d, NOW)?.heartNote).toBe("hola");
   });
 });

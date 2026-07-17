@@ -55,4 +55,18 @@ describe("buildIntentLine", () => {
       "INTENCIÓN DE LA PERSONA (contexto, no lo cites literal): foco actual: Trabajo.",
     );
   });
+
+  it("renders a new relationship status (situationship) in ES", () => {
+    const i = intent({ goals: [], focus: [], relationship: "situationship" });
+    expect(buildIntentLine(i, "es")).toBe(
+      "INTENCIÓN DE LA PERSONA (contexto, no lo cites literal): corazón: Sin etiquetas.",
+    );
+  });
+
+  it("renders a new relationship status (situationship) in EN", () => {
+    const i = intent({ goals: [], focus: [], relationship: "situationship" });
+    expect(buildIntentLine(i, "en")).toBe(
+      "THE PERSON'S INTENTION (context, don't quote it literally): heart: Situationship.",
+    );
+  });
 });

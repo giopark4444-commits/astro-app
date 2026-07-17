@@ -6,18 +6,29 @@ describe("parseIntent", () => {
   it("acepta un intent válido y descarta basura", () => {
     const raw = {
       goals: ["self", "nope", "bonds"], goalNote: "  algo  ",
-      focus: ["love", "invalid"], relationship: "single",
+      focus: ["love", "invalid"], relationship: "single", heartNote: "  el corazón  ",
       useInAI: true, answeredAt: "2026-07-16T00:00:00Z", extra: 1,
     };
     expect(parseIntent(raw)).toEqual({
       goals: ["self", "bonds"], goalNote: "algo", focus: ["love"],
-      relationship: "single", useInAI: true, answeredAt: "2026-07-16T00:00:00Z",
+      relationship: "single", heartNote: "el corazón", useInAI: true, answeredAt: "2026-07-16T00:00:00Z",
     });
   });
   it("null si no hay señal (todo omitido o basura)", () => {
     expect(parseIntent(null)).toBeNull();
     expect(parseIntent({ goals: [], focus: [] })).toBeNull();
     expect(parseIntent("x")).toBeNull();
+  });
+  it("heartNote sola cuenta como señal (no null) y se recorta", () => {
+    const p = parseIntent({ goals: [], focus: [], heartNote: "  hola  " });
+    expect(p).not.toBeNull();
+    expect(p?.heartNote).toBe("hola");
+  });
+  it("heartNote vacía/basura se omite", () => {
+    const p1 = parseIntent({ goals: ["self"], focus: [], heartNote: "   " });
+    expect(p1 && "heartNote" in p1).toBe(false);
+    const p2 = parseIntent({ goals: ["self"], focus: [], heartNote: 42 });
+    expect(p2 && "heartNote" in p2).toBe(false);
   });
   it("useInAI default true si falta, answeredAt default ''", () => {
     const p = parseIntent({ goals: ["self"], focus: [] });
