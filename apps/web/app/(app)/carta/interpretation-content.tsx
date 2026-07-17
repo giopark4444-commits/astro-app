@@ -4,7 +4,7 @@
 // (móvil) — una sola fuente de significado, dos marcos. No inventa prosa:
 // todo sale del glosario de @aluna/core y de las lecturas compuestas.
 import { useLocale, useTranslations } from "next-intl";
-import { glossaryEntry, planetMeaningKey, patternMeaningKey } from "@aluna/core";
+import { glossaryEntry, patternMeaningKey } from "@aluna/core";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { composeBodyReading as composeEs } from "@/lib/content/astrology-readings-es";
 import { composeBodyReading as composeEn } from "@/lib/content/astrology-readings-en";
