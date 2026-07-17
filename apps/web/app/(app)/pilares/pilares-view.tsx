@@ -7,6 +7,7 @@ import {
   type Pillar,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
+import { useCountUp } from "@/lib/motion/use-count-up";
 import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
@@ -22,6 +23,26 @@ const ELEMENT_KEY: Record<string, string> = {
   metal: "elMetal",
   water: "elWater",
 };
+
+/** Una fila de la barra de balance de elementos: extraída para poder llamar
+ *  useCountUp (el número sube en el MISMO reloj que el fill de la barra,
+ *  --dur-count) — no se puede llamar un hook dentro del .map() del padre. */
+function ElementBar({ el, count, total }: { el: string; count: number; total: number }) {
+  const t = useTranslations();
+  const displayCount = useCountUp(count);
+  return (
+    <div className={styles.elRow}>
+      <span className={styles.elName}>{t(`pilares.${ELEMENT_KEY[el]}`)}</span>
+      <span className={styles.elTrack}>
+        <span
+          className={`${styles.elBar} ${styles[`elBg_${el}`] ?? ""} bar-fill-in`}
+          style={{ width: `${(count / total) * 100}%` }}
+        />
+      </span>
+      <span className={styles.elCount}>{displayCount}</span>
+    </div>
+  );
+}
 
 /** Lente Cuatro Pilares (Ba Zi / Saju). Pide /api/bazi (server, efemérides) y dibuja
  *  los 4 pilares tronco×rama, marca el Maestro del Día y el balance de elementos. */
@@ -160,16 +181,7 @@ export function PilaresView() {
             <h2 className={styles.section}>{t("pilares.balance")}</h2>
             <div className={styles.balance}>
               {ELEMENTS.map((el) => (
-                <div key={el} className={styles.elRow}>
-                  <span className={styles.elName}>{t(`pilares.${ELEMENT_KEY[el]}`)}</span>
-                  <span className={styles.elTrack}>
-                    <span
-                      className={`${styles.elBar} ${styles[`elBg_${el}`] ?? ""}`}
-                      style={{ width: `${((counts[el] ?? 0) / totalEls) * 100}%` }}
-                    />
-                  </span>
-                  <span className={styles.elCount}>{counts[el] ?? 0}</span>
-                </div>
+                <ElementBar key={el} el={el} count={counts[el] ?? 0} total={totalEls} />
               ))}
             </div>
 

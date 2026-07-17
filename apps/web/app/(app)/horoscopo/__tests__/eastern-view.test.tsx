@@ -175,6 +175,12 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(screen.queryByText("Esto toca tus pilares")).toBeNull();
   });
 
+  it("el pilar del año se enciende con la clase de ignición (movimiento de carga)", async () => {
+    renderView();
+    const pillarChar = await screen.findByText("丙午");
+    expect(pillarChar.className).toMatch(/ignite/);
+  });
+
   it("la vista año pinta SOLO el pilar del año: sin celda de Día ni 'Choque del día' (FIX 1)", async () => {
     renderView();
     await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));

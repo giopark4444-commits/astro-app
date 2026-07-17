@@ -202,7 +202,8 @@ export function HoroscopoView() {
             <div className={styles.signs} role="radiogroup" aria-label={t("animalAria")}>
               {EASTERN_ANIMALS.map((a, i) => (
                 <button key={a} type="button" role="radio" aria-checked={animal === a}
-                  className={`chip--control ${animal === a ? "chip--control-on" : ""}`}
+                  className={`chip--control ${animal === a ? "chip--control-on" : ""} ${styles.chipReveal}`}
+                  style={{ ["--i" as string]: i }}
                   onClick={() => setAnimal(a)}>
                   {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
                 </button>
@@ -319,9 +320,10 @@ export function HoroscopoView() {
           {/* Columna izquierda (sticky en desktop): selector + barras */}
           <div className={styles.side}>
             <div className={styles.signs} role="radiogroup" aria-label={t("signAria")}>
-              {ZODIAC_SIGNS.map((s) => (
+              {ZODIAC_SIGNS.map((s, i) => (
                 <button key={s.key} type="button" role="radio" aria-checked={sign === s.key}
-                  className={`chip--control ${sign === s.key ? "chip--control-on" : ""}`}
+                  className={`chip--control ${sign === s.key ? "chip--control-on" : ""} ${styles.chipReveal}`}
+                  style={{ ["--i" as string]: i }}
                   onClick={() => setSign(s.key)}>
                   {SIGN_GLYPH[s.key]} {L.signs[s.key]}
                 </button>

@@ -17,6 +17,15 @@
 
 .side { display: flex; flex-direction: column; gap: var(--sp-4); }
 .signs { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
+/* Entrada escalonada de los 12 chips (signos/animales): mismo mecanismo que
+   `.reveal` global (globals.css, aluna-reveal + --i por índice) pero con un
+   stagger propio más corto — con el global 70ms el chip 12 entraría a 770ms,
+   se siente lento para una fila de 12 elementos pequeños. */
+.chipReveal {
+  opacity: 0;
+  animation: aluna-reveal var(--dur) var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
 .periods { display: flex; justify-content: center; gap: var(--sp-1); }
 
 .mainCol { display: flex; flex-direction: column; gap: var(--sp-4); }

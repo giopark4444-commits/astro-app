@@ -31,7 +31,7 @@ const TABS: Array<{ key: PilaresTab; labelKey: string }> = [
 export function PilaresTabs({ active, onSelect }: { active: PilaresTab; onSelect: (t: PilaresTab) => void }) {
   const t = useTranslations();
   return (
-    <div className={styles.vtabs} role="tablist" aria-label={t("pilares.title")}>
+    <div className={`${styles.vtabs} reveal`} role="tablist" aria-label={t("pilares.title")}>
       {TABS.map(({ key, labelKey }) => (
         <button
           key={key}

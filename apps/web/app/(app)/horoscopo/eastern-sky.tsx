@@ -45,12 +45,12 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
       <div className={styles.pillarsRow}>
         {/* Solo los pilares PRESENTES en el periodo (day solo en today, month
             null en la vista año — ver EasternPeriodPillars en el motor). */}
-        {PILLAR_KEYS.filter((key) => payload.pillars[key] !== null).map((key) => {
+        {PILLAR_KEYS.filter((key) => payload.pillars[key] !== null).map((key, i) => {
           const p = payload.pillars[key]!;
           return (
             <div key={key} className={styles.pillarCell}>
               <span className={styles.pillarLabel}>{tp(key)}</span>
-              <span className={styles.pillarChar}>
+              <span className={`${styles.pillarChar} ignite`} style={{ ["--i" as string]: i }}>
                 {script === "hangul"
                   ? `${STEM_LABELS[p.stem]!.hangul}${BRANCH_LABELS[p.branch]!.hangul}`
                   : `${p.stemHanzi}${p.branchHanzi}`}
@@ -68,7 +68,7 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
 
       {/* Wu Xing del periodo (spec §5): elemento del pilar focal del periodo
           frente al elemento de la rama del animal, con la relación 生/克. */}
-      <p className={styles.hitRow}>
+      <p className={`${styles.hitRow} reveal`} style={{ ["--i" as string]: 3 }}>
         <span className={styles.hitGlyphs}>五行</span>
         {t("wuXingTitle")}: {t(WU_XING_KEY[payload.wuXing.relation], {
           period: tp(`el${cap(payload.wuXing.periodElement)}`),
@@ -79,7 +79,7 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
       {(dayClash || dayHarmonies.length > 0) && (
         <div>
           {dayClash && (
-            <p className={`${styles.hitRow} ${styles.hitHard}`}>
+            <p className={`${styles.hitRow} ${styles.hitHard} reveal`} style={{ ["--i" as string]: 4 }}>
               <span className={styles.hitGlyphs}>
                 {animalHanzi} 冲 {EARTHLY_BRANCHES[dayClash.withBranch]!.hanzi}
               </span>
@@ -87,7 +87,7 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
             </p>
           )}
           {dayHarmonies.map((h, i) => (
-            <p key={i} className={`${styles.hitRow} ${styles.hitSoft}`}>
+            <p key={i} className={`${styles.hitRow} ${styles.hitSoft} reveal`} style={{ ["--i" as string]: 5 + i }}>
               <span className={styles.hitGlyphs}>
                 {animalHanzi} 合 {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
               </span>
@@ -101,7 +101,7 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
         <div>
           <h3 className={styles.sectionH}>{t("taiSuiTitle")}</h3>
           {payload.taiSui.map((hit, i) => (
-            <p key={i} className={`${styles.hitRow} ${hit.kind === "zhi" ? styles.hitSoft : styles.hitHard}`}>
+            <p key={i} className={`${styles.hitRow} ${hit.kind === "zhi" ? styles.hitSoft : styles.hitHard} reveal`} style={{ ["--i" as string]: 8 + i }}>
               {t(TAI_SUI_KEY[hit.kind]!)}
             </p>
           ))}

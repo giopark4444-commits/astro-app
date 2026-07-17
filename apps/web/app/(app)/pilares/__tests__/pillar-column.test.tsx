@@ -45,4 +45,13 @@ describe("PillarColumn", () => {
     const { container: on } = renderColumn({ pro: true });
     expect(on.firstElementChild).toHaveAttribute("data-pro", "true");
   });
+
+  it("los hanzi grandes (tronco y rama) llevan la clase de ignición local (glow currentColor, no dorado)", () => {
+    const pillar: Pillar = { stem: 6, branch: 0 };
+    renderColumn({ pillar, script: "hanzi" });
+    const stemChar = screen.getByText("庚");
+    const branchChar = screen.getByText("子");
+    expect(stemChar.className).toMatch(/charIgnite/);
+    expect(branchChar.className).toMatch(/charIgnite/);
+  });
 });
