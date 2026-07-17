@@ -101,6 +101,10 @@ export function DeckManager() {
         body: JSON.stringify({ active: next }),
       });
       if (res.ok) await refresh();
+    } catch {
+      // Sin red: no se aplicó el cambio. El toggle refleja el manifiesto (no
+      // se llamó refresh), así que visualmente queda como estaba — sin
+      // rejection sin manejar ni estado incoherente.
     } finally {
       setToggling(false);
     }

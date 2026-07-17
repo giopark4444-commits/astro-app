@@ -6,7 +6,7 @@
 // entrada al editor de reverso. Miniaturas siempre RWS por ahora
 // (cardImageUrl resuelve el slot custom cuando el mazo esté activo — Task 7
 // cablea las lecturas).
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { TAROT_DECK, cardImageUrl, rwsCtx, TAROT_CARDS_ES, TAROT_CARDS_EN } from "@aluna/core";
@@ -25,8 +25,6 @@ import {
   type DeckImageFile,
 } from "../lib/tarot-deck-api";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
-
-const deckCtx = rwsCtx(apiUrl());
 
 function cardsDictFor(locale: Locale) {
   return locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
@@ -57,6 +55,9 @@ export function DeckManager() {
   const s = useStyles(tk);
   const cardsDict = cardsDictFor(locale);
   const accessToken = session?.access_token ?? null;
+  // apiUrl() dentro del componente (no a nivel de módulo): si la config
+  // faltara, no tumba TODA la pantalla de Ajustes al importar este archivo.
+  const deckCtx = useMemo(() => rwsCtx(apiUrl()), []);
 
   const [manifest, setManifest] = useState<DeckManifest | null>(null);
   const [busyCardId, setBusyCardId] = useState<string | null>(null);

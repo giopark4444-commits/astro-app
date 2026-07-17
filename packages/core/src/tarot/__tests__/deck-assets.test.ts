@@ -146,6 +146,17 @@ describe("deckCtxFromManifest", () => {
     expect(cardBackUrl(ctx)).toBe("https://storage.example.com/u1/back.webp");
   });
 
+  it("builds a custom ctx for a back-only deck (reverso propio, sin cartas) — el dorso se usa, las cartas caen a rws", () => {
+    const ctx = deckCtxFromManifest(
+      { available: true, active: true, cardIds: [], cardBase: null, backUrl: "https://storage.example.com/u1/back.webp" },
+      "",
+    );
+    expect(ctx.activeDeck).toBe("custom");
+    expect(ctx.customCardIds).toEqual(new Set());
+    expect(cardImageUrl("fool", ctx)).toBe("/tarot/rws/fool.webp"); // sin cartas custom → rws
+    expect(cardBackUrl(ctx)).toBe("https://storage.example.com/u1/back.webp"); // el reverso propio SÍ se usa
+  });
+
   it("propagates a null backUrl (rws back) into the custom ctx", () => {
     const ctx = deckCtxFromManifest(
       { available: true, active: true, cardIds: ["fool"], cardBase: "https://storage.example.com/u1", backUrl: null },

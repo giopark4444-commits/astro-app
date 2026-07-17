@@ -55,9 +55,14 @@ export interface DeckManifestLike {
 /**
  * Traduce el manifiesto del mazo (Task 4/7) a un `DeckAssetCtx` puro y
  * testeable, sin I/O. Latente (`available:false`), inactivo (`active:false`)
- * o activo-sin-contenido (sin `cardIds` o sin `cardBase`) siempre caen a
- * `rwsCtx(base)` — no-regresión: mismas URLs que hoy. Solo con contenido real
- * arma el ctx custom.
+ * o activo-sin-NADA (ni cartas custom ni reverso) caen a `rwsCtx(base)`
+ * — no-regresión: mismas URLs que hoy.
+ *
+ * El mazo custom es PARCIAL: basta ≥1 carta subida O un reverso propio (spec §2,
+ * y ambas UIs activan con `cardIds || back`). Un mazo "solo reverso" arma un ctx
+ * custom con `customCardIds` vacío → cada carta cae a RWS por el resolver, pero
+ * el dorso propio SÍ se usa. (Antes exigía cartas y se ignoraba el reverso en
+ * silencio.)
  */
 export function deckCtxFromManifest(
   manifest: DeckManifestLike | null | undefined,
@@ -65,12 +70,14 @@ export function deckCtxFromManifest(
 ): DeckAssetCtx {
   if (!manifest?.available || !manifest.active) return rwsCtx(base);
   const cardIds = manifest.cardIds ?? [];
-  if (cardIds.length === 0 || !manifest.cardBase) return rwsCtx(base);
+  const back = manifest.backUrl ?? null;
+  const hasCards = cardIds.length > 0 && !!manifest.cardBase;
+  if (!hasCards && !back) return rwsCtx(base);
   return {
     base,
     activeDeck: "custom",
-    customCardIds: new Set(cardIds),
-    customBase: manifest.cardBase,
-    customBack: manifest.backUrl ?? null,
+    customCardIds: new Set(hasCards ? cardIds : []),
+    ...(hasCards ? { customBase: manifest.cardBase as string } : {}),
+    customBack: back,
   };
 }

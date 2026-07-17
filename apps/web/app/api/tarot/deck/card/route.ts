@@ -22,9 +22,12 @@ type DeckUpsertBuilder = {
 async function currentCardIds(
   svc: ReturnType<typeof createServiceSupabaseClient>,
   userId: string,
-): Promise<string[]> {
-  const { data } = await svc.from("tarot_deck").select("card_ids").eq("user_id", userId).maybeSingle();
-  return (data as Pick<Tables<"tarot_deck">, "card_ids"> | null)?.card_ids ?? [];
+): Promise<{ ids: string[]; error: { message: string } | null }> {
+  const { data, error } = await svc.from("tarot_deck").select("card_ids").eq("user_id", userId).maybeSingle();
+  // El error del SELECT NO se puede tragar: si vuelve vacío por un fallo
+  // transitorio, el upsert de abajo persistiría card_ids con SOLO la carta
+  // nueva y orfanizaría todas las demás. Propagamos para responder 500 sin tocar la fila.
+  return { ids: (data as Pick<Tables<"tarot_deck">, "card_ids"> | null)?.card_ids ?? [], error };
 }
 
 export async function POST(req: NextRequest) {
@@ -55,7 +58,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "upload" }, { status: 500 });
   }
 
-  const ids = new Set(await currentCardIds(svc, user.id));
+  const cur = await currentCardIds(svc, user.id);
+  if (cur.error) {
+    console.error("[tarot/deck/card] read card_ids failed", cur.error);
+    return NextResponse.json({ error: "db" }, { status: 500 });
+  }
+  const ids = new Set(cur.ids);
   ids.add(cardId);
   const builder = svc.from("tarot_deck") as unknown as DeckUpsertBuilder;
   const { error } = await builder.upsert({ user_id: user.id, card_ids: [...ids] }, { onConflict: "user_id" });
@@ -87,7 +95,12 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "storage" }, { status: 500 });
   }
 
-  const ids = new Set(await currentCardIds(svc, user.id));
+  const cur = await currentCardIds(svc, user.id);
+  if (cur.error) {
+    console.error("[tarot/deck/card] read card_ids failed", cur.error);
+    return NextResponse.json({ error: "db" }, { status: 500 });
+  }
+  const ids = new Set(cur.ids);
   ids.delete(cardId);
   const builder = svc.from("tarot_deck") as unknown as DeckUpsertBuilder;
   const { error } = await builder.upsert({ user_id: user.id, card_ids: [...ids] }, { onConflict: "user_id" });
