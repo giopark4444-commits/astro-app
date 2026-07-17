@@ -1,13 +1,19 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
 import { EARTHLY_BRANCHES, STEM_LABELS, BRANCH_LABELS } from "@aluna/core";
-import type { EasternPayload, EasternPillarKey } from "@/lib/horoscope/eastern";
+import type { EasternPayload, EasternPillarKey, WuXingRelation } from "@/lib/horoscope/eastern";
 import styles from "./horoscopo.module.css";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const PILLAR_KEYS: EasternPillarKey[] = ["year", "month", "day"];
 const TAI_SUI_KEY: Record<string, string> = {
   zhi: "taiSuiZhi", chong: "taiSuiChong", hai: "taiSuiHai", zixing: "taiSuiZixing", po: "taiSuiPo",
+};
+// Frase por relación Wu Xing (acción del elemento del periodo SOBRE el del
+// animal, como la define el motor): clave i18n con {period} y {animal}.
+const WU_XING_KEY: Record<WuXingRelation, string> = {
+  same: "wuXingSame", generates: "wuXingGenerates", controls: "wuXingControls",
+  controlled_by: "wuXingControlledBy", generated_by: "wuXingGeneratedBy",
 };
 
 /** Lámina del periodo oriental: pilares año/mes/día en hanzi (con pinyin/animal),
@@ -59,6 +65,16 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
           );
         })}
       </div>
+
+      {/* Wu Xing del periodo (spec §5): elemento del pilar focal del periodo
+          frente al elemento de la rama del animal, con la relación 生/克. */}
+      <p className={styles.hitRow}>
+        <span className={styles.hitGlyphs}>五行</span>
+        {t("wuXingTitle")}: {t(WU_XING_KEY[payload.wuXing.relation], {
+          period: tp(`el${cap(payload.wuXing.periodElement)}`),
+          animal: tp(`el${cap(payload.wuXing.animalElement)}`),
+        })}
+      </p>
 
       {(dayClash || dayHarmonies.length > 0) && (
         <div>

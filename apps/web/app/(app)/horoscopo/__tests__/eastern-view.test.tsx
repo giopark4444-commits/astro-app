@@ -140,6 +140,13 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(screen.getByText(/子時/)).toBeInTheDocument();
   });
 
+  it("pinta el Wu Xing del periodo: elementos y relación (FIX 3, spec §5)", async () => {
+    renderView();
+    await waitFor(() => expect(screen.getByText(/Wu Xing del periodo/)).toBeInTheDocument());
+    // mock: fire vs fire, relation "same" → frase con ambos elementos
+    expect(screen.getByText(/Fuego del periodo y Fuego de tu animal/)).toBeInTheDocument();
+  });
+
   it("con natalHits en el payload, aparece la sección de cruce personal con el par en hanzi (FIX 2)", async () => {
     global.fetch = vi.fn(async () => ({
       ok: true,
