@@ -1,0 +1,20 @@
+/* apps/web/components/meaning.module.css — sobre tokens existentes (tokens.css) */
+.trigger {
+  display: inline; background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: inherit; letter-spacing: inherit; cursor: help;
+  text-decoration: underline dotted rgba(var(--acc-rgb), 0.5);
+  text-underline-offset: 3px;
+}
+.trigger:hover { text-decoration-color: var(--acc); }
+.veil {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: end center;
+  background: color-mix(in oklab, var(--bg) 55%, transparent); backdrop-filter: blur(2px);
+}
+.sheet {
+  width: min(480px, calc(100vw - 24px)); margin-bottom: 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  padding: var(--sp-5); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+.glyph { font-size: 26px; color: var(--acc-text); display: block; margin-bottom: var(--sp-2); }
+.title { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); margin: 0 0 var(--sp-2); }
+.body { font-family: var(--font-ui); font-size: var(--text-sm); line-height: 1.6; color: var(--soft); margin: 0; }
