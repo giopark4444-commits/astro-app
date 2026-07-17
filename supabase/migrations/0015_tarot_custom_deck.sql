@@ -4,7 +4,7 @@
 -- subida real vive en /api/tarot/deck/* con service-role, como /api/avatar).
 
 create table if not exists public.tarot_deck (
-  user_id uuid primary key references auth.users(id) on delete cascade,
+  user_id uuid primary key references public.profiles_user(id) on delete cascade,
   active boolean not null default false,
   card_ids text[] not null default '{}',
   back_kind text not null default 'none' check (back_kind in ('none', 'upload', 'editor')),
