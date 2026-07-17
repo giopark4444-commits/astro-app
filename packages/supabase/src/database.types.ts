@@ -315,6 +315,35 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0015_tarot_custom_deck.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      tarot_deck: {
+        Row: {
+          active: boolean;
+          back_config: Json | null;
+          back_kind: string;
+          card_ids: string[];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          active?: boolean;
+          back_config?: Json | null;
+          back_kind?: string;
+          card_ids?: string[];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          active?: boolean;
+          back_config?: Json | null;
+          back_kind?: string;
+          card_ids?: string[];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       // Añadida a mano junto con supabase/migrations/0006_user_reports.sql
       // (regenerar desde la BD viva si se instala el CLI de Supabase).
       user_reports: {
