@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
-  planetMeaningKey, dignityMeaningKey, patternMeaningKey,
+  planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMeaningKey,
   type ChartResult, type BodyPosition, type Aspect, type HouseSystem, type Zodiac,
 } from "@aluna/core";
 import { Enso } from "../../../components/Enso";
@@ -274,7 +274,10 @@ export default function CartaScreen() {
                     {(["placidus", "koch", "equal", "whole", "regiomontanus", "porphyry"] as HouseSystem[]).map((h) => {
                       const on = houseSystem === h;
                       return (
-                        <Chip key={h} kind="control" label={L.houses[h]!} selected={on} onPress={() => setHouseSystem(h)} />
+                        <View key={h} style={styles.chipWithInfo}>
+                          <Chip kind="control" label={L.houses[h]!} selected={on} onPress={() => setHouseSystem(h)} />
+                          <Meaning k={houseSystemMeaningKey(h)} style={styles.chipInfo}>ⓘ</Meaning>
+                        </View>
                       );
                     })}
                   </View>
@@ -286,13 +289,15 @@ export default function CartaScreen() {
                     {(["tropical", "sidereal"] as Zodiac[]).map((z) => {
                       const on = zodiac === z;
                       return (
-                        <Chip
-                          key={z}
-                          kind="control"
-                          label={t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
-                          selected={on}
-                          onPress={() => setZodiac(z)}
-                        />
+                        <View key={z} style={styles.chipWithInfo}>
+                          <Chip
+                            kind="control"
+                            label={t(z === "tropical" ? "carta.zodiacT" : "carta.zodiacS")}
+                            selected={on}
+                            onPress={() => setZodiac(z)}
+                          />
+                          <Meaning k={`zodiac.${z}`} style={styles.chipInfo}>ⓘ</Meaning>
+                        </View>
                       );
                     })}
                   </View>
@@ -466,7 +471,7 @@ function AspectRow({
     <View style={[styles.aspRow, last && styles.rowLast]}>
       <Text style={[styles.aspGlyphs, color]}>
         <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a] ?? a.a}</Meaning>{" "}
-        {ASPECT_GLYPHS[a.aspect] ?? "·"}{" "}
+        <Meaning k={`aspect.${a.aspect}`}>{ASPECT_GLYPHS[a.aspect] ?? "·"}</Meaning>{" "}
         <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b] ?? a.b}</Meaning>
       </Text>
       <View style={styles.aspMain}>
@@ -553,6 +558,11 @@ function makeStyles(t: ThemeTokens) {
     // los chips en sí son <Chip kind="control">, este solo los reparte en fila.
     kindRow: { flexDirection: "row", flexWrap: "wrap", gap: space.sm, width: "100%" },
     kindHint: { color: t.textFaint, fontSize: typeScale.sm, fontFamily: fonts.serifItalic, marginTop: space.sm },
+    // Afijo ⓘ junto a cada chip de casas/zodiaco (paridad con el web
+    // chart-controls.tsx): el Chip es un View, no puede ir dentro del <Text>
+    // que <Meaning/> necesita ser — se coloca aparte, al lado.
+    chipWithInfo: { flexDirection: "row", alignItems: "center", gap: 3 },
+    chipInfo: { color: t.textFaint, fontSize: typeScale.sm, opacity: 0.7 },
 
     // Ídem: fondo/borde ahora los da <Card accent> (variante --surface-2 del SPEC).
     balanceCard: { width: "100%", marginBottom: space.lg },
