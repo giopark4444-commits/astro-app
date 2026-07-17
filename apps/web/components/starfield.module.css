@@ -3,17 +3,16 @@
   inset: 0;
   pointer-events: none;
   opacity: var(--stars, 0);
-  background-image:
-    radial-gradient(1.5px 1.5px at 18% 12%, #fff, transparent),
-    radial-gradient(1px 1px at 68% 8%, #fff, transparent),
-    radial-gradient(1.6px 1.6px at 86% 16%, rgba(var(--acc-rgb), 1), transparent),
-    radial-gradient(1px 1px at 40% 22%, #fff, transparent),
-    radial-gradient(1px 1px at 12% 34%, #cdd6ff, transparent),
-    radial-gradient(1.5px 1.5px at 78% 38%, rgba(var(--acc-rgb), 1), transparent),
-    radial-gradient(1px 1px at 54% 28%, #fff, transparent),
-    radial-gradient(1px 1px at 30% 58%, #fff, transparent),
-    radial-gradient(1.4px 1.4px at 90% 68%, rgba(var(--acc-rgb), 1), transparent),
-    radial-gradient(1px 1px at 8% 78%, #fff, transparent),
-    radial-gradient(1px 1px at 62% 84%, #cdd6ff, transparent);
-  animation: aluna-twinkle 7s var(--ease-soft) infinite;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  animation: aluna-star-twinkle var(--tw, 5s) var(--ease-soft) infinite;
+  animation-delay: var(--td, 0s);
+}
+
+@keyframes aluna-star-twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }
