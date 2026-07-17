@@ -1,4 +1,6 @@
-// Contenido de "Ayuda y soporte" / "Síguenos" en Ajustes (brief ajustes-web T2).
+// Contenido de "Ayuda y soporte" / "Síguenos" en Ajustes — compartido web+móvil
+// (antes vivía solo en apps/web/lib/content/support.ts; brief ajustes-movil T3
+// lo sube a @aluna/core para que ambas plataformas importen la misma fuente).
 
 // TODO-Gio: confirmar dominio/correo real de soporte antes de lanzamiento.
 export const SUPPORT_EMAIL = "hola@aluna.app";

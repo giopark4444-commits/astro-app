@@ -1,7 +1,7 @@
 // Mapeo puro slug→documento legal (extraído para poder testearlo sin montar
 // la página de Next — brief ajustes-web T3/T5).
-import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "@/lib/content/legal-es";
-import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@/lib/content/legal-en";
+import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "@aluna/core";
+import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
 
 export const LEGAL_SLUGS = ["terminos", "privacidad", "descargo"] as const;
 export type LegalSlug = (typeof LEGAL_SLUGS)[number];

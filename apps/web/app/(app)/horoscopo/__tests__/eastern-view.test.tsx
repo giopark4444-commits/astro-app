@@ -210,6 +210,34 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(pillarChar.className).toMatch(/ignite/);
   });
 
+  it("con harmonies y monthChange en el payload, Modo Pro pinta las filas de armonías y cambio de mes", async () => {
+    global.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ ...PAYLOAD_EASTERN, harmonies: ["goat"] }),
+    })) as unknown as typeof fetch;
+    renderView();
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const proBtn = await screen.findByText("Modo Pro");
+    act(() => { proBtn.click(); });
+    // fila de armonías: título + hint + animal en 六合 (未 Cabra) envuelto en Meaning
+    await waitFor(() => expect(screen.getByText("Armonías del periodo")).toBeInTheDocument());
+    expect(screen.getByText(/六合 contigo/)).toBeInTheDocument();
+    expect(screen.getAllByText(byNodeText(/未 Cabra/)).length).toBeGreaterThan(0);
+    // fila de cambio de mes: título + hint + fecha del primer 節 del rango
+    expect(screen.getByText("Cambio de mes solar")).toBeInTheDocument();
+    expect(screen.getByText(/marca el cambio de energía mensual/)).toBeInTheDocument();
+    expect(screen.getAllByText(/節/).length).toBeGreaterThan(0);
+  });
+
+  it("sin harmonies en el payload, la fila de armonías del Modo Pro no aparece", async () => {
+    renderView();
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const proBtn = await screen.findByText("Modo Pro");
+    act(() => { proBtn.click(); });
+    await waitFor(() => expect(screen.getByText("Interacciones completas")).toBeInTheDocument());
+    expect(screen.queryByText("Armonías del periodo")).toBeNull();
+  });
+
   it("la vista año pinta SOLO el pilar del año: sin celda de Día ni 'Choque del día' (FIX 1)", async () => {
     renderView();
     await waitFor(() => expect(screen.getAllByText(byNodeText(/丙午/)).length).toBeGreaterThan(0));

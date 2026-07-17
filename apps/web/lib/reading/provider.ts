@@ -4,14 +4,22 @@ import Anthropic from "@anthropic-ai/sdk";
 // system + prompt (la VOZ) y este módulo solo se encarga de "llamar al modelo
 // y devolver texto". Cambiar de proveedor = variables de entorno, sin tocar
 // código:
-//   READING_PROVIDER = anthropic | openai | gemini   (opcional; por defecto,
-//     usa el primero cuyo API key esté presente, en ese orden)
+//   READING_PROVIDER = anthropic | openai | gemini | ollama   (opcional; por
+//     defecto, usa el primero cuyo API key esté presente, en ese orden)
 //   ANTHROPIC_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY
 //   ANTHROPIC_READING_MODEL / OPENAI_READING_MODEL / GEMINI_READING_MODEL
 //     (opcional; sobrescribe el modelo por defecto de cada proveedor)
 //
 // Claude va por su SDK oficial; OpenAI y Gemini por REST (fetch) para no sumar
 // dependencias mientras los caminos están latentes.
+//
+// Ollama (voz local, gratis, sin llave): solo participa si OLLAMA_ENABLED=1
+// (nunca por defecto — en producción no hay servidor local, así que el
+// camino se queda latente exactamente como hoy). Con OLLAMA_ENABLED=1 entra
+// como último recurso tras los proveedores con llave; READING_PROVIDER=ollama
+// lo fuerza. OLLAMA_BASE_URL / OLLAMA_READING_MODEL / OLLAMA_TIMEOUT_MS
+// (opcionales; por defecto http://localhost:11434/v1, hermes3:8b, 120s — la
+// inferencia local en un 8B tarda bastante más que un API en la nube).
 
 export interface CompleteOptions {
   system: string;
@@ -67,9 +75,18 @@ function keyFor(name: ProviderName): string | undefined {
 }
 
 /** Elige el proveedor a usar: el forzado por READING_PROVIDER si tiene llave,
- *  o el primero (en orden) cuya llave esté presente. Sin llaves → latente. */
+ *  o el primero (en orden) cuya llave esté presente. Si ninguno tiene llave y
+ *  OLLAMA_ENABLED=1, cae a Ollama (local, sin llave) como último recurso;
+ *  READING_PROVIDER=ollama lo fuerza (siempre que OLLAMA_ENABLED=1). Sin
+ *  llaves y sin OLLAMA_ENABLED → latente. */
 export function resolveReadingProvider(): ResolvedProvider {
   const configured = (process.env.READING_PROVIDER ?? "").toLowerCase();
+  const ollamaEnabled = process.env.OLLAMA_ENABLED === "1";
+
+  if (configured === "ollama" && ollamaEnabled) {
+    return { available: true, provider: ollamaProvider(ollamaTimeoutMs()) };
+  }
+
   const candidates: ProviderName[] = (ORDER as readonly string[]).includes(configured)
     ? [configured as ProviderName]
     : [...ORDER];
@@ -78,6 +95,11 @@ export function resolveReadingProvider(): ResolvedProvider {
     const key = keyFor(name);
     if (key) return { available: true, provider: makeProvider(name, key) };
   }
+
+  if (ollamaEnabled) {
+    return { available: true, provider: ollamaProvider(ollamaTimeoutMs()) };
+  }
+
   return { available: false };
 }
 
@@ -359,6 +381,16 @@ function geminiProvider(apiKey: string): ReadingProvider {
 /** Timeout por defecto de la cascada de informes: 150s (vs. 60s de lecturas). */
 const REPORT_TIMEOUT_MS = 150_000;
 
+/** Timeout por defecto de Ollama (voz local): 120s. Un 8B en un M1 Max
+ *  tarda entre 30 y 60s en generar una lectura larga; con 60s (el timeout de
+ *  las lecturas por API) se cortaría seguido. */
+const OLLAMA_TIMEOUT_MS = 120_000;
+
+function ollamaTimeoutMs(): number {
+  const configured = Number(process.env.OLLAMA_TIMEOUT_MS);
+  return Number.isFinite(configured) && configured > 0 ? configured : OLLAMA_TIMEOUT_MS;
+}
+
 /**
  * Factory genérico para proveedores REST compatibles con la API de OpenAI en
  * `/chat/completions` (Hermes vía Nous Portal, DeepSeek, y también el propio
@@ -418,6 +450,19 @@ function openAICompatibleProvider(
   };
 }
 
+/** Ollama (voz local, gratis, sin llave real — Ollama ignora el header
+ *  Authorization que el factory siempre manda). Solo se construye cuando
+ *  OLLAMA_ENABLED=1 lo habilita en resolveReadingProvider/resolveReportCascade. */
+function ollamaProvider(timeoutMs: number): ReadingProvider {
+  return openAICompatibleProvider(
+    "ollama",
+    process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1",
+    "ollama",
+    process.env.OLLAMA_READING_MODEL || "hermes3:8b",
+    timeoutMs,
+  );
+}
+
 function hermesProvider(apiKey: string, timeoutMs: number): ReadingProvider {
   return openAICompatibleProvider(
     "hermes",
@@ -457,8 +502,10 @@ function openaiReportProvider(apiKey: string, timeoutMs: number): ReadingProvide
 /**
  * Arma la cascada real de proveedores para informes desde las variables de
  * entorno, en orden Hermes → DeepSeek → OpenAI: cada uno entra solo si su
- * llave está presente. Sin ninguna llave presente, cascada vacía (el
- * llamador decide qué hacer, p. ej. dejar el informe latente).
+ * llave está presente. Si OLLAMA_ENABLED=1, Ollama entra al final de todos
+ * (sin llave, local) como último recurso. Sin ninguna llave presente ni
+ * OLLAMA_ENABLED, cascada vacía (el llamador decide qué hacer, p. ej. dejar
+ * el informe latente).
  */
 export function resolveReportCascade(timeoutMs: number = REPORT_TIMEOUT_MS): ReadingProvider[] {
   const providers: ReadingProvider[] = [];
@@ -468,6 +515,7 @@ export function resolveReportCascade(timeoutMs: number = REPORT_TIMEOUT_MS): Rea
   if (nousKey) providers.push(hermesProvider(nousKey, timeoutMs));
   if (deepseekKey) providers.push(deepseekProvider(deepseekKey, timeoutMs));
   if (openaiKey) providers.push(openaiReportProvider(openaiKey, timeoutMs));
+  if (process.env.OLLAMA_ENABLED === "1") providers.push(ollamaProvider(timeoutMs));
   return providers;
 }
 

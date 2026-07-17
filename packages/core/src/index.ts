@@ -15,6 +15,9 @@ export { reduce, reduceWithTrace, digitsSum, isMaster } from "./numerology/reduc
 export * from "./constants/astrology";
 export * from "./constants/colors";
 
+// Ayuda y soporte / Síguenos en Ajustes — compartido web+móvil
+export { SUPPORT_EMAIL, SOCIAL_LINKS, type SocialLink } from "./constants/support";
+
 // Dominio de carta astral (puro)
 export * from "./astrology/types";
 export { normalizeAngle, signOfLongitude, angularSeparation } from "./astrology/signs";
@@ -111,3 +114,6 @@ export type { Rng, DrawnCard } from "./tarot/shuffle";
 export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
 export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
+
+export { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "./legal/legal-es";
+export { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "./legal/legal-en";
