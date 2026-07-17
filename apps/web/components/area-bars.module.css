@@ -13,6 +13,13 @@
 }
 
 .track { height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+/* .bar-fill-in (global, aluna-bar-fill) hace el llenado 0→width al MONTAR;
+   la transition de aquí solo entra en juego si el width cambia con el nodo ya
+   montado (no ocurre hoy: EnergyPanel desmonta AreaBars entre periodos, así
+   que cada carga es un montaje nuevo → solo corre la animation). Las dos no
+   compiten: una CSS animation gana sobre una transition en la misma
+   propiedad mientras está activa, así que dejarlas juntas es seguro y cubre
+   el caso futuro de un consumidor que SÍ mantenga el nodo vivo. */
 .fill {
   display: block; height: 100%; border-radius: 999px;
   transition: width var(--dur) var(--ease-spring);
