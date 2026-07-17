@@ -7,3 +7,8 @@ export const planetMeaningKey = (k: string) => `planet.${k.replace("_", "")}`;
 export const dignityMeaningKey = (d: string) => `dignity.${d === "exile" ? "detriment" : d}`;
 export const patternMeaningKey = (t: string) => `pattern.${t.replace(/_/g, "")}`;
 export const houseSystemMeaningKey = (h: string) => `housesystem.${h === "whole" ? "wholesign" : h}`;
+// bazi.interaction.*: id interno de EasternInteractionType/InteractionType
+// ("clash", "harm", "punishment", "po", "six_combo", "self_punishment") a
+// clave del glosario; six_combo/self_punishment pierden el guion bajo, "po"
+// (破, no cubierto por branchPairInteractions) queda igual.
+export const interactionKey = (t: string) => `bazi.interaction.${t.replace(/_/g, "")}`;

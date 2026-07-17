@@ -1,7 +1,8 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { EARTHLY_BRANCHES, STEM_LABELS, BRANCH_LABELS } from "@aluna/core";
+import { EARTHLY_BRANCHES, HEAVENLY_STEMS, STEM_LABELS, BRANCH_LABELS, interactionKey } from "@aluna/core";
 import type { EasternPayload, EasternPillarKey, WuXingRelation } from "@/lib/horoscope/eastern";
+import { Meaning } from "@/components/meaning";
 import styles from "./horoscopo.module.css";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -51,9 +52,12 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
             <div key={key} className={styles.pillarCell}>
               <span className={styles.pillarLabel}>{tp(key)}</span>
               <span className={`${styles.pillarChar} ignite`} style={{ ["--i" as string]: i }}>
-                {script === "hangul"
-                  ? `${STEM_LABELS[p.stem]!.hangul}${BRANCH_LABELS[p.branch]!.hangul}`
-                  : `${p.stemHanzi}${p.branchHanzi}`}
+                <Meaning k={`bazi.stem.${HEAVENLY_STEMS[p.stem]!.key}`}>
+                  {script === "hangul" ? STEM_LABELS[p.stem]!.hangul : p.stemHanzi}
+                </Meaning>
+                <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[p.branch]!.key}`}>
+                  {script === "hangul" ? BRANCH_LABELS[p.branch]!.hangul : p.branchHanzi}
+                </Meaning>
               </span>
               <span className={styles.pillarSub}>
                 {script === "hangul"
@@ -69,8 +73,10 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
       {/* Wu Xing del periodo (spec §5): elemento del pilar focal del periodo
           frente al elemento de la rama del animal, con la relación 生/克. */}
       <p className={`${styles.hitRow} reveal`} style={{ ["--i" as string]: 3 }}>
-        <span className={styles.hitGlyphs}>五行</span>
-        {t("wuXingTitle")}: {t(WU_XING_KEY[payload.wuXing.relation], {
+        <Meaning k="bazi.term.wuxing">
+          <span className={styles.hitGlyphs}>五行</span>
+          {t("wuXingTitle")}
+        </Meaning>: {t(WU_XING_KEY[payload.wuXing.relation], {
           period: tp(`el${cap(payload.wuXing.periodElement)}`),
           animal: tp(`el${cap(payload.wuXing.animalElement)}`),
         })}
@@ -81,17 +87,21 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
           {dayClash && (
             <p className={`${styles.hitRow} ${styles.hitHard} reveal`} style={{ ["--i" as string]: 4 }}>
               <span className={styles.hitGlyphs}>
-                {animalHanzi} 冲 {EARTHLY_BRANCHES[dayClash.withBranch]!.hanzi}
+                <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[animalBranch]!.key}`}>{animalHanzi}</Meaning>{" "}
+                <Meaning k={interactionKey("clash")}>冲</Meaning>{" "}
+                <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[dayClash.withBranch]!.key}`}>{EARTHLY_BRANCHES[dayClash.withBranch]!.hanzi}</Meaning>
               </span>
-              {t("clashDay")}: {tp(`animal${cap(dayClash.withAnimal)}`)}
+              <Meaning k={interactionKey("clash")}>{t("clashDay")}</Meaning>: {tp(`animal${cap(dayClash.withAnimal)}`)}
             </p>
           )}
           {dayHarmonies.map((h, i) => (
             <p key={i} className={`${styles.hitRow} ${styles.hitSoft} reveal`} style={{ ["--i" as string]: 5 + i }}>
               <span className={styles.hitGlyphs}>
-                {animalHanzi} 合 {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[animalBranch]!.key}`}>{animalHanzi}</Meaning>{" "}
+                <Meaning k={interactionKey("six_combo")}>合</Meaning>{" "}
+                <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[h.withBranch]!.key}`}>{EARTHLY_BRANCHES[h.withBranch]!.hanzi}</Meaning>
               </span>
-              {t("harmonyDay")}: {tp(`animal${cap(h.withAnimal)}`)}
+              <Meaning k={interactionKey("six_combo")}>{t("harmonyDay")}</Meaning>: {tp(`animal${cap(h.withAnimal)}`)}
             </p>
           ))}
         </div>

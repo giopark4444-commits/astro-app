@@ -526,6 +526,36 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
     body: "Los pilares no viven aislados: sus troncos y ramas se combinan, chocan o se castigan entre sí. Estas interacciones son la trama fina de la carta — donde dos energías se funden en algo nuevo o se restan fuerza. Leerlas es ver el mapa en movimiento, no como foto.",
   },
 
+  // ——— BaZi: Interacciones de rama (horóscopo oriental) ———
+  "bazi.interaction.clash": {
+    title: "Choque", glyph: "冲",
+    body: "Dos ramas frente a frente: energías opuestas que se empujan. Un choque no es castigo — es movimiento forzado: algo pide cambiar de lugar, de plan o de ritmo. Los periodos de choque incomodan, y justo por eso destraban.",
+  },
+  "bazi.interaction.punishment": {
+    title: "Castigo", glyph: "刑",
+    body: "Una fricción interna entre ramas que no se ve venir: roces de ingratitud, de exceso o de impaciencia según el trío que lo forme. Habla menos de enemigos afuera y más de hábitos propios que se pisan la cola. Su medicina es la autoconciencia.",
+  },
+  "bazi.interaction.po": {
+    title: "Ruptura", glyph: "破",
+    body: "Dos ramas que se desarman una a otra en silencio: planes que se deshilachan, acuerdos que pierden forma. No es catástrofe — es desgaste fino. Pide revisar los detalles antes de firmar, prometer o dar por hecho.",
+  },
+  "bazi.interaction.harm": {
+    title: "Daño", glyph: "害",
+    body: "El roce que llega por donde confiabas: malentendidos, favores que salen torcidos, cercanías que hieren sin querer. No pide cerrarte — pide claridad al hablar y acuerdos explícitos mientras dure.",
+  },
+  "bazi.interaction.sixcombo": {
+    title: "Combinación", glyph: "合",
+    body: "Dos ramas que se atraen y se funden en un elemento nuevo: alianzas, química, puertas que se abren solas. Es el cielo cooperando — pero lo que se combina también te compromete: elige con quién te fundes.",
+  },
+  "bazi.interaction.selfpunishment": {
+    title: "Auto-castigo", glyph: "自刑",
+    body: "Una rama que se castiga a sí misma cuando se duplica: la autoexigencia, el rumiar, el sabotaje silencioso. El periodo no te ataca — te espeja. Su práctica es tratarte como tratarías a alguien que quieres.",
+  },
+  "bazi.term.wuxing": {
+    title: "Wu Xing", glyph: "五行",
+    body: "Los cinco movimientos — Madera, Fuego, Tierra, Metal y Agua — que se generan y se controlan en ciclo. No son sustancias: son fases de la energía. Toda la lectura oriental es, en el fondo, ver cómo bailan estos cinco contigo.",
+  },
+
   // ——— BaZi: Cinco Elementos (wuxing) ———
   "bazi.element.wood": {
     title: "Madera", glyph: "木",

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { HoroscopoView } from "../horoscopo-view";
@@ -53,6 +53,13 @@ beforeEach(() => {
   mockActive.current = null;
   global.fetch = vi.fn(async () => ({ ok: true, json: async () => PAYLOAD_EASTERN })) as unknown as typeof fetch;
 });
+
+// Los caracteres del pilar (丙/午) y los pares de interacción (子/冲/午) ahora
+// se envuelven CADA UNO en su propio <Meaning> (capa de significados, task
+// oriental): el texto combinado deja de ser un único nodo de texto, así que
+// el matcher exacto/regex de RTL (que solo mira nodos de texto DIRECTOS) ya
+// no encuentra el contenedor. Este helper mira el textContent recursivo.
+const byNodeText = (re: RegExp) => (_: string, node: Element | null) => re.test(node?.textContent ?? "");
 
 function renderView() {
   return render(
@@ -120,11 +127,11 @@ describe("HoroscopoView — tab Oriental", () => {
     const sajuBtn = await screen.findByRole("tab", { name: "Saju" });
     act(() => { sajuBtn.click(); });
     // pilar del año 丙午 en hangul: 병 (stem 2) + 오 (branch 6)
-    await waitFor(() => expect(screen.getAllByText(/병오/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText(byNodeText(/병오/)).length).toBeGreaterThan(0));
     // volver a Ba Zi restaura el hanzi
     const baziBtn = screen.getByRole("tab", { name: "Ba Zi" });
     act(() => { baziBtn.click(); });
-    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText(byNodeText(/丙午/)).length).toBeGreaterThan(0));
   });
 
   it("el toggle Pro muestra la tabla completa de interacciones con hanzi", async () => {
@@ -165,25 +172,47 @@ describe("HoroscopoView — tab Oriental", () => {
     })) as unknown as typeof fetch;
     renderView();
     await waitFor(() => expect(screen.getByText("Esto toca tus pilares")).toBeInTheDocument());
-    expect(screen.getByText(/子 冲 午/)).toBeInTheDocument();
+    expect(screen.getAllByText(byNodeText(/子 冲 午/)).length).toBeGreaterThan(0);
     expect(screen.getByText(/Choque/)).toBeInTheDocument();
+  });
+
+  it("una fila de interacción en 'Esto toca tus pilares' abre el glosario (capa de significados, antes muda)", async () => {
+    global.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        ...PAYLOAD_EASTERN,
+        natalHits: [
+          { natalPillar: "day", periodPillar: "year", type: "clash", natalBranch: 0, withBranch: 6, favorable: false },
+        ],
+      }),
+    })) as unknown as typeof fetch;
+    renderView();
+    await waitFor(() => expect(screen.getByText("Esto toca tus pilares")).toBeInTheDocument());
+    const triggers = screen.getAllByRole("button", { name: "Choque" });
+    expect(triggers.length).toBeGreaterThan(0);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(triggers[0]!);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveTextContent(/Choque/);
+    expect(dialog).toHaveTextContent(/冲/);
   });
 
   it("sin natalHits, la sección de cruce personal NO aparece (FIX 2)", async () => {
     renderView();
-    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText(byNodeText(/丙午/)).length).toBeGreaterThan(0));
     expect(screen.queryByText("Esto toca tus pilares")).toBeNull();
   });
 
   it("el pilar del año se enciende con la clase de ignición (movimiento de carga)", async () => {
     renderView();
-    const pillarChar = await screen.findByText("丙午");
+    const pillarChar = await screen.findByText((_, node) => node?.textContent === "丙午");
     expect(pillarChar.className).toMatch(/ignite/);
   });
 
   it("la vista año pinta SOLO el pilar del año: sin celda de Día ni 'Choque del día' (FIX 1)", async () => {
     renderView();
-    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText(byNodeText(/丙午/)).length).toBeGreaterThan(0));
     // "Día" solo existiría como etiqueta del pilar del día (el selector de
     // periodo dice "Hoy"); con day=null no debe aparecer.
     expect(screen.queryByText("Día")).toBeNull();
