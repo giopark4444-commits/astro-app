@@ -6,8 +6,29 @@ import { LIFE_AREAS, type LifeArea } from "./astrology/life-areas";
 export type IntentGoal = "self" | "bonds" | "purpose" | "future" | "spirituality" | "others" | "decisions";
 export const INTENT_GOALS: readonly IntentGoal[] = ["self", "bonds", "purpose", "future", "spirituality", "others", "decisions"];
 
-export type RelationshipStatus = "single" | "partnered" | "married" | "complicated" | "private";
-export const RELATIONSHIP_STATUSES: readonly RelationshipStatus[] = ["single", "partnered", "married", "complicated", "private"];
+export type RelationshipStatus =
+  | "single"
+  | "partnered"
+  | "situationship"
+  | "engaged"
+  | "married"
+  | "separated"
+  | "divorced"
+  | "widowed"
+  | "complicated"
+  | "private";
+export const RELATIONSHIP_STATUSES: readonly RelationshipStatus[] = [
+  "single",
+  "partnered",
+  "situationship",
+  "engaged",
+  "married",
+  "separated",
+  "divorced",
+  "widowed",
+  "complicated",
+  "private",
+];
 
 export interface UserIntent {
   goals: IntentGoal[];
