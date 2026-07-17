@@ -73,8 +73,20 @@ export function OnboardingFlow() {
     setI((idx) => idx + 1);
   }
 
+  // Enter avanza al siguiente paso cuando el actual está completo. Se ignora
+  // sobre botones (los chips ya usan Enter para activarse) y sobre las opciones
+  // del autocomplete de lugar (Enter ahí selecciona, no avanza).
+  function onEnter(e: React.KeyboardEvent) {
+    if (e.key !== "Enter") return;
+    const el = e.target as HTMLElement;
+    if (el.tagName === "BUTTON" || el.getAttribute("role") === "option") return;
+    if (!canNext || busy) return;
+    e.preventDefault();
+    next();
+  }
+
   return (
-    <main className={styles.shell}>
+    <main className={styles.shell} onKeyDown={onEnter}>
       <div className={styles.aura}>
         <Starfield />
         <span className={styles.glyph} aria-hidden><Icon name="enso" size={44} /></span>
