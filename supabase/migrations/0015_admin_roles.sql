@@ -54,7 +54,7 @@ returns boolean
 language sql
 security definer
 stable
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1 from public.roles where user_id = auth.uid() and role = 'superadmin'
@@ -71,7 +71,7 @@ returns table (email text, role text, user_id uuid)
 language plpgsql
 security definer
 stable
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if not public.is_superadmin() then
@@ -96,7 +96,7 @@ create or replace function public.admin_grant_role(target_email text, target_rol
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_email text := lower(trim(target_email));
@@ -110,9 +110,19 @@ begin
     raise exception 'rol inválido: %', target_role;
   end if;
 
-  select id into v_user_id from auth.users where lower(email) = v_email limit 1;
+  select id into v_user_id from auth.users
+  where lower(email) = v_email and email_confirmed_at is not null
+  order by created_at limit 1;
   if v_user_id is null then
     raise exception 'no existe ninguna cuenta con el correo %', v_email;
+  end if;
+
+  -- Candado anti-autodegradación (hermano del lockout guard de
+  -- admin_revoke_role de abajo): un superadmin tampoco puede rebajarse A SÍ
+  -- MISMO a collaborator vía grant — sin esto, el guard de revoke se podía
+  -- rodear haciendo grant('collaborator') sobre la propia cuenta.
+  if v_user_id = auth.uid() and target_role <> 'superadmin' then
+    raise exception 'no puedes rebajarte a ti mismo el rol de superadmin';
   end if;
 
   insert into public.roles (user_id, role)
@@ -131,7 +141,7 @@ create or replace function public.admin_revoke_role(target_email text)
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_email text := lower(trim(target_email));

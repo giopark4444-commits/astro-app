@@ -44,10 +44,10 @@ export async function saveNavOrder(order: unknown): Promise<ActionResult> {
     // Cast puntual (mismo patrón que settingsBuilder en app/(app)/actions.ts):
     // exactOptionalPropertyTypes + el bug conocido de postgrest-js con upsert.
     type ConfigUpsert = {
-      upsert: (v: { key: string; value: NavKey[] }) => Promise<{ error: { message: string } | null }>;
+      upsert: (v: { key: string; value: NavKey[]; updated_at: string }) => Promise<{ error: { message: string } | null }>;
     };
     const builder = supabase.from("app_config") as unknown as ConfigUpsert;
-    const { error } = await builder.upsert({ key: "nav_order", value: clean });
+    const { error } = await builder.upsert({ key: "nav_order", value: clean, updated_at: new Date().toISOString() });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   } catch (e) {

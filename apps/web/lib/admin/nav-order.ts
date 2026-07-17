@@ -41,6 +41,24 @@ export function sanitizeNavOrder(input: unknown): NavKey[] {
 }
 
 /**
+ * Decide el orden de la nav a partir de la fila cruda de app_config.nav_order
+ * (o su ausencia/error). PURA (sin Supabase): recibe ya el `{ data, error }`
+ * de la query, para que layout.tsx solo haga el fetch y esta función decida.
+ *
+ * Sin fila guardada (data null) o con cualquier error (p.ej. migración 0015
+ * sin aplicar), devuelve `null` — "todavía sin opinión" — en vez de
+ * DEFAULT_NAV_ORDER. Review Fable: el default NO puede ser un valor que la
+ * app fuerza a aplicar (eso cambiaba el orden real de BottomNav/hub-view
+ * apenas se aplicara la migración, sin que nadie tocara /admin); con `null`,
+ * cada consumidor (TopNav/BottomNav/hub-view) cae en su propio orden
+ * histórico hasta que alguien guarde de verdad en /admin.
+ */
+export function resolveNavOrder(data: { value: unknown } | null | undefined, error: unknown): NavKey[] | null {
+  if (error || !data) return null;
+  return sanitizeNavOrder(data.value);
+}
+
+/**
  * Reordena una lista de items (TopNav.ITEMS, BottomNav.ITEMS, hub-view.LENSES…)
  * según `order`. Los items son SIEMPRE los mismos — esto solo cambia su
  * posición relativa. Cualquier item cuya `key` NO aparezca en `order` (p.ej.

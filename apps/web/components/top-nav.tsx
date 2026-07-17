@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Icon } from "./icon";
-import { DEFAULT_NAV_ORDER, reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
+import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./top-nav.module.css";
 
 // Orden default de Gio (2026-07-13). Perfil → /perfil (R4b: el santuario
@@ -21,7 +21,11 @@ const ITEMS = [
   { href: "/perfil", icon: "person", key: "perfil", soon: false },
 ] as const;
 
-export function TopNav({ order = DEFAULT_NAV_ORDER }: { order?: readonly NavKey[] } = {}) {
+// Sin `order` (review Fable: default debe ser un no-op) reorderByNavOrder(ITEMS,
+// []) conserva el orden original de ITEMS tal cual está arriba — nunca fuerces
+// esto de vuelta a DEFAULT_NAV_ORDER (coincide hoy con ITEMS, pero es
+// casualidad; BottomNav es la prueba de que NO siempre coincide).
+export function TopNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
   const path = usePathname();
   const t = useTranslations("nav");
   const items = reorderByNavOrder(ITEMS, order);

@@ -62,12 +62,18 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
       state.role = "superadmin";
       const res = await saveNavOrder(["no-existe", "carta", "carta"]);
       expect(res).toEqual({ ok: true });
-      expect(state.upsertCalls).toEqual([
-        {
-          table: "app_config",
-          v: { key: "nav_order", value: ["carta", "hoy", "horoscopo", "numeros", "pilares", "tarot"] },
+      expect(state.upsertCalls).toHaveLength(1);
+      expect(state.upsertCalls[0]).toEqual({
+        table: "app_config",
+        v: {
+          key: "nav_order",
+          value: ["carta", "hoy", "horoscopo", "numeros", "pilares", "tarot"],
+          updated_at: expect.any(String),
         },
-      ]);
+      });
+      // updated_at real (review Fable): un ISO timestamp válido, no un valor fijo.
+      const v = state.upsertCalls[0]!.v as { updated_at: string };
+      expect(new Date(v.updated_at).toISOString()).toBe(v.updated_at);
     });
 
     it("propaga el error de la BD tal cual si el upsert falla", async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_NAV_ORDER, NAV_KEYS, reorderByNavOrder, sanitizeNavOrder } from "../nav-order";
+import { DEFAULT_NAV_ORDER, NAV_KEYS, reorderByNavOrder, resolveNavOrder, sanitizeNavOrder } from "../nav-order";
 
 describe("nav-order", () => {
   it("NAV_KEYS/DEFAULT_NAV_ORDER coinciden con el orden actual de TopNav (menos perfil)", () => {
@@ -31,6 +31,28 @@ describe("nav-order", () => {
 
   it("un array vacío devuelve el default completo", () => {
     expect(sanitizeNavOrder([])).toEqual([...DEFAULT_NAV_ORDER]);
+  });
+});
+
+describe("resolveNavOrder", () => {
+  // Review Fable: sin fila guardada (o con error) el resultado es `null`, NO
+  // DEFAULT_NAV_ORDER — layout.tsx depende de esta distinción para dejar a
+  // cada nav en su propio orden histórico hasta que /admin guarde algo real.
+  it("sin fila (data null) devuelve null", () => {
+    expect(resolveNavOrder(null, null)).toBeNull();
+  });
+
+  it("con error (p.ej. migración 0015 sin aplicar) devuelve null aunque haya data", () => {
+    expect(resolveNavOrder({ value: ["hoy"] }, { message: "relation does not exist" })).toBeNull();
+  });
+
+  it("con fila guardada, sanea su value y lo devuelve", () => {
+    const perm = ["tarot", "hoy", "pilares", "carta", "numeros", "horoscopo"];
+    expect(resolveNavOrder({ value: perm }, null)).toEqual(perm);
+  });
+
+  it("con fila guardada pero value basura, sanea al default completo (no null: SÍ hay fila)", () => {
+    expect(resolveNavOrder({ value: "no-es-un-array" }, null)).toEqual([...DEFAULT_NAV_ORDER]);
   });
 });
 
