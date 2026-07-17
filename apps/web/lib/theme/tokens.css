@@ -16,7 +16,7 @@
   --dur-fast: 0.22s;
 
   /* Escala tipográfica (R2: ritmo consistente en toda la web) */
-  --text-2xs: 11px;
+  --text-2xs: 12px; /* 11→12: legibilidad (Gio, rediseño 2col) — la más pequeña de la escala */
   --text-xs: 12px;
   --text-sm: 13px;
   --text-md: 15px;
