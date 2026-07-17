@@ -13,6 +13,7 @@ const ITEMS = [
   { href: "/horoscopo", icon: "aries", key: "horoscopo", soon: false },
   { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
   { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
+  { href: "/tarot", icon: "cards", key: "tarot", soon: false },
   { href: "/perfil", icon: "person", key: "perfil", soon: false },
 ] as const;
 

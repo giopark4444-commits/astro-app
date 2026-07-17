@@ -11,6 +11,7 @@
     "numeros": "Numbers",
     "hoy": "Today",
     "pilares": "Pillars",
+    "tarot": "Tarot",
     "perfil": "Profile",
     "horoscopo": "Horoscope",
     "mainNav": "Main navigation"
@@ -585,6 +586,28 @@
     "noProfileBody": "You need a profile with a birth date and place to generate your reports.",
     "noProfileCta": "Create profile",
     "tocLabel": "Contents"
+  },
+  "tarot": {
+    "eyebrow": "TAROT",
+    "title": "Tarot",
+    "dailyTitle": "Your card of the day",
+    "dailyFlipCta": "Tap to reveal your card of the day",
+    "dailyReversed": "Reversed",
+    "dailyReveal": "See full reading",
+    "spreadsTitle": "Spreads",
+    "spreadThree": "Three cards",
+    "spreadThreeDesc": "Past, present, future",
+    "spreadCeltic": "Celtic cross",
+    "spreadCelticSoon": "Coming soon · Plus",
+    "diaryTitle": "Your journal",
+    "diaryEmpty": "You haven't saved any readings yet.",
+    "diaryClose": "Close",
+    "diaryQuestionLabel": "Your question",
+    "diaryCardsLabel": "Cards",
+    "diarySpreadDaily": "Card of the day",
+    "diarySpreadThree": "Three cards",
+    "diarySpreadCeltic": "Celtic cross",
+    "freeLimitNote": "Showing {count} of {total} saved readings · go Plus to see them all"
   },
   "errors": {
     "notFoundTitle": "This constellation isn't on the map",

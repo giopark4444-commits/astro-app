@@ -11,6 +11,7 @@
     "numeros": "Números",
     "hoy": "Hoy",
     "pilares": "Pilares",
+    "tarot": "Tarot",
     "perfil": "Perfil",
     "horoscopo": "Horóscopo",
     "mainNav": "Navegación principal"
@@ -585,6 +586,28 @@
     "noProfileBody": "Necesitas un perfil con fecha y lugar de nacimiento para generar tus informes.",
     "noProfileCta": "Crear perfil",
     "tocLabel": "Índice"
+  },
+  "tarot": {
+    "eyebrow": "TAROT",
+    "title": "Tarot",
+    "dailyTitle": "Tu carta del día",
+    "dailyFlipCta": "Toca para revelar tu carta del día",
+    "dailyReversed": "Invertida",
+    "dailyReveal": "Ver lectura completa",
+    "spreadsTitle": "Tiradas",
+    "spreadThree": "Tres cartas",
+    "spreadThreeDesc": "Pasado, presente, futuro",
+    "spreadCeltic": "Cruz celta",
+    "spreadCelticSoon": "Pronto · Plus",
+    "diaryTitle": "Tu diario",
+    "diaryEmpty": "Todavía no guardaste ninguna lectura.",
+    "diaryClose": "Cerrar",
+    "diaryQuestionLabel": "Tu pregunta",
+    "diaryCardsLabel": "Cartas",
+    "diarySpreadDaily": "Carta del día",
+    "diarySpreadThree": "Tres cartas",
+    "diarySpreadCeltic": "Cruz celta",
+    "freeLimitNote": "Ves {count} de {total} lecturas guardadas · hazte Plus para ver todas"
   },
   "errors": {
     "notFoundTitle": "Esta constelación no existe",
