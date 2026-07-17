@@ -1,0 +1,143 @@
+/* Modo manual (mazo físico, Tarot T3) — mismo lenguaje visual que la
+   ceremonia digital (ceremony.module.css: dorado --acc sobre índigo), pero
+   sin coreografía de barajado: el rito acá es el buscador + la elección. */
+.manual {
+  margin-bottom: var(--sp-7);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg, 20px);
+  padding: var(--sp-5) var(--sp-4);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, color-mix(in srgb, var(--acc) 7%, transparent), transparent),
+    var(--surface-2, transparent);
+}
+
+.pane { display: flex; flex-direction: column; gap: var(--sp-3); }
+.paneTitle { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--ink); margin: 0; }
+.hint { color: var(--soft); font-size: var(--text-xs); margin: 0; }
+
+.primaryBtn {
+  align-self: flex-start;
+  border: 1px solid var(--acc);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--acc-text);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-5);
+  transition: box-shadow 400ms var(--ease), border-color 400ms var(--ease);
+}
+.primaryBtn:hover { box-shadow: var(--glow-soft); }
+.primaryBtn:disabled { opacity: 0.6; cursor: default; }
+
+.ghostBtn {
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--soft);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-4);
+}
+.ghostBtn:hover { border-color: var(--acc); color: var(--acc-text); }
+
+/* ---------- template ---------- */
+.templateRow { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.templateBtn {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--soft);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-4);
+}
+.freeStepper { display: flex; flex-direction: column; gap: var(--sp-2); }
+.freeLabel { color: var(--soft); font-size: var(--text-xs); }
+.stepperRow { display: flex; align-items: center; gap: var(--sp-3); }
+.stepperBtn {
+  width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink); font-size: var(--text-lg); cursor: pointer;
+}
+.stepperBtn:disabled { opacity: 0.4; cursor: default; }
+.stepperValue { color: var(--ink); font-size: var(--text-sm); min-width: 8ch; text-align: center; }
+
+/* ---------- picker (selector + jumpers) ---------- */
+.pickedList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.pickedItem { display: flex; align-items: center; gap: var(--sp-2); }
+.pickedThumb { width: 40px; height: 66px; object-fit: contain; border-radius: 6px; border: 1px solid var(--line); flex-shrink: 0; }
+.pickedBody { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.pickedName { color: var(--ink); font-size: var(--text-sm); font-weight: 600; }
+.pickedPosition { color: var(--acc-text); font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; }
+.removeBtn {
+  border: 0; background: transparent; color: var(--soft); cursor: pointer; font-size: var(--text-sm); padding: var(--sp-1);
+}
+.removeBtn:hover { color: var(--ink); }
+
+.search {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  padding: var(--sp-2) var(--sp-4);
+}
+.search:focus { outline: none; border-color: var(--acc); box-shadow: var(--glow-soft); }
+.suitTabs { display: flex; gap: var(--sp-1); flex-wrap: wrap; }
+.suitTab { font-size: var(--text-2xs); padding: var(--sp-1) var(--sp-3); cursor: pointer; border: 0; }
+.noResults { color: var(--soft); font-size: var(--text-xs); text-align: center; margin: var(--sp-3) 0; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: var(--sp-2);
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--sp-1);
+}
+.gridCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  padding: var(--sp-1);
+  cursor: pointer;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+}
+.gridCard:hover { border-color: var(--acc); box-shadow: var(--glow-soft); }
+.gridThumb { width: 100%; aspect-ratio: 0.6; object-fit: contain; }
+.gridName { color: var(--soft); font-size: var(--text-2xs); text-align: center; line-height: 1.3; }
+
+/* ---------- reading ---------- */
+.readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
+.readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
+.readingImg { width: 64px; height: 106px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); flex-shrink: 0; }
+.readingCardBody { display: flex; flex-direction: column; gap: var(--sp-1); }
+.readingPosition { font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); }
+.readingName { font-family: var(--font-display); font-size: var(--text-md); color: var(--ink); margin: 0; }
+.readingAmbit { color: var(--soft); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+.readingProse { width: 100%; text-align: left; border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+
+.jumpersReading { display: flex; flex-direction: column; gap: var(--sp-2); border-top: 1px dashed var(--line); padding-top: var(--sp-3); }
+.jumpersLabel { font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); }
+
+.savedOk { color: var(--acc-text); font-size: var(--text-sm); margin: 0; }
+.saveError { color: var(--tone-caution, var(--soft)); font-size: var(--text-xs); margin: 0; }
+.freeLimit { color: var(--soft); font-size: var(--text-sm); margin: 0; max-width: 420px; }
+.freeLimitCta { color: var(--acc-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (min-width: 1080px) {
+  .manual { padding: var(--sp-6) var(--sp-6); }
+  .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .readingCard { flex-direction: column; align-items: center; text-align: center; }
+  .readingCardBody { align-items: center; text-align: center; }
+}

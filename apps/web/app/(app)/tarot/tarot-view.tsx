@@ -6,12 +6,14 @@ import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Ceremony } from "./ceremony";
+import { ManualEntry } from "./manual-entry";
 import styles from "./tarot.module.css";
 
 interface TarotReadingCard {
   cardId: string;
   reversed: boolean;
   position: string;
+  jumper?: boolean;
 }
 
 interface TarotReadingRow {
@@ -35,6 +37,7 @@ const DIARY_SPREAD_KEY: Record<string, string> = {
   daily: "diarySpreadDaily",
   three: "diarySpreadThree",
   "celtic-cross": "diarySpreadCeltic",
+  free: "diarySpreadFree",
 };
 
 /** Fecha local YYYY-MM-DD del CLIENTE en su tz resuelta (mismo patrón que
@@ -81,6 +84,8 @@ export function TarotView({ userId }: { userId: string }) {
   // fue tocada. La ceremonia en sí (dibujar, componer, guardar) es Task 5 —
   // este componente solo deja el punto de montaje listo.
   const [ceremony, setCeremony] = useState<"three" | null>(null);
+  // Modo manual (T3): independiente de la ceremonia digital — su propio rito.
+  const [manualOpen, setManualOpen] = useState(false);
   const postedDailyRef = useRef(false);
 
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
@@ -197,15 +202,30 @@ export function TarotView({ userId }: { userId: string }) {
   );
 
   const openReading = diary.s === "ready" ? diary.readings.find((r) => r.id === openReadingId) ?? null : null;
+  // Las lecturas guardadas (T3) pueden traer jumpers mezclados en `cards`
+  // (position "jumper-N", flag jumper:true) — el composer v2 espera la
+  // tirada principal en `cards` y los jumpers aparte en `opts.jumpers`
+  // (sin eso, labelForPosition no reconoce "jumper-N" y los muestra crudos).
+  const openReadingMainCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => !c.jumper) : []),
+    [openReading],
+  );
+  const openReadingJumperCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => c.jumper) : []),
+    [openReading],
+  );
   const openReadingProse = useMemo(() => {
     if (!openReading) return [];
     return composeReadingProse(
       locale === "en" ? "en" : "es",
       openReading.spread,
-      openReading.cards,
+      openReadingMainCards,
       openReading.question ?? undefined,
+      openReadingJumperCards.length > 0
+        ? { jumpers: openReadingJumperCards.map(({ cardId, reversed }) => ({ cardId, reversed })) }
+        : undefined,
     );
-  }, [openReading, locale]);
+  }, [openReading, locale, openReadingMainCards, openReadingJumperCards]);
 
   return (
     <main className={styles.wrap}>
@@ -284,6 +304,14 @@ export function TarotView({ userId }: { userId: string }) {
             <span className={styles.spreadName}>{t("spreadCeltic")}</span>
             <span className="chip">{t("spreadCelticSoon")}</span>
           </div>
+          <button
+            type="button"
+            className={`card card--interactive card--tight ${styles.spreadCard}`}
+            onClick={() => setManualOpen(true)}
+          >
+            <span className={styles.spreadName}>{t("manualEntry")}</span>
+            <span className={styles.spreadDesc}>{t("manualEntryDesc")}</span>
+          </button>
         </div>
       </section>
 
@@ -292,6 +320,16 @@ export function TarotView({ userId }: { userId: string }) {
           onClose={() => {
             setCeremony(null);
             // La lectura pudo guardarse durante la ceremonia: refresca el diario.
+            loadDiary();
+          }}
+        />
+      )}
+
+      {manualOpen && (
+        <ManualEntry
+          onClose={() => {
+            setManualOpen(false);
+            // La lectura pudo guardarse durante el modo manual: refresca el diario.
             loadDiary();
           }}
         />
