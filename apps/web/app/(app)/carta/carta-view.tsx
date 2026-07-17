@@ -16,6 +16,7 @@ import { BodyReadingView } from "./body-reading";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { Meaning } from "@/components/meaning";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
 import styles from "./carta.module.css";
@@ -33,6 +34,13 @@ const KIND_KEY: Record<ChartKind, string> = {
 };
 const pad = (n: number) => String(n).padStart(2, "0");
 const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
+
+// Capa de significados: la clave del glosario SIEMPRE se arma desde la clave
+// INTERNA (planet/sign/aspect/pattern/dignity keys de core), nunca desde el
+// label traducido. Unos pocos internos difieren del glosario — se mapean acá.
+const planetMeaningKey = (k: string) => `planet.${k.replace("_", "")}`;
+const dignityMeaningKey = (d: string) => `dignity.${d === "exile" ? "detriment" : d}`;
+const patternMeaningKey = (t: string) => `pattern.${t.replace(/_/g, "")}`;
 
 type State =
   | { s: "loading" }
@@ -201,20 +209,23 @@ export function CartaView() {
               <div className={styles.bigThree}>
                 {byKey.get("sun") && (
                   <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
-                    sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                    sub={`${byKey.get("sun")!.degree}°${pad(byKey.get("sun")!.minute)}′ · ${t("house")} ${byKey.get("sun")!.house}`}
+                    signKey={byKey.get("sun")!.sign} sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
+                    degMin={`${byKey.get("sun")!.degree}°${pad(byKey.get("sun")!.minute)}′`}
+                    house={byKey.get("sun")!.house} houseLabel={t("house")}
                     dignity={byKey.get("sun")!.dignity ? L.dignities[byKey.get("sun")!.dignity!] : undefined}
                     dignityKey={byKey.get("sun")!.dignity} />
                 )}
                 {byKey.get("moon") && (
                   <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
-                    sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                    sub={`${byKey.get("moon")!.degree}°${pad(byKey.get("moon")!.minute)}′ · ${t("house")} ${byKey.get("moon")!.house}`}
+                    signKey={byKey.get("moon")!.sign} sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
+                    degMin={`${byKey.get("moon")!.degree}°${pad(byKey.get("moon")!.minute)}′`}
+                    house={byKey.get("moon")!.house} houseLabel={t("house")}
                     dignity={byKey.get("moon")!.dignity ? L.dignities[byKey.get("moon")!.dignity!] : undefined}
                     dignityKey={byKey.get("moon")!.dignity} />
                 )}
-                <BigCard glyph="Asc" name={t("ascendant")} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
-                  sub={`${ascPos?.degree ?? 0}°${pad(ascPos?.minute ?? 0)}′`} dim={ready.solar} />
+                <BigCard glyph="Asc" name={<Meaning k="point.ascendant">{t("ascendant")}</Meaning>}
+                  signKey={ascSign} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
+                  degMin={`${ascPos?.degree ?? 0}°${pad(ascPos?.minute ?? 0)}′`} dim={ready.solar} />
               </div>
 
               {coreSegs && (
@@ -227,9 +238,9 @@ export function CartaView() {
               )}
 
               <div className={styles.balPair}>
-                <Balance title={t("elements")} entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
                   dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
-                <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
                   dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
               </div>
               <p className={styles.balCap}>
@@ -243,7 +254,13 @@ export function CartaView() {
                   <div className={`${styles.chips} ${styles.coreExtra}`}>
                     {ready.chart.patterns.map((p, i) => (
                       <span key={i} className={`chip ${styles.chip}`}>
-                        {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
+                        <Meaning k={patternMeaningKey(p.type)}>{L.patterns[p.type]}</Meaning>:{" "}
+                        {p.bodies.map((k, j) => (
+                          <span key={k}>
+                            {j > 0 && " "}
+                            <Meaning k={planetMeaningKey(k)}>{PLANET_GLYPH[k] ?? k}</Meaning>
+                          </span>
+                        ))}
                       </span>
                     ))}
                   </div>
@@ -255,9 +272,9 @@ export function CartaView() {
 
             {/* balance de elementos y modalidades */}
             <div className={pane("balance")}>
-              <Balance title={t("elements")} entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+              <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
                 dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
-              <Balance title={t("modalities")} entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+              <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
                 dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
             </div>
 
@@ -269,14 +286,19 @@ export function CartaView() {
                   {ready.transitAspects.map((a, i) => (
                     <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
                       <span className={styles.aspPair}>
-                        {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                        {PLANET_GLYPH[a.b]}
+                        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
+                        <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
+                        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
                       </span>
                       <span className={styles.aspName}>
-                        {L.bodies[a.a]} {L.aspects[a.aspect]} {t("yourPossessive")} {L.bodies[a.b]}
+                        {L.bodies[a.a]} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>{" "}
+                        {t("yourPossessive")} {L.bodies[a.b]}
                       </span>
                       <span className={styles.aspOrb}>
-                        {a.orb.toFixed(1)}° · {a.applying ? t("applying") : t("separating")}
+                        {a.orb.toFixed(1)}° ·{" "}
+                        <Meaning k={a.applying ? "term.applying" : "term.separating"}>
+                          {a.applying ? t("applying") : t("separating")}
+                        </Meaning>
                       </span>
                     </div>
                   ))}
@@ -298,11 +320,18 @@ export function CartaView() {
                 <div className={styles.posTable}>
                   {ready.chart.bodies.map((b) => (
                     <div key={b.body} className={styles.posRow}>
-                      <span className={styles.posBody}>{PLANET_GLYPH[b.body] ?? "•"} {L.bodies[b.body] ?? b.body}</span>
-                      <span className={styles.posSign}>{SIGN_GLYPH[b.sign]} {dms(b)}</span>
-                      <span className={styles.posHouse}>{t("house")} {b.house}</span>
+                      <span className={styles.posBody}>
+                        <Meaning k={planetMeaningKey(b.body)}>{PLANET_GLYPH[b.body] ?? "•"} {L.bodies[b.body] ?? b.body}</Meaning>
+                      </span>
+                      <span className={styles.posSign}>
+                        <Meaning k={`sign.${b.sign}`}>{SIGN_GLYPH[b.sign]}</Meaning> {dms(b)}
+                      </span>
+                      <span className={styles.posHouse}>
+                        <Meaning k={`house.${b.house}`}>{t("house")} {b.house}</Meaning>
+                      </span>
                       <span className={styles.posDign}>
-                        {b.dignity ? L.dignities[b.dignity] : ""}{b.retrograde ? " ℞" : ""}
+                        {b.dignity && <Meaning k={dignityMeaningKey(b.dignity)}>{L.dignities[b.dignity]}</Meaning>}
+                        {b.retrograde ? " ℞" : ""}
                       </span>
                     </div>
                   ))}
@@ -315,10 +344,14 @@ export function CartaView() {
                   <h3 className={styles.cardH}>{t("distribution")}</h3>
                   <div className={styles.distGrid}>
                     {ELEMENTS.map((k) => (
-                      <span key={k} className={styles.distCell}>{L.elements[k]}: <b>{ready.chart.distribution.elements[k]}</b></span>
+                      <span key={k} className={styles.distCell}>
+                        <Meaning k={`element.${k}`}>{L.elements[k]}</Meaning>: <b>{ready.chart.distribution.elements[k]}</b>
+                      </span>
                     ))}
                     {MODALITIES.map((k) => (
-                      <span key={k} className={styles.distCell}>{L.modalities[k]}: <b>{ready.chart.distribution.modalities[k]}</b></span>
+                      <span key={k} className={styles.distCell}>
+                        <Meaning k={`modality.${k}`}>{L.modalities[k]}</Meaning>: <b>{ready.chart.distribution.modalities[k]}</b>
+                      </span>
                     ))}
                   </div>
                 </section>
@@ -331,10 +364,19 @@ export function CartaView() {
                   {ready.chart.aspects.map((a, i) => (
                     <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
                       <span className={styles.aspPair}>
-                        {PLANET_GLYPH[a.a]} <span className={styles.aspGlyph}>{(ASPECT_GLYPHS[a.aspect] ?? "") + TEXT_VS}</span> {PLANET_GLYPH[a.b]}
+                        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
+                        <span className={styles.aspGlyph}>{(ASPECT_GLYPHS[a.aspect] ?? "") + TEXT_VS}</span>{" "}
+                        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
                       </span>
-                      <span className={styles.aspName}>{L.aspects[a.aspect]}</span>
-                      <span className={styles.aspOrb}>{t("orb")} {a.orb.toFixed(1)}° · {a.applying ? t("applying") : t("separating")}</span>
+                      <span className={styles.aspName}>
+                        <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>
+                      </span>
+                      <span className={styles.aspOrb}>
+                        <Meaning k="term.orb">{t("orb")}</Meaning> {a.orb.toFixed(1)}° ·{" "}
+                        <Meaning k={a.applying ? "term.applying" : "term.separating"}>
+                          {a.applying ? t("applying") : t("separating")}
+                        </Meaning>
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -347,7 +389,13 @@ export function CartaView() {
                   <div className={styles.chips}>
                     {ready.chart.patterns.map((p, i) => (
                       <span key={i} className={`chip ${styles.chip}`}>
-                        {L.patterns[p.type]}: {p.bodies.map((k) => PLANET_GLYPH[k] ?? k).join(" ")}
+                        <Meaning k={patternMeaningKey(p.type)}>{L.patterns[p.type]}</Meaning>:{" "}
+                        {p.bodies.map((k, j) => (
+                          <span key={k}>
+                            {j > 0 && " "}
+                            <Meaning k={planetMeaningKey(k)}>{PLANET_GLYPH[k] ?? k}</Meaning>
+                          </span>
+                        ))}
                       </span>
                     ))}
                   </div>
@@ -408,8 +456,9 @@ export function CartaView() {
 const ELEMENTS = ["fire", "earth", "air", "water"] as const;
 const MODALITIES = ["cardinal", "fixed", "mutable"] as const;
 
-function BigCard({ glyph, name, sign, signGlyph, sub, dignity, dignityKey, dim }: {
-  glyph: string; name: string; sign: string; signGlyph: string; sub: string;
+function BigCard({ glyph, name, signKey, sign, signGlyph, degMin, house, houseLabel, dignity, dignityKey, dim }: {
+  glyph: string; name: React.ReactNode; signKey: string; sign: string; signGlyph: string; degMin: string;
+  house?: number | undefined; houseLabel?: string | undefined;
   dignity?: string | undefined; dignityKey?: string | null | undefined; dim?: boolean;
 }) {
   const good = dignityKey === "domicile" || dignityKey === "exaltation";
@@ -417,17 +466,24 @@ function BigCard({ glyph, name, sign, signGlyph, sub, dignity, dignityKey, dim }
     <div className={`card card--tight ${styles.big} ${dim ? styles.bigDim : ""}`}>
       <span className={styles.bigGlyph}>{glyph}</span>
       <span className={styles.bigName}>{name}</span>
-      <span className={styles.bigSign}>{signGlyph} {sign}</span>
+      <span className={styles.bigSign}>
+        {signGlyph} <Meaning k={`sign.${signKey}`}>{sign}</Meaning>
+      </span>
       <span className={styles.bigSub}>
-        {sub}
-        {dignity && <span className={`chip ${styles.bigTag} ${good ? styles.bigTagGood : ""}`}>{dignity}</span>}
+        {degMin}
+        {house !== undefined && houseLabel && <> · <Meaning k={`house.${house}`}>{houseLabel} {house}</Meaning></>}
+        {dignity && dignityKey && (
+          <Meaning k={dignityMeaningKey(dignityKey)}>
+            <span className={`chip ${styles.bigTag} ${good ? styles.bigTagGood : ""}`}>{dignity}</span>
+          </Meaning>
+        )}
       </span>
     </div>
   );
 }
 
-function Balance({ title, entries, dominant, dominantLabel }: {
-  title: string; entries: Array<{ k: string; label: string; n: number }>;
+function Balance({ title, kind, entries, dominant, dominantLabel }: {
+  title: string; kind: "element" | "modality"; entries: Array<{ k: string; label: string; n: number }>;
   dominant: string; dominantLabel: string;
 }) {
   const max = Math.max(1, ...entries.map((e) => e.n));
@@ -436,7 +492,10 @@ function Balance({ title, entries, dominant, dominantLabel }: {
       <h4 className={styles.balanceH}>{title}</h4>
       {entries.map((e) => (
         <div key={e.k} className={styles.barRow}>
-          <span className={styles.barLabel}>{e.label}{e.k === dominant ? ` · ${dominantLabel}` : ""}</span>
+          <span className={styles.barLabel}>
+            <Meaning k={`${kind}.${e.k}`}>{e.label}</Meaning>
+            {e.k === dominant ? ` · ${dominantLabel}` : ""}
+          </span>
           <span className={styles.barTrack}>
             <span className={`${styles.barFill} ${e.k === dominant ? styles.barDom : ""}`} style={{ width: `${(e.n / max) * 100}%` }} />
           </span>
