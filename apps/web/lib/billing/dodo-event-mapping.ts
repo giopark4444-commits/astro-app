@@ -11,6 +11,11 @@ export interface DodoEvent {
     product_id?: string;
     next_billing_date?: string;
     customer?: { customer_id?: string; email?: string };
+    // Campos de payment.succeeded/refund.succeeded (referidos, ver
+    // referral-commission.ts) — el resto del mapeo de arriba no los toca.
+    payment_id?: string;
+    total_amount?: number;
+    currency?: string;
   };
 }
 

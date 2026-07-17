@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import { verifyDodoSignature } from "@/lib/billing/dodo-webhook";
 import { mapDodoEventToRow, type DodoEvent } from "@/lib/billing/dodo-event-mapping";
+import { handleReferralPayment, handleReferralRefund } from "@/lib/billing/referral-webhook";
 
 // Única fuente de verdad del estado de Aluna Plus. Dodo NO manda sesión de
 // usuario — manda su propia firma (Standard Webhooks). Server-only,
@@ -37,6 +38,16 @@ export async function POST(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
+
+  // refund.succeeded no es evento de suscripción (mapDodoEventToRow no lo
+  // mapea) y no necesita resolver `userId` — el payment_ref alcanza para
+  // reversar la ganancia en el ledger de referidos. Se resuelve ANTES de la
+  // resolución de usuario de abajo para no pagar el costo de un lookup por
+  // email que este evento no necesita.
+  if (event.type === "refund.succeeded") {
+    await handleReferralRefund(supabase, event);
+    return NextResponse.json({ received: true });
+  }
 
   // Orden de resolución del usuario: primero por dodo_subscription_id (fila
   // ya existente, es `unique` en la tabla), y SOLO si no existe todavía
@@ -90,6 +101,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // no confundir con "sin fila" — puede disparar el downgrade fantasma yearly→monthly
     }
     existingPlan = (existing?.plan as "monthly" | "yearly" | undefined) ?? null;
+  }
+
+  // payment.succeeded tampoco es evento de suscripción para mapDodoEventToRow
+  // (sigue de largo hacia el early-return de abajo) — pero SÍ reusa el
+  // `userId` recién resuelto para atribuir la comisión de referidos si
+  // corresponde (ver referral-webhook.ts; nunca revienta ni bloquea el resto
+  // del webhook).
+  if (event.type === "payment.succeeded" && userId) {
+    await handleReferralPayment(supabase, event, userId);
   }
 
   const row = mapDodoEventToRow(
