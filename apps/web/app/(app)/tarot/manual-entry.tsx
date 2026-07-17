@@ -9,14 +9,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { TAROT_DECK, spreadById, type TarotCard, cardImageUrl, rwsCtx } from "@aluna/core";
+import { TAROT_DECK, spreadById, type TarotCard, type DeckAssetCtx, cardImageUrl, rwsCtx } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ReadingChat } from "./reading-chat";
 import tarot from "./tarot.module.css";
 import styles from "./manual-entry.module.css";
-
-const deckCtx = rwsCtx("");
 
 type Template = "three" | "daily" | "free";
 type Step = "template" | "select" | "jumpers" | "reading";
@@ -56,7 +54,15 @@ function cardMatchesSuit(card: TarotCard, suit: SuitTab): boolean {
   return card.suit === suit;
 }
 
-export function ManualEntry({ onClose }: { onClose: () => void }) {
+export function ManualEntry({
+  deckCtx = rwsCtx(""),
+  onClose,
+}: {
+  /** Ctx del resolver de assets (Task 7); default rws — preserva el
+   *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
+  deckCtx?: DeckAssetCtx;
+  onClose: () => void;
+}) {
   const t = useTranslations("tarot");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
@@ -148,7 +154,7 @@ export function ManualEntry({ onClose }: { onClose: () => void }) {
     void fetch("/api/tarot/readings", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ spread: template, deck: "rws", cards }),
+      body: JSON.stringify({ spread: template, deck: deckCtx.activeDeck, cards }),
     })
       .then(async (res) => {
         if (res.status === 201) return setSave("saved");

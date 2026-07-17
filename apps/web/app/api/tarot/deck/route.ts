@@ -44,9 +44,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "db" }, { status: 500 });
   }
 
+  // Prefijo público hasta la carpeta del usuario (SIN archivo) — el resolver
+  // (@aluna/core cardImageUrl) arma `${cardBase}/${cardId}.webp`, espejo
+  // exacto de deckCardPath(userId, cardId). getPublicUrl no valida que el
+  // objeto exista, así que es seguro devolverlo siempre que la feature esté
+  // disponible (available), no solo cuando ya hay fila.
+  const cardBase = supabase.storage.from("tarot-decks").getPublicUrl(user.id).data.publicUrl;
+
   const row = data as Pick<Tables<"tarot_deck">, "active" | "card_ids" | "back_kind"> | null;
   if (!row) {
-    return NextResponse.json({ available: true, active: false, cardIds: [], backKind: "none", backUrl: null });
+    return NextResponse.json({ available: true, active: false, cardIds: [], backKind: "none", backUrl: null, cardBase });
   }
 
   const backUrl =
@@ -58,6 +65,7 @@ export async function GET(req: NextRequest) {
     cardIds: row.card_ids,
     backKind: row.back_kind,
     backUrl,
+    cardBase,
   });
 }
 

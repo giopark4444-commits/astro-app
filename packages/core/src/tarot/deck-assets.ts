@@ -38,3 +38,39 @@ export function cardBackUrl(ctx: DeckAssetCtx): string {
 export function rwsCtx(base: string): DeckAssetCtx {
   return { base, activeDeck: "rws" };
 }
+
+/**
+ * Shape mínimo del manifiesto GET /api/tarot/deck que necesita el resolver
+ * (subset de lo que devuelve la ruta / `DeckManifest` en apps/mobile) — no
+ * importamos el tipo completo de la ruta para no acoplar @aluna/core a Next.
+ */
+export interface DeckManifestLike {
+  available: boolean;
+  active?: boolean;
+  cardIds?: readonly string[];
+  cardBase?: string | null;
+  backUrl?: string | null;
+}
+
+/**
+ * Traduce el manifiesto del mazo (Task 4/7) a un `DeckAssetCtx` puro y
+ * testeable, sin I/O. Latente (`available:false`), inactivo (`active:false`)
+ * o activo-sin-contenido (sin `cardIds` o sin `cardBase`) siempre caen a
+ * `rwsCtx(base)` — no-regresión: mismas URLs que hoy. Solo con contenido real
+ * arma el ctx custom.
+ */
+export function deckCtxFromManifest(
+  manifest: DeckManifestLike | null | undefined,
+  base: string,
+): DeckAssetCtx {
+  if (!manifest?.available || !manifest.active) return rwsCtx(base);
+  const cardIds = manifest.cardIds ?? [];
+  if (cardIds.length === 0 || !manifest.cardBase) return rwsCtx(base);
+  return {
+    base,
+    activeDeck: "custom",
+    customCardIds: new Set(cardIds),
+    customBase: manifest.cardBase,
+    customBack: manifest.backUrl ?? null,
+  };
+}

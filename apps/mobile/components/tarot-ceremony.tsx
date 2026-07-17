@@ -35,6 +35,7 @@ import {
   cardImageUrl,
   cardBackUrl,
   rwsCtx,
+  type DeckAssetCtx,
 } from "@aluna/core";
 import { TarotFlipCard } from "./TarotFlipCard";
 import { ReadingChat } from "./ReadingChat";
@@ -234,7 +235,17 @@ function fanTransform(i: number): { rotate: string; translateY: number } {
   return { rotate: `${(d * 9).toFixed(2)}deg`, translateY: d * d * 20 };
 }
 
-export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+export function TarotCeremony({
+  deckCtx,
+  onClose,
+  onSaved,
+}: {
+  /** Ctx del resolver de assets (Task 7); default rws si el llamador no lo
+   *  pasa — preserva el comportamiento pre-T4. */
+  deckCtx?: DeckAssetCtx;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const { t: tk } = useTheme();
@@ -243,8 +254,8 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
 
   const accessToken = session?.access_token ?? null;
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
-  const deckCtx = rwsCtx(apiUrl());
-  const backUri = cardBackUrl(deckCtx);
+  const resolvedDeckCtx = deckCtx ?? rwsCtx(apiUrl());
+  const backUri = cardBackUrl(resolvedDeckCtx);
 
   const [state, dispatch] = useReducer(ceremonyReducer, INITIAL_CEREMONY_STATE);
   const [questionDraft, setQuestionDraft] = useState("");
@@ -322,7 +333,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
     dispatch({ type: "save", status: "saving" });
     saveTarotReading(accessToken, {
       spread: SPREAD_ID,
-      deck: "rws",
+      deck: resolvedDeckCtx.activeDeck,
       ...(state.question !== undefined ? { question: state.question } : {}),
       cards: readingCards,
     })
@@ -541,7 +552,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                     <TarotFlipCard
                       revealed={flipped}
                       onFlip={() => dispatch({ type: "flip", slot: i })}
-                      frontUri={cardImageUrl(d.card.id, deckCtx)}
+                      frontUri={cardImageUrl(d.card.id, resolvedDeckCtx)}
                       backUri={backUri}
                       reversed={d.reversed}
                       frontLabel={content.name}
@@ -593,7 +604,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                 return (
                   <View key={d.card.id} style={styles.readingCard}>
                     <Image
-                      source={{ uri: cardImageUrl(d.card.id, deckCtx) }}
+                      source={{ uri: cardImageUrl(d.card.id, resolvedDeckCtx) }}
                       resizeMode="contain"
                       style={[
                         styles.readingImg,

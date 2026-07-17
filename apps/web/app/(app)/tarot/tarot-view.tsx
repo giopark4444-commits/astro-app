@@ -1,15 +1,14 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { dailyCard, cardById, cardImageUrl, cardBackUrl, rwsCtx } from "@aluna/core";
+import { dailyCard, cardById, cardImageUrl, cardBackUrl } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
 import { Ceremony } from "./ceremony";
 import { ManualEntry } from "./manual-entry";
 import styles from "./tarot.module.css";
-
-const deckCtx = rwsCtx("");
 
 interface TarotReadingCard {
   cardId: string;
@@ -64,6 +63,7 @@ export function TarotView({ userId }: { userId: string }) {
   const t = useTranslations("tarot");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
+  const deckCtx = useDeckAssets();
 
   // tz/localDate se calculan al MONTAR y quedan stale si la página queda
   // abierta cruzando la medianoche — limitación aceptada a propósito (recargar
@@ -157,7 +157,7 @@ export function TarotView({ userId }: { userId: string }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         spread: "daily",
-        deck: "rws",
+        deck: deckCtx.activeDeck,
         cards: [{ cardId: daily.card.id, reversed: daily.reversed, position: "day" }],
       }),
     })
@@ -172,7 +172,7 @@ export function TarotView({ userId }: { userId: string }) {
       .catch(() => {
         /* sin red: reintento en el próximo montaje (revelada sin savedKey) */
       });
-  }, [daily, savedKey, loadDiary]);
+  }, [daily, savedKey, loadDiary, deckCtx]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -319,6 +319,7 @@ export function TarotView({ userId }: { userId: string }) {
 
       {ceremony === "three" && (
         <Ceremony
+          deckCtx={deckCtx}
           onClose={() => {
             setCeremony(null);
             // La lectura pudo guardarse durante la ceremonia: refresca el diario.
@@ -329,6 +330,7 @@ export function TarotView({ userId }: { userId: string }) {
 
       {manualOpen && (
         <ManualEntry
+          deckCtx={deckCtx}
           onClose={() => {
             setManualOpen(false);
             // La lectura pudo guardarse durante el modo manual: refresca el diario.

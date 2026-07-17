@@ -15,6 +15,9 @@ export interface DeckManifest {
   cardIds?: string[];
   backKind?: "none" | "upload" | "editor";
   backUrl?: string | null;
+  /** Prefijo público (hasta la carpeta del usuario, sin archivo) para las
+   *  cartas custom — insumo directo de `deckCtxFromManifest` (@aluna/core). */
+  cardBase?: string | null;
 }
 
 export class TarotDeckApiError extends Error {
