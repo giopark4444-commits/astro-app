@@ -10,6 +10,7 @@ import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
 import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
+import { DeckManager } from "./deck-manager";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -80,6 +81,11 @@ export default async function AjustesPage({
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
+      </section>
+
+      <section className="card">
+        <h2 className={styles.eyebrow}>{t("deckTitle")}</h2>
+        <DeckManager />
       </section>
 
       <section className="card">
