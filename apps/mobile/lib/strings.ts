@@ -43,6 +43,7 @@ export const STRINGS = {
       astros: "Astros",
       pilares: "Pilares",
       numeros: "Números",
+      tarot: "Tarot",
       ajustes: "Ajustes",
     },
     universo: {
@@ -568,6 +569,7 @@ export const STRINGS = {
       astros: "Astros",
       pilares: "Pillars",
       numeros: "Numbers",
+      tarot: "Tarot",
       ajustes: "Settings",
     },
     universo: {
