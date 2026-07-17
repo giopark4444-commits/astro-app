@@ -11,6 +11,7 @@ import { dailyCard, cardById, TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingPros
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { TarotFlipCard } from "../../components/TarotFlipCard";
+import { TarotCeremony } from "../../components/tarot-ceremony";
 import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
@@ -63,8 +64,8 @@ export default function TarotScreen() {
   const [revealed, setRevealed] = useState(false);
   const [saved, setSaved] = useState(false);
   const [dailySheetOpen, setDailySheetOpen] = useState(false);
-  // Ceremonia "Tres cartas": placeholder de montaje — Task 4 la reemplaza por
-  // la máquina táctil completa (question→shuffle→cut→fan→reveal→reading).
+  // Ceremonia "Tres cartas" (Task 4): overlay efímero — cerrarlo lo desmonta
+  // y la máquina vuelve a cero, como recargar la página en la web.
   const [ceremonyOpen, setCeremonyOpen] = useState(false);
 
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
@@ -277,21 +278,6 @@ export default function TarotScreen() {
           </View>
         </FadeIn>
 
-        {/* Ceremonia "Tres cartas" — placeholder hasta Task 4. */}
-        {ceremonyOpen && (
-          <View testID="tarot-ceremony-placeholder" style={styles.fadeFull}>
-            <FadeIn delay={0} style={styles.fadeFull}>
-              <Card style={styles.card}>
-                <Text style={styles.cardH}>{t("tarot.spreadThree")}</Text>
-                <Text style={styles.muted}>…</Text>
-                <Pressable style={styles.dailyRevealBtn} onPress={() => setCeremonyOpen(false)}>
-                  <Text style={styles.dailyRevealBtnText}>{t("tarot.backToThreshold")}</Text>
-                </Pressable>
-              </Card>
-            </FadeIn>
-          </View>
-        )}
-
         {/* Diario */}
         <FadeIn delay={100} style={styles.fadeFull}>
           <Text style={styles.sectionTitle}>{t("tarot.diaryTitle")}</Text>
@@ -333,6 +319,13 @@ export default function TarotScreen() {
           )}
         </FadeIn>
       </ScrollView>
+
+      {/* Ceremonia "Tres cartas" (Task 4): overlay de pantalla completa sobre
+          el umbral — el umbral queda montado debajo (conserva revealed/diario)
+          y al guardar la lectura loadDiary refresca el diario de fondo. */}
+      {ceremonyOpen && (
+        <TarotCeremony onClose={() => setCeremonyOpen(false)} onSaved={loadDiary} />
+      )}
 
       <BottomSheet open={dailySheetOpen} onClose={() => setDailySheetOpen(false)} title={dailyContent?.name}>
         {dailyProse.map((p, i) => (
@@ -425,15 +418,6 @@ function makeStyles(t: ThemeTokens) {
     spreadName: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sansSemi },
     spreadDesc: { color: t.textDim, fontSize: typeScale.xs, fontFamily: fonts.sans },
 
-    card: { width: "100%" },
-    cardH: {
-      color: t.accText,
-      fontSize: typeScale.sm,
-      letterSpacing: 2.5,
-      textTransform: "uppercase",
-      marginBottom: space.md,
-      fontFamily: fonts.sansSemi,
-    },
     cardSub: {
       color: t.textDim,
       fontSize: typeScale.sm,
