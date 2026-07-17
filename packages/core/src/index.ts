@@ -106,5 +106,14 @@ export { sunSignFromDate } from "./astrology/sun-sign";
 export { glossaryEntry, GLOSSARY_ES, GLOSSARY_EN, type GlossaryEntry } from "./glossary";
 export { planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMeaningKey, interactionKey } from "./glossary/keys";
 
+// Tarot — el mazo como datos puros (78 cartas, correspondencias Golden Dawn)
+export * from "./tarot/types";
+export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
+export { mulberry32, shuffleDeck, drawCards } from "./tarot/shuffle";
+export type { Rng, DrawnCard } from "./tarot/shuffle";
+export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
+export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
+export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
+
 export { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "./legal/legal-es";
 export { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "./legal/legal-en";
