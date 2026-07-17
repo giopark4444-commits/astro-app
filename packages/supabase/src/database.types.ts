@@ -277,6 +277,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0012_tarot_readings.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      tarot_readings: {
+        Row: {
+          cards: Json;
+          created_at: string;
+          deck: string;
+          id: string;
+          notes: string | null;
+          profile_id: string | null;
+          question: string | null;
+          spread: string;
+          user_id: string;
+        };
+        Insert: {
+          cards: Json;
+          created_at?: string;
+          deck?: string;
+          id?: string;
+          notes?: string | null;
+          profile_id?: string | null;
+          question?: string | null;
+          spread: string;
+          user_id: string;
+        };
+        Update: {
+          cards?: Json;
+          created_at?: string;
+          deck?: string;
+          id?: string;
+          notes?: string | null;
+          profile_id?: string | null;
+          question?: string | null;
+          spread?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       // Añadida a mano junto con supabase/migrations/0006_user_reports.sql
       // (regenerar desde la BD viva si se instala el CLI de Supabase).
       user_reports: {
