@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Enso } from "../../components/Enso";
@@ -10,9 +10,30 @@ import { useTheme, type ModePref } from "../../lib/theme-context";
 import { useT, type Locale } from "../../lib/i18n-context";
 import { formatPlace } from "../../lib/geocode";
 import { getSupabase } from "../../lib/supabase";
-import type { SubscriptionStatus, UserIntent } from "@aluna/core";
+import {
+  SUPPORT_EMAIL,
+  SOCIAL_LINKS,
+  TERMS_ES,
+  PRIVACY_ES,
+  DISCLAIMER_ES,
+  TERMS_EN,
+  PRIVACY_EN,
+  DISCLAIMER_EN,
+  type SubscriptionStatus,
+  type UserIntent,
+} from "@aluna/core";
 import { fetchRemoteIntent, saveRemoteIntent } from "../../lib/intent";
 import { THEMES, THEME_LABELS, fonts, radius, space, type as typeScale, type ThemeName, type ThemeTokens } from "../../theme/tokens";
+
+const VISIBLE_SOCIAL_LINKS = SOCIAL_LINKS.filter((s) => s.href);
+
+// Labels de la sección Legal: reusan el título ya localizado de cada LegalDoc
+// (mismo patrón que apps/web/app/(app)/ajustes/page.tsx, LEGAL_LINKS).
+const LEGAL_LINKS = [
+  { slug: "terminos", es: TERMS_ES, en: TERMS_EN },
+  { slug: "privacidad", es: PRIVACY_ES, en: PRIVACY_EN },
+  { slug: "descargo", es: DISCLAIMER_ES, en: DISCLAIMER_EN },
+] as const;
 
 const prettyDate = (iso: string, locale: Locale) => {
   const [y, m, d] = iso.split("-").map(Number);
@@ -80,6 +101,14 @@ export default function AjustesScreen() {
   // aviso de pago pendiente), no la de "hazte Plus" como si nunca se
   // hubiera suscrito. La rama se decide por presencia de fila + status.
   const hasManagedSubscription = subRow !== null && subRow.status !== "cancelled";
+
+  // Método de acceso: Supabase Auth guarda el proveedor en app_metadata (mismo
+  // campo/lógica que apps/web/app/(app)/ajustes/page.tsx).
+  const provider = (session?.user.app_metadata as { provider?: string } | undefined)?.provider;
+  const loginMethodLabel =
+    !provider || provider === "email"
+      ? t("settings.loginEmail")
+      : provider.charAt(0).toUpperCase() + provider.slice(1);
 
   function confirmLogout() {
     Alert.alert(t("settings.logoutConfirmTitle"), t("settings.logoutConfirmBody"), [
@@ -274,14 +303,90 @@ export default function AjustesScreen() {
                 <Text style={styles.profileName}>
                   {t(subRow!.status === "trialing" ? "billing.planTrialing" : subRow!.status === "past_due" ? "billing.planPastDue" : "billing.planActive")}
                 </Text>
-                <Text style={styles.muted}>{t("billing.manageNote")}</Text>
+                {subRow!.current_period_end && (
+                  <Text style={styles.muted}>
+                    {t(subRow!.status === "trialing" ? "billing.trialEndsOn" : "billing.renewsOn", {
+                      date: prettyDate(subRow!.current_period_end.slice(0, 10), locale),
+                    })}
+                  </Text>
+                )}
+                <Text style={[styles.muted, { marginTop: space.sm }]}>{t("billing.manageNote")}</Text>
               </>
             ) : (
               <>
                 <Text style={styles.rowLabel}>{t("billing.freeBody")}</Text>
-                <Text style={[styles.muted, { marginTop: space.sm }]}>{t("billing.upsell")}</Text>
+                <Text style={[styles.muted, { marginTop: space.sm }]}>{t("settings.planWebNote")}</Text>
               </>
             )}
+          </Card>
+        </FadeIn>
+
+        {/* Cuenta: correo, ID de usuario y método de acceso (brief ajustes-movil T2) —
+           sin botón "Copiar": ni expo-clipboard ni el Clipboard viejo de react-native
+           están instalados en este repo (grep en package.json), y el brief prohíbe
+           sumar dependencias nuevas. Se omite el botón (ver reporte). */}
+        {session && (
+          <FadeIn delay={150} style={styles.cardGap}>
+            <Card>
+              <Text style={styles.cardEyebrow}>{t("settings.account")}</Text>
+              <Row styles={styles} label={t("settings.email")} value={session.user.email ?? "—"} />
+              <Row styles={styles} label={t("settings.userId")} value={session.user.id} valueStyle={styles.mono} />
+              <Row styles={styles} label={t("settings.loginMethod")} value={loginMethodLabel} last />
+            </Card>
+          </FadeIn>
+        )}
+
+        {/* Ayuda y soporte */}
+        <FadeIn delay={180} style={styles.cardGap}>
+          <Card>
+            <Text style={styles.cardEyebrow}>{t("settings.help")}</Text>
+            <LinkRow
+              styles={styles}
+              label={SUPPORT_EMAIL}
+              onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+            />
+            <LinkRow
+              styles={styles}
+              label={t("settings.askAluna")}
+              onPress={() => router.push("/preguntar")}
+              last
+            />
+          </Card>
+        </FadeIn>
+
+        {/* Síguenos: igual que la web — solo aparece si al menos un link tiene href. */}
+        {VISIBLE_SOCIAL_LINKS.length > 0 && (
+          <FadeIn delay={210} style={styles.cardGap}>
+            <Card>
+              <Text style={styles.cardEyebrow}>{t("settings.followUs")}</Text>
+              {VISIBLE_SOCIAL_LINKS.map((s, i) => (
+                <LinkRow
+                  key={s.key}
+                  styles={styles}
+                  label={s.label}
+                  onPress={() => Linking.openURL(s.href)}
+                  last={i === VISIBLE_SOCIAL_LINKS.length - 1}
+                />
+              ))}
+            </Card>
+          </FadeIn>
+        )}
+
+        {/* Legal: cada fila usa el título ya localizado del LegalDoc de @aluna/core
+           (mismo patrón que la web — LEGAL_LINKS en ajustes/page.tsx), no una
+           traducción propia duplicada. */}
+        <FadeIn delay={240} style={styles.cardGap}>
+          <Card>
+            <Text style={styles.cardEyebrow}>{t("settings.legal")}</Text>
+            {LEGAL_LINKS.map((l, i) => (
+              <LinkRow
+                key={l.slug}
+                styles={styles}
+                label={locale === "en" ? l.en.title : l.es.title}
+                onPress={() => router.push({ pathname: "/legal", params: { doc: l.slug } })}
+                last={i === LEGAL_LINKS.length - 1}
+              />
+            ))}
           </Card>
         </FadeIn>
 
@@ -320,18 +425,47 @@ function Row({
   styles,
   label,
   value,
+  valueStyle,
   last,
 }: {
   styles: ReturnType<typeof makeStyles>;
   label: string;
   value: string;
+  valueStyle?: StyleProp<TextStyle>;
   last?: boolean;
 }) {
   return (
     <View style={[styles.row, last && styles.rowLast]}>
       <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
+      <Text style={[styles.rowValue, valueStyle]} numberOfLines={1}>
+        {value}
+      </Text>
     </View>
+  );
+}
+
+/** Fila tocable (mailto, chat, redes, legal) — arrow a la derecha, mismo
+ * espíritu que `.rowLink` de la web (ajustes.module.css). */
+function LinkRow({
+  styles,
+  label,
+  onPress,
+  last,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  label: string;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  return (
+    <Pressable
+      style={[styles.row, last && styles.rowLast]}
+      onPress={onPress}
+      accessibilityRole="button"
+    >
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowArrow}>→</Text>
+    </Pressable>
   );
 }
 
@@ -428,6 +562,11 @@ function makeStyles(t: ThemeTokens) {
     rowLast: { borderBottomWidth: 0 },
     rowLabel: { color: t.textDim, fontSize: typeScale.md, fontFamily: fonts.sans },
     rowValue: { color: t.text, fontSize: typeScale.md, fontFamily: fonts.sans, flexShrink: 1, textAlign: "right", marginLeft: space.lg },
+    // ID de usuario: sin `fonts.mono` (no existe en la escala del móvil — grep
+    // en theme/tokens.ts), aproximado con letterSpacing sobre la sans normal
+    // (brief ajustes-movil T2, fallback explícito si no hay fuente mono).
+    mono: { fontSize: typeScale.sm, letterSpacing: 0.5 },
+    rowArrow: { color: t.acc, fontSize: typeScale.md, fontFamily: fonts.sans },
     systemName: { color: t.text, fontSize: typeScale.md },
     systemOn: { color: t.acc, fontSize: typeScale.xs, letterSpacing: 1, textTransform: "uppercase", fontFamily: fonts.sans },
 
