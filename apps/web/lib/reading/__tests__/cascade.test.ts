@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { completeWithCascade, resolveReportCascade } from "../provider";
+import { completeWithCascade, resolveReportCascade, resolveReadingProvider } from "../provider";
 import type { CompleteOptions, ReadingProvider } from "../provider";
 // Nota: los métodos fake abajo (completeStream/chat/chatStream) omiten el
 // parámetro de opciones porque no lo usan — una función con menos parámetros
@@ -7,7 +7,19 @@ import type { CompleteOptions, ReadingProvider } from "../provider";
 // evitamos el error de lint no-unused-vars sobre un parámetro que nunca haría falta leer.
 
 // Guardamos las llaves originales para no filtrar estado entre archivos de test.
-const ENV_KEYS = ["NOUS_API_KEY", "DEEPSEEK_API_KEY", "OPENAI_API_KEY"] as const;
+const ENV_KEYS = [
+  "NOUS_API_KEY",
+  "DEEPSEEK_API_KEY",
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
+  "READING_PROVIDER",
+  "OLLAMA_ENABLED",
+  "OLLAMA_BASE_URL",
+  "OLLAMA_READING_MODEL",
+  "OLLAMA_TIMEOUT_MS",
+] as const;
 const originalEnv: Record<string, string | undefined> = {};
 
 beforeEach(() => {
@@ -69,6 +81,24 @@ describe("resolveReportCascade", () => {
     process.env.DEEPSEEK_API_KEY = "deepseek-key";
     const providers = resolveReportCascade();
     expect(providers.map((p) => p.name)).toEqual(["deepseek"]);
+  });
+
+  it("con NOUS_API_KEY y OLLAMA_ENABLED=1, devuelve [hermes, ollama] — ollama al final", () => {
+    process.env.NOUS_API_KEY = "nous-key";
+    process.env.OLLAMA_ENABLED = "1";
+    const providers = resolveReportCascade();
+    expect(providers.map((p) => p.name)).toEqual(["hermes", "ollama"]);
+  });
+
+  it("sin ninguna llave pero con OLLAMA_ENABLED=1, devuelve [ollama]", () => {
+    process.env.OLLAMA_ENABLED = "1";
+    const providers = resolveReportCascade();
+    expect(providers.map((p) => p.name)).toEqual(["ollama"]);
+  });
+
+  it("sin llaves y sin OLLAMA_ENABLED, ollama no aparece (cascada vacía)", () => {
+    const providers = resolveReportCascade();
+    expect(providers).toEqual([]);
   });
 
   it("los proveedores construidos golpean el endpoint OpenAI-compatible correcto (Hermes y DeepSeek)", async () => {
@@ -166,5 +196,53 @@ describe("completeWithCascade", () => {
       }
     };
     await expect(completeWithCascade([a, b], { ...OPTS, validate })).rejects.toThrow();
+  });
+});
+
+describe("resolveReadingProvider — Ollama (voz local)", () => {
+  it("sin llaves y sin OLLAMA_ENABLED, sigue latente", () => {
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(false);
+  });
+
+  it("con OLLAMA_ENABLED=1 y sin llaves de nube, resuelve a ollama con hermes3:8b por defecto", () => {
+    process.env.OLLAMA_ENABLED = "1";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) {
+      expect(resolved.provider.name).toBe("ollama");
+      expect(resolved.provider.model).toBe("hermes3:8b");
+    }
+  });
+
+  it("con OLLAMA_ENABLED=1 y OLLAMA_READING_MODEL propio, usa ese modelo", () => {
+    process.env.OLLAMA_ENABLED = "1";
+    process.env.OLLAMA_READING_MODEL = "qwen3.6:latest";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.model).toBe("qwen3.6:latest");
+  });
+
+  it("con ANTHROPIC_API_KEY y OLLAMA_ENABLED=1, prefiere anthropic (ollama es último recurso)", () => {
+    process.env.ANTHROPIC_API_KEY = "ant-key";
+    process.env.OLLAMA_ENABLED = "1";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("anthropic");
+  });
+
+  it("con READING_PROVIDER=ollama y OLLAMA_ENABLED=1, fuerza ollama aunque haya llaves de nube", () => {
+    process.env.ANTHROPIC_API_KEY = "ant-key";
+    process.env.READING_PROVIDER = "ollama";
+    process.env.OLLAMA_ENABLED = "1";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("ollama");
+  });
+
+  it("con READING_PROVIDER=ollama pero SIN OLLAMA_ENABLED, no fuerza nada raro (cae al orden normal)", () => {
+    process.env.READING_PROVIDER = "ollama";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(false);
   });
 });
