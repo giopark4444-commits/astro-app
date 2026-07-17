@@ -131,7 +131,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false });
   }
 
-  const cacheKey = `${locale}:${position}:${value}:${length}`;
+  // El nombre entra a la clave porque el prompt personaliza con él: sin esto,
+  // la lectura cacheada de una cuenta (con su nombre tejido en el texto) se
+  // serviría a cualquier otra que comparta número y posición — fuga entre cuentas.
+  const nameKey = profileName.toLowerCase();
+  const cacheKey = `${locale}:${position}:${value}:${length}:${nameKey}`;
   const cache = getReadingCache();
   // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
   // Lectura best-effort: si el caché falla (red), seguimos y generamos.
