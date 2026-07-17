@@ -53,11 +53,20 @@ describe("BackEditor", () => {
     expect(decodeURIComponent(preview.src)).toContain("#1a2150");
   });
 
-  it("estado latente (available=false): deshabilita guardar, subir y los swatches", () => {
+  it("estado latente (available=false): deshabilita Guardar pero deja VIVOS los controles de diseño", () => {
     renderEditor(false);
 
+    // Guardar toca el bucket → deshabilitado sin Storage.
     expect(screen.getByRole("button", { name: /Guardar reverso/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "#c9a227" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: es.settings.deckBackSymbolStar })).toBeDisabled();
+    // Los controles de diseño siguen vivos: el preview es puro cliente, así que
+    // se puede diseñar y ver el reverso desde ya (solo no se puede guardar aún).
+    expect(screen.getByRole("button", { name: "#c9a227" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: es.settings.deckBackSymbolStar })).not.toBeDisabled();
+
+    // Y el preview reacciona al elegir símbolo aun en latente.
+    const preview = screen.getByAltText(es.settings.deckBackEditorTitle) as HTMLImageElement;
+    const before = preview.src;
+    fireEvent.click(screen.getByRole("button", { name: es.settings.deckBackSymbolMoon }));
+    expect(preview.src).not.toBe(before);
   });
 });

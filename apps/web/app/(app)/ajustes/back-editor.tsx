@@ -3,7 +3,10 @@
 // (@aluna/core, la misma función pura que usa el server para el webp final —
 // el preview es byte-consistente con lo que se guarda). "Subir imagen propia"
 // es la alternativa al editor generado. Ambos caminos POST /api/tarot/deck/back
-// (JSON {config} o FormData file) — latente sin Storage, controles deshabilitados.
+// (JSON {config} o FormData file). Latente sin Storage: los controles de DISEÑO
+// (colores/símbolo) siguen VIVOS — el preview es puro cliente (buildBackSvg), así
+// que puedes diseñar y ver el reverso desde ya; solo Guardar/Subir (que tocan el
+// bucket) quedan deshabilitados hasta conectar Storage.
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { buildBackSvg, type BackSymbol } from "@aluna/core";
@@ -102,7 +105,6 @@ export function BackEditor({ available, backKind, backUrl, onSaved }: Props) {
                 style={{ background: sw }}
                 aria-pressed={bg === sw}
                 aria-label={sw}
-                disabled={!available}
                 onClick={() => setBg(sw)}
               />
             ))}
@@ -120,7 +122,6 @@ export function BackEditor({ available, backKind, backUrl, onSaved }: Props) {
                 style={{ background: sw }}
                 aria-pressed={border === sw}
                 aria-label={sw}
-                disabled={!available}
                 onClick={() => setBorder(sw)}
               />
             ))}
@@ -136,7 +137,6 @@ export function BackEditor({ available, backKind, backUrl, onSaved }: Props) {
                 type="button"
                 className={`seg__item ${styles.segItem} ${symbol === s ? "seg__item--active" : ""}`}
                 aria-pressed={symbol === s}
-                disabled={!available}
                 onClick={() => setSymbol(s)}
               >
                 {t(SYMBOL_KEY[s])}

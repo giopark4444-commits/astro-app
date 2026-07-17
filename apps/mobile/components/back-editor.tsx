@@ -4,8 +4,9 @@
 // webp final) renderizado con SvgXml de react-native-svg — el preview es
 // byte-consistente con lo que el server produce, mismo SVG en ambas
 // plataformas. "Subir imagen propia" es la alternativa al editor generado.
-// Ambos caminos llaman uploadDeckBack (config o file) — latente sin Storage,
-// controles deshabilitados mientras `available` es false.
+// Ambos caminos llaman uploadDeckBack (config o file). Latente sin Storage: los
+// controles de DISEÑO (colores/símbolo) siguen vivos — el preview es puro
+// cliente (SvgXml + buildBackSvg) — y solo Guardar/Subir quedan deshabilitados.
 import { useMemo, useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SvgXml } from "react-native-svg";
@@ -120,10 +121,9 @@ export function BackEditor({ accessToken, available, backKind, backUrl, onSaved 
             <Pressable
               key={sw}
               style={[s.swatch, { backgroundColor: sw }, bg === sw && s.swatchOn]}
-              disabled={!available}
               onPress={() => setBg(sw)}
               accessibilityRole="button"
-              accessibilityState={{ selected: bg === sw, disabled: !available }}
+              accessibilityState={{ selected: bg === sw }}
             />
           ))}
         </View>
@@ -136,10 +136,9 @@ export function BackEditor({ accessToken, available, backKind, backUrl, onSaved 
             <Pressable
               key={sw}
               style={[s.swatch, { backgroundColor: sw }, border === sw && s.swatchOn]}
-              disabled={!available}
               onPress={() => setBorder(sw)}
               accessibilityRole="button"
-              accessibilityState={{ selected: border === sw, disabled: !available }}
+              accessibilityState={{ selected: border === sw }}
             />
           ))}
         </View>
@@ -153,11 +152,10 @@ export function BackEditor({ accessToken, available, backKind, backUrl, onSaved 
             return (
               <Pressable
                 key={sym}
-                style={[s.symbolChip, on && s.symbolChipOn, !available && s.btnDisabled]}
-                disabled={!available}
+                style={[s.symbolChip, on && s.symbolChipOn]}
                 onPress={() => setSymbol(sym)}
                 accessibilityRole="button"
-                accessibilityState={{ selected: on, disabled: !available }}
+                accessibilityState={{ selected: on }}
               >
                 <Text style={[s.symbolChipText, on && s.symbolChipTextOn]}>{t(SYMBOL_KEY[sym])}</Text>
               </Pressable>
