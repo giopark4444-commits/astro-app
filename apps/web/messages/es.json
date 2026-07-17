@@ -373,7 +373,10 @@
     "tabNucleo": "Núcleo",
     "tabPosiciones": "Posiciones",
     "tabAspectos": "Aspectos",
-    "tabBalance": "Balance"
+    "tabBalance": "Balance",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca cualquier planeta, aspecto o casa a la izquierda para leer qué significa en tu carta.",
+    "interpAspectOf": "entre"
   },
   "chat": {
     "title": "Pregúntale a Aluna",
