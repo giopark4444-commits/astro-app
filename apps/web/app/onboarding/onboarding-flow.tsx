@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { INTENT_GOALS, LIFE_AREAS, RELATIONSHIP_STATUSES } from "@aluna/core";
 import {
   EMPTY_ANSWERS, EMPTY_INTENT_DRAFT, buildSteps, isStepComplete,
@@ -11,6 +11,7 @@ import { createBirthProfile } from "./actions";
 import { PlaceAutocomplete } from "./place-autocomplete";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { ZodiacGauge } from "./zodiac-gauge";
 import styles from "./onboarding.module.css";
 
 // Todos los ids de meta/foco/estado son una sola palabra en inglés — capitalizar
@@ -44,6 +45,7 @@ function isIntentStep(step: OnboardingStep): step is IntentStep {
 
 export function OnboardingFlow() {
   const t = useTranslations("onboarding");
+  const locale = useLocale();
   const [a, setA] = useState<OnboardingAnswers>(EMPTY_ANSWERS);
   const [draft, setDraft] = useState<IntentDraft>(EMPTY_INTENT_DRAFT);
   const [i, setI] = useState(0);
@@ -147,8 +149,11 @@ export function OnboardingFlow() {
               placeholder={t("namePlaceholder")} aria-label={t("nameTitle")} />
           )}
           {step === "date" && (
-            <input className={styles.input} type="date" value={a.birthDate}
-              onChange={(e) => setA({ ...a, birthDate: e.target.value })} aria-label={t("dateTitle")} />
+            <>
+              <ZodiacGauge date={a.birthDate} locale={locale} />
+              <input className={styles.input} type="date" value={a.birthDate}
+                onChange={(e) => setA({ ...a, birthDate: e.target.value })} aria-label={t("dateTitle")} />
+            </>
           )}
           {step === "time" && (
             <>

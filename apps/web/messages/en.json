@@ -101,7 +101,8 @@
     "genderFeminine": "Feminine",
     "genderMasculine": "Masculine",
     "genderNeutral": "Neutral",
-    "genderHint": "Sets the grammatical gender your readings use."
+    "genderHint": "Sets the grammatical gender your readings use.",
+    "cuspHint": "Your chart will tell the exact boundary"
   },
   "profile": { "title": "Profiles", "new": "New profile", "changePhoto": "Change photo", "photoTooBig": "The image is over 5 MB", "photoBadType": "Invalid format (use PNG, JPG or WEBP)", "uploading": "Uploading…", "photoError": "We couldn't upload the photo. Please try again.", "sanctuary": "Your sanctuary", "birthData": "Birth data", "people": "People", "peopleSub": "The skies of your loved ones, kept beside yours.", "addPerson": "Add person", "compatibility": "Compatibility", "lifePath": "Life path", "preferences": "Preferences" },
   "manifest": { "eyebrow": "Journal & manifestation", "title": "Manifestations", "subtitle": "Sown at the new moon, harvested at the full.", "addCta": "+ Sow an intention", "cancel": "Cancel", "submit": "Sow it", "submitting": "Sowing…", "loading": "Reading the sky…", "empty": "Sow your first intention…", "emptyHint": "Pick a lunar horizon and write what you want to grow.", "error": "We couldn't bring in your manifestations. Try again.", "formError": "We couldn't sow your intention. Try again.", "deleteError": "We couldn't release this intention. Try again.", "deleteAria": "Release this intention", "horizonLabel": "Choose a horizon", "intentionLabel": "Your intention", "intentionPlaceholder": "What do you want to grow?", "charCount": "{count} / 280", "sownOn": "Sown on {date}", "harvestIn": "Harvest in {n} days", "harvestInOne": "Harvest in 1 day", "phaseSeeded": "Seeded", "phaseGrowing": "Growing", "phaseHarvested": "Harvested", "horizonNewMoon": "New moon", "horizonFullMoon": "Full moon", "horizonSolarReturn": "My solar return", "horizonThreeMonths": "Three moons", "horizonOneYear": "One year" },
