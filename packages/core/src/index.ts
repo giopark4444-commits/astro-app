@@ -108,3 +108,6 @@ export * from "./tarot/types";
 export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
 export { mulberry32, shuffleDeck, drawCards } from "./tarot/shuffle";
 export type { Rng, DrawnCard } from "./tarot/shuffle";
+export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
+export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
+export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
