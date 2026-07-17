@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { PLANETS, planetMeaningKey, type Aspect, type LifeArea } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
+import { useNavOrder } from "@/lib/admin/nav-order-provider";
+import { reorderByNavOrder } from "@/lib/admin/nav-order";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { transitPhrase as phraseEs } from "@/lib/content/transit-phrases-es";
 import { transitPhrase as phraseEn } from "@/lib/content/transit-phrases-en";
@@ -37,6 +39,8 @@ export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
   const locale = useLocale();
   const L = astroLabels(locale);
   const { active } = useProfiles();
+  const navOrder = useNavOrder();
+  const lenses = reorderByNavOrder(LENSES, navOrder);
   const router = useRouter();
   const [weather, setWeather] = useState<Aspect[] | null>(null);
   const [q, setQ] = useState("");
@@ -155,7 +159,7 @@ export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
         </section>
 
         <div className={styles.lenses}>
-          {LENSES.map((l, i) => {
+          {lenses.map((l, i) => {
             const inner = (
               <span className={`card ${l.soon ? "" : "card--interactive"} ${styles.tile} ${l.soon ? styles.soon : ""} reveal`} style={{ ["--i" as string]: 2 + i }}>
                 <span className={styles.tileIcon}>

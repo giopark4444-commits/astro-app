@@ -385,6 +385,46 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0015_admin_roles.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      roles: {
+        Row: {
+          created_at: string;
+          role: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          role: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          role?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0015_admin_roles.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      app_config: {
+        Row: {
+          key: string;
+          updated_at: string;
+          value: Json;
+        };
+        Insert: {
+          key: string;
+          updated_at?: string;
+          value: Json;
+        };
+        Update: {
+          key?: string;
+          updated_at?: string;
+          value?: Json;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
@@ -408,6 +448,24 @@ export type Database = {
           p_respect_ready: boolean;
         };
         Returns: string;
+      };
+      // Añadidas a mano junto con supabase/migrations/0015_admin_roles.sql:
+      // panel de superusuario/colaboradores (regenerar cuando se aplique).
+      is_superadmin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      admin_list_roles: {
+        Args: Record<string, never>;
+        Returns: { email: string; role: string; user_id: string }[];
+      };
+      admin_grant_role: {
+        Args: { target_email: string; target_role: string };
+        Returns: undefined;
+      };
+      admin_revoke_role: {
+        Args: { target_email: string };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

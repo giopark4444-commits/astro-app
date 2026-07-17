@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Icon } from "./icon";
+import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./bottom-nav.module.css";
 
 const ITEMS = [
@@ -12,12 +13,17 @@ const ITEMS = [
   { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
 ] as const;
 
-export function BottomNav() {
+// Sin `order` (review Fable: default debe ser un no-op hasta que /admin
+// guarde algo) reorderByNavOrder(ITEMS, []) conserva el orden original de
+// ITEMS de arriba (carta, números, hoy, pilares). Ojo: ese orden NO coincide
+// con NAV_KEYS/DEFAULT_NAV_ORDER — por eso ya no se usa ese default acá.
+export function BottomNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
   const path = usePathname();
   const t = useTranslations("nav");
+  const items = reorderByNavOrder(ITEMS, order);
   return (
     <nav className={styles.nav}>
-      {ITEMS.map((it) => {
+      {items.map((it) => {
         const active = path === it.href || path.startsWith(it.href + "/");
         const content = (
           <span className={`${styles.item} ${active ? styles.on : ""} ${it.soon ? styles.soon : ""}`}>
