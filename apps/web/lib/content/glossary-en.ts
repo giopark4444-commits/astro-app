@@ -333,4 +333,198 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
     title: "Mutable",
     body: "The energy that adapts: the one that bends without breaking when the plan changes. With a lot of mutable energy, you flow with any turn — the risk is scattering so much that nobody knows where you stand, including you. With little, last-minute changes throw you off: advance notice is a gift to you, and letting go of the plan is your practice.",
   },
+
+  // ——— BaZi: Heavenly Stems ———
+  "bazi.stem.jia": {
+    title: "Jiǎ · Yang Wood", glyph: "甲",
+    body: "The tree that grows straight toward the sky: pioneering, upright, with an integrity that doesn't bend easily. Where Jiǎ appears in your pillars there's drive to break ground and lead by growing — and a stiffness that may snap before it yields. Its lesson is the oak's: firmness serves best when it knows when to be bamboo.",
+  },
+  "bazi.stem.yi": {
+    title: "Yǐ · Yin Wood", glyph: "乙",
+    body: "The vine and the grass: the wood that doesn't compete with the oak — it climbs it. Yǐ is flexible, diplomatic, able to grow through any crack and bloom where others can't even take root. Its strength doesn't look like strength, and that's the secret: it survives storms that bring whole trees down.",
+  },
+  "bazi.stem.bing": {
+    title: "Bǐng · Yang Fire", glyph: "丙",
+    body: "The midday sun: warmth enough for everyone, with nothing asked in return. Bǐng is generous, visible, optimistic — it walks into a room and the room knows, lifting spirits without meaning to. Its challenge is accepting that even the sun doesn't shine at night: it too needs dusk, and to be taken care of once in a while.",
+  },
+  "bazi.stem.ding": {
+    title: "Dīng · Yin Fire", glyph: "丁",
+    body: "The candle flame, the lamp lit against the night: focused, warm, intimate light. Dīng illuminates up close — inspiring one person at a time, noticing what Bǐng's sun is too bright to see. Its care is guarding the flame: a wind that barely stirs a bonfire can put out a candle.",
+  },
+  "bazi.stem.wu": {
+    title: "Wù · Yang Earth", glyph: "戊",
+    body: "The mountain, the fortress wall: earth at its most solid and protective. Wù is dependable, steady, someone to shelter behind when the weather turns — but changing its mind takes what moving a mountain takes. Its gift is holding things up; its task, remembering that even rock lets itself be carved.",
+  },
+  "bazi.stem.ji": {
+    title: "Jǐ · Yin Earth", glyph: "己",
+    body: "The cultivated field: moist, fertile, ready to receive any seed and make it grow. Jǐ nourishes quietly — teaching, tending, improving everything it touches without claiming credit. Its risk is giving itself to so many other crops that it forgets to plant something of its own.",
+  },
+  "bazi.stem.geng": {
+    title: "Gēng · Yang Metal", glyph: "庚",
+    body: "The axe, the fresh-forged sword, raw ore: strength that cuts away what no longer serves. Gēng is direct, justice-minded, loyal to its principles past the point of comfort. It needs fire to temper it and work worthy of its edge — an idle axe rusts, or cuts where it shouldn't.",
+  },
+  "bazi.stem.xin": {
+    title: "Xīn · Yin Metal", glyph: "辛",
+    body: "The finished jewel: fine gold, precision, a shine that was worked for. Xīn carries an aesthetic sensitivity and a standard of quality that shows in everything it makes — and a fine memory for every scratch. Its lesson is that its worth doesn't depend on the display case: a jewel is a jewel in the drawer too.",
+  },
+  "bazi.stem.ren": {
+    title: "Rén · Yang Water", glyph: "壬",
+    body: "The great river, the ocean: water that moves at scale and recognizes no borders. Rén brings ingenuity, fluid ambition, the knack for flowing around an obstacle instead of crashing into it. Its challenge is banks: without a channel, that much current floods instead of watering.",
+  },
+  "bazi.stem.gui": {
+    title: "Guǐ · Yin Water", glyph: "癸",
+    body: "The fine rain, the dew before dawn: the gentlest water and the most penetrating. Guǐ nourishes without noise, intuits without knowing how, reaches where the river can't fit. It is the power of the subtle — drop by drop it wears through the stone the torrent only pounds.",
+  },
+
+  // ——— BaZi: Earthly Branches ———
+  "bazi.branch.zi": {
+    title: "Zǐ · Rat", glyph: "子",
+    body: "The Rat: water in deepest winter, the midnight of the year. As a foundation it brings ingenuity, survival instinct, and an intelligence that works quietly while everyone else sleeps. Where you have Zǐ, there are hidden resources that surface exactly when scarcity bites.",
+  },
+  "bazi.branch.chou": {
+    title: "Chǒu · Ox", glyph: "丑",
+    body: "The Ox: the damp earth of winter's end, when spring is being prepared under frozen ground. It brings long-haul patience, steady work, and the strength to carry what others put down. Where you have Chǒu, the harvest comes late — but it comes, and it comes solid.",
+  },
+  "bazi.branch.yin": {
+    title: "Yín · Tiger", glyph: "寅",
+    body: "The Tiger: wood at the start of spring, the first force to crack the ice. It brings courage, initiative, and a pioneering drive that would rather ask forgiveness than permission. Where you have Yín, part of you leaps first and learns midair — beginnings don't scare it: they wake it up.",
+  },
+  "bazi.branch.mao": {
+    title: "Mǎo · Rabbit", glyph: "卯",
+    body: "The Rabbit: wood in full spring, the garden in bloom. It brings diplomacy, aesthetic sensitivity, and a talent for growing without stepping on anyone. Where you have Mǎo, progress is soft but relentless — grass makes no noise and still covers the field.",
+  },
+  "bazi.branch.chen": {
+    title: "Chén · Dragon", glyph: "辰",
+    body: "The Dragon: earth at spring's end, and the only mythical animal of the twelve. It is a storehouse — it keeps water inside — and brings ambition, magnetism, and a complexity that won't be read at first glance. Where you have Chén, there are deep reserves and dreams built to scale.",
+  },
+  "bazi.branch.si": {
+    title: "Sì · Snake", glyph: "巳",
+    body: "The Snake: fire at the start of summer, warmth that is no longer a promise but a fact. It brings insight, strategy, and an elegance that gets things done without wrestling. Where you have Sì, the mind sees several moves ahead — and rarely shows its cards.",
+  },
+  "bazi.branch.wu": {
+    title: "Wǔ · Horse", glyph: "午",
+    body: "The Horse: fire at summer's height, the noon of the year. It brings passion, frankness, and a need for motion that doesn't negotiate — the most comfortable stable is still a stall. Where you have Wǔ, the energy is visible, contagious, and hard to rein in.",
+  },
+  "bazi.branch.wei": {
+    title: "Wèi · Goat", glyph: "未",
+    body: "The Goat: the dry earth of late summer, when the harvest ripens in the sun. It is a storehouse of wood, and brings kindness, creativity, and a care that holds the whole flock together. Where you have Wèi, there is sweetness with a memory — it yields on the form, never on the essence.",
+  },
+  "bazi.branch.shen": {
+    title: "Shēn · Monkey", glyph: "申",
+    body: "The Monkey: metal at the start of autumn, ingenuity made animal. It brings versatility, humor, and a technical knack for solving with one hand what others can't with two. Where you have Shēn, there is always a plan B — and probably a C.",
+  },
+  "bazi.branch.you": {
+    title: "Yǒu · Rooster", glyph: "酉",
+    body: "The Rooster: metal in full autumn, the jewel already separated from the ore. It brings precision, a critical eye, and pride in work properly finished — it crows at the exact hour, not a minute early or late. Where you have Yǒu, detail isn't decoration: it's principle.",
+  },
+  "bazi.branch.xu": {
+    title: "Xū · Dog", glyph: "戌",
+    body: "The Dog: earth at autumn's end, the gatekeeper when dark comes early. It is a storehouse of fire, and brings loyalty, a sense of justice, and a watchfulness that doesn't sleep. Where you have Xū, you guard what's yours — and what's yours includes your people.",
+  },
+  "bazi.branch.hai": {
+    title: "Hài · Pig", glyph: "亥",
+    body: "The Pig: water at winter's onset, when the year folds inward. It brings generosity, honesty without a false bottom, and a calm that savors the simple. Where you have Hài, rest isn't laziness: it's the seed gathering strength underground.",
+  },
+
+  // ——— BaZi: Ten Gods (relative to the Day Master) ———
+  "bazi.god.peer": {
+    title: "Friend", glyph: "比肩",
+    body: "The same element and same polarity as your Day Master: someone cut from your very wood. It is lived as self-reliance, friendships between equals, the ability to stand without leaning. In excess, being so good at going it alone isolates you — or turns every shared table into a comparison.",
+  },
+  "bazi.god.rob": {
+    title: "Rival", glyph: "劫財",
+    body: "Your own element with the opposite polarity: a sibling running your same race. It is lived as competitive charisma, nerve for risk — and a tendency for money to be shared or slip away through hands close to you. Worked well, it makes you brave; unexamined, it has you betting what was never only yours.",
+  },
+  "bazi.god.eating": {
+    title: "Output", glyph: "食神",
+    body: "The element your Day Master produces, in the same polarity: your talent flowing without strain. It is lived as gentle creativity, a taste for good food and the good life, expression that comes out naturally. This is the god of enjoyment: what's yours blooms when you create for pleasure, not under pressure.",
+  },
+  "bazi.god.hurting": {
+    title: "Maverick", glyph: "傷官",
+    body: "Also born of what your Day Master produces, but in the opposite polarity: talent with an edge. It is lived as brilliance that can't stomach a foolish rule, quick words, the need to stand out by breaking the mold. It's the uncomfortable genius of the chart: channeled, it makes great work; loose, it argues with every authority it meets.",
+  },
+  "bazi.god.wealth_direct": {
+    title: "Direct Wealth", glyph: "正財",
+    body: "The element your Day Master controls, in the opposite polarity: the fruit of your own labor. It is lived as material steadiness, prudence with what's earned, loyalty in your bonds — the paycheck that arrives because you showed up first. Its lesson: the security you build outlasts the security you wait for.",
+  },
+  "bazi.god.wealth_indirect": {
+    title: "Indirect Wealth", glyph: "偏財",
+    body: "The element you control, in your same polarity: wealth that circulates rather than sits. It is lived as a nose for opportunity, easy generosity, money that comes and goes in large motions. It's the god of the entrepreneur and the gambler — the difference between them is knowing when to walk away.",
+  },
+  "bazi.god.power_direct": {
+    title: "Authority", glyph: "正官",
+    body: "The element that controls your Day Master, in the opposite polarity: the law that orders you without crushing you. It is lived as duty, a guarded reputation, respect for the rules of the game — the fair boss, the rank that was earned. Well integrated, it gives you standing; in excess, you live for the rulebook and forget what it was for.",
+  },
+  "bazi.god.power_indirect": {
+    title: "Indirect Power", glyph: "七殺",
+    body: "The element that controls you, in your same polarity: pure pressure, no diplomacy — tradition calls it Seven Killings. It is lived as fierce demand, crises that forge you, an authority won in the field rather than behind a desk. Tamed, it's the god of warriors and surgeons; untamed, it's living under siege.",
+  },
+  "bazi.god.resource_direct": {
+    title: "Direct Resource", glyph: "正印",
+    body: "The element that produces your Day Master, in the opposite polarity: the mother, the teacher, the knowledge that feeds you. It is lived as a love of learning, protection that arrives on time, an ethic that backs you up. Its shadow is sweet, which is how it fools you: cared for this well, why ever step out into the weather?",
+  },
+  "bazi.god.resource_indirect": {
+    title: "Indirect Resource", glyph: "偏印",
+    body: "It nourishes you too, but in your same polarity: knowledge by unofficial roads. It is lived as sharp intuition, unusual interests, a mind that teaches itself what no classroom offers. It's the god of healers and specialists — its care is not sealing its world so tightly that no one else fits inside.",
+  },
+
+  // ——— BaZi: Concepts ———
+  "bazi.term.daymaster": {
+    title: "Day Master", glyph: "日主",
+    body: "The heavenly stem of the day you were born: in BaZi, that is you. Everything else in the chart — gods, elements, pillars — is read in relation to it: what feeds you, what demands of you, what you produce, what you control. Before reading anything else in your pillars, look at your Day Master: it's the protagonist of the story.",
+  },
+  "bazi.term.hiddenstems": {
+    title: "Hidden Stems", glyph: "藏干",
+    body: "Every earthly branch carries one, two, or three stems tucked inside it, like layers of soil beneath the surface. They are nuances you don't see at first glance but that carry weight: quiet talents, deep loyalties, elements working from below. Much of the finesse of a BaZi reading lives here.",
+  },
+  "bazi.term.nayin": {
+    title: "Nayin", glyph: "納音",
+    body: "A poetic system that gives every stem-branch pair an image of its own — Gold in the Sea, Furnace Fire, Pomegranate Wood. There are sixty melodies in all, and yours adds texture to the pillar: it doesn't change the element, it describes it with more poetry. Read it as each pillar's symbolic surname.",
+  },
+  "bazi.term.luckpillars": {
+    title: "Luck Pillars", glyph: "大運",
+    body: "Beyond your four natal pillars, life is traveled in ten-year stretches, each with its own stem and branch. They are the long seasons of your biography: one decade that favors your element, another that prunes it. They don't change who you are — they change the weather you get to be it in.",
+  },
+  "bazi.term.twelvestages": {
+    title: "Twelve Stages", glyph: "十二運星",
+    body: "The full life cycle of an element, from birth to the tomb and back to conception: twelve stations like Birth, Peak, Decline, or Severance. Each of your pillars stands in one, and that tells you how much vitality that zone of your chart runs on. None is good or bad in itself: the Tomb stores, Conception prepares.",
+  },
+  "bazi.term.symbolicstars": {
+    title: "Symbolic Stars", glyph: "神煞",
+    body: "Special markers that certain stem-branch combinations switch on in your chart: the Heavenly Noble who brings timely help, the Peach Blossom that magnetizes, the Traveling Horse that asks for motion. They are brushstrokes, not the whole painting — flavor and detail on top of what the pillars already tell.",
+  },
+  "bazi.term.pillar": {
+    title: "Pillar", glyph: "柱",
+    body: "Each pillar is a pair — one heavenly stem over one earthly branch — and your chart has four: year (your roots and ancestors), month (your parents and career), day (you and your partner), and hour (your children and legacy). Together they are the eight characters that give BaZi its name. Read them as four acts of a single life.",
+  },
+  "bazi.term.favorable": {
+    title: "Favorable Elements", glyph: "用神",
+    body: "The elements your chart needs to come into balance: if your Day Master is weak, whatever feeds and accompanies it; if strong, whatever drains it or gives it work. Knowing them makes the whole reading practical — colors, seasons, activities, even entire decades line up with what serves you, or don't.",
+  },
+  "bazi.term.strength": {
+    title: "Day Master Strength", glyph: "強弱",
+    body: "The chart's central diagnosis: how much support your Day Master receives from the season, from its roots, and from the visible stems. Strong doesn't mean better and weak doesn't mean worse — they mean different strategies: the strong thrives on challenge and outlet, the weak on nourishment and backing. Your favorable elements follow from this verdict.",
+  },
+
+  // ——— BaZi: Five Elements (wuxing) ———
+  "bazi.element.wood": {
+    title: "Wood", glyph: "木",
+    body: "In the five-element cycle, Wood is growth: born of Water, it feeds Fire and sinks roots into the Earth it controls. In you it is lived as the drive to expand, flexibility, a vision of what's next — a tree is always halfway made. Unlike the four Western elements, Wood here is a force of its own: spring turned into character.",
+  },
+  "bazi.element.fire": {
+    title: "Fire", glyph: "火",
+    body: "Fire transforms: born of Wood, it leaves Earth behind as ash and melts the Metal it controls. It is lived as passion, expression, visibility — the power to turn into light what others left as firewood. It is the cycle's summer: full expansion, with the eternal risk of consuming what feeds it.",
+  },
+  "bazi.element.earth": {
+    title: "Earth", glyph: "土",
+    body: "Earth holds, and sits at the center of the cycle: born of Fire, it raises Metal in its depths and contains the Water it controls. It is lived as stability, dependability, the patience of harvests. In Chinese thought it isn't just one more element among four: it's the axis where the seasons change hands.",
+  },
+  "bazi.element.metal": {
+    title: "Metal", glyph: "金",
+    body: "Metal defines and cuts: born of Earth, it gives rise to Water and prunes the Wood it controls. It is lived as precision, justice, the discipline of removing what's extra until only the essential remains. It is the cycle's autumn: harvest demands choosing, and choosing demands an edge.",
+  },
+  "bazi.element.water": {
+    title: "Water", glyph: "水",
+    body: "Water connects and descends: born of Metal, it nourishes Wood and quenches the Fire it controls. It is lived as wisdom, adaptability, the intelligence that flows where it can instead of insisting where it can't. It is the cycle's winter: apparent stillness, real depth.",
+  },
 };

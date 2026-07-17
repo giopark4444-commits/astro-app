@@ -334,4 +334,198 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
     title: "Mutable",
     body: "La energía que se adapta: la que dobla sin romperse cuando el plan cambia. Con mucha energía mutable, fluyes con cualquier giro — el riesgo es dispersarte tanto que nadie sepa dónde estás parado, ni siquiera tú. Con poca, los cambios de última hora te descolocan: avisarte con tiempo es un regalo, y practicar soltar el plan, tu aprendizaje.",
   },
+
+  // ——— BaZi: Troncos Celestes ———
+  "bazi.stem.jia": {
+    title: "Jiǎ · Madera yang", glyph: "甲",
+    body: "El árbol que crece recto hacia el cielo: pionero, franco, con una integridad que no se dobla fácil. Donde Jiǎ aparece en tus pilares hay empuje para abrirse camino y liderar creciendo — y una rigidez que puede quebrarse antes que ceder. Su aprendizaje es el del roble: la firmeza sirve más cuando sabe cuándo ser bambú.",
+  },
+  "bazi.stem.yi": {
+    title: "Yǐ · Madera yin", glyph: "乙",
+    body: "La enredadera y la hierba: la madera que no compite con el roble — lo trepa. Yǐ es flexible, diplomática, capaz de crecer en cualquier grieta y florecer donde otros ni echan raíz. Su fuerza no parece fuerza, y ahí está el secreto: sobrevive a tormentas que tumban árboles enteros.",
+  },
+  "bazi.stem.bing": {
+    title: "Bǐng · Fuego yang", glyph: "丙",
+    body: "El sol de mediodía: calor que alcanza para todos y no pide nada a cambio. Bǐng es generoso, visible, optimista — entra a un cuarto y el cuarto se entera, levanta el ánimo ajeno sin proponérselo. Su reto es aceptar que ni el sol brilla de noche: también necesita ocaso, y que lo cuiden a él de vez en cuando.",
+  },
+  "bazi.stem.ding": {
+    title: "Dīng · Fuego yin", glyph: "丁",
+    body: "La llama de la vela, la lámpara encendida en la noche: luz enfocada, cálida, íntima. Dīng ilumina de cerca — inspira a una persona a la vez y percibe lo que el sol de Bǐng, de tan brillante, no alcanza a ver. Su cuidado es proteger la llama: el viento que apenas despeina un incendio puede apagar una vela.",
+  },
+  "bazi.stem.wu": {
+    title: "Wù · Tierra yang", glyph: "戊",
+    body: "La montaña, la muralla: la tierra en su versión más sólida y protectora. Wù es confiable, estable, alguien detrás de quien resguardarse cuando arrecia — pero moverlo de opinión cuesta lo que mover una montaña. Su don es sostener; su tarea, recordar que también la roca se deja esculpir.",
+  },
+  "bazi.stem.ji": {
+    title: "Jǐ · Tierra yin", glyph: "己",
+    body: "La tierra de cultivo: húmeda, fértil, dispuesta a recibir cualquier semilla y hacerla crecer. Jǐ nutre con discreción — educa, cuida, mejora todo lo que toca sin exigir el crédito. Su riesgo es darse tanto a los cultivos ajenos que olvida sembrar algo propio.",
+  },
+  "bazi.stem.geng": {
+    title: "Gēng · Metal yang", glyph: "庚",
+    body: "El hacha, la espada recién forjada, el mineral en bruto: fuerza que corta lo que ya no sirve. Gēng es directo, justiciero, leal a sus principios hasta la incomodidad. Necesita fuego que lo temple y una tarea digna de su filo — un hacha ociosa se oxida, o corta donde no debe.",
+  },
+  "bazi.stem.xin": {
+    title: "Xīn · Metal yin", glyph: "辛",
+    body: "La joya ya pulida: oro fino, precisión, brillo que se trabajó. Xīn tiene sensibilidad estética y una exigencia de calidad que se nota en todo lo que hace — y una memoria fina para cada roce que lo rayó. Su lección es que su valor no depende de la vitrina: la joya lo es también en el cajón.",
+  },
+  "bazi.stem.ren": {
+    title: "Rén · Agua yang", glyph: "壬",
+    body: "El río caudaloso, el océano: agua que se mueve en grande y no reconoce fronteras. Rén trae ingenio, ambición fluida, la capacidad de rodear cualquier obstáculo en vez de chocar con él. Su desafío son las orillas: sin cauce, tanta corriente inunda en lugar de regar.",
+  },
+  "bazi.stem.gui": {
+    title: "Guǐ · Agua yin", glyph: "癸",
+    body: "La lluvia fina, el rocío de la madrugada: el agua más suave y la más penetrante. Guǐ nutre sin ruido, intuye sin explicar cómo, llega a donde el río no cabe. Es la fuerza de lo sutil — gota a gota atraviesa la piedra que el torrente solo golpea.",
+  },
+
+  // ——— BaZi: Ramas Terrestres ———
+  "bazi.branch.zi": {
+    title: "Zǐ · Rata", glyph: "子",
+    body: "La Rata: agua en pleno invierno, la medianoche del año. Como cimiento aporta ingenio, instinto de supervivencia y una inteligencia que trabaja en silencio mientras todos duermen. Donde tienes Zǐ, hay recursos escondidos que aparecen justo cuando la escasez aprieta.",
+  },
+  "bazi.branch.chou": {
+    title: "Chǒu · Buey", glyph: "丑",
+    body: "El Buey: tierra húmeda del final del invierno, cuando la primavera se prepara bajo el suelo helado. Aporta paciencia de largo aliento, trabajo constante y la fuerza de cargar lo que otros sueltan. Donde tienes Chǒu, los frutos tardan — pero llegan, y llegan sólidos.",
+  },
+  "bazi.branch.yin": {
+    title: "Yín · Tigre", glyph: "寅",
+    body: "El Tigre: madera del arranque de la primavera, la primera fuerza que rompe el hielo. Aporta coraje, iniciativa y un impulso pionero que prefiere pedir perdón antes que permiso. Donde tienes Yín, hay una parte tuya que salta primero y aprende en el aire — los comienzos no la asustan: la despiertan.",
+  },
+  "bazi.branch.mao": {
+    title: "Mǎo · Conejo", glyph: "卯",
+    body: "El Conejo: madera en plena primavera, el jardín en flor. Aporta diplomacia, sensibilidad estética y un talento para crecer sin pisar a nadie. Donde tienes Mǎo, el avance es suave pero constante — la hierba no hace ruido y aun así cubre el campo.",
+  },
+  "bazi.branch.chen": {
+    title: "Chén · Dragón", glyph: "辰",
+    body: "El Dragón: tierra del final de la primavera y el único animal mítico de los doce. Es un almacén — guarda agua en su interior — y aporta ambición, magnetismo y una complejidad que no se deja leer a la primera. Donde tienes Chén, hay reservas profundas y sueños de escala mayor.",
+  },
+  "bazi.branch.si": {
+    title: "Sì · Serpiente", glyph: "巳",
+    body: "La Serpiente: fuego del comienzo del verano, calor que ya no es promesa sino hecho. Aporta perspicacia, estrategia y una elegancia que consigue las cosas sin forcejear. Donde tienes Sì, la mente ve varias jugadas adelante — y rara vez muestra sus cartas.",
+  },
+  "bazi.branch.wu": {
+    title: "Wǔ · Caballo", glyph: "午",
+    body: "El Caballo: fuego en pleno verano, el mediodía del año. Aporta pasión, franqueza y una necesidad de movimiento que no negocia — el establo más cómodo sigue siendo un encierro. Donde tienes Wǔ, la energía es visible, contagiosa y difícil de frenar.",
+  },
+  "bazi.branch.wei": {
+    title: "Wèi · Cabra", glyph: "未",
+    body: "La Cabra: tierra seca del final del verano, cuando la cosecha madura al sol. Es almacén de madera y aporta amabilidad, creatividad y un cuidado que sostiene al rebaño entero. Donde tienes Wèi, hay dulzura con memoria — cede en las formas, no en lo esencial.",
+  },
+  "bazi.branch.shen": {
+    title: "Shēn · Mono", glyph: "申",
+    body: "El Mono: metal del comienzo del otoño, el ingenio hecho animal. Aporta versatilidad, humor y una habilidad técnica que resuelve con una mano lo que otros no logran con dos. Donde tienes Shēn, siempre hay un plan B — y probablemente un C.",
+  },
+  "bazi.branch.you": {
+    title: "Yǒu · Gallo", glyph: "酉",
+    body: "El Gallo: metal en pleno otoño, la joya ya separada de la ganga. Aporta precisión, ojo crítico y orgullo por el trabajo bien terminado — canta a la hora exacta, ni antes ni después. Donde tienes Yǒu, el detalle no es adorno: es principio.",
+  },
+  "bazi.branch.xu": {
+    title: "Xū · Perro", glyph: "戌",
+    body: "El Perro: tierra del final del otoño, el guardián de la puerta cuando oscurece temprano. Es almacén de fuego y aporta lealtad, sentido de justicia y una vigilancia que no duerme. Donde tienes Xū, proteges lo tuyo — y lo tuyo incluye a tu gente.",
+  },
+  "bazi.branch.hai": {
+    title: "Hài · Cerdo", glyph: "亥",
+    body: "El Cerdo: agua del comienzo del invierno, cuando el año se recoge hacia adentro. Aporta generosidad, honestidad sin doblez y una calma que disfruta lo simple. Donde tienes Hài, el descanso no es pereza: es la semilla juntando fuerzas bajo tierra.",
+  },
+
+  // ——— BaZi: Diez Dioses (relativos al Maestro del Día) ———
+  "bazi.god.peer": {
+    title: "Paralelo", glyph: "比肩",
+    body: "El mismo elemento y la misma polaridad que tu Maestro del Día: alguien hecho de tu misma madera. Se vive como autosuficiencia, amistades de igual a igual, la capacidad de sostenerte sin apoyos. En exceso, valerte tan bien solo te aísla — o convierte cada mesa compartida en comparación.",
+  },
+  "bazi.god.rob": {
+    title: "Compañero rival", glyph: "劫財",
+    body: "Tu mismo elemento con la polaridad opuesta: un hermano que corre tu misma carrera. Se vive como carisma competitivo, arrojo para arriesgar — y una tendencia a que el dinero se comparta o se escape por manos cercanas. Bien trabajado te vuelve valiente; sin conciencia, te hace apostar lo que no era solo tuyo.",
+  },
+  "bazi.god.eating": {
+    title: "Genio", glyph: "食神",
+    body: "El elemento que tu Maestro del Día produce, en su misma polaridad: tu talento fluyendo sin esfuerzo. Se vive como creatividad amable, gusto por la buena mesa y la buena vida, expresión que sale natural. Es el dios del disfrute: lo tuyo florece cuando creas por placer, no por presión.",
+  },
+  "bazi.god.hurting": {
+    title: "Rebelde", glyph: "傷官",
+    body: "También nace de lo que tu Maestro del Día produce, pero en polaridad opuesta: talento con filo. Se vive como brillantez que no soporta reglas tontas, palabra rápida, necesidad de destacar rompiendo el molde. Es el genio incómodo de la carta: canalizado crea obras; suelto, discute con cada autoridad que encuentra.",
+  },
+  "bazi.god.wealth_direct": {
+    title: "Riqueza directa", glyph: "正財",
+    body: "El elemento que tu Maestro del Día controla, en polaridad opuesta: el fruto del trabajo propio. Se vive como estabilidad material, prudencia con lo ganado, lealtad en los vínculos — el sueldo que llega porque tú llegaste primero. Su lección: la seguridad que construyes vale más que la que esperas.",
+  },
+  "bazi.god.wealth_indirect": {
+    title: "Riqueza indirecta", glyph: "偏財",
+    body: "El elemento que controlas, en tu misma polaridad: la riqueza que circula, no la que se guarda. Se vive como olfato para las oportunidades, generosidad fácil, dinero que entra y sale en grande. Es el dios del empresario y del jugador — la diferencia entre ambos es saber cuándo retirarse.",
+  },
+  "bazi.god.power_direct": {
+    title: "Autoridad", glyph: "正官",
+    body: "El elemento que controla a tu Maestro del Día, en polaridad opuesta: la ley que te ordena sin aplastarte. Se vive como sentido del deber, reputación cuidada, respeto por las reglas del juego — el jefe justo, el cargo ganado. Bien integrada te da rango; en exceso, vives para el reglamento y olvidas para qué era.",
+  },
+  "bazi.god.power_indirect": {
+    title: "Poder indirecto", glyph: "七殺",
+    body: "El elemento que te controla, en tu misma polaridad: presión pura, sin diplomacia — la tradición lo llama Siete Matanzas. Se vive como exigencia intensa, crisis que te forjan, una autoridad que se gana en el campo y no en el escritorio. Domado, es el dios de guerreros y cirujanos; sin domar, es vivir bajo asedio.",
+  },
+  "bazi.god.resource_direct": {
+    title: "Recurso directo", glyph: "正印",
+    body: "El elemento que produce a tu Maestro del Día, en polaridad opuesta: la madre, el maestro, el saber que te alimenta. Se vive como amor por aprender, protección que llega a tiempo, una ética que te respalda. Su sombra es dulce y por eso engaña: tan bien cuidado, ¿para qué salir a la intemperie?",
+  },
+  "bazi.god.resource_indirect": {
+    title: "Recurso indirecto", glyph: "偏印",
+    body: "También te nutre, pero en tu misma polaridad: el conocimiento por caminos no oficiales. Se vive como intuición aguda, intereses raros, la mente que aprende sola lo que ningún aula enseña. Es el dios de sanadores y especialistas — su cuidado es no cerrar tanto su mundo que nadie más quepa dentro.",
+  },
+
+  // ——— BaZi: Conceptos ———
+  "bazi.term.daymaster": {
+    title: "Maestro del Día", glyph: "日主",
+    body: "El tronco celeste del día en que naciste: en BaZi, ese eres tú. Todo lo demás en la carta — dioses, elementos, pilares — se lee en relación a él: qué te nutre, qué te exige, qué produces, qué controlas. Antes de leer cualquier otra cosa de tus pilares, mira tu Maestro del Día: es el protagonista de la historia.",
+  },
+  "bazi.term.hiddenstems": {
+    title: "Troncos ocultos", glyph: "藏干",
+    body: "Cada rama terrestre guarda dentro uno, dos o tres troncos escondidos, como capas de suelo bajo la superficie. Son matices que no se ven a primera vista pero pesan: talentos discretos, lealtades de fondo, elementos que trabajan desde abajo. Buena parte de la finura de una lectura BaZi vive aquí.",
+  },
+  "bazi.term.nayin": {
+    title: "Nayin", glyph: "納音",
+    body: "Un sistema poético que le da a cada pareja tronco-rama una imagen propia — Oro en el Mar, Fuego de Fragua, Madera de Granado. Son sesenta melodías en total, y la tuya añade textura al pilar: no cambia el elemento, lo describe con más poesía. Léelo como el apellido simbólico de cada pilar.",
+  },
+  "bazi.term.luckpillars": {
+    title: "Pilares de la suerte", glyph: "大運",
+    body: "Además de tus cuatro pilares natales, la vida se recorre en tramos de diez años, cada uno con su propio tronco y rama. Son las estaciones largas de tu biografía: una década que favorece tu elemento, otra que lo poda. No cambian quién eres — cambian el clima en el que te toca serlo.",
+  },
+  "bazi.term.twelvestages": {
+    title: "Doce etapas", glyph: "十二運星",
+    body: "El ciclo de vida completo de un elemento, del nacimiento a la tumba y de vuelta a la gestación: doce estaciones como Nacimiento, Cumbre, Declive o Corte. Cada pilar tuyo atraviesa una, y eso dice con cuánta vitalidad opera esa zona de tu carta. No son buenas ni malas: la Tumba guarda, la Gestación prepara.",
+  },
+  "bazi.term.symbolicstars": {
+    title: "Estrellas simbólicas", glyph: "神煞",
+    body: "Marcas especiales que ciertas combinaciones de tronco y rama activan en tu carta: el Noble Celestial que trae ayuda oportuna, la Flor de Durazno que imanta, el Caballo Viajero que pide movimiento. Son pinceladas, no la pintura entera — dan sabor y detalle a lo que los pilares ya cuentan.",
+  },
+  "bazi.term.pillar": {
+    title: "Pilar", glyph: "柱",
+    body: "Cada pilar es una pareja de tronco celeste y rama terrestre, y tu carta tiene cuatro: año (tus raíces y ancestros), mes (tus padres y tu carrera), día (tú y tu pareja) y hora (tus hijos y tu legado). Juntos son los ocho caracteres que dan nombre al BaZi. Léelos como los cuatro actos de una misma vida.",
+  },
+  "bazi.term.favorable": {
+    title: "Elementos favorables", glyph: "用神",
+    body: "Los elementos que tu carta necesita para equilibrarse: si tu Maestro del Día es débil, lo que lo nutre y acompaña; si es fuerte, lo que lo drena o le pone tarea. Conocerlos vuelve práctica toda la lectura: te dicen qué estaciones, actividades y hasta qué décadas enteras juegan a tu favor — y cuáles te van a pedir más remo.",
+  },
+  "bazi.term.strength": {
+    title: "Fuerza del Maestro del Día", glyph: "強弱",
+    body: "El diagnóstico central de la carta: cuánto apoyo recibe tu Maestro del Día de la estación, de sus raíces y de los troncos visibles. Fuerte no significa mejor ni débil peor — significan estrategias distintas: el fuerte prospera con desafío y salida; el débil, con nutrición y respaldo. De este veredicto salen tus elementos favorables.",
+  },
+
+  // ——— BaZi: Cinco Elementos (wuxing) ———
+  "bazi.element.wood": {
+    title: "Madera", glyph: "木",
+    body: "En el ciclo de los cinco elementos, la Madera es crecimiento: nace del Agua, alimenta al Fuego y echa raíces en la Tierra que controla. En ti se vive como impulso de expandirte, flexibilidad, visión de futuro — un árbol siempre está a medio hacerse. A diferencia de los cuatro elementos occidentales, aquí la Madera es fuerza propia: la primavera hecha carácter.",
+  },
+  "bazi.element.fire": {
+    title: "Fuego", glyph: "火",
+    body: "El Fuego transforma: nace de la Madera, deja Tierra como ceniza y funde al Metal que controla. Se vive como pasión, expresión, visibilidad — la capacidad de convertir en luz lo que otros dejaron en leña. Es el verano del ciclo: expansión plena, con el riesgo eterno de consumir lo que lo alimenta.",
+  },
+  "bazi.element.earth": {
+    title: "Tierra", glyph: "土",
+    body: "La Tierra sostiene y ocupa el centro del ciclo: nace del Fuego, cría al Metal en su seno y contiene al Agua que controla. Se vive como estabilidad, confiabilidad, la paciencia de las cosechas. En el pensamiento chino no es un elemento más entre cuatro: es el eje donde las estaciones cambian de mano.",
+  },
+  "bazi.element.metal": {
+    title: "Metal", glyph: "金",
+    body: "El Metal define y corta: nace de la Tierra, engendra al Agua y poda a la Madera que controla. Se vive como precisión, justicia, la disciplina de quitar lo que sobra hasta que quede lo esencial. Es el otoño del ciclo: la cosecha exige elegir, y elegir exige filo.",
+  },
+  "bazi.element.water": {
+    title: "Agua", glyph: "水",
+    body: "El Agua conecta y desciende: nace del Metal, nutre a la Madera y apaga al Fuego que controla. Se vive como sabiduría, adaptabilidad, la inteligencia que fluye por donde puede en vez de insistir por donde no. Es el invierno del ciclo: quietud aparente, profundidad real.",
+  },
 };
