@@ -32,10 +32,17 @@ describe("buildBackSvg", () => {
     expect(enso).not.toBe(moon);
     expect(star).not.toBe(moon);
 
-    // enso draws an arc path; star draws 8 radiating lines; moon draws a crescent path.
+    // enso draws an arc path; star draws 8 radiating lines; moon draws a
+    // crescent = disco del color de borde + "mordisco" del color de fondo.
+    // (El moon usa dos <circle>, NO un path evenodd: ese se renderizaba vacío.)
     expect(enso).toContain("<path");
     expect((star.match(/<line/g) ?? []).length).toBeGreaterThanOrEqual(8);
-    expect(moon).toContain("<path");
+    // moon = disco (borde) + mordisco (fondo) + punto central = 3 círculos;
+    // enso/star solo tienen el punto central (1). Así el creciente se distingue
+    // y no vuelve a colarse un símbolo que se renderiza VACÍO.
+    const countCircles = (s: string) => (s.match(/<circle/g) ?? []).length;
+    expect(countCircles(moon)).toBeGreaterThanOrEqual(3);
+    expect(countCircles(enso)).toBe(1);
   });
 
   it("falls back to a safe default for an invalid symbol", () => {

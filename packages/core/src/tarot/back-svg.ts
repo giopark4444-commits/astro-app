@@ -51,36 +51,29 @@ function ensoPath(cx: number, cy: number, r: number): string {
   return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
 }
 
-/** Luna creciente: dos arcos superpuestos (disco + mordida) formando un menguante elegante. */
-function moonPath(cx: number, cy: number, r: number): string {
-  const outerTop: [number, number] = [cx, cy - r];
-  const outerBottom: [number, number] = [cx, cy + r];
-  // Arco exterior (disco completo, mitad derecha) + arco interior (mordisco, curvado
-  // hacia el mismo lado) para producir un creciente clásico, usando evenodd-like
-  // combinación de dos arcos en un solo path con fill.
-  const innerR = r * 0.78;
-  const innerOffset = r * 0.45;
-  const innerTop: [number, number] = [cx + innerOffset, cy - innerR];
-  const innerBottom: [number, number] = [cx + innerOffset, cy + innerR];
-
+/**
+ * Luna creciente: disco lleno del color de borde + un "mordisco" del color de
+ * fondo desplazado a la derecha, dejando un menguante limpio a la izquierda.
+ * Dos <circle> superpuestos en vez de un path evenodd de dos arcos: ese path
+ * (con extremos exactamente a un diámetro) se degeneraba y resvg/sharp lo
+ * renderizaba VACÍO — cazado a ojo en el pipeline real. Esta técnica de dos
+ * círculos es robusta (sin casos-borde de arco) y da un creciente sólido.
+ */
+function moonMarkup(cx: number, cy: number, r: number, color: string, bg: string): string {
+  const biteOffset = r * 0.46;
+  const biteR = r * 0.88;
   return [
-    `M ${outerTop[0].toFixed(2)} ${outerTop[1].toFixed(2)}`,
-    `A ${r} ${r} 0 1 1 ${outerBottom[0].toFixed(2)} ${outerBottom[1].toFixed(2)}`,
-    `A ${r} ${r} 0 0 0 ${outerTop[0].toFixed(2)} ${outerTop[1].toFixed(2)}`,
-    `Z`,
-    `M ${innerTop[0].toFixed(2)} ${innerTop[1].toFixed(2)}`,
-    `A ${innerR} ${innerR} 0 1 0 ${innerBottom[0].toFixed(2)} ${innerBottom[1].toFixed(2)}`,
-    `A ${innerR} ${innerR} 0 0 1 ${innerTop[0].toFixed(2)} ${innerTop[1].toFixed(2)}`,
-    `Z`,
-  ].join(" ");
+    `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r.toFixed(2)}" fill="${color}" opacity="0.92" />`,
+    `<circle cx="${(cx + biteOffset).toFixed(2)}" cy="${cy.toFixed(2)}" r="${biteR.toFixed(2)}" fill="${bg}" />`,
+  ].join("\n    ");
 }
 
-function symbolMarkup(symbol: BackSymbol, cx: number, cy: number, r: number, color: string): string {
+function symbolMarkup(symbol: BackSymbol, cx: number, cy: number, r: number, color: string, bg: string): string {
   switch (symbol) {
     case "star":
       return `<g>\n    ${starLines(cx, cy, r - 6, 22, color)}\n  </g>`;
     case "moon":
-      return `<path d="${moonPath(cx, cy, r - 10)}" fill="${color}" fill-rule="evenodd" opacity="0.92" />`;
+      return moonMarkup(cx, cy, r - 10, color, bg);
     case "enso":
     default:
       return `<path d="${ensoPath(cx, cy, r)}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" />`;
@@ -109,7 +102,7 @@ export function buildBackSvg(cfg: BackConfig): string {
   <rect x="${margin + 8}" y="${margin + 8}" width="${WIDTH - (margin + 8) * 2}" height="${HEIGHT - (margin + 8) * 2}" rx="6"
         fill="none" stroke="${border}" stroke-width="1" opacity="0.55" />
 
-  ${symbolMarkup(symbol, cx, cy, r, border)}
+  ${symbolMarkup(symbol, cx, cy, r, border, bg)}
 
   <circle cx="${cx}" cy="${cy}" r="4" fill="${border}" />
 </svg>
