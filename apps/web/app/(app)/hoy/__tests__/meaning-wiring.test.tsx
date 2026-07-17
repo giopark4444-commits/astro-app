@@ -38,10 +38,13 @@ describe("HubView — capa de significados (clima)", () => {
   it('"Trígono" en la tarjeta de clima es un botón que abre el glosario (dialog)', async () => {
     render(<HubView />, { wrapper: Providers });
 
-    const trigger = await screen.findByRole("button", { name: "Trígono" });
+    // Ambos triggers del aspecto (glifo △ y el label "Trígono") comparten
+    // aria-label={entry.title} tras el fix de accesibilidad, así que hay dos
+    // botones con el mismo nombre accesible — cualquiera abre el mismo glosario.
+    const [trigger] = await screen.findAllByRole("button", { name: "Trígono" });
     expect(trigger).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    fireEvent.click(trigger);
+    fireEvent.click(trigger!);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 

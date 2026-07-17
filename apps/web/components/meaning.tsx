@@ -11,7 +11,7 @@ import styles from "./meaning.module.css";
 
 const TEXT_VS = "︎";
 
-export function Meaning({ k, children }: { k: string; children: React.ReactNode }) {
+export function Meaning({ k, children, ariaLabel }: { k: string; children: React.ReactNode; ariaLabel?: string }) {
   const locale = useLocale();
   const [open, setOpen] = useState(false);
   const entry = glossaryEntry(k, locale);
@@ -19,7 +19,8 @@ export function Meaning({ k, children }: { k: string; children: React.ReactNode 
   if (!entry) return <>{children}</>;
   return (
     <>
-      <button type="button" className={styles.trigger} onClick={(e) => { e.stopPropagation(); setOpen(true); }}>
+      <button type="button" className={styles.trigger} aria-label={ariaLabel ?? entry.title}
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}>
         {children}
       </button>
       {open && createPortal(

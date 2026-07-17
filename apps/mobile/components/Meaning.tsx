@@ -46,7 +46,8 @@ export function Meaning({
       style={[styles.trigger, style]}
       onPress={() => open(entry)}
       accessibilityRole="button"
-      accessibilityHint={entry.title}
+      accessibilityLabel={entry.title}
+      accessibilityHint="Abre el significado"
       suppressHighlighting
     >
       {children}

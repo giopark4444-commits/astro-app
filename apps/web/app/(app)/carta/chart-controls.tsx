@@ -32,13 +32,13 @@ export function ChartControls({
       <div className={styles.ctrlRow} role="tablist" aria-label={t("houseSystem")}>
         {labeled && <span className={styles.ctrlLab}>{t("housesLabel")}</span>}
         {HOUSE_SYSTEMS.map((h) => (
-          <span key={h} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+          <span key={h} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
             <button className={`chip--control ${houseSystem === h ? "chip--control-on" : ""}`}
               aria-selected={houseSystem === h} role="tab" onClick={() => onHouseSystem(h)}>
               {t(`houseSystems.${h}`)}
             </button>
-            <Meaning k={houseSystemMeaningKey(h)}>
-              <span aria-label={t(`houseSystems.${h}`)} style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
+            <Meaning k={houseSystemMeaningKey(h)} ariaLabel={`Qué significa ${t(`houseSystems.${h}`)}`}>
+              <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
             </Meaning>
           </span>
         ))}
@@ -46,13 +46,13 @@ export function ChartControls({
       <div className={styles.ctrlRow} role="tablist" aria-label={t("zodiac")}>
         {labeled && <span className={styles.ctrlLab}>{t("zodiacLabel")}</span>}
         {ZODIACS.map((z) => (
-          <span key={z} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+          <span key={z} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
             <button className={`chip--control ${zodiac === z ? "chip--control-on" : ""}`}
               aria-selected={zodiac === z} role="tab" onClick={() => onZodiac(z)}>
               {t(z)}
             </button>
-            <Meaning k={`zodiac.${z}`}>
-              <span aria-label={t(z)} style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
+            <Meaning k={`zodiac.${z}`} ariaLabel={`Qué significa ${t(z)}`}>
+              <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
             </Meaning>
           </span>
         ))}

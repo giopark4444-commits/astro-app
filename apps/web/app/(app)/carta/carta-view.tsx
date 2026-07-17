@@ -421,7 +421,11 @@ export function CartaView() {
             <div className={styles.sheetBig}>{SIGN_GLYPH[sheet.sign]} {dms(sheet)}</div>
             <div className={styles.sheetSign}>{L.signs[sheet.sign]} · {t("house")} {sheet.house}</div>
             <div className={styles.sheetMeta}>
-              {sheet.dignity && <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>}
+              {sheet.dignity && (
+                <Meaning k={dignityMeaningKey(sheet.dignity)}>
+                  <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>
+                </Meaning>
+              )}
               {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}><Meaning k="term.retrograde">{t("retrograde")} ℞</Meaning></span>}
               <span className={`chip ${styles.tag}`}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
             </div>

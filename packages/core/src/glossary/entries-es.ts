@@ -3,6 +3,8 @@
 // Voz Aluna: segunda persona, cálida y honesta, 2–4 frases. Claves en inglés,
 // namespaced (sign.* planet.* house.* aspect.* term.* dignity.* pattern.*
 // housesystem.* zodiac.* element.* modality.* bazi.*). Paridad EN vigilada por test.
+// Claves sin productor todavía (dignity.peregrine, pattern.grandcross, pattern.yod,
+// bazi.term.pillar, term.transit, term.natal) son stock a futuro, no cableado faltante.
 export interface GlossaryEntry { title: string; glyph?: string; body: string }
 
 export const GLOSSARY_ES: Record<string, GlossaryEntry> = {

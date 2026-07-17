@@ -24,16 +24,22 @@ const MeaningContext = createContext<MeaningContextValue | null>(null);
 
 export function MeaningProvider({ children }: { children: React.ReactNode }) {
   const [entry, setEntry] = useState<GlossaryEntry | null>(null);
+  // `visible` controla la hoja; `entry` NO se limpia al cerrar (solo se
+  // reemplaza al abrir la siguiente) para que el contenido siga montado
+  // durante la animación de salida — si limpiáramos `entry` en `close`, el
+  // título y el cuerpo desaparecerían de golpe antes de que el Modal
+  // terminara de desvanecerse (destello en blanco).
+  const [visible, setVisible] = useState(false);
 
-  const open = useCallback((e: GlossaryEntry) => setEntry(e), []);
-  const close = useCallback(() => setEntry(null), []);
+  const open = useCallback((e: GlossaryEntry) => { setEntry(e); setVisible(true); }, []);
+  const close = useCallback(() => setVisible(false), []);
 
   const value = useMemo<MeaningContextValue>(() => ({ open }), [open]);
 
   return (
     <MeaningContext.Provider value={value}>
       {children}
-      <BottomSheet open={!!entry} onClose={close} title={entry?.title}>
+      <BottomSheet open={visible} onClose={close} title={entry?.title}>
         {entry?.glyph && (
           <Text
             style={{ fontSize: typeScale.xl2, fontFamily: fonts.serif, textAlign: "center", marginBottom: space.sm }}

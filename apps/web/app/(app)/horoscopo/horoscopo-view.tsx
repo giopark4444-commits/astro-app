@@ -132,14 +132,14 @@ export function HoroscopoView() {
                 // role="radio" — envolver el botón entero anidaría un <button>
                 // del <Meaning> dentro de otro <button> (mismo problema que
                 // housesystem/zodiac en /carta): afijo ⓘ envuelto aparte.
-                <span key={s.key} style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                <span key={s.key} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
                   <button type="button" role="radio" aria-checked={sign === s.key}
                     className={`chip--control ${sign === s.key ? "chip--control-on" : ""}`}
                     onClick={() => setSign(s.key)}>
                     {SIGN_GLYPH[s.key]} {L.signs[s.key]}
                   </button>
-                  <Meaning k={`sign.${s.key}`}>
-                    <span aria-label={L.signs[s.key]} style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
+                  <Meaning k={`sign.${s.key}`} ariaLabel={`Qué significa ${L.signs[s.key]}`}>
+                    <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
                   </Meaning>
                 </span>
               ))}

@@ -56,7 +56,10 @@ function renderView() {
 describe("PilaresView — capa de significados (troncos)", () => {
   it('el carácter 甲 (tronco del pilar de año) es un botón que abre el glosario (dialog)', async () => {
     renderView();
-    const trigger = await screen.findByRole("button", { name: "甲" });
+    // El botón ahora lleva aria-label={entry.title} (fix de accesibilidad:
+    // el glifo suelto no anunciaba nada por sí mismo) — el nombre accesible
+    // pasa a ser el título del glosario ("Jiǎ · Madera yang"), no el glifo.
+    const trigger = await screen.findByRole("button", { name: /Jiǎ/ });
     expect(trigger).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(trigger);
