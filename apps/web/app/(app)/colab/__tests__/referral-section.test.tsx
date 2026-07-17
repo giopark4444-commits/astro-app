@@ -36,7 +36,15 @@ describe("ReferralSection", () => {
   it("con código propio, muestra código, link y contadores", async () => {
     summaryMock.mockResolvedValue({
       ok: true,
-      row: { code: "GIO1234", discount_pct: 10, commission_pct: 30, referred_count: 3, pending_cents: 999, paid_cents: 100 },
+      row: {
+        code: "GIO1234",
+        discount_pct: 10,
+        commission_pct: 30,
+        referred_count: 3,
+        pending_cents: 999,
+        paid_cents: 100,
+        clawback_cents: 0,
+      },
     });
     renderSection();
     await waitFor(() => expect(screen.getByText("GIO1234")).toBeInTheDocument());
@@ -44,6 +52,26 @@ describe("ReferralSection", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getByText("$9.99")).toBeInTheDocument();
     expect(screen.getByText("$1.00")).toBeInTheDocument();
+    // clawback_cents en 0: el estadístico NO se muestra (solo > 0).
+    expect(screen.queryByText(es.admin.referralClawbackShort)).not.toBeInTheDocument();
+  });
+
+  it("con clawback_cents > 0, muestra el estadístico de reembolso tras pago", async () => {
+    summaryMock.mockResolvedValue({
+      ok: true,
+      row: {
+        code: "GIO1234",
+        discount_pct: 10,
+        commission_pct: 30,
+        referred_count: 3,
+        pending_cents: 0,
+        paid_cents: 100,
+        clawback_cents: 299,
+      },
+    });
+    renderSection();
+    await waitFor(() => expect(screen.getByText(es.admin.referralClawbackShort)).toBeInTheDocument());
+    expect(screen.getByText("$2.99")).toBeInTheDocument();
   });
 
   it("si la migración 0016 no está aplicada, muestra el banner de migración pendiente", async () => {

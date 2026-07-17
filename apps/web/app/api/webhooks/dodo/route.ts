@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
   // resolución de usuario de abajo para no pagar el costo de un lookup por
   // email que este evento no necesita.
   if (event.type === "refund.succeeded") {
-    await handleReferralRefund(supabase, event);
+    const referralResult = await handleReferralRefund(supabase, event);
+    if (!referralResult.ok) return NextResponse.json({ error: "referral_write_failed" }, { status: 500 }); // error real (no "tabla inexistente") — que Dodo reintente
     return NextResponse.json({ received: true });
   }
 
@@ -109,7 +110,8 @@ export async function POST(request: NextRequest) {
   // corresponde (ver referral-webhook.ts; nunca revienta ni bloquea el resto
   // del webhook).
   if (event.type === "payment.succeeded" && userId) {
-    await handleReferralPayment(supabase, event, userId);
+    const referralResult = await handleReferralPayment(supabase, event, userId);
+    if (!referralResult.ok) return NextResponse.json({ error: "referral_write_failed" }, { status: 500 }); // error real (no "tabla inexistente") — que Dodo reintente
   }
 
   const row = mapDodoEventToRow(

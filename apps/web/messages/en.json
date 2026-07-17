@@ -116,6 +116,7 @@
     "referralReferredShort": "Referred",
     "referralPendingShort": "Pending",
     "referralPaidShort": "Paid",
+    "referralClawbackShort": "Clawed back",
     "referralMarkPaid": "Mark paid",
     "referralDeactivate": "Deactivate",
     "referralWorking": "One moment…",

@@ -12,10 +12,16 @@ export interface DodoEvent {
     next_billing_date?: string;
     customer?: { customer_id?: string; email?: string };
     // Campos de payment.succeeded/refund.succeeded (referidos, ver
-    // referral-commission.ts) — el resto del mapeo de arriba no los toca.
+    // referral-webhook.ts) — el resto del mapeo de arriba no los toca.
     payment_id?: string;
+    // total_amount/currency: lo que le cobraron al cliente. settlement_amount/
+    // settlement_currency: lo que Dodo efectivamente acredita a Aluna tras
+    // conversión de moneda (node_modules/dodopayments/resources/payments.d.ts)
+    // — la base correcta para la comisión cuando Dodo los manda.
     total_amount?: number;
     currency?: string;
+    settlement_amount?: number;
+    settlement_currency?: string;
   };
 }
 

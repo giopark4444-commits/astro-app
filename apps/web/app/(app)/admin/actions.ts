@@ -123,6 +123,7 @@ export type ReferralSummaryRow = {
   referred_count: number;
   pending_cents: number;
   paid_cents: number;
+  clawback_cents: number;
 };
 export type ListReferralSummaryResult = { ok: true; rows: ReferralSummaryRow[] } | { ok: false; error: string };
 
@@ -196,14 +197,22 @@ export async function deactivateReferralCode(code: string): Promise<ActionResult
 
 /** «Marcar pagado» (rpc admin_mark_earnings_paid) — Gio ya le pagó al
  * colaborador POR FUERA de Dodo; esto marca todo lo pendiente de ese código
- * como pagado (pending -> paid, paid_at = now()). */
-export async function markReferralEarningsPaid(code: string): Promise<ActionResult> {
+ * como pagado (pending -> paid, paid_at = now()). `expectedPendingCents` es
+ * el `pending_cents` que el panel le mostró a Gio ANTES de apretar el botón
+ * — la función de BD lo revalida contra el pendiente REAL en ese momento y
+ * lanza si cambió entre medio (nueva ganancia, otro reembolso), para no
+ * pagarle de más/de menos sin que se entere. Ese mensaje de EXCEPTION llega
+ * tal cual en `error.message`. */
+export async function markReferralEarningsPaid(code: string, expectedPendingCents: number): Promise<ActionResult> {
   const supabase = await createClient();
   const denied = await requireSuperadmin(supabase);
   if (denied) return denied;
 
   try {
-    const { error } = await rpcClient(supabase).rpc("admin_mark_earnings_paid", { p_code: code });
+    const { error } = await rpcClient(supabase).rpc("admin_mark_earnings_paid", {
+      p_code: code,
+      p_expected_pending_cents: expectedPendingCents,
+    });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
   } catch (e) {

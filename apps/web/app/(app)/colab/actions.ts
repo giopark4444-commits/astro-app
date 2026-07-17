@@ -9,6 +9,7 @@ export type MyReferralSummary = {
   referred_count: number;
   pending_cents: number;
   paid_cents: number;
+  clawback_cents: number;
 };
 export type MyReferralSummaryResult = { ok: true; row: MyReferralSummary | null } | { ok: false; error: string };
 

@@ -182,7 +182,7 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
 
     it("devuelve las filas del rpc admin_referral_summary como superadmin", async () => {
       state.role = "superadmin";
-      state.rpcData = [{ code: "GIO1234", owner_email: "a@b.com", discount_pct: 10, commission_pct: 30, active: true, referred_count: 2, pending_cents: 500, paid_cents: 0 }];
+      state.rpcData = [{ code: "GIO1234", owner_email: "a@b.com", discount_pct: 10, commission_pct: 30, active: true, referred_count: 2, pending_cents: 500, paid_cents: 0, clawback_cents: 0 }];
       const res = await listReferralSummary();
       expect(res).toEqual({ ok: true, rows: state.rpcData });
       expect(state.rpcCalls).toEqual([{ fn: "admin_referral_summary", args: undefined }]);
@@ -254,16 +254,25 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
   describe("markReferralEarningsPaid", () => {
     it("rechaza sin rol superadmin y nunca llama al rpc", async () => {
       state.role = "collaborator";
-      const res = await markReferralEarningsPaid("GIO1234");
+      const res = await markReferralEarningsPaid("GIO1234", 500);
       expect(res).toEqual({ ok: false, error: "No autorizado." });
       expect(state.rpcCalls).toHaveLength(0);
     });
 
-    it("llama a admin_mark_earnings_paid con el código como superadmin", async () => {
+    it("llama a admin_mark_earnings_paid con el código y el pendiente esperado como superadmin", async () => {
       state.role = "superadmin";
-      const res = await markReferralEarningsPaid("GIO1234");
+      const res = await markReferralEarningsPaid("GIO1234", 500);
       expect(res).toEqual({ ok: true });
-      expect(state.rpcCalls).toEqual([{ fn: "admin_mark_earnings_paid", args: { p_code: "GIO1234" } }]);
+      expect(state.rpcCalls).toEqual([
+        { fn: "admin_mark_earnings_paid", args: { p_code: "GIO1234", p_expected_pending_cents: 500 } },
+      ]);
+    });
+
+    it("propaga tal cual el guard de BD si el pendiente cambió entre medio", async () => {
+      state.role = "superadmin";
+      state.rpcError = { message: "el pendiente cambió — recarga la página" };
+      const res = await markReferralEarningsPaid("GIO1234", 500);
+      expect(res).toEqual({ ok: false, error: "el pendiente cambió — recarga la página" });
     });
   });
 });

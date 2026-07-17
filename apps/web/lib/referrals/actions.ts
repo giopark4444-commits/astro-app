@@ -26,6 +26,7 @@ export async function captureReferralCode(rawCode: string | null | undefined): P
     store.set(REFERRAL_COOKIE, code, {
       httpOnly: true,
       sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
       maxAge: REFERRAL_COOKIE_MAX_AGE_SECONDS,
       path: "/",
     });

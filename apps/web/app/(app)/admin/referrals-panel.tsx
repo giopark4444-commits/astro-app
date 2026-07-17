@@ -73,7 +73,10 @@ export function ReferralsPanel() {
     if (!window.confirm(t("referralConfirmMarkPaid", { code: row.code }))) return;
     setBusyCode(row.code);
     setRowError(null);
-    const res = await markReferralEarningsPaid(row.code);
+    // Manda el pending_cents que ESTA fila mostraba en pantalla — la función
+    // de BD lo revalida contra el pendiente real y lanza si cambió entre
+    // medio (nueva ganancia, otro reembolso) en vez de pagar de más/de menos.
+    const res = await markReferralEarningsPaid(row.code, row.pending_cents);
     setBusyCode(null);
     if (!res.ok) {
       setRowError(res.error);
@@ -133,6 +136,11 @@ export function ReferralsPanel() {
                 <span>
                   {t("referralPaidShort")} {formatCents(row.paid_cents)}
                 </span>
+                {row.clawback_cents > 0 && (
+                  <span>
+                    {t("referralClawbackShort")} {formatCents(row.clawback_cents)}
+                  </span>
+                )}
               </div>
               <div className={styles.referralRowActions}>
                 <button

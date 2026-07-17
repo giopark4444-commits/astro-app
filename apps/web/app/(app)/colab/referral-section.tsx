@@ -85,6 +85,12 @@ export function ReferralSection() {
               <span className={styles.myReferralStatValue}>{formatCents(state.row.paid_cents)}</span>
               <span className={styles.myReferralStatLabel}>{t("myReferralPaid")}</span>
             </div>
+            {state.row.clawback_cents > 0 && (
+              <div className={styles.myReferralStat}>
+                <span className={styles.myReferralStatValue}>{formatCents(state.row.clawback_cents)}</span>
+                <span className={styles.myReferralStatLabel}>{t("referralClawbackShort")}</span>
+              </div>
+            )}
           </div>
         </>
       )}

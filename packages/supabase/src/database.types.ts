@@ -543,7 +543,7 @@ export type Database = {
         Returns: undefined;
       };
       admin_mark_earnings_paid: {
-        Args: { p_code: string };
+        Args: { p_code: string; p_expected_pending_cents: number };
         Returns: undefined;
       };
       admin_referral_summary: {
@@ -557,6 +557,7 @@ export type Database = {
           referred_count: number;
           pending_cents: number;
           paid_cents: number;
+          clawback_cents: number;
         }[];
       };
       my_referral_summary: {
@@ -568,6 +569,7 @@ export type Database = {
           referred_count: number;
           pending_cents: number;
           paid_cents: number;
+          clawback_cents: number;
         }[];
       };
       my_referral_code_for_checkout: {

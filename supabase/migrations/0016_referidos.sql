@@ -78,6 +78,16 @@ create policy "referred_users select superadmin or owner or self" on public.refe
 -- role, sin RLS) y admin_mark_earnings_paid() (definer superadmin) — el
 -- navegador JAMÁS escribe acá directo. payment_ref UNIQUE = idempotencia del
 -- webhook (ON CONFLICT DO NOTHING).
+-- status: 'pending' (recién generada) -> 'paid' (Gio ya le pagó al
+-- colaborador) es el camino feliz. Un reembolso de Dodo puede llegar en
+-- cualquier momento de ese camino, y el ledger NUNCA borra ni "encoge"
+-- dinero ya entregado — por eso hay DOS estados de reembolso distintos:
+--   'reversed'  = se reembolsó ANTES de pagarle al colaborador (pending ->
+--                 reversed; simplemente no se le debe nada por este pago).
+--   'clawback'  = se reembolsó DESPUÉS de haberle pagado (paid -> clawback;
+--                 el dinero YA salió de las manos de Gio hacia el
+--                 colaborador — la fila sigue siendo visible con su
+--                 paid_at intacto, nunca se borra ni se re-marca 'pending').
 create table public.referral_earnings (
   id bigint generated always as identity primary key,
   code text not null references public.referral_codes(code) on update cascade,
@@ -86,7 +96,7 @@ create table public.referral_earnings (
   amount_cents int not null check (amount_cents >= 0),
   commission_cents int not null check (commission_cents >= 0),
   currency text not null default 'USD',
-  status text not null default 'pending' check (status in ('pending', 'paid', 'reversed')),
+  status text not null default 'pending' check (status in ('pending', 'paid', 'reversed', 'clawback')),
   created_at timestamptz not null default now(),
   paid_at timestamptz
 );
@@ -190,13 +200,16 @@ begin
     raise exception 'el código % ya pertenece a otro colaborador', v_code;
   end if;
 
+  -- OJO: el UPDATE de ON CONFLICT NO toca `active` a propósito — editar
+  -- porcentajes/código de un colaborador ya desactivado no debe reactivarlo
+  -- por la puerta de atrás; solo admin_deactivate_referral_code() decide eso
+  -- (v2 pendiente: un admin_activate_referral_code() si hace falta reactivar).
   insert into public.referral_codes (code, owner_user_id, discount_pct, commission_pct)
   values (v_code, v_user_id, p_discount_pct, p_commission_pct)
   on conflict (owner_user_id) do update
     set code = excluded.code,
         discount_pct = excluded.discount_pct,
-        commission_pct = excluded.commission_pct,
-        active = true;
+        commission_pct = excluded.commission_pct;
 end;
 $$;
 
@@ -231,8 +244,12 @@ grant execute on function public.admin_deactivate_referral_code(text) to authent
 
 -- admin_mark_earnings_paid(): Gio le paga al colaborador POR FUERA de Dodo (no
 -- hay pagos a terceros en Dodo) y marca acá todo lo pendiente de ese código
--- como pagado. pending -> paid, paid_at = now().
-create or replace function public.admin_mark_earnings_paid(p_code text)
+-- como pagado. pending -> paid, paid_at = now(). `p_expected_pending_cents` es
+-- el total que el panel le mostró a Gio ANTES de que apretara el botón — si
+-- alguien más cobró/reembolsó algo entre medio (o llegó una nueva ganancia)
+-- ese número ya no coincide con lo que hay en BD ahora mismo, y hay que
+-- frenar en vez de pagarle de más/de menos sin que Gio se entere.
+create or replace function public.admin_mark_earnings_paid(p_code text, p_expected_pending_cents int)
 returns void
 language plpgsql
 security definer
@@ -240,9 +257,22 @@ set search_path = public, pg_temp
 as $$
 declare
   v_code text := upper(trim(p_code));
+  v_actual_pending_cents bigint;
 begin
   if not public.is_superadmin() then
     raise exception 'solo superadmin puede marcar comisiones como pagadas';
+  end if;
+
+  if not exists (select 1 from public.referral_codes where code = v_code) then
+    raise exception 'no existe el código %', v_code;
+  end if;
+
+  select coalesce(sum(commission_cents), 0) into v_actual_pending_cents
+  from public.referral_earnings
+  where code = v_code and status = 'pending';
+
+  if v_actual_pending_cents <> p_expected_pending_cents then
+    raise exception 'el pendiente cambió — recarga la página';
   end if;
 
   update public.referral_earnings
@@ -251,11 +281,14 @@ begin
 end;
 $$;
 
-revoke execute on function public.admin_mark_earnings_paid(text) from anon, authenticated, public;
-grant execute on function public.admin_mark_earnings_paid(text) to authenticated;
+revoke execute on function public.admin_mark_earnings_paid(text, int) from anon, authenticated, public;
+grant execute on function public.admin_mark_earnings_paid(text, int) to authenticated;
 
 -- admin_referral_summary(): 1 fila por código para la tabla del panel /admin.
--- pending_cents/paid_cents en centavos enteros — el front solo formatea.
+-- pending_cents/paid_cents/clawback_cents en centavos enteros — el front solo
+-- formatea. clawback_cents = dinero YA entregado al colaborador que después
+-- se reembolsó (nunca se resta de paid_cents ni desaparece — ver comentario
+-- de status en la tabla referral_earnings arriba).
 create or replace function public.admin_referral_summary()
 returns table (
   code text,
@@ -265,7 +298,8 @@ returns table (
   active boolean,
   referred_count bigint,
   pending_cents bigint,
-  paid_cents bigint
+  paid_cents bigint,
+  clawback_cents bigint
 )
 language plpgsql
 security definer
@@ -292,6 +326,10 @@ begin
       coalesce((
         select sum(re.commission_cents) from public.referral_earnings re
         where re.code = rc.code and re.status = 'paid'
+      ), 0),
+      coalesce((
+        select sum(re.commission_cents) from public.referral_earnings re
+        where re.code = rc.code and re.status = 'clawback'
       ), 0)
     from public.referral_codes rc
     join auth.users u on u.id = rc.owner_user_id
@@ -304,7 +342,9 @@ grant execute on function public.admin_referral_summary() to authenticated;
 
 -- my_referral_summary(): el equivalente para el propio colaborador (panel
 -- /colab) — SIN guard de superadmin, pero solo agrega SUS datos (auth.uid() =
--- owner). Vacío (0 filas) si todavía no tiene código.
+-- owner). Vacío (0 filas) si todavía no tiene código. clawback_cents: ver
+-- admin_referral_summary() arriba (dinero ya cobrado que después se
+-- reembolsó — nunca se resta de paid_cents, el colaborador lo ve aparte).
 create or replace function public.my_referral_summary()
 returns table (
   code text,
@@ -312,7 +352,8 @@ returns table (
   commission_pct int,
   referred_count bigint,
   pending_cents bigint,
-  paid_cents bigint
+  paid_cents bigint,
+  clawback_cents bigint
 )
 language plpgsql
 security definer
@@ -333,6 +374,10 @@ begin
       coalesce((
         select sum(re.commission_cents) from public.referral_earnings re
         where re.code = rc.code and re.status = 'paid'
+      ), 0),
+      coalesce((
+        select sum(re.commission_cents) from public.referral_earnings re
+        where re.code = rc.code and re.status = 'clawback'
       ), 0)
     from public.referral_codes rc
     where rc.owner_user_id = auth.uid();
