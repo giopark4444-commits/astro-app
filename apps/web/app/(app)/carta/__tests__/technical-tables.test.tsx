@@ -26,10 +26,12 @@ describe("PositionsTable", () => {
   it("dignidad solo con pro", () => {
     const { rerender } = wrap(<PositionsTable bodies={[SUN]} pro={false} onSelect={() => {}} />);
     expect(screen.queryByText(/Exilio/)).toBeNull();
+    expect(screen.queryByText(/1\.01°\/d/)).toBeNull();
     rerender(<NextIntlClientProvider locale="es" messages={es}>
       <PositionsTable bodies={[SUN]} pro={true} onSelect={() => {}} />
     </NextIntlClientProvider>);
     expect(screen.getByText(/Exilio/)).toBeTruthy();
+    expect(screen.getByText(/1\.01°\/d/)).toBeTruthy();
   });
 });
 

@@ -36,6 +36,8 @@ export function PositionsTable({ bodies, pro, onSelect }: {
             <span className={styles.posDign}>
               {b.dignity ? L.dignities[b.dignity] : ""}
               {b.retrograde ? " ℞" : ""}
+              {(b.dignity || b.retrograde) && b.speed !== undefined ? " · " : ""}
+              {b.speed !== undefined ? `${b.speed.toFixed(2)}°/d` : ""}
             </span>
           )}
         </div>
