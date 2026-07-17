@@ -2,15 +2,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
+import { PLANETS, ZODIAC_SIGNS, EARTHLY_BRANCHES } from "@aluna/core";
 import type { WesternPayload, HoroscopePeriod } from "@/lib/horoscope/western";
+import type { EasternPayload, EasternAnimal, EasternInteractionType } from "@/lib/horoscope/eastern";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
-import { composeWesternProse, SOLAR_HOUSE_LABELS_ES } from "@/lib/content/horoscope-es";
+import { composeWesternProse, composeEasternProse, SOLAR_HOUSE_LABELS_ES } from "@/lib/content/horoscope-es";
 import { SOLAR_HOUSE_LABELS_EN } from "@/lib/content/horoscope-en";
+import { baziLabels } from "@/lib/content/bazi-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Starfield } from "@/components/starfield";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
+import { EasternSky } from "./eastern-sky";
 import { HoroscopeReading } from "./horoscope-reading";
 import styles from "./horoscopo.module.css";
 
@@ -26,6 +29,23 @@ const AREA_KEY: Record<string, string> = {
   health: "areaHealth", mood: "areaMood", luck: "areaLuck",
 };
 const TONE_KEY: Record<string, string> = { high: "toneHigh", mixed: "toneMixed", low: "toneLow" };
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+// Animales en orden de rama (índice = 子…亥), calculado localmente desde
+// @aluna/core (client-safe) para NO importar el motor eastern.ts en el
+// cliente — ese módulo es server-only (importa @aluna/ephemeris, ver su
+// cabecera). El shape del payload viaja SOLO como tipos (`import type`).
+const EASTERN_ANIMALS: readonly EasternAnimal[] =
+  EARTHLY_BRANCHES.map((b) => b.animal as EasternAnimal);
+
+// Glifo de interacción (universal, no traducido) y etiqueta legible por tipo
+// (bazi-labels cubre 6 de los 7; 破 no existe ahí — clave propia "interactionPo").
+const INTERACTION_GLYPH: Record<EasternInteractionType, string> = {
+  six_combo: "合", clash: "冲", harm: "害", punishment: "刑",
+  self_punishment: "自刑", po: "破", stem_combo: "", trine: "", half_trine: "",
+};
+
+type EasternState = { s: "loading" } | { s: "error" } | { s: "ready"; p: EasternPayload };
 
 type Payload = WesternPayload & {
   events: SkyEventJson[];
@@ -36,6 +56,7 @@ type State = { s: "loading" } | { s: "error" } | { s: "ready"; p: Payload };
 export function HoroscopoView() {
   const t = useTranslations("horoscopo");
   const th = useTranslations("hoy");
+  const tp = useTranslations("pilares");
   const locale = useLocale();
   const L = astroLabels(locale);
   const HOUSES = locale === "en" ? SOLAR_HOUSE_LABELS_EN : SOLAR_HOUSE_LABELS_ES;
@@ -97,6 +118,60 @@ export function HoroscopoView() {
     // active?.id: si cambia el perfil activo, re-resolvemos el signo
   }, [trad, sign, period, tz, active?.id]);
 
+  // Oriental: mismo patrón que occidental (state machine, ref anti-parpadeo,
+  // resolución del animal desde el perfil en la 1ª carga). `period` y `pro`
+  // se COMPARTEN con la occidental — cambiar de pestaña no reinicia ni el
+  // periodo elegido ni el modo Pro, que es el comportamiento natural.
+  const [animal, setAnimal] = useState<string | null>(active ? null : "rat");
+  const prevAnimalRef = useRef<string | null>(animal);
+  const [easternState, setEasternState] = useState<EasternState>({ s: "loading" });
+  const [openAreaEastern, setOpenAreaEastern] = useState<string | null>(null);
+  // Toggle Ba Zi ↔ Saju de los pilares (spec §5 nota c) — mismo par de valores
+  // que pilares-view; visible junto al Modo Pro.
+  const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
+
+  useEffect(() => {
+    if (trad !== "oriental") return;
+    let alive = true;
+    const resolvingFromNull = prevAnimalRef.current === null && animal !== null;
+    prevAnimalRef.current = animal;
+    if (!resolvingFromNull) setEasternState({ s: "loading" });
+    void (async () => {
+      try {
+        const res = await fetch("/api/horoscope/eastern", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            animal: animal ?? undefined, period, tz,
+            profileId: active?.id ?? undefined,
+          }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const p = (await res.json()) as EasternPayload;
+        if (!alive) return;
+        setAnimal(p.animal);
+        setEasternState({ s: "ready", p });
+      } catch {
+        if (alive) setEasternState({ s: "error" });
+      }
+    })();
+    return () => { alive = false; };
+  }, [trad, animal, period, tz, active?.id]);
+
+  const readyEastern = easternState.s === "ready" ? easternState.p : null;
+  const proseEastern = readyEastern
+    ? composeEasternProse(locale === "en" ? "en" : "es", readyEastern)
+    : [];
+  const baziL = baziLabels(locale);
+  const interactionLabel = (type: EasternInteractionType) =>
+    type === "po" ? t("interactionPo") : baziL.interactions[type] ?? type;
+  // Rama del animal consultado (constante en todos los hits del payload) — la
+  // tabla Pro y los drivers de las barras SIEMPRE la usan como un lado fijo del
+  // par (nunca la rama del pilar del periodo, que varía por hit).
+  const animalHanzi = readyEastern
+    ? EARTHLY_BRANCHES[EASTERN_ANIMALS.indexOf(readyEastern.animal)]!.hanzi
+    : "";
+
   const ready = state.s === "ready" ? state.p : null;
   const prose = ready ? composeWesternProse(locale === "en" ? "en" : "es", ready) : [];
   const fmtExact = new Intl.DateTimeFormat(locale === "en" ? "en" : "es", {
@@ -109,7 +184,7 @@ export function HoroscopoView() {
 
       <header className={styles.head}>
         <p className={styles.eyebrow}>{t("title")}</p>
-        <h1 className={`${styles.h1} reveal`}>{t("subtitle")}</h1>
+        <h1 className={`${styles.h1} reveal`}>{t(trad === "oriental" ? "subtitleEastern" : "subtitle")}</h1>
         <div className={styles.trads} role="tablist" aria-label={t("title")}>
           <button type="button" role="tab" aria-selected={trad === "occidental"}
             className={`seg__item ${trad === "occidental" ? "seg__item--active" : ""}`}
@@ -121,7 +196,124 @@ export function HoroscopoView() {
       </header>
 
       {trad === "oriental" ? (
-        <section className={`card ${styles.soonCard}`}>{t("easternSoon")}</section>
+        <div className={styles.grid}>
+          {/* Columna izquierda (sticky en desktop): selector + barras — espejo occidental */}
+          <div className={styles.side}>
+            <div className={styles.signs} role="radiogroup" aria-label={t("animalAria")}>
+              {EASTERN_ANIMALS.map((a, i) => (
+                <button key={a} type="button" role="radio" aria-checked={animal === a}
+                  className={`chip--control ${animal === a ? "chip--control-on" : ""}`}
+                  onClick={() => setAnimal(a)}>
+                  {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
+                </button>
+              ))}
+            </div>
+            <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
+              {PERIODS.map((p) => (
+                <button key={p} type="button" role="tab" aria-selected={p === period}
+                  className={`seg__item ${p === period ? "seg__item--active" : ""}`}
+                  onClick={() => setPeriod(p)}>{th(PERIOD_KEY[p])}</button>
+              ))}
+            </div>
+
+            {readyEastern && (
+              <section className={`card ${styles.section}`}>
+                <h2 className={styles.sectionH}>{t("areasTitle")}</h2>
+                <AreaBars
+                  calmText={th("calm")}
+                  open={openAreaEastern}
+                  onToggle={(key) => setOpenAreaEastern((prev) => (prev === key ? null : key))}
+                  areas={readyEastern.areas.map((a): BarArea => ({
+                    key: a.area,
+                    label: th(AREA_KEY[a.area] ?? a.area),
+                    score: a.score,
+                    tone: a.tone,
+                    toneLabel: th(TONE_KEY[a.tone] ?? a.tone),
+                    drivers: a.drivers.map((d) => ({
+                      glyphs: `${animalHanzi} ${INTERACTION_GLYPH[d.type]} ${EARTHLY_BRANCHES[d.withBranch]!.hanzi}`,
+                      text: `${interactionLabel(d.type)} · ${tp(d.pillar)} — ${tp(`animal${cap(d.withAnimal)}`)}`,
+                      favorable: d.favorable,
+                    })),
+                  }))}
+                />
+              </section>
+            )}
+          </div>
+
+          {/* Columna derecha: cielo oriental + prosa + pro */}
+          <div className={styles.mainCol}>
+            {easternState.s === "loading" && <p className={styles.note}>{t("loading")}</p>}
+            {easternState.s === "error" && <p className={styles.note}>{t("error")}</p>}
+            {readyEastern && (
+              <>
+                <section className={`card ${styles.section}`}>
+                  <h2 className={styles.sectionH}>{t("pillarsTitle")}</h2>
+                  <EasternSky payload={readyEastern} tz={tz} script={script} />
+                </section>
+
+                <section className={`card ${styles.section}`}>
+                  <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
+                  {proseEastern.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)}
+                </section>
+
+                {/* Cruce personal (espejo de natalHits occidental): pilares
+                    natales REALES vs pilares del periodo, con el par en hanzi. */}
+                {readyEastern.natalHits && readyEastern.natalHits.length > 0 && (
+                  <section className={`card ${styles.section}`}>
+                    <h2 className={styles.sectionH}>{t("natalHitsTitle")}</h2>
+                    {readyEastern.natalHits.map((h, i) => (
+                      <p key={i} className={`${styles.hitRow} ${h.favorable ? styles.hitSoft : styles.hitHard}`}>
+                        <span className={styles.hitGlyphs}>
+                          {EARTHLY_BRANCHES[h.natalBranch]!.hanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                        </span>
+                        {interactionLabel(h.type)} · {t("natalVsPeriod", { natal: tp(h.natalPillar), period: tp(h.periodPillar) })}
+                      </p>
+                    ))}
+                  </section>
+                )}
+
+                <button type="button" className={`seg__item ${styles.proToggle} ${pro ? "seg__item--active" : ""}`}
+                  aria-pressed={pro} onClick={() => setPro(!pro)}>{t("pro")}</button>
+
+                {pro && (
+                  <>
+                    {/* Toggle de escritura Ba Zi ↔ Saju (spec §5 nota c) — mismo
+                        chip-par que pilares-view.tsx; con Pro, como allí en móvil. */}
+                    <div className={styles.scriptRow} role="tablist" aria-label="Ba Zi / Saju">
+                      {(["hanzi", "hangul"] as const).map((s) => (
+                        <button key={s} type="button" role="tab" aria-selected={script === s}
+                          className={`chip--control chip--control-outline ${script === s ? "chip--control-on" : ""}`}
+                          onClick={() => setScript(s)}>
+                          {tp(s === "hanzi" ? "scriptBazi" : "scriptSaju")}
+                        </button>
+                      ))}
+                    </div>
+                    <section className={`card ${styles.section}`}>
+                      <h2 className={styles.sectionH}>{t("proInteractions")}</h2>
+                      <table className={styles.proTable}>
+                        <tbody>
+                          {readyEastern.interactions.map((h, i) => (
+                            <tr key={i}>
+                              <td className={styles.proGlyph}>
+                                {animalHanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                              </td>
+                              <td>{tp(h.pillar)}</td>
+                              <td>{interactionLabel(h.type)}</td>
+                              <td>{tp(`animal${cap(h.withAnimal)}`)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </section>
+                    <p className={styles.method}>
+                      {t("proMethodEastern", { tz })} {t("lateZiNote")}
+                    </p>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       ) : (
         <div className={styles.grid}>
           {/* Columna izquierda (sticky en desktop): selector + barras */}

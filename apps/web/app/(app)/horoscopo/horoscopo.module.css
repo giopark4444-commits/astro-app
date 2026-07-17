@@ -46,3 +46,12 @@
 .proTable tr:last-child td { border-bottom: 0; }
 .proGlyph { color: var(--acc-text); }
 .method { color: var(--soft); font-size: var(--text-xs); text-align: center; margin: 0; }
+
+/* Oriental — lámina de pilares (eastern-sky.tsx) y toggle de script Pro. */
+.pillarsRow { display: flex; gap: var(--sp-3); justify-content: center; flex-wrap: wrap; margin-bottom: var(--sp-3); }
+.pillarCell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 72px; }
+.pillarLabel { color: var(--acc-text); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 1px; }
+.pillarChar { font-size: var(--text-2xl); font-weight: 600; color: var(--ink); line-height: 1.15; }
+.pillarSub { font-size: var(--text-2xs); color: var(--soft); }
+.pillarAnimal { font-size: var(--text-xs); color: var(--soft); }
+.scriptRow { display: flex; justify-content: center; gap: var(--sp-1); margin-bottom: var(--sp-3); }

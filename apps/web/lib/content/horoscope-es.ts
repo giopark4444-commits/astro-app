@@ -5,7 +5,7 @@
 import { solarHouseOf } from "@aluna/core";
 import { astroLabels } from "./astrology-labels";
 import type { WesternPayload } from "@/lib/horoscope/western";
-import { DICTS_EN } from "./horoscope-en";
+import { DICTS_EN, DICTS_EASTERN_EN } from "./horoscope-en";
 
 export interface SignEssence { essence: string; flow: string; shadow: string; }
 
@@ -119,6 +119,186 @@ const DICTS_ES: ComposeDicts = {
     lunationIn: (name, house) => `La ${name} de este ciclo cae en ${house}; es buen momento para escucharla.`,
     eclipse: "Además trae energía de eclipse: los cambios que abre son más hondos de lo que parecen.",
     stationRetro: (body) => `${body} estaciona retrógrado: el cielo invita a revisar antes que a empujar.`,
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Horóscopo oriental (12 animales): mismo patrón que los signos solares —
+// ADN evolutivo-yóguico, segunda persona, sin fatalismo. es.ts es el motor de
+// composición (composeEasternProse); horoscope-en.ts SOLO exporta dicts EN.
+//
+// CONTRATO PROVISIONAL H2: la Task 2 (apps/web/lib/horoscope/eastern.ts) aún
+// no existe. Este tipo describe el payload MÍNIMO que composeEasternProse
+// necesita; el motor de eastern.ts debe producir esto (o un superset). La
+// Task 5 (UI) hará el mapeo real del payload completo del motor a esta forma.
+export interface EasternProsePayload {
+  animal: string;
+  period: string;
+  clash?: { withAnimal: string } | null;
+  harmonies?: string[];
+  taiSui?: Array<{ kind: "zhi" | "chong" | "hai" | "zixing" | "po" }> | null;
+  monthChange?: { atIso: string } | null;
+  toneBalance: "favorable" | "tense" | "mixed";
+}
+
+export const HOROSCOPE_ANIMALS_ES: Record<string, SignEssence> = {
+  rat: {
+    essence: "Tu alma vino con el ingenio de quien llega primero: observas, calculas y encuentras la grieta por donde otros no ven salida.",
+    flow: "Cuando fluyes, tu astucia es faro y tu red de vínculos se convierte en abundancia compartida.",
+    shadow: "En sombra, la vigilancia se vuelve desconfianza; tu práctica es soltar el control y dejar que otros también acierten.",
+  },
+  ox: {
+    essence: "Tu alma vino a arar con paciencia infinita: cargas lo que otros sueltan y conviertes el esfuerzo callado en cosecha real.",
+    flow: "Cuando fluyes, tu constancia es raíz para toda la tribu y tu palabra dada nunca se quiebra.",
+    shadow: "En sombra, la terquedad se disfraza de deber; tu práctica es pedir ayuda antes de que el yugo pese demasiado.",
+  },
+  tiger: {
+    essence: "Tu alma vino a cruzar el territorio con coraje: desafías lo establecido y abres senda donde había solo miedo.",
+    flow: "Cuando fluyes, tu valentía inspira y tu instinto certero protege a quien camina contigo.",
+    shadow: "En sombra, el ímpetu ruge sin escuchar; tu práctica es pausar el salto y sentir el suelo primero.",
+  },
+  rabbit: {
+    essence: "Tu alma vino a tejer refugio con delicadeza: lees el ánimo del entorno y sabes cuándo acercarte y cuándo guardar distancia.",
+    flow: "Cuando fluyes, tu diplomacia desarma tensiones y tu ternura vuelve seguro cualquier lugar.",
+    shadow: "En sombra, la cautela se vuelve huida; tu práctica es quedarte un instante más en la conversación difícil.",
+  },
+  dragon: {
+    essence: "Tu alma vino con fuego ancestral: nace para liderar visiones grandes y convocar a otros hacia lo que aún no existe.",
+    flow: "Cuando fluyes, tu magnetismo mueve montañas y tu generosidad multiplica lo que tocas.",
+    shadow: "En sombra, el orgullo exige altares; tu práctica es servir a la visión sin necesitar ser el centro de ella.",
+  },
+  snake: {
+    essence: "Tu alma vino a mudar de piel las veces que haga falta: intuyes lo oculto y transformas el veneno del pasado en sabiduría quieta.",
+    flow: "Cuando fluyes, tu discernimiento es certero y tu calma desarma lo que otros no logran nombrar.",
+    shadow: "En sombra, el misterio se vuelve aislamiento; tu práctica es dejar que alguien entre antes de cerrarte del todo.",
+  },
+  horse: {
+    essence: "Tu alma vino a galopar libre: buscas horizonte, movimiento y la libertad de decidir tu propio rumbo cada día.",
+    flow: "Cuando fluyes, tu energía contagia y tu independencia abre camino para quien te sigue de cerca.",
+    shadow: "En sombra, la inquietud huye del compromiso; tu práctica es plantar raíz sin sentir que pierdes las riendas.",
+  },
+  goat: {
+    essence: "Tu alma vino a crear belleza y refugio: sensible al arte y al vínculo, sanas con la ternura que otros olvidan ofrecer.",
+    flow: "Cuando fluyes, tu sensibilidad embellece lo cotidiano y tu empatía sostiene a quien lo necesita.",
+    shadow: "En sombra, la duda pide permiso de más; tu práctica es confiar en tu propio gusto sin pedir aprobación ajena.",
+  },
+  monkey: {
+    essence: "Tu alma vino con el ingenio del que juega con las reglas: inventas, improvisas y encuentras salida donde otros se traban.",
+    flow: "Cuando fluyes, tu creatividad resuelve lo imposible y tu humor aligera cualquier carga.",
+    shadow: "En sombra, la astucia se vuelve atajo deshonesto; tu práctica es elegir el camino largo cuando es el correcto.",
+  },
+  rooster: {
+    essence: "Tu alma vino a anunciar el amanecer con precisión: observas los detalles que otros pasan por alto y hablas con una claridad que ordena.",
+    flow: "Cuando fluyes, tu franqueza es brújula y tu disciplina vuelve hermoso lo bien hecho.",
+    shadow: "En sombra, la exigencia se vuelve crítica afilada; tu práctica es aplicar la misma ternura hacia adentro.",
+  },
+  dog: {
+    essence: "Tu alma vino a guardar lo justo: lealtad, verdad y la vigilancia silenciosa de quien protege sin pedir reconocimiento.",
+    flow: "Cuando fluyes, tu integridad es refugio y tu instinto detecta lo que de verdad importa.",
+    shadow: "En sombra, la alerta constante se agota en desconfianza; tu práctica es descansar la guardia y confiar un poco más.",
+  },
+  pig: {
+    essence: "Tu alma vino a disfrutar sin culpa: generoso, sincero y capaz de convertir cualquier mesa compartida en abundancia.",
+    flow: "Cuando fluyes, tu generosidad es contagiosa y tu honestidad simplifica lo que otros complican.",
+    shadow: "En sombra, la indulgencia evita lo incómodo; tu práctica es sostener el límite aunque cueste el gusto del momento.",
+  },
+};
+
+const EASTERN_ANIMAL_NAMES_ES: Record<string, string> = {
+  rat: "la Rata", ox: "el Buey", tiger: "el Tigre", rabbit: "el Conejo",
+  dragon: "el Dragón", snake: "la Serpiente", horse: "el Caballo", goat: "la Cabra",
+  monkey: "el Mono", rooster: "el Gallo", dog: "el Perro", pig: "el Cerdo",
+};
+
+export interface EasternComposeDicts {
+  animals: Record<string, SignEssence>;
+  animalNames: Record<string, string>;
+  periodLabels: Record<string, string>;
+  t: {
+    periodIntro: (periodLabel: string) => string;
+    clash: (withName: string) => string;
+    harmony: (names: string) => string;
+    taiSui: (kinds: string) => string;
+    monthChange: () => string;
+  };
+}
+
+const EASTERN_PERIOD_LABELS_ES: Record<string, string> = {
+  today: "hoy", week: "esta semana", month: "este mes", year: "este ciclo anual",
+};
+
+const TAI_SUI_LABELS_ES: Record<string, string> = {
+  zhi: "值太歲 (año regido por tu animal)",
+  chong: "冲太歲 (choque frontal)",
+  hai: "害太歲 (perjuicio silencioso)",
+  zixing: "自刑太歲 (autocastigo)",
+  po: "破太歲 (ruptura)",
+};
+
+const DICTS_EASTERN_ES: EasternComposeDicts = {
+  animals: HOROSCOPE_ANIMALS_ES,
+  animalNames: EASTERN_ANIMAL_NAMES_ES,
+  periodLabels: EASTERN_PERIOD_LABELS_ES,
+  t: {
+    periodIntro: (periodLabel) => `Para ${periodLabel}, el cielo del Tong Shu se cruza con tu animal desde ese mismo ADN.`,
+    clash: (withName) => `Este periodo trae un choque (冲) con ${withName}: no es mala suerte, es fricción que te pide moverte con más presencia que de costumbre.`,
+    harmony: (names) => `También hay armonía (合) con ${names}: deja que esa alianza sostenga lo que estás construyendo.`,
+    taiSui: (kinds) => `Frente al Tai Sui del año hay ${kinds}: es un año para caminar con más consciencia, no para detenerte.`,
+    monthChange: () => `El mes cambia de signo (節) dentro de este periodo: nota cómo el tono se transforma antes y después del corte.`,
+  },
+};
+
+/** Prosa oriental compuesta SOLO desde el payload (contrato provisional H2 arriba).
+ *  Espejo estructural de composeWith: ADN del animal → interacción del periodo
+ *  (choque tenso / armonía favorable) → Tai Sui o cambio de mes si vienen → cierre
+ *  flow/shadow según toneBalance. */
+export function composeEasternProse(locale: "es" | "en", payload: EasternProsePayload): string[] {
+  return composeEasternWith(locale, payload, locale === "en" ? DICTS_EASTERN_EN : DICTS_EASTERN_ES);
+}
+
+export function composeEasternWith(
+  locale: "es" | "en",
+  payload: EasternProsePayload,
+  dicts: EasternComposeDicts,
+): string[] {
+  const parts: string[] = [];
+  const animal = dicts.animals[payload.animal];
+  if (animal) parts.push(animal.essence);
+
+  const periodLabel = dicts.periodLabels[payload.period] ?? payload.period;
+  parts.push(dicts.t.periodIntro(periodLabel));
+
+  const interactionLines: string[] = [];
+  if (payload.clash) {
+    const withName = dicts.animalNames[payload.clash.withAnimal] ?? payload.clash.withAnimal;
+    interactionLines.push(dicts.t.clash(withName));
+  }
+  if (payload.harmonies && payload.harmonies.length > 0) {
+    const names = payload.harmonies.map((a) => dicts.animalNames[a] ?? a).join(locale === "en" ? " and " : " y ");
+    interactionLines.push(dicts.t.harmony(names));
+  }
+  if (interactionLines.length) parts.push(interactionLines.join(" "));
+
+  if (payload.taiSui && payload.taiSui.length > 0) {
+    const kinds = payload.taiSui.map((h) => TAI_SUI_KIND_LABELS[locale][h.kind]).join(", ");
+    parts.push(dicts.t.taiSui(kinds));
+  } else if (payload.monthChange) {
+    parts.push(dicts.t.monthChange());
+  }
+
+  const closing = payload.toneBalance === "tense" ? animal?.shadow : animal?.flow;
+  if (closing) parts.push(closing);
+  return parts;
+}
+
+const TAI_SUI_KIND_LABELS: Record<"es" | "en", Record<string, string>> = {
+  es: TAI_SUI_LABELS_ES,
+  en: {
+    zhi: "值太歲 (your year to lead)",
+    chong: "冲太歲 (head-on clash)",
+    hai: "害太歲 (quiet harm)",
+    zixing: "自刑太歲 (self-punishment)",
+    po: "破太歲 (breakage)",
   },
 };
 
