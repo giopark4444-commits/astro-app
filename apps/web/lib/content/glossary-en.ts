@@ -4,19 +4,6 @@
 import type { GlossaryEntry } from "./glossary-es";
 
 export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
-  "aspect.trine": {
-    title: "Trine", glyph: "△",
-    body: "Two planets at 120°, sharing the same element: the energy moves between them with no friction at all. It's a talent you were simply born with — so natural you might not even clock it as a gift. The real work with a trine isn't earning it, it's not taking it for granted.",
-  },
-  "term.orb": {
-    title: "Orb",
-    body: "The degrees an aspect is off from being exact. The tighter the orb, the louder it speaks: an aspect at 0.5° talks to you daily; at 7°, it's more of a quiet background hum.",
-  },
-  "dignity.exaltation": {
-    title: "Exaltation",
-    body: "The planet lands in a sign that amplifies its best self, like an honored guest at someone else's table. It's not home turf (that would be rulership), but here it gets celebrated: its energy turns up in voltage and wants to express itself big.",
-  },
-
   // ——— Signs ———
   "sign.aries": {
     title: "Aries", glyph: "♈",
@@ -177,5 +164,173 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
   "house.12": {
     title: "House 12",
     body: "The terrain of the hidden: dreams, endings, what you've made so much your own that you no longer see it. It's the house of retreat and of the unconscious — planets here work backstage, in silence, in what gets released. It's not a house of punishment: it's where the soul rests from the character and remembers where it came from.",
+  },
+
+  // ——— Aspects ———
+  "aspect.conjunction": {
+    title: "Conjunction", glyph: "☌",
+    body: "Two planets at the same degree, so close their energies fuse into one. They don't see each other — they act as a unit, for better or for tangle, like two paints mixed past the point of separating. It's the most potent aspect there is: where you have a conjunction, you have an engine.",
+  },
+  "aspect.opposition": {
+    title: "Opposition", glyph: "☍",
+    body: "Two planets face to face, 180° apart, pulling you toward opposite shores. It feels like an inner tug-of-war — or like you live one end yourself and keep meeting the other end in someone else. The work isn't picking a winner: it's learning to hold both without splitting in two.",
+  },
+  "aspect.trine": {
+    title: "Trine", glyph: "△",
+    body: "Two planets at 120°, sharing the same element: the energy moves between them with no friction at all. It's a talent you were simply born with — so natural you might not even clock it as a gift. The real work with a trine isn't earning it, it's not taking it for granted.",
+  },
+  "aspect.square": {
+    title: "Square", glyph: "□",
+    body: "Two planets at 90°, colliding at a right angle: each one wants something that gets in the other's way. It's friction, yes — but friction that strikes sparks. Squares are the aspects that make you work the hardest, and precisely where you build the most muscle: almost everything you're proud of has one behind it.",
+  },
+  "aspect.sextile": {
+    title: "Sextile", glyph: "⚹",
+    body: "Two planets at 60°, in elements that get along: a door left ajar between them. It's an opportunity, not a gift — the energy cooperates when you invite it, but it won't insist on its own the way a trine does. Where you have a sextile, there's a talent that only wakes up when you say yes to it.",
+  },
+  "aspect.quincunx": {
+    title: "Quincunx", glyph: "⚻",
+    body: "Two planets at 150°, in signs that share neither element nor mode: they speak different languages, and there's no interpreter. It feels like a diffuse discomfort, something that never quite fits no matter how you arrange it. Its work is fine adjustment: not resolving the tension, but learning to live with it cleverly.",
+  },
+  "aspect.semisextile": {
+    title: "Semisextile", glyph: "⚺",
+    body: "Two planets at 30°, in neighboring signs: close enough to brush shoulders, different enough not to understand each other. It's a subtle aspect — a faint background rub rather than open conflict. It asks you to notice the difference between two parts of you that live next door but lead separate lives.",
+  },
+
+  // ——— Terms ———
+  "term.orb": {
+    title: "Orb",
+    body: "The degrees an aspect is off from being exact. The tighter the orb, the louder it speaks: an aspect at 0.5° talks to you daily; at 7°, it's more of a quiet background hum.",
+  },
+  "term.applying": {
+    title: "Applying",
+    body: "The aspect is still forming: the faster planet is closing in on exact but hasn't arrived yet. It's the crescendo phase — the energy is building, like a wave you can see coming. Applying aspects feel more alive than ones already past: whatever they announce still lies ahead.",
+  },
+  "term.separating": {
+    title: "Separating",
+    body: "The aspect has already had its exact moment, and the planets are drifting apart. The energy doesn't vanish all at once — it lingers as an echo, something that already happened and is still ringing. It feels less like waiting for what's coming and more like digesting what just was.",
+  },
+  "term.retrograde": {
+    title: "Retrograde",
+    body: "Seen from Earth, the planet appears to walk backward — it isn't really, but the effect is felt. That planet's themes turn inward: instead of advancing, they review, repeat, ripen. It's not the sky punishing you: it's life asking for a second look before the next step.",
+  },
+  "term.transit": {
+    title: "Transit",
+    body: "A planet moving through the sky today, touching a point in your natal chart. If the chart is the map, transits are the weather: they tell you which season each area of your life is passing through, and for how long. They force nothing — they open and close doors that you still have to walk through yourself.",
+  },
+  "term.natal": {
+    title: "Natal",
+    body: "What was fixed at the instant you were born: the snapshot of the sky that travels with you for life. Your natal chart doesn't change — how you inhabit it does. It's the instrument you arrived with; the music you draw from it is up to you.",
+  },
+
+  // ——— Dignities ———
+  "dignity.domicile": {
+    title: "Domicile",
+    body: "The planet sits in the sign it rules: in its own house, keys in hand. There its energy expresses itself without translation or permission — its clearest, most natural version. A planet in domicile doesn't need pushing: it knows exactly what it came to do.",
+  },
+  "dignity.exaltation": {
+    title: "Exaltation",
+    body: "The planet lands in a sign that amplifies its best self, like an honored guest at someone else's table. It's not home turf (that would be rulership), but here it gets celebrated: its energy turns up in voltage and wants to express itself big.",
+  },
+  "dignity.detriment": {
+    title: "Detriment",
+    body: "The planet sits in the sign opposite its domicile: far from home, in a culture that doesn't speak its language. Its energy doesn't disappear — it just struggles more, coming out awkwardly or through side doors. And there's the hidden gift: what doesn't come easy becomes conscious, and what's conscious can be worked with.",
+  },
+  "dignity.fall": {
+    title: "Fall",
+    body: "The planet sits in the sign opposite its exaltation: where it was once the guest of honor, nobody here saves it a seat. Its energy speaks in a low voice, doubting itself. It doesn't mean that planet is broken — it means its strength asks for more patience and humility to bloom, and when it does, it's strength truly earned.",
+  },
+  "dignity.peregrine": {
+    title: "Peregrine",
+    body: "The planet holds no dignity at all in that sign: no home, no honors, no debts. It's a traveler without papers — not strong, not weak, just unanchored, and easily colored by whatever planets touch it. Its lesson is finding its own direction in a land that doesn't claim it.",
+  },
+
+  // ——— Patterns ———
+  "pattern.stellium": {
+    title: "Stellium",
+    body: "Three or more planets bunched in the same sign or house: a concentration of energy that's hard to ignore. That area of your life weighs more than the rest — there you're intense, a specialist, sometimes a one-topic person. The challenge isn't turning it down: it's not letting that single spotlight swallow the rest of the map.",
+  },
+  "pattern.grandtrine": {
+    title: "Grand Trine",
+    body: "Three planets forming a triangle of trines, usually all in one element: a closed circuit where energy flows on its own. It's an enormous gift — and a dangerous hammock, because what costs nothing also wakes nothing. Its work is giving all that ease a job, so the talent circulates outward instead of just spinning in place.",
+  },
+  "pattern.tsquare": {
+    title: "T-Square",
+    body: "Two planets in opposition and a third squaring them both: all the tension funnels into that focal planet. It feels like constant pressure in that area of your life — and also like your biggest engine. People with T-squares don't rest easy, but they build: the way through is giving the focal planet work worthy of its force.",
+  },
+  "pattern.yod": {
+    title: "Yod",
+    body: "Two planets in sextile and a third 150° from both: they call it \"the finger of God\" because it seems to point at something. The planet being pointed at carries an uncomfortable sense of mission — something life asks you to adjust again and again, never letting you settle. It doesn't resolve in one go: it gets tuned over the years, like a rare instrument only you know how to play.",
+  },
+  "pattern.grandcross": {
+    title: "Grand Cross",
+    body: "Four planets forming two crossed oppositions: tension in all four directions at once. It's one of the most demanding patterns — the feeling that there's always an open front, whichever way you pull. Its gift matches the price: whoever learns to carry that cross develops a capacity for work and endurance few charts ever know.",
+  },
+
+  // ——— House systems ———
+  "housesystem.placidus": {
+    title: "Placidus",
+    body: "It divides the sky by how long each degree takes to rise over the horizon, so the houses come out unequal in size. It's the most widely used system in modern Western astrology: if you've never chosen one, you're probably already using it.",
+  },
+  "housesystem.koch": {
+    title: "Koch",
+    body: "Similar to Placidus, but it calculates the intermediate houses anchored more tightly to your exact birthplace. It has loyal followers — especially in Europe — who feel houses 2 through 12 describe their lives better with this cut.",
+  },
+  "housesystem.equal": {
+    title: "Equal House",
+    body: "Twelve houses of exactly 30° each, counted from your Ascendant. It's simple and steady, and makes special sense for anyone born at extreme latitudes, where other systems stretch the houses out of all proportion.",
+  },
+  "housesystem.wholesign": {
+    title: "Whole Sign",
+    body: "Each full sign is one house: your Ascendant's sign is your entire 1st house, the next sign the 2nd, and so on. It's the oldest system we know of — the favorite of Hellenistic astrology and of anyone who prefers reading the chart in clean strokes, with no borders cutting through mid-sign.",
+  },
+  "housesystem.regiomontanus": {
+    title: "Regiomontanus",
+    body: "It slices the sky by projecting divisions from the celestial equator down to your horizon, a medieval method that ruled Europe for centuries. Today it makes sense above all for horary astrologers — the ones answering concrete questions — where it remains the classical standard.",
+  },
+  "housesystem.porphyry": {
+    title: "Porphyry",
+    body: "It takes the four angles of your chart and splits each quadrant into three equal parts: an elegant middle ground between simple and astronomical. It makes sense for anyone who wants to honor their exact angles without marrying more intricate math.",
+  },
+
+  // ——— Zodiacs ———
+  "zodiac.tropical": {
+    title: "Tropical Zodiac",
+    body: "It anchors the zodiac to the seasons: Aries always begins at the northern spring equinox, regardless of which constellation sits behind it. It's the system of Western astrology — it reads your chart through the relationship between Earth and Sun, the cycle of light.",
+  },
+  "zodiac.sidereal": {
+    title: "Sidereal Zodiac",
+    body: "It anchors the zodiac to the constellations actually visible in the sky, which have drifted from the seasons over the centuries — the gap is now around 24°. It's the system of Vedic astrology: if your Sun \"changes sign\" when calculated this way, it's not an error — it's a different map measuring with a different stick.",
+  },
+
+  // ——— Elements ———
+  "element.fire": {
+    title: "Fire",
+    body: "The element of drive, faith, and enthusiasm. With a lot of fire in your chart, you start fast, spread energy, and need motion — the risk is burning out, or burning others with all that flame. With little, lighting your own motivation is hard: you don't lack ability, you lack the first spark, and it helps to surround yourself with people and projects that lend you one.",
+  },
+  "element.earth": {
+    title: "Earth",
+    body: "The element of the concrete: the body, money, whatever can be touched and held. With a lot of earth, you're someone others lean on — practical, steady — though you can overstay in what's safe. With little, ideas come easily and landing them doesn't: your work is giving your visions a body, one habit and one deadline at a time.",
+  },
+  "element.air": {
+    title: "Air",
+    body: "The element of mind and connection: words, ideas, the distance that makes understanding possible. With a lot of air, you think everything through and talk everything out — the risk is living in your head, watching your own life from the balcony. With little, it's hard to put what's happening to you into words or step back for perspective: writing and talking things through with others sorts you out inside.",
+  },
+  "element.water": {
+    title: "Water",
+    body: "The element of feeling: emotions, intuition, the things you know without knowing how. With a lot of water, you're a sponge — you pick up the emotional weather of any room, and you need shores so you don't drown in what isn't yours. With little, emotions arrive late or in a foreign language: it's not coldness, it's that your feeling asks for more time and more permission.",
+  },
+
+  // ——— Modalities ———
+  "modality.cardinal": {
+    title: "Cardinal",
+    body: "The energy that initiates: the one that sees empty ground and lays the first stone. With a lot of cardinal energy, you launch projects effortlessly — finishing them is another story — and waiting for others to decide makes you itch. With little, you'd rather join what's already moving: taking the first step yourself is the muscle to train.",
+  },
+  "modality.fixed": {
+    title: "Fixed",
+    body: "The energy that sustains: the one that stays after the opening excitement is gone. With a lot of fixed energy, you have a persistence that moves mountains — and a stubbornness that sometimes keeps defending them after they've stopped serving you. With little, starting comes easy and staying costs you: your work is to remain one chapter longer than the impulse asks.",
+  },
+  "modality.mutable": {
+    title: "Mutable",
+    body: "The energy that adapts: the one that bends without breaking when the plan changes. With a lot of mutable energy, you flow with any turn — the risk is scattering so much that nobody knows where you stand, including you. With little, last-minute changes throw you off: advance notice is a gift to you, and letting go of the plan is your practice.",
   },
 };
