@@ -1,13 +1,15 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { dailyCard, cardById } from "@aluna/core";
+import { dailyCard, cardById, cardImageUrl, cardBackUrl, rwsCtx } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Ceremony } from "./ceremony";
 import { ManualEntry } from "./manual-entry";
 import styles from "./tarot.module.css";
+
+const deckCtx = rwsCtx("");
 
 interface TarotReadingCard {
   cardId: string;
@@ -245,12 +247,12 @@ export function TarotView({ userId }: { userId: string }) {
           >
             <span className={`${styles.face} ${styles.faceBack}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/tarot/rws/back.webp" alt={t("dailyFlipCta")} className={styles.cardImg} />
+              <img src={cardBackUrl(deckCtx)} alt={t("dailyFlipCta")} className={styles.cardImg} />
             </span>
             <span className={`${styles.face} ${styles.faceFront}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/tarot/rws/${daily.card.id}.webp`}
+                src={cardImageUrl(daily.card.id, deckCtx)}
                 alt={dailyContent.name}
                 className={`${styles.cardImg} ${daily.reversed ? styles.reversedImg : ""}`}
               />

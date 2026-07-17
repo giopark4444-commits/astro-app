@@ -28,7 +28,14 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingProse } from "@aluna/core";
+import {
+  TAROT_CARDS_ES,
+  TAROT_CARDS_EN,
+  composeReadingProse,
+  cardImageUrl,
+  cardBackUrl,
+  rwsCtx,
+} from "@aluna/core";
 import { TarotFlipCard } from "./TarotFlipCard";
 import { ReadingChat } from "./ReadingChat";
 import { useAuth } from "../lib/auth-context";
@@ -236,8 +243,8 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
 
   const accessToken = session?.access_token ?? null;
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
-  const rwsBase = `${apiUrl()}/tarot/rws`;
-  const backUri = `${rwsBase}/back.webp`;
+  const deckCtx = rwsCtx(apiUrl());
+  const backUri = cardBackUrl(deckCtx);
 
   const [state, dispatch] = useReducer(ceremonyReducer, INITIAL_CEREMONY_STATE);
   const [questionDraft, setQuestionDraft] = useState("");
@@ -534,7 +541,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                     <TarotFlipCard
                       revealed={flipped}
                       onFlip={() => dispatch({ type: "flip", slot: i })}
-                      frontUri={`${rwsBase}/${d.card.id}.webp`}
+                      frontUri={cardImageUrl(d.card.id, deckCtx)}
                       backUri={backUri}
                       reversed={d.reversed}
                       frontLabel={content.name}
@@ -586,7 +593,7 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                 return (
                   <View key={d.card.id} style={styles.readingCard}>
                     <Image
-                      source={{ uri: `${rwsBase}/${d.card.id}.webp` }}
+                      source={{ uri: cardImageUrl(d.card.id, deckCtx) }}
                       resizeMode="contain"
                       style={[
                         styles.readingImg,

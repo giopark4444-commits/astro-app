@@ -7,7 +7,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { dailyCard, cardById, TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingProse } from "@aluna/core";
+import {
+  dailyCard,
+  cardById,
+  TAROT_CARDS_ES,
+  TAROT_CARDS_EN,
+  composeReadingProse,
+  cardImageUrl,
+  cardBackUrl,
+  rwsCtx,
+} from "@aluna/core";
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { TarotFlipCard } from "../../components/TarotFlipCard";
@@ -218,7 +227,7 @@ export default function TarotScreen() {
     );
   }, [openReading, locale, openReadingMainCards, openReadingJumperCards]);
 
-  const rwsBase = `${apiUrl()}/tarot/rws`;
+  const deckCtx = rwsCtx(apiUrl());
 
   return (
     <View style={styles.root}>
@@ -244,8 +253,8 @@ export default function TarotScreen() {
               <TarotFlipCard
                 revealed={revealed}
                 onFlip={handleFlip}
-                frontUri={`${rwsBase}/${daily.card.id}.webp`}
-                backUri={`${rwsBase}/back.webp`}
+                frontUri={cardImageUrl(daily.card.id, deckCtx)}
+                backUri={cardBackUrl(deckCtx)}
                 reversed={daily.reversed}
                 frontLabel={dailyContent.name}
                 backLabel={t("tarot.dailyFlipCta")}

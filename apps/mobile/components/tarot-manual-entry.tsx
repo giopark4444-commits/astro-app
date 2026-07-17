@@ -12,7 +12,14 @@
 import { useMemo, useState } from "react";
 import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TAROT_DECK, TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingProse } from "@aluna/core";
+import {
+  TAROT_DECK,
+  TAROT_CARDS_ES,
+  TAROT_CARDS_EN,
+  composeReadingProse,
+  cardImageUrl,
+  rwsCtx,
+} from "@aluna/core";
 import { useAuth } from "../lib/auth-context";
 import { useTheme } from "../lib/theme-context";
 import { useT } from "../lib/i18n-context";
@@ -72,7 +79,7 @@ export function TarotManualEntry({ onClose, onSaved }: { onClose: () => void; on
 
   const accessToken = session?.access_token ?? null;
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
-  const rwsBase = `${apiUrl()}/tarot/rws`;
+  const deckCtx = rwsCtx(apiUrl());
 
   const [step, setStep] = useState<Step>("template");
   const [template, setTemplate] = useState<ManualTemplate>("three");
@@ -155,7 +162,7 @@ export function TarotManualEntry({ onClose, onSaved }: { onClose: () => void; on
               return (
                 <View key={c.cardId} style={styles.pickedItem}>
                   <Image
-                    source={{ uri: `${rwsBase}/${c.cardId}.webp` }}
+                    source={{ uri: cardImageUrl(c.cardId, deckCtx) }}
                     resizeMode="contain"
                     style={[styles.pickedThumb, c.reversed && { transform: [{ rotate: "180deg" }] }]}
                   />
@@ -237,7 +244,7 @@ export function TarotManualEntry({ onClose, onSaved }: { onClose: () => void; on
                       accessibilityRole="button"
                     >
                       <Image
-                        source={{ uri: `${rwsBase}/${card.id}.webp` }}
+                        source={{ uri: cardImageUrl(card.id, deckCtx) }}
                         resizeMode="contain"
                         style={styles.gridThumb}
                       />
@@ -403,7 +410,7 @@ export function TarotManualEntry({ onClose, onSaved }: { onClose: () => void; on
                 return (
                   <View key={c.cardId} style={styles.readingCard}>
                     <Image
-                      source={{ uri: `${rwsBase}/${c.cardId}.webp` }}
+                      source={{ uri: cardImageUrl(c.cardId, deckCtx) }}
                       resizeMode="contain"
                       style={[styles.readingImg, c.reversed && { transform: [{ rotate: "180deg" }] }]}
                     />
@@ -429,7 +436,7 @@ export function TarotManualEntry({ onClose, onSaved }: { onClose: () => void; on
                     return (
                       <View key={c.cardId} style={[styles.readingCard, styles.readingCardDashed]}>
                         <Image
-                          source={{ uri: `${rwsBase}/${c.cardId}.webp` }}
+                          source={{ uri: cardImageUrl(c.cardId, deckCtx) }}
                           resizeMode="contain"
                           style={[styles.readingImg, c.reversed && { transform: [{ rotate: "180deg" }] }]}
                         />

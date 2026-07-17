@@ -118,6 +118,8 @@ export type { Rng, DrawnCard } from "./tarot/shuffle";
 export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
 export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
+export { cardImageUrl, cardBackUrl, rwsCtx } from "./tarot/deck-assets";
+export type { DeckAssetCtx } from "./tarot/deck-assets";
 export {
   TAROT_CARDS_ES,
   composeReadingProse,
