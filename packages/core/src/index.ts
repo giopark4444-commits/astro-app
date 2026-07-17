@@ -106,3 +106,5 @@ export { planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMean
 // Tarot — el mazo como datos puros (78 cartas, correspondencias Golden Dawn)
 export * from "./tarot/types";
 export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
+export { mulberry32, shuffleDeck, drawCards } from "./tarot/shuffle";
+export type { Rng, DrawnCard } from "./tarot/shuffle";
