@@ -184,7 +184,7 @@ export function HoroscopoView() {
 
       <header className={styles.head}>
         <p className={styles.eyebrow}>{t("title")}</p>
-        <h1 className={`${styles.h1} reveal`}>{t("subtitle")}</h1>
+        <h1 className={`${styles.h1} reveal`}>{t(trad === "oriental" ? "subtitleEastern" : "subtitle")}</h1>
         <div className={styles.trads} role="tablist" aria-label={t("title")}>
           <button type="button" role="tab" aria-selected={trad === "occidental"}
             className={`seg__item ${trad === "occidental" ? "seg__item--active" : ""}`}

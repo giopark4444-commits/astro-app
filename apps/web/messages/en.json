@@ -465,6 +465,7 @@
   "horoscopo": {
     "title": "Horoscope",
     "subtitle": "The sky of the period, read for your sign",
+    "subtitleEastern": "The sky of the period, read for your animal",
     "tabWestern": "Western",
     "tabEastern": "Eastern",
     "signAria": "Choose a sign",

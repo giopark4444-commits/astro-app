@@ -465,6 +465,7 @@
   "horoscopo": {
     "title": "Horóscopo",
     "subtitle": "El cielo del periodo, leído para tu signo",
+    "subtitleEastern": "El cielo del periodo, leído para tu animal",
     "tabWestern": "Occidental",
     "tabEastern": "Oriental",
     "signAria": "Elige un signo",

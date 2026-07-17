@@ -140,6 +140,12 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(screen.getByText(/子時/)).toBeInTheDocument();
   });
 
+  it("el subtítulo oriental habla del animal, no del signo (FIX 5)", async () => {
+    renderView();
+    expect(screen.getByText("El cielo del periodo, leído para tu animal")).toBeInTheDocument();
+    expect(screen.queryByText("El cielo del periodo, leído para tu signo")).toBeNull();
+  });
+
   it("pinta el Wu Xing del periodo: elementos y relación (FIX 3, spec §5)", async () => {
     renderView();
     await waitFor(() => expect(screen.getByText(/Wu Xing del periodo/)).toBeInTheDocument());
