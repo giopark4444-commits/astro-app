@@ -60,13 +60,69 @@ describe("tabla Tai Sui del año 丙午 (rama del año = 午)", () => {
   });
 });
 
+describe("pilares por periodo (period-aware, spec §6: día solo en today)", () => {
+  it("today trae year+month+day; week/month traen year+month sin día; year SOLO year", () => {
+    const t = computeEasternHoroscope("horse", "today", "America/Bogota", NOW);
+    expect(t.pillars.year).not.toBeNull();
+    expect(t.pillars.month).not.toBeNull();
+    expect(t.pillars.day).not.toBeNull();
+    for (const period of ["week", "month"] as const) {
+      const p = computeEasternHoroscope("horse", period, "America/Bogota", NOW);
+      expect(p.pillars.month).not.toBeNull();
+      expect(p.pillars.day).toBeNull();
+    }
+    const y = computeEasternHoroscope("horse", "year", "America/Bogota", NOW);
+    expect(y.pillars.month).toBeNull();
+    expect(y.pillars.day).toBeNull();
+  });
+  it("today y year producen pilares distintos (year no está dominado por el día)", () => {
+    const t = computeEasternHoroscope("rat", "today", "utc", NOW);
+    const y = computeEasternHoroscope("rat", "year", "utc", NOW);
+    expect(t.pillars.day).not.toBeNull();
+    expect(y.pillars.day).toBeNull();
+    expect(t.pillars).not.toEqual(y.pillars);
+  });
+  it("year NO incluye interacciones de día ni de mes (Tai Sui captura lo anual)", () => {
+    for (const animal of EASTERN_ANIMALS) {
+      const p = computeEasternHoroscope(animal, "year", "utc", NOW);
+      for (const h of p.interactions) expect(h.pillar).toBe("year");
+      for (const a of p.areas) for (const d of a.drivers) expect(d.pillar).toBe("year");
+    }
+  });
+  it("la vista año es estable dentro del mismo año solar (dos nowIso → mismo payload y misma entrada de caché)", () => {
+    const a = computeEasternHoroscope("horse", "year", "utc", "2026-03-01T12:00:00Z");
+    const b = computeEasternHoroscope("horse", "year", "utc", "2026-11-20T12:00:00Z");
+    expect(b).toEqual(a);
+    const c = cachedEasternHoroscope("goat", "year", "utc", "2026-03-01T12:00:00Z");
+    const d = cachedEasternHoroscope("goat", "year", "utc", "2026-11-20T12:00:00Z");
+    expect(d).toBe(c); // clave por fromIso del rango (Lichun): gira con el año solar
+  });
+  it("semana que cruza 節 usa el mes del punto medio (小暑 7-jul-2026: lun 6 → mes 未 en el midpoint)", () => {
+    // El 6-jul-2026 el mes solar vigente aún es 午 (小暑 cae el 7-jul), pero el
+    // punto medio de la semana lun 6 – dom 12 ya pasó el corte → mes 未.
+    const NOW2 = "2026-07-06T12:00:00Z";
+    const t = computeEasternHoroscope("rat", "today", "utc", NOW2);
+    expect(t.pillars.month!.branch).toBe(6); // 午 vigente hoy
+    const w = computeEasternHoroscope("rat", "week", "utc", NOW2);
+    expect(w.pillars.month!.branch).toBe(7); // 未 vigente en el punto medio
+  });
+  it("sin pilar de día, los pesos son mes×2 / año×1", () => {
+    // rata (子) en semana con mes 未 (害 子未) — delta de mes debe venir ×2.
+    const w = computeEasternHoroscope("rat", "week", "utc", "2026-07-06T12:00:00Z");
+    const money = w.areas.find((a) => a.area === "money")!;
+    const harmDriver = money.drivers.find((d) => d.type === "harm" && d.pillar === "month");
+    expect(harmDriver).toBeDefined();
+    expect(harmDriver!.delta).toBe(-6 * 2);
+  });
+});
+
 describe("choque del día", () => {
   it("13-jul-2026 (día 戊子): el caballo está en 冲 con la rama del día", () => {
     const day = dayPillar(2026, 7, 13);
     expect(day.branch).toBe(0); // ancla: rama 子 (rata)
     const clashAnimal = EARTHLY_BRANCHES[day.branch]!.animal;
     const p = computeEasternHoroscope("horse", "today", "America/Bogota", NOW);
-    expect(p.pillars.day.branch).toBe(day.branch);
+    expect(p.pillars.day!.branch).toBe(day.branch);
     expect(p.clash).toEqual({ withAnimal: clashAnimal });
     expect(p.interactions.some((h) => h.pillar === "day" && h.type === "clash")).toBe(true);
   });

@@ -16,7 +16,9 @@ vi.mock("next/navigation", () => ({
 
 // Payload realista (丙午 = 2026, animal consultado = "horse"): mismos números
 // que el motor real produce para year/丙午 (ver lib/horoscope/__tests__/eastern.test.ts
-// "tabla Tai Sui del año 丙午" — horse → zhi + zixing).
+// "tabla Tai Sui del año 丙午" — horse → zhi + zixing). Period-aware (FIX 1):
+// la vista año trae SOLO el pilar del año (month/day = null) e interacciones
+// exclusivamente del pilar del año (caballo 午 vs año 午 = 自刑).
 const PAYLOAD_EASTERN = {
   animal: "horse",
   period: "year",
@@ -25,25 +27,24 @@ const PAYLOAD_EASTERN = {
   solarYear: 2026,
   pillars: {
     year: { stem: 2, branch: 6, stemHanzi: "丙", branchHanzi: "午", animal: "horse" },
-    month: { stem: 4, branch: 8, stemHanzi: "戊", branchHanzi: "申", animal: "monkey" },
-    day: { stem: 0, branch: 0, stemHanzi: "甲", branchHanzi: "子", animal: "rat" },
+    month: null,
+    day: null,
   },
   jieDates: [{ atIso: "2026-08-07T10:00:00Z", solarLongitude: 135 }],
   interactions: [
-    { pillar: "day", type: "clash", withBranch: 0, withAnimal: "rat", favorable: false },
-    { pillar: "month", type: "harm", withBranch: 8, withAnimal: "monkey", favorable: false },
+    { pillar: "year", type: "self_punishment", withBranch: 6, withAnimal: "horse", favorable: false },
   ],
-  clash: { withAnimal: "rat" },
+  clash: null,
   harmonies: [],
   taiSui: [{ kind: "zhi" }, { kind: "zixing" }],
   monthChange: { atIso: "2026-08-07T10:00:00Z" },
   wuXing: { periodElement: "fire", animalElement: "fire", relation: "same" },
   toneBalance: "tense",
   areas: [
-    { area: "work", score: 51, tone: "mixed", drivers: [{ pillar: "day", type: "clash", withBranch: 0, withAnimal: "rat", favorable: false, delta: -21 }] },
+    { area: "work", score: 58, tone: "mixed", drivers: [] },
     { area: "money", score: 58, tone: "mixed", drivers: [] },
     { area: "love", score: 58, tone: "mixed", drivers: [] },
-    { area: "health", score: 43, tone: "low", drivers: [{ pillar: "day", type: "clash", withBranch: 0, withAnimal: "rat", favorable: false, delta: -15 }] },
+    { area: "health", score: 52, tone: "mixed", drivers: [{ pillar: "year", type: "self_punishment", withBranch: 6, withAnimal: "horse", favorable: false, delta: -6 }] },
     { area: "luck", score: 54, tone: "mixed", drivers: [{ pillar: "year", type: "self_punishment", withBranch: 6, withAnimal: "horse", favorable: false, delta: -4 }] },
   ],
 };
@@ -132,10 +133,20 @@ describe("HoroscopoView — tab Oriental", () => {
     const proBtn = await screen.findByText("Modo Pro");
     act(() => { proBtn.click(); });
     await waitFor(() => expect(screen.getByText("Interacciones completas")).toBeInTheDocument());
-    // hanzi del choque día (甲子 vs 午 del animal consultado por defecto: Rata,
-    // rama 子 — el mismo choque que trae PAYLOAD_EASTERN.interactions[0])
-    expect(screen.getAllByText(/冲/).length).toBeGreaterThan(0);
+    // hanzi del 自刑 del año (午 自刑 午 — la única interacción de la vista año
+    // que trae PAYLOAD_EASTERN.interactions[0])
+    expect(screen.getAllByText(/自刑/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Zona horaria/)).toBeInTheDocument();
     expect(screen.getByText(/子時/)).toBeInTheDocument();
+  });
+
+  it("la vista año pinta SOLO el pilar del año: sin celda de Día ni 'Choque del día' (FIX 1)", async () => {
+    renderView();
+    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+    // "Día" solo existiría como etiqueta del pilar del día (el selector de
+    // periodo dice "Hoy"); con day=null no debe aparecer.
+    expect(screen.queryByText("Día")).toBeNull();
+    expect(screen.queryByText(/Choque del día/)).toBeNull();
+    expect(screen.queryByText(/Armonía del día/)).toBeNull();
   });
 });

@@ -56,6 +56,19 @@ export interface EasternPillar {
   animal: EasternAnimal;
 }
 
+/**
+ * Pilares presentes según el periodo (spec §6: "día solo en period=today"):
+ *   today → year + month + day; week/month → year + month (el mes = pilar
+ *   vigente en el PUNTO MEDIO del rango, que en semana puede cruzar un 節);
+ *   year → SOLO year (Lichun→Lichun; el Tai Sui ya captura lo anual).
+ * month es null solo en la vista año; day es null fuera de today.
+ */
+export interface EasternPeriodPillars {
+  year: EasternPillar;
+  month: EasternPillar | null;
+  day: EasternPillar | null;
+}
+
 export interface EasternInteractionHit {
   pillar: EasternPillarKey;        // pilar del periodo que interactúa
   type: EasternInteractionType;
@@ -107,7 +120,7 @@ export interface EasternPayload {
   tz: string;
   range: { fromIso: string; toIso: string }; // year = Lichun → Lichun
   solarYear: number; // año del Lichun vigente (乙巳=2025, 丙午=2026…)
-  pillars: Record<EasternPillarKey, EasternPillar>;
+  pillars: EasternPeriodPillars; // solo los pilares del periodo (ver tipo)
   jieDates: Array<{ atIso: string; solarLongitude: number }>;
   interactions: EasternInteractionHit[]; // tabla Pro: la fuente de verdad
   clash: { withAnimal: EasternAnimal } | null; // primer 冲 (día > mes > año)
@@ -145,7 +158,11 @@ const isPoPair = (a: number, b: number) =>
 // ── Puntuación (spec §5) ────────────────────────────────────────────────────
 //
 // Determinística desde las interacciones, baseline neutro 58 y clamp 0-100.
-// Ponderación por pilar (día > mes > año): día ×3, mes ×2, año ×1.
+// Ponderación por pilar (día > mes > año): día ×3, mes ×2, año ×1. Solo los
+// pilares PRESENTES en el periodo aportan (ver EasternPeriodPillars): today usa
+// los tres; week/month usan mes+año; year usa solo el año. Sin el pilar del
+// día, week/month/year quedan más cerca del baseline — correcto: menos
+// interacciones activas = clima más neutro.
 // Mapeo interacción → áreas (decisión H2, explícita y explicable por drivers):
 //   六合 (armonía)      → love +8, luck +6, money +3  (vínculo, fortuna, acuerdos)
 //   冲   (choque)       → work −7, health −5          (mueve/inestabiliza planes y cuerpo)
@@ -306,22 +323,34 @@ export function computeEasternHoroscope(
   const animalBranch = EASTERN_ANIMALS.indexOf(animal);
   const range = resolveEasternPeriodRange(period, tz, nowIso);
 
-  // Pilares del periodo desde el mediodía local de la fecha vigente (mismo
-  // truco de determinismo que western: misma fecha local → mismos pilares).
-  const noon = localNoon(tz, nowIso);
-  const sunLon = sunLongitudeAt(noon.toUTC().toISO()!);
-  const solarYear = resolveSolarYear(noon.year, noon.month, sunLon);
+  // Instante de referencia de los pilares por periodo:
+  //   today/year → mediodía local de la fecha vigente (determinismo western);
+  //   week/month → PUNTO MEDIO del rango (el mes vigente en el centro del
+  //   periodo; en semana puede cruzar un 節 y difiere del mes de "hoy").
+  const zone = isValidTz(tz) ? tz : "utc";
+  const ref = period === "week" || period === "month"
+    ? DateTime.fromMillis(
+        (DateTime.fromISO(range.fromIso).toMillis() + DateTime.fromISO(range.toIso).toMillis()) / 2,
+        { zone: "utc" },
+      ).setZone(zone)
+    : localNoon(tz, nowIso);
+  const sunLon = sunLongitudeAt(ref.toUTC().toISO()!);
+  const solarYear = resolveSolarYear(ref.year, ref.month, sunLon);
   const yp = yearPillar(solarYear);
-  const mp = monthPillar(yp.stem, sunLon);
-  const dp = dayPillar(noon.year, noon.month, noon.day);
-  const pillars: Record<EasternPillarKey, EasternPillar> = {
-    year: toEasternPillar(yp), month: toEasternPillar(mp), day: toEasternPillar(dp),
+  // Pilares presentes según el periodo (spec §6: día solo en today; la vista
+  // año lee SOLO el pilar del año — el Tai Sui captura las aflicciones anuales).
+  const pillars: EasternPeriodPillars = {
+    year: toEasternPillar(yp),
+    month: period === "year" ? null : toEasternPillar(monthPillar(yp.stem, sunLon)),
+    day: period === "today" ? toEasternPillar(dayPillar(ref.year, ref.month, ref.day)) : null,
   };
 
   // Tabla de interacciones (fuente de verdad de barras y prosa), día → mes → año.
   const interactions: EasternInteractionHit[] = [];
   for (const key of ["day", "month", "year"] as const) {
-    const b = pillars[key].branch;
+    const pillar = pillars[key];
+    if (!pillar) continue;
+    const b = pillar.branch;
     for (const h of pairHits(animalBranch, b)) {
       interactions.push({
         pillar: key, type: h.type, withBranch: b,
@@ -364,7 +393,8 @@ export function computeEasternHoroscope(
 
   // Wu Xing del periodo: elemento del TRONCO del pilar focal (hoy → día,
   // semana/mes → mes, año → año) frente al elemento de la rama del animal.
-  const focal = period === "today" ? pillars.day : period === "year" ? pillars.year : pillars.month;
+  // El focal SIEMPRE existe para su periodo (ver EasternPeriodPillars).
+  const focal = (period === "today" ? pillars.day : period === "year" ? pillars.year : pillars.month)!;
   const periodElement = HEAVENLY_STEMS[focal.stem]!.element;
   const animalElement = EARTHLY_BRANCHES[animalBranch]!.element;
   const wuXing: EasternWuXing = {
@@ -383,7 +413,9 @@ export function computeEasternHoroscope(
     ];
     for (const { pos, pillar } of natalEntries) {
       for (const key of ["day", "month", "year"] as const) {
-        const b = pillars[key].branch;
+        const periodPillar = pillars[key];
+        if (!periodPillar) continue;
+        const b = periodPillar.branch;
         for (const h of pairHits(pillar.branch, b)) {
           natalHits.push({
             natalPillar: pos, periodPillar: key, type: h.type,
@@ -415,7 +447,13 @@ export function cachedEasternHoroscope(
   animal: string, period: HoroscopePeriod, tz: string, nowIso?: string,
 ): EasternPayload {
   const r = resolveEasternPeriodRange(period, tz, nowIso);
-  const key = `${animal}:${period}:${r.localDate}:${r.offsetMinutes}`;
+  // Clave por el ARRANQUE del rango (instante UTC), no por la fecha local:
+  // fromIso ya encierra fecha local + offset (es la medianoche/lunes/día-1/
+  // Lichun local llevado a UTC), y TODO el payload se deriva del rango + su
+  // punto de referencia. Así cada periodo expira cuando le toca — today gira
+  // a diario, week por semana, month por mes y year SOLO al cruzar Lichun
+  // (antes giraba a diario sin motivo y el año cambiaba de contenido cada día).
+  const key = `${animal}:${period}:${r.fromIso}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const payload = computeEasternHoroscope(animal, period, tz, nowIso);

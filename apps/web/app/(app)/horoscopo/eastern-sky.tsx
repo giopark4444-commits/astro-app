@@ -37,8 +37,10 @@ export function EasternSky({ payload, tz, script = "hanzi" }: {
   return (
     <>
       <div className={styles.pillarsRow}>
-        {PILLAR_KEYS.map((key) => {
-          const p = payload.pillars[key];
+        {/* Solo los pilares PRESENTES en el periodo (day solo en today, month
+            null en la vista año — ver EasternPeriodPillars en el motor). */}
+        {PILLAR_KEYS.filter((key) => payload.pillars[key] !== null).map((key) => {
+          const p = payload.pillars[key]!;
           return (
             <div key={key} className={styles.pillarCell}>
               <span className={styles.pillarLabel}>{tp(key)}</span>
