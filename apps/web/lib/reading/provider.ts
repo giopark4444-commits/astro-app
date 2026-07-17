@@ -430,10 +430,24 @@ function openAICompatibleProvider(
   }
 
   async function chat({ system, messages, maxTokens }: ChatOptions): Promise<string> {
-    // Los informes no usan chat(): se resuelve delegando a complete() con el
-    // último turno del usuario, así el proveedor cumple la interfaz entera.
-    const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
-    return complete({ system, prompt: lastUser, maxTokens });
+    // El chat (preguntar / "conversa esta tirada") quiere PROSA conversacional,
+    // NO el objeto JSON de los informes. Por eso NO delega a complete() (que
+    // fuerza response_format: json_object): hace su propia llamada a /chat/
+    // completions con el hilo completo y sin response_format. Los informes
+    // siguen usando complete()/completeStream() intactos.
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        messages: [{ role: "system", content: system }, ...messages.map((m) => ({ role: m.role, content: m.content }))],
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!res.ok) throw new Error(`${name} ${res.status}`);
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    return json.choices?.[0]?.message?.content ?? "";
   }
 
   return {
