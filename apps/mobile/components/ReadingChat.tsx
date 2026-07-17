@@ -76,6 +76,12 @@ export function ReadingChat({
         setStatus("dormant");
         return;
       }
+      // Espejo de reading-chat.tsx:89 (web): un stream vacío (proveedor que
+      // cierra sin texto) no debe pintarse como burbuja vacía "de éxito".
+      if (res.text.trim() === "") {
+        setStatus("error");
+        return;
+      }
       setMessages([...nextMessages, { role: "assistant", content: res.text }]);
       setStatus("idle");
     } catch {

@@ -32,6 +32,7 @@ const DIARY_SPREAD_KEY: Record<string, string> = {
   daily: "tarot.diarySpreadDaily",
   three: "tarot.diarySpreadThree",
   "celtic-cross": "tarot.diarySpreadCeltic",
+  free: "tarot.diarySpreadFree",
 };
 
 type DiaryState =
@@ -191,15 +192,31 @@ export default function TarotScreen() {
   );
 
   const openReading = diary.s === "ready" ? diary.readings.find((r) => r.id === openReadingId) ?? null : null;
+  // Las lecturas guardadas (T3) pueden traer jumpers mezclados en `cards`
+  // (position "jumper-N", flag jumper:true) — el composer v2 espera la
+  // tirada principal en `cards` y los jumpers aparte en `opts.jumpers`
+  // (sin eso, labelForPosition no reconoce "jumper-N" y los muestra crudos).
+  // Espejo de apps/web/app/(app)/tarot/tarot-view.tsx:205-228.
+  const openReadingMainCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => !c.jumper) : []),
+    [openReading],
+  );
+  const openReadingJumperCards = useMemo(
+    () => (openReading ? openReading.cards.filter((c) => c.jumper) : []),
+    [openReading],
+  );
   const openReadingProse = useMemo(() => {
     if (!openReading) return [];
     return composeReadingProse(
       locale === "en" ? "en" : "es",
       openReading.spread,
-      openReading.cards,
+      openReadingMainCards,
       openReading.question ?? undefined,
+      openReadingJumperCards.length > 0
+        ? { jumpers: openReadingJumperCards.map(({ cardId, reversed }) => ({ cardId, reversed })) }
+        : undefined,
     );
-  }, [openReading, locale]);
+  }, [openReading, locale, openReadingMainCards, openReadingJumperCards]);
 
   const rwsBase = `${apiUrl()}/tarot/rws`;
 
@@ -374,6 +391,7 @@ export default function TarotScreen() {
                 <Text key={`${c.cardId}-${c.position}`} style={styles.sheetCardLine}>
                   {content?.name ?? c.cardId}
                   {c.reversed ? ` · ${t("tarot.reversed")}` : ""}
+                  {c.jumper ? ` · ${t("tarot.manualJumpersReadingLabel")}` : ""}
                 </Text>
               );
             })}
