@@ -268,7 +268,7 @@ export function CartaView() {
                     <h3 className={styles.cardH}>{t("patterns")}</h3>
                     <div className={styles.chips}>
                       {ready.chart.patterns.map((p, i) => (
-                        <button key={i} type="button" className={`chip ${styles.chip} ${styles.selRow}`}
+                        <button key={i} type="button" className={`chip ${styles.chip} ${styles.chipBtn}`}
                           onClick={() => select({ kind: "pattern", pattern: p })}>
                           {L.patterns[p.type]}:{" "}
                           {p.bodies.map((k, j) => (
@@ -323,29 +323,32 @@ export function CartaView() {
                   <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
                   <AspectList aspects={ready.chart.aspects} pro={pro} onSelect={select} />
                 </section>
-
-                {/* balance de elementos y modalidades + distribución (Pro) */}
-                <section className={`card card--tight fade-in ${pane("balance")}`}>
-                  <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
-                    dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
-                  <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
-                    dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
-                  {pro && (
-                    <div className={styles.distGrid}>
-                      {ELEMENTS.map((k) => (
-                        <span key={k} className={styles.distCell}>
-                          <Meaning k={`element.${k}`}>{L.elements[k]}</Meaning>: <b>{ready.chart.distribution.elements[k]}</b>
-                        </span>
-                      ))}
-                      {MODALITIES.map((k) => (
-                        <span key={k} className={styles.distCell}>
-                          <Meaning k={`modality.${k}`}>{L.modalities[k]}</Meaning>: <b>{ready.chart.distribution.modalities[k]}</b>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </section>
               </div>
+
+              {/* balance de elementos y modalidades + distribución (Pro): FUERA de
+                  .mobileLamina (spec review Fable ítem 1) — en móvil sin Pro las
+                  barras de Elementos/Modalidades deben verse igual que en main;
+                  {pro && distGrid} adentro sigue siendo el único gate Pro. */}
+              <section className={`card card--tight fade-in ${pane("balance")}`}>
+                <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                  dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
+                <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                  dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+                {pro && (
+                  <div className={styles.distGrid}>
+                    {ELEMENTS.map((k) => (
+                      <span key={k} className={styles.distCell}>
+                        <Meaning k={`element.${k}`}>{L.elements[k]}</Meaning>: <b>{ready.chart.distribution.elements[k]}</b>
+                      </span>
+                    ))}
+                    {MODALITIES.map((k) => (
+                      <span key={k} className={styles.distCell}>
+                        <Meaning k={`modality.${k}`}>{L.modalities[k]}</Meaning>: <b>{ready.chart.distribution.modalities[k]}</b>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </section>
             </div>
           </div>
 

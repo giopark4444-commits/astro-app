@@ -151,6 +151,10 @@
 .selRow { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
 .selCell:focus-visible, .selRow:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
 
+/* chip clickeable del maestro-detalle: resetea el botón pero conserva la piel de .chip */
+.chipBtn { background: none; font: inherit; color: inherit; cursor: pointer; }
+.chipBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; }
+
 .distGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1) var(--sp-3); } /* 5→sp-1 nearest; 14→sp-3 empate (apoyo, gap de grilla) */
 .distCell { font-size: var(--text-xs); color: var(--soft); }
 .distCell b { color: var(--ink); }

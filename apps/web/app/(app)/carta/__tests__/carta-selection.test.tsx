@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import type { BodyPosition, ChartResult } from "@aluna/core";
 import es from "@/messages/es.json";
 import { CartaView } from "../carta-view";
+import cartaStyles from "../carta.module.css";
 
 const FIXTURE_PROFILE = {
   id: "p1",
@@ -133,5 +134,62 @@ describe("CartaView maestro-detalle", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Tu Clima" }));
     expect(await screen.findByText("Lectura del núcleo")).toBeInTheDocument();
     expect(screen.queryByText(/Tu Sol es tu identidad esencial/)).not.toBeInTheDocument();
+  });
+});
+
+/** La sección técnica que envuelve el bloque de Balance (h4 → ancestro <section>). */
+function balanceSectionOf(headingName: string) {
+  // Hay dos <h4> "Elementos"/"Modalidades": uno en el pane núcleo (dentro de un
+  // <div>, sin <section>) y otro en el pane balance (dentro de un <section>).
+  // Se busca el que SÍ tiene un ancestro <section>.
+  const headings = screen.getAllByText(headingName);
+  const withSection = headings.map((h) => h.closest("section")).find((s): s is HTMLElement => s !== null);
+  if (!withSection) throw new Error(`ninguna "${headingName}" está dentro de un <section>`);
+  return withSection;
+}
+
+describe("CartaView móvil sin Pro (review Fable: balance + router)", () => {
+  beforeEach(() => {
+    // matches:true para "(max-width: 1079px)" = móvil → el router de
+    // selección abre el sheet (setSheetSel), no el panel derecho.
+    vi.stubGlobal("matchMedia", (q: string) => ({
+      matches: q.includes("max-width: 1079px"),
+      media: q, addEventListener: () => {}, removeEventListener: () => {},
+    }));
+  });
+
+  it("ítem 1: el pane balance NO es descendiente de .mobileLamina; el de posiciones SÍ (y ambos siguen dentro de .techCard)", async () => {
+    const { container } = renderView();
+    await screen.findByText("Interpretación");
+
+    // "Elementos" está visible en el DOM (barras de Elementos/Modalidades sin Pro).
+    expect(screen.getAllByText("Elementos").length).toBeGreaterThan(0);
+
+    const lamina = container.querySelector(`.${CSS.escape(cartaStyles.mobileLamina!)}`);
+    const techCard = container.querySelector(`.${CSS.escape(cartaStyles.techCard!)}`);
+    expect(lamina).not.toBeNull();
+    expect(techCard).not.toBeNull();
+
+    const balanceSection = balanceSectionOf("Elementos");
+    const posSection = sectionOf("Posiciones");
+
+    expect(lamina!.contains(balanceSection)).toBe(false);
+    expect(techCard!.contains(balanceSection)).toBe(true);
+    expect(lamina!.contains(posSection)).toBe(true);
+  });
+
+  it("ítem 4: clic en fila de aspectario en móvil abre el dialog con prosa del glosario (trígono → 120°) y el panel desktop no cambia", async () => {
+    renderView();
+    await screen.findByText("Interpretación");
+
+    const aspSection = sectionOf("Aspectos");
+    fireEvent.click(within(aspSection).getByRole("button", { name: /Trígono/ }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/120°/)).toBeInTheDocument();
+
+    // El panel desktop (siempre montado, oculto por CSS en móvil) no cambió:
+    // sigue en el núcleo, no tejió el aspecto.
+    expect(screen.getByText("Lectura del núcleo")).toBeInTheDocument();
   });
 });

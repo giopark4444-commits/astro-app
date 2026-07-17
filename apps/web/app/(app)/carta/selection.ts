@@ -1,7 +1,7 @@
 // Estado unificado de selección del maestro-detalle: TODO lo tocable de la
 // columna técnica produce una Selection; el panel derecho (desktop) o el
 // bottom-sheet (móvil) la interpretan. Ver spec 2026-07-17.
-import type { BodyPosition, Aspect } from "@aluna/core";
+import type { BodyPosition, Aspect, Pattern } from "@aluna/core";
 
 export type Selection =
   | { kind: "core" }
@@ -9,7 +9,7 @@ export type Selection =
   | { kind: "aspect"; aspect: Aspect }
   | { kind: "house"; house: number }
   | { kind: "sign"; sign: string }
-  | { kind: "pattern"; pattern: { type: string; bodies: string[] } }
+  | { kind: "pattern"; pattern: Pattern }
   | { kind: "ascendant"; sign: string; degree: number; minute: number };
 
 /** ¿Viewport móvil? (bajo el bp desktop 1080 de R4a). SSR-safe: false en servidor. */
