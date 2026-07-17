@@ -115,6 +115,13 @@ export function CartaView() {
     if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
 
+  // El contexto de la carta cambió (perfil/casas/zodíaco/tipo): la selección
+  // apuntaba al chart anterior — el panel vuelve al Núcleo y el sheet se cierra.
+  useEffect(() => {
+    setSelected({ kind: "core" });
+    setSheetSel(null);
+  }, [active, houseSystem, zodiac, kind]);
+
   // Núcleo narrativo (mockup 06 §4.4): teje sol+luna+ascendente en un párrafo.
   // Se lee en el panel derecho (o el sheet) como interpretación por defecto.
   const coreSegs = useMemo(() => {

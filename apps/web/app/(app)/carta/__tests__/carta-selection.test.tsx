@@ -119,4 +119,19 @@ describe("CartaView maestro-detalle", () => {
     fireEvent.click(within(posSection).getByRole("button", { name: /Sol/ }));
     expect(await screen.findByRole("tab", { name: "Profunda" })).toBeInTheDocument();
   });
+
+  it("cambiar de tipo de carta resetea la selección al núcleo", async () => {
+    renderView();
+    await screen.findByText("Interpretación");
+    // Seleccionar el Sol: el panel teje su esencia.
+    const posSection = sectionOf("Posiciones");
+    fireEvent.click(within(posSection).getByRole("button", { name: /Sol/ }));
+    expect(await screen.findByText(/Tu Sol es tu identidad esencial/)).toBeInTheDocument();
+    // Cambiar el tipo de carta (natal → Tu Clima/transits): es OTRO chart — la
+    // selección del Sol quedó apuntando al chart anterior. El panel debe volver
+    // al núcleo, no sostener la esencia del Sol del chart viejo.
+    fireEvent.click(screen.getByRole("tab", { name: "Tu Clima" }));
+    expect(await screen.findByText("Lectura del núcleo")).toBeInTheDocument();
+    expect(screen.queryByText(/Tu Sol es tu identidad esencial/)).not.toBeInTheDocument();
+  });
 });
