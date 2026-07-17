@@ -20,9 +20,7 @@ import { parseBearerToken } from "./bearer";
 //    sigue el patrón de prefijo de /login//signup//auth (no exacta-match como
 //    el webhook) — la ruta declara explícitamente que quiere ser pública, no
 //    lo hereda por accidente.
-// VISTA PREVIA TEMPORAL (NO COMMITEAR): /dev-admin solo en dev.
-const BASE_PP = ["/login", "/signup", "/auth", "/api/webhooks/dodo", "/legal"];
-const PUBLIC_PREFIXES = process.env.NODE_ENV === "development" ? [...BASE_PP, "/dev-admin"] : BASE_PP;
+const PUBLIC_PREFIXES = ["/login", "/signup", "/auth", "/api/webhooks/dodo", "/legal"];
 
 /** True si la ruta es pública (no requiere sesión). */
 export function isPublicPath(path: string): boolean {
