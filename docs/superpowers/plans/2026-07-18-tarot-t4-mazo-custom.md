@@ -44,9 +44,9 @@ export function rwsCtx(base: string): DeckAssetCtx; // helper: {base, activeDeck
 **Tests:** unit del resolver (rws puro = URLs actuales; custom con/ sin la carta en el set; back custom vs rws). Los tests existentes de tarot siguen verdes.
 **Acceptance:** tsc web+móvil+core limpio; suites verdes; grep confirma que ya no quedan `/tarot/rws/${` inline fuera del resolver.
 
-## Task 2 — Migración 0015 + tipos Supabase
+## Task 2 — Migración 0016 + tipos Supabase
 
-**Files:** Create `supabase/migrations/0015_tarot_custom_deck.sql`; Modify
+**Files:** Create `supabase/migrations/0016_tarot_custom_deck.sql`; Modify
 `packages/supabase/src/database.types.ts` (fila `tarot_deck`); Modify
 `apps/web/lib/tarot/validate-reading.ts` (aceptar deck `'custom'`); Modify
 `packages/core/src/tarot/deck.ts` si el check de deck vive replicado.
@@ -57,7 +57,7 @@ bucket `tarot-decks` público + file_size_limit 5MB + allowed_mime_types; amplia
 `tarot_deck_known` → `deck in ('rws','aluna','custom')`.
 **Tests:** validate-reading acepta `'custom'`; rechaza deck desconocido.
 **Acceptance:** migración idempotente/segura; tipos compilan; tests verdes.
-PENDIENTE GIO: aplicar 0015 (con 0011-0014).
+PENDIENTE GIO: aplicar 0016 (con 0011-0014).
 
 ## Task 3 — Lógica de SVG del reverso compartida (@aluna/core)
 
@@ -120,4 +120,4 @@ simulado, el resolver elige custom donde corresponde. Navegador (deck rws) sin r
 - Review adversarial (Fable): fugas de path desde el cliente, fallos silenciosos,
   no-regresión del resolver, consistencia deck='custom' en validación/guardado.
 - Fixes; merge a main (+push, Aluna autorizado); memoria; checklist PENDIENTE GIO
-  (aplicar 0015 + bucket + service-role para encender la subida; Expo Go del editor/picker).
+  (aplicar 0016 + bucket + service-role para encender la subida; Expo Go del editor/picker).

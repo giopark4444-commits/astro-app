@@ -62,7 +62,7 @@ aceptan `'custom'` además de `'rws'`/`'aluna'`.
 
 ### 3. Persistencia — migración + Storage (latente)
 
-- **Migración `0015_tarot_custom_deck.sql`:**
+- **Migración `0016_tarot_custom_deck.sql`:**
   - Tabla `public.tarot_deck` (`user_id uuid pk refs auth.users`, `active boolean
     default false`, `card_ids text[] default '{}'` = ids con imagen custom,
     `back_kind text check (back_kind in ('none','upload','editor')) default 'none'`,
