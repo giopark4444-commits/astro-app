@@ -10,6 +10,20 @@ describe("dailyCard / dailySeed", () => {
     expect(dailySeed("user-2", "2026-07-17")).not.toBe(dailySeed("user-1", "2026-07-17"));
   });
 
+  it("opts.reversals:false → carta del día siempre derecha, sin afectar la carta elegida (misma que sin opts salvo inversión)", () => {
+    // "2026-07-05" da reversed:true por defecto para user-1 (verificado a mano) —
+    // asegura que el test realmente ejercita el paso de opts, no una coincidencia.
+    const withReversals = dailyCard("user-1", "2026-07-05");
+    expect(withReversals.reversed).toBe(true);
+    const forcedUpright = dailyCard("user-1", "2026-07-05", { reversals: false });
+    expect(forcedUpright.reversed).toBe(false);
+    expect(forcedUpright.card).toEqual(withReversals.card);
+  });
+
+  it("sin opts, es retrocompatible: mismo resultado exacto que antes de introducir opts", () => {
+    expect(dailyCard("user-1", "2026-07-17")).toEqual(dailyCard("user-1", "2026-07-17", {}));
+  });
+
   it("FNV-1a 32-bit canónico sobre `${userId}|${localDate}`", () => {
     // Vector de referencia calculado a mano con offset 2166136261 / prime 16777619.
     expect(dailySeed("user-1", "2026-07-17")).toBe(fnv1a32("user-1|2026-07-17"));

@@ -1,0 +1,85 @@
+/* R2/R3: valores sobre la escala tokenizada + primitivos globales (ver
+   docs/redesign/R3-sistema.md). Página del umbral de Tarot. */
+.wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px = alto del bottom-nav fijo */
+
+.head { margin-bottom: var(--sp-6); }
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
+.title { font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm)); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+
+.sectionTitle { font-size: var(--text-lg); font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-3); }
+
+.dailySection { margin-bottom: var(--sp-7); }
+
+/* ------------------------------------------------------------------
+   Flip 3D de la carta del día: el toggle es una simple clase (.flipped)
+   con transition en transform — NO requiere lógica JS de reduced-motion
+   porque la regla global (@media prefers-reduced-motion, app/globals.css)
+   ya fuerza transition-duration a 0.001ms en *todo* el árbol, lo que
+   colapsa el flip a un swap instantáneo sin código extra aquí.
+------------------------------------------------------------------- */
+.flipScene {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-4);
+}
+.flipCard {
+  position: relative; width: 160px; height: 260px;
+  perspective: 1000px; background: none; border: 0; padding: 0; cursor: pointer;
+}
+.face {
+  position: absolute; inset: 0; display: block;
+  backface-visibility: hidden; transform-style: preserve-3d;
+  border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--line); box-shadow: var(--glow-soft);
+  transition: transform 700ms var(--ease-spring, var(--ease));
+}
+.faceBack { transform: rotateY(0deg); }
+.faceFront { transform: rotateY(180deg); }
+.flipped .faceBack { transform: rotateY(-180deg); }
+.flipped .faceFront { transform: rotateY(0deg); }
+.cardImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.reversedImg { transform: rotate(180deg); }
+
+.dailyRevealBody { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); text-align: center; max-width: 440px; }
+.dailyName { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--ink); margin: 0; }
+.reversedTag {
+  display: inline-block; font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase;
+  color: var(--tone-caution, var(--soft)); border: 1px solid var(--line); border-radius: 9px;
+  padding: 2px var(--sp-2); margin-top: var(--sp-1);
+}
+.dailyKeywords { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: center; margin: 0; }
+.dailyEssence { color: var(--soft); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+.dailyRevealBtn {
+  margin-top: var(--sp-2); border: 1px solid var(--line); border-radius: 999px; background: transparent;
+  color: var(--acc-text); font-family: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+  padding: var(--sp-2) var(--sp-4);
+}
+.dailyRevealBtn:hover { border-color: var(--acc); }
+
+.spreadsSection { margin-bottom: var(--sp-7); }
+.spreadsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.spreadCard {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2);
+  text-align: left; font-family: inherit; cursor: pointer;
+}
+.spreadDisabled { cursor: not-allowed; }
+.spreadName { font-weight: 600; color: var(--ink); font-size: var(--text-md); }
+.spreadDesc { color: var(--soft); font-size: var(--text-xs); }
+
+.diarySection { }
+.diaryEmpty { text-align: center; color: var(--soft); }
+.diaryList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
+.diaryItem {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  font-family: inherit; cursor: pointer;
+}
+.diarySpread { font-weight: 600; color: var(--ink); font-size: var(--text-sm); }
+.diaryDate { color: var(--soft); font-size: var(--text-xs); }
+.freeLimitNote { color: var(--soft); font-size: var(--text-xs); text-align: center; margin: var(--sp-3) 0 0; }
+
+.sheetParagraph { color: var(--ink); font-size: var(--text-sm); line-height: 1.6; margin: 0 0 var(--sp-3); }
+.sheetQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0 0 var(--sp-3); }
+.sheetCardsLabel { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
+.sheetCardsList { list-style: none; margin: 0 0 var(--sp-4); padding: 0; display: flex; flex-direction: column; gap: var(--sp-1); color: var(--ink); font-size: var(--text-sm); }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .diaryList { display: grid; grid-template-columns: repeat(2, 1fr); }
+}

@@ -19,12 +19,15 @@ function renderNav(path: string) {
 }
 
 describe("TopNav", () => {
-  it("renderiza los 6 botones en el orden de Gio", () => {
+  it("renderiza los 7 botones en el orden de Gio", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    // horóscopo ya es un link activo (T8): entra en su lugar en el orden
-    expect(labels).toEqual([es.nav.hoy, es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares, es.nav.perfil]);
+    // horóscopo ya es un link activo (T8); tarot entra tras pilares, antes de perfil (T4)
+    expect(labels).toEqual([
+      es.nav.hoy, es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares, es.nav.tarot, es.nav.perfil,
+    ]);
     expect(screen.getByRole("link", { name: new RegExp(es.nav.horoscopo) })).toHaveAttribute("href", "/horoscopo");
+    expect(screen.getByRole("link", { name: new RegExp(es.nav.tarot) })).toHaveAttribute("href", "/tarot");
   });
 
   it("marca activo el mundo actual (y subrutas)", () => {

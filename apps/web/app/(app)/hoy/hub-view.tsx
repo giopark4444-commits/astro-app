@@ -21,12 +21,15 @@ const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "锔
 // inline recrea el array en cada render y romper铆a la memoizaci贸n aguas abajo.
 const NO_FOCUS: LifeArea[] = [];
 
-type IconName = "grid3" | "wheel" | "pillars" | "sun" | "aries";
+type IconName = "grid3" | "wheel" | "pillars" | "sun" | "aries" | "cards";
 const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }> = [
   { key: "numeros", icon: "grid3", href: "/numeros", soon: false },
   { key: "carta", icon: "wheel", href: "/carta", soon: false },
   { key: "horoscopo", icon: "aries", href: "/horoscopo", soon: false },
   { key: "pilares", icon: "pillars", href: "/pilares", soon: false },
+  // Review final: bajo 1080px el TopNav no se renderiza, as铆 que este tile es
+  // la 脷NICA entrada a /tarot en m贸vil-web (patr贸n exacto de hor贸scopo).
+  { key: "tarot", icon: "cards", href: "/tarot", soon: false },
 ];
 
 export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {

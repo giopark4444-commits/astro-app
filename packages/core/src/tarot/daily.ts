@@ -26,7 +26,11 @@ export function dailySeed(userId: string, localDate: string): number {
  * Carta del día: determinista por (userId, localDate) — misma carta e inversión
  * siempre que se repita el par, distinta semilla ante cualquier cambio de usuario o fecha.
  */
-export function dailyCard(userId: string, localDate: string): DrawnCard {
+export function dailyCard(
+  userId: string,
+  localDate: string,
+  opts?: { reversals?: boolean }
+): DrawnCard {
   const rng = mulberry32(dailySeed(userId, localDate));
-  return drawCards(1, rng)[0]!;
+  return drawCards(1, rng, opts)[0]!;
 }
