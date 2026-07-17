@@ -55,7 +55,22 @@
     "intentAI": "Personalize readings with my intentions",
     "intentAIHint": "Only if you answered the questionnaire. Off, Aluna reads your chart without that context.",
     "intentAIOn": "On",
-    "intentAIOff": "Off"
+    "intentAIOff": "Off",
+    "account": "Account",
+    "email": "Email",
+    "userId": "User ID",
+    "loginMethod": "Login method",
+    "loginEmail": "Email & password",
+    "copyId": "Copy",
+    "copied": "Copied!",
+    "help": "Help & support",
+    "followUs": "Follow us",
+    "legal": "Legal"
+  },
+  "legal": {
+    "back": "Back",
+    "updated": "Updated {date}",
+    "draftNote": "Draft under review — this document may change before launch."
   },
   "hoy": {
     "greeting": "Hi,",

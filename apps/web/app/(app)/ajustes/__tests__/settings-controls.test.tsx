@@ -13,14 +13,11 @@ vi.mock("@/lib/theme/theme-provider", () => ({
 vi.mock("../actions", () => ({
   setLanguage: vi.fn(),
 }));
-vi.mock("@/app/auth/actions", () => ({
-  signOut: vi.fn(),
-}));
 
 function renderControls() {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <SettingsControls currentLocale="es" email="gio@example.com" hasIntent intentUseInAI={false} />
+      <SettingsControls currentLocale="es" hasIntent intentUseInAI={false} />
     </NextIntlClientProvider>,
   );
 }
@@ -32,12 +29,9 @@ describe("SettingsControls", () => {
     expect(screen.getAllByRole("group", { name: "Tema" })).toHaveLength(2);
   });
 
-  it("el pie de cuenta (desktop) muestra el correo y un botón para cerrar sesión", () => {
+  it("ya no trae pie de cuenta — Cuenta y Cerrar sesión viven en su propia sección de /ajustes", () => {
     renderControls();
-    expect(screen.getByText("gio@example.com")).toBeInTheDocument();
-    const signOutBtn = screen.getByRole("button", { name: "Salir" });
-    expect(signOutBtn).toBeInTheDocument();
-    expect(signOutBtn.closest("form")).toHaveAttribute("action");
+    expect(screen.queryByRole("button", { name: "Salir" })).not.toBeInTheDocument();
   });
 
   it("las filas compactas de tema incluyen el circulito de glifo por swatch", () => {

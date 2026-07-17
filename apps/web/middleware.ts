@@ -1,8 +1,26 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "./lib/supabase/middleware";
 
+// VISTA PREVIA TEMPORAL (NO COMMITEAR): CORS dev para expo web del worktree (8082).
+const DEV_CORS =
+  process.env.NODE_ENV === "development"
+    ? {
+        "Access-Control-Allow-Origin": "http://localhost:8082",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Headers": "authorization,content-type",
+      }
+    : null;
+
 export async function middleware(request: NextRequest) {
-  return updateSession(request);
+  const isApi = request.nextUrl.pathname.startsWith("/api/");
+  if (DEV_CORS && isApi && request.method === "OPTIONS") {
+    return new NextResponse(null, { status: 204, headers: DEV_CORS });
+  }
+  const response = await updateSession(request);
+  if (DEV_CORS && isApi && request.headers.get("origin") === "http://localhost:8082") {
+    for (const [k, v] of Object.entries(DEV_CORS)) response.headers.set(k, v);
+  }
+  return response;
 }
 
 export const config = {

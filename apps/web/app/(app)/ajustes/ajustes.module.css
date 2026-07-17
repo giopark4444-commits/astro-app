@@ -1,0 +1,50 @@
+/* Centro de Ajustes (brief ajustes-web) — secciones apiladas, .card global
+   por sección; eyebrow uppercase estilo R4c (referencia visual: .prefsTitle
+   desktop de perfil.module.css), aquí aplicado siempre (no solo desktop). */
+.page { padding: var(--sp-6) var(--sp-5) var(--sp-7); max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--sp-5); }
+
+.section { display: flex; flex-direction: column; gap: var(--sp-3); }
+.eyebrow {
+  font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc-text); margin: 0;
+}
+
+/* Fila label→valor estática (Cuenta) */
+.row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-2) 0; }
+.row + .row { border-top: 1px solid var(--line); }
+.rowLabel { font-size: var(--text-sm); color: var(--soft); }
+.rowValueGroup { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.rowValue { font-size: var(--text-sm); color: var(--ink); text-align: right; overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-xs); }
+
+.copyBtn {
+  flex: none; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--soft); font-family: inherit;
+  font-size: var(--text-2xs); font-weight: 600; cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.copyBtn:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+
+/* Fila-link (Ayuda, Preguntar, redes, legales) */
+.rowLink {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  padding: var(--sp-3) 0; color: var(--ink); font-size: var(--text-sm);
+  transition: color var(--dur-fast) var(--ease);
+}
+.rowLink:hover { color: var(--acc-text); }
+.rowLink + .rowLink { border-top: 1px solid var(--line); }
+.rowArrow { color: var(--soft); flex: none; }
+
+/* Cerrar sesión — fila propia al final, estilo sobrio (patrón .out heredado
+   de settings.module.css: sin relleno, hover a --tone-warm). */
+.signOut { margin-top: var(--sp-2); display: flex; justify-content: center; }
+.signOutBtn {
+  color: var(--soft); background: none; border: 0; cursor: pointer; font-family: inherit;
+  font-size: var(--text-sm); font-weight: 600; padding: var(--sp-2) var(--sp-4);
+  transition: color var(--dur-fast) var(--ease);
+}
+.signOutBtn:hover { color: var(--tone-warm); }
+
+@media (min-width: 1080px) { /* bp desktop R4a — cap intermedio, mismo patrón que perfil/settings.module.css */
+  .page { max-width: 640px; margin-left: auto; margin-right: auto; }
+}

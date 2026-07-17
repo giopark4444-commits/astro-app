@@ -55,7 +55,22 @@
     "intentAI": "Personalizar lecturas con mis intenciones",
     "intentAIHint": "Solo si respondiste el cuestionario. Apagado, Aluna lee tu carta sin ese contexto.",
     "intentAIOn": "Encendido",
-    "intentAIOff": "Apagado"
+    "intentAIOff": "Apagado",
+    "account": "Cuenta",
+    "email": "Correo",
+    "userId": "ID de usuario",
+    "loginMethod": "Método de acceso",
+    "loginEmail": "Correo y contraseña",
+    "copyId": "Copiar",
+    "copied": "¡Copiado!",
+    "help": "Ayuda y soporte",
+    "followUs": "Síguenos",
+    "legal": "Legal"
+  },
+  "legal": {
+    "back": "Volver",
+    "updated": "Actualizado {date}",
+    "draftNote": "Borrador en revisión — este documento puede cambiar antes del lanzamiento."
   },
   "hoy": {
     "greeting": "Hola,",

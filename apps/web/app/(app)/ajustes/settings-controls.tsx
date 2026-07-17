@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { THEMES, MODES, type Theme } from "@/lib/theme/themes";
-import { signOut } from "@/app/auth/actions";
 import { setLanguage, setIntentUseInAI } from "../actions";
 import styles from "./settings.module.css";
 
@@ -16,17 +15,14 @@ const SWATCH: Record<Theme, string> = {
 
 export function SettingsControls({
   currentLocale,
-  email,
   hasIntent,
   intentUseInAI,
 }: {
   currentLocale: string;
-  email: string;
   hasIntent: boolean;
   intentUseInAI: boolean;
 }) {
   const t = useTranslations("settings");
-  const tAuth = useTranslations("auth");
   const router = useRouter();
   const { theme, setTheme, mode, setMode } = useTheme();
   // Estado local optimista: el toggle no depende de router.refresh() para
@@ -151,17 +147,6 @@ export function SettingsControls({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Pie de cuenta — reusa el mismo signOut server action que
-            app/login /app/signup (form action={signOut}); no existe hoy un
-            botón de salir en ProfileMenu (se verificó leyéndolo), así que no
-            hay "otro mecanismo" que duplicar — este es el único. */}
-        <div className={styles.acct}>
-          <span>{email}</span>
-          <form action={signOut}>
-            <button type="submit" className={styles.out}>{tAuth("logout")}</button>
-          </form>
         </div>
       </div>
     </>

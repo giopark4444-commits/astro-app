@@ -20,4 +20,8 @@ describe("isPublicPath", () => {
     expect(isPublicPath("/api/webhooks")).toBe(false);
     expect(isPublicPath("/api/webhooks/otro-proveedor-futuro")).toBe(false);
   });
+  it("permite las páginas legales sin sesión (se leen antes de crear cuenta)", () => {
+    expect(isPublicPath("/legal/terminos")).toBe(true);
+    expect(isPublicPath("/legal/privacidad")).toBe(true);
+  });
 });

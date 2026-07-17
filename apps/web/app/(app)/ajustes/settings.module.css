@@ -48,9 +48,6 @@
 .pswDot[data-theme-dot="observatory"] { background: radial-gradient(circle at 32% 28%, #2b3570, #0a0d24 72%); border-color: rgba(231, 201, 134, 0.7); } /* mockup 06: .obs */
 .pswDot[data-theme-dot="aurora"] { background: linear-gradient(140deg, #f3ecff, #cdb9f2 60%, #f7d9c4); } /* mockup 06: .aur */
 .pswDot[data-theme-dot="cosmic"] { background: linear-gradient(140deg, #3d1d63, #7a2f8f 55%, #e56ca4); } /* mockup 06: .cos */
-.acct { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 13px; border-top: 1px solid rgba(var(--acc-rgb), 0.14); font-size: var(--text-xs); color: var(--soft); } /* mockup 06: .pf-acct */
-.out { color: var(--soft); background: none; border: 0; cursor: pointer; font-family: inherit; font-size: var(--text-xs); transition: color var(--dur-fast) var(--ease); }
-.out:hover { color: var(--tone-warm); } /* mockup 06: .pf-out:hover */
 /* Modo/idioma reusan el .seg global — en la fila compacta es "pill al
    contenido", no full-width (brief T8 Step 2). */
 .segCompactWrap { width: auto; }

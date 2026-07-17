@@ -1,24 +1,14 @@
 import { redirect } from "next/navigation";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import type { SubscriptionStatus } from "@aluna/core";
-import { parseIntent } from "@aluna/core";
 import { PerfilHero } from "./perfil-hero";
 import { Personas } from "./personas";
 import { Manifestations } from "./manifestations";
 import { Journal } from "./journal";
-import { PlanCard } from "./plan-card";
-import { SettingsControls } from "./settings-controls";
 import styles from "./perfil.module.css";
 
-export default async function PerfilPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ checkout?: string }>;
-}) {
-  const t = await getTranslations("profile");
+export default async function PerfilPage() {
   const locale = await getLocale();
-  const { checkout } = await searchParams;
 
   const supabase = await createClient();
   const {
@@ -36,31 +26,9 @@ export default async function PerfilPage({
     ? supabase.storage.from("avatars").getPublicUrl(avatarPathValue).data.publicUrl
     : null;
 
-  // Misma lógica que la vieja ajustes/page.tsx (jubilada): cast necesario, ver
-  // ese archivo en el historial de git para el porqué completo del bug de
-  // inferencia de @supabase/ssr.
-  const { data: subRow } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
-
   // "En Aluna desde {mes} {año}" (mockup 06 §5.1, .pf-since) — created_at es un
   // timestamp de Supabase Auth, siempre presente para un usuario ya logueado.
   const since = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(new Date(user.created_at));
-
-  // Intención del cuestionario de primera entrada (Task 13): se lee aquí
-  // (server component que ya carga los demás datos de la página) para pasar
-  // el estado inicial del toggle "Aluna te conoce" — el control se muestra
-  // igual aunque no haya intent (parseIntent null), pero entonces no tiene
-  // efecto real (ver setIntentUseInAI).
-  const { data: intentRow } = await supabase
-    .from("settings")
-    .select("intent")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const intent = parseIntent((intentRow as { intent: unknown } | null)?.intent);
 
   return (
     <main className={styles.page}>
@@ -70,15 +38,6 @@ export default async function PerfilPage({
         <Manifestations />
         <Journal />
       </div>
-      <section className={styles.prefs}>
-        <h2 className={styles.prefsTitle}>{t("preferences")}</h2>
-        <SettingsControls currentLocale={locale} email={user.email ?? ""} hasIntent={intent !== null} intentUseInAI={intent?.useInAI ?? false} />
-      </section>
-      {/* "Tu plan" no está en el mockup 06 (que no modela billing) — se conserva
-          como fila propia, adaptación consciente (brief T8, no eliminar). */}
-      <section className={styles.plan}>
-        <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
-      </section>
     </main>
   );
 }

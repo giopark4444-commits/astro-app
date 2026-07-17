@@ -5,8 +5,7 @@ import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { ProfilesProvider, type BirthProfile } from "@/lib/profiles/profiles-provider";
 import { BottomNav } from "@/components/bottom-nav";
 import { TopNav } from "@/components/top-nav";
-import { ThemeChip } from "@/components/theme-chip";
-import { ProfileMenu } from "@/components/profile-menu";
+import { SettingsLink } from "@/components/settings-link";
 import { persistSettings } from "./actions";
 import styles from "./app-shell.module.css";
 
@@ -34,11 +33,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <header className={styles.header}>
             <span className={styles.brand}>Aluna</span>
             <TopNav />
-            {/* wrapper estable: ProfileMenu es un Fragment (botón + BottomSheet
-                condicional) — sin esto, al abrir el sheet el backdrop se vuelve
-                el :last-child del header y el avatar pierde su alineación en el
-                grid desktop (hallazgo de la review de T1) */}
-            <div className={styles.menuSlot}><ThemeChip /><ProfileMenu /></div>
+            {/* wrapper estable: se conserva aunque ya no monte el BottomSheet de
+                ProfileMenu (jubilado, brief ajustes-web T1) — mismo nombre de
+                clase, mismo layout de grid desktop, sin re-litigar ese hallazgo. */}
+            <div className={styles.menuSlot}><SettingsLink /></div>
           </header>
           <div className={styles.main}>{children}</div>
           <BottomNav />
