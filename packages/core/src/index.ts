@@ -102,3 +102,7 @@ export { sunSignFromDate } from "./astrology/sun-sign";
 // Glosario de significados ("toca y entiende") — contenido único, compartido web+móvil
 export { glossaryEntry, GLOSSARY_ES, GLOSSARY_EN, type GlossaryEntry } from "./glossary";
 export { planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMeaningKey, interactionKey } from "./glossary/keys";
+
+// Tarot — el mazo como datos puros (78 cartas, correspondencias Golden Dawn)
+export * from "./tarot/types";
+export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
