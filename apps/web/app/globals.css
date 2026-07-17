@@ -54,10 +54,6 @@ button { font-family: inherit; }
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
-@keyframes aluna-twinkle {
-  0%, 100% { opacity: calc(var(--stars) * 0.55); }
-  50%      { opacity: calc(var(--stars) * 1); }
-}
 @keyframes aluna-glow {
   0%, 100% { text-shadow: 0 0 18px rgba(var(--acc-rgb), 0.35); }
   50%      { text-shadow: 0 0 30px rgba(var(--acc-rgb), 0.6); }

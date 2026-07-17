@@ -257,6 +257,7 @@
 
   /* Núcleo narrativo (mockup 06 §4.4) */
   .coreExtra { display: block; } /* wrapper del bloque de patrones dentro de Núcleo — sin clase .reading/.balPair/.balCap/.coreHint propia */
+  .chips.coreExtra { display: flex; } /* los chips de patrones conservan su flex/gap — .coreExtra{block} los pisaba (review final) */
   .reading {
     display: block; border: 1px solid rgba(var(--acc-rgb), 0.22); border-radius: var(--radius);
     background: color-mix(in oklab, var(--bg) 65%, transparent); padding: 14px 17px; /* mockup .reading */

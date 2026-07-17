@@ -45,7 +45,7 @@ export const MOON_FRAGMENT: Record<string, string> = {
   leo: "necesitas que te vean sentir, no solo que te escuchen",
   virgo: "cuidas ordenando: un gesto útil vale más que mil palabras",
   libra: "sientes en relación, tu paz depende del vínculo que sostienes",
-  scorpio: "siente hondo lo que otros apenas rozan",
+  scorpio: "sientes hondo lo que otros apenas rozan",
   sagittarius: "necesitas espacio para sentir, y te asfixia lo que te encierra",
   capricorn: "guardas lo que sientes y lo sostienes con disciplina silenciosa",
   aquarius: "sientes desde la distancia justa, observando antes de nombrarlo",
