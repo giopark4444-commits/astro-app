@@ -69,7 +69,9 @@ export async function POST(request: NextRequest) {
 
       natalPillars = { year: yearP, month: monthP, day: dayP, hour: hourP };
       if (!animal) animal = EARTHLY_BRANCHES[yearP.branch]!.animal as EasternAnimal;
-    } catch {
+    } catch (err) {
+      // Solo el mensaje: nada de datos del perfil en el log.
+      console.error("[horoscope/eastern] natal:", err instanceof Error ? err.message : String(err));
       return NextResponse.json({ error: "compute" }, { status: 500 });
     }
   }
@@ -83,7 +85,9 @@ export async function POST(request: NextRequest) {
     const natalHits = natalPillars ? computeEasternNatalHits(natalPillars, payload.pillars) : undefined;
 
     return NextResponse.json(natalHits ? { ...payload, natalHits } : payload);
-  } catch {
+  } catch (err) {
+    // Solo el mensaje: nada de datos personales en el log.
+    console.error("[horoscope/eastern] compute:", err instanceof Error ? err.message : String(err));
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }
 }
