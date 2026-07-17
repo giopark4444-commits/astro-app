@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getLegalDoc, isLegalSlug, LEGAL_SLUGS } from "../slug";
-import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@/lib/content/legal-es";
-import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@/lib/content/legal-en";
+import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@aluna/core";
+import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
 
 describe("isLegalSlug", () => {
   it("acepta los 3 slugs válidos", () => {
