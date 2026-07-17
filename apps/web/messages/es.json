@@ -534,6 +534,10 @@
     "taiSuiZixing": "自刑太歲 — autocastigo",
     "taiSuiPo": "破太歲 — ruptura",
     "proInteractions": "Interacciones completas",
+    "proHarmonies": "Armonías del periodo",
+    "proHarmoniesHint": "Animales en 六合 contigo: alianzas que fluyen solas.",
+    "proMonthChange": "Cambio de mes solar",
+    "proMonthChangeHint": "El 節 marca el cambio de energía mensual dentro del periodo.",
     "proMethodEastern": "Pilares del periodo a mediodía local. Zona horaria: {tz}."
   },
   "billing": {

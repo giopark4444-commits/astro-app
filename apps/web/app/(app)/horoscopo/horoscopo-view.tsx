@@ -178,6 +178,11 @@ export function HoroscopoView() {
   const fmtExact = new Intl.DateTimeFormat(locale === "en" ? "en" : "es", {
     day: "numeric", month: "short", timeZone: tz,
   });
+  // Fecha del 節 (cambio de mes solar) — mismo formato que las fechas 節 de
+  // EasternSky (día+mes+hora, la hora importa: el 節 cae en un instante exacto).
+  const fmtMonthChange = new Intl.DateTimeFormat(locale === "en" ? "en" : "es", {
+    day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: tz,
+  });
 
   return (
     <main className={styles.wrap}>
@@ -317,6 +322,37 @@ export function HoroscopoView() {
                         </tbody>
                       </table>
                     </section>
+                    {/* Armonías 六合 del periodo con el animal consultado — la
+                        tabla de arriba ya las lista fila a fila, pero mezcladas
+                        con choques/daños; esta fila resume solo las favorables. */}
+                    {readyEastern.harmonies.length > 0 && (
+                      <section className={`card ${styles.section}`}>
+                        <h2 className={styles.sectionH}>{t("proHarmonies")}</h2>
+                        <p className={styles.method}>{t("proHarmoniesHint")}</p>
+                        <p className={styles.hitRow}>
+                          {readyEastern.harmonies.map((a, i) => {
+                            const idx = EASTERN_ANIMALS.indexOf(a);
+                            const b = EARTHLY_BRANCHES[idx]!;
+                            return (
+                              <span key={a}>
+                                <Meaning k={`bazi.branch.${b.key}`}>{b.hanzi} {tp(`animal${cap(a)}`)}</Meaning>
+                                {i < readyEastern.harmonies.length - 1 ? " · " : ""}
+                              </span>
+                            );
+                          })}
+                        </p>
+                      </section>
+                    )}
+                    {/* Primer 節 dentro del rango (frontera de mes solar) —
+                        jieDates ya las lista todas en EasternSky; aquí solo el
+                        próximo cambio de mes, con la hora exacta del cruce. */}
+                    {readyEastern.monthChange && (
+                      <section className={`card ${styles.section}`}>
+                        <h2 className={styles.sectionH}>{t("proMonthChange")}</h2>
+                        <p className={styles.method}>{t("proMonthChangeHint")}</p>
+                        <p className={styles.hitRow}>節 {fmtMonthChange.format(new Date(readyEastern.monthChange.atIso))}</p>
+                      </section>
+                    )}
                     <p className={styles.method}>
                       {t("proMethodEastern", { tz })} {t("lateZiNote")}
                     </p>
