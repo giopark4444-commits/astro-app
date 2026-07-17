@@ -124,7 +124,14 @@
     "referralSuggest": "Sugerir",
     "referralDiscountPct": "% descuento",
     "referralCommissionPct": "% comisión",
-    "referralSave": "Guardar"
+    "referralSave": "Guardar",
+    "myReferralTitle": "Tu código",
+    "myReferralEmpty": "Aún no tienes código — pídeselo al administrador.",
+    "myReferralCopy": "Copiar",
+    "myReferralCopied": "¡Copiado!",
+    "myReferralReferred": "Referidos",
+    "myReferralPending": "Pendiente",
+    "myReferralPaid": "Pagada"
   },
   "hoy": {
     "greeting": "Hola,",

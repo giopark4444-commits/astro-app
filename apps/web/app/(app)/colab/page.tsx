@@ -5,6 +5,7 @@ import { getRole } from "@/lib/admin/roles";
 import { DEFAULT_NAV_ORDER, sanitizeNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import { NAV_ICON } from "@/lib/admin/nav-icons";
 import { Icon } from "@/components/icon";
+import { ReferralSection } from "./referral-section";
 import styles from "./colab.module.css";
 
 // Panel de colaboradores (brief admin-panel T5): collaborator O superadmin.
@@ -32,6 +33,8 @@ export default async function ColabPage() {
         <h2 className={styles.eyebrow}>{t("colabWelcomeTitle")}</h2>
         <p className={styles.hint}>{t("colabWelcomeBody")}</p>
       </section>
+
+      <ReferralSection />
 
       <section className="card">
         <h2 className={styles.eyebrow}>{t("navOrderTitle")}</h2>

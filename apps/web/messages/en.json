@@ -124,7 +124,14 @@
     "referralSuggest": "Suggest",
     "referralDiscountPct": "% discount",
     "referralCommissionPct": "% commission",
-    "referralSave": "Save"
+    "referralSave": "Save",
+    "myReferralTitle": "Your code",
+    "myReferralEmpty": "You don't have a code yet — ask the administrator for one.",
+    "myReferralCopy": "Copy",
+    "myReferralCopied": "Copied!",
+    "myReferralReferred": "Referred",
+    "myReferralPending": "Pending",
+    "myReferralPaid": "Paid"
   },
   "hoy": {
     "greeting": "Hi,",
