@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { answersToInsert, draftToIntent, type IntentDraft, type OnboardingAnswers } from "@/lib/onboarding";
 import type { TablesInsert } from "@aluna/supabase";
-import type { UserIntent } from "@aluna/core";
+import { parseIntent, type UserIntent } from "@aluna/core";
 
 // exactOptionalPropertyTypes hace que postgrest-js infiera el arg de insert() como
 // `never`. Casteamos solo el builder a un shim tipado; el valor sigue type-checked.
@@ -19,15 +19,15 @@ export async function createBirthProfile(answers: OnboardingAnswers, intentDraft
   if (error) throw new Error(`No se pudo crear el perfil: ${error.message}`);
 
   if (intentDraft) {
-    const intent = draftToIntent(intentDraft, new Date().toISOString());
-    if (intent) {
-      type SettingsIntent = { update: (v: { intent: UserIntent }) => { eq: (c: string, v: string) => PromiseLike<unknown> } };
-      const sb = supabase.from("settings") as unknown as SettingsIntent;
-      try {
+    type SettingsIntent = { update: (v: { intent: UserIntent }) => { eq: (c: string, v: string) => PromiseLike<unknown> } };
+    const sb = supabase.from("settings") as unknown as SettingsIntent;
+    try {
+      const intent = parseIntent(draftToIntent(intentDraft, new Date().toISOString()));
+      if (intent) {
         await sb.update({ intent }).eq("user_id", user.id);
-      } catch {
-        // best effort: la intención nunca bloquea crear el perfil
       }
+    } catch {
+      // best effort: la intención nunca bloquea crear el perfil
     }
   }
 
