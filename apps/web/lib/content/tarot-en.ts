@@ -380,4 +380,484 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
     },
     bridge: "The World carries Saturn's structure: discipline that, once its time is served, crowns itself in real achievement.",
   },
+
+  // --- Wands (fire: action, creative will, momentum) ---
+  "wands-01": {
+    name: "Ace of Wands",
+    keywords: ["spark", "creative drive", "new venture", "vitality"],
+    essence:
+      "A hand emerges from a cloud gripping a wand still budding with leaves. Nobody knows yet what this will grow into — that's the point. This is fire in its rawest state, want before shape, yes before plan.",
+    upright: {
+      love: "You feel pulled toward someone or something without needing to explain the pull first — that's allowed.",
+      work: "An idea shows up already burning. Grab it now, before overthinking cools it down.",
+      path: "Something in you wants to move. Give that hunger an outlet instead of leaving it as pure enthusiasm.",
+    },
+    reversed: {
+      love: "The spark flares and dies without catching on anything real — figure out if you actually want to build, or just enjoy the flicker.",
+      work: "A strong start fizzles fast. First bursts of motivation aren't enough to carry a whole project on their own.",
+      path: "The fuel is there but there's no outlet for it yet — find where this energy actually belongs before it burns off into nothing.",
+    },
+    bridge: "The Ace of Wands is fire before it picks a direction — pure creative charge, still undecided about where it's headed.",
+  },
+  "wands-02": {
+    name: "Two of Wands",
+    keywords: ["planning", "vision", "decision", "the wider view"],
+    essence:
+      "Globe in hand, gaze fixed past the castle walls. This isn't the spark anymore — it's the first real question: where does this fire actually want to go?",
+    upright: {
+      love: "You're starting to picture something more concrete together. Say the vision out loud instead of keeping it private.",
+      work: "The groundwork is done — now the real call is direction, not another reaction to whatever comes next.",
+      path: "The world suddenly feels bigger than your usual radius. Let that scale pull you forward instead of freezing you.",
+    },
+    reversed: {
+      love: "Fear of committing to a real future keeps you staring at the horizon instead of stepping toward it.",
+      work: "Without a real plan, the energy scatters into five directions at once and none of them go anywhere.",
+      path: "Staying in daydream mode without landing a single decision drains the momentum you started with.",
+    },
+    bridge: "The Two of Wands is fire that starts looking far off — will needs a horizon, or it just burns in place.",
+  },
+  "wands-03": {
+    name: "Three of Wands",
+    keywords: ["expansion", "active waiting", "partnership", "long view"],
+    essence:
+      "Standing at the cliff's edge, watching ships already out at sea. The planting is done. What's left is trust — that the voyage keeps moving even when you can't see the deck anymore.",
+    upright: {
+      love: "A relationship stretches beyond what's familiar — distance, future plans, a commitment with more range than before.",
+      work: "Early signs of payoff start arriving from far away. Keep your eyes on the horizon, patiently, not anxiously.",
+      path: "Your vision is already in motion. You don't have to push every ship yourself — you just have to trust the course you set.",
+    },
+    reversed: {
+      love: "Distance starts costing more than it's giving back — check whether the bond is still growing or just stretched thin.",
+      work: "An unexpected delay throws off the timeline. Adjust how long you're willing to wait, not the direction itself.",
+      path: "Impatience for results makes you doubt a vision that's still very much alive — it's just running late.",
+    },
+    bridge: "The Three of Wands is fire already traveling far from you — expanded will, trusting its own reach.",
+  },
+  "wands-04": {
+    name: "Four of Wands",
+    keywords: ["celebration", "homecoming", "shared achievement", "festive stability"],
+    essence:
+      "Four staves hold up a garland, and underneath it, people are celebrating. Fire finally lands somewhere solid enough to throw a party on top of it.",
+    upright: {
+      love: "A shared celebration — a homecoming, an anniversary, moving in together — deserves to be lived slowly, not rushed through.",
+      work: "A milestone wants acknowledgment before you move to the next thing. Take the festive pause; you earned it.",
+      path: "You land on a stretch of stability that feels like coming home. Let yourself enjoy standing still for once.",
+    },
+    reversed: {
+      love: "The celebration feels hollow or forced somehow — name what's missing for this to actually feel like home.",
+      work: "A win that deserved recognition slips by unnoticed. If nobody claps, clap for yourself.",
+      path: "Shaky foundations keep you from enjoying what you've already built — go back and shore up the base before you celebrate.",
+    },
+    bridge: "The Four of Wands is fire turned into a home — will that finally found stability without going out.",
+  },
+  "wands-05": {
+    name: "Five of Wands",
+    keywords: ["friction", "competition", "creative conflict", "disorder"],
+    essence:
+      "Five figures swing staves at once, all out of sync with each other. This is fire multiplied in five directions before anyone agrees on a rhythm — noisy, chaotic, not yet dangerous.",
+    upright: {
+      love: "Disagreements surface between you two. Friction here isn't the end — it just means both of you still have fire of your own.",
+      work: "Competing ideas or egos crowd the room. Somewhere in that clash, tension turns into something creative — find it.",
+      path: "What looks like chaos is really unchanneled energy. Give it a structure before it wears you out for nothing.",
+    },
+    reversed: {
+      love: "A conflict you'd been avoiding finally gets resolved, or at least named clearly for the first time.",
+      work: "The internal competition on the team starts easing off. Room opens for collaboration instead of collision.",
+      path: "You're learning to stop needing to win every friction point — not every disagreement calls for a victory lap.",
+    },
+    bridge: "The Five of Wands is fire scattered without coordination — many wills that haven't found a shared beat yet.",
+  },
+  "wands-06": {
+    name: "Six of Wands",
+    keywords: ["victory", "recognition", "confidence", "visible progress"],
+    essence:
+      "He rides back crowned in laurel, and a crowd gathers to greet him. Fire that already produced something visible gets to be shown off — no need for false modesty here.",
+    upright: {
+      love: "The effort you've put into this bond is starting to show. Let people see you enjoying what you built together.",
+      work: "Public recognition arrives, and it's earned. Take it in without immediately shrinking it down.",
+      path: "Confidence rises here because there's real evidence behind it, not just wishful thinking — walk in it.",
+    },
+    reversed: {
+      love: "Chasing outside approval over your own sense of satisfaction leaves you dependent on other people's opinions.",
+      work: "Recognition you expected gets delayed or looks different than imagined — the work's worth doesn't hinge on it.",
+      path: "Misplaced pride pulls you away from a humility your path still needs — celebrate without requiring an audience.",
+    },
+    bridge: "The Six of Wands is fire that got seen — will confirmed by a result other people notice too.",
+  },
+  "wands-07": {
+    name: "Seven of Wands",
+    keywords: ["defense", "standing ground", "sustained challenge", "conviction"],
+    essence:
+      "From the high ground, he holds off staves reaching up from below. This is fire defending what it already built, not because it's under real threat, but because what's up for question is worth protecting.",
+    upright: {
+      love: "Holding your ground on what you believe about this bond, against outside opinions, takes conviction — not stubbornness.",
+      work: "You're defending a hard-won position. Stay firm without needing to win everyone over to your side.",
+      path: "The challenge in front of you is confirmation that you've already reached somewhere worth guarding.",
+    },
+    reversed: {
+      love: "Feeling constantly on the defensive wears the bond down — ask whether the threat is real or just assumed.",
+      work: "Giving up ground out of exhaustion rather than conviction leaves you somewhere you never actually chose.",
+      path: "Defending everything, even what no longer matters, drains you for nothing — pick your battles more carefully.",
+    },
+    bridge: "The Seven of Wands is fire under pressure-test — will learning what it takes to hold steady.",
+  },
+  "wands-08": {
+    name: "Eight of Wands",
+    keywords: ["speed", "movement", "messages", "acceleration"],
+    essence:
+      "Eight staves fly through open sky in a straight line, nothing in their way. Fire finally hits clear road and moves fast enough that there's no time left for second-guessing.",
+    upright: {
+      love: "Things move quickly now — news, a reunion, a decision arriving sooner than you expected.",
+      work: "Everything speeds up at once: messages, signals, progress. Ride the pace instead of stalling it with overanalysis.",
+      path: "The momentum you feel is real. Trust it and act while the wind is still behind you.",
+    },
+    reversed: {
+      love: "Communication jams right when you needed it flowing fastest — figure out what's stuck, and why.",
+      work: "Unexpected delays frustrate progress that had real speed behind it — hold steady before forcing the pace back.",
+      path: "Rushing to arrive makes you skip steps that mattered. Even fast fire needs a short pause sometimes.",
+    },
+    bridge: "The Eight of Wands is fire without friction — will moving faster than the mind analyzing it.",
+  },
+  "wands-09": {
+    name: "Nine of Wands",
+    keywords: ["resilience", "last reserve", "vigilance", "almost there"],
+    essence:
+      "Bandaged, exhausted, still standing guard with the last stave in hand. This is fire that has almost nothing left to give and chooses to keep holding anyway.",
+    upright: {
+      love: "You've given a lot and you're tired, but the bond still deserves one more conscious effort.",
+      work: "You're close to the finish, running on reserves — this isn't the moment to quit, it's the moment to hold.",
+      path: "Resilience doesn't come from never getting hurt. It comes from staying upright afterward.",
+    },
+    reversed: {
+      love: "Old wounds have you guarding against people who aren't actually attacking you.",
+      work: "Exhaustion is making you see threats that aren't there — tell the difference between real caution and tired paranoia.",
+      path: "Keeping your guard up at all times, even when it's no longer needed, blocks the rest and healing you actually need.",
+    },
+    bridge: "The Nine of Wands is fire nearly spent, refusing to go out — will pushing one step further than it thought it had.",
+  },
+  "wands-10": {
+    name: "Ten of Wands",
+    keywords: ["overload", "responsibility", "final load", "heavy close"],
+    essence:
+      "Hunched under all ten staves, barely able to see the road ahead. Fire pushed to its limit — the last stretch of a cycle, heavy right before you finally get to set it down.",
+    upright: {
+      love: "You're carrying more emotional weight than you're saying out loud — ask for help before you buckle completely.",
+      work: "You're near the end of something big and the load feels maximal — you're close, so share the weight if you can.",
+      path: "What you're carrying is yours by choice, but that doesn't mean you have to haul it alone to the finish.",
+    },
+    reversed: {
+      love: "You're starting to set down burdens you never should have carried solo — delegating isn't failing, it's finally asking.",
+      work: "You recognize you're overloaded and take the first step toward spreading the weight before you collapse under it.",
+      path: "Relief arrives the moment you accept that not every responsibility has to stay yours forever.",
+    },
+    bridge: "The Ten of Wands is fire at its heaviest point — will crowning the cycle right before it finally gets to rest.",
+  },
+  "wands-page": {
+    name: "Page of Wands",
+    keywords: ["burning curiosity", "messenger", "enthusiasm", "apprentice of fire"],
+    essence:
+      "He studies his wand like he's never seen fire before. News, ideas, a curiosity with no destination yet mapped out — and that's exactly the charm of it.",
+    upright: {
+      love: "Playful, direct energy shows up. Let enthusiasm speak before caution gets a chance to cool it down.",
+      work: "A new idea wants exploring even without a finished plan yet — learning is part of the process, not a delay.",
+      path: "Your curiosity about the new is spiritual information: it's pointing at exactly where your fire wants to grow next.",
+    },
+    reversed: {
+      love: "Initial excitement scatters before it becomes anything steady — name what it would take to actually sustain it.",
+      work: "You start a dozen things at once and finish none of them — the fire needs a little focus so it doesn't burn itself out.",
+      path: "Impatience for instant results makes you undervalue the plain fact that you're still learning.",
+    },
+    bridge: "The Page of Wands is master number eleven turned apprentice — the teacher-in-waiting still playing with its own fire.",
+  },
+  "wands-knight": {
+    name: "Knight of Wands",
+    keywords: ["all-in momentum", "adventure", "impatience", "unbraked action"],
+    essence:
+      "He gallops off before the route is even finished. This is fire in pure motion — action that would rather course-correct on the road than sit still planning the exit.",
+    upright: {
+      love: "Passion arrives fast and intense — enjoy the rush without demanding it already be a lifelong promise.",
+      work: "This is the moment to move decisively even with an unfinished plan — the terrain gets known by walking it.",
+      path: "Your fire is asking for real adventure, not a rehearsal. Go move, even without every certainty locked in.",
+    },
+    reversed: {
+      love: "Nonstop impulsiveness leaves wounds that need repairing later — pause before acting purely on the heat of the moment.",
+      work: "Starting with zero plan costs you ground you'd already gained — a little direction sharpens the drive, it doesn't kill it.",
+      path: "Constant impatience blinds you to when the road is asking for a breather instead of another launch.",
+    },
+    bridge: "The Knight of Wands is fire already galloping — will testing itself through motion, not through planning.",
+  },
+  "wands-queen": {
+    name: "Queen of Wands",
+    keywords: ["magnetism", "radiant confidence", "independence", "warm firmness"],
+    essence:
+      "Sunflower in hand, black cat at her feet, she isn't asking permission to shine. Fire that became presence — warm and unshakeable in the same breath.",
+    upright: {
+      love: "Your natural magnetism draws people in without trying — show up as you are instead of dimming yourself smaller.",
+      work: "You lead with warmth and resolve at once. The way you show up front and center inspires more than it commands.",
+      path: "Your independence doesn't push people away — it invites them toward a more grounded version of you.",
+    },
+    reversed: {
+      love: "Needing outside validation dulls your own shine — remember your fire was never dependent on someone else's gaze.",
+      work: "Insecurity dresses itself up as over-control — release the urge to constantly prove your own worth.",
+      path: "Measuring your light against someone else's dims it for no reason — your fire isn't in competition, it just is.",
+    },
+    bridge: "The Queen of Wands is fire matured into presence — will that no longer needs to force itself to be seen.",
+  },
+  "wands-king": {
+    name: "King of Wands",
+    keywords: ["visionary leadership", "charisma", "boldness", "clear direction"],
+    essence:
+      "Wand ablaze in hand, eyes on a horizon only he can see right now. This is fire that finally learned how to lead without scorching what it touches.",
+    upright: {
+      love: "You bring vision and decisiveness to the bond — lead by example, not by demand.",
+      work: "This is the moment to take the reins boldly — your long-range vision can become the whole team's map.",
+      path: "Your natural charisma is a spiritual tool when it's used to inspire rather than to dominate.",
+    },
+    reversed: {
+      love: "Needing to always be right suffocates the other person's voice — lead with the bond, not over it.",
+      work: "Ambition that never listens isolates your leadership — fire that shares no space eventually burns alone.",
+      path: "Boldness without humility curdles into arrogance — even the biggest fire still needs oxygen from somewhere else.",
+    },
+    bridge: "The King of Wands is fire at full mastery — will that directs without needing to destroy in order to lead.",
+  },
+
+  // --- Cups (water: emotion, connection, inner world) ---
+  "cups-01": {
+    name: "Ace of Cups",
+    keywords: ["emotional opening", "new love", "inner fullness", "receptivity"],
+    essence:
+      "A hand holds a cup so full it spills into five streams below. This is the seed of feeling itself — the heart opening before it even knows where that overflow is headed.",
+    upright: {
+      love: "A new feeling arrives with a fullness that needs no explanation — let yourself feel it instead of dissecting it.",
+      work: "You find a purpose that connects you emotionally to what you do, beyond just the outcome.",
+      path: "Your heart is opening to something nourishing — receive it, drop the guard you keep out of habit.",
+    },
+    reversed: {
+      love: "You're struggling to receive the affection coming your way — check if that guard protects you or just isolates you.",
+      work: "The job feels emotionally hollow even though it functions fine on paper.",
+      path: "There's a disconnect from your own feeling — the water is already there, you just have to stop damming it.",
+    },
+    bridge: "The Ace of Cups is water in its purest state — emotional opening before it takes any particular shape.",
+  },
+  "cups-02": {
+    name: "Two of Cups",
+    keywords: ["mutual connection", "reciprocity", "union", "recognition"],
+    essence:
+      "Two figures raise their cups to each other at the same moment, eyes locked. Water no longer moving alone — now it mirrors another current entirely.",
+    upright: {
+      love: "A bond feels balanced, give and take in equal measure — celebrate a reciprocity this rare.",
+      work: "A partnership forms on genuine mutual respect — build on that foundation of trust.",
+      path: "Recognizing yourself in someone else doesn't divide you, it fills you out a little more — the mirror teaches too.",
+    },
+    reversed: {
+      love: "An imbalance between giving and receiving starts weighing on things — name the asymmetry before it grows.",
+      work: "Trust in the partnership starts cracking — an honest conversation is needed to repair it.",
+      path: "Looking outside yourself for what you haven't yet found within leaves you dependent on that external mirror.",
+    },
+    bridge: "The Two of Cups is water meeting water — feeling that recognizes itself reflected in someone else.",
+  },
+  "cups-03": {
+    name: "Three of Cups",
+    keywords: ["shared celebration", "friendship", "community", "collective joy"],
+    essence:
+      "Three figures lift their cups together, celebrating something none of them would have enjoyed the same way alone. Water multiplies the moment it's shared.",
+    upright: {
+      love: "A circle of friends or family celebrates a good moment alongside you — let the joy stay collective.",
+      work: "A team win deserves a group celebration, not a quiet, modest shrug.",
+      path: "Community is part of your spiritual path — shared joy is its own form of gratitude.",
+    },
+    reversed: {
+      love: "Too much socializing starts substituting for real one-on-one connection — chase depth, not just company.",
+      work: "Team dynamics fill up with gossip or competition dressed as celebration — return to what's genuine.",
+      path: "Surrounding yourself with people without real connection leaves you lonelier than it looks from outside.",
+    },
+    bridge: "The Three of Cups is water shared in a circle — feeling that multiplies instead of splitting apart.",
+  },
+  "cups-04": {
+    name: "Four of Cups",
+    keywords: ["apathy", "introspection", "quiet dissatisfaction", "an offer unnoticed"],
+    essence:
+      "Arms crossed under a tree, he doesn't even look at the cup a hand offers from the cloud above. Water gone still inside — so full of the past it misses what's arriving.",
+    upright: {
+      love: "A certain indifference creeps in toward something that used to excite you — check if it's needed rest, or real disconnection.",
+      work: "Boredom with the familiar blinds you to an opportunity already sitting right in front of you, waiting to be noticed.",
+      path: "Today's introspection is valid — just don't let it curdle into prolonged apathy.",
+    },
+    reversed: {
+      love: "You come out of the disconnection and start noticing again what's actually available to you.",
+      work: "New motivation shows up right as you were ready to stop refusing what was already being offered.",
+      path: "You wake from an emotional slump and turn back outward with genuine curiosity.",
+    },
+    bridge: "The Four of Cups is water that stopped moving — feeling gone stagnant, needing to turn and notice what's still flowing.",
+  },
+  "cups-05": {
+    name: "Five of Cups",
+    keywords: ["grief", "loss", "what remains", "partial view"],
+    essence:
+      "Back turned to the two cups still standing, he stares only at the three that spilled. Real grief, yes — but also a reminder that even a wounded gaze doesn't see the whole landscape.",
+    upright: {
+      love: "A loss or disappointment needs mourning without a deadline — grief is its own way of honoring what mattered.",
+      work: "A failure hurts, genuinely — give yourself permission to feel it before forcing an early lesson out of it.",
+      path: "The pain is real, and something is still standing behind you, waiting for you to turn around.",
+    },
+    reversed: {
+      love: "You start turning toward what you still have, without denying what was lost.",
+      work: "Accepting what didn't work opens space to see the opportunity still available.",
+      path: "Grief starts turning into insight — you're no longer just staring at what spilled.",
+    },
+    bridge: "The Five of Cups is water spilled and still stinging — feeling that needs its own time before it turns to face what's left.",
+  },
+  "cups-06": {
+    name: "Six of Cups",
+    keywords: ["nostalgia", "childhood", "reunion", "sweetness of the past"],
+    essence:
+      "In an old courtyard, one child hands another a cup filled with flowers. This is memory's water — the sweetness of who we used to be, occasionally showing up again uninvited.",
+    upright: {
+      love: "A reunion or shared memory stirs real tenderness — let nostalgia visit without moving in.",
+      work: "A skill or passion from your past becomes relevant again — don't write it off as childish.",
+      path: "Healing a piece of your inner child unlocks a joy you thought you'd lost.",
+    },
+    reversed: {
+      love: "Idealizing the past clouds your view of the present — today's bond shouldn't have to compete with a memory.",
+      work: "Clinging to old methods out of comfort blocks what the current moment actually calls for.",
+      path: "Living inside nostalgia keeps you from building new memories — honor the past without staying trapped there.",
+    },
+    bridge: "The Six of Cups is water remembering its own source — feeling returning to innocence without getting stuck in it.",
+  },
+  "cups-07": {
+    name: "Seven of Cups",
+    keywords: ["fantasy", "options", "illusion", "confused choice"],
+    essence:
+      "Seven cups float in the clouds, each holding a different vision — a castle, a jewel, a shadowed figure. Imagination running wild enough that real desire and mere mirage start looking the same.",
+    upright: {
+      love: "Several possibilities or fantasies swirl at once — sort out which is genuine longing and which is just comfortable illusion.",
+      work: "Too many options with no focus breeds paralysis — pick a direction even while the others still glimmer from a distance.",
+      path: "Your imagination is a gift, but today it needs an anchor so it doesn't dissolve into endless maybes.",
+    },
+    reversed: {
+      love: "You start seeing clearly which option was real and which was only fantasy — the fog lifts.",
+      work: "You finally make a concrete decision after circling imaginary alternatives for too long.",
+      path: "You step out of the daydream and land on what you can actually build with what you have.",
+    },
+    bridge: "The Seven of Cups is water splitting into mirages — feeling that needs to choose one channel among many possible ones.",
+  },
+  "cups-08": {
+    name: "Eight of Cups",
+    keywords: ["walking away", "inner search", "leaving behind", "deeper purpose"],
+    essence:
+      "He turns his back on eight neatly stacked cups and walks off into the mountains at night. Water deciding that what's already built isn't enough anymore — there's something truer out there worth the walk.",
+    upright: {
+      love: "Something stable no longer fully satisfies you — listening to that restlessness isn't betrayal, it's honesty.",
+      work: "Material success stops feeding your need for purpose — the next step calls for more meaning, not more achievement.",
+      path: "You're ready to leave a whole chapter behind, even though letting go of the familiar hurts.",
+    },
+    reversed: {
+      love: "Fear of the unknown keeps you in a bond that no longer nourishes you — name what's really holding you there.",
+      work: "Putting off leaving a depleted situation only stretches out the wear — the decision has already been made inside.",
+      path: "You go back to what you left without resolving why you left in the first place — check if it's healing or avoidance of the void.",
+    },
+    bridge: "The Eight of Cups is water pulling away from its known channel — feeling in search of a deeper source than comfort.",
+  },
+  "cups-09": {
+    name: "Nine of Cups",
+    keywords: ["satisfaction", "wish fulfilled", "gratitude", "earned pleasure"],
+    essence:
+      "Arms crossed, nine cups arranged behind him in an arc, he smiles with the ease of someone who got exactly what he wanted. This is pleasure enjoyed without a hint of guilt.",
+    upright: {
+      love: "You feel a real satisfaction with the bond exactly as it stands — enjoy it without hunting for a flaw.",
+      work: "A concrete wish comes true — celebrate the achievement without discounting it.",
+      path: "The wellbeing you feel is real and earned — full gratitude is a valid spiritual state on its own.",
+    },
+    reversed: {
+      love: "Surface-level satisfaction is masking a deeper emotional need that's still unresolved.",
+      work: "Material success doesn't fill a gap that actually wanted something else — check what you were really after.",
+      path: "Complacency stops your growth cold — fulfilled pleasure shouldn't become the ceiling of your path.",
+    },
+    bridge: "The Nine of Cups is water that knows it's full — feeling satisfied enough to celebrate without needing to justify it.",
+  },
+  "cups-10": {
+    name: "Ten of Cups",
+    keywords: ["family fulfillment", "harmony", "shared happiness", "fulfilled sky"],
+    essence:
+      "A rainbow of ten cups arcs over a family celebrating in an embrace below. Water reaching its fullest channel — happiness that holds because it's shared.",
+    upright: {
+      love: "Deep, lasting harmony fills the bond — enjoy this fullness as the fruit of what you built together.",
+      work: "The balance between work and personal life finally feels sustainable and real.",
+      path: "You reach a sense of complete peace — this is the emotional cycle fulfilled in its most generous form.",
+    },
+    reversed: {
+      love: "A picture-perfect family image hides cracks that need honest attention, not just a harmonious surface.",
+      work: "The balance you were chasing breaks when one part of your life demands more than the other can give.",
+      path: "Mistaking outward harmony for inner peace leaves you performing wellbeing instead of actually feeling it.",
+    },
+    bridge: "The Ten of Cups is water overflowing into shared abundance — feeling fulfilled through real community.",
+  },
+  "cups-page": {
+    name: "Page of Cups",
+    keywords: ["sensitivity", "emotional messenger", "tender creativity", "new intuition"],
+    essence:
+      "He stares, startled, at a fish poking out of his cup, as if the emotional life keeps revealing secrets he never expected. This is sensitivity just starting to explore what it even feels.",
+    upright: {
+      love: "A tender, slightly shy feeling wants expression — don't dismiss it just because it feels new or vulnerable.",
+      work: "A creative idea arrives from intuition rather than analysis — give it room before you rationalize it to death.",
+      path: "Your sensitivity is a doorway, not a weakness — let yourself be surprised by what you're still learning to feel.",
+    },
+    reversed: {
+      love: "Sensitivity turns into shutdown when you're afraid to show what you feel — one small step toward openness helps.",
+      work: "A creative idea stays undeveloped out of fear it isn't serious or professional enough.",
+      path: "Suppressing what you feel out of discomfort pulls you away from an intuition that was just about to teach you something.",
+    },
+    bridge: "The Page of Cups is master number eleven turned novice feeling — the emotional teacher-in-waiting only just learning to listen to itself.",
+  },
+  "cups-knight": {
+    name: "Knight of Cups",
+    keywords: ["romanticism", "proposal", "idealism", "advancing with the heart"],
+    essence:
+      "He rides slowly, cup held up like an offering. This is water in motion — not fire's rush, but the care of someone carrying something that genuinely matters to them.",
+    upright: {
+      love: "A romantic gesture or a meaningful offer is approaching — receive it with the same gentleness it arrives in.",
+      work: "An offer or collaboration comes with real, good intentions behind it — trust the sincerity of the gesture.",
+      path: "Your idealism moves you forward heart-first — that doesn't make you naive, it makes you loyal to yourself.",
+    },
+    reversed: {
+      love: "Pretty promises aren't always followed by real action — watch what gets done, not just what gets said.",
+      work: "An offer that looks great on the surface hides unclear terms — check the fine print before committing.",
+      path: "Idealism without action stays pure fantasy — let feeling translate into something concrete too.",
+    },
+    bridge: "The Knight of Cups is water advancing carefully — feeling moving toward someone else without losing its tenderness.",
+  },
+  "cups-queen": {
+    name: "Queen of Cups",
+    keywords: ["deep empathy", "mature intuition", "compassion", "healthy emotional boundaries"],
+    essence:
+      "She holds a closed cup, unlike everyone else's, studying it with total focus. This is water that learned to contain its own depth without drowning itself, or anyone nearby.",
+    upright: {
+      love: "Your capacity to feel and hold others with real empathy is a gift — offer it without losing yourself inside it.",
+      work: "Your sensitivity toward the team or clients becomes a genuine professional strength, not something to hide.",
+      path: "You've learned to feel deeply without overflowing — that's a mature form of emotional wisdom.",
+    },
+    reversed: {
+      love: "You absorb everyone else's emotions until you lose track of your own — set a compassionate boundary.",
+      work: "Emotional overload from the environment overwhelms you — you need space to process before holding anyone else up.",
+      path: "Caring for others so much that you forget to care for yourself drains the very well you draw from.",
+    },
+    bridge: "The Queen of Cups is water matured into presence — feeling that holds depth without spilling or sealing shut.",
+  },
+  "cups-king": {
+    name: "King of Cups",
+    keywords: ["emotional balance", "wisdom of the heart", "calm under pressure", "compassionate leadership"],
+    essence:
+      "He sits calm on a throne floating over choppy water. This is water mastering its own tide — feeling everything without being swept away by any of it.",
+    upright: {
+      love: "You bring emotional stability to the bond, able to hold even the intense moments without overflowing.",
+      work: "You lead with real emotional intelligence — listening before reacting builds genuine trust.",
+      path: "You've integrated your emotional world with your reason — this calm isn't coldness, it's mastery earned over time.",
+    },
+    reversed: {
+      love: "The calm you show outside hides an inner tide you're not fully allowing yourself to feel.",
+      work: "Subtle emotional manipulation disguises itself as serenity — check if your control is balance or avoidance.",
+      path: "Suppressing what you feel behind a mask of calm disconnects you from your own real emotional wisdom.",
+    },
+    bridge: "The King of Cups is water at full mastery — feeling that governs its own tide without ever denying it.",
+  },
 };

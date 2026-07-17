@@ -3,7 +3,7 @@ import { TAROT_DECK } from "@aluna/core";
 import { TAROT_CARDS_ES } from "../tarot-es";
 import { TAROT_CARDS_EN } from "../tarot-en";
 
-const DONE: ReadonlyArray<(typeof TAROT_DECK)[number]["arcana"] | string> = ["major"]; // tasks 5-7 añaden palos
+const DONE: ReadonlyArray<(typeof TAROT_DECK)[number]["arcana"] | string> = ["major", "wands", "cups"]; // task 6-7 añaden swords/pentacles
 
 const cardsDone = TAROT_DECK.filter((c) => DONE.includes(c.arcana) || DONE.includes(c.suit ?? ""));
 
