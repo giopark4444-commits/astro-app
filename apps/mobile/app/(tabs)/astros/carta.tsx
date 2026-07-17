@@ -16,6 +16,7 @@ import { useTheme } from "../../../lib/theme-context";
 import { useT } from "../../../lib/i18n-context";
 import { astroLabels, ASPECT_GLYPHS } from "../../../content/astrology";
 import { fetchChart, type ChartKind } from "../../../lib/chart-api";
+import { hasCeremonyPlayed, markCeremonyPlayed } from "../../../lib/ceremony-gate";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../../../theme/tokens";
 
 const TEXT_VS = "︎"; // presentación de texto (no emoji) en los glifos
@@ -89,10 +90,11 @@ export default function CartaScreen() {
   }, [profileId, accessToken, kind, houseSystem, zodiac]);
 
   const ready = state.s === "ready" ? state : null;
-  // Ceremonia de dibujo (R5): solo en el PRIMER chart listo — togglear casas/
-  // zodiaco/kind re-renderiza la misma rueda pero no la re-dibuja. Espejo del web.
-  const ceremonyPlayed = useRef(false);
-  const playCeremony = ready !== null && !ceremonyPlayed.current;
+  // Ceremonia de dibujo (R5): solo en el PRIMER chart listo de toda la SESIÓN
+  // de app (gate a nivel de módulo en lib/ceremony-gate.ts, Task 3) — togglear
+  // casas/zodiaco/kind, o salir y volver a re-entrar a esta pantalla, re-
+  // renderiza la misma rueda pero no la re-dibuja. Espejo del web.
+  const playCeremony = ready !== null && !hasCeremonyPlayed();
   const ascPos = ready ? signOfLongitude(ready.chart.houses.ascendant) : null;
   const byKey = useMemo(() => {
     const m = new Map<string, BodyPosition>();
@@ -104,7 +106,7 @@ export default function CartaScreen() {
     [byKey],
   );
   useEffect(() => {
-    if (ready !== null) ceremonyPlayed.current = true;
+    if (ready !== null) markCeremonyPlayed();
   }, [ready]);
 
   if (!profile || !profileId) {
