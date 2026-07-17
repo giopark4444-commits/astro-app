@@ -13,8 +13,11 @@ const TAI_SUI_KEY: Record<string, string> = {
 /** Lámina del periodo oriental: pilares año/mes/día en hanzi (con pinyin/animal),
  *  choque y armonías del día, fila Tai Sui en vista año, fechas 節 del rango.
  *  Componente local propio (no comparte código con SkyEvents, que está acoplado
- *  a signos/casas occidentales). */
-export function EasternSky({ payload, tz }: { payload: EasternPayload; tz: string }) {
+ *  a signos/casas occidentales). `script` alterna hanzi ↔ hangul en los pilares
+ *  (spec §5 nota c — toggle Saju, mismo contrato que pillar-column de pilares). */
+export function EasternSky({ payload, tz, script = "hanzi" }: {
+  payload: EasternPayload; tz: string; script?: "hanzi" | "hangul";
+}) {
   const t = useTranslations("horoscopo");
   const tp = useTranslations("pilares");
   const locale = useLocale();
@@ -39,9 +42,15 @@ export function EasternSky({ payload, tz }: { payload: EasternPayload; tz: strin
           return (
             <div key={key} className={styles.pillarCell}>
               <span className={styles.pillarLabel}>{tp(key)}</span>
-              <span className={styles.pillarChar}>{p.stemHanzi}{p.branchHanzi}</span>
+              <span className={styles.pillarChar}>
+                {script === "hangul"
+                  ? `${STEM_LABELS[p.stem]!.hangul}${BRANCH_LABELS[p.branch]!.hangul}`
+                  : `${p.stemHanzi}${p.branchHanzi}`}
+              </span>
               <span className={styles.pillarSub}>
-                {STEM_LABELS[p.stem]!.pinyin} {BRANCH_LABELS[p.branch]!.pinyin}
+                {script === "hangul"
+                  ? `${STEM_LABELS[p.stem]!.romanKo} ${BRANCH_LABELS[p.branch]!.romanKo}`
+                  : `${STEM_LABELS[p.stem]!.pinyin} ${BRANCH_LABELS[p.branch]!.pinyin}`}
               </span>
               <span className={styles.pillarAnimal}>{tp(`animal${cap(p.animal)}`)}</span>
             </div>

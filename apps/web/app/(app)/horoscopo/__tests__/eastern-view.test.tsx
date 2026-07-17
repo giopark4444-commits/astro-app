@@ -110,6 +110,22 @@ describe("HoroscopoView — tab Oriental", () => {
     await waitFor(() => expect(screen.getByText(/Lichun a Lichun/)).toBeInTheDocument());
   });
 
+  it("con Pro activo, el toggle Ba Zi ↔ Saju cambia los pilares a hangul (spec §5 nota c)", async () => {
+    renderView();
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const proBtn = await screen.findByText("Modo Pro");
+    act(() => { proBtn.click(); });
+    // el toggle de escritura aparece con Pro (mismo contrato que pilares en móvil)
+    const sajuBtn = await screen.findByRole("tab", { name: "Saju" });
+    act(() => { sajuBtn.click(); });
+    // pilar del año 丙午 en hangul: 병 (stem 2) + 오 (branch 6)
+    await waitFor(() => expect(screen.getAllByText(/병오/).length).toBeGreaterThan(0));
+    // volver a Ba Zi restaura el hanzi
+    const baziBtn = screen.getByRole("tab", { name: "Ba Zi" });
+    act(() => { baziBtn.click(); });
+    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+  });
+
   it("el toggle Pro muestra la tabla completa de interacciones con hanzi", async () => {
     renderView();
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());

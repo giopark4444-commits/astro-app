@@ -126,6 +126,9 @@ export function HoroscopoView() {
   const prevAnimalRef = useRef<string | null>(animal);
   const [easternState, setEasternState] = useState<EasternState>({ s: "loading" });
   const [openAreaEastern, setOpenAreaEastern] = useState<string | null>(null);
+  // Toggle Ba Zi ↔ Saju de los pilares (spec §5 nota c) — mismo par de valores
+  // que pilares-view; visible junto al Modo Pro.
+  const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
 
   useEffect(() => {
     if (trad !== "oriental") return;
@@ -245,7 +248,7 @@ export function HoroscopoView() {
               <>
                 <section className={`card ${styles.section}`}>
                   <h2 className={styles.sectionH}>{t("pillarsTitle")}</h2>
-                  <EasternSky payload={readyEastern} tz={tz} />
+                  <EasternSky payload={readyEastern} tz={tz} script={script} />
                 </section>
 
                 <section className={`card ${styles.section}`}>
@@ -258,6 +261,17 @@ export function HoroscopoView() {
 
                 {pro && (
                   <>
+                    {/* Toggle de escritura Ba Zi ↔ Saju (spec §5 nota c) — mismo
+                        chip-par que pilares-view.tsx; con Pro, como allí en móvil. */}
+                    <div className={styles.scriptRow} role="tablist" aria-label="Ba Zi / Saju">
+                      {(["hanzi", "hangul"] as const).map((s) => (
+                        <button key={s} type="button" role="tab" aria-selected={script === s}
+                          className={`chip--control chip--control-outline ${script === s ? "chip--control-on" : ""}`}
+                          onClick={() => setScript(s)}>
+                          {tp(s === "hanzi" ? "scriptBazi" : "scriptSaju")}
+                        </button>
+                      ))}
+                    </div>
                     <section className={`card ${styles.section}`}>
                       <h2 className={styles.sectionH}>{t("proInteractions")}</h2>
                       <table className={styles.proTable}>
