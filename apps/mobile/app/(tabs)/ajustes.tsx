@@ -437,9 +437,7 @@ function Row({
   return (
     <View style={[styles.row, last && styles.rowLast]}>
       <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={[styles.rowValue, valueStyle]} numberOfLines={1}>
-        {value}
-      </Text>
+      <Text style={[styles.rowValue, valueStyle]}>{value}</Text>
     </View>
   );
 }
