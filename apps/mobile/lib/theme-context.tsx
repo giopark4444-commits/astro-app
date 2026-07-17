@@ -8,6 +8,9 @@ import {
   makeTokens,
 } from "../theme/tokens";
 import { getRaw, setRaw } from "./storage";
+import { DEFAULT_PALETTE_MODE, isPaletteMode, type PaletteMode } from "./palette-mode";
+
+export type { PaletteMode };
 
 /**
  * Preferencia de modo del usuario: "auto" sigue el esquema del sistema; "light"
@@ -17,6 +20,7 @@ export type ModePref = Mode | "auto";
 
 const THEME_KEY = "aluna.theme.v1";
 const MODE_KEY = "aluna.mode.v1";
+const PALETTE_KEY = "aluna.palette.v1";
 
 const DEFAULT_THEME: ThemeName = "observatory";
 const DEFAULT_MODE: ModePref = "dark";
@@ -30,8 +34,12 @@ interface ThemeContextValue {
   mode: Mode;
   /** Paleta resuelta del (tema × modo) activo. */
   t: ThemeTokens;
+  /** Modo Colorido: "gold" (default, monocromo dorado) o "colorful" (tiñe
+   *  datos con su color de dominio — áreas de vida, números, Wu Xing, elemento). */
+  paletteMode: PaletteMode;
   setTheme: (theme: ThemeName) => void;
   setModePref: (mode: ModePref) => void;
+  setPaletteMode: (mode: PaletteMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -48,15 +56,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [theme, setThemeState] = useState<ThemeName>(DEFAULT_THEME);
   const [modePref, setModePrefState] = useState<ModePref>(DEFAULT_MODE);
+  const [paletteMode, setPaletteModeState] = useState<PaletteMode>(DEFAULT_PALETTE_MODE);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([getRaw(THEME_KEY), getRaw(MODE_KEY)]).then(([rawTheme, rawMode]) => {
-      if (!alive) return;
-      if (isTheme(rawTheme)) setThemeState(rawTheme);
-      if (isModePref(rawMode)) setModePrefState(rawMode);
-      setReady(true);
-    });
+    Promise.all([getRaw(THEME_KEY), getRaw(MODE_KEY), getRaw(PALETTE_KEY)]).then(
+      ([rawTheme, rawMode, rawPalette]) => {
+        if (!alive) return;
+        if (isTheme(rawTheme)) setThemeState(rawTheme);
+        if (isModePref(rawMode)) setModePrefState(rawMode);
+        if (isPaletteMode(rawPalette)) setPaletteModeState(rawPalette);
+        setReady(true);
+      },
+    );
     return () => {
       alive = false;
     };
@@ -72,12 +84,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     void setRaw(MODE_KEY, next);
   }, []);
 
+  const setPaletteMode = useCallback((next: PaletteMode) => {
+    setPaletteModeState(next);
+    void setRaw(PALETTE_KEY, next);
+  }, []);
+
   const mode: Mode = modePref === "auto" ? (system === "light" ? "light" : "dark") : modePref;
   const t = useMemo(() => makeTokens(theme, mode), [theme, mode]);
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ ready, theme, modePref, mode, t, setTheme, setModePref }),
-    [ready, theme, modePref, mode, t, setTheme, setModePref],
+    () => ({ ready, theme, modePref, mode, t, paletteMode, setTheme, setModePref, setPaletteMode }),
+    [ready, theme, modePref, mode, t, paletteMode, setTheme, setModePref, setPaletteMode],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

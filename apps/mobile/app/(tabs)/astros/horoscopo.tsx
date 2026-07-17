@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PLANETS, ZODIAC_SIGNS } from "@aluna/core";
+import { ELEMENT_INK, PLANETS, ZODIAC_SIGNS } from "@aluna/core";
 import { AreaBars, type BarArea } from "../../../components/AreaBars";
 import { SkyEvents } from "../../../components/SkyEvents";
 import { HoroscopeReading } from "../../../components/HoroscopeReading";
@@ -50,7 +50,8 @@ export default function HoroscopoScreen() {
   const insets = useSafeAreaInsets();
   const { profile } = useProfile();
   const { session } = useAuth();
-  const { t: tk } = useTheme();
+  const { t: tk, paletteMode } = useTheme();
+  const colorful = paletteMode === "colorful";
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const L = astroLabels(locale);
@@ -165,15 +166,29 @@ export default function HoroscopoScreen() {
           <>
             {/* Signo — 12 chips */}
             <View style={styles.optionsRow}>
-              {ZODIAC_SIGNS.map((s) => (
-                <Chip
-                  key={s.key}
-                  kind="control"
-                  label={`${SIGN_GLYPH[s.key]} ${L.signs[s.key]}`}
-                  selected={sign === s.key}
-                  onPress={() => setSign(s.key)}
-                />
-              ))}
+              {ZODIAC_SIGNS.map((s) => {
+                const selected = sign === s.key;
+                // Colorido: solo el glifo de los chips INACTIVOS se tiñe por
+                // elemento (ELEMENT_INK) — el chip activo conserva el dorado
+                // de siempre (legibilidad), mismo label combinado que antes.
+                const tintGlyph = colorful && !selected;
+                return (
+                  <Chip
+                    key={s.key}
+                    kind="control"
+                    label={tintGlyph ? L.signs[s.key] : `${SIGN_GLYPH[s.key]} ${L.signs[s.key]}`}
+                    icon={
+                      tintGlyph ? (
+                        <Text style={[styles.signGlyphTint, { color: ELEMENT_INK[s.element] }]}>
+                          {SIGN_GLYPH[s.key]}
+                        </Text>
+                      ) : undefined
+                    }
+                    selected={selected}
+                    onPress={() => setSign(s.key)}
+                  />
+                );
+              })}
             </View>
 
             {/* Periodo — 4 chips */}
@@ -335,6 +350,10 @@ function makeStyles(t: ThemeTokens) {
     // Contenedor de cualquier fila de chips (tradición / signo / periodo): los
     // chips en sí son <Chip kind="control">, este solo los reparte en fila.
     optionsRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: space.sm, width: "100%", marginBottom: space.lg },
+    // Glifo del signo teñido por elemento (modo Colorido, chips inactivos) — mismo
+    // tamaño que el label del chip (`controlText`/typeScale.md en components/ui.tsx)
+    // para no desalinear la fila cuando reemplaza al glifo embebido en el label.
+    signGlyphTint: { fontSize: typeScale.md, fontFamily: fonts.sansMedium },
 
     note: { color: t.textDim, fontSize: typeScale.sm, fontFamily: fonts.sans, textAlign: "center", marginVertical: space.xxl },
 
