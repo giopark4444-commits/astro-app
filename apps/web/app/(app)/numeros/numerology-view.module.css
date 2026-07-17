@@ -45,8 +45,11 @@
    0,1,0; el módulo carga después de globals.css así que .heroN ganaría el
    shorthand `animation` completo y mataría la ignición). Se encadenan los
    dos keyframes en un solo shorthand: ignite corre una vez (0→1200ms) y el
-   glow ambiental arranca justo después via animation-delay, ya instalado. */
-.heroN.ignite {
+   glow ambiental arranca justo después via animation-delay, ya instalado.
+   :global(.ignite) porque la clase viene de globals.css — sin él, CSS Modules
+   escala `.ignite` al módulo y el selector jamás matchea (bug cazado en la
+   verificación en vivo). */
+.heroN:global(.ignite) {
   animation: aluna-ignite 1200ms var(--ease-soft) both,
     aluna-glow 4.5s var(--ease-soft) 1200ms infinite;
 }

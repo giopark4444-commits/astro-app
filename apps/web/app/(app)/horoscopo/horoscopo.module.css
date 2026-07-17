@@ -20,11 +20,24 @@
 /* Entrada escalonada de los 12 chips (signos/animales): mismo mecanismo que
    `.reveal` global (globals.css, aluna-reveal + --i por índice) pero con un
    stagger propio más corto — con el global 70ms el chip 12 entraría a 770ms,
-   se siente lento para una fila de 12 elementos pequeños. */
+   se siente lento para una fila de 12 elementos pequeños.
+   El keyframe se REDEFINE local (mismo cuerpo que aluna-reveal de globals.css):
+   css-modules escala los animation-name del módulo, así que referenciar el
+   global directo deja el nombre colgando y los chips se quedan en opacity:0
+   — bug cazado en la verificación en vivo (los 12 animales invisibles). */
+@keyframes aluna-reveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .chipReveal {
   opacity: 0;
   animation: aluna-reveal var(--dur) var(--ease) both;
   animation-delay: calc(var(--i, 0) * 40ms);
+}
+/* reduced-motion: la variante local necesita su propio safety (el bloque
+   global de globals.css cubre duración/delay, esto cubre el estado base). */
+@media (prefers-reduced-motion: reduce) {
+  .chipReveal { opacity: 1; }
 }
 .periods { display: flex; justify-content: center; gap: var(--sp-1); }
 
