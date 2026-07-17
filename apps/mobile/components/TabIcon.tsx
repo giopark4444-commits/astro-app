@@ -1,5 +1,5 @@
 import { View, type ColorValue } from "react-native";
-import Svg, { Circle, G, Path } from "react-native-svg";
+import Svg, { Circle, G, Path, Rect } from "react-native-svg";
 
 /**
  * Iconos de línea fina para las tabs (reemplazan los glifos Unicode ☾☉八✦◷).
@@ -10,8 +10,12 @@ import Svg, { Circle, G, Path } from "react-native-svg";
  * el enso, que ya representa la marca en otro lugar de la UI).
  * "astros" (tab que hospeda Carta+Horóscopo, T2) reusa la rueda de "carta" —
  * ya es el ícono conceptual correcto para "astros/carta astral".
+ * "tarot" (T3) es VERBATIM del glifo "cards" web (apps/web/components/
+ * icon.tsx:9): dos rects redondeados solapados en abanico, mismo viewBox
+ * 24×24 y radios — solo cambia el idioma de trazo (stroke discreto en vez de
+ * `fill:none;stroke:currentColor` inline, ya lo da el <G> compartido de abajo).
  */
-type TabIconName = "hoy" | "astros" | "numeros" | "pilares" | "ajustes";
+type TabIconName = "hoy" | "astros" | "numeros" | "pilares" | "tarot" | "ajustes";
 
 const STROKE_WIDTH = 1.5;
 
@@ -48,6 +52,18 @@ function IconPillars() {
   return <Path d="M6 4v16M11 4v16M16 4v16M21 4v16" />;
 }
 
+/** Dos cartas en abanico, VERBATIM de apps/web/components/icon.tsx:9 ("cards")
+ *  — mismas coordenadas/radios, rotación de la carta trasera vía `rotation`+
+ *  `origin` (equivalente RN de `transform="rotate(-12 9 14.5)"`). */
+function IconCards() {
+  return (
+    <>
+      <Rect x={3.5} y={7} width={11} height={15} rx={2} rotation={-12} origin="9, 14.5" />
+      <Rect x={9.5} y={5.5} width={11} height={15} rx={2} />
+    </>
+  );
+}
+
 /** Engrane fino de línea, diseño nuevo (sin equivalente en el set web). */
 function IconGear() {
   return (
@@ -63,6 +79,7 @@ const ICONS: Record<TabIconName, () => React.ReactNode> = {
   astros: IconWheel,
   numeros: IconGrid3,
   pilares: IconPillars,
+  tarot: IconCards,
   ajustes: IconGear,
 };
 

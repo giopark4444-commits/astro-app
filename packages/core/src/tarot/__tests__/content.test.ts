@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { TAROT_DECK } from "@aluna/core";
-import { TAROT_CARDS_ES, composeReadingProse } from "../tarot-es";
-import { TAROT_CARDS_EN } from "../tarot-en";
+import { TAROT_DECK } from "../deck";
+import { TAROT_CARDS_ES, composeReadingProse } from "../content-es";
+import { TAROT_CARDS_EN } from "../content-en";
 
 describe("contenido tarot", () => {
   it("cada carta cubierta existe en ES y EN con todos los campos no vacíos", () => {
