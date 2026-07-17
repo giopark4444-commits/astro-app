@@ -101,4 +101,4 @@ export { sunSignFromDate } from "./astrology/sun-sign";
 
 // Glosario de significados ("toca y entiende") — contenido único, compartido web+móvil
 export { glossaryEntry, GLOSSARY_ES, GLOSSARY_EN, type GlossaryEntry } from "./glossary";
-export { planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMeaningKey } from "./glossary/keys";
+export { planetMeaningKey, dignityMeaningKey, patternMeaningKey, houseSystemMeaningKey, interactionKey } from "./glossary/keys";
