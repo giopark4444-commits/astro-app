@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { dailyCard, cardById } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { Ceremony } from "./ceremony";
 import styles from "./tarot.module.css";
 
 interface TarotReadingCard {
@@ -55,9 +56,17 @@ export function TarotView({ userId }: { userId: string }) {
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
 
+  // tz/localDate se calculan al MONTAR y quedan stale si la página queda
+  // abierta cruzando la medianoche — limitación aceptada a propósito (recargar
+  // trae el día nuevo; el cruce en vivo no amerita un ticker).
   const tz = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone ?? "utc", []);
   const localDate = useMemo(() => localDateKey(tz), [tz]);
   const storageKey = `tarot-daily-${userId}-${localDate}`;
+  // Dos llaves separadas a propósito: `storageKey` = "revelada visualmente"
+  // (no volver a mostrar el dorso), `savedKey` = "confirmada en el servidor".
+  // Si el POST falla, la carta sigue revelada pero savedKey no se marca y el
+  // próximo montaje reintenta el guardado una vez en background (review T4).
+  const savedKey = `tarot-daily-saved-${userId}-${localDate}`;
 
   const daily = useMemo(() => dailyCard(userId, localDate, { reversals: true }), [userId, localDate]);
   const dailyContent = cardsDict[daily.card.id]!;
@@ -70,18 +79,12 @@ export function TarotView({ userId }: { userId: string }) {
   const [ceremony, setCeremony] = useState<"three" | null>(null);
   const postedDailyRef = useRef(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.localStorage.getItem(storageKey) === "1") {
-      setRevealed(true);
-      postedDailyRef.current = true;
-    }
-  }, [storageKey]);
-
-  function handleFlip() {
-    if (revealed) return;
-    setRevealed(true);
-    if (typeof window !== "undefined") window.localStorage.setItem(storageKey, "1");
+  const postDaily = useCallback(() => {
+    // Guarda el daily en el servidor. `postedDailyRef` evita el doble POST
+    // dentro de un mismo montaje; `savedKey` solo se marca cuando el servidor
+    // confirmó (res.ok) — un fallo deja la puerta abierta al reintento del
+    // próximo montaje, y el catch es silencioso a propósito (el diario es un
+    // hábito, no un bloqueo del rito).
     if (postedDailyRef.current) return;
     postedDailyRef.current = true;
     void fetch("/api/tarot/readings", {
@@ -92,7 +95,29 @@ export function TarotView({ userId }: { userId: string }) {
         deck: "rws",
         cards: [{ cardId: daily.card.id, reversed: daily.reversed, position: "day" }],
       }),
-    });
+    })
+      .then((res) => {
+        if (res.ok) window.localStorage.setItem(savedKey, "1");
+      })
+      .catch(() => {
+        /* sin red: reintento en el próximo montaje (revelada sin savedKey) */
+      });
+  }, [daily, savedKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem(storageKey) === "1") {
+      setRevealed(true);
+      // Revelada pero nunca confirmada por el servidor → reintenta una vez.
+      if (window.localStorage.getItem(savedKey) !== "1") postDaily();
+    }
+  }, [storageKey, savedKey, postDaily]);
+
+  function handleFlip() {
+    if (revealed) return;
+    setRevealed(true);
+    if (typeof window !== "undefined") window.localStorage.setItem(storageKey, "1");
+    postDaily();
   }
 
   const dailyProse = useMemo(
@@ -106,23 +131,28 @@ export function TarotView({ userId }: { userId: string }) {
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
   const [openReadingId, setOpenReadingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let alive = true;
+  const aliveRef = useRef(true);
+  const loadDiary = useCallback(() => {
     void (async () => {
       try {
         const res = await fetch("/api/tarot/readings", { method: "GET" });
         if (!res.ok) throw new Error(String(res.status));
         const data = (await res.json()) as { readings: TarotReadingRow[]; total: number };
-        if (!alive) return;
+        if (!aliveRef.current) return;
         setDiary({ s: "ready", readings: data.readings, total: data.total });
       } catch {
-        if (alive) setDiary({ s: "error" });
+        if (aliveRef.current) setDiary({ s: "error" });
       }
     })();
-    return () => {
-      alive = false;
-    };
   }, []);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    loadDiary();
+    return () => {
+      aliveRef.current = false;
+    };
+  }, [loadDiary]);
 
   const dateFmt = useMemo(
     () => new Intl.DateTimeFormat(locale === "en" ? "en" : "es", { day: "numeric", month: "short", year: "numeric" }),
@@ -221,9 +251,13 @@ export function TarotView({ userId }: { userId: string }) {
       </section>
 
       {ceremony === "three" && (
-        // Punto de montaje de Task 5: la ceremonia real (dibujar 3 cartas,
-        // componer la prosa, guardar) reemplaza este placeholder.
-        <div data-testid="ceremony-placeholder" />
+        <Ceremony
+          onClose={() => {
+            setCeremony(null);
+            // La lectura pudo guardarse durante la ceremonia: refresca el diario.
+            loadDiary();
+          }}
+        />
       )}
 
       <section className={styles.diarySection}>

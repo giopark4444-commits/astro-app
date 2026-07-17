@@ -1,0 +1,286 @@
+/* La ceremonia de tirada — el alma es LENTA y SUAVE: dorado (--acc) sobre el
+   índigo del fondo, nada de confeti. Todos los keyframes son LOCALES a este
+   módulo (lección CSS Modules: un keyframe global referenciado desde un
+   .module.css se escapea y muere silencioso — aquí todo vive en el módulo).
+   prefers-reduced-motion: la regla global de app/globals.css colapsa
+   transitions; las animation de este módulo se apagan explícitamente abajo. */
+
+.ceremony {
+  margin-bottom: var(--sp-7);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg, 20px);
+  padding: var(--sp-5) var(--sp-4);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, color-mix(in srgb, var(--acc) 7%, transparent), transparent),
+    var(--surface-2, transparent);
+  animation: paneIn 700ms var(--ease) both;
+}
+
+.stepPane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: center;
+  animation: paneIn 700ms var(--ease) both;
+}
+@keyframes paneIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-xl);
+  color: var(--ink);
+  margin: 0;
+}
+.stepHint { color: var(--soft); font-size: var(--text-xs); margin: 0; }
+
+.primaryBtn {
+  border: 1px solid var(--acc);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--acc-text);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-5);
+  transition: box-shadow 400ms var(--ease), border-color 400ms var(--ease);
+}
+.primaryBtn:hover { box-shadow: var(--glow-soft); }
+.primaryBtn:disabled { opacity: 0.6; cursor: default; }
+
+.ghostBtn {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--soft);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-4);
+  transition: border-color 400ms var(--ease), color 400ms var(--ease);
+}
+.ghostBtn:hover { border-color: var(--acc); color: var(--acc-text); }
+
+/* ---------- question ---------- */
+.questionInput {
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  padding: var(--sp-3) var(--sp-4);
+}
+.questionInput:focus { outline: none; border-color: var(--acc); box-shadow: var(--glow-soft); }
+.stepActions { display: flex; gap: var(--sp-3); }
+
+/* ---------- shuffle: el mazo sostenido y las cartas fantasma ---------- */
+.shuffleStage {
+  position: relative;
+  width: 200px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deck {
+  position: relative;
+  width: 120px;
+  height: 195px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  box-shadow: var(--glow-soft);
+  touch-action: none; /* el hold es el gesto; sin scroll accidental */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.deck:active { box-shadow: 0 0 28px color-mix(in srgb, var(--acc) 35%, transparent); }
+
+/* 5-7 cartas fantasma que danzan alrededor mientras sostienes: órbitas lentas,
+   ligeramente desfasadas entre sí (var(--g) = índice del fantasma). Solo
+   transform/opacity — nada de layout. */
+.ghostCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 88px;
+  margin: -44px 0 0 -27px;
+  border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  animation: ghostOrbit 4200ms ease-in-out infinite;
+  animation-delay: calc(var(--g) * -640ms);
+  will-change: transform, opacity;
+}
+@keyframes ghostOrbit {
+  0% { opacity: 0; transform: rotate(calc(var(--g) * 60deg)) translateX(0) rotate(6deg) scale(0.9); }
+  18% { opacity: 0.55; }
+  50% { opacity: 0.4; transform: rotate(calc(var(--g) * 60deg + 170deg)) translateX(86px) rotate(-10deg) scale(1); }
+  82% { opacity: 0.55; }
+  100% { opacity: 0; transform: rotate(calc(var(--g) * 60deg + 360deg)) translateX(6px) rotate(6deg) scale(0.9); }
+}
+
+/* ---------- cut: 3 montones desde el centro ---------- */
+.cutRow { display: flex; gap: var(--sp-4); justify-content: center; }
+.cutPile {
+  width: 88px;
+  height: 143px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  animation: pileSplit 900ms var(--ease) both;
+  animation-delay: calc(var(--p) * 120ms);
+  transition: transform 500ms var(--ease), box-shadow 500ms var(--ease);
+}
+.cutPile:hover { transform: translateY(-6px); box-shadow: var(--glow-soft); }
+@keyframes pileSplit {
+  from { opacity: 0; transform: translateX(calc((var(--p) - 1) * -60px)) translateY(8px); }
+  to { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+/* ---------- fan: las 78 boca abajo en arco ---------- */
+.fanScroll { width: 100%; overflow-x: auto; padding: var(--sp-2) 0; }
+.fanArc {
+  position: relative;
+  /* Arco cerrado en móvil: contenedor más ancho que el viewport, con scroll. */
+  width: 640px;
+  height: 190px;
+  margin: 0 auto;
+}
+.fanCard {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 58px;
+  height: 94px;
+  margin-left: -29px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  background: var(--surface-2, #141225);
+  cursor: pointer;
+  /* Arco: rotación por índice desde un origen muy por debajo del viewport —
+     el abanico respira como un solo cuerpo. */
+  transform-origin: 50% 420%;
+  transform: rotate(calc((var(--i) - 38.5) * 1.35deg));
+  transition: transform 600ms var(--ease), opacity 600ms var(--ease), box-shadow 400ms var(--ease);
+}
+.fanCard:hover { box-shadow: var(--glow-soft); transform: rotate(calc((var(--i) - 38.5) * 1.35deg)) translateY(-10px); }
+/* La elegida "vuela": sube y se desvanece hacia su slot (el slot la recibe). */
+.fanCardPicked {
+  opacity: 0;
+  transform: rotate(0deg) translateY(140px) scale(0.7);
+  pointer-events: none;
+}
+.fanCount { color: var(--acc-text); font-size: var(--text-xs); letter-spacing: 1px; margin: 0; }
+
+/* ---------- slots (fan + reveal) ---------- */
+.slotRow, .revealRow {
+  display: flex;
+  gap: var(--sp-4);
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 150px; }
+.slotCardBox {
+  width: 96px;
+  height: 156px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 600ms var(--ease), box-shadow 600ms var(--ease);
+}
+.slotFilled { border-style: solid; border-color: var(--acc); box-shadow: var(--glow-soft); animation: slotLand 700ms var(--ease) both; }
+@keyframes slotLand {
+  from { opacity: 0; transform: translateY(-16px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.slotLabel {
+  font-size: var(--text-2xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--acc-text);
+}
+
+/* Flip del reveal: reusa .flipCard/.face de tarot.module.css; aquí solo el tamaño. */
+.slotFlip { width: 96px !important; height: 156px !important; }
+
+.revealBody { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.revealName {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink);
+  margin: 0;
+  /* Ignite local (no se referencia el keyframe global desde el módulo). */
+  animation: nameIgnite 1400ms var(--ease) both;
+}
+@keyframes nameIgnite {
+  0% { opacity: 0; text-shadow: 0 0 0 transparent; }
+  45% { opacity: 1; text-shadow: 0 0 18px currentColor; }
+  100% { opacity: 1; text-shadow: 0 0 0 transparent; }
+}
+.revealKeywords { color: var(--soft); font-size: var(--text-2xs); margin: 0; }
+
+/* ---------- reading ---------- */
+.readingQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0; }
+.readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
+.readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
+.readingImg {
+  width: 64px;
+  height: 104px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.readingCardBody { display: flex; flex-direction: column; gap: var(--sp-1); }
+.readingPosition {
+  font-size: var(--text-2xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--acc-text);
+}
+.readingName { font-family: var(--font-display); font-size: var(--text-md); color: var(--ink); margin: 0; }
+.readingAmbit { color: var(--soft); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+.readingProse { width: 100%; text-align: left; border-top: 1px solid var(--line); padding-top: var(--sp-4); }
+
+.savedOk { color: var(--acc-text); font-size: var(--text-sm); margin: 0; }
+.saveError { color: var(--tone-caution, var(--soft)); font-size: var(--text-xs); margin: 0; }
+.freeLimit { color: var(--soft); font-size: var(--text-sm); margin: 0; max-width: 420px; }
+.freeLimitCta { color: var(--acc-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .ceremony { padding: var(--sp-6) var(--sp-6); }
+  .fanArc { width: 940px; height: 210px; }
+  .fanCard { transform: rotate(calc((var(--i) - 38.5) * 1.05deg)); transform-origin: 50% 560%; }
+  .fanCard:hover { transform: rotate(calc((var(--i) - 38.5) * 1.05deg)) translateY(-10px); }
+  .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .readingCard { flex-direction: column; align-items: center; text-align: center; }
+  .readingCardBody { align-items: center; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ceremony, .stepPane, .ghostCard, .cutPile, .slotFilled, .revealName {
+    animation: none;
+  }
+  .ceremony, .stepPane { opacity: 1; transform: none; }
+}

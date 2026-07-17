@@ -101,9 +101,10 @@ describe("TarotView", () => {
     expect(localStorage.getItem(`tarot-daily-${USER_ID}-${localDate}`)).toBeTruthy();
   });
 
-  it("si ya estaba revelada en localStorage, monta con la cara arriba y NO vuelve a postear", async () => {
+  it("si ya estaba revelada Y guardada en localStorage, monta con la cara arriba y NO vuelve a postear", async () => {
     const localDate = localDateKey();
     localStorage.setItem(`tarot-daily-${USER_ID}-${localDate}`, "1");
+    localStorage.setItem(`tarot-daily-saved-${USER_ID}-${localDate}`, "1");
     const { calls } = mockFetch();
     renderView();
 
@@ -116,13 +117,53 @@ describe("TarotView", () => {
     expect(calls.some((c) => c.init?.method === "POST")).toBe(false);
   });
 
-  it("la tarjeta 'Tres cartas' activa monta el punto de montaje de la ceremonia (Task 5)", async () => {
+  it("la tarjeta 'Tres cartas' monta la ceremonia (paso de la pregunta)", async () => {
     mockFetch();
     renderView();
-    expect(screen.queryByTestId("ceremony-placeholder")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("ceremony")).not.toBeInTheDocument();
     const threeCard = await screen.findByRole("button", { name: new RegExp(es.tarot.spreadThree) });
     fireEvent.click(threeCard);
-    expect(await screen.findByTestId("ceremony-placeholder")).toBeInTheDocument();
+    expect(await screen.findByTestId("ceremony")).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.questionTitle)).toBeInTheDocument();
+  });
+
+  it("si el POST del daily falla, NO se marca guardado y al remontar se reintenta una vez", async () => {
+    // GET responde vacío; el POST rechaza (red caída) siempre.
+    const calls: FetchCall[] = [];
+    global.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+      calls.push({ url: String(url), init });
+      if ((init?.method ?? "GET") === "POST") throw new Error("network down");
+      return { ok: true, json: async () => ({ readings: [], total: 0 }) } as unknown as Response;
+    }) as unknown as typeof fetch;
+
+    const { unmount } = renderView();
+    const flipBtn = await screen.findByRole("button", { name: es.tarot.dailyFlipCta });
+    fireEvent.click(flipBtn);
+    await waitFor(() => expect(calls.filter((c) => c.init?.method === "POST").length).toBe(1));
+
+    const localDate = localDateKey();
+    // Revelada visualmente, pero NO marcada como guardada en servidor.
+    expect(localStorage.getItem(`tarot-daily-${USER_ID}-${localDate}`)).toBe("1");
+    expect(localStorage.getItem(`tarot-daily-saved-${USER_ID}-${localDate}`)).toBeNull();
+
+    unmount();
+    renderView();
+    // Al remontar: revelada-sin-guardar → reintenta el POST en background.
+    await waitFor(() => expect(calls.filter((c) => c.init?.method === "POST").length).toBe(2));
+  });
+
+  it("cuando el POST del daily responde ok, se marca guardado y el remontaje no re-postea", async () => {
+    const { calls } = mockFetch();
+    const { unmount } = renderView();
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.dailyFlipCta }));
+    const localDate = localDateKey();
+    await waitFor(() =>
+      expect(localStorage.getItem(`tarot-daily-saved-${USER_ID}-${localDate}`)).toBe("1"),
+    );
+    unmount();
+    renderView();
+    await waitFor(() => expect(calls.filter((c) => c.init?.method === "GET").length).toBeGreaterThanOrEqual(2));
+    expect(calls.filter((c) => c.init?.method === "POST").length).toBe(1);
   });
 
   it("'Cruz celta' está deshabilitada con el chip 'Pronto · Plus' y no hace nada al tocarla", async () => {
