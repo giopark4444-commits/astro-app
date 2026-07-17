@@ -3,7 +3,7 @@
 // Voice: evolutionary, second person, no fatalism, concrete imagery — the
 // same Aluna voice as ES, written fresh in English, never a literal
 // translation of the Spanish copy.
-import type { TarotCardContent } from "./tarot-es";
+import type { TarotCardContent, ReadingComposeDicts } from "./tarot-es";
 
 export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
   fool: {
@@ -1337,5 +1337,37 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
       path: "Measuring your worth only by what you own disconnects you from a deeper wealth that net worth can't name.",
     },
     bridge: "The King of Pentacles is earth at full mastery — consolidated matter that knows how to hold and how to share.",
+  },
+};
+
+// composeReadingProse's fixed EN phrases and position labels. The engine
+// (composeReadingProse / composeReadingWith) lives in tarot-es.ts; this file
+// only exports data, same direction as the rest of this module.
+const READING_POSITION_LABELS_EN: Record<string, string> = {
+  day: "today",
+  past: "the past",
+  present: "the present",
+  future: "the future",
+  heart: "the heart of the matter",
+  crossing: "what crosses your path",
+  foundation: "the root of the situation",
+  crown: "what crowns the matter",
+  self: "your own view",
+  environment: "your surroundings",
+  "hopes-fears": "your hopes and fears",
+  outcome: "the possible outcome",
+};
+
+export const DICTS_READING_EN: ReadingComposeDicts = {
+  positionLabels: READING_POSITION_LABELS_EN,
+  t: {
+    openingWithQuestion: (question) =>
+      `You carry a question with you — "${question}" — and the cards answer not with certainty, but with mirrors.`,
+    openingDefault: () => "The cards open to show you what your soul already senses, even without words for it yet.",
+    cardParagraph: (cardName, positionLabel, ambitText) => `In ${positionLabel}, ${cardName} speaks: ${ambitText}`,
+    closingMostlyReversed: () =>
+      "Most of the cards landed reversed: the sky asks you to review before you advance — not as punishment, but as care.",
+    closingNormal: () =>
+      "Weave these voices calmly: the spread doesn't decide for you, it hands back the mirror so you can decide with more clarity.",
   },
 };

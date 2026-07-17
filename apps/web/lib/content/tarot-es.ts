@@ -1,6 +1,7 @@
 // Contenido tarot (ES): voz Aluna — evolutiva, segunda persona, sin fatalismo,
 // imágenes concretas. Este archivo es el motor de datos ES; tarot-en.ts SOLO
 // exporta datos EN (misma dirección de import que horoscope: es→en).
+import { TAROT_CARDS_EN, DICTS_READING_EN } from "./tarot-en";
 
 export interface TarotAmbits {
   love: string;
@@ -1353,3 +1354,102 @@ export const TAROT_CARDS_ES: Record<string, TarotCardContent> = {
     bridge: "El Rey de Oros es tierra en su máxima maestría: la materia consolidada que sabe sostener y también sabe compartir.",
   },
 };
+
+// ---------------------------------------------------------------------------
+// composeReadingProse: prosa base de lectura, SIN IA, mismo patrón que
+// composeWith (horóscopo occidental) — se compone solo desde datos deterministas
+// (nombre de carta + ámbito según orientación) nunca puede contradecir la carta.
+//
+// Mapping role → ámbito (v1): TODOS los roles de posición (past/present/future,
+// heart/crossing/foundation/crown/self/environment/hopes-fears/outcome, message)
+// usan el ámbito `path` de la carta. Es la lectura de "camino de alma", la más
+// general y la que menos supone sobre el tipo de pregunta. T2 podrá pasar un
+// ámbito explícito (love/work) por posición cuando el usuario indique el tema
+// de la tirada; v1 mantiene esta única fuente para no inventar contenido nuevo.
+//
+// Las etiquetas de posición (past→"el pasado", etc.) aún no tienen i18n de UI
+// propio (esa capa vive en otra task); por eso este archivo trae su propio dict
+// interno ES/EN indexado por `key` de posición, reemplazable en T2 sin tocar la firma.
+export interface ReadingComposeDicts {
+  positionLabels: Record<string, string>;
+  t: {
+    openingWithQuestion: (question: string) => string;
+    openingDefault: () => string;
+    cardParagraph: (cardName: string, positionLabel: string, ambitText: string) => string;
+    closingMostlyReversed: () => string;
+    closingNormal: () => string;
+  };
+}
+
+const READING_POSITION_LABELS_ES: Record<string, string> = {
+  day: "el día de hoy",
+  past: "el pasado",
+  present: "el presente",
+  future: "el futuro",
+  heart: "el corazón del asunto",
+  crossing: "lo que cruza tu camino",
+  foundation: "la raíz de la situación",
+  crown: "lo que corona el asunto",
+  self: "tu propia mirada",
+  environment: "tu entorno",
+  "hopes-fears": "tus esperanzas y temores",
+  outcome: "el desenlace posible",
+};
+
+const DICTS_READING_ES: ReadingComposeDicts = {
+  positionLabels: READING_POSITION_LABELS_ES,
+  t: {
+    openingWithQuestion: (question) =>
+      `Traes contigo una pregunta — "${question}" — y las cartas responden no con certezas, sino con espejos.`,
+    openingDefault: () => "Las cartas se abren para mostrarte lo que tu alma ya intuye, aunque aún no tenga palabras.",
+    cardParagraph: (cardName, positionLabel, ambitText) => `En ${positionLabel}, ${cardName} habla: ${ambitText}`,
+    closingMostlyReversed: () =>
+      "La mayoría de las cartas llegó invertida: el cielo te pide revisar antes que avanzar, no como castigo sino como cuidado.",
+    closingNormal: () =>
+      "Teje estas voces con calma: la tirada no decide por ti, te devuelve el espejo para que decidas con más claridad.",
+  },
+};
+
+/** Prosa determinista de lectura de tarot (sin IA). Espejo estructural de
+ *  composeWith: apertura → un párrafo por carta (nombre + ámbito `path` según
+ *  orientación, tejido con la posición) → cierre que teje la tirada completa. */
+export function composeReadingProse(
+  locale: "es" | "en",
+  spreadId: string,
+  cards: Array<{ cardId: string; reversed: boolean; position: string }>,
+  question?: string,
+): string[] {
+  return composeReadingWith(
+    locale,
+    cards,
+    locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES,
+    locale === "en" ? DICTS_READING_EN : DICTS_READING_ES,
+    question,
+  );
+}
+
+export function composeReadingWith(
+  locale: "es" | "en",
+  cards: Array<{ cardId: string; reversed: boolean; position: string }>,
+  cardDict: Record<string, TarotCardContent>,
+  dicts: ReadingComposeDicts,
+  question?: string,
+): string[] {
+  const parts: string[] = [];
+
+  parts.push(question ? dicts.t.openingWithQuestion(question) : dicts.t.openingDefault());
+
+  for (const drawn of cards) {
+    const card = cardDict[drawn.cardId];
+    if (!card) continue;
+    const positionLabel = dicts.positionLabels[drawn.position] ?? drawn.position;
+    const ambitText = drawn.reversed ? card.reversed.path : card.upright.path;
+    parts.push(dicts.t.cardParagraph(card.name, positionLabel, ambitText));
+  }
+
+  const reversedCount = cards.filter((c) => c.reversed).length;
+  const mostlyReversed = cards.length > 0 && reversedCount / cards.length >= 0.5;
+  parts.push(mostlyReversed ? dicts.t.closingMostlyReversed() : dicts.t.closingNormal());
+
+  return parts;
+}
