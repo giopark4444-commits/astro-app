@@ -98,3 +98,6 @@ export type { UserIntent, IntentGoal, RelationshipStatus } from "./intent";
 
 // Signo solar aproximado por fecha (gauge zodiacal del cuestionario de primera entrada)
 export { sunSignFromDate } from "./astrology/sun-sign";
+
+// Glosario de significados ("toca y entiende") — contenido único, compartido web+móvil
+export { glossaryEntry, GLOSSARY_ES, GLOSSARY_EN, type GlossaryEntry } from "./glossary";

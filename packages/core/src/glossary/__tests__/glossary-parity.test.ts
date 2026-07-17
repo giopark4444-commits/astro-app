@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { GLOSSARY_ES } from "../glossary-es";
-import { GLOSSARY_EN } from "../glossary-en";
+import { GLOSSARY_ES } from "../entries-es";
+import { GLOSSARY_EN } from "../entries-en";
 
 describe("glosario ES↔EN", () => {
   it("mismas claves en ambos idiomas", () => {

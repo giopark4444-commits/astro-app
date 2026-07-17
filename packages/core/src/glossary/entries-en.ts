@@ -1,7 +1,8 @@
-// Glossary of meanings (EN) — same keys as glossary-es.ts, natural English
-// voice (not a literal translation). Second person, warm and honest, 2–4
-// sentences. Parity with ES is checked by a test.
-import type { GlossaryEntry } from "./glossary-es";
+// Glossary of meanings (EN) — same keys as entries-es.ts, shared by web and
+// mobile from @aluna/core (content written once, skin per platform). Natural
+// English voice (not a literal translation). Second person, warm and honest,
+// 2–4 sentences. Parity with ES is checked by a test.
+import type { GlossaryEntry } from "./entries-es";
 
 export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
   // ——— Signs ———

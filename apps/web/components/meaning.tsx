@@ -4,7 +4,7 @@
 // (la capa nunca rompe contenido). Inline: hereda tipografía del contexto.
 import { useState } from "react";
 import { useLocale } from "next-intl";
-import { glossaryEntry } from "@/lib/content/glossary";
+import { glossaryEntry } from "@aluna/core";
 import { BottomSheet } from "./bottom-sheet";
 import styles from "./meaning.module.css";
 

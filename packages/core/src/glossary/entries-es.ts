@@ -1,4 +1,5 @@
-// Glosario de significados (ES) — la capa "toca y entiende" de toda la web.
+// Glosario de significados (ES) — la capa "toca y entiende", compartida por
+// web y móvil desde @aluna/core (contenido único, piel por plataforma).
 // Voz Aluna: segunda persona, cálida y honesta, 2–4 frases. Claves en inglés,
 // namespaced (sign.* planet.* house.* aspect.* term.* dignity.* pattern.*
 // housesystem.* zodiac.* element.* modality.* bazi.*). Paridad EN vigilada por test.
