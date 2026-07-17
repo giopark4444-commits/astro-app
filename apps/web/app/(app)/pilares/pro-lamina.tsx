@@ -24,6 +24,7 @@ import {
   type LuckSequence,
 } from "@aluna/core";
 import { baziLabels } from "@/lib/content/bazi-labels";
+import { Meaning } from "@/components/meaning";
 import type { BaZiData } from "./types";
 import type { PilaresTab } from "./pilares-tabs";
 import styles from "./pilares.module.css";
@@ -75,7 +76,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Na Yin */}
       <section className={`card ${pane("nayin")}`}>
-        <h3 className={styles.cardH}>{t("pilares.nayinTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.nayin">{t("pilares.nayinTitle")}</Meaning></h3>
         {entries.map((e) => {
           const n = nayin(e.pillar);
           return (
@@ -92,7 +93,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Fuerza del DM */}
       <section className={`card ${pane("strength")}`}>
-        <h3 className={styles.cardH}>{t("pilares.strengthTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.strength">{t("pilares.strengthTitle")}</Meaning></h3>
         <div className={styles.meterRow}>
           <span className={styles.verdict}>{L.verdicts[strength.verdict]}</span>
           {/* El medidor usa `score` (0-100, capado); el número mostrado usa `raw`
@@ -114,17 +115,25 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Favorables */}
       <section className={`card ${pane("favor")}`}>
-        <h3 className={styles.cardH}>{t("pilares.favorTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.favorable">{t("pilares.favorTitle")}</Meaning></h3>
         {strength.verdict === "balanced" ? (
           <p className={styles.note}>{t("pilares.balancedNote")}</p>
         ) : (
           <>
             <div className={styles.chips}>
-              {favor.favor.map((el) => <span key={el} className={`chip chip--pill ${styles[`elBg_${el}`] ?? ""}`}>{elName(el)}</span>)}
+              {favor.favor.map((el) => (
+                <span key={el} className={`chip chip--pill ${styles[`elBg_${el}`] ?? ""}`}>
+                  <Meaning k={`bazi.element.${el}`}>{elName(el)}</Meaning>
+                </span>
+              ))}
             </div>
             <p className={styles.subRow}>{t("pilares.avoidTitle")}</p>
             <div className={styles.chips}>
-              {favor.avoid.map((el) => <span key={el} className={`chip chip--pill ${styles.chipDim}`}>{elName(el)}</span>)}
+              {favor.avoid.map((el) => (
+                <span key={el} className={`chip chip--pill ${styles.chipDim}`}>
+                  <Meaning k={`bazi.element.${el}`}>{elName(el)}</Meaning>
+                </span>
+              ))}
             </div>
           </>
         )}
@@ -132,7 +141,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* 大運 */}
       <section className={`card ${pane("luck")}`}>
-        <h3 className={styles.cardH}>{t("pilares.luckTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.luckpillars">{t("pilares.luckTitle")}</Meaning></h3>
         {data.gender === "neutral" && <p className={styles.note}>{t("pilares.luckNeutralNote")}</p>}
         {!data.timeKnown && <p className={styles.note}>{t("pilares.luckNoTimeNote")}</p>}
         {sequences.map((seq) => (
@@ -144,7 +153,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* 12 etapas */}
       <section className={`card ${pane("stages")}`}>
-        <h3 className={styles.cardH}>{t("pilares.stagesTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.twelvestages">{t("pilares.stagesTitle")}</Meaning></h3>
         {entries.map((e) => {
           const st = lifeStage(data.day.stem, e.pillar.branch);
           const def = TWELVE_STAGES.find((x) => x.key === st)!;
@@ -160,7 +169,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Interacciones */}
       <section className={`card ${pane("interactions")}`}>
-        <h3 className={styles.cardH}>{t("pilares.interactionsTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.interactions">{t("pilares.interactionsTitle")}</Meaning></h3>
         {interactions.length === 0 ? (
           <p className={styles.note}>{t("pilares.interactionsEmpty")}</p>
         ) : (
@@ -177,7 +186,7 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Estrellas */}
       <section className={`card ${pane("stars")}`}>
-        <h3 className={styles.cardH}>{t("pilares.starsTitle")}</h3>
+        <h3 className={styles.cardH}><Meaning k="bazi.term.symbolicstars">{t("pilares.starsTitle")}</Meaning></h3>
         {stars.length === 0 ? (
           <p className={styles.note}>—</p>
         ) : (

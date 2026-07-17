@@ -10,6 +10,7 @@ import {
   type Pillar,
   type TenGod,
 } from "@aluna/core";
+import { Meaning } from "@/components/meaning";
 import styles from "./pilares.module.css";
 
 /** Clave i18n del nombre de cada Dios (十神) en la sección `pilares`. Exportada
@@ -61,35 +62,53 @@ export function PillarColumn({
     >
       <span className={styles.colLabel}>{t(`pilares.${posKey}`)}</span>
       <span className={`chip ${styles.god} ${isDay ? styles.godSelf : ""}`}>
-        {isDay
-          ? t("pilares.dayMasterHanzi")
-          : t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
+        {isDay ? (
+          <Meaning k="bazi.term.daymaster">{t("pilares.dayMasterHanzi")}</Meaning>
+        ) : (
+          <Meaning k={`bazi.god.${tenGod(dayMaster, pillar.stem)}`}>
+            {t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
+          </Meaning>
+        )}
       </span>
       <span className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""}`}>
-        {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
+        <Meaning k={`bazi.stem.${stem.key}`}>
+          {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
+        </Meaning>
       </span>
       <span className={styles.roman}>
         {script === "hangul" ? STEM_LABELS[pillar.stem]!.romanKo : STEM_LABELS[pillar.stem]!.pinyin}
       </span>
       <span className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""}`}>
-        {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+        <Meaning k={`bazi.branch.${branch.key}`}>
+          {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
+        </Meaning>
       </span>
       <span className={styles.roman}>
         {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.romanKo : BRANCH_LABELS[pillar.branch]!.pinyin}
       </span>
-      <span className={styles.animal}>{t(`pilares.animal${cap(branch.animal)}`)}</span>
-      {isDay && <span className={`chip ${styles.dayTag}`}>{t("pilares.dayMaster")}</span>}
+      <span className={styles.animal}>
+        <Meaning k={`bazi.branch.${branch.key}`}>{t(`pilares.animal${cap(branch.animal)}`)}</Meaning>
+      </span>
+      {isDay && (
+        <span className={`chip ${styles.dayTag}`}>
+          <Meaning k="bazi.term.daymaster">{t("pilares.dayMaster")}</Meaning>
+        </span>
+      )}
       <div className={styles.hidden}>
-        <span className={styles.hiddenLabel}>{t("pilares.hiddenStems")}</span>
+        <span className={styles.hiddenLabel}>
+          <Meaning k="bazi.term.hiddenstems">{t("pilares.hiddenStems")}</Meaning>
+        </span>
         {hiddenStems(pillar.branch).map((hs, j) => {
           const hidden = HEAVENLY_STEMS[hs]!;
           return (
             <span key={j} className={styles.hiddenRow}>
               <span className={`${styles.hiddenChar} ${styles[`el_${hidden.element}`] ?? ""}`}>
-                {hidden.hanzi}
+                <Meaning k={`bazi.stem.${hidden.key}`}>{hidden.hanzi}</Meaning>
               </span>
               <span className={styles.hiddenGod}>
-                {t(`pilares.${GOD_KEY[tenGod(dayMaster, hs)]}`)}
+                <Meaning k={`bazi.god.${tenGod(dayMaster, hs)}`}>
+                  {t(`pilares.${GOD_KEY[tenGod(dayMaster, hs)]}`)}
+                </Meaning>
               </span>
             </span>
           );
