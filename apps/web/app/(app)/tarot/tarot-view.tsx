@@ -394,6 +394,7 @@ export function TarotView({ userId }: { userId: string }) {
                   <li key={`${c.cardId}-${c.position}`}>
                     <span>{content?.name ?? c.cardId}</span>
                     {c.reversed && <span className={styles.reversedTag}> · {t("dailyReversed")}</span>}
+                    {c.jumper && <span className={styles.reversedTag}> · {t("manualJumpersReadingLabel")}</span>}
                   </li>
                 );
               })}
