@@ -393,6 +393,10 @@ export const STRINGS = {
       logoutConfirmBody: "Vuelves a la pantalla de acceso; tus datos siguen a salvo en tu cuenta.",
       footNote: "Aluna · para jugar y explorar",
       offline: "Numerología se calcula en tu dispositivo; la Carta usa el servidor de Aluna (necesita conexión).",
+      intentAI: "Personalizar lecturas con mis intenciones",
+      intentAIHint: "Solo si respondiste el cuestionario. Apagado, Aluna lee tu carta sin ese contexto.",
+      intentAIOn: "Encendido",
+      intentAIOff: "Apagado",
     },
     gender: {
       feminine: "Femenino",
@@ -798,6 +802,10 @@ export const STRINGS = {
       logoutConfirmBody: "You'll return to the sign-in screen; your data stays safe in your account.",
       footNote: "Aluna · to play and explore",
       offline: "Numerology is computed on your device; the Chart uses Aluna's server (needs a connection).",
+      intentAI: "Personalize readings with my intentions",
+      intentAIHint: "Only if you answered the questionnaire. Off, Aluna reads your chart without that context.",
+      intentAIOn: "On",
+      intentAIOff: "Off",
     },
     gender: {
       feminine: "Feminine",
