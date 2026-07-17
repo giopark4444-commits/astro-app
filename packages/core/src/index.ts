@@ -15,6 +15,9 @@ export { reduce, reduceWithTrace, digitsSum, isMaster } from "./numerology/reduc
 export * from "./constants/astrology";
 export * from "./constants/colors";
 
+// Ayuda y soporte / Síguenos en Ajustes — compartido web+móvil
+export { SUPPORT_EMAIL, SOCIAL_LINKS, type SocialLink } from "./constants/support";
+
 // Dominio de carta astral (puro)
 export * from "./astrology/types";
 export { normalizeAngle, signOfLongitude, angularSeparation } from "./astrology/signs";
