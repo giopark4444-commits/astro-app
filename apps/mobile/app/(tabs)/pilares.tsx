@@ -60,7 +60,8 @@ export default function PilaresScreen() {
   const insets = useSafeAreaInsets();
   const { profile } = useProfile();
   const { session } = useAuth();
-  const { t: tk } = useTheme();
+  const { t: tk, paletteMode } = useTheme();
+  const colorful = paletteMode === "colorful";
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const content = baziContent(locale);
@@ -232,10 +233,26 @@ export default function PilaresScreen() {
                         </View>
                       )}
                       <Text style={styles.colLabel}>{content.ui.position[key]}</Text>
-                      <Text style={[styles.char, isDay && styles.charDay]}>{glyphStem(pillar.stem)}</Text>
+                      <Text
+                        style={[
+                          styles.char,
+                          isDay && styles.charDay,
+                          colorful && { color: EL_COLOR[stem.element] },
+                        ]}
+                      >
+                        {glyphStem(pillar.stem)}
+                      </Text>
                       <Text style={styles.nombre}>{stemName(pillar.stem)}</Text>
                       <View style={styles.hr} />
-                      <Text style={[styles.char, isDay && styles.charDay]}>{glyphBranch(pillar.branch)}</Text>
+                      <Text
+                        style={[
+                          styles.char,
+                          isDay && styles.charDay,
+                          colorful && { color: EL_COLOR[branch.element] },
+                        ]}
+                      >
+                        {glyphBranch(pillar.branch)}
+                      </Text>
                       <Text style={styles.nombre}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
                       {pro && (
                         <View style={styles.hiddenWrap}>
@@ -293,7 +310,15 @@ export default function PilaresScreen() {
                       <View key={el} style={styles.balRow}>
                         <Text style={styles.balLabel}>{elName(el)}</Text>
                         <View style={[styles.balTrack, empty && styles.balTrackEmpty]}>
-                          {!empty && <View style={[styles.balFill, { width: `${(n / totalEls) * 100}%` }]} />}
+                          {!empty && (
+                            <View
+                              style={[
+                                styles.balFill,
+                                colorful && { backgroundColor: EL_COLOR[el] },
+                                { width: `${(n / totalEls) * 100}%` },
+                              ]}
+                            />
+                          )}
                         </View>
                         <Text style={styles.balN}>{n}</Text>
                       </View>
