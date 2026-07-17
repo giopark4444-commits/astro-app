@@ -12,6 +12,7 @@ import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { TarotFlipCard } from "../../components/TarotFlipCard";
 import { TarotCeremony } from "../../components/tarot-ceremony";
+import { TarotManualEntry } from "../../components/tarot-manual-entry";
 import { Card, Chip, FadeIn, SoonBadge } from "../../components/ui";
 import { useAuth } from "../../lib/auth-context";
 import { useTheme } from "../../lib/theme-context";
@@ -67,6 +68,9 @@ export default function TarotScreen() {
   // Ceremonia "Tres cartas" (Task 4): overlay efímero — cerrarlo lo desmonta
   // y la máquina vuelve a cero, como recargar la página en la web.
   const [ceremonyOpen, setCeremonyOpen] = useState(false);
+  // Modo manual (T3): mismo criterio de overlay efímero que la ceremonia —
+  // cerrarlo lo desmonta y todo vuelve a cero.
+  const [manualOpen, setManualOpen] = useState(false);
 
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
   const [openReadingId, setOpenReadingId] = useState<string | null>(null);
@@ -276,6 +280,15 @@ export default function TarotScreen() {
               </Card>
             </View>
           </View>
+
+          {/* Modo manual (T3): mazo físico — la persona baraja y elige ella
+              misma, en vez de la ceremonia táctil digital. */}
+          <Pressable testID="tarot-manual-entry-cta" onPress={() => setManualOpen(true)}>
+            <Card style={styles.manualCard}>
+              <Text style={styles.spreadName}>{t("tarot.manualEntry")}</Text>
+              <Text style={styles.spreadDesc}>{t("tarot.manualEntryDesc")}</Text>
+            </Card>
+          </Pressable>
         </FadeIn>
 
         {/* Diario */}
@@ -325,6 +338,12 @@ export default function TarotScreen() {
           y al guardar la lectura loadDiary refresca el diario de fondo. */}
       {ceremonyOpen && (
         <TarotCeremony onClose={() => setCeremonyOpen(false)} onSaved={loadDiary} />
+      )}
+
+      {/* Modo manual (T3): mismo criterio de overlay efímero de pantalla
+          completa que la ceremonia digital. */}
+      {manualOpen && (
+        <TarotManualEntry onClose={() => setManualOpen(false)} onSaved={loadDiary} />
       )}
 
       <BottomSheet open={dailySheetOpen} onClose={() => setDailySheetOpen(false)} title={dailyContent?.name}>
@@ -412,6 +431,7 @@ function makeStyles(t: ThemeTokens) {
     dailyRevealBtnText: { color: t.accText, fontSize: typeScale.sm, fontFamily: fonts.sansSemi },
 
     spreadsGrid: { flexDirection: "row", gap: space.sm, width: "100%" },
+    manualCard: { gap: space.xs, alignItems: "flex-start", marginTop: space.sm, width: "100%" },
     spreadCard: { flex: 1 },
     spreadCardInner: { gap: space.xs, alignItems: "flex-start" },
     spreadDisabled: { opacity: 0.6 },

@@ -30,6 +30,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TAROT_CARDS_ES, TAROT_CARDS_EN, composeReadingProse } from "@aluna/core";
 import { TarotFlipCard } from "./TarotFlipCard";
+import { ReadingChat } from "./ReadingChat";
 import { useAuth } from "../lib/auth-context";
 import { useTheme } from "../lib/theme-context";
 import { useT } from "../lib/i18n-context";
@@ -613,6 +614,14 @@ export function TarotCeremony({ onClose, onSaved }: { onClose: () => void; onSav
                 </Text>
               ))}
             </View>
+
+            {/* Chat inline "Conversa esta tirada" (T3): montado al final de
+                CADA lectura, digital y manual — mismo componente en ambas. */}
+            <ReadingChat
+              spreadId={SPREAD_ID}
+              cards={readingCards}
+              {...(state.question ? { question: state.question } : {})}
+            />
 
             {state.save === "free_limit" ? (
               // Nota suave, sin modal: el límite free no interrumpe el rito

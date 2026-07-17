@@ -10,12 +10,17 @@
 // mismo criterio que EasternPayload en eastern-api.ts:4-8.
 import { apiUrl } from "./config";
 
-export type TarotSpreadId = "daily" | "three";
+// T3: extendido a celtic-cross (Plus, aún no construible desde el móvil) y
+// free (modo manual, tirada libre 1-10) — el server ya los acepta.
+export type TarotSpreadId = "daily" | "three" | "celtic-cross" | "free";
 
 export interface TarotReadingCardInput {
   cardId: string;
   reversed: boolean;
   position: string;
+  /** Cartas que saltaron del mazo al barajar (modo manual): opcional, el
+   *  server valida. Espeja TarotChatCardInput de tarot-chat-api.ts. */
+  jumper?: boolean;
 }
 
 export interface TarotReadingRow {
