@@ -265,7 +265,9 @@ export default function PilaresScreen() {
                       </Text>
                       {pro && (
                         <View style={styles.hiddenWrap}>
-                          <Text style={styles.hiddenLabel}>{t("pilares.hiddenStems")}</Text>
+                          <Text style={styles.hiddenLabel}>
+                            <Meaning k="bazi.term.hiddenstems">{t("pilares.hiddenStems")}</Meaning>
+                          </Text>
                           {hiddenStems(pillar.branch).map((hs, j) => {
                             const hidden = HEAVENLY_STEMS[hs]!;
                             return (
