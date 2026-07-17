@@ -140,20 +140,7 @@ export function baziContent(locale: Locale): BaziContent {
   return locale === "en" ? EN : ES;
 }
 
-// Voz poética del Maestro del Día (日主) — mockup 11 (§B.4 gap-analysis-astros-mockups.md),
-// card `.maestro`: 1 línea curada por tronco celeste (10 combinaciones, no cruzada con
-// rama). Clave = StemDef.key de @aluna/core (jia/yi/bing/… — el mismo identificador que
-// usa HEAVENLY_STEMS[data.day.stem].key), NO el hanzi ni el índice numérico — verificado
-// contra el shape real de BaZiData (packages/core/src/bazi/bazi.ts) antes de escribir esto.
-export const DAY_MASTER_VOICE: Record<string, { es: string; en: string }> = {
-  jia:  { es: "Roble al amanecer: creces derecho aunque el viento diga otra cosa.",        en: "Oak at dawn: you grow straight even when the wind says otherwise." },
-  yi:   { es: "Enredadera viva: no rompes el muro — lo conviertes en camino.",             en: "Living vine: you don't break the wall — you turn it into a path." },
-  bing: { es: "Sol de mediodía: calor que da vida sin pedir permiso.",                     en: "Midday sun: warmth that gives life without asking permission." },
-  ding: { es: "Llama de vela: luz íntima que enseña más que mil focos.",                   en: "Candle flame: an intimate light that teaches more than a thousand lamps." },
-  wu:   { es: "Montaña quieta: los demás descansan porque tú no te mueves.",               en: "Still mountain: others rest because you do not move." },
-  ji:   { es: "Tierra de huerto: todo lo que te confían, florece.",                        en: "Garden soil: everything entrusted to you, blooms." },
-  geng: { es: "Acero templado: cortas lo que sobra para que quede lo verdadero.",          en: "Tempered steel: you cut away the excess so the true remains." },
-  xin:  { es: "Joya pulida: tu brillo viene de la presión que supiste sostener.",          en: "Polished gem: your shine comes from the pressure you learned to hold." },
-  ren:  { es: "Río ancho: llegas lejos porque no peleas con el cauce.",                    en: "Wide river: you go far because you don't fight the current." },
-  gui:  { es: "Rocío del alba: tocas suave y aun así lo transformas todo.",                en: "Dawn dew: you touch softly and still transform everything." },
-};
+// DAY_MASTER_VOICE se movió a @aluna/core (packages/core/src/bazi/reading.ts) para que
+// la lectura narrativa compuesta (composeBaziReading) sea la MISMA fuente en web y
+// móvil — reexportado desde ahí, ya no vive aquí. Importa `DAY_MASTER_VOICE` desde
+// "@aluna/core" en su lugar.

@@ -12,6 +12,7 @@ import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
 import { PilaresTabs, type PilaresTab } from "./pilares-tabs";
+import { BaziReadingView } from "./bazi-reading";
 import { Meaning } from "@/components/meaning";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
@@ -187,6 +188,19 @@ export function PilaresView() {
                 <ElementBar key={el} el={el} count={counts[el] ?? 0} total={totalEls} />
               ))}
             </div>
+
+            {active && (
+              <>
+                <h2 className={styles.section}>{t("pilares.readingTitle")}</h2>
+                <section className={styles.reading}>
+                  <BaziReadingView
+                    pillars={{ year: data.year, month: data.month, day: data.day, hour: data.hour }}
+                    profileId={active.id}
+                    profileName={active.name}
+                  />
+                </section>
+              </>
+            )}
 
             <div className={styles.tabsRow}>
               <PilaresTabs active={tab} onSelect={setTab} />
