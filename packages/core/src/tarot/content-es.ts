@@ -5,6 +5,7 @@
 // Vive en @aluna/core porque web y móvil comparten este contenido byte-igual
 // (precedente: glossary).
 import { TAROT_CARDS_EN, DICTS_READING_EN } from "./content-en";
+import { cardById } from "./deck";
 
 export interface TarotAmbits {
   love: string;
@@ -1359,30 +1360,66 @@ export const TAROT_CARDS_ES: Record<string, TarotCardContent> = {
 };
 
 // ---------------------------------------------------------------------------
-// composeReadingProse: prosa base de lectura, SIN IA, mismo patrón que
-// composeWith (horóscopo occidental) — se compone solo desde datos deterministas
-// (nombre de carta + ámbito según orientación) nunca puede contradecir la carta.
+// composeReadingProse (v2): prosa de SESIÓN REAL, SIN IA — se compone solo
+// desde datos deterministas (nombre/esencia/ámbito/puente de la carta, según
+// orientación) nunca puede contradecir la carta. v2 (T3) profundiza sobre el
+// mismo principio de v1: apertura → clima de la tirada (mayorías) → 2-3
+// párrafos por carta (escena=essence anclada al rol, ámbito+eco de la
+// pregunta, puente astrológico como cierre) → jumpers (si vienen) → cierre
+// que teje las relaciones reales de la tirada. Firma pública retrocompatible:
+// el único agregado es `opts?.jumpers`, opcional.
 //
-// Mapping role → ámbito (v1): TODOS los roles de posición (past/present/future,
-// heart/crossing/foundation/crown/self/environment/hopes-fears/outcome, message)
-// usan el ámbito `path` de la carta. Es la lectura de "camino de alma", la más
-// general y la que menos supone sobre el tipo de pregunta. T2 podrá pasar un
-// ámbito explícito (love/work) por posición cuando el usuario indique el tema
-// de la tirada; v1 mantiene esta única fuente para no inventar contenido nuevo.
+// Mapping role → ámbito: TODOS los roles de posición (past/present/future,
+// heart/crossing/foundation/crown/self/environment/hopes-fears/outcome,
+// message, free-N) usan el ámbito `path` de la carta. Es la lectura de
+// "camino de alma", la más general y la que menos supone sobre el tipo de
+// pregunta. Un ámbito explícito (love/work) por posición queda para cuando el
+// usuario indique el tema de la tirada; v2 mantiene esta única fuente para no
+// inventar contenido nuevo.
 //
-// Las etiquetas de posición (past→"el pasado", etc.) aún no tienen i18n de UI
-// propio (esa capa vive en otra task); por eso este archivo trae su propio dict
-// interno ES/EN indexado por `key` de posición, reemplazable en T2 sin tocar la firma.
+// Las etiquetas de posición (past→"el pasado", etc.) y los ordinales de la
+// tirada libre (free-N→"la primera carta"…) aún no tienen i18n de UI propio
+// (esa capa vive en otra task); por eso este archivo trae su propio dict
+// interno ES/EN indexado por `key` de posición.
+export interface ReadingClimateInfo {
+  /** Elemento dominante (ya traducido al locale) cuando ≥50% de las cartas
+   *  MENORES de la tirada (y al menos 2) comparten el mismo elemento de palo.
+   *  undefined si no hay una mayoría clara o la tirada no trae menores. */
+  dominantElementLabel: string | undefined;
+  reversedCount: number;
+  total: number;
+  majorsCount: number;
+  minorsCount: number;
+}
+
 export interface ReadingComposeDicts {
   positionLabels: Record<string, string>;
+  /** Ordinales para la tirada libre (spreadId "free"): index 0 = "la primera
+   *  carta"/"the first card"… hasta 10. Las posiciones `free-N` no tienen rol,
+   *  así que la prosa las presenta por orden de aparición, no por sentido. */
+  ordinals: readonly string[];
+  elementLabels: Record<"fire" | "water" | "air" | "earth", string>;
   t: {
     openingWithQuestion: (question: string) => string;
     openingDefault: () => string;
-    /** Conectores del párrafo por carta. La prosa ROTA por índice de carta
-     *  (i % length) para que una tirada de varias cartas no repita el mismo
-     *  arranque tres veces. Cada idioma trae sus propias plantillas, escritas
-     *  naturales en su idioma (no traducciones espejo). */
-    cardParagraphs: ReadonlyArray<(cardName: string, positionLabel: string, ambitText: string) => string>;
+    /** Un párrafo de "clima": mayoría elemental, invertidas, mayores vs
+     *  menores. Solo se emite con 2+ cartas (con 1 sola carta no hay mayoría
+     *  que leer). */
+    climate: (info: ReadingClimateInfo) => string;
+    /** Escena de la carta: essence anclada al rol de la posición ("En tu
+     *  pasado, El Loco…"). Rota por índice de carta (i % length). */
+    sceneParagraphs: ReadonlyArray<(cardName: string, positionLabel: string, essence: string) => string>;
+    /** Ámbito (`path`) desarrollado, con eco de la pregunta si existe. */
+    ambitParagraphs: ReadonlyArray<(ambitText: string, question?: string) => string>;
+    /** Puente astrológico como cierre del párrafo de la carta. */
+    bridgeParagraphs: ReadonlyArray<(bridge: string) => string>;
+    jumpersIntro: () => string;
+    /** Un párrafo por jumper (essence + ámbito tejidos). */
+    jumperParagraphs: ReadonlyArray<(cardName: string, essence: string, ambitText: string) => string>;
+    /** Se agrega al cierre cuando hay elemento dominante. */
+    closingSuitRepeat: (elementLabel: string) => string;
+    /** Se agrega al cierre cuando TODAS las cartas son arcanos mayores (2+). */
+    closingAllMajors: () => string;
     closingMostlyReversed: () => string;
     closingNormal: () => string;
   };
@@ -1403,19 +1440,75 @@ const READING_POSITION_LABELS_ES: Record<string, string> = {
   outcome: "el desenlace posible",
 };
 
+const READING_ORDINALS_ES: readonly string[] = [
+  "la primera carta",
+  "la segunda carta",
+  "la tercera carta",
+  "la cuarta carta",
+  "la quinta carta",
+  "la sexta carta",
+  "la séptima carta",
+  "la octava carta",
+  "la novena carta",
+  "la décima carta",
+];
+
 const DICTS_READING_ES: ReadingComposeDicts = {
   positionLabels: READING_POSITION_LABELS_ES,
+  ordinals: READING_ORDINALS_ES,
+  elementLabels: { fire: "fuego", water: "agua", air: "aire", earth: "tierra" },
   t: {
     openingWithQuestion: (question) =>
       `Traes contigo una pregunta — "${question}" — y las cartas responden no con certezas, sino con espejos.`,
     openingDefault: () => "Las cartas se abren para mostrarte lo que tu alma ya intuye, aunque aún no tenga palabras.",
-    cardParagraphs: [
-      (cardName, positionLabel, ambitText) => `En ${positionLabel}, ${cardName} habla: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `Sobre ${positionLabel} se posa ${cardName}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `${cardName} ilumina ${positionLabel}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) =>
-        `Cuando miras hacia ${positionLabel}, responde ${cardName}: ${ambitText}`,
+    climate: ({ dominantElementLabel, reversedCount, total, majorsCount }) => {
+      const lead = dominantElementLabel
+        ? `En esta tirada domina el ${dominantElementLabel}`
+        : majorsCount === total
+          ? "Esta tirada viene cargada de arcanos mayores"
+          : "La tirada mezcla energías sin un solo color dominante";
+      const reversedBit =
+        reversedCount === 0
+          ? "ninguna carta llegó invertida"
+          : reversedCount === total
+            ? "todas las cartas llegaron invertidas"
+            : `${reversedCount} de ${total} cartas llegaron invertidas`;
+      return `${lead}, y ${reversedBit}.`;
+    },
+    sceneParagraphs: [
+      (cardName, positionLabel, essence) => `En ${positionLabel}, ${cardName} planta la escena: ${essence}`,
+      (cardName, positionLabel, essence) => `${cardName} se instala en ${positionLabel} y trae su propia escena. ${essence}`,
+      (cardName, positionLabel, essence) => `Miras hacia ${positionLabel} y ahí está ${cardName}: ${essence}`,
+      (cardName, positionLabel, essence) => `${positionLabel} habla hoy con la voz de ${cardName}. ${essence}`,
     ],
+    ambitParagraphs: [
+      (ambitText, question) =>
+        question ? `${ambitText} Con "${question}" todavía resonando, esto no es un detalle menor.` : ambitText,
+      (ambitText, question) =>
+        question ? `${ambitText} Vuelve a "${question}": esta carta ya empezó a contestar.` : ambitText,
+      (ambitText, question) =>
+        question ? `${ambitText} Frente a "${question}", esto es lo que no puedes saltarte.` : ambitText,
+    ],
+    bridgeParagraphs: [
+      (bridge) => `Y el cielo lo confirma: ${bridge}`,
+      (bridge) => `${bridge} Ese es el eco astrológico que sostiene la escena.`,
+      (bridge) => `Detrás de la imagen hay cielo real: ${bridge}`,
+      (bridge) => `El puente astrológico cierra la carta sin adornos: ${bridge}`,
+    ],
+    jumpersIntro: () =>
+      "Estas cartas saltaron del mazo antes de tiempo: escúchalas aparte, sin mezclarlas con la tirada principal.",
+    jumperParagraphs: [
+      (cardName, essence, ambitText) =>
+        `${cardName} no esperó a ser elegida — saltó porque tenía algo urgente que decir. ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) =>
+        `Que ${cardName} se cayera del mazo no es azar menor: ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) =>
+        `${cardName} se adelantó al orden de la tirada. ${essence} ${ambitText}`,
+    ],
+    closingSuitRepeat: (elementLabel) =>
+      `El ${elementLabel} vuelve una y otra vez en esta tirada — no es casualidad, es el tono que domina la sesión.`,
+    closingAllMajors: () =>
+      "Todas las cartas que salieron son arcanos mayores: el alma habla fuerte hoy, sin detalles menores que la distraigan.",
     closingMostlyReversed: () =>
       "La mayoría de las cartas llegó invertida: el cielo te pide revisar antes que avanzar, no como castigo sino como cuidado.",
     closingNormal: () =>
@@ -1423,27 +1516,83 @@ const DICTS_READING_ES: ReadingComposeDicts = {
   },
 };
 
-/** Prosa determinista de lectura de tarot (sin IA). Espejo estructural de
- *  composeWith: apertura → un párrafo por carta (nombre + ámbito `path` según
- *  orientación, tejido con la posición y un conector que rota por índice) →
- *  cierre que teje la tirada completa.
- *
- *  `spreadId` hoy no participa en la composición (las posiciones llegan ya en
- *  `cards` y el ámbito es siempre `path`) — se mantiene en la firma pública
- *  porque la lectura por tipo de tirada (celtic-cross con ámbitos propios por
- *  rol, T3) lo va a necesitar sin romper a los llamadores existentes. */
+/** Posición de una carta dentro de la tirada libre ("free-3" → índice 2). */
+function freeOrdinalIndex(position: string): number | undefined {
+  const match = /^free-(\d+)$/.exec(position);
+  if (!match) return undefined;
+  return Number(match[1]) - 1;
+}
+
+function labelForPosition(dicts: ReadingComposeDicts, position: string): string {
+  const ordinalIndex = freeOrdinalIndex(position);
+  if (ordinalIndex !== undefined) return dicts.ordinals[ordinalIndex] ?? position;
+  return dicts.positionLabels[position] ?? position;
+}
+
+interface Majority {
+  dominantElementLabel: string | undefined;
+  reversedCount: number;
+  total: number;
+  majorsCount: number;
+  minorsCount: number;
+  allMajors: boolean;
+}
+
+/** Mayorías de la tirada: elemento dominante (solo entre cartas menores,
+ *  ≥50% y al menos 2), conteo de invertidas, mayores vs menores. Determinista
+ *  — nunca inventa una mayoría que no está en los datos. */
+function computeMajority(cards: ReadonlyArray<{ cardId: string; reversed: boolean }>, dicts: ReadingComposeDicts): Majority {
+  const total = cards.length;
+  const reversedCount = cards.filter((c) => c.reversed).length;
+  const elementCounts = new Map<"fire" | "water" | "air" | "earth", number>();
+  let minorsCount = 0;
+  for (const c of cards) {
+    const deckCard = cardById(c.cardId);
+    if (!deckCard || deckCard.arcana !== "minor") continue;
+    minorsCount++;
+    const el = deckCard.correspondence.element;
+    elementCounts.set(el, (elementCounts.get(el) ?? 0) + 1);
+  }
+  const majorsCount = total - minorsCount;
+  let dominantElementLabel: string | undefined;
+  for (const [el, count] of elementCounts) {
+    if (count >= 2 && count / minorsCount >= 0.5) {
+      dominantElementLabel = dicts.elementLabels[el];
+      break;
+    }
+  }
+  return {
+    dominantElementLabel,
+    reversedCount,
+    total,
+    majorsCount,
+    minorsCount,
+    allMajors: total >= 2 && majorsCount === total,
+  };
+}
+
+/** Prosa determinista de lectura de tarot (sin IA), v2: apertura + clima →
+ *  2-3 párrafos por carta (escena/ámbito+pregunta/puente) → jumpers → cierre
+ *  tejido. `spreadId` sigue sin participar directo en la composición (las
+ *  posiciones llegan ya en `cards`, y `free-N` se detecta por el propio
+ *  formato de `position`) — se mantiene en la firma pública porque la lectura
+ *  por tipo de tirada con ámbitos propios por rol lo va a necesitar sin
+ *  romper a los llamadores existentes. `opts.jumpers` es el único agregado a
+ *  la firma pública: opcional, retrocompatible. */
 export function composeReadingProse(
   locale: "es" | "en",
   spreadId: string,
   cards: Array<{ cardId: string; reversed: boolean; position: string }>,
   question?: string,
+  opts?: { jumpers?: Array<{ cardId: string; reversed: boolean }> },
 ): string[] {
-  void spreadId; // reservado para T3 (ver doc arriba)
+  void spreadId; // reservado (ver doc arriba)
   return composeReadingWith(
     cards,
     locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES,
     locale === "en" ? DICTS_READING_EN : DICTS_READING_ES,
     question,
+    opts,
   );
 }
 
@@ -1452,25 +1601,61 @@ export function composeReadingWith(
   cardDict: Record<string, TarotCardContent>,
   dicts: ReadingComposeDicts,
   question?: string,
+  opts?: { jumpers?: Array<{ cardId: string; reversed: boolean }> },
 ): string[] {
   const parts: string[] = [];
 
   parts.push(question ? dicts.t.openingWithQuestion(question) : dicts.t.openingDefault());
 
+  const majority = computeMajority(cards, dicts);
+  if (cards.length >= 2) {
+    parts.push(
+      dicts.t.climate({
+        dominantElementLabel: majority.dominantElementLabel,
+        reversedCount: majority.reversedCount,
+        total: majority.total,
+        majorsCount: majority.majorsCount,
+        minorsCount: majority.minorsCount,
+      }),
+    );
+  }
+
   let emitted = 0;
   for (const drawn of cards) {
     const card = cardDict[drawn.cardId];
     if (!card) continue;
-    const positionLabel = dicts.positionLabels[drawn.position] ?? drawn.position;
+    const positionLabel = labelForPosition(dicts, drawn.position);
     const ambitText = drawn.reversed ? card.reversed.path : card.upright.path;
-    const connector = dicts.t.cardParagraphs[emitted % dicts.t.cardParagraphs.length]!;
-    parts.push(connector(card.name, positionLabel, ambitText));
+    const scene = dicts.t.sceneParagraphs[emitted % dicts.t.sceneParagraphs.length]!;
+    const ambit = dicts.t.ambitParagraphs[emitted % dicts.t.ambitParagraphs.length]!;
+    const bridge = dicts.t.bridgeParagraphs[emitted % dicts.t.bridgeParagraphs.length]!;
+    parts.push(scene(card.name, positionLabel, card.essence));
+    parts.push(ambit(ambitText, question));
+    parts.push(bridge(card.bridge));
     emitted++;
   }
 
-  const reversedCount = cards.filter((c) => c.reversed).length;
-  const mostlyReversed = cards.length > 0 && reversedCount / cards.length >= 0.5;
-  parts.push(mostlyReversed ? dicts.t.closingMostlyReversed() : dicts.t.closingNormal());
+  const jumpers = opts?.jumpers ?? [];
+  if (jumpers.length > 0) {
+    parts.push(dicts.t.jumpersIntro());
+    jumpers.forEach((jumper, i) => {
+      const card = cardDict[jumper.cardId];
+      if (!card) return;
+      const ambitText = jumper.reversed ? card.reversed.path : card.upright.path;
+      const paragraph = dicts.t.jumperParagraphs[i % dicts.t.jumperParagraphs.length]!;
+      parts.push(paragraph(card.name, card.essence, ambitText));
+    });
+  }
+
+  const closing: string[] = [];
+  closing.push(
+    majority.total > 0 && majority.reversedCount / majority.total >= 0.5
+      ? dicts.t.closingMostlyReversed()
+      : dicts.t.closingNormal(),
+  );
+  if (majority.dominantElementLabel) closing.push(dicts.t.closingSuitRepeat(majority.dominantElementLabel));
+  if (majority.allMajors) closing.push(dicts.t.closingAllMajors());
+  parts.push(closing.join(" "));
 
   return parts;
 }

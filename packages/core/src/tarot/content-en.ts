@@ -1343,7 +1343,10 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
 
 // composeReadingProse's fixed EN phrases and position labels. The engine
 // (composeReadingProse / composeReadingWith) lives in content-es.ts; this file
-// only exports data, same direction as the rest of this module.
+// only exports data, same direction as the rest of this module. v2 (T3): the
+// EN connective text below is written with its own sentence architecture —
+// different clause order and sentence counts from the ES originals — per the
+// lesson from T1 (Sonnet mirrors structure when it merely translates).
 const READING_POSITION_LABELS_EN: Record<string, string> = {
   day: "today",
   past: "the past",
@@ -1359,18 +1362,74 @@ const READING_POSITION_LABELS_EN: Record<string, string> = {
   outcome: "the possible outcome",
 };
 
+const READING_ORDINALS_EN: readonly string[] = [
+  "the first card",
+  "the second card",
+  "the third card",
+  "the fourth card",
+  "the fifth card",
+  "the sixth card",
+  "the seventh card",
+  "the eighth card",
+  "the ninth card",
+  "the tenth card",
+];
+
 export const DICTS_READING_EN: ReadingComposeDicts = {
   positionLabels: READING_POSITION_LABELS_EN,
+  ordinals: READING_ORDINALS_EN,
+  elementLabels: { fire: "fire", water: "water", air: "air", earth: "earth" },
   t: {
     openingWithQuestion: (question) =>
       `You carry a question with you — "${question}" — and the cards answer not with certainty, but with mirrors.`,
     openingDefault: () => "The cards open to show you what your soul already senses, even without words for it yet.",
-    cardParagraphs: [
-      (cardName, positionLabel, ambitText) => `In ${positionLabel}, ${cardName} speaks: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `${cardName} settles over ${positionLabel}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `Turning toward ${positionLabel}, you find ${cardName}: ${ambitText}`,
-      (cardName, positionLabel, ambitText) => `${cardName} sheds its light on ${positionLabel}: ${ambitText}`,
+    climate: ({ dominantElementLabel, reversedCount, total, majorsCount }) => {
+      const sentences: string[] = [];
+      if (dominantElementLabel) {
+        sentences.push(
+          `${dominantElementLabel[0]!.toUpperCase()}${dominantElementLabel.slice(1)} runs through this spread more than any other force.`,
+        );
+      } else if (majorsCount === total) {
+        sentences.push("Major arcana carry the whole spread today.");
+      } else {
+        sentences.push("No single force leads here — the spread mixes its currents.");
+      }
+      if (reversedCount === 0) sentences.push("Not one card fell reversed.");
+      else if (reversedCount === total) sentences.push("Every card fell reversed.");
+      else sentences.push(`${reversedCount} of ${total} cards fell reversed.`);
+      return sentences.join(" ");
+    },
+    sceneParagraphs: [
+      (cardName, positionLabel, essence) => `${cardName} shows up first, right where ${positionLabel} lives. ${essence}`,
+      (cardName, positionLabel, essence) => `Look at ${positionLabel} and you'll find ${cardName} already there: ${essence}`,
+      (cardName, positionLabel, essence) => `${essence} That's the scene ${cardName} sets over ${positionLabel}.`,
+      (cardName, positionLabel, essence) => `${positionLabel} belongs to ${cardName} right now. ${essence}`,
     ],
+    ambitParagraphs: [
+      (ambitText, question) => (question ? `${ambitText} Hold that next to "${question}" and see how it lands.` : ambitText),
+      (ambitText, question) =>
+        question ? `${ambitText} That's already an answer to "${question}", even if it isn't the one you expected.` : ambitText,
+      (ambitText, question) =>
+        question ? `${ambitText} "${question}" — this is the part of that answer you can't skip past.` : ambitText,
+    ],
+    bridgeParagraphs: [
+      (bridge) => `The sky backs this up: ${bridge}`,
+      (bridge) => `${bridge} That's the astrology underneath the image.`,
+      (bridge) => `There's a real chart behind this picture — ${bridge}`,
+      (bridge) => `No decoration needed here, the bridge says it plainly: ${bridge}`,
+    ],
+    jumpersIntro: () =>
+      "A few cards jumped free from the deck before their turn — give them their own attention, separate from the main spread.",
+    jumperParagraphs: [
+      (cardName, essence, ambitText) =>
+        `${cardName} didn't wait to be picked — it fell because it had something urgent to say. ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) => `There's nothing random about ${cardName} slipping out of the deck: ${essence} ${ambitText}`,
+      (cardName, essence, ambitText) => `${cardName} jumped ahead of the spread's own order. ${essence} ${ambitText}`,
+    ],
+    closingSuitRepeat: (elementLabel) =>
+      `Notice how ${elementLabel} keeps resurfacing across these cards — that repetition is the session's real theme, not a coincidence.`,
+    closingAllMajors: () =>
+      "Every single card here is a major arcana — the small, everyday details step aside while the soul does the talking.",
     closingMostlyReversed: () =>
       "Most of the cards landed reversed: the sky asks you to review before you advance — not as punishment, but as care.",
     closingNormal: () =>
