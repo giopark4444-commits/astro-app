@@ -1,9 +1,10 @@
 "use client";
+import type { ReactNode } from "react";
 import styles from "./area-bars.module.css";
 import { useCountUp } from "@/lib/motion/use-count-up";
 
 export interface BarDriver {
-  glyphs: string;
+  glyphs: ReactNode;
   text: string;
   favorable: boolean;
 }

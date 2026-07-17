@@ -8,6 +8,8 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import es from "../../../../messages/es.json";
 import { Balance } from "../carta-view";
 
 function stubReducedMotion() {
@@ -16,6 +18,10 @@ function stubReducedMotion() {
     addEventListener: () => {},
     removeEventListener: () => {},
   }));
+}
+
+function wrap(ui: React.ReactNode) {
+  return render(<NextIntlClientProvider locale="es" messages={es}>{ui}</NextIntlClientProvider>);
 }
 
 afterEach(() => {
@@ -31,8 +37,8 @@ describe("Balance (tab Balance) — barras + número contando", () => {
       { k: "air", label: "Aire", n: 0 },
       { k: "water", label: "Agua", n: 3 },
     ];
-    const { container } = render(
-      <Balance title="Elementos" entries={entries} dominant="fire" dominantLabel="Dominante" />,
+    const { container } = wrap(
+      <Balance title="Elementos" kind="element" entries={entries} dominant="fire" dominantLabel="Dominante" />,
     );
 
     expect(screen.getAllByText("3").length).toBe(2); // fuego y agua, ambos n=3
@@ -49,7 +55,13 @@ describe("Balance (tab Balance) — barras + número contando", () => {
       { k: "fire", label: "Fuego", n: 3 },
       { k: "water", label: "Agua", n: 1 },
     ];
-    render(<Balance title="Elementos" entries={entries} dominant="fire" dominantLabel="Dominante" />);
-    expect(screen.getByText("Fuego · Dominante")).toBeTruthy();
+    const { container } = wrap(
+      <Balance title="Elementos" kind="element" entries={entries} dominant="fire" dominantLabel="Dominante" />,
+    );
+    // el label está partido entre el trigger de Meaning ("Fuego") y el
+    // sufijo del dominante (" · Dominante") — se compara el texto combinado
+    // del contenedor en vez de un único nodo de texto exacto.
+    const labels = Array.from(container.querySelectorAll("span")).map((el) => el.textContent);
+    expect(labels).toContain("Fuego · Dominante");
   });
 });

@@ -3,12 +3,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ZODIAC_SIGNS, PLANETS, signOfLongitude,
+  planetMeaningKey, dignityMeaningKey, patternMeaningKey,
   type ChartResult, type BodyPosition, type Aspect, type HouseSystem, type Zodiac,
 } from "@aluna/core";
 import { Enso } from "../../../components/Enso";
 import { ChartWheel } from "../../../components/ChartWheel";
 import { BodyReadingReader } from "../../../components/BodyReading";
 import { BottomSheet } from "../../../components/BottomSheet";
+import { Meaning } from "../../../components/Meaning";
 import { Card, Chip, FadeIn, ToggleRow } from "../../../components/ui";
 import { useProfile } from "../../../lib/profile-context";
 import { useAuth } from "../../../lib/auth-context";
@@ -171,6 +173,7 @@ export default function CartaScreen() {
                     <DataChip
                       styles={styles}
                       glyph={PLANET_GLYPH.sun!}
+                      glyphKey={planetMeaningKey("sun")}
                       text={`${L.signs[byKey.get("sun")!.sign]} · ${t("carta.house")} ${byKey.get("sun")!.house}`}
                     />
                   )}
@@ -178,10 +181,11 @@ export default function CartaScreen() {
                     <DataChip
                       styles={styles}
                       glyph={PLANET_GLYPH.moon!}
+                      glyphKey={planetMeaningKey("moon")}
                       text={`${L.signs[byKey.get("moon")!.sign]} · ${t("carta.house")} ${byKey.get("moon")!.house}`}
                     />
                   )}
-                  <DataChip styles={styles} glyph="ASC" text={L.signs[ascPos.sign]!} />
+                  <DataChip styles={styles} glyph="ASC" glyphKey="point.ascendant" text={L.signs[ascPos.sign]!} />
                 </View>
               </View>
             </FadeIn>
@@ -298,6 +302,7 @@ export default function CartaScreen() {
                 <Balance
                   styles={styles}
                   title={t("carta.elements")}
+                  kind="element"
                   entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
                   dominant={ready.chart.distribution.dominantElement}
                   dominantLabel={t("carta.dominant")}
@@ -305,6 +310,7 @@ export default function CartaScreen() {
                 <Balance
                   styles={styles}
                   title={t("carta.modalities")}
+                  kind="modality"
                   entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
                   dominant={ready.chart.distribution.dominantModality}
                   dominantLabel={t("carta.dominant")}
@@ -313,15 +319,21 @@ export default function CartaScreen() {
                 <SectionCard styles={styles} title={t("carta.positions")}>
                   {ready.chart.bodies.map((b, i) => (
                     <View key={b.body} style={[styles.posRow, i === ready.chart.bodies.length - 1 && styles.rowLast]}>
-                      <Text style={styles.posGlyph}>{PLANET_GLYPH[b.body] ?? "•"}</Text>
+                      <Text style={styles.posGlyph}>
+                        <Meaning k={planetMeaningKey(b.body)}>{PLANET_GLYPH[b.body] ?? "•"}</Meaning>
+                      </Text>
                       <View style={styles.posMain}>
                         <Text style={styles.posName}>{L.bodies[b.body] ?? b.body}</Text>
                         <Text style={styles.posDetail}>
-                          {SIGN_GLYPH[b.sign]} {L.signs[b.sign]} {dms(b)} · {t("carta.house")} {b.house}
+                          <Meaning k={`sign.${b.sign}`}>{SIGN_GLYPH[b.sign]} {L.signs[b.sign]}</Meaning> {dms(b)} ·{" "}
+                          <Meaning k={`house.${b.house}`}>{t("carta.house")} {b.house}</Meaning>
                         </Text>
                       </View>
                       <View style={styles.posTags}>
-                        {b.retrograde && <Text style={styles.tagWarn}>℞</Text>}
+                        {/* Chip de dignidad NO envuelto (gap, ver report): es un
+                            <Chip> (View), y RN no permite anidar un View dentro
+                            del <Text> que <Meaning/> necesita ser. */}
+                        {b.retrograde && <Text style={styles.tagWarn}><Meaning k="term.retrograde">℞</Meaning></Text>}
                         {b.dignity && <Chip kind="tag" label={L.dignities[b.dignity]!} />}
                       </View>
                     </View>
@@ -344,7 +356,13 @@ export default function CartaScreen() {
                   ) : (
                     ready.chart.patterns.map((p, i) => (
                       <Text key={i} style={styles.patternRow}>
-                        {L.patterns[p.type] ?? p.type}: {p.bodies.map((b) => PLANET_GLYPH[b] ?? b).join(" ")}
+                        <Meaning k={patternMeaningKey(p.type)}>{L.patterns[p.type] ?? p.type}</Meaning>:{" "}
+                        {p.bodies.map((b, j) => (
+                          <Text key={b}>
+                            {j > 0 ? " " : ""}
+                            <Meaning k={planetMeaningKey(b)}>{PLANET_GLYPH[b] ?? b}</Meaning>
+                          </Text>
+                        ))}
                       </Text>
                     ))
                   )}
@@ -372,20 +390,27 @@ export default function CartaScreen() {
 }
 
 /** Data-chip compacto del mockup §2 (glifo + texto combinado, p.ej. "☉ Acuario · Casa 11"). */
-function DataChip({ styles, glyph, text }: { styles: ReturnType<typeof makeStyles>; glyph: string; text: string }) {
+function DataChip({
+  styles, glyph, glyphKey, text,
+}: {
+  styles: ReturnType<typeof makeStyles>; glyph: string; glyphKey?: string; text: string;
+}) {
   return (
     <View style={styles.dataChip}>
-      <Text style={styles.dataChipGlyph}>{glyph}</Text>
+      <Text style={styles.dataChipGlyph}>
+        {glyphKey ? <Meaning k={glyphKey}>{glyph}</Meaning> : glyph}
+      </Text>
       <Text style={styles.dataChipText}>{text}</Text>
     </View>
   );
 }
 
 function Balance({
-  styles, title, entries, dominant, dominantLabel,
+  styles, title, kind, entries, dominant, dominantLabel,
 }: {
   styles: ReturnType<typeof makeStyles>;
   title: string;
+  kind: "element" | "modality";
   entries: Array<{ k: string; label: string; n: number }>;
   dominant: string;
   dominantLabel: string;
@@ -397,7 +422,7 @@ function Balance({
       {entries.map((e) => (
         <View key={e.k} style={styles.balRow}>
           <Text style={styles.balLabel}>
-            {e.label}
+            <Meaning k={`${kind}.${e.k}`}>{e.label}</Meaning>
             {e.k === dominant ? ` · ${dominantLabel}` : ""}
           </Text>
           <View style={styles.balTrack}>
@@ -440,14 +465,19 @@ function AspectRow({
   return (
     <View style={[styles.aspRow, last && styles.rowLast]}>
       <Text style={[styles.aspGlyphs, color]}>
-        {PLANET_GLYPH[a.a] ?? a.a} {ASPECT_GLYPHS[a.aspect] ?? "·"} {PLANET_GLYPH[a.b] ?? a.b}
+        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a] ?? a.a}</Meaning>{" "}
+        {ASPECT_GLYPHS[a.aspect] ?? "·"}{" "}
+        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b] ?? a.b}</Meaning>
       </Text>
       <View style={styles.aspMain}>
         <Text style={styles.aspName}>
-          {L.bodies[a.a] ?? a.a} {L.aspects[a.aspect] ?? a.aspect} {L.bodies[a.b] ?? a.b}
+          {L.bodies[a.a] ?? a.a} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect] ?? a.aspect}</Meaning> {L.bodies[a.b] ?? a.b}
         </Text>
         <Text style={styles.aspSub}>
-          {t("carta.orb")} {a.orb.toFixed(1)}° · {a.applying ? t("carta.applying") : t("carta.separating")}
+          <Meaning k="term.orb">{t("carta.orb")}</Meaning> {a.orb.toFixed(1)}° ·{" "}
+          <Meaning k={a.applying ? "term.applying" : "term.separating"}>
+            {a.applying ? t("carta.applying") : t("carta.separating")}
+          </Meaning>
         </Text>
       </View>
     </View>

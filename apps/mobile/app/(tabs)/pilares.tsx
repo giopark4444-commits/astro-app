@@ -27,6 +27,7 @@ import {
   type LuckSequence,
 } from "@aluna/core";
 import { Enso } from "../../components/Enso";
+import { Meaning } from "../../components/Meaning";
 import { Card, Chip, FadeIn, ToggleRow } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
 import { useAuth } from "../../lib/auth-context";
@@ -228,7 +229,13 @@ export default function PilaresScreen() {
                       {pro && (
                         <View style={[styles.godBadge, isDay && styles.godBadgeSelf]}>
                           <Text style={styles.godText}>
-                            {isDay ? t("pilares.dayMasterHanzi") : content.ui.god[tenGod(dayMaster, pillar.stem)]}
+                            {isDay ? (
+                              <Meaning k="bazi.term.daymaster">{t("pilares.dayMasterHanzi")}</Meaning>
+                            ) : (
+                              <Meaning k={`bazi.god.${tenGod(dayMaster, pillar.stem)}`}>
+                                {content.ui.god[tenGod(dayMaster, pillar.stem)]}
+                              </Meaning>
+                            )}
                           </Text>
                         </View>
                       )}
@@ -240,7 +247,7 @@ export default function PilaresScreen() {
                           colorful && { color: EL_COLOR[stem.element] },
                         ]}
                       >
-                        {glyphStem(pillar.stem)}
+                        <Meaning k={`bazi.stem.${stem.key}`}>{glyphStem(pillar.stem)}</Meaning>
                       </Text>
                       <Text style={styles.nombre}>{stemName(pillar.stem)}</Text>
                       <View style={styles.hr} />
@@ -251,9 +258,11 @@ export default function PilaresScreen() {
                           colorful && { color: EL_COLOR[branch.element] },
                         ]}
                       >
-                        {glyphBranch(pillar.branch)}
+                        <Meaning k={`bazi.branch.${branch.key}`}>{glyphBranch(pillar.branch)}</Meaning>
                       </Text>
-                      <Text style={styles.nombre}>{content.ui.animal[branch.animal] ?? branch.animal}</Text>
+                      <Text style={styles.nombre}>
+                        <Meaning k={`bazi.branch.${branch.key}`}>{content.ui.animal[branch.animal] ?? branch.animal}</Meaning>
+                      </Text>
                       {pro && (
                         <View style={styles.hiddenWrap}>
                           <Text style={styles.hiddenLabel}>{t("pilares.hiddenStems")}</Text>
@@ -262,9 +271,11 @@ export default function PilaresScreen() {
                             return (
                               <View key={j} style={styles.hiddenRow}>
                                 <Text style={[styles.hiddenChar, { color: EL_COLOR[hidden.element] }]}>
-                                  {hidden.hanzi}
+                                  <Meaning k={`bazi.stem.${hidden.key}`}>{hidden.hanzi}</Meaning>
                                 </Text>
-                                <Text style={styles.hiddenGod}>{content.ui.god[tenGod(dayMaster, hs)]}</Text>
+                                <Text style={styles.hiddenGod}>
+                                  <Meaning k={`bazi.god.${tenGod(dayMaster, hs)}`}>{content.ui.god[tenGod(dayMaster, hs)]}</Meaning>
+                                </Text>
                               </View>
                             );
                           })}
@@ -286,7 +297,8 @@ export default function PilaresScreen() {
             <FadeIn delay={60} style={styles.fadeFull}>
               <Card accent style={styles.maestro}>
                 <Text style={styles.maestroNombre}>
-                  {glyphStem(data.day.stem)} {stemName(data.day.stem)}
+                  <Meaning k={`bazi.stem.${HEAVENLY_STEMS[data.day.stem]!.key}`}>{glyphStem(data.day.stem)}</Meaning>{" "}
+                  {stemName(data.day.stem)}
                 </Text>
                 <Text style={styles.maestroDesc}>
                   {DAY_MASTER_VOICE[HEAVENLY_STEMS[data.day.stem]!.key]?.[locale] ?? ""}
@@ -308,7 +320,7 @@ export default function PilaresScreen() {
                     const empty = n === 0;
                     return (
                       <View key={el} style={styles.balRow}>
-                        <Text style={styles.balLabel}>{elName(el)}</Text>
+                        <Text style={styles.balLabel}><Meaning k={`bazi.element.${el}`}>{elName(el)}</Meaning></Text>
                         <View style={[styles.balTrack, empty && styles.balTrackEmpty]}>
                           {!empty && (
                             <View
@@ -412,7 +424,7 @@ function SectionCard({
   children,
 }: {
   styles: ReturnType<typeof makeStyles>;
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -437,7 +449,7 @@ function NayinSection({
   glyphPillar: (p: Pillar) => string;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.nayinTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.nayin">{t("pilares.nayinTitle")}</Meaning>}>
       {entries.map((e, i) => {
         const n = nayin(e.pillar);
         return (
@@ -466,7 +478,7 @@ function StrengthSection({
   strength: ReturnType<typeof dayMasterStrength>;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.strengthTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.strength">{t("pilares.strengthTitle")}</Meaning>}>
       <View style={styles.meterRow}>
         {/* Verdicto en pill bordeada (receta "tag-chip" del mockup) en vez del texto
            suelto anterior — mismo `content.verdicts[strength.verdict]`, cero dato nuevo. */}
@@ -523,7 +535,7 @@ function FavorSection({
   tk: ThemeTokens;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.favorTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.favorable">{t("pilares.favorTitle")}</Meaning>}>
       {strength.verdict === "balanced" ? (
         <Text style={styles.note}>{t("pilares.balancedNote")}</Text>
       ) : (
@@ -585,7 +597,7 @@ function LuckSection({
   setOpenDecade: (n: number | null) => void;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.luckTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.luckpillars">{t("pilares.luckTitle")}</Meaning>}>
       {gender === "neutral" && <Text style={styles.note}>{t("pilares.luckNeutralNote")}</Text>}
       {!timeKnown && <Text style={styles.note}>{t("pilares.luckNoTimeNote")}</Text>}
       {sequences.map((seq) => (
@@ -674,7 +686,7 @@ function LuckRow({
                 <Text style={styles.rowLabel}>{r.year}</Text>
                 <Text style={styles.rowGlyph}>{glyphPillar(r.pillar)}</Text>
                 <Text style={styles.rowValue}>
-                  {content.ui.god[r.tenGod]}
+                  <Meaning k={`bazi.god.${r.tenGod}`}>{content.ui.god[r.tenGod]}</Meaning>
                   {r.marks.map((m, k) => (
                     <Text key={k} style={styles.mark}>
                       {" "}
@@ -709,7 +721,7 @@ function StagesSection({
   script: "hanzi" | "hangul";
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.stagesTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.twelvestages">{t("pilares.stagesTitle")}</Meaning>}>
       {entries.map((e, i) => {
         const st = lifeStage(dayStem, e.pillar.branch);
         const def = TWELVE_STAGES.find((x) => x.key === st)!;
@@ -741,7 +753,7 @@ function InteractionsSection({
   elName: (el: string) => string;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.interactionsTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.interactions">{t("pilares.interactionsTitle")}</Meaning>}>
       {interactions.length === 0 ? (
         <Text style={styles.note}>{t("pilares.interactionsEmpty")}</Text>
       ) : (
@@ -750,7 +762,7 @@ function InteractionsSection({
             <Text style={styles.rowLabel}>{x.positions.map((p) => content.ui.position[p]).join(" · ")}</Text>
             <Text style={styles.rowValue}>
               {content.interactions[x.type]}
-              {x.element ? ` → ${elName(x.element)}` : ""}
+              {x.element ? <> → <Meaning k={`bazi.element.${x.element}`}>{elName(x.element)}</Meaning></> : ""}
             </Text>
           </View>
         ))
@@ -775,7 +787,7 @@ function StarsSection({
   tk: ThemeTokens;
 }) {
   return (
-    <SectionCard styles={styles} title={t("pilares.starsTitle")}>
+    <SectionCard styles={styles} title={<Meaning k="bazi.term.symbolicstars">{t("pilares.starsTitle")}</Meaning>}>
       {stars.length === 0 ? (
         <Text style={styles.note}>—</Text>
       ) : (

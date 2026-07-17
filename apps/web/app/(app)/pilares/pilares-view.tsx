@@ -12,6 +12,7 @@ import { Starfield } from "@/components/starfield";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
 import { PilaresTabs, type PilaresTab } from "./pilares-tabs";
+import { Meaning } from "@/components/meaning";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
@@ -32,7 +33,9 @@ function ElementBar({ el, count, total }: { el: string; count: number; total: nu
   const displayCount = useCountUp(count);
   return (
     <div className={styles.elRow}>
-      <span className={styles.elName}>{t(`pilares.${ELEMENT_KEY[el]}`)}</span>
+      <span className={styles.elName}>
+        <Meaning k={`bazi.element.${el}`}>{t(`pilares.${ELEMENT_KEY[el]}`)}</Meaning>
+      </span>
       <span className={styles.elTrack}>
         <span
           className={`${styles.elBar} ${styles[`elBg_${el}`] ?? ""} bar-fill-in`}

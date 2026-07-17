@@ -4,12 +4,14 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   PLANETS,
   orderAreasByFocus,
+  planetMeaningKey,
   type LifeArea,
   type ScoreTone,
   type AreaDriver,
 } from "@aluna/core";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
+import { Meaning } from "@/components/meaning";
 import styles from "./energy.module.css";
 
 type Period = "today" | "week" | "month" | "year";
@@ -121,7 +123,13 @@ export function EnergyPanel({
             tone: a.tone,
             toneLabel: t(`hoy.${TONE_KEY[a.tone]}`),
             drivers: a.drivers.map((d) => ({
-              glyphs: `${PLANET_GLYPH[d.transit]} ${ASPECT_GLYPHS[d.aspect]} ${PLANET_GLYPH[d.natal]}`,
+              glyphs: (
+                <>
+                  <Meaning k={planetMeaningKey(d.transit)}>{PLANET_GLYPH[d.transit]}</Meaning>{" "}
+                  <Meaning k={`aspect.${d.aspect}`}>{ASPECT_GLYPHS[d.aspect]}</Meaning>{" "}
+                  <Meaning k={planetMeaningKey(d.natal)}>{PLANET_GLYPH[d.natal]}</Meaning>
+                </>
+              ),
               text: `${L.bodies[d.transit]} ${L.aspects[d.aspect]} ${t("carta.yourPossessive")} ${L.bodies[d.natal]}`,
               favorable: d.favorable,
             })),

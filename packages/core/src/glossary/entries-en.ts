@@ -1,0 +1,547 @@
+// Glossary of meanings (EN) — same keys as entries-es.ts, shared by web and
+// mobile from @aluna/core (content written once, skin per platform). Natural
+// English voice (not a literal translation). Second person, warm and honest,
+// 2–4 sentences. Parity with ES is checked by a test.
+import type { GlossaryEntry } from "./entries-es";
+
+export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
+  // ——— Signs ———
+  "sign.aries": {
+    title: "Aries", glyph: "♈",
+    body: "Cardinal fire: the spark that ignites before it thinks. Wherever Aries touches your chart, you move first and ask questions later — there you're a pioneer, brave, allergic to waiting for permission. Its gift is the courage to begin; its shadow, the impatience that breaks what hasn't finished being born.",
+  },
+  "sign.taurus": {
+    title: "Taurus", glyph: "♉",
+    body: "Fixed earth: the art of staying. Wherever Taurus lives in your chart, you want what's real — what can be touched, tasted, and kept — and you build slowly but for good. Its gift is the calm that holds steady; its shadow, gripping the familiar after life has already asked for something else.",
+  },
+  "sign.gemini": {
+    title: "Gemini", glyph: "♊",
+    body: "Mutable air: curiosity with two hands and a thousand questions. Wherever Gemini lives in your chart, you need to name things, connect them, try the other side of every idea — there you're a bridge between worlds. Its gift is the quickness of mind; its shadow, skimming so many surfaces that none of them ever gets depth.",
+  },
+  "sign.cancer": {
+    title: "Cancer", glyph: "♋",
+    body: "Cardinal water: the tide that takes care. Wherever Cancer touches your chart, home is your compass — the one with walls and the one in your chest — and you protect what's yours with a strength that surprises even you. Its gift is emotional memory that nourishes; its shadow, a shell that mistakes protecting yourself for letting no one in.",
+  },
+  "sign.leo": {
+    title: "Leo", glyph: "♌",
+    body: "Fixed fire: the heart that needs to shine in order to give warmth. Wherever Leo lives in your chart, something in you asks for a stage — not out of vanity, but because your light exists to be shared. Its gift is the generosity that lights others up; its shadow, needing applause to believe you're worth anything.",
+  },
+  "sign.virgo": {
+    title: "Virgo", glyph: "♍",
+    body: "Mutable earth: love expressed as detail. Wherever Virgo lives in your chart, you serve by refining — you see what's missing, what's excess, what could be done better — and your care shows up in the small things. Its gift is precision that heals; its shadow, criticism that forgives nothing, starting with you.",
+  },
+  "sign.libra": {
+    title: "Libra", glyph: "♎",
+    body: "Cardinal air: the scale that reaches for the other. Wherever Libra touches your chart, you think in mirrors — you need the meeting, the beauty, the fair deal — and you know how to build bridges where there were trenches. Its gift is the harmony that reconciles; its shadow, pleasing so much that your own voice gets left out of the bargain.",
+  },
+  "sign.scorpio": {
+    title: "Scorpio", glyph: "♏",
+    body: "Fixed water: intensity that doesn't know how to stay on the surface. Wherever Scorpio touches your chart, you won't settle for the official version of anything — you want the truth with its roots attached. Its gift is transformation; its shadow, controlling what it loves out of fear of losing it.",
+  },
+  "sign.sagittarius": {
+    title: "Sagittarius", glyph: "♐",
+    body: "Mutable fire: the arrow aimed past the edge of the map. Wherever Sagittarius lives in your chart, you need horizon — to travel, to study, to believe in something bigger — and you spread that faith without trying. Its gift is meaning that expands; its shadow, promising the sky and already being halfway down another road when it's time to deliver.",
+  },
+  "sign.capricorn": {
+    title: "Capricorn", glyph: "♑",
+    body: "Cardinal earth: the mountain climbed one step at a time. Wherever Capricorn touches your chart, there's an ambition that is serious and patient — you build with time, with discipline, with a word that gets kept. Its gift is the maturity others lean on; its shadow, carrying so much duty you forget you also came here to live.",
+  },
+  "sign.aquarius": {
+    title: "Aquarius", glyph: "♒",
+    body: "Fixed air: the mind that watches from outside the circle. Wherever Aquarius lives in your chart, you question what everyone takes for granted — there you are the future, the chosen tribe, the idea that arrives ahead of its time. Its gift is freeing what had gone rigid; its shadow, becoming so different that no one can touch you up close.",
+  },
+  "sign.pisces": {
+    title: "Pisces", glyph: "♓",
+    body: "Mutable water: the ocean where edges dissolve. Wherever Pisces lives in your chart, you feel what's floating in the air — compassion, art, the invisible all pass through you without asking. Its gift is a surrender that dissolves the ego; its shadow, swimming away from shore just when reality is asking for your hands.",
+  },
+
+  // ——— Planets & points ———
+  "planet.sun": {
+    title: "Sun", glyph: "☉",
+    body: "The center of your chart and of your identity: who you're here to become once you stop imitating. The Sun isn't your whole personality — it's the fire that feeds it, the purpose that lights you up when you live it and dims you when you keep postponing it. Living your Sun isn't selfishness: it's how you give light.",
+  },
+  "planet.moon": {
+    title: "Moon", glyph: "☽",
+    body: "Your emotional world: how you feel, what soothes you, where you return when the day has worn you down. The Moon is the child still inside you asking for the same things it always did — and also your wisest instinct. Knowing your Moon means knowing what you truly need, before you demand it in tears or collect it in silence.",
+  },
+  "planet.mercury": {
+    title: "Mercury", glyph: "☿",
+    body: "Your mind in motion: how you think, speak, learn, and connect the dots. Mercury is the messenger between your inner world and the outer one — its sign tells you whether your words run, weigh, cut, or embrace. When it flows, it translates; when it doesn't, it tangles: talking a lot and saying little.",
+  },
+  "planet.venus": {
+    title: "Venus", glyph: "♀",
+    body: "What you love and how you love: your way of attracting, of enjoying, of saying \"this is beautiful.\" Venus marks what gives you pleasure and what you value — in people, in things, in yourself. Its work isn't just romance: it's learning to receive without guilt and to love without keeping a tab.",
+  },
+  "planet.mars": {
+    title: "Mars", glyph: "♂",
+    body: "Your fire of action: how you desire, how you fight, how you go after what you want. Mars is the sword that cuts a path — used well it defends what's yours, used badly it wounds or rusts with swallowed anger. Its sign tells you whether your energy charges, calculates, seduces, or endures.",
+  },
+  "planet.jupiter": {
+    title: "Jupiter", glyph: "♃",
+    body: "Your principle of expansion: where life opens doors and you dare to believe. Jupiter marks your faith, your abundance, your way of finding meaning — you have luck there, but it's the kind of luck that switches on with trust. Its excess is real too: overpromising, growing without roots, mistaking optimism for not looking.",
+  },
+  "planet.saturn": {
+    title: "Saturn", glyph: "♄",
+    body: "Your inner teacher: the one who sets limits, structure, and exams. Where Saturn sits you feel the weight — fear, delay, demand — but it's also where you can build the most solid thing in your life, because nothing of yours there comes free. Saturn doesn't punish: it matures. What it asks of you early, it returns late and multiplied.",
+  },
+  "planet.uranus": {
+    title: "Uranus", glyph: "♅",
+    body: "The lightning that wakes you: where Uranus touches your chart, you can't be like everyone else no matter how hard you try. It's your genius, your rebellion, the part of you that has to break the mold in order to breathe. Its gift is authentic freedom; its risk, breaking things just to break them, mistaking the slammed door for liberation.",
+  },
+  "planet.neptune": {
+    title: "Neptune", glyph: "♆",
+    body: "The fog and the ocean: where Neptune lives, the edges dissolve — there you're a mystic, an artist, a dreamer, and there you can also lose yourself. It's your antenna to the invisible, your compassion without conditions. Its lesson is a fine one: learning to tell inspiration from mirage, surrender from escape.",
+  },
+  "planet.pluto": {
+    title: "Pluto", glyph: "♇",
+    body: "Your underground power: slow, invisible, and total. Where Pluto touches your chart, something dies and is reborn again and again — life won't let you stay halfway there. Its gift is a transformative force few can hold; its shadow, obsession and control whenever you resist letting go.",
+  },
+  "planet.chiron": {
+    title: "Chiron", glyph: "⚷",
+    body: "The wound that teaches: the place where something hurt early and never fully closed. Chiron's paradox is that right there — where you can't completely heal yourself — you develop an enormous medicine for others. The point isn't to fix the wound; it's to let it make you wise.",
+  },
+  "planet.lilith": {
+    title: "Lilith", glyph: "⚸",
+    body: "The untamable in you: the instinct that doesn't negotiate, the desire that doesn't apologize. Lilith marks where you were exiled — or exiled yourself — for not fitting in, and where you buried something wild to stay acceptable. Reclaiming her isn't revenge: it's coming home to the part of you that never should have asked forgiveness for existing.",
+  },
+  "planet.northnode": {
+    title: "North Node", glyph: "☊",
+    body: "Your soul's direction in this life: what you came to learn, not what you already know how to do. The North Node is uncomfortable because it points at new territory — every step toward it feels clumsy at first and deeply right afterward. It isn't a destiny that happens to you: it's one you walk.",
+  },
+  "planet.southnode": {
+    title: "South Node", glyph: "☋",
+    body: "The luggage you arrived with: talents and habits so well-learned you do them in your sleep. The South Node is comfort zone, and that's exactly why it's a trap — staying there means replaying a story you've already lived through. The point isn't to renounce those gifts, but to put them in service of the new road.",
+  },
+  "point.ascendant": {
+    title: "Ascendant",
+    body: "The sign rising over the horizon when you were born: the doorway through which the world meets you. It's your first impression, your style of starting things, the clothes your essence puts on to go outside. It's no false mask — it's a threshold: over the years, you stop performing it and start inhabiting it.",
+  },
+
+  // ——— Houses ———
+  "house.1": {
+    title: "House 1",
+    body: "Your body, your face, the way you walk into a room: the self that shows. It's the house of beginnings — how you start life, and everything inside it. Planets here are visible at first glance: they're the introduction you can't hide.",
+  },
+  "house.2": {
+    title: "House 2",
+    body: "The terrain of what's yours: your money, your talents, the ground under your feet when everything else shakes. The question here is what you're worth to yourself — not to the market. Its work is building a security no one can take from you, because it grows from resources that are part of your body.",
+  },
+  "house.3": {
+    title: "House 3",
+    body: "The terrain of the nearby: siblings, the streets of your neighborhood, the word spoken and the word heard. It's the house of the everyday mind — how you learn, write, converse, and move through your immediate world. Life here doesn't arrive in revelations: it arrives in errands, messages, and short trips.",
+  },
+  "house.4": {
+    title: "House 4",
+    body: "The root of the chart: your childhood home, your family, the emotional soil you grew in. It's the bottom of the sky — the most private place in you, where you return when the world gets heavy. What you plant here holds up everything else: no one blooms far from their roots without carrying them inside.",
+  },
+  "house.5": {
+    title: "House 5",
+    body: "Joy lives here: what you create, your children, play, the romance that makes you feel alive. It's the house where the heart expresses itself without asking permission — your art, your risk, your way of shining for pure pleasure. If you don't play on this ground, life turns into nothing but duty.",
+  },
+  "house.6": {
+    title: "House 6",
+    body: "The terrain of the daily: your everyday work, your routines, your body asking to be listened to. It's the house where the sacred becomes practical — order, service, health as a habit rather than an emergency. There's no glory here: there's consistency, and consistency is what heals.",
+  },
+  "house.7": {
+    title: "House 7",
+    body: "The terrain of the other: partners in love and in business, the agreements you sign with your soul or your hand. It's your mirror — what you seek (or attract) in the person across from you is usually something of yours you haven't recognized yet. Here you learn that a bond doesn't complete you: it reveals you.",
+  },
+  "house.8": {
+    title: "House 8",
+    body: "The terrain of the shared and the uncontrollable: deep intimacy, other people's money, the crises that remake you. Planets here don't live comfortably — they live deep. It's the house where you learn to let go in order to be reborn.",
+  },
+  "house.9": {
+    title: "House 9",
+    body: "The house of the horizon: long journeys, higher learning, the faith and philosophy you use to make sense of the chaos. This is the terrain that pulls you out of your village — sometimes on a plane, sometimes through a book that redraws your map. The question here isn't how to live, but what for.",
+  },
+  "house.10": {
+    title: "House 10",
+    body: "The terrain of the visible summit: your calling, your reputation, the mark you leave in the public square. It's the highest point of the chart — what you build in front of everyone, and what the world will ask you to account for. No one inherits this place: you climb to it.",
+  },
+  "house.11": {
+    title: "House 11",
+    body: "The tribe: friends, groups, causes bigger than you. It's the house of future projects — the dreams that only come true in a network, alongside others looking at the same horizon. On this ground you discover that your individual voice finds its echo in the collective.",
+  },
+  "house.12": {
+    title: "House 12",
+    body: "The terrain of the hidden: dreams, endings, what you've made so much your own that you no longer see it. It's the house of retreat and of the unconscious — planets here work backstage, in silence, in what gets released. It's not a house of punishment: it's where the soul rests from the character and remembers where it came from.",
+  },
+
+  // ——— Aspects ———
+  "aspect.conjunction": {
+    title: "Conjunction", glyph: "☌",
+    body: "Two planets at the same degree, so close their energies fuse into one. They don't see each other — they act as a unit, for better or for tangle, like two paints mixed past the point of separating. It's the most potent aspect there is: where you have a conjunction, you have an engine.",
+  },
+  "aspect.opposition": {
+    title: "Opposition", glyph: "☍",
+    body: "Two planets face to face, 180° apart, pulling you toward opposite shores. It feels like an inner tug-of-war — or like you live one end yourself and keep meeting the other end in someone else. The work isn't picking a winner: it's learning to hold both without splitting in two.",
+  },
+  "aspect.trine": {
+    title: "Trine", glyph: "△",
+    body: "Two planets at 120°, sharing the same element: the energy moves between them with no friction at all. It's a talent you were simply born with — so natural you might not even clock it as a gift. The real work with a trine isn't earning it, it's not taking it for granted.",
+  },
+  "aspect.square": {
+    title: "Square", glyph: "□",
+    body: "Two planets at 90°, colliding at a right angle: each one wants something that gets in the other's way. It's friction, yes — but friction that strikes sparks. Squares are the aspects that make you work the hardest, and precisely where you build the most muscle: almost everything you're proud of has one behind it.",
+  },
+  "aspect.sextile": {
+    title: "Sextile", glyph: "⚹",
+    body: "Two planets at 60°, in elements that get along: a door left ajar between them. It's an opportunity, not a gift — the energy cooperates when you invite it, but it won't insist on its own the way a trine does. Where you have a sextile, there's a talent that only wakes up when you say yes to it.",
+  },
+  "aspect.quincunx": {
+    title: "Quincunx", glyph: "⚻",
+    body: "Two planets at 150°, in signs that share neither element nor mode: they speak different languages, and there's no interpreter. It feels like a diffuse discomfort, something that never quite fits no matter how you arrange it. Its work is fine adjustment: not resolving the tension, but learning to live with it cleverly.",
+  },
+  "aspect.semisextile": {
+    title: "Semisextile", glyph: "⚺",
+    body: "Two planets at 30°, in neighboring signs: close enough to brush shoulders, different enough not to understand each other. It's a subtle aspect — a faint background rub rather than open conflict. It asks you to notice the difference between two parts of you that live next door but lead separate lives.",
+  },
+  "aspect.semisquare": {
+    title: "Semisquare", glyph: "∠",
+    body: "Half a square: 45° of fine friction — more chafe than collision. It's low-volume discomfort that accumulates, the kind of tension you ignore until the day it pinches. Tended early, it's an adjustment; ignored, it hardens.",
+  },
+  "aspect.sesquisquare": {
+    title: "Sesquisquare", glyph: "⚼",
+    body: "A square and a half: 135° of tension that shows up off-beat, just when you thought the matter was settled. It often speaks of impatience — forcing what asked for another rhythm. Its gift is teaching you to correct course without drama.",
+  },
+  "aspect.quintile": {
+    title: "Quintile", glyph: "Q",
+    body: "72°: the aspect of fine talent. It joins two planets with an almost artisanal skill — a specific gift, sometimes so natural you don't recognize it as one. Look for it where you make easy what others struggle to explain.",
+  },
+
+  // ——— Terms ———
+  "term.orb": {
+    title: "Orb",
+    body: "The degrees an aspect is off from being exact. The tighter the orb, the louder it speaks: an aspect at 0.5° talks to you daily; at 7°, it's more of a quiet background hum.",
+  },
+  "term.applying": {
+    title: "Applying",
+    body: "The aspect is still forming: the faster planet is closing in on exact but hasn't arrived yet. It's the crescendo phase — the energy is building, like a wave you can see coming. Applying aspects feel more alive than ones already past: whatever they announce still lies ahead.",
+  },
+  "term.separating": {
+    title: "Separating",
+    body: "The aspect has already had its exact moment, and the planets are drifting apart. The energy doesn't vanish all at once — it lingers as an echo, something that already happened and is still ringing. It feels less like waiting for what's coming and more like digesting what just was.",
+  },
+  "term.retrograde": {
+    title: "Retrograde",
+    body: "Seen from Earth, the planet appears to walk backward — it isn't really, but the effect is felt. That planet's themes turn inward: instead of advancing, they review, repeat, ripen. It's not the sky punishing you: it's life asking for a second look before the next step.",
+  },
+  "term.transit": {
+    title: "Transit",
+    body: "A planet moving through the sky today, touching a point in your natal chart. If the chart is the map, transits are the weather: they tell you which season each area of your life is passing through, and for how long. They force nothing — they open and close doors that you still have to walk through yourself.",
+  },
+  "term.natal": {
+    title: "Natal",
+    body: "What was fixed at the instant you were born: the snapshot of the sky that travels with you for life. Your natal chart doesn't change — how you inhabit it does. It's the instrument you arrived with; the music you draw from it is up to you.",
+  },
+
+  // ——— Dignities ———
+  "dignity.domicile": {
+    title: "Domicile",
+    body: "The planet sits in the sign it rules: in its own house, keys in hand. There its energy expresses itself without translation or permission — its clearest, most natural version. A planet in domicile doesn't need pushing: it knows exactly what it came to do.",
+  },
+  "dignity.exaltation": {
+    title: "Exaltation",
+    body: "The planet lands in a sign that amplifies its best self, like an honored guest at someone else's table. It's not home turf (that would be rulership), but here it gets celebrated: its energy turns up in voltage and wants to express itself big.",
+  },
+  "dignity.detriment": {
+    title: "Detriment",
+    body: "The planet sits in the sign opposite its domicile: far from home, in a culture that doesn't speak its language. Its energy doesn't disappear — it just struggles more, coming out awkwardly or through side doors. And there's the hidden gift: what doesn't come easy becomes conscious, and what's conscious can be worked with.",
+  },
+  "dignity.fall": {
+    title: "Fall",
+    body: "The planet sits in the sign opposite its exaltation: where it was once the guest of honor, nobody here saves it a seat. Its energy speaks in a low voice, doubting itself. It doesn't mean that planet is broken — it means its strength asks for more patience and humility to bloom, and when it does, it's strength truly earned.",
+  },
+  "dignity.peregrine": {
+    title: "Peregrine",
+    body: "The planet holds no dignity at all in that sign: no home, no honors, no debts. It's a traveler without papers — not strong, not weak, just unanchored, and easily colored by whatever planets touch it. Its lesson is finding its own direction in a land that doesn't claim it.",
+  },
+
+  // ——— Patterns ———
+  "pattern.stellium": {
+    title: "Stellium",
+    body: "Three or more planets bunched in the same sign or house: a concentration of energy that's hard to ignore. That area of your life weighs more than the rest — there you're intense, a specialist, sometimes a one-topic person. The challenge isn't turning it down: it's not letting that single spotlight swallow the rest of the map.",
+  },
+  "pattern.grandtrine": {
+    title: "Grand Trine",
+    body: "Three planets forming a triangle of trines, usually all in one element: a closed circuit where energy flows on its own. It's an enormous gift — and a dangerous hammock, because what costs nothing also wakes nothing. Its work is giving all that ease a job, so the talent circulates outward instead of just spinning in place.",
+  },
+  "pattern.tsquare": {
+    title: "T-Square",
+    body: "Two planets in opposition and a third squaring them both: all the tension funnels into that focal planet. It feels like constant pressure in that area of your life — and also like your biggest engine. People with T-squares don't rest easy, but they build: the way through is giving the focal planet work worthy of its force.",
+  },
+  "pattern.yod": {
+    title: "Yod",
+    body: "Two planets in sextile and a third 150° from both: they call it \"the finger of God\" because it seems to point at something. The planet being pointed at carries an uncomfortable sense of mission — something life asks you to adjust again and again, never letting you settle. It doesn't resolve in one go: it gets tuned over the years, like a rare instrument only you know how to play.",
+  },
+  "pattern.grandcross": {
+    title: "Grand Cross",
+    body: "Four planets forming two crossed oppositions: tension in all four directions at once. It's one of the most demanding patterns — the feeling that there's always an open front, whichever way you pull. Its gift matches the price: whoever learns to carry that cross develops a capacity for work and endurance few charts ever know.",
+  },
+
+  // ——— House systems ———
+  "housesystem.placidus": {
+    title: "Placidus",
+    body: "It divides the sky by how long each degree takes to rise over the horizon, so the houses come out unequal in size. It's the most widely used system in modern Western astrology: if you've never chosen one, you're probably already using it.",
+  },
+  "housesystem.koch": {
+    title: "Koch",
+    body: "Similar to Placidus, but it calculates the intermediate houses anchored more tightly to your exact birthplace. It has loyal followers — especially in Europe — who feel houses 2 through 12 describe their lives better with this cut.",
+  },
+  "housesystem.equal": {
+    title: "Equal House",
+    body: "Twelve houses of exactly 30° each, counted from your Ascendant. It's simple and steady, and makes special sense for anyone born at extreme latitudes, where other systems stretch the houses out of all proportion.",
+  },
+  "housesystem.wholesign": {
+    title: "Whole Sign",
+    body: "Each full sign is one house: your Ascendant's sign is your entire 1st house, the next sign the 2nd, and so on. It's the oldest system we know of — the favorite of Hellenistic astrology and of anyone who prefers reading the chart in clean strokes, with no borders cutting through mid-sign.",
+  },
+  "housesystem.regiomontanus": {
+    title: "Regiomontanus",
+    body: "It slices the sky by projecting divisions from the celestial equator down to your horizon, a medieval method that ruled Europe for centuries. Today it makes sense above all for horary astrologers — the ones answering concrete questions — where it remains the classical standard.",
+  },
+  "housesystem.porphyry": {
+    title: "Porphyry",
+    body: "It takes the four angles of your chart and splits each quadrant into three equal parts: an elegant middle ground between simple and astronomical. It makes sense for anyone who wants to honor their exact angles without marrying more intricate math.",
+  },
+
+  // ——— Zodiacs ———
+  "zodiac.tropical": {
+    title: "Tropical Zodiac",
+    body: "It anchors the zodiac to the seasons: Aries always begins at the northern spring equinox, regardless of which constellation sits behind it. It's the system of Western astrology — it reads your chart through the relationship between Earth and Sun, the cycle of light.",
+  },
+  "zodiac.sidereal": {
+    title: "Sidereal Zodiac",
+    body: "It anchors the zodiac to the constellations actually visible in the sky, which have drifted from the seasons over the centuries — the gap is now around 24°. It's the system of Vedic astrology: if your Sun \"changes sign\" when calculated this way, it's not an error — it's a different map measuring with a different stick.",
+  },
+
+  // ——— Elements ———
+  "element.fire": {
+    title: "Fire",
+    body: "The element of drive, faith, and enthusiasm. With a lot of fire in your chart, you start fast, spread energy, and need motion — the risk is burning out, or burning others with all that flame. With little, lighting your own motivation is hard: you don't lack ability, you lack the first spark, and it helps to surround yourself with people and projects that lend you one.",
+  },
+  "element.earth": {
+    title: "Earth",
+    body: "The element of the concrete: the body, money, whatever can be touched and held. With a lot of earth, you're someone others lean on — practical, steady — though you can overstay in what's safe. With little, ideas come easily and landing them doesn't: your work is giving your visions a body, one habit and one deadline at a time.",
+  },
+  "element.air": {
+    title: "Air",
+    body: "The element of mind and connection: words, ideas, the distance that makes understanding possible. With a lot of air, you think everything through and talk everything out — the risk is living in your head, watching your own life from the balcony. With little, it's hard to put what's happening to you into words or step back for perspective: writing and talking things through with others sorts you out inside.",
+  },
+  "element.water": {
+    title: "Water",
+    body: "The element of feeling: emotions, intuition, the things you know without knowing how. With a lot of water, you're a sponge — you pick up the emotional weather of any room, and you need shores so you don't drown in what isn't yours. With little, emotions arrive late or in a foreign language: it's not coldness, it's that your feeling asks for more time and more permission.",
+  },
+
+  // ——— Modalities ———
+  "modality.cardinal": {
+    title: "Cardinal",
+    body: "The energy that initiates: the one that sees empty ground and lays the first stone. With a lot of cardinal energy, you launch projects effortlessly — finishing them is another story — and waiting for others to decide makes you itch. With little, you'd rather join what's already moving: taking the first step yourself is the muscle to train.",
+  },
+  "modality.fixed": {
+    title: "Fixed",
+    body: "The energy that sustains: the one that stays after the opening excitement is gone. With a lot of fixed energy, you have a persistence that moves mountains — and a stubbornness that sometimes keeps defending them after they've stopped serving you. With little, starting comes easy and staying costs you: your work is to remain one chapter longer than the impulse asks.",
+  },
+  "modality.mutable": {
+    title: "Mutable",
+    body: "The energy that adapts: the one that bends without breaking when the plan changes. With a lot of mutable energy, you flow with any turn — the risk is scattering so much that nobody knows where you stand, including you. With little, last-minute changes throw you off: advance notice is a gift to you, and letting go of the plan is your practice.",
+  },
+
+  // ——— BaZi: Heavenly Stems ———
+  "bazi.stem.jia": {
+    title: "Jiǎ · Yang Wood", glyph: "甲",
+    body: "The tree that grows straight toward the sky: pioneering, upright, with an integrity that doesn't bend easily. Where Jiǎ appears in your pillars there's drive to break ground and lead by growing — and a stiffness that may snap before it yields. Its lesson is the oak's: firmness serves best when it knows when to be bamboo.",
+  },
+  "bazi.stem.yi": {
+    title: "Yǐ · Yin Wood", glyph: "乙",
+    body: "The vine and the grass: the wood that doesn't compete with the oak — it climbs it. Yǐ is flexible, diplomatic, able to grow through any crack and bloom where others can't even take root. Its strength doesn't look like strength, and that's the secret: it survives storms that bring whole trees down.",
+  },
+  "bazi.stem.bing": {
+    title: "Bǐng · Yang Fire", glyph: "丙",
+    body: "The midday sun: warmth enough for everyone, with nothing asked in return. Bǐng is generous, visible, optimistic — it walks into a room and the room knows, lifting spirits without meaning to. Its challenge is accepting that even the sun doesn't shine at night: it too needs dusk, and to be taken care of once in a while.",
+  },
+  "bazi.stem.ding": {
+    title: "Dīng · Yin Fire", glyph: "丁",
+    body: "The candle flame, the lamp lit against the night: focused, warm, intimate light. Dīng illuminates up close — inspiring one person at a time, noticing what Bǐng's sun is too bright to see. Its care is guarding the flame: a wind that barely stirs a bonfire can put out a candle.",
+  },
+  "bazi.stem.wu": {
+    title: "Wù · Yang Earth", glyph: "戊",
+    body: "The mountain, the fortress wall: earth at its most solid and protective. Wù is dependable, steady, someone to shelter behind when the weather turns — but changing its mind takes what moving a mountain takes. Its gift is holding things up; its task, remembering that even rock lets itself be carved.",
+  },
+  "bazi.stem.ji": {
+    title: "Jǐ · Yin Earth", glyph: "己",
+    body: "The cultivated field: moist, fertile, ready to receive any seed and make it grow. Jǐ nourishes quietly — teaching, tending, improving everything it touches without claiming credit. Its risk is giving itself to so many other crops that it forgets to plant something of its own.",
+  },
+  "bazi.stem.geng": {
+    title: "Gēng · Yang Metal", glyph: "庚",
+    body: "The axe, the fresh-forged sword, raw ore: strength that cuts away what no longer serves. Gēng is direct, justice-minded, loyal to its principles past the point of comfort. It needs fire to temper it and work worthy of its edge — an idle axe rusts, or cuts where it shouldn't.",
+  },
+  "bazi.stem.xin": {
+    title: "Xīn · Yin Metal", glyph: "辛",
+    body: "The finished jewel: fine gold, precision, a shine that was worked for. Xīn carries an aesthetic sensitivity and a standard of quality that shows in everything it makes — and a fine memory for every scratch. Its lesson is that its worth doesn't depend on the display case: a jewel is a jewel in the drawer too.",
+  },
+  "bazi.stem.ren": {
+    title: "Rén · Yang Water", glyph: "壬",
+    body: "The great river, the ocean: water that moves at scale and recognizes no borders. Rén brings ingenuity, fluid ambition, the knack for flowing around an obstacle instead of crashing into it. Its challenge is banks: without a channel, that much current floods instead of watering.",
+  },
+  "bazi.stem.gui": {
+    title: "Guǐ · Yin Water", glyph: "癸",
+    body: "The fine rain, the dew before dawn: the gentlest water and the most penetrating. Guǐ nourishes without noise, intuits without knowing how, reaches where the river can't fit. It is the power of the subtle — drop by drop it wears through the stone the torrent only pounds.",
+  },
+
+  // ——— BaZi: Earthly Branches ———
+  "bazi.branch.zi": {
+    title: "Zǐ · Rat", glyph: "子",
+    body: "The Rat: water in deepest winter, the midnight of the year. As a foundation it brings ingenuity, survival instinct, and an intelligence that works quietly while everyone else sleeps. Where you have Zǐ, there are hidden resources that surface exactly when scarcity bites.",
+  },
+  "bazi.branch.chou": {
+    title: "Chǒu · Ox", glyph: "丑",
+    body: "The Ox: the damp earth of winter's end, when spring is being prepared under frozen ground. It brings long-haul patience, steady work, and the strength to carry what others put down. Where you have Chǒu, the harvest comes late — but it comes, and it comes solid.",
+  },
+  "bazi.branch.yin": {
+    title: "Yín · Tiger", glyph: "寅",
+    body: "The Tiger: wood at the start of spring, the first force to crack the ice. It brings courage, initiative, and a pioneering drive that would rather ask forgiveness than permission. Where you have Yín, part of you leaps first and learns midair — beginnings don't scare it: they wake it up.",
+  },
+  "bazi.branch.mao": {
+    title: "Mǎo · Rabbit", glyph: "卯",
+    body: "The Rabbit: wood in full spring, the garden in bloom. It brings diplomacy, aesthetic sensitivity, and a talent for growing without stepping on anyone. Where you have Mǎo, progress is soft but relentless — grass makes no noise and still covers the field.",
+  },
+  "bazi.branch.chen": {
+    title: "Chén · Dragon", glyph: "辰",
+    body: "The Dragon: earth at spring's end, and the only mythical animal of the twelve. It is a storehouse — it keeps water inside — and brings ambition, magnetism, and a complexity that won't be read at first glance. Where you have Chén, there are deep reserves and dreams built to scale.",
+  },
+  "bazi.branch.si": {
+    title: "Sì · Snake", glyph: "巳",
+    body: "The Snake: fire at the start of summer, warmth that is no longer a promise but a fact. It brings insight, strategy, and an elegance that gets things done without wrestling. Where you have Sì, the mind sees several moves ahead — and rarely shows its cards.",
+  },
+  "bazi.branch.wu": {
+    title: "Wǔ · Horse", glyph: "午",
+    body: "The Horse: fire at summer's height, the noon of the year. It brings passion, frankness, and a need for motion that doesn't negotiate — the most comfortable stable is still a stall. Where you have Wǔ, the energy is visible, contagious, and hard to rein in.",
+  },
+  "bazi.branch.wei": {
+    title: "Wèi · Goat", glyph: "未",
+    body: "The Goat: the dry earth of late summer, when the harvest ripens in the sun. It is a storehouse of wood, and brings kindness, creativity, and a care that holds the whole flock together. Where you have Wèi, there is sweetness with a memory — it yields on the form, never on the essence.",
+  },
+  "bazi.branch.shen": {
+    title: "Shēn · Monkey", glyph: "申",
+    body: "The Monkey: metal at the start of autumn, ingenuity made animal. It brings versatility, humor, and a technical knack for solving with one hand what others can't with two. Where you have Shēn, there is always a plan B — and probably a C.",
+  },
+  "bazi.branch.you": {
+    title: "Yǒu · Rooster", glyph: "酉",
+    body: "The Rooster: metal in full autumn, the jewel already separated from the ore. It brings precision, a critical eye, and pride in work properly finished — it crows at the exact hour, not a minute early or late. Where you have Yǒu, detail isn't decoration: it's principle.",
+  },
+  "bazi.branch.xu": {
+    title: "Xū · Dog", glyph: "戌",
+    body: "The Dog: earth at autumn's end, the gatekeeper when dark comes early. It is a storehouse of fire, and brings loyalty, a sense of justice, and a watchfulness that doesn't sleep. Where you have Xū, you guard what's yours — and what's yours includes your people.",
+  },
+  "bazi.branch.hai": {
+    title: "Hài · Pig", glyph: "亥",
+    body: "The Pig: water at winter's onset, when the year folds inward. It brings generosity, honesty without a false bottom, and a calm that savors the simple. Where you have Hài, rest isn't laziness: it's the seed gathering strength underground.",
+  },
+
+  // ——— BaZi: Ten Gods (relative to the Day Master) ———
+  "bazi.god.peer": {
+    title: "Friend", glyph: "比肩",
+    body: "The same element and same polarity as your Day Master: someone cut from your very wood. It is lived as self-reliance, friendships between equals, the ability to stand without leaning. In excess, being so good at going it alone isolates you — or turns every shared table into a comparison.",
+  },
+  "bazi.god.rob": {
+    title: "Rival", glyph: "劫財",
+    body: "Your own element with the opposite polarity: a sibling running your same race. It is lived as competitive charisma, nerve for risk — and a tendency for money to be shared or slip away through hands close to you. Worked well, it makes you brave; unexamined, it has you betting what was never only yours.",
+  },
+  "bazi.god.eating": {
+    title: "Output", glyph: "食神",
+    body: "The element your Day Master produces, in the same polarity: your talent flowing without strain. It is lived as gentle creativity, a taste for good food and the good life, expression that comes out naturally. This is the god of enjoyment: what's yours blooms when you create for pleasure, not under pressure.",
+  },
+  "bazi.god.hurting": {
+    title: "Maverick", glyph: "傷官",
+    body: "Also born of what your Day Master produces, but in the opposite polarity: talent with an edge. It is lived as brilliance that can't stomach a foolish rule, quick words, the need to stand out by breaking the mold. It's the uncomfortable genius of the chart: channeled, it makes great work; loose, it argues with every authority it meets.",
+  },
+  "bazi.god.wealth_direct": {
+    title: "Direct Wealth", glyph: "正財",
+    body: "The element your Day Master controls, in the opposite polarity: the fruit of your own labor. It is lived as material steadiness, prudence with what's earned, loyalty in your bonds — the paycheck that arrives because you showed up first. Its lesson: the security you build outlasts the security you wait for.",
+  },
+  "bazi.god.wealth_indirect": {
+    title: "Indirect Wealth", glyph: "偏財",
+    body: "The element you control, in your same polarity: wealth that circulates rather than sits. It is lived as a nose for opportunity, easy generosity, money that comes and goes in large motions. It's the god of the entrepreneur and the gambler — the difference between them is knowing when to walk away.",
+  },
+  "bazi.god.power_direct": {
+    title: "Authority", glyph: "正官",
+    body: "The element that controls your Day Master, in the opposite polarity: the law that orders you without crushing you. It is lived as duty, a guarded reputation, respect for the rules of the game — the fair boss, the rank that was earned. Well integrated, it gives you standing; in excess, you live for the rulebook and forget what it was for.",
+  },
+  "bazi.god.power_indirect": {
+    title: "Indirect Power", glyph: "七殺",
+    body: "The element that controls you, in your same polarity: pure pressure, no diplomacy — tradition calls it Seven Killings. It is lived as fierce demand, crises that forge you, an authority won in the field rather than behind a desk. Tamed, it's the god of warriors and surgeons; untamed, it's living under siege.",
+  },
+  "bazi.god.resource_direct": {
+    title: "Direct Resource", glyph: "正印",
+    body: "The element that produces your Day Master, in the opposite polarity: the mother, the teacher, the knowledge that feeds you. It is lived as a love of learning, protection that arrives on time, an ethic that backs you up. Its shadow is sweet, which is how it fools you: cared for this well, why ever step out into the weather?",
+  },
+  "bazi.god.resource_indirect": {
+    title: "Indirect Resource", glyph: "偏印",
+    body: "It nourishes you too, but in your same polarity: knowledge by unofficial roads. It is lived as sharp intuition, unusual interests, a mind that teaches itself what no classroom offers. It's the god of healers and specialists — its care is not sealing its world so tightly that no one else fits inside.",
+  },
+
+  // ——— BaZi: Concepts ———
+  "bazi.term.daymaster": {
+    title: "Day Master", glyph: "日主",
+    body: "The heavenly stem of the day you were born: in BaZi, that is you. Everything else in the chart — gods, elements, pillars — is read in relation to it: what feeds you, what demands of you, what you produce, what you control. Before reading anything else in your pillars, look at your Day Master: it's the protagonist of the story.",
+  },
+  "bazi.term.hiddenstems": {
+    title: "Hidden Stems", glyph: "藏干",
+    body: "Every earthly branch carries one, two, or three stems tucked inside it, like layers of soil beneath the surface. They are nuances you don't see at first glance but that carry weight: quiet talents, deep loyalties, elements working from below. Much of the finesse of a BaZi reading lives here.",
+  },
+  "bazi.term.nayin": {
+    title: "Nayin", glyph: "納音",
+    body: "A poetic system that gives every stem-branch pair an image of its own — Gold in the Sea, Furnace Fire, Pomegranate Wood. There are sixty melodies in all, and yours adds texture to the pillar: it doesn't change the element, it describes it with more poetry. Read it as each pillar's symbolic surname.",
+  },
+  "bazi.term.luckpillars": {
+    title: "Luck Pillars", glyph: "大運",
+    body: "Beyond your four natal pillars, life is traveled in ten-year stretches, each with its own stem and branch. They are the long seasons of your biography: one decade that favors your element, another that prunes it. They don't change who you are — they change the weather you get to be it in.",
+  },
+  "bazi.term.twelvestages": {
+    title: "Twelve Stages", glyph: "十二運星",
+    body: "The full life cycle of an element, from birth to the tomb and back to conception: twelve stations like Birth, Peak, Decline, or Severance. Each of your pillars stands in one, and that tells you how much vitality that zone of your chart runs on. None is good or bad in itself: the Tomb stores, Conception prepares.",
+  },
+  "bazi.term.symbolicstars": {
+    title: "Symbolic Stars", glyph: "神煞",
+    body: "Special markers that certain stem-branch combinations switch on in your chart: the Heavenly Noble who brings timely help, the Peach Blossom that magnetizes, the Traveling Horse that asks for motion. They are brushstrokes, not the whole painting — flavor and detail on top of what the pillars already tell.",
+  },
+  "bazi.term.pillar": {
+    title: "Pillar", glyph: "柱",
+    body: "Each pillar is a pair — one heavenly stem over one earthly branch — and your chart has four: year (your roots and ancestors), month (your parents and career), day (you and your partner), and hour (your children and legacy). Together they are the eight characters that give BaZi its name. Read them as four acts of a single life.",
+  },
+  "bazi.term.favorable": {
+    title: "Favorable Elements", glyph: "用神",
+    body: "The elements your chart needs to come into balance: if your Day Master is weak, whatever feeds and accompanies it; if strong, whatever drains it or gives it work. Knowing them makes the whole reading practical — colors, seasons, activities, even entire decades line up with what serves you, or don't.",
+  },
+  "bazi.term.interactions": {
+    title: "Interactions",
+    body: "Pillars don't live in isolation: their stems and branches combine, clash or punish one another. These interactions are the chart's fine weave — where two energies merge into something new or drain each other. Reading them is seeing the map in motion, not as a photograph.",
+  },
+  "bazi.term.strength": {
+    title: "Day Master Strength", glyph: "強弱",
+    body: "The chart's central diagnosis: how much support your Day Master receives from the season, from its roots, and from the visible stems. Strong doesn't mean better and weak doesn't mean worse — they mean different strategies: the strong thrives on challenge and outlet, the weak on nourishment and backing. Your favorable elements follow from this verdict.",
+  },
+
+  // ——— BaZi: Five Elements (wuxing) ———
+  "bazi.element.wood": {
+    title: "Wood", glyph: "木",
+    body: "In the five-element cycle, Wood is growth: born of Water, it feeds Fire and sinks roots into the Earth it controls. In you it is lived as the drive to expand, flexibility, a vision of what's next — a tree is always halfway made. Unlike the four Western elements, Wood here is a force of its own: spring turned into character.",
+  },
+  "bazi.element.fire": {
+    title: "Fire", glyph: "火",
+    body: "Fire transforms: born of Wood, it leaves Earth behind as ash and melts the Metal it controls. It is lived as passion, expression, visibility — the power to turn into light what others left as firewood. It is the cycle's summer: full expansion, with the eternal risk of consuming what feeds it.",
+  },
+  "bazi.element.earth": {
+    title: "Earth", glyph: "土",
+    body: "Earth holds, and sits at the center of the cycle: born of Fire, it raises Metal in its depths and contains the Water it controls. It is lived as stability, dependability, the patience of harvests. In Chinese thought it isn't just one more element among four: it's the axis where the seasons change hands.",
+  },
+  "bazi.element.metal": {
+    title: "Metal", glyph: "金",
+    body: "Metal defines and cuts: born of Earth, it gives rise to Water and prunes the Wood it controls. It is lived as precision, justice, the discipline of removing what's extra until only the essential remains. It is the cycle's autumn: harvest demands choosing, and choosing demands an edge.",
+  },
+  "bazi.element.water": {
+    title: "Water", glyph: "水",
+    body: "Water connects and descends: born of Metal, it nourishes Wood and quenches the Fire it controls. It is lived as wisdom, adaptability, the intelligence that flows where it can instead of insisting where it can't. It is the cycle's winter: apparent stillness, real depth.",
+  },
+};

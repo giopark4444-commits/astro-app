@@ -1,0 +1,10 @@
+/* apps/web/components/meaning.module.css — sobre tokens existentes (tokens.css) */
+.trigger {
+  display: inline; background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: inherit; letter-spacing: inherit; cursor: help;
+  text-decoration: underline dotted rgba(var(--acc-rgb), 0.5);
+  text-underline-offset: 3px;
+}
+.trigger:hover { text-decoration-color: var(--acc); }
+.glyph { font-size: 26px; color: var(--acc-text); display: block; margin-bottom: var(--sp-2); }
+.body { font-family: var(--font-ui); font-size: var(--text-sm); line-height: 1.6; color: var(--soft); margin: 0; }

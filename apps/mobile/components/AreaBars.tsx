@@ -14,7 +14,10 @@ import { useTheme } from "../lib/theme-context";
 import { fonts, radius, space, type as typeScale, type ThemeTokens } from "../theme/tokens";
 
 export interface BarDriver {
-  glyphs: string;
+  /** ReactNode (no solo string) para que cada glifo pueda envolverse en
+   *  <Meaning/> ("toca y entiende") sin perder el layout — mismo contrato
+   *  que BarArea de la web (apps/web/components/area-bars.tsx). */
+  glyphs: React.ReactNode;
   text: string;
   favorable: boolean;
 }
