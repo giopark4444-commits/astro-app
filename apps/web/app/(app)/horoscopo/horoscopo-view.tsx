@@ -256,6 +256,22 @@ export function HoroscopoView() {
                   {proseEastern.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)}
                 </section>
 
+                {/* Cruce personal (espejo de natalHits occidental): pilares
+                    natales REALES vs pilares del periodo, con el par en hanzi. */}
+                {readyEastern.natalHits && readyEastern.natalHits.length > 0 && (
+                  <section className={`card ${styles.section}`}>
+                    <h2 className={styles.sectionH}>{t("natalHitsTitle")}</h2>
+                    {readyEastern.natalHits.map((h, i) => (
+                      <p key={i} className={`${styles.hitRow} ${h.favorable ? styles.hitSoft : styles.hitHard}`}>
+                        <span className={styles.hitGlyphs}>
+                          {EARTHLY_BRANCHES[h.natalBranch]!.hanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                        </span>
+                        {interactionLabel(h.type)} · {t("natalVsPeriod", { natal: tp(h.natalPillar), period: tp(h.periodPillar) })}
+                      </p>
+                    ))}
+                  </section>
+                )}
+
                 <button type="button" className={`seg__item ${styles.proToggle} ${pro ? "seg__item--active" : ""}`}
                   aria-pressed={pro} onClick={() => setPro(!pro)}>{t("pro")}</button>
 

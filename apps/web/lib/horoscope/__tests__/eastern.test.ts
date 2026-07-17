@@ -4,7 +4,7 @@ import { setEphePath } from "@aluna/ephemeris";
 import { dayPillar, EARTHLY_BRANCHES, scoreTone } from "@aluna/core";
 import {
   EASTERN_ANIMALS, EASTERN_AREAS, computeEasternHoroscope, cachedEasternHoroscope,
-  resolveEasternPeriodRange,
+  computeEasternNatalHits, resolveEasternPeriodRange,
 } from "../eastern";
 
 // Los tests corren con cwd apps/web → la carpeta .se1 vive dos niveles arriba.
@@ -188,19 +188,29 @@ describe("vista año: 節 del rango", () => {
 });
 
 describe("natalHits (capa personal opcional)", () => {
-  it("cruza los pilares natales contra los del periodo, par a par", () => {
-    const natal = {
-      year: { stem: 0, branch: 0 },  // 子 → 冲 con el año 午
-      month: { stem: 2, branch: 2 }, // 寅
-      day: { stem: 4, branch: 6 },   // 午 → 自刑 con el año 午
-    };
+  const natal = {
+    year: { stem: 0, branch: 0 },  // 子 → 冲 con el año 午
+    month: { stem: 2, branch: 2 }, // 寅
+    day: { stem: 4, branch: 6 },   // 午 → 自刑 con el año 午
+  };
+  it("cruza los pilares natales contra los del periodo, par a par (con la rama natal en el hit)", () => {
     const p = computeEasternHoroscope("horse", "year", "utc", NOW, natal);
     expect(p.natalHits).toBeDefined();
-    expect(p.natalHits!.some(
+    const clash = p.natalHits!.find(
       (h) => h.natalPillar === "year" && h.periodPillar === "year" && h.type === "clash",
-    )).toBe(true);
+    );
+    expect(clash).toBeDefined();
+    expect(clash!.natalBranch).toBe(0); // 子 (para pintar el par en hanzi)
     const q = computeEasternHoroscope("horse", "year", "utc", NOW);
     expect(q.natalHits).toBeUndefined();
+  });
+  it("computeEasternNatalHits es pura y produce lo mismo que el motor (capa separable para la route)", () => {
+    const p = computeEasternHoroscope("horse", "year", "utc", NOW, natal);
+    expect(computeEasternNatalHits(natal, p.pillars)).toEqual(p.natalHits);
+    // solo cruza los pilares PRESENTES del periodo (year-view: nada de mes/día)
+    for (const h of computeEasternNatalHits(natal, p.pillars)) {
+      expect(h.periodPillar).toBe("year");
+    }
   });
 });
 

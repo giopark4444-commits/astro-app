@@ -5,7 +5,7 @@ import { yearPillar, monthPillar, dayPillar, hourPillar, EARTHLY_BRANCHES, type 
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { isSolarChart, profileToChartInput } from "@/lib/chart";
 import {
-  cachedEasternHoroscope, computeEasternHoroscope, isEasternAnimal,
+  cachedEasternHoroscope, computeEasternNatalHits, isEasternAnimal,
   type EasternAnimal,
 } from "@/lib/horoscope/eastern";
 import { isValidTz, HOROSCOPE_PERIODS, type HoroscopePeriod } from "@/lib/horoscope/western";
@@ -76,11 +76,13 @@ export async function POST(request: NextRequest) {
   if (!animal) return NextResponse.json({ error: "bad_request" }, { status: 400 });
 
   try {
-    const payload = natalPillars
-      ? computeEasternHoroscope(animal, period, tz, undefined, natalPillars)
-      : cachedEasternHoroscope(animal, period, tz);
+    // Payload universal SIEMPRE desde la caché (patrón western: con perfil no
+    // se bypasea la caché); la capa natal se computa aparte y se fusiona en la
+    // respuesta — jamás entra a la caché compartida.
+    const payload = cachedEasternHoroscope(animal, period, tz);
+    const natalHits = natalPillars ? computeEasternNatalHits(natalPillars, payload.pillars) : undefined;
 
-    return NextResponse.json(payload);
+    return NextResponse.json(natalHits ? { ...payload, natalHits } : payload);
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }

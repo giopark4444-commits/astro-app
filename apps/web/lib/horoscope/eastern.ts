@@ -96,7 +96,8 @@ export interface EasternNatalHit {
   natalPillar: PillarPos;
   periodPillar: EasternPillarKey;
   type: EasternInteractionType;
-  withBranch: number; // rama del pilar del periodo
+  natalBranch: number; // rama del pilar natal (para pintar el par en hanzi)
+  withBranch: number;  // rama del pilar del periodo
   favorable: boolean;
 }
 
@@ -316,6 +317,38 @@ function wuXingRelation(periodEl: WuXingElement, animalEl: WuXingElement): WuXin
   return (["same", "generates", "controls", "controlled_by", "generated_by"] as const)[d]!;
 }
 
+/**
+ * Capa personal PURA: pilares natales (Ba Zi real del perfil) cruzados par a
+ * par contra los pilares PRESENTES del periodo. Separada del motor para que la
+ * route pueda tomar el payload universal de la caché y superponer esta capa por
+ * usuario (patrón western: cache universal + capa natal aparte, nunca cacheada).
+ */
+export function computeEasternNatalHits(
+  natalPillars: PillarSet, periodPillars: EasternPeriodPillars,
+): EasternNatalHit[] {
+  const natalHits: EasternNatalHit[] = [];
+  const natalEntries: Array<{ pos: PillarPos; pillar: Pillar }> = [
+    { pos: "year", pillar: natalPillars.year },
+    { pos: "month", pillar: natalPillars.month },
+    { pos: "day", pillar: natalPillars.day },
+    ...(natalPillars.hour ? [{ pos: "hour" as const, pillar: natalPillars.hour }] : []),
+  ];
+  for (const { pos, pillar } of natalEntries) {
+    for (const key of ["day", "month", "year"] as const) {
+      const periodPillar = periodPillars[key];
+      if (!periodPillar) continue;
+      const b = periodPillar.branch;
+      for (const h of pairHits(pillar.branch, b)) {
+        natalHits.push({
+          natalPillar: pos, periodPillar: key, type: h.type,
+          natalBranch: pillar.branch, withBranch: b, favorable: h.type === "six_combo",
+        });
+      }
+    }
+  }
+  return natalHits;
+}
+
 export function computeEasternHoroscope(
   animal: string, period: HoroscopePeriod, tz: string, nowIso?: string, natalPillars?: PillarSet,
 ): EasternPayload {
@@ -402,29 +435,7 @@ export function computeEasternHoroscope(
   };
 
   // Capa personal opcional: pilares natales vs pilares del periodo, par a par.
-  let natalHits: EasternNatalHit[] | undefined;
-  if (natalPillars) {
-    natalHits = [];
-    const natalEntries: Array<{ pos: PillarPos; pillar: Pillar }> = [
-      { pos: "year", pillar: natalPillars.year },
-      { pos: "month", pillar: natalPillars.month },
-      { pos: "day", pillar: natalPillars.day },
-      ...(natalPillars.hour ? [{ pos: "hour" as const, pillar: natalPillars.hour }] : []),
-    ];
-    for (const { pos, pillar } of natalEntries) {
-      for (const key of ["day", "month", "year"] as const) {
-        const periodPillar = pillars[key];
-        if (!periodPillar) continue;
-        const b = periodPillar.branch;
-        for (const h of pairHits(pillar.branch, b)) {
-          natalHits.push({
-            natalPillar: pos, periodPillar: key, type: h.type,
-            withBranch: b, favorable: h.type === "six_combo",
-          });
-        }
-      }
-    }
-  }
+  const natalHits = natalPillars ? computeEasternNatalHits(natalPillars, pillars) : undefined;
 
   return {
     animal, period, tz: isValidTz(tz) ? tz : "utc",

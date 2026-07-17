@@ -473,6 +473,8 @@
     "areasTitle": "Tus áreas",
     "aspectsTitle": "Aspectos por signo",
     "hitsTitle": "Esto toca tu carta",
+    "natalHitsTitle": "Esto toca tus pilares",
+    "natalVsPeriod": "{natal} natal · {period} del periodo",
     "proseTitle": "Tu lectura",
     "pro": "Modo Pro",
     "proPositions": "Tránsitos por casa solar",

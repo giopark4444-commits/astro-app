@@ -140,6 +140,28 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(screen.getByText(/子時/)).toBeInTheDocument();
   });
 
+  it("con natalHits en el payload, aparece la sección de cruce personal con el par en hanzi (FIX 2)", async () => {
+    global.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        ...PAYLOAD_EASTERN,
+        natalHits: [
+          { natalPillar: "day", periodPillar: "year", type: "clash", natalBranch: 0, withBranch: 6, favorable: false },
+        ],
+      }),
+    })) as unknown as typeof fetch;
+    renderView();
+    await waitFor(() => expect(screen.getByText("Esto toca tus pilares")).toBeInTheDocument());
+    expect(screen.getByText(/子 冲 午/)).toBeInTheDocument();
+    expect(screen.getByText(/Choque/)).toBeInTheDocument();
+  });
+
+  it("sin natalHits, la sección de cruce personal NO aparece (FIX 2)", async () => {
+    renderView();
+    await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));
+    expect(screen.queryByText("Esto toca tus pilares")).toBeNull();
+  });
+
   it("la vista año pinta SOLO el pilar del año: sin celda de Día ni 'Choque del día' (FIX 1)", async () => {
     renderView();
     await waitFor(() => expect(screen.getAllByText(/丙午/).length).toBeGreaterThan(0));

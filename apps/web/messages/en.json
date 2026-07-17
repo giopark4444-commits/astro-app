@@ -473,6 +473,8 @@
     "areasTitle": "Your areas",
     "aspectsTitle": "Aspects by sign",
     "hitsTitle": "Touching your chart",
+    "natalHitsTitle": "Touching your pillars",
+    "natalVsPeriod": "natal {natal} · period {period}",
     "proseTitle": "Your reading",
     "pro": "Pro Mode",
     "proPositions": "Transits by solar house",
