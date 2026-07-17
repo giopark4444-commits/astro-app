@@ -34,7 +34,7 @@ export async function POST() {
     // recibe el customerId como primer argumento posicional (no dentro del
     // objeto) y devuelve `{ link }`, no `{ url }`.
     const portal = await getDodoClient().customers.customerPortal.create(sub.dodo_customer_id, {
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/perfil`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes`,
     });
     return NextResponse.json({ portalUrl: portal.link });
   } catch {

@@ -17,8 +17,9 @@ import { parseBearerToken } from "./bearer";
 //    debe optar explícitamente por ser público, no heredarlo por accidente.
 //  - "/legal" es pública a propósito: Términos/Privacidad/Descargo deben
 //    poder leerse sin cuenta (antes de crearla, o compartidos por un enlace),
-//    mismo patrón que el webhook de arriba — la ruta declara explícitamente
-//    que quiere ser pública, no lo hereda por accidente.
+//    sigue el patrón de prefijo de /login//signup//auth (no exacta-match como
+//    el webhook) — la ruta declara explícitamente que quiere ser pública, no
+//    lo hereda por accidente.
 const PUBLIC_PREFIXES = ["/login", "/signup", "/auth", "/api/webhooks/dodo", "/legal"];
 
 /** True si la ruta es pública (no requiere sesión). */

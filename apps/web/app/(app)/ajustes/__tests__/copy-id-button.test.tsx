@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { CopyIdButton } from "../copy-id-button";
@@ -26,7 +26,7 @@ describe("CopyIdButton", () => {
     fireEvent.click(screen.getByRole("button", { name: es.settings.copyId }));
     await waitFor(() => expect(writeTextMock).toHaveBeenCalledWith("abc-123"));
     await waitFor(() => expect(screen.getByRole("button")).toHaveTextContent(es.settings.copied));
-    vi.advanceTimersByTime(1600);
+    act(() => vi.advanceTimersByTime(1600));
     await waitFor(() => expect(screen.getByRole("button")).toHaveTextContent(es.settings.copyId));
     vi.useRealTimers();
   });
