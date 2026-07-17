@@ -1,15 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-
-// Cookie httpOnly que guarda el ?ref=CODIGO de la landing/login/signup hasta
-// que el onboarding termine (ver redeemFromCookie más abajo, enganchado en
-// app/onboarding/actions.ts). httpOnly: el navegador nunca la lee/toca —
-// solo la escribe/borra el servidor.
-export const REFERRAL_COOKIE = "aluna_ref";
-const REFERRAL_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 días
-
-const CODE_RE = /^[A-Z0-9]{4,20}$/;
+import { REFERRAL_COOKIE, REFERRAL_COOKIE_MAX_AGE_SECONDS, REFERRAL_CODE_RE } from "./constants";
 
 export type RedeemResult = { ok: true } | { ok: false; error: string };
 
@@ -28,7 +20,7 @@ function rpcClient(supabase: Awaited<ReturnType<typeof createClient>>): RpcClien
  */
 export async function captureReferralCode(rawCode: string | null | undefined): Promise<void> {
   const code = (rawCode ?? "").trim().toUpperCase();
-  if (!CODE_RE.test(code)) return;
+  if (!REFERRAL_CODE_RE.test(code)) return;
   try {
     const store = await cookies();
     store.set(REFERRAL_COOKIE, code, {

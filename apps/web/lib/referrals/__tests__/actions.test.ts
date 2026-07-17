@@ -43,7 +43,8 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
-import { captureReferralCode, redeemFromCookie, redeemReferralCode, REFERRAL_COOKIE } from "../actions";
+import { captureReferralCode, redeemFromCookie, redeemReferralCode } from "../actions";
+import { REFERRAL_COOKIE } from "../constants";
 
 beforeEach(() => {
   state.cookieStore = new Map();
