@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DEFAULT_NAV_ORDER, NAV_KEYS, sanitizeNavOrder } from "../nav-order";
+import { DEFAULT_NAV_ORDER, NAV_KEYS, reorderByNavOrder, sanitizeNavOrder } from "../nav-order";
 
 describe("nav-order", () => {
   it("NAV_KEYS/DEFAULT_NAV_ORDER coinciden con el orden actual de TopNav (menos perfil)", () => {
@@ -31,5 +31,43 @@ describe("nav-order", () => {
 
   it("un array vacío devuelve el default completo", () => {
     expect(sanitizeNavOrder([])).toEqual([...DEFAULT_NAV_ORDER]);
+  });
+});
+
+describe("reorderByNavOrder", () => {
+  const items = [
+    { key: "hoy", label: "Hoy" },
+    { key: "carta", label: "Carta" },
+    { key: "horoscopo", label: "Horóscopo" },
+    { key: "numeros", label: "Números" },
+    { key: "pilares", label: "Pilares" },
+    { key: "tarot", label: "Tarot" },
+    { key: "perfil", label: "Perfil" },
+  ];
+
+  it("reordena según `order` respetando el set completo de items", () => {
+    const order = ["tarot", "hoy", "pilares", "carta", "numeros", "horoscopo"];
+    const result = reorderByNavOrder(items, order);
+    expect(result.map((it) => it.key)).toEqual(["tarot", "hoy", "pilares", "carta", "numeros", "horoscopo", "perfil"]);
+  });
+
+  it("un item cuya key no está en `order` (perfil) se añade al final, en su posición original", () => {
+    const result = reorderByNavOrder(items, DEFAULT_NAV_ORDER);
+    expect(result.map((it) => it.key)).toEqual([...DEFAULT_NAV_ORDER, "perfil"]);
+  });
+
+  it("un subconjunto de items (p.ej. BottomNav, LENSES) se reordena sin perder ni añadir ninguno", () => {
+    const subset = [
+      { key: "carta", label: "Carta" },
+      { key: "numeros", label: "Números" },
+      { key: "hoy", label: "Hoy" },
+      { key: "pilares", label: "Pilares" },
+    ];
+    const result = reorderByNavOrder(subset, ["pilares", "hoy", "carta", "numeros", "horoscopo", "tarot"]);
+    expect(result.map((it) => it.key)).toEqual(["pilares", "hoy", "carta", "numeros"]);
+  });
+
+  it("con `order` vacío u orden basura, conserva el orden original de los items", () => {
+    expect(reorderByNavOrder(items, []).map((it) => it.key)).toEqual(items.map((it) => it.key));
   });
 });

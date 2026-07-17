@@ -39,3 +39,27 @@ export function sanitizeNavOrder(input: unknown): NavKey[] {
   }
   return order;
 }
+
+/**
+ * Reordena una lista de items (TopNav.ITEMS, BottomNav.ITEMS, hub-view.LENSES…)
+ * según `order`. Los items son SIEMPRE los mismos — esto solo cambia su
+ * posición relativa. Cualquier item cuya `key` NO aparezca en `order` (p.ej.
+ * "perfil" en TopNav, fuera de NAV_KEYS a propósito) se añade al final, en su
+ * posición original — así Perfil/avatar quedan siempre donde están sin que
+ * cada consumidor tenga que tratarlo como caso especial.
+ */
+export function reorderByNavOrder<T extends { key: string }>(items: readonly T[], order: readonly string[]): T[] {
+  const remaining = new Map(items.map((it) => [it.key, it]));
+  const ordered: T[] = [];
+  for (const key of order) {
+    const it = remaining.get(key);
+    if (it) {
+      ordered.push(it);
+      remaining.delete(key);
+    }
+  }
+  for (const it of items) {
+    if (remaining.has(it.key)) ordered.push(it);
+  }
+  return ordered;
+}

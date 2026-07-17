@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Icon } from "./icon";
+import { DEFAULT_NAV_ORDER, reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./bottom-nav.module.css";
 
 const ITEMS = [
@@ -12,12 +13,13 @@ const ITEMS = [
   { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ order = DEFAULT_NAV_ORDER }: { order?: readonly NavKey[] } = {}) {
   const path = usePathname();
   const t = useTranslations("nav");
+  const items = reorderByNavOrder(ITEMS, order);
   return (
     <nav className={styles.nav}>
-      {ITEMS.map((it) => {
+      {items.map((it) => {
         const active = path === it.href || path.startsWith(it.href + "/");
         const content = (
           <span className={`${styles.item} ${active ? styles.on : ""} ${it.soon ? styles.soon : ""}`}>
