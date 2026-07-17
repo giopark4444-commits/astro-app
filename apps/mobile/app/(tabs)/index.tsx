@@ -22,6 +22,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path } from "react-native-svg";
 import type { BodyPosition } from "@aluna/core";
+import { LIFE_AREA_COLORS } from "@aluna/core";
 import { Enso } from "../../components/Enso";
 import { Card, FadeIn } from "../../components/ui";
 import { useProfile } from "../../lib/profile-context";
@@ -82,7 +83,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useProfile();
   const { session } = useAuth();
-  const { t: tk } = useTheme();
+  const { t: tk, paletteMode } = useTheme();
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const L = astroLabels(locale);
@@ -258,7 +259,16 @@ export default function HomeScreen() {
             ) : (
               ENERGY_AREAS.map((a) => {
                 const score = scoreByArea.get(a.key)?.score ?? 0;
-                return <EnergyRow key={a.key} styles={styles} label={t(`hoy.${a.labelKey}`)} score={score} />;
+                const domainColor = paletteMode === "colorful" ? LIFE_AREA_COLORS[a.key] : null;
+                return (
+                  <EnergyRow
+                    key={a.key}
+                    styles={styles}
+                    label={t(`hoy.${a.labelKey}`)}
+                    score={score}
+                    domainColor={domainColor}
+                  />
+                );
               })
             )}
           </Card>
@@ -327,15 +337,26 @@ function MiniChip({ styles, label, value }: { styles: ReturnType<typeof makeStyl
   );
 }
 
-function EnergyRow({ styles, label, score }: { styles: ReturnType<typeof makeStyles>; label: string; score: number }) {
+function EnergyRow({
+  styles,
+  label,
+  score,
+  domainColor,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  label: string;
+  score: number;
+  /** Modo Colorido: color de dominio del área (LIFE_AREA_COLORS) — null en gold. */
+  domainColor?: string | null;
+}) {
   const pct = Math.max(0, Math.min(100, score));
   return (
     <View style={styles.energyRow}>
       <Text style={styles.energyLabel}>{label}</Text>
       <View style={styles.energyTrack}>
-        <View style={[styles.energyFill, { width: `${pct}%` }]} />
+        <View style={[styles.energyFill, domainColor && { backgroundColor: domainColor }, { width: `${pct}%` }]} />
       </View>
-      <Text style={styles.energyNum}>{score}</Text>
+      <Text style={[styles.energyNum, domainColor && { color: domainColor }]}>{score}</Text>
     </View>
   );
 }

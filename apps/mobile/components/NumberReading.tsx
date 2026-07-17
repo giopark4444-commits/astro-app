@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import type { ReductionTrace } from "@aluna/core";
+import { numberColor, type ReductionTrace } from "@aluna/core";
 import { numerologyContent } from "../content/numerology";
 import { useTheme } from "../lib/theme-context";
 import { useT } from "../lib/i18n-context";
@@ -15,7 +15,8 @@ const formatReduction = (tr: Pick<ReductionTrace, "steps">) => tr.steps.join("  
  * Profunda/Completa (IA) se anuncian como "pronto". Tema e idioma activos.
  */
 export function NumberReading({ positionKey, trace }: { positionKey: string; trace: ReductionTrace }) {
-  const { t: tk } = useTheme();
+  const { t: tk, paletteMode } = useTheme();
+  const colorful = paletteMode === "colorful";
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const content = numerologyContent(locale);
@@ -27,7 +28,7 @@ export function NumberReading({ positionKey, trace }: { positionKey: string; tra
   return (
     <View style={styles.wrap}>
       <View style={styles.bigRow}>
-        <Text style={styles.big}>{trace.value}</Text>
+        <Text style={[styles.big, colorful && { color: numberColor(trace.value) }]}>{trace.value}</Text>
         {trace.isMaster && <Text style={styles.master}>{t("reading.master")}</Text>}
       </View>
 

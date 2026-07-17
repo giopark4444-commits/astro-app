@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { computeNumerology, type NumerologyResult, type ReductionTrace } from "@aluna/core";
+import { computeNumerology, numberColor, type NumerologyResult, type ReductionTrace } from "@aluna/core";
 import { Enso } from "../../components/Enso";
 import { BottomSheet } from "../../components/BottomSheet";
 import { NumberReading } from "../../components/NumberReading";
@@ -28,7 +28,8 @@ interface SheetState {
 export default function NumerosScreen() {
   const insets = useSafeAreaInsets();
   const { profile } = useProfile();
-  const { t: tk } = useTheme();
+  const { t: tk, paletteMode } = useTheme();
+  const colorful = paletteMode === "colorful";
   const { t, locale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
   const content = numerologyContent(locale);
@@ -99,7 +100,10 @@ export default function NumerosScreen() {
         <FadeIn delay={0} style={styles.fadeFull}>
           <Pressable onPress={() => setSheet({ positionKey: "lifePath", trace: core.lifePath })}>
             <Card accent style={styles.hero}>
-              <Text style={styles.heroN} maxFontSizeMultiplier={1.2}>
+              <Text
+                style={[styles.heroN, colorful && { color: numberColor(core.lifePath.value) }]}
+                maxFontSizeMultiplier={1.2}
+              >
                 {core.lifePath.value}
               </Text>
               <View style={styles.heroStack}>
@@ -125,7 +129,7 @@ export default function NumerosScreen() {
                 onPress={() => setSheet({ positionKey: it.key, trace: it.trace })}
               >
                 <Card style={styles.cell}>
-                  <Text style={styles.cellN}>{it.trace.value}</Text>
+                  <Text style={[styles.cellN, colorful && { color: numberColor(it.trace.value) }]}>{it.trace.value}</Text>
                   <Text style={styles.cellL}>{labels[it.key]}</Text>
                   <Text style={styles.cellSub}>{nicknames[it.trace.value]}</Text>
                 </Card>
@@ -139,7 +143,9 @@ export default function NumerosScreen() {
             a mes/día personal (que se quedan en Pro, ver abajo). */}
         <FadeIn delay={100} style={styles.fadeFull}>
           <Card style={styles.yearRow}>
-            <Text style={styles.yearNum}>{cycles.personalYear.value}</Text>
+            <Text style={[styles.yearNum, colorful && { color: numberColor(cycles.personalYear.value) }]}>
+              {cycles.personalYear.value}
+            </Text>
             <Text style={styles.yearTxt}>
               <Text style={styles.yearLead}>
                 {t("numerology.personalYear")} {currentYear}

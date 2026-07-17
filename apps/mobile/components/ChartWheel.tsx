@@ -15,11 +15,16 @@ import {
 } from "@aluna/core";
 import { useTheme } from "../lib/theme-context";
 import { fonts } from "../theme/tokens";
-import { useCeremony } from "./use-ceremony";
+import { useCeremony, bloomScale } from "./use-ceremony";
 
-// <G> animable por Animated (R5, ceremonia de dibujo) — fuera del componente
-// para no recrear el wrapper en cada render.
+// <G>/<Circle> animables por Animated (R5, ceremonia de dibujo) — fuera del
+// componente para no recrear los wrappers en cada render.
 const AnimatedG = Animated.createAnimatedComponent(G);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+/** Circunferencia (2πr) de un anillo — para strokeDasharray/strokeDashoffset
+ * del trazo de dibujo (fase "structure"). Solo se usa cuando `animated`. */
+const circumference = (r: number) => 2 * Math.PI * r;
 
 const { CX, CY, R_SIGN_OUT, R_SIGN_IN, R_SIGN_GLYPH, R_HOUSE_IN, R_HOUSE_NUM, R_BODY, R_ASPECT } = WHEEL;
 
@@ -56,24 +61,44 @@ export function ChartWheel({
   const { t: tk } = useTheme();
   const { width } = useWindowDimensions();
   const size = Math.min(width - 32, 420);
-  const { structure, signs, bodies } = useCeremony(animated);
+  const { structureDraw, structure, signs, bodies, aspects } = useCeremony(
+    animated,
+    ZODIAC_SIGNS.length,
+    chart.bodies.length,
+  );
 
   const asc = chart.houses.ascendant;
   const disp = useMemo(() => spreadBodies(chart.bodies, 7), [chart]);
   const lonOf = (b: BodyPosition) => disp.get(b.body) ?? b.longitude;
   const houseOpacity = solar ? 0.28 : 1;
 
+  // Trazo de anillos (fase "structure"): SOLO con props de dasharray/offset
+  // cuando `animated` — en estático el markup es BYTE-equivalente al de
+  // siempre (ni dasharray ni offset, <Circle> plano). `structureDraw` va
+  // 0→1; dashoffset interpola circunferencia→0 (trazo oculto → completo).
+  const ringDraw = (r: number) =>
+    animated
+      ? {
+          strokeDasharray: circumference(r),
+          strokeDashoffset: structureDraw.interpolate({
+            inputRange: [0, 1],
+            outputRange: [circumference(r), 0],
+          }),
+        }
+      : undefined;
+
   return (
     <View style={{ width: size, height: size, alignSelf: "center" }}>
       <Svg viewBox="0 0 360 360" width={size} height={size}>
-        {/* FASE 1/3 — estructura: anillos base, líneas divisorias de 30° y
-            cúspides de casas. Sin stagger por-elemento (deliberado, anti-jank
-            — ver use-ceremony.ts). houseOpacity (dimming solar) compone
+        {/* FASE 1/3 — estructura: anillos base (con trazo de dibujo cuando
+            animated), líneas divisorias de 30° y cúspides de casas (bajo el
+            fundido de grupo `structure`, sin stagger — deliberado, ver
+            use-ceremony.ts). houseOpacity (dimming solar) compone
             multiplicativo dentro de este grupo, no hace falta tocarlo. */}
         <AnimatedG opacity={structure}>
-          <Circle cx={CX} cy={CY} r={R_SIGN_OUT} stroke={tk.accHair} strokeWidth={1} fill="none" />
-          <Circle cx={CX} cy={CY} r={R_SIGN_IN} stroke={tk.accHair} strokeWidth={1} fill="none" />
-          <Circle cx={CX} cy={CY} r={R_HOUSE_IN} stroke={tk.accFaint} strokeWidth={1} fill="none" />
+          <AnimatedCircle cx={CX} cy={CY} r={R_SIGN_OUT} stroke={tk.accHair} strokeWidth={1} fill="none" {...ringDraw(R_SIGN_OUT)} />
+          <AnimatedCircle cx={CX} cy={CY} r={R_SIGN_IN} stroke={tk.accHair} strokeWidth={1} fill="none" {...ringDraw(R_SIGN_IN)} />
+          <AnimatedCircle cx={CX} cy={CY} r={R_HOUSE_IN} stroke={tk.accFaint} strokeWidth={1} fill="none" {...ringDraw(R_HOUSE_IN)} />
 
           {ZODIAC_SIGNS.map((s, i) => {
             const [xo, yo] = pointAt(R_SIGN_OUT, i * 30, asc);
@@ -123,45 +148,52 @@ export function ChartWheel({
           </G>
         </AnimatedG>
 
-        {/* FASE 2/3 — signos: sectores tintados por elemento + glifos. */}
-        <AnimatedG opacity={signs}>
-          {ZODIAC_SIGNS.map((s, i) => {
-            const lonA = i * 30;
-            const [gx, gy] = pointAt(R_SIGN_GLYPH, lonA + 15, asc);
-            return (
-              <G key={s.key}>
-                <Path d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)} fill={ELEMENT_FILL[s.element]} />
-                <SvgText x={gx} y={gy} fill={ELEMENT_INK[s.element]} fontSize={13} textAnchor="middle" alignmentBaseline="central">
-                  {s.glyph + TEXT_VS}
-                </SvgText>
-              </G>
-            );
+        {/* FASE 2/3 — signos: sectores tintados por elemento + glifos. Cada
+            signo hace su propio bloom escalonado (opacity+scale) — el bloom
+            de scale SOLO cuando animated (origin/scale extra ausentes en
+            estático: markup byte-equivalente al de siempre). */}
+        {ZODIAC_SIGNS.map((s, i) => {
+          const lonA = i * 30;
+          const [gx, gy] = pointAt(R_SIGN_GLYPH, lonA + 15, asc);
+          const bloomProps = animated
+            ? { origin: `${gx},${gy}`, scale: bloomScale(signs[i]!) }
+            : undefined;
+          return (
+            <AnimatedG key={s.key} opacity={animated ? signs[i] : 1} {...bloomProps}>
+              <Path d={annularSector(R_SIGN_OUT, R_SIGN_IN, lonA, lonA + 30, asc)} fill={ELEMENT_FILL[s.element]} />
+              <SvgText x={gx} y={gy} fill={ELEMENT_INK[s.element]} fontSize={13} textAnchor="middle" alignmentBaseline="central">
+                {s.glyph + TEXT_VS}
+              </SvgText>
+            </AnimatedG>
+          );
+        })}
+
+        {/* FASE 3/3 — cuerpos: líneas de aspecto (fundido único, sin
+            escalonar — como en @aluna/core) + planetas/luminarias (bloom
+            escalonado por cuerpo, ídem signos). */}
+        <AnimatedG opacity={aspects}>
+          {chart.aspects.map((asp, i) => {
+            const a = chart.bodies.find((b) => b.body === asp.a);
+            const b = chart.bodies.find((b) => b.body === asp.b);
+            if (!a || !b) return null;
+            const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
+            const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
+            return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} strokeWidth={1} />;
           })}
         </AnimatedG>
 
-        {/* FASE 3/3 — cuerpos: líneas de aspecto + planetas/luminarias. */}
-        <AnimatedG opacity={bodies}>
-          {/* líneas de aspecto */}
-          <G>
-            {chart.aspects.map((asp, i) => {
-              const a = chart.bodies.find((b) => b.body === asp.a);
-              const b = chart.bodies.find((b) => b.body === asp.b);
-              if (!a || !b) return null;
-              const [x1, y1] = pointAt(R_ASPECT, lonOf(a), asc);
-              const [x2, y2] = pointAt(R_ASPECT, lonOf(b), asc);
-              return <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={HARMONY_STROKE[asp.harmony]} strokeWidth={1} />;
-            })}
-          </G>
-
-          {/* cuerpos: halo dorado del seleccionado detrás + área táctil de 44pt
-              (r=23 en viewBox 360 ≈ 44pt de diámetro en un ancho de 375) ANTES
-              del glifo visible, que no cambia de tamaño. */}
-          {chart.bodies.map((b) => {
-            const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
-            const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
-            const isSelected = b.body === selected;
-            return (
-              <G key={b.body} onPress={() => onSelect(b)}>
+        {/* cuerpos: halo dorado del seleccionado detrás + área táctil de 44pt
+            (r=23 en viewBox 360 ≈ 44pt de diámetro en un ancho de 375) ANTES
+            del glifo visible, que no cambia de tamaño. */}
+        {chart.bodies.map((b, i) => {
+          const [gx, gy] = pointAt(R_BODY, lonOf(b), asc);
+          const [tx, ty] = pointAt(R_BODY + 16, lonOf(b), asc);
+          const isSelected = b.body === selected;
+          const bloomProps = animated
+            ? { origin: `${gx},${gy}`, scale: bloomScale(bodies[i]!) }
+            : undefined;
+          return (
+            <AnimatedG key={b.body} opacity={animated ? bodies[i] : 1} {...bloomProps} onPress={() => onSelect(b)}>
                 {isSelected && <Circle cx={gx} cy={gy} r={16} fill={tk.acc} opacity={0.12} />}
                 <Circle cx={gx} cy={gy} r={23} fill="transparent" />
                 <SvgText x={gx} y={gy} fill={tk.text} fontSize={13} textAnchor="middle" alignmentBaseline="central">
@@ -170,10 +202,9 @@ export function ChartWheel({
                 <SvgText x={tx} y={ty} fill={tk.textFaint} fontSize={7} textAnchor="middle" alignmentBaseline="central">
                   {`${b.degree}°${b.retrograde ? "℞" : ""}`}
                 </SvgText>
-              </G>
-            );
-          })}
-        </AnimatedG>
+              </AnimatedG>
+          );
+        })}
       </Svg>
     </View>
   );

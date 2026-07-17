@@ -27,7 +27,7 @@ export default function AjustesScreen() {
   const router = useRouter();
   const { profile, reset } = useProfile();
   const { session, signOut } = useAuth();
-  const { t: tk, theme, modePref, setTheme, setModePref } = useTheme();
+  const { t: tk, theme, modePref, paletteMode, setTheme, setModePref, setPaletteMode } = useTheme();
   const { t, locale, setLocale } = useT();
   const styles = useMemo(() => makeStyles(tk), [tk]);
 
@@ -206,6 +206,22 @@ export default function AjustesScreen() {
                   onPress={() => setModePref(o.id)}
                 />
               ))}
+            </View>
+
+            <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.palette")}</Text>
+            <View style={styles.chipRow}>
+              <Chip
+                kind="control"
+                label={t("settings.paletteGold")}
+                selected={paletteMode === "gold"}
+                onPress={() => setPaletteMode("gold")}
+              />
+              <Chip
+                kind="control"
+                label={t("settings.paletteColorful")}
+                selected={paletteMode === "colorful"}
+                onPress={() => setPaletteMode("colorful")}
+              />
             </View>
 
             <Text style={[styles.fieldLabel, styles.fieldLabelGap]}>{t("settings.language")}</Text>
