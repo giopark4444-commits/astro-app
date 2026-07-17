@@ -1375,7 +1375,11 @@ export interface ReadingComposeDicts {
   t: {
     openingWithQuestion: (question: string) => string;
     openingDefault: () => string;
-    cardParagraph: (cardName: string, positionLabel: string, ambitText: string) => string;
+    /** Conectores del párrafo por carta. La prosa ROTA por índice de carta
+     *  (i % length) para que una tirada de varias cartas no repita el mismo
+     *  arranque tres veces. Cada idioma trae sus propias plantillas, escritas
+     *  naturales en su idioma (no traducciones espejo). */
+    cardParagraphs: ReadonlyArray<(cardName: string, positionLabel: string, ambitText: string) => string>;
     closingMostlyReversed: () => string;
     closingNormal: () => string;
   };
@@ -1402,7 +1406,13 @@ const DICTS_READING_ES: ReadingComposeDicts = {
     openingWithQuestion: (question) =>
       `Traes contigo una pregunta — "${question}" — y las cartas responden no con certezas, sino con espejos.`,
     openingDefault: () => "Las cartas se abren para mostrarte lo que tu alma ya intuye, aunque aún no tenga palabras.",
-    cardParagraph: (cardName, positionLabel, ambitText) => `En ${positionLabel}, ${cardName} habla: ${ambitText}`,
+    cardParagraphs: [
+      (cardName, positionLabel, ambitText) => `En ${positionLabel}, ${cardName} habla: ${ambitText}`,
+      (cardName, positionLabel, ambitText) => `Sobre ${positionLabel} se posa ${cardName}: ${ambitText}`,
+      (cardName, positionLabel, ambitText) => `${cardName} ilumina ${positionLabel}: ${ambitText}`,
+      (cardName, positionLabel, ambitText) =>
+        `Cuando miras hacia ${positionLabel}, responde ${cardName}: ${ambitText}`,
+    ],
     closingMostlyReversed: () =>
       "La mayoría de las cartas llegó invertida: el cielo te pide revisar antes que avanzar, no como castigo sino como cuidado.",
     closingNormal: () =>
@@ -1412,15 +1422,21 @@ const DICTS_READING_ES: ReadingComposeDicts = {
 
 /** Prosa determinista de lectura de tarot (sin IA). Espejo estructural de
  *  composeWith: apertura → un párrafo por carta (nombre + ámbito `path` según
- *  orientación, tejido con la posición) → cierre que teje la tirada completa. */
+ *  orientación, tejido con la posición y un conector que rota por índice) →
+ *  cierre que teje la tirada completa.
+ *
+ *  `spreadId` hoy no participa en la composición (las posiciones llegan ya en
+ *  `cards` y el ámbito es siempre `path`) — se mantiene en la firma pública
+ *  porque la lectura por tipo de tirada (celtic-cross con ámbitos propios por
+ *  rol, T3) lo va a necesitar sin romper a los llamadores existentes. */
 export function composeReadingProse(
   locale: "es" | "en",
   spreadId: string,
   cards: Array<{ cardId: string; reversed: boolean; position: string }>,
   question?: string,
 ): string[] {
+  void spreadId; // reservado para T3 (ver doc arriba)
   return composeReadingWith(
-    locale,
     cards,
     locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES,
     locale === "en" ? DICTS_READING_EN : DICTS_READING_ES,
@@ -1429,7 +1445,6 @@ export function composeReadingProse(
 }
 
 export function composeReadingWith(
-  locale: "es" | "en",
   cards: Array<{ cardId: string; reversed: boolean; position: string }>,
   cardDict: Record<string, TarotCardContent>,
   dicts: ReadingComposeDicts,
@@ -1439,12 +1454,15 @@ export function composeReadingWith(
 
   parts.push(question ? dicts.t.openingWithQuestion(question) : dicts.t.openingDefault());
 
+  let emitted = 0;
   for (const drawn of cards) {
     const card = cardDict[drawn.cardId];
     if (!card) continue;
     const positionLabel = dicts.positionLabels[drawn.position] ?? drawn.position;
     const ambitText = drawn.reversed ? card.reversed.path : card.upright.path;
-    parts.push(dicts.t.cardParagraph(card.name, positionLabel, ambitText));
+    const connector = dicts.t.cardParagraphs[emitted % dicts.t.cardParagraphs.length]!;
+    parts.push(connector(card.name, positionLabel, ambitText));
+    emitted++;
   }
 
   const reversedCount = cards.filter((c) => c.reversed).length;

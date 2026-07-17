@@ -1364,7 +1364,12 @@ export const DICTS_READING_EN: ReadingComposeDicts = {
     openingWithQuestion: (question) =>
       `You carry a question with you — "${question}" — and the cards answer not with certainty, but with mirrors.`,
     openingDefault: () => "The cards open to show you what your soul already senses, even without words for it yet.",
-    cardParagraph: (cardName, positionLabel, ambitText) => `In ${positionLabel}, ${cardName} speaks: ${ambitText}`,
+    cardParagraphs: [
+      (cardName, positionLabel, ambitText) => `In ${positionLabel}, ${cardName} speaks: ${ambitText}`,
+      (cardName, positionLabel, ambitText) => `${cardName} settles over ${positionLabel}: ${ambitText}`,
+      (cardName, positionLabel, ambitText) => `Turning toward ${positionLabel}, you find ${cardName}: ${ambitText}`,
+      (cardName, positionLabel, ambitText) => `${cardName} sheds its light on ${positionLabel}: ${ambitText}`,
+    ],
     closingMostlyReversed: () =>
       "Most of the cards landed reversed: the sky asks you to review before you advance — not as punishment, but as care.",
     closingNormal: () =>

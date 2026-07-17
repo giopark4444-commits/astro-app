@@ -65,6 +65,17 @@ describe("composeReadingProse", () => {
     expect(closing).toMatch(/revisar/i);
   });
 
+  it("conectores variados: los 3 párrafos de carta de una tirada three no comparten arranque (ES y EN)", () => {
+    for (const locale of ["es", "en"] as const) {
+      const paras = composeReadingProse(locale, "three", threeCards);
+      // paras = [apertura, carta1, carta2, carta3, cierre]
+      expect(paras.length).toBe(5);
+      const cardParas = paras.slice(1, 4);
+      const starts = cardParas.map((p) => p.slice(0, 10));
+      expect(new Set(starts).size, `${locale}: ${starts.join(" | ")}`).toBe(3);
+    }
+  });
+
   it("daily produce al menos 2 párrafos", () => {
     const paras = composeReadingProse("es", "daily", [
       { cardId: "sun", reversed: false, position: "day" },
