@@ -872,4 +872,484 @@ export const TAROT_CARDS_ES: Record<string, TarotCardContent> = {
     },
     bridge: "El Rey de Copas es agua en su máxima maestría: el sentir que gobierna su propia marea sin negarla nunca.",
   },
+
+  // --- Espadas (aire: mente, verdad, conflicto) ---
+  "swords-01": {
+    name: "As de Espadas",
+    keywords: ["claridad", "verdad", "avance mental", "corte limpio"],
+    essence:
+      "Una mano sale de la nube sosteniendo la espada en alto, coronada: el As de Espadas es la semilla pura del aire, el pensamiento que corta la confusión de un solo tajo y deja ver lo que de verdad es.",
+    upright: {
+      love: "Una conversación pendiente pide decirse sin adornos; la claridad, aunque incómoda, es la forma más real de cuidar el vínculo.",
+      work: "Una idea llega con filo y dirección; úsala para cortar de raíz lo que ya no aporta, no para herir sin necesidad.",
+      path: "Tu mente ve algo con una nitidez que no habías tenido antes; confía en ese corte limpio.",
+    },
+    reversed: {
+      love: "La verdad se dice con más filo del necesario y hiere en vez de aclarar; busca precisión sin crueldad.",
+      work: "La claridad que creías tener se revela parcial; antes de cortar, verifica que ves el cuadro completo.",
+      path: "El pensamiento sin dirección se vuelve arma contra ti misma; la mente afilada también necesita un propósito.",
+    },
+    bridge: "El As de Espadas es aire en su forma más pura: la mente que corta antes de saber todavía hacia dónde va a apuntar.",
+  },
+  "swords-02": {
+    name: "Dos de Espadas",
+    keywords: ["indecisión", "tregua tensa", "ceguera elegida", "equilibrio forzado"],
+    essence:
+      "Sentada con los ojos vendados, cruza las dos espadas frente al pecho: el Dos de Espadas es la mente que se niega a decidir porque ambas opciones duelen, y la venda no es paz, es una pausa que ya pesa.",
+    upright: {
+      love: "Evitas una decisión porque las dos salidas cuestan; nombrar el dilema en voz alta ya es un primer movimiento.",
+      work: "Sostienes dos opciones en equilibrio forzado; la tregua sirve un tiempo, pero no reemplaza la decisión pendiente.",
+      path: "Te venda los ojos protege de un dolor, pero también te impide ver el camino que sigue esperando.",
+    },
+    reversed: {
+      love: "La verdad que evitabas empieza a abrirse paso; quitarte la venda duele menos de lo que temías.",
+      work: "La parálisis se rompe y una de las dos opciones finalmente pesa más que la otra; sigue esa señal.",
+      path: "Dejas de fingir equilibrio donde había estancamiento; el primer paso real empieza por mirar de frente.",
+    },
+    bridge: "El Dos de Espadas es aire detenido en tensión: la mente que sostiene dos verdades sin animarse a elegir ninguna todavía.",
+  },
+  "swords-03": {
+    name: "Tres de Espadas",
+    keywords: ["dolor", "desengaño", "verdad que corta", "corazón atravesado"],
+    essence:
+      "Tres espadas atraviesan un corazón bajo la lluvia: el Tres de Espadas no suaviza el golpe, nombra el dolor tal como es. No es catástrofe ni condena, es la verdad de una herida que necesita ser sentida, no negada, para poder cerrar.",
+    upright: {
+      love: "Una traición, una ruptura o una verdad dolorosa atraviesa el pecho; llorarla de frente es lo que empieza a sanarla.",
+      work: "Una crítica o un fracaso duele más de lo esperado; el dolor no mide tu valor, mide cuánto te importaba.",
+      path: "Hay una herida honesta que pedía ser nombrada; el corte de hoy es real, y también es el principio del alivio.",
+    },
+    reversed: {
+      love: "El dolor empieza a ceder, aunque la cicatriz todavía se sienta; date permiso de sanar en tu propio tiempo.",
+      work: "Sigues cargando una decepción antigua que ya podrías soltar; la herida sirvió su propósito, ahora puede cerrar.",
+      path: "Reabrir la misma herida una y otra vez sin dejarla sanar te mantiene atrapada en el mismo dolor; hoy toca soltar.",
+    },
+    bridge: "El Tres de Espadas es aire que corta hasta el corazón: la verdad más dura del palo, sentida sin adorno y sin exageración.",
+  },
+  "swords-04": {
+    name: "Cuatro de Espadas",
+    keywords: ["descanso", "retirada", "recuperación", "pausa necesaria"],
+    essence:
+      "Yace en calma sobre la tumba, con las tres espadas colgadas encima y una en la mano: el Cuatro de Espadas es la mente que por fin se permite detenerse, no por rendición, sino para recuperar la fuerza que necesita.",
+    upright: {
+      love: "Un tiempo de silencio compartido no es distancia, es descanso que el vínculo también necesita para seguir sano.",
+      work: "Antes de la siguiente batalla, hace falta parar; el descanso de hoy es lo que hace posible la claridad de mañana.",
+      path: "Tu mente pide tregua, no huida; detenerte a recuperar fuerzas es también un acto de sabiduría.",
+    },
+    reversed: {
+      love: "El descanso se ha alargado más de lo sano; vuelve al vínculo cuando estés lista, pero no lo pospongas indefinidamente.",
+      work: "Retomas actividad después de una pausa necesaria; el cuerpo y la mente ya están listos para el siguiente paso.",
+      path: "El aislamiento que era sanador empieza a volverse encierro; nota cuándo el descanso ya cumplió su función.",
+    },
+    bridge: "El Cuatro de Espadas es aire que se aquieta: la mente que se retira un momento para poder pensar con más filo después.",
+  },
+  "swords-05": {
+    name: "Cinco de Espadas",
+    keywords: ["victoria vacía", "conflicto", "orgullo herido", "costo del ganar"],
+    essence:
+      "Recoge las espadas mientras los otros se alejan derrotados: el Cinco de Espadas pregunta qué ganaste en realidad si ganar te dejó sola. No toda victoria vale lo que costó.",
+    upright: {
+      love: "Ganar la discusión no es lo mismo que ganar el vínculo; revisa si la razón te importa más que la relación.",
+      work: "Un conflicto se resuelve a tu favor, pero el ambiente queda tenso; considera qué precio pagaste por imponerte.",
+      path: "El orgullo de tener razón puede costarte una conexión que valía más que tener razón.",
+    },
+    reversed: {
+      love: "Estás lista para reparar lo dañado por un conflicto pasado; la disculpa honesta pesa más que la razón ganada.",
+      work: "Reconoces que el conflicto costó más de lo que valía; buscas ahora reconstruir en vez de seguir compitiendo.",
+      path: "Sueltas la necesidad de ganar cada roce; hay batallas que de verdad no valen la pena pelear.",
+    },
+    bridge: "El Cinco de Espadas es aire que corta sin cuidado: la mente que gana el argumento y pierde la conexión.",
+  },
+  "swords-06": {
+    name: "Seis de Espadas",
+    keywords: ["transición", "alejarse", "aguas más calmas", "avance silencioso"],
+    essence:
+      "El barquero lleva a la mujer y al niño hacia aguas más tranquilas, dejando atrás la orilla agitada: el Seis de Espadas es la mente que elige moverse, aunque el destino todavía no se vea del todo claro.",
+    upright: {
+      love: "Un vínculo o una etapa se mueve hacia aguas más tranquilas; el alejamiento de lo difícil es parte del proceso, no una derrota.",
+      work: "Dejas atrás una situación tensa por una más estable; el tránsito puede sentirse lento, pero va en la dirección correcta.",
+      path: "Te alejas de lo que dolía sin necesidad de mirar atrás con culpa; avanzar también es una forma de sanar.",
+    },
+    reversed: {
+      love: "Te cuesta soltar amarras aunque sepas que ya es momento; el barco no se mueve mientras sigas mirando la orilla.",
+      work: "Resistes un cambio de rumbo necesario; quedarte donde ya no fluye solo prolonga la tormenta.",
+      path: "El apego a lo conocido, aunque duela, te frena de llegar a las aguas más calmas que ya te esperan.",
+    },
+    bridge: "El Seis de Espadas es aire que por fin se mueve: la mente que deja atrás la tormenta con un rumbo, aunque sea incierto.",
+  },
+  "swords-07": {
+    name: "Siete de Espadas",
+    keywords: ["estrategia", "sigilo", "atajo cuestionable", "autosuficiencia"],
+    essence:
+      "Se aleja del campamento cargando cinco espadas, dejando dos atrás, mirando hacia atrás con cautela: el Siete de Espadas es la mente estratégica que a veces elige el atajo, y el espejo que pregunta a qué costo.",
+    upright: {
+      love: "Guardas algo para ti antes de compartirlo del todo; pregúntate si es prudencia o si es evitar una conversación honesta.",
+      work: "Un plan discreto o independiente te da ventaja; asegúrate de que la estrategia no cruce la línea hacia el engaño.",
+      path: "Tu autosuficiencia es una fortaleza, pero revisa si a veces la usas para evitar pedir ayuda que sí necesitas.",
+    },
+    reversed: {
+      love: "Un secreto o una verdad a medias sale a la luz; la honestidad completa, aunque incómoda, repara más que el silencio.",
+      work: "Una estrategia poco transparente se descubre; es momento de corregir el rumbo con estas cartas sobre la mesa.",
+      path: "Dejas de esconderte detrás de la astucia y eliges la vulnerabilidad de pedir lo que en verdad necesitas.",
+    },
+    bridge: "El Siete de Espadas es aire que se mueve en sigilo: la mente estratégica que a veces olvida que el atajo también tiene precio.",
+  },
+  "swords-08": {
+    name: "Ocho de Espadas",
+    keywords: ["atrapamiento mental", "autolimitación", "percepción", "libertad posible"],
+    essence:
+      "Atada y con los ojos vendados, rodeada de espadas clavadas en el suelo, la figura no nota que las cuerdas están sueltas: el Ocho de Espadas es la mente que se convence de estar presa cuando la salida siempre estuvo cerca.",
+    upright: {
+      love: "Te sientes atrapada en un patrón del vínculo que, mirado de cerca, tiene más salidas de las que crees.",
+      work: "La sensación de no tener opciones es más mental que real; hay un movimiento posible que todavía no consideraste.",
+      path: "Tu propia narrativa te tiene inmóvil; cambiar la historia que te cuentas es el primer paso hacia soltar las cuerdas.",
+    },
+    reversed: {
+      love: "Empiezas a ver que la trampa era en gran parte tuya; ese ver es lo que te permite finalmente moverte.",
+      work: "Te atreves a cuestionar la limitación que dabas por hecha, y descubres que había más margen del que creías.",
+      path: "Te quitas la venda de tu propio relato limitante; la libertad estaba esperando que dejaras de creerte presa.",
+    },
+    bridge: "El Ocho de Espadas es aire que se enreda en sí mismo: la mente que se ata con historias más apretadas que cualquier cuerda real.",
+  },
+  "swords-09": {
+    name: "Nueve de Espadas",
+    keywords: ["ansiedad", "insomnio", "miedo nocturno", "peso mental"],
+    essence:
+      "Se sienta en la cama a medianoche con el rostro entre las manos, nueve espadas suspendidas en la oscuridad detrás: el Nueve de Espadas es el peor momento de la noche, cuando la mente magnifica lo que a la luz del día se vería distinto. No es catástrofe real, es la catástrofe que la mente construye a solas.",
+    upright: {
+      love: "El miedo a perder lo que tienes te tiene despierta imaginando lo peor; casi nunca es tan grave como en la oscuridad.",
+      work: "La ansiedad por un resultado incierto te consume más energía que el problema real; busca hablarlo con alguien, no rumiarlo sola.",
+      path: "Tu mente de noche no es tu mente de día; date permiso de esperar la luz antes de creer del todo lo que hoy temes.",
+    },
+    reversed: {
+      love: "El miedo empieza a perder su poder cuando por fin lo dices en voz alta; nombrarlo lo hace más pequeño.",
+      work: "Sales de la rumiación nocturna y encuentras que el problema tenía solución más simple de lo que la ansiedad prometía.",
+      path: "El peso mental empieza a aliviarse cuando dejas de cargarlo en silencio; pedir ayuda no es debilidad, es salida.",
+    },
+    bridge: "El Nueve de Espadas es aire que se vuelve contra sí mismo en la oscuridad: la mente que magnifica el miedo hasta el amanecer.",
+  },
+  "swords-10": {
+    name: "Diez de Espadas",
+    keywords: ["final doloroso", "rendición", "punto más bajo", "amanecer después"],
+    essence:
+      "Diez espadas clavadas en la espalda bajo un cielo que empieza a aclarar en el horizonte: el Diez de Espadas es el fondo real, el punto en que ya no queda nada por negar. Duele de frente, sin adorno, y aun así el amanecer al fondo de la imagen no es casualidad: después de esto, solo queda subir.",
+    upright: {
+      love: "Un ciclo termina de la forma más definitiva posible; no hay ambigüedad que suavice el cierre, solo la certeza de que ya acabó.",
+      work: "Un proyecto o etapa llega a su final más brusco; no hay forma de seguir fingiendo que hay algo que salvar aquí.",
+      path: "Tocas un fondo real, y es exactamente eso: un fondo, no un abismo sin salida. El amanecer ya empieza a asomar.",
+    },
+    reversed: {
+      love: "Empiezas a levantarte después del golpe más duro; la recuperación es lenta, pero ya es real.",
+      work: "Lo peor ya pasó y empiezas a reconstruir con lo que queda; el fondo tocado te da un punto de partida honesto.",
+      path: "Te resistes a aceptar que algo terminó del todo, y esa resistencia alarga el dolor más de lo necesario.",
+    },
+    bridge: "El Diez de Espadas es aire en su corte más final: la mente que toca fondo justo antes de que el cielo empiece a aclarar.",
+  },
+  "swords-page": {
+    name: "Paje de Espadas",
+    keywords: ["curiosidad alerta", "mensajero mental", "vigilancia", "aprendiz de la verdad"],
+    essence:
+      "Sostiene la espada en alto, escrutando el horizonte con el viento revolviéndole el cabello: el Paje de Espadas es la mente joven que todavía está aprendiendo a distinguir la información real del rumor.",
+    upright: {
+      love: "Llega una conversación directa, quizás inesperada; escúchala con la mente abierta antes de reaccionar a la defensiva.",
+      work: "Una idea nueva pide ser investigada con curiosidad honesta, sin todavía tener todas las respuestas.",
+      path: "Tu mente alerta te sirve para observar antes de opinar; aprende a distinguir el dato de la suposición.",
+    },
+    reversed: {
+      love: "Un comentario apresurado se dice sin pensar del todo el efecto; revisa antes de hablar la próxima vez.",
+      work: "Te dejas llevar por un chisme o una información sin verificar; confirma antes de actuar sobre lo que oíste.",
+      path: "La mente que todavía no distingue bien la señal del ruido necesita más quietud antes de emitir un veredicto.",
+    },
+    bridge: "El Paje de Espadas es el número 11 vuelto aprendiz: el pensador en potencia que todavía confunde el rumor con la verdad.",
+  },
+  "swords-knight": {
+    name: "Caballero de Espadas",
+    keywords: ["acción directa", "impaciencia mental", "ímpetu verbal", "avance sin filtro"],
+    essence:
+      "Carga a toda velocidad con la espada al frente, sin mirar el terreno que pisa: el Caballero de Espadas es el aire hecho velocidad pura, la mente tan segura de su verdad que a veces olvida frenar antes de decirla.",
+    upright: {
+      love: "Dices lo que piensas sin rodeos; la honestidad directa puede ser un regalo si viene acompañada de algo de tacto.",
+      work: "Es momento de actuar rápido y con determinación sobre una decisión ya clara en tu mente.",
+      path: "Tu convicción avanza como una carga; asegúrate de que el terreno que pisas también merece esa velocidad.",
+    },
+    reversed: {
+      love: "Las palabras salen antes de pensarlas del todo y hieren más de lo que pretendías; frena antes de hablar.",
+      work: "La prisa por imponer tu punto de vista atropella a quien también tenía algo que decir; escucha antes de cargar.",
+      path: "El ímpetu sin discernimiento gasta energía en batallas que no valían la velocidad que les diste.",
+    },
+    bridge: "El Caballero de Espadas es aire que ya galopa sin frenos: la mente que confunde velocidad con certeza.",
+  },
+  "swords-queen": {
+    name: "Reina de Espadas",
+    keywords: ["claridad afilada", "independencia", "verdad sin adorno", "límites firmes"],
+    essence:
+      "Sentada de perfil, con la espada en alto y la mirada puesta lejos del trono, la Reina de Espadas ve con una claridad que no se deja nublar por sentimentalismo; su verdad es su forma de cuidar.",
+    upright: {
+      love: "Dices lo que necesitas sin rodeos ni culpa; tu claridad, aunque directa, viene de un lugar honesto.",
+      work: "Tu criterio afilado corta la ambigüedad de la situación; confía en tu lectura precisa aunque incomode a alguien.",
+      path: "Tu independencia mental es fortaleza, no frialdad; ver con claridad no te aleja de sentir profundo.",
+    },
+    reversed: {
+      love: "La claridad se vuelve dureza cuando olvidas el tacto; la verdad también puede decirse con calidez.",
+      work: "El criterio agudo se vuelve crítica constante; discierne cuándo cortar y cuándo simplemente acompañar.",
+      path: "Usar la mente como escudo contra el sentir te deja precisa pero sola; la verdad no tiene que excluir la ternura.",
+    },
+    bridge: "La Reina de Espadas es aire hecho presencia madura: la mente que corta con precisión sin perder su propio centro.",
+  },
+  "swords-king": {
+    name: "Rey de Espadas",
+    keywords: ["autoridad intelectual", "juicio justo", "objetividad", "verdad con poder"],
+    essence:
+      "Sentado con la espada en línea recta hacia el cielo, el Rey de Espadas gobierna desde la claridad mental, no desde el impulso; su poder es la objetividad que no se deja comprar por la simpatía ni el miedo.",
+    upright: {
+      love: "Aportas al vínculo una honestidad estructurada, capaz de nombrar lo difícil sin dramatismo ni evasión.",
+      work: "Es momento de decidir desde el análisis frío, no desde la presión del momento; tu juicio claro guía al equipo.",
+      path: "Tu autoridad nace de pensar con rigor, no de imponer; esa es una forma madura de liderazgo mental.",
+    },
+    reversed: {
+      love: "La lógica fría sustituye la calidez que el vínculo también necesita; la razón sin ternura se siente distante.",
+      work: "El poder del cargo se usa para controlar en vez de guiar; revisa si tu autoridad todavía sirve a un propósito justo.",
+      path: "El intelecto sin compasión se vuelve tiranía silenciosa; la verdadera maestría mental también sabe ser humana.",
+    },
+    bridge: "El Rey de Espadas es aire en su máxima maestría: la mente que gobierna con objetividad y no necesita imponerse a gritos.",
+  },
+
+  // --- Oros (tierra: materia, trabajo, cuerpo) ---
+  "pentacles-01": {
+    name: "As de Oros",
+    keywords: ["oportunidad", "semilla material", "nuevo recurso", "posibilidad concreta"],
+    essence:
+      "Una mano sostiene una moneda dorada sobre un jardín en flor: el As de Oros es la semilla pura de la tierra, la oportunidad concreta que todavía no sabes en qué se va a convertir, pero que ya está en tu mano.",
+    upright: {
+      love: "Se abre la posibilidad de construir algo estable juntos — un hogar, un proyecto compartido, un compromiso con raíces.",
+      work: "Una oportunidad concreta llega con potencial real; plántala con cuidado antes de esperar la cosecha completa.",
+      path: "Tu bienestar material también es camino espiritual; cuidar de tu cuerpo y tus recursos es una forma de honrar la vida.",
+    },
+    reversed: {
+      love: "Una oportunidad de estabilidad se deja pasar por miedo o desconfianza; revisa qué te impide sembrarla.",
+      work: "Un recurso o una propuesta se malgasta por falta de plan; la semilla necesita tierra preparada, no solo buena intención.",
+      path: "Perseguir la seguridad material sin propósito claro te deja con las manos llenas y el sentido vacío.",
+    },
+    bridge: "El As de Oros es tierra en su forma más pura: la posibilidad concreta antes de que sepas todavía qué va a dar de fruto.",
+  },
+  "pentacles-02": {
+    name: "Dos de Oros",
+    keywords: ["malabarismo", "adaptabilidad", "prioridades", "equilibrio en movimiento"],
+    essence:
+      "Hace malabares con dos monedas unidas por un lazo infinito, con los barcos meciéndose al fondo: el Dos de Oros es la tierra que aprende que el equilibrio no es quietud, es movimiento constante bien calibrado.",
+    upright: {
+      love: "Balanceas el vínculo con otras responsabilidades; la clave no es tener todo perfecto, es fluir entre las prioridades.",
+      work: "Manejas varios proyectos a la vez con agilidad; disfruta el ritmo en vez de estresarte por no tener uno solo.",
+      path: "Tu adaptabilidad es una fortaleza real; el equilibrio de hoy no es estático, se sostiene bailando.",
+    },
+    reversed: {
+      love: "Intentas sostener demasiadas cosas y el vínculo empieza a sentir la falta de atención; algo necesita soltarse.",
+      work: "La sobrecarga de tareas simultáneas empieza a costarte calidad; prioriza en vez de seguir malabareando todo.",
+      path: "El desequilibrio prolongado te agota; revisa qué puedes soltar para recuperar un ritmo sostenible.",
+    },
+    bridge: "El Dos de Oros es tierra en movimiento: la materia que se sostiene equilibrándose, no quedándose quieta.",
+  },
+  "pentacles-03": {
+    name: "Tres de Oros",
+    keywords: ["colaboración", "maestría", "trabajo en equipo", "reconocimiento del oficio"],
+    essence:
+      "Un artesano revisa su trabajo en la catedral junto a quienes lo encargaron: el Tres de Oros es la tierra que entiende que la maestría real se construye en conjunto, no en aislamiento.",
+    upright: {
+      love: "Construir algo juntos — un proyecto, un hogar, una meta compartida — fortalece el vínculo más que cualquier palabra.",
+      work: "La colaboración con otros expertos eleva tu trabajo más allá de lo que lograrías sola; valora el equipo.",
+      path: "Tu oficio se refina cuando lo compartes con otros que también lo dominan; el aprendizaje colectivo también es sagrado.",
+    },
+    reversed: {
+      love: "La falta de coordinación entre ambos hace que los planes compartidos se tropiecen; alinéense antes de seguir construyendo.",
+      work: "Un proyecto grupal sufre por mala comunicación o falta de reconocimiento mutuo; nombra lo que no está funcionando.",
+      path: "Trabajar sin reconocer el aporte de otros te deja una obra a medias; el oficio maduro sabe compartir el crédito.",
+    },
+    bridge: "El Tres de Oros es tierra construida en conjunto: la materia que se vuelve obra cuando varias manos la sostienen.",
+  },
+  "pentacles-04": {
+    name: "Cuatro de Oros",
+    keywords: ["control", "seguridad material", "apego", "miedo a perder"],
+    essence:
+      "Abraza una moneda contra el pecho, con otra bajo cada pie y una en la cabeza: el Cuatro de Oros es la tierra que confunde seguridad con control absoluto, y en el intento de no perder nada, deja de disfrutar lo que ya tiene.",
+    upright: {
+      love: "El miedo a perder lo construido te hace aferrarte más de lo necesario; la seguridad real no depende de apretar tanto.",
+      work: "Guardas recursos o información con cautela; está bien proteger lo tuyo, pero revisa si el control ya te está costando flexibilidad.",
+      path: "Tu necesidad de estabilidad es válida, pero cuando se vuelve rigidez, te aleja de la abundancia que temes perder.",
+    },
+    reversed: {
+      love: "Empiezas a soltar el control excesivo sobre el vínculo; compartir da más seguridad de la que da acaparar.",
+      work: "Te animas a invertir o compartir recursos que antes guardabas con miedo; el riesgo calculado también genera crecimiento.",
+      path: "Sueltas un poco el puño cerrado y descubres que la vida no se te escapa por abrir la mano.",
+    },
+    bridge: "El Cuatro de Oros es tierra apretada con fuerza: la materia que, sostenida con miedo, deja de fluir y de dar.",
+  },
+  "pentacles-05": {
+    name: "Cinco de Oros",
+    keywords: ["escasez", "exclusión", "dificultad material", "ayuda cercana no vista"],
+    essence:
+      "Dos figuras caminan heridas por la nieve, pasando frente a una ventana iluminada sin notarla: el Cinco de Oros es la tierra en tiempos difíciles, y también el recordatorio de que el refugio a veces está más cerca de lo que el dolor deja ver.",
+    upright: {
+      love: "Un momento de dificultad económica o de salud pesa sobre el vínculo; atravesarlo juntas cuenta tanto como resolverlo.",
+      work: "Una racha difícil — pérdida de ingreso, inseguridad laboral — pide apoyo real, no orgullo silencioso.",
+      path: "Sentirte excluida o en carencia es un dolor real; y aun así, hay ayuda cerca que quizás todavía no has visto.",
+    },
+    reversed: {
+      love: "Empiezas a aceptar el apoyo que antes rechazabas por orgullo; dejarte ayudar también es un acto de amor propio.",
+      work: "Lo peor de la crisis material queda atrás; encuentras un camino de recuperación que antes no veías.",
+      path: "Sales del aislamiento y descubres que la comunidad estuvo dispuesta a sostenerte todo este tiempo.",
+    },
+    bridge: "El Cinco de Oros es tierra en su momento más frío: la materia escasa que enseña a pedir y a recibir ayuda real.",
+  },
+  "pentacles-06": {
+    name: "Seis de Oros",
+    keywords: ["generosidad", "intercambio justo", "dar y recibir", "equilibrio de poder"],
+    essence:
+      "Un comerciante reparte monedas con una balanza en la otra mano: el Seis de Oros es la tierra que fluye en equilibrio, el dar que se sostiene porque también sabe medir con justicia.",
+    upright: {
+      love: "El dar y recibir se siente equilibrado en el vínculo; agradece tanto lo que ofreces como lo que te permites aceptar.",
+      work: "Compartir recursos, tiempo o conocimiento con generosidad genuina fortalece tu posición, no la debilita.",
+      path: "Estás en posición de ayudar a otros; hazlo desde la abundancia real, no desde la necesidad de sentirte superior.",
+    },
+    reversed: {
+      love: "El dar se ha vuelto desigual, con una parte siempre entregando más que la otra; nombra el desbalance.",
+      work: "Una ayuda ofrecida con condiciones ocultas genera dependencia en vez de crecimiento mutuo; revisa la intención.",
+      path: "Dar solo para sentirte necesitada vacía el gesto de su generosidad real; da porque quieres, no porque temes soltar el poder.",
+    },
+    bridge: "El Seis de Oros es tierra que circula con justicia: la materia que se comparte sin perder su propio equilibrio.",
+  },
+  "pentacles-07": {
+    name: "Siete de Oros",
+    keywords: ["paciencia", "evaluación", "inversión a largo plazo", "espera activa"],
+    essence:
+      "Se apoya en su azadón mirando el fruto que todavía cuelga verde de la planta: el Siete de Oros es la tierra que aprendió que el crecimiento real no se apura, se evalúa con paciencia mientras sigue trabajando.",
+    upright: {
+      love: "El vínculo pide tiempo para madurar; evalúa el progreso con honestidad, sin exigirle una cosecha antes de tiempo.",
+      work: "Un proyecto de largo plazo empieza a mostrar señales, aunque el resultado final todavía tarde; sigue invirtiendo con paciencia.",
+      path: "Tu crecimiento se mide en temporadas, no en días; hoy toca revisar el progreso sin exigir la cosecha completa.",
+    },
+    reversed: {
+      love: "La impaciencia por resultados inmediatos te hace subestimar un vínculo que en realidad va bien encaminado.",
+      work: "Inviertes tiempo y esfuerzo en algo que no está dando fruto; es momento de decidir si ajustar el método o el terreno.",
+      path: "La frustración por no ver resultados rápidos te hace querer abandonar justo antes de que algo empiece a florecer.",
+    },
+    bridge: "El Siete de Oros es tierra en pausa activa: la materia que crece despacio y pide una mirada honesta antes de decidir el siguiente paso.",
+  },
+  "pentacles-08": {
+    name: "Ocho de Oros",
+    keywords: ["maestría", "dedicación", "trabajo minucioso", "perfeccionamiento del oficio"],
+    essence:
+      "Talla moneda tras moneda con total concentración, repitiendo el gesto hasta dominarlo: el Ocho de Oros es la tierra que entiende que la maestría se construye repetición a repetición, sin atajos.",
+    upright: {
+      love: "Dedicas tiempo y cuidado consciente al vínculo, como quien pule un oficio; el esfuerzo constante también es amor.",
+      work: "Te concentras en perfeccionar tu habilidad con disciplina genuina; el detalle que cuidas hoy es la maestría de mañana.",
+      path: "Tu compromiso con la práctica constante es en sí mismo un camino espiritual; el oficio bien hecho también es devoción.",
+    },
+    reversed: {
+      love: "Pones todo el esfuerzo en la forma y descuidas la conexión real; revisa si el perfeccionismo te aleja de lo esencial.",
+      work: "El exceso de detalle sin avanzar hacia el resultado te estanca; a veces basta con suficientemente bien.",
+      path: "Buscar la perfección antes de permitirte mostrar el trabajo te mantiene atrapada en un ensayo que nunca termina.",
+    },
+    bridge: "El Ocho de Oros es tierra trabajada con dedicación: la materia que se refina a través de la práctica repetida y consciente.",
+  },
+  "pentacles-09": {
+    name: "Nueve de Oros",
+    keywords: ["autosuficiencia", "abundancia ganada", "placer solitario", "independencia plena"],
+    essence:
+      "De pie en su propio jardín cultivado, con el halcón en la mano y sin necesitar compañía para disfrutarlo, el Nueve de Oros es la tierra que floreció por esfuerzo propio, y el placer tranquilo de disfrutarla sola, sin pedirle permiso a nadie.",
+    upright: {
+      love: "Disfrutas de tu propia compañía con plenitud; cualquier vínculo que llegue ahora se suma a algo que ya está completo.",
+      work: "Cosechas el resultado de un esfuerzo sostenido en el tiempo; el logro es tuyo y mereces disfrutarlo sin apuro.",
+      path: "Tu independencia no es soledad, es la libertad de haber construido tu propio jardín con tus propias manos.",
+    },
+    reversed: {
+      love: "Confundes autosuficiencia con no dejar entrar a nadie; revisa si la independencia se volvió una muralla.",
+      work: "El éxito material no se siente pleno si nadie más lo ve o lo celebra contigo; permítete compartir el logro.",
+      path: "Disfrutar en soledad está bien, pero aislarte del todo por miedo a depender de otros te empobrece de otra forma.",
+    },
+    bridge: "El Nueve de Oros es tierra en plena cosecha propia: la materia disfrutada por quien la cultivó con sus propias manos.",
+  },
+  "pentacles-10": {
+    name: "Diez de Oros",
+    keywords: ["legado", "abundancia familiar", "estabilidad duradera", "culminación material"],
+    essence:
+      "Tres generaciones conviven bajo el mismo techo, con los perros y el arco que enmarca la escena entera: el Diez de Oros es la tierra en su culminación más plena, la abundancia que trasciende a una sola persona y se vuelve legado.",
+    upright: {
+      love: "El vínculo alcanza una estabilidad que se siente generacional, capaz de sostener no solo a ustedes sino a lo que vendrá después.",
+      work: "Un proyecto de largo aliento culmina en algo que perdura más allá del esfuerzo inicial; construiste algo con raíces.",
+      path: "Tu legado no se mide solo en logros propios, sino en lo que dejas disponible para quienes vienen después.",
+    },
+    reversed: {
+      love: "Tensiones familiares o patrones heredados amenazan la estabilidad que creías firme; revisa qué patrón antiguo se repite.",
+      work: "Una estructura sólida se tambalea por decisiones que no consideraron el largo plazo; ajusta antes de que se erosione más.",
+      path: "Confundir estabilidad con estancamiento te impide notar que el legado también necesita renovarse para seguir vivo.",
+    },
+    bridge: "El Diez de Oros es tierra en su culminación generacional: la materia que se vuelve legado cuando trasciende a quien la sembró.",
+  },
+  "pentacles-page": {
+    name: "Paje de Oros",
+    keywords: ["estudiante aplicado", "curiosidad práctica", "mensajero material", "aprendiz de la tierra"],
+    essence:
+      "Observa la moneda dorada con total atención, como si estudiara un mapa hacia su futuro: el Paje de Oros es la mente joven que aprende que los sueños se construyen paso a paso, con los pies en la tierra.",
+    upright: {
+      love: "Un interés nuevo se acerca con intenciones serias, aunque todavía en etapa de aprendizaje; dale tiempo para crecer.",
+      work: "Una oportunidad de estudio o un proyecto nuevo pide dedicación práctica; empieza con humildad de principiante.",
+      path: "Tu curiosidad por lo concreto y tangible es una forma válida de crecimiento espiritual; aprende haciendo.",
+    },
+    reversed: {
+      love: "El interés se queda en promesas sin acción concreta que las respalde; observa si hay compromiso real detrás.",
+      work: "Falta disciplina para convertir la buena idea en resultado tangible; el estudio sin práctica no basta.",
+      path: "La procrastinación te aleja de un aprendizaje que ya estaba listo para empezar; da el primer paso concreto hoy.",
+    },
+    bridge: "El Paje de Oros es el número 11 vuelto aprendiz: el maestro material en potencia que todavía estudia cómo sembrar su propio futuro.",
+  },
+  "pentacles-knight": {
+    name: "Caballero de Oros",
+    keywords: ["constancia", "método", "trabajo sostenido", "fiabilidad"],
+    essence:
+      "Se detiene, inmóvil sobre su caballo también quieto, mirando el campo arado que tiene enfrente: el Caballero de Oros es la tierra que avanza sin prisa, paso a paso, confiando en que la constancia rinde más que la velocidad.",
+    upright: {
+      love: "Ofreces al vínculo una presencia confiable y constante, sin necesitar grandes gestos para demostrar compromiso.",
+      work: "El progreso lento pero seguro es tu fortaleza ahora; sigue el método aunque no sea el más veloz.",
+      path: "Tu paciencia metódica es una forma de disciplina espiritual; no todo camino sagrado requiere prisa.",
+    },
+    reversed: {
+      love: "La rutina se vuelve estancamiento cuando deja de tener intención detrás; revisa si la constancia sigue siendo elección.",
+      work: "Te aferras tanto al método que pierdes la capacidad de adaptarte cuando la situación lo pide.",
+      path: "La disciplina sin propósito se vuelve rigidez vacía; pregúntate para qué sigues el paso constante que llevas.",
+    },
+    bridge: "El Caballero de Oros es tierra que avanza sin prisa: la materia que confía en el paso constante más que en el galope.",
+  },
+  "pentacles-queen": {
+    name: "Reina de Oros",
+    keywords: ["cuidado práctico", "abundancia terrenal", "generosidad tangible", "sabiduría del cuerpo"],
+    essence:
+      "Sentada en su jardín exuberante con el conejo a sus pies y la moneda en el regazo, la Reina de Oros nutre lo que toca con una generosidad que se siente en lo concreto: comida, cobijo, cuidado real.",
+    upright: {
+      love: "Cuidas al vínculo con gestos tangibles — un plato preparado, un espacio ordenado, presencia constante que se siente.",
+      work: "Tu habilidad para sostener proyectos y personas a la vez es un talento real; administra con la misma generosidad que ya tienes.",
+      path: "Tu sabiduría vive en el cuerpo y en lo cotidiano; el cuidado práctico también es una forma profunda de espiritualidad.",
+    },
+    reversed: {
+      love: "Cuidas tanto de los demás que descuidas tu propio bienestar físico; revisa cuánto te queda a ti misma.",
+      work: "Te sobrecargas administrando todo para todos; delegar no te resta valor, te permite sostenerlo con más calidad.",
+      path: "Confundir productividad con valor propio te desconecta del cuerpo que también merece tu cuidado.",
+    },
+    bridge: "La Reina de Oros es tierra hecha presencia madura: la materia que nutre con generosidad sin descuidar su propia raíz.",
+  },
+  "pentacles-king": {
+    name: "Rey de Oros",
+    keywords: ["prosperidad", "liderazgo estable", "abundancia consolidada", "generosidad con base"],
+    essence:
+      "Sentado en su trono rodeado de vides cargadas de fruto, con la moneda firme en la mano, el Rey de Oros gobierna desde una abundancia construida con esfuerzo sostenido, no heredada por azar.",
+    upright: {
+      love: "Traes estabilidad y generosidad concreta al vínculo; tu presencia se siente segura, no solo en palabras sino en hechos.",
+      work: "Lideras con visión práctica y resultados tangibles; tu éxito abre camino para que otros también prosperen contigo.",
+      path: "Tu abundancia madura sabe compartirse sin empobrecerse; la prosperidad real también es capacidad de generosidad.",
+    },
+    reversed: {
+      love: "El foco excesivo en lo material deja poco espacio para la conexión emocional que el vínculo también necesita.",
+      work: "El poder acumulado se usa para controlar en vez de nutrir el crecimiento de otros; revisa el propósito detrás del éxito.",
+      path: "Medir tu valor solo por lo que posees te desconecta de una riqueza más profunda que el patrimonio no alcanza a nombrar.",
+    },
+    bridge: "El Rey de Oros es tierra en su máxima maestría: la materia consolidada que sabe sostener y también sabe compartir.",
+  },
 };

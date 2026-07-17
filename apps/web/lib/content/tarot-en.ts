@@ -860,4 +860,482 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
     },
     bridge: "The King of Cups is water at full mastery — feeling that governs its own tide without ever denying it.",
   },
+
+  "swords-01": {
+    name: "Ace of Swords",
+    keywords: ["clarity", "truth", "mental breakthrough", "clean cut"],
+    essence:
+      "A crowned blade rises straight out of the cloud, and everything blurry snaps into focus. This is thought at its sharpest — the single insight that slices through noise and shows you exactly what's real.",
+    upright: {
+      love: "Something needs saying plainly. Skip the cushioning — clarity, even when it stings, is the kindest thing here.",
+      work: "An idea lands with real edge to it. Use it to cut away what isn't working, not to wound anyone unnecessarily.",
+      path: "You're seeing something with a sharpness you haven't had before. Trust that cut.",
+    },
+    reversed: {
+      love: "The truth gets said with more edge than it needed, and it cuts instead of clearing anything up. Aim for precision, not force.",
+      work: "The clarity you thought you had turns out to be partial. Check the whole picture before you cut anything.",
+      path: "A mind without direction turns its blade on itself. Even a sharp mind needs somewhere to point.",
+    },
+    bridge: "The Ace of Swords is air at its rawest — a mind that cuts before it even knows which way it's aiming.",
+  },
+  "swords-02": {
+    name: "Two of Swords",
+    keywords: ["indecision", "tense standoff", "chosen blindness", "forced balance"],
+    essence:
+      "Blindfolded, arms crossed, two blades held level against her chest. Neither option is painless, so she's stopped choosing at all — and calling the stalemate peace doesn't make it one.",
+    upright: {
+      love: "You're avoiding a decision because both paths cost something. Saying the dilemma out loud is already a move.",
+      work: "You're holding two options in forced balance. The truce buys time — it doesn't replace the choice waiting underneath it.",
+      path: "The blindfold spares you one kind of pain and costs you sight of the road that's still there, waiting.",
+    },
+    reversed: {
+      love: "The truth you'd been avoiding starts pushing through. Taking the blindfold off hurts less than you feared.",
+      work: "The stalemate breaks — one option finally outweighs the other. Follow that signal.",
+      path: "You stop performing balance where there was really just standstill. Looking straight at it is the first real step.",
+    },
+    bridge: "The Two of Swords is air locked in tension — a mind holding two truths, unwilling yet to pick either one.",
+  },
+  "swords-03": {
+    name: "Three of Swords",
+    keywords: ["heartbreak", "disillusionment", "cutting truth", "pierced heart"],
+    essence:
+      "Three blades through a heart, rain falling straight down. No softening here, no drama either — this is pain named exactly as it is. Not a catastrophe, not a life sentence: a wound that needs to be felt, not argued away, before it can close.",
+    upright: {
+      love: "A betrayal, a break, a truth that cuts — it's gone straight through. Crying it out honestly is what starts the mending.",
+      work: "A rejection or a failure hurts more than expected. The pain isn't a verdict on your worth — it's a measure of how much you cared.",
+      path: "An honest wound asked to be named, and today it was. This cut is real, and it's also where the relief starts.",
+    },
+    reversed: {
+      love: "The pain is loosening its grip, even if the scar still aches sometimes. Let yourself heal on your own clock.",
+      work: "You're still carrying an old disappointment you could set down by now. It did its job — it can close.",
+      path: "Reopening the same wound over and over keeps you stuck in the same pain. Today asks you to let it close instead.",
+    },
+    bridge: "The Three of Swords cuts straight to the heart — the hardest truth of the suit, felt plainly, without exaggeration.",
+  },
+  "swords-04": {
+    name: "Four of Swords",
+    keywords: ["rest", "retreat", "recovery", "necessary pause"],
+    essence:
+      "A knight lies still on a tomb, three swords mounted above, one held close. This isn't surrender — it's a mind finally allowing itself to stop moving long enough to actually recover.",
+    upright: {
+      love: "A stretch of shared quiet isn't distance — it's rest the bond needs too, to stay healthy.",
+      work: "Before the next round, something has to stop. The rest you take now is what makes tomorrow's clarity possible.",
+      path: "Your mind is asking for a truce, not an exit. Stopping to recharge is its own kind of wisdom.",
+    },
+    reversed: {
+      love: "The quiet has stretched longer than it needed to. Come back to the bond when you're ready — but don't let it stretch on indefinitely.",
+      work: "You're picking activity back up after a pause that did its job. Mind and body are ready for the next move.",
+      path: "What was healing solitude is starting to curdle into isolation. Notice when the rest has already served its purpose.",
+    },
+    bridge: "The Four of Swords is air gone still — a mind stepping back so it can think with a sharper edge afterward.",
+  },
+  "swords-05": {
+    name: "Five of Swords",
+    keywords: ["hollow victory", "conflict", "wounded pride", "the cost of winning"],
+    essence:
+      "He gathers up the fallen blades while the others walk off defeated — and the question hangs in the air: what did winning actually get you, if it left you standing alone?",
+    upright: {
+      love: "Winning the argument isn't the same as winning the bond. Check whether being right matters more to you than the relationship does.",
+      work: "A conflict tips in your favor, but the air stays tense. Weigh what the win cost against what it was actually worth.",
+      path: "Being right can cost you a connection that was worth more than being right.",
+    },
+    reversed: {
+      love: "You're ready to repair the damage from an old fight. A genuine apology outweighs a won argument.",
+      work: "You see clearly now that the conflict cost more than it was worth, and you're choosing to rebuild instead of keep scoring points.",
+      path: "You're letting go of the need to win every skirmish. Some battles genuinely aren't worth the fight.",
+    },
+    bridge: "The Five of Swords cuts without care — a mind that wins the argument and loses the connection.",
+  },
+  "swords-06": {
+    name: "Six of Swords",
+    keywords: ["transition", "moving on", "calmer waters", "quiet forward motion"],
+    essence:
+      "A ferryman pushes the boat toward smoother water, a woman and child huddled among the planted blades, the rough shore falling behind. This is a mind that chooses to move, even before the destination comes fully into view.",
+    upright: {
+      love: "A relationship or a chapter is drifting toward calmer water. Leaving the hard part behind is part of the process, not a defeat.",
+      work: "You're moving away from a tense situation toward something more stable. The crossing may feel slow, but it's headed the right way.",
+      path: "You're moving away from what hurt without needing to look back in guilt. Moving forward is its own form of healing.",
+    },
+    reversed: {
+      love: "You're struggling to cut the rope even though you know it's time. The boat doesn't move while you keep watching the shore.",
+      work: "You're resisting a change of course that's overdue. Staying where nothing's flowing just prolongs the storm.",
+      path: "Attachment to the familiar, even when it hurts, is keeping you from the calmer water that's already waiting.",
+    },
+    bridge: "The Six of Swords is air finally in motion — a mind leaving the storm behind with a heading, even an uncertain one.",
+  },
+  "swords-07": {
+    name: "Seven of Swords",
+    keywords: ["strategy", "stealth", "questionable shortcut", "self-reliance"],
+    essence:
+      "He slips away from camp with five swords under his arm, leaving two behind, glancing back over his shoulder. This is the strategic mind that sometimes reaches for the shortcut — and the mirror asking what it cost to take it.",
+    upright: {
+      love: "You're holding something back before sharing it fully. Ask yourself if that's discretion, or avoidance of a conversation you owe.",
+      work: "A quiet or independent plan gives you an edge. Just make sure the strategy stops short of the line into deception.",
+      path: "Your self-reliance is a real strength — just check whether you're sometimes using it to dodge asking for help you actually need.",
+    },
+    reversed: {
+      love: "A secret or a half-truth surfaces. Full honesty, uncomfortable as it is, repairs more than the silence did.",
+      work: "An underhanded strategy gets found out. Time to course-correct with the cards actually on the table.",
+      path: "You stop hiding behind cleverness and choose the vulnerability of asking for what you actually need.",
+    },
+    bridge: "The Seven of Swords is air moving in stealth — the strategic mind that sometimes forgets the shortcut has a price too.",
+  },
+  "swords-08": {
+    name: "Eight of Swords",
+    keywords: ["mental entrapment", "self-limitation", "perception", "possible freedom"],
+    essence:
+      "Bound and blindfolded, ringed by blades stuck upright in the ground, she doesn't notice the ropes have gone slack. This is a mind convincing itself it's trapped when the way out has been within reach the whole time.",
+    upright: {
+      love: "You feel stuck in a pattern with this bond that, looked at closely, has more exits than you're giving it credit for.",
+      work: "The sense of having no options is more mental than actual. There's a move available you haven't considered yet.",
+      path: "Your own story about yourself has you frozen. Changing the narrative is the first real step toward loosening the ropes.",
+    },
+    reversed: {
+      love: "You start to see that the trap was largely self-made. That seeing is what finally lets you move.",
+      work: "You dare to question a limitation you'd taken for granted, and find there was more room than you believed.",
+      path: "You pull the blindfold off your own limiting story. Freedom was waiting for you to stop believing yourself caught.",
+    },
+    bridge: "The Eight of Swords is air tangled in itself — a mind that binds itself with stories tighter than any real rope.",
+  },
+  "swords-09": {
+    name: "Nine of Swords",
+    keywords: ["anxiety", "insomnia", "night fear", "mental weight"],
+    essence:
+      "She sits up in bed at midnight, face in her hands, nine swords hanging in the dark behind her. This is the worst hour of the night, when the mind blows up what daylight would size down. Not a real catastrophe — the catastrophe the mind builds alone, in the dark.",
+    upright: {
+      love: "Fear of losing what you have keeps you awake imagining the worst. It's almost never as bad as it looks at 3am.",
+      work: "Anxiety over an uncertain outcome is costing you more energy than the actual problem. Talk it through with someone — don't just circle it alone.",
+      path: "Your nighttime mind isn't your daytime mind. Give yourself permission to wait for the light before fully believing what you fear tonight.",
+    },
+    reversed: {
+      love: "The fear starts losing its grip the moment you finally say it out loud. Naming it shrinks it.",
+      work: "You break the loop of night-thinking and find the problem had a simpler answer than the anxiety was promising.",
+      path: "The mental weight starts lifting once you stop carrying it in silence. Asking for help isn't weakness — it's the way out.",
+    },
+    bridge: "The Nine of Swords is air turning on itself in the dark — a mind magnifying fear until the sun comes up.",
+  },
+  "swords-10": {
+    name: "Ten of Swords",
+    keywords: ["painful ending", "surrender", "rock bottom", "dawn after"],
+    essence:
+      "Ten blades in his back under a sky that's already starting to lighten at the horizon. This is the actual bottom — nothing left to deny. It hurts plainly, no softening, and still the dawn in the background isn't an accident: after this, the only direction is up.",
+    upright: {
+      love: "A chapter closes as definitively as it possibly could. There's no ambiguity to cushion it — just the certainty that it's over.",
+      work: "A project or a phase ends abruptly. There's no pretending anymore that something here can be salvaged.",
+      path: "You've hit a real bottom, and that's exactly what it is — a bottom, not a bottomless drop. The dawn is already showing.",
+    },
+    reversed: {
+      love: "You're starting to get up after the hardest hit. Recovery is slow, but it's real.",
+      work: "The worst has passed, and you start rebuilding with what's left. Hitting bottom gives you an honest place to start from.",
+      path: "You're resisting the fact that something is fully over, and that resistance is stretching out the pain longer than it needs to.",
+    },
+    bridge: "The Ten of Swords is air at its most final cut — a mind touching bottom right as the sky starts to clear.",
+  },
+  "swords-page": {
+    name: "Page of Swords",
+    keywords: ["alert curiosity", "mental messenger", "vigilance", "apprentice of truth"],
+    essence:
+      "Sword held high, scanning the horizon, wind tearing at her hair. This is the young mind still learning to tell real information apart from rumor.",
+    upright: {
+      love: "A direct, maybe unexpected conversation arrives. Take it in with an open mind before reacting defensively.",
+      work: "A new idea wants investigating with honest curiosity, before you've got all the answers yet.",
+      path: "Your alertness serves you when it observes before it opines. Learn to tell the fact from the assumption.",
+    },
+    reversed: {
+      love: "A comment gets said before its impact is fully weighed. Check yourself before speaking next time.",
+      work: "You get swept up by gossip or unverified information. Confirm before acting on what you heard.",
+      path: "A mind that still can't sort signal from noise needs more stillness before it hands down a verdict.",
+    },
+    bridge: "The Page of Swords is the number 11 turned apprentice — the thinker-in-training still mistaking rumor for truth.",
+  },
+  "swords-knight": {
+    name: "Knight of Swords",
+    keywords: ["direct action", "mental impatience", "verbal charge", "unfiltered advance"],
+    essence:
+      "He charges at full speed, blade forward, not looking at the ground beneath him. This is air turned to pure velocity — a mind so certain of its truth it sometimes forgets to brake before saying it.",
+    upright: {
+      love: "You say exactly what you think, no detour. Directness can be a gift if it comes with a little tact attached.",
+      work: "It's time to move fast and decisively on something already clear in your mind.",
+      path: "Your conviction is charging forward — make sure the ground beneath it is worth that speed.",
+    },
+    reversed: {
+      love: "Words come out before they're fully thought through and cut deeper than intended. Brake before you speak.",
+      work: "Rushing to push your view through runs over someone who also had something to say. Listen before you charge.",
+      path: "Momentum without discernment burns energy on fights that never needed that much speed.",
+    },
+    bridge: "The Knight of Swords is air already galloping without brakes — a mind confusing speed with certainty.",
+  },
+  "swords-queen": {
+    name: "Queen of Swords",
+    keywords: ["sharp clarity", "independence", "unadorned truth", "firm boundaries"],
+    essence:
+      "Seated in profile, blade raised, gaze fixed somewhere past the throne — she sees with a clarity that doesn't blur for anyone's feelings. Her truth is her way of taking care.",
+    upright: {
+      love: "You say what you need without spin or guilt. Your directness comes from an honest place.",
+      work: "Your sharp judgment cuts through the fog of the situation. Trust your precise read even if it lands uncomfortably.",
+      path: "Your mental independence is strength, not coldness. Seeing clearly doesn't stop you from feeling deeply.",
+    },
+    reversed: {
+      love: "Clarity turns to bluntness the moment tact gets dropped. Truth can be said with warmth too.",
+      work: "Sharp judgment curdles into constant criticism. Learn to tell when to cut and when to simply stand beside someone.",
+      path: "Using the mind as a shield against feeling leaves you precise but alone. Truth doesn't have to exclude tenderness.",
+    },
+    bridge: "The Queen of Swords is air made mature presence — a mind that cuts with precision without losing its own center.",
+  },
+  "swords-king": {
+    name: "King of Swords",
+    keywords: ["intellectual authority", "fair judgment", "objectivity", "truth with power"],
+    essence:
+      "He sits with the blade pointed dead straight at the sky. The King of Swords governs from mental clarity, not impulse — his power is an objectivity that can't be bought by charm or bullied by fear.",
+    upright: {
+      love: "You bring structured honesty to the bond, able to name what's difficult without theatrics or dodging.",
+      work: "It's time to decide from cold analysis, not the pressure of the moment. Your clear judgment guides the team.",
+      path: "Your authority comes from thinking rigorously, not from imposing. That's a mature form of mental leadership.",
+    },
+    reversed: {
+      love: "Cold logic replaces the warmth the bond also needs. Reason without tenderness reads as distance.",
+      work: "The authority of the position gets used to control rather than guide. Check whether it still serves a fair purpose.",
+      path: "Intellect without compassion becomes a quiet tyranny. Real mental mastery also knows how to be human.",
+    },
+    bridge: "The King of Swords is air at full mastery — a mind that governs with objectivity and never needs to raise its voice.",
+  },
+
+  "pentacles-01": {
+    name: "Ace of Pentacles",
+    keywords: ["opportunity", "material seed", "new resource", "concrete possibility"],
+    essence:
+      "A hand offers up a gold coin over a garden in bloom — a real opportunity, not yet knowing what it will grow into, but already resting in your palm.",
+    upright: {
+      love: "The chance to build something stable together opens up — a home, a shared project, a commitment with roots.",
+      work: "A concrete opportunity arrives with real potential. Plant it carefully before expecting the full harvest.",
+      path: "Your material well-being is also a spiritual path. Tending your body and your resources honors life itself.",
+    },
+    reversed: {
+      love: "A chance at real stability slips by out of fear or distrust. Notice what's stopping you from planting it.",
+      work: "A resource or offer goes to waste for lack of a plan. The seed needs prepared ground, not just good intentions.",
+      path: "Chasing material security without a clear why leaves your hands full and your sense of purpose empty.",
+    },
+    bridge: "The Ace of Pentacles is earth at its rawest — real possibility before you even know what it's going to yield.",
+  },
+  "pentacles-02": {
+    name: "Two of Pentacles",
+    keywords: ["juggling", "adaptability", "priorities", "balance in motion"],
+    essence:
+      "He juggles two coins linked by an infinity loop, ships rocking in the water behind him. This is earth learning that balance isn't stillness — it's constant, well-timed motion.",
+    upright: {
+      love: "You're balancing the bond against other responsibilities. The point isn't perfect control — it's flowing between priorities.",
+      work: "You're handling several projects at once with agility. Enjoy the rhythm instead of stressing over not having just one.",
+      path: "Your adaptability is a real strength. Today's balance isn't static — it holds by dancing.",
+    },
+    reversed: {
+      love: "You're trying to hold too many things at once, and the bond starts feeling the lack of attention. Something needs to be set down.",
+      work: "Juggling too many tasks at once starts costing you quality. Prioritize instead of keeping every ball in the air.",
+      path: "Prolonged imbalance is wearing you down. Notice what you can put down to get a sustainable rhythm back.",
+    },
+    bridge: "The Two of Pentacles is earth in motion — matter that holds itself up by staying balanced, not by standing still.",
+  },
+  "pentacles-03": {
+    name: "Three of Pentacles",
+    keywords: ["collaboration", "mastery", "teamwork", "craft recognized"],
+    essence:
+      "A stonemason reviews his work in the cathedral alongside those who commissioned it. This is earth understanding that real mastery gets built together, not in isolation.",
+    upright: {
+      love: "Building something together — a project, a home, a shared goal — strengthens the bond more than words ever could.",
+      work: "Collaborating with other experts lifts your work past what you'd manage alone. Value the team.",
+      path: "Your craft sharpens when you share it with others who also master it. Collective learning is sacred too.",
+    },
+    reversed: {
+      love: "A lack of coordination between you trips up shared plans. Get aligned before building any further.",
+      work: "A group project suffers from poor communication or a lack of mutual credit. Name what isn't working.",
+      path: "Working without acknowledging others' contribution leaves you with a half-finished piece. Mature craft knows how to share the credit.",
+    },
+    bridge: "The Three of Pentacles is earth built together — matter that becomes a work of craft when several hands hold it up.",
+  },
+  "pentacles-04": {
+    name: "Four of Pentacles",
+    keywords: ["control", "material security", "attachment", "fear of loss"],
+    essence:
+      "He clutches a coin to his chest, one under each foot, one balanced on his head. This is earth mistaking security for absolute control — and in trying not to lose anything, he stops enjoying what he already has.",
+    upright: {
+      love: "Fear of losing what you've built makes you grip tighter than you need to. Real security doesn't come from squeezing this hard.",
+      work: "You're guarding resources or information carefully. Protecting what's yours is fine — check whether the control is already costing you flexibility.",
+      path: "Your need for stability is valid, but once it hardens into rigidity, it distances you from the abundance you're afraid of losing.",
+    },
+    reversed: {
+      love: "You start loosening your grip on the bond. Sharing gives more security than hoarding ever did.",
+      work: "You risk investing or sharing resources you used to guard out of fear. Calculated risk also grows things.",
+      path: "You unclench your fist a little and discover life doesn't slip away just because your hand opened.",
+    },
+    bridge: "The Four of Pentacles is earth held too tight — matter that, gripped out of fear, stops flowing and stops giving.",
+  },
+  "pentacles-05": {
+    name: "Five of Pentacles",
+    keywords: ["scarcity", "exclusion", "material hardship", "unseen shelter nearby"],
+    essence:
+      "Two figures limp through the snow, passing right by a lit window without noticing it. This is earth in hard times — and also the reminder that shelter is sometimes closer than pain lets you see.",
+    upright: {
+      love: "A stretch of financial or health difficulty weighs on the bond. Getting through it together counts as much as solving it.",
+      work: "A rough patch — lost income, job insecurity — needs real support, not quiet pride.",
+      path: "Feeling excluded or in short supply is real pain — and there's help nearby you may not have seen yet.",
+    },
+    reversed: {
+      love: "You start accepting support you used to refuse out of pride. Letting yourself be helped is also self-love.",
+      work: "The worst of the material crisis is behind you. A path to recovery appears that wasn't visible before.",
+      path: "You come out of isolation and find the community was willing to hold you this whole time.",
+    },
+    bridge: "The Five of Pentacles is earth at its coldest hour — scarce matter teaching how to ask for, and receive, real help.",
+  },
+  "pentacles-06": {
+    name: "Six of Pentacles",
+    keywords: ["generosity", "fair exchange", "giving and receiving", "balance of power"],
+    essence:
+      "A merchant hands out coins while holding a scale in the other hand. This is earth flowing in balance — giving that holds together because it also knows how to measure fairly.",
+    upright: {
+      love: "Giving and receiving feel balanced in the bond. Thank yourself for what you offer and for what you let yourself accept.",
+      work: "Sharing resources, time, or knowledge with real generosity strengthens your position — it doesn't weaken it.",
+      path: "You're in a position to help others. Do it from genuine abundance, not from needing to feel superior.",
+    },
+    reversed: {
+      love: "Giving has become uneven, with one side always handing over more than the other. Name the imbalance.",
+      work: "Help offered with hidden strings creates dependence instead of mutual growth. Check the intention behind it.",
+      path: "Giving only to feel needed empties the gesture of its real generosity. Give because you want to, not because you're afraid to let go of the power.",
+    },
+    bridge: "The Six of Pentacles is earth circulating fairly — matter shared without losing its own balance.",
+  },
+  "pentacles-07": {
+    name: "Seven of Pentacles",
+    keywords: ["patience", "assessment", "long-term investment", "active waiting"],
+    essence:
+      "He leans on his hoe, studying the fruit that's still hanging green on the vine. This is earth that learned real growth doesn't get rushed — it gets patiently assessed while the work keeps going.",
+    upright: {
+      love: "The bond needs time to ripen. Assess the progress honestly, without demanding a harvest before its season.",
+      work: "A long-term project is showing early signs, even if the final result is still a ways off. Keep investing patiently.",
+      path: "Your growth measures in seasons, not days. Today's task is checking progress honestly, not demanding the full harvest.",
+    },
+    reversed: {
+      love: "Impatience for instant results makes you undersell a bond that's actually on track.",
+      work: "You've invested time and effort into something that isn't bearing fruit. Decide whether to adjust the method or the ground.",
+      path: "Frustration at slow results makes you want to quit right before something was about to bloom.",
+    },
+    bridge: "The Seven of Pentacles is earth in active pause — matter growing slowly, asking for an honest look before the next move.",
+  },
+  "pentacles-08": {
+    name: "Eight of Pentacles",
+    keywords: ["mastery", "dedication", "meticulous work", "craft refinement"],
+    essence:
+      "Coin after coin, carved with total focus, the same gesture repeated until it's mastered. This is earth understanding that mastery gets built one repetition at a time — no shortcuts.",
+    upright: {
+      love: "You give the bond deliberate time and care, the way a craftsperson polishes a piece. Steady effort is also love.",
+      work: "You're focused on refining your skill with genuine discipline. The detail you tend today is tomorrow's mastery.",
+      path: "Your commitment to steady practice is itself a spiritual path. Work done well is also a form of devotion.",
+    },
+    reversed: {
+      love: "You pour all the effort into the form and neglect the actual connection. Check whether perfectionism is pulling you away from what matters.",
+      work: "Excess attention to detail without moving toward the result stalls you out. Sometimes good enough is enough.",
+      path: "Chasing perfection before letting yourself show the work keeps you stuck in a rehearsal that never ends.",
+    },
+    bridge: "The Eight of Pentacles is earth worked with dedication — matter refined through repeated, conscious practice.",
+  },
+  "pentacles-09": {
+    name: "Nine of Pentacles",
+    keywords: ["self-sufficiency", "earned abundance", "solitary pleasure", "full independence"],
+    essence:
+      "She stands in her own cultivated garden, falcon on her wrist, needing no company to enjoy it. This is earth that flourished through her own effort, and the quiet pleasure of savoring it alone, answering to no one.",
+    upright: {
+      love: "You enjoy your own company fully. Any bond that arrives now adds onto something already complete.",
+      work: "You're harvesting the result of sustained effort. The win is yours — let yourself enjoy it without rushing to the next thing.",
+      path: "Your independence isn't loneliness — it's the freedom of having built your own garden with your own hands.",
+    },
+    reversed: {
+      love: "You confuse self-sufficiency with letting no one in. Check whether independence has hardened into a wall.",
+      work: "Material success doesn't feel complete if no one else sees or celebrates it with you. Let yourself share the win.",
+      path: "Enjoying solitude is fine — but shutting out others entirely out of fear of depending on them impoverishes you a different way.",
+    },
+    bridge: "The Nine of Pentacles is earth at full harvest — matter enjoyed by the one who cultivated it with her own hands.",
+  },
+  "pentacles-10": {
+    name: "Ten of Pentacles",
+    keywords: ["legacy", "family abundance", "lasting stability", "material culmination"],
+    essence:
+      "Three generations share one roof, dogs at their feet, an archway framing the whole scene. This is earth at its fullest culmination — abundance that outgrows any one person and becomes a legacy.",
+    upright: {
+      love: "The bond reaches a stability that feels generational, able to hold not just the two of you but whatever comes after.",
+      work: "A long-haul project culminates in something that outlasts the initial effort. What you built has roots.",
+      path: "Your legacy isn't measured only in personal achievement, but in what you leave available for those who come after.",
+    },
+    reversed: {
+      love: "Family tension or inherited patterns threaten a stability you thought was solid. Notice which old pattern is repeating.",
+      work: "A solid structure wobbles from decisions that didn't consider the long run. Adjust before it erodes further.",
+      path: "Mistaking stability for stagnation keeps you from noticing that a legacy also needs renewing to stay alive.",
+    },
+    bridge: "The Ten of Pentacles is earth at its generational culmination — matter that becomes legacy once it outgrows whoever planted it.",
+  },
+  "pentacles-page": {
+    name: "Page of Pentacles",
+    keywords: ["diligent student", "practical curiosity", "material messenger", "apprentice of the earth"],
+    essence:
+      "She studies the gold coin with total focus, like reading a map toward her own future. This is the young mind learning that dreams get built step by step, feet on the ground.",
+    upright: {
+      love: "A new interest approaches with serious intent, even if it's still in its learning stage. Give it room to grow.",
+      work: "A study opportunity or a new project calls for practical dedication. Start with a beginner's humility.",
+      path: "Your curiosity about the concrete and tangible is a valid form of spiritual growth. Learn by doing.",
+    },
+    reversed: {
+      love: "Interest stays at the level of promises without concrete action behind them. Look for real commitment underneath.",
+      work: "Discipline is missing to turn a good idea into a tangible result. Study without practice isn't enough.",
+      path: "Procrastination is keeping you from a lesson that was already ready to begin. Take the first concrete step today.",
+    },
+    bridge: "The Page of Pentacles is the number 11 turned apprentice — the material master-in-training still learning how to plant her own future.",
+  },
+  "pentacles-knight": {
+    name: "Knight of Pentacles",
+    keywords: ["steadiness", "method", "sustained effort", "reliability"],
+    essence:
+      "He stops, motionless atop a horse that's just as still, studying the plowed field ahead. This is earth advancing without hurry, one step at a time, trusting that steadiness outperforms speed.",
+    upright: {
+      love: "You offer the bond a reliable, steady presence, needing no grand gestures to prove commitment.",
+      work: "Slow but sure progress is your strength right now. Stick to the method even if it isn't the fastest one.",
+      path: "Your methodical patience is a form of spiritual discipline. Not every sacred path needs to rush.",
+    },
+    reversed: {
+      love: "Routine curdles into stagnation once the intention behind it fades. Check whether the steadiness is still a choice.",
+      work: "You cling so hard to the method that you lose the ability to adapt when the situation calls for it.",
+      path: "Discipline without purpose turns into empty rigidity. Ask yourself what the steady pace you're keeping is actually for.",
+    },
+    bridge: "The Knight of Pentacles is earth advancing without hurry — matter that trusts the steady step over the gallop.",
+  },
+  "pentacles-queen": {
+    name: "Queen of Pentacles",
+    keywords: ["practical care", "earthly abundance", "tangible generosity", "wisdom of the body"],
+    essence:
+      "Seated in her lush garden, rabbit at her feet, coin resting in her lap — the Queen of Pentacles nurtures whatever she touches with a generosity you can feel in the concrete: food, shelter, real care.",
+    upright: {
+      love: "You care for the bond with tangible gestures — a meal made, a space put in order, a steady presence that's felt.",
+      work: "Your ability to hold projects and people at once is a real talent. Manage it with the same generosity you already carry.",
+      path: "Your wisdom lives in the body and in the everyday. Practical care is also a deep form of spirituality.",
+    },
+    reversed: {
+      love: "You care for others so much you neglect your own physical wellbeing. Check how much is left for you.",
+      work: "You overload yourself managing everything for everyone. Delegating doesn't diminish your value — it lets you hold it with more quality.",
+      path: "Confusing productivity with self-worth disconnects you from the body that also deserves your care.",
+    },
+    bridge: "The Queen of Pentacles is earth made mature presence — matter that nurtures generously without neglecting its own root.",
+  },
+  "pentacles-king": {
+    name: "King of Pentacles",
+    keywords: ["prosperity", "steady leadership", "consolidated abundance", "grounded generosity"],
+    essence:
+      "Seated on his throne, ringed by vines heavy with fruit, coin held firm in hand — the King of Pentacles rules from an abundance built through sustained effort, not luck inherited.",
+    upright: {
+      love: "You bring stability and concrete generosity to the bond. Your presence feels secure — in actions, not just words.",
+      work: "You lead with practical vision and tangible results. Your success clears a path for others to prosper alongside you.",
+      path: "Your mature abundance knows how to share without impoverishing itself. Real prosperity is also the capacity for generosity.",
+    },
+    reversed: {
+      love: "Too much focus on the material leaves little room for the emotional connection the bond also needs.",
+      work: "Accumulated power gets used to control rather than nurture others' growth. Check the purpose behind the success.",
+      path: "Measuring your worth only by what you own disconnects you from a deeper wealth that net worth can't name.",
+    },
+    bridge: "The King of Pentacles is earth at full mastery — consolidated matter that knows how to hold and how to share.",
+  },
 };
