@@ -171,6 +171,7 @@
     "intentRelWidowed": "Widowed",
     "intentRelComplicated": "It's complicated",
     "intentRelPrivate": "I'd rather not say",
+    "intentHeartNotePlaceholder": "Anything you'd like to share? (optional)",
     "intentSkip": "Skip",
     "cuspHint": "Your chart will tell the exact boundary"
   },

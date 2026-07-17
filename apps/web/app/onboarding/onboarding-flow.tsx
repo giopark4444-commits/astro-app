@@ -69,7 +69,7 @@ export function OnboardingFlow() {
   function skip() {
     if (step === "goals") setDraft((d) => ({ ...d, goals: [], goalNote: "" }));
     if (step === "focus") setDraft((d) => ({ ...d, focus: [] }));
-    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null }));
+    if (step === "relationship") setDraft((d) => ({ ...d, relationship: null, heartNote: "" }));
     setI((idx) => idx + 1);
   }
 
@@ -133,15 +133,20 @@ export function OnboardingFlow() {
             </>
           )}
           {step === "relationship" && (
-            <div className={styles.chips}>
-              {RELATIONSHIP_STATUSES.map((rel) => (
-                <button key={rel} type="button" className={`chip ${styles.intentChip} ${draft.relationship === rel ? styles.intentChipOn : ""}`}
-                  aria-pressed={draft.relationship === rel}
-                  onClick={() => setDraft((d) => ({ ...d, relationship: d.relationship === rel ? null : rel }))}>
-                  {t(`intentRel${capitalize(rel)}`)}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className={styles.chips}>
+                {RELATIONSHIP_STATUSES.map((rel) => (
+                  <button key={rel} type="button" className={`chip ${styles.intentChip} ${draft.relationship === rel ? styles.intentChipOn : ""}`}
+                    aria-pressed={draft.relationship === rel}
+                    onClick={() => setDraft((d) => ({ ...d, relationship: d.relationship === rel ? null : rel }))}>
+                    {t(`intentRel${capitalize(rel)}`)}
+                  </button>
+                ))}
+              </div>
+              <input className={styles.input} value={draft.heartNote}
+                onChange={(e) => setDraft((d) => ({ ...d, heartNote: e.target.value }))}
+                placeholder={t("intentHeartNotePlaceholder")} />
+            </>
           )}
           {step === "name" && (
             <input className={styles.input} autoFocus value={a.name}

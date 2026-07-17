@@ -15,6 +15,7 @@ export interface IntentDraft {
   goalNote: string;
   focus: LifeArea[];
   relationship: RelationshipStatus | null;
+  heartNote: string;
 }
 
 export const EMPTY_INTENT_DRAFT: IntentDraft = {
@@ -22,17 +23,20 @@ export const EMPTY_INTENT_DRAFT: IntentDraft = {
   goalNote: "",
   focus: [],
   relationship: null,
+  heartNote: "",
 };
 
 /** Draft local → UserIntent puro. null si TODO quedó omitido (no persistir nada). */
 export function draftToIntent(d: IntentDraft, now: string): UserIntent | null {
   const goalNote = d.goalNote.trim();
-  if (d.goals.length === 0 && d.focus.length === 0 && !d.relationship && !goalNote) return null;
+  const heartNote = d.heartNote.trim();
+  if (d.goals.length === 0 && d.focus.length === 0 && !d.relationship && !goalNote && !heartNote) return null;
   return {
     goals: d.goals,
     focus: d.focus,
     goalNote: goalNote || undefined,
     relationship: d.relationship ?? undefined,
+    heartNote: heartNote || undefined,
     useInAI: true,
     answeredAt: now,
   };
