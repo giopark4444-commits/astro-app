@@ -1,0 +1,122 @@
+// Integración del maestro-detalle: tocar en la columna técnica actualiza el
+// panel de interpretación (desktop). matchMedia se burla como desktop, así que
+// `select` escribe en `selected` (panel derecho) y no abre el sheet.
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import type { BodyPosition, ChartResult } from "@aluna/core";
+import es from "@/messages/es.json";
+import { CartaView } from "../carta-view";
+
+const FIXTURE_PROFILE = {
+  id: "p1",
+  name: "Fixture",
+  birth_date: "1990-01-01",
+  birth_time: "12:00",
+  time_known: true,
+  place_name: "Bogotá",
+  latitude: 4.7,
+  longitude: -74.1,
+  time_zone: "America/Bogota",
+  gender: "x",
+};
+
+vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: FIXTURE_PROFILE }) }));
+
+function body(overrides: Partial<BodyPosition> & { body: string }): BodyPosition {
+  return {
+    longitude: 0, signDegree: 0, degree: 0, minute: 0, second: 0,
+    speed: 1, retrograde: false, house: 1, dignity: null, sign: "aries",
+    ...overrides,
+  };
+}
+
+function makeChart(overrides: Partial<ChartResult> = {}): ChartResult {
+  return {
+    bodies: [
+      body({ body: "sun", sign: "leo", house: 5, dignity: "domicile" }),
+      body({ body: "moon", sign: "cancer", house: 4, dignity: "domicile" }),
+    ],
+    houses: {
+      system: "placidus",
+      cusps: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+      ascendant: 0,
+      midheaven: 270,
+    },
+    aspects: [{ a: "sun", b: "moon", aspect: "trine", angle: 120, orb: 2.1, applying: true, harmony: "soft" }],
+    distribution: {
+      elements: { fire: 3, earth: 1, air: 0, water: 3 },
+      modalities: { cardinal: 2, fixed: 3, mutable: 2 },
+      polarities: { yang: 4, yin: 3 },
+      dominantElement: "fire",
+      dominantModality: "fixed",
+    },
+    patterns: [],
+    meta: { julianDayUt: 2451545, julianDayEt: 2451545.0007, utcHour: 12, zodiac: "tropical" },
+    ...overrides,
+  };
+}
+
+const CHART = makeChart();
+
+beforeEach(() => {
+  // matches:false para "(max-width: 1079px)" = desktop → el router de selección
+  // escribe el panel derecho (setSelected), no el sheet.
+  vi.stubGlobal("matchMedia", (q: string) => ({
+    matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {},
+  }));
+  global.fetch = vi.fn(async () => ({
+    ok: true,
+    json: async () => ({ chart: CHART, solar: false, transitAspects: [] }),
+  })) as unknown as typeof fetch;
+});
+
+function renderView() {
+  return render(
+    <NextIntlClientProvider locale="es" messages={es}>
+      <CartaView />
+    </NextIntlClientProvider>,
+  );
+}
+
+/** La sección técnica que envuelve una tabla (h3 → <section>). */
+function sectionOf(headingName: string) {
+  return screen.getByRole("heading", { name: headingName, level: 3 }).closest("section") as HTMLElement;
+}
+
+describe("CartaView maestro-detalle", () => {
+  it("arranca con el núcleo tejido en el panel", async () => {
+    renderView();
+    // La cabecera del panel de interpretación (desktop) está presente desde el
+    // arranque, con la selección por defecto = núcleo.
+    expect(await screen.findByText("Interpretación")).toBeInTheDocument();
+  });
+
+  it("clic en fila de posiciones → panel muestra ese cuerpo", async () => {
+    renderView();
+    await screen.findByText("Interpretación");
+    // El cuerpo del Sol aún no está tejido en el panel.
+    expect(screen.queryByText(/Tu Sol es tu identidad esencial/)).not.toBeInTheDocument();
+    // La celda "cuerpo" de la fila del Sol en la tabla de Posiciones es un botón.
+    const posSection = sectionOf("Posiciones");
+    const solCell = within(posSection).getByRole("button", { name: /Sol/ });
+    fireEvent.click(solCell);
+    // Ahora el panel derecho teje la esencia del Sol.
+    expect(await screen.findByText(/Tu Sol es tu identidad esencial/)).toBeInTheDocument();
+  });
+
+  it("Modo Pro revela dignidades/velocidad en la tabla y tiers en el panel", async () => {
+    renderView();
+    await screen.findByText("Interpretación");
+    // Sin Pro la tabla no muestra la columna técnica (dignidad · velocidad).
+    expect(screen.queryByText(/°\/d/)).not.toBeInTheDocument();
+    // Activar Modo Pro (hay dos toggles equivalentes: pie de rueda + móvil).
+    fireEvent.click(screen.getAllByRole("button", { name: "Modo Pro" })[0]!);
+    // La tabla de Posiciones revela la velocidad (detalle Pro) — una por cuerpo.
+    expect((await screen.findAllByText(/°\/d/)).length).toBeGreaterThan(0);
+    // Al seleccionar un cuerpo, el panel abre el selector de profundidad (tiers).
+    const posSection = sectionOf("Posiciones");
+    fireEvent.click(within(posSection).getByRole("button", { name: /Sol/ }));
+    expect(await screen.findByRole("tab", { name: "Profunda" })).toBeInTheDocument();
+  });
+});

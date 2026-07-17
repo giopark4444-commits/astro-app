@@ -200,8 +200,13 @@
 /* móvil: la lámina pro solo se ve con el toggle encendido (mismo efecto que
    el {pro && ...} que reemplazó — ver carta-view Step 6c) */
 .pro:not([data-pro]) { display: none; }
+/* maestro-detalle: el panel de interpretación es SOLO desktop; en móvil la
+   interpretación vive en el bottom-sheet. Base defensiva (T4) — el look del
+   panel (sticky/card/grid) lo aporta T5. */
+.interpCol { display: none; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
+  .interpCol { display: block; }
   /* sin bottom-nav en desktop: sobra el clearance de 96px (paridad con hoy,
      hallazgo de la review final) */
   .wrap { padding-bottom: var(--sp-7); }

@@ -1,10 +1,14 @@
-// Task 5 (capa de significados): la carta debe ser "tocable" — nombres de
-// aspecto, glifos de planeta, signos, casas, dignidades y patrones abren el
-// glosario vía <Meaning>. Este test cubre el caso mínimo obligado por el
-// brief: en el tab Aspectos, "Trígono" es un botón (Meaning envuelve el
-// label) que abre el BottomSheet (role="dialog") con la entrada del glosario.
+// Capa de significados tras el maestro-detalle. Con el recableado (T4) la carta
+// tiene DOS gestos distintos sobre la columna técnica:
+//   1. Selección — las celdas de la tabla de posiciones y las filas del
+//      aspectario son <button> que eligen qué leer en el panel/sheet. YA NO
+//      abren el mini-glosario <Meaning> celda-a-celda.
+//   2. Glosario — lo que queda envuelto en <Meaning> (etiquetas de
+//      elemento/modalidad de las barras de Balance) sigue abriendo la hoja del
+//      glosario (role="dialog").
+// Este test fija ambos contratos para que no regresen.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { BodyPosition, ChartResult } from "@aluna/core";
 import es from "@/messages/es.json";
@@ -76,11 +80,34 @@ function renderView() {
   );
 }
 
-describe("CartaView — capa de significados (aspectos)", () => {
-  it('"Trígono" es un botón que abre el glosario (dialog)', async () => {
+describe("CartaView — capa de significados y selección", () => {
+  it("la fila del aspectario es un botón de selección, no un <Meaning> de glosario", async () => {
     renderView();
-    const trigger = await screen.findByRole("button", { name: "Trígono" });
-    expect(trigger).toBeInTheDocument();
+    const aspSection = (await screen.findByRole("heading", { name: "Aspectos", level: 3 })).closest("section") as HTMLElement;
+    // "Trígono" vive dentro de la fila del aspectario, que es un <button>.
+    const row = within(aspSection).getByRole("button", { name: /Trígono/ });
+    expect(row.tagName).toBe("BUTTON");
+    // Seleccionar NO abre el glosario (eso es del <Meaning>): sin diálogo.
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(row);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("las celdas de la tabla de posiciones son botones de selección", async () => {
+    renderView();
+    const posSection = (await screen.findByRole("heading", { name: "Posiciones", level: 3 })).closest("section") as HTMLElement;
+    // Cuerpo, signo y casa del Sol son tres botones seleccionables (no <Meaning>).
+    expect(within(posSection).getByRole("button", { name: /Sol/ }).tagName).toBe("BUTTON");
+    expect(within(posSection).getByRole("button", { name: /Leo/ }).tagName).toBe("BUTTON");
+    expect(within(posSection).getByRole("button", { name: "Casa 5" }).tagName).toBe("BUTTON");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it('las barras de Balance conservan <Meaning>: "Fuego" abre el glosario (dialog)', async () => {
+    renderView();
+    // La etiqueta de elemento "Fuego" sigue envuelta en <Meaning> (aparece en
+    // el núcleo y en el pane de balance): tomamos la primera.
+    const trigger = (await screen.findAllByRole("button", { name: "Fuego" }))[0]!;
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(trigger);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
