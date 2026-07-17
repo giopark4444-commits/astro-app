@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -37,12 +37,15 @@ export default function LegalScreen() {
 
   const back = () => router.back();
 
-  if (!legalDoc) {
-    // Slug desconocido (deep link roto, versión vieja de la app, etc.):
-    // vuelve atrás en vez de mostrar una pantalla vacía sin salida.
-    router.back();
-    return null;
-  }
+  // Slug desconocido (deep link roto, versión vieja de la app, etc.): vuelve
+  // atrás en vez de mostrar una pantalla vacía sin salida. En un efecto, no
+  // durante el render (navegar es un efecto secundario — llamarlo directo en
+  // el cuerpo del componente viola las reglas de React).
+  useEffect(() => {
+    if (!legalDoc) router.back();
+  }, [legalDoc, router]);
+
+  if (!legalDoc) return null;
 
   return (
     <View style={styles.root}>
