@@ -114,6 +114,15 @@ export type { Rng, DrawnCard } from "./tarot/shuffle";
 export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
 export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
+export {
+  TAROT_CARDS_ES,
+  composeReadingProse,
+  composeReadingWith,
+  type TarotAmbits,
+  type TarotCardContent,
+  type ReadingComposeDicts,
+} from "./tarot/content-es";
+export { TAROT_CARDS_EN } from "./tarot/content-en";
 
 export { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "./legal/legal-es";
 export { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "./legal/legal-en";
