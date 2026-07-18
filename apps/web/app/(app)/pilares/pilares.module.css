@@ -265,6 +265,15 @@
    incluía la regla. */
 .vtabs { display: none; }
 
+/* Panel de interpretación (maestro-detalle, Task 4): feature 100% desktop —
+   en móvil la interpretación la sirve el bottom-sheet y la card `.readingMobile`
+   de la columna izquierda, así que el panel derecho NO debe montarse visible
+   (duplicaría la Lectura). Mismo mecanismo que `.vtabs`/`.lamina` arriba: oculto
+   por defecto; la regla @media que lo muestra (grid 2-col + sticky) llega en
+   Task 5 junto con el resto del layout desktop. `.readingMobile` es el inverso:
+   visible por defecto (móvil), la oculta Task 5 dentro del @media desktop. */
+.interpCol { display: none; }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy */
 

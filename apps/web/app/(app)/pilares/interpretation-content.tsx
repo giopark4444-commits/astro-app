@@ -192,7 +192,10 @@ export function PilaresInterpretation({
 /** Título del bottom-sheet móvil para una PilarSelection. */
 export function pilarSelectionTitle(
   selected: PilarSelection,
-  t: (k: string, v?: Record<string, unknown>) => string,
+  // Solo se llama con la clave (nunca con values), así que basta `(k) => string`:
+  // esta forma SÍ acepta el `t` real de useTranslations() sin cast (la anterior,
+  // `(k, v?: Record<string, unknown>)`, fallaba por contravarianza de values).
+  t: (k: string) => string,
   L: ReturnType<typeof baziLabels>,
   locale: string,
 ): string {

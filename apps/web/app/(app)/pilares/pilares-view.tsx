@@ -1,24 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
   type Pillar,
+  type PillarSet,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { useCountUp } from "@/lib/motion/use-count-up";
+import { baziLabels } from "@/lib/content/bazi-labels";
 import { Starfield } from "@/components/starfield";
+import { BottomSheet } from "@/components/bottom-sheet";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
-import { PilaresTabs, type PilaresTab } from "./pilares-tabs";
+import { PilaresTabs, FREE_TABS, type PilaresTab } from "./pilares-tabs";
 import { BaziReadingView } from "./bazi-reading";
-import { Meaning } from "@/components/meaning";
+import { PilaresInterpretation, pilarSelectionTitle } from "./interpretation-content";
+import { isMobileViewport, type PilarSelection } from "./selection";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
-const ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
-const ELEMENT_KEY: Record<string, string> = {
+type Element = "wood" | "fire" | "earth" | "metal" | "water";
+const ELEMENTS: readonly Element[] = ["wood", "fire", "earth", "metal", "water"];
+const ELEMENT_KEY: Record<Element, string> = {
   wood: "elWood",
   fire: "elFire",
   earth: "elEarth",
@@ -28,14 +33,32 @@ const ELEMENT_KEY: Record<string, string> = {
 
 /** Una fila de la barra de balance de elementos: extraída para poder llamar
  *  useCountUp (el número sube en el MISMO reloj que el fill de la barra,
- *  --dur-count) — no se puede llamar un hook dentro del .map() del padre. */
-function ElementBar({ el, count, total }: { el: string; count: number; total: number }) {
+ *  --dur-count) — no se puede llamar un hook dentro del .map() del padre.
+ *  Maestro-detalle (Task 4): el nombre del elemento es ahora un botón `.selBtn`
+ *  que emite {kind:"element",…} al router — reemplaza al viejo <Meaning>. */
+function ElementBar({
+  el,
+  count,
+  total,
+  onSelect,
+}: {
+  el: Element;
+  count: number;
+  total: number;
+  onSelect: (s: PilarSelection) => void;
+}) {
   const t = useTranslations();
   const displayCount = useCountUp(count);
   return (
     <div className={styles.elRow}>
       <span className={styles.elName}>
-        <Meaning k={`bazi.element.${el}`}>{t(`pilares.${ELEMENT_KEY[el]}`)}</Meaning>
+        <button
+          type="button"
+          className={styles.selBtn}
+          onClick={() => onSelect({ kind: "element", element: el, count })}
+        >
+          {t(`pilares.${ELEMENT_KEY[el]}`)}
+        </button>
       </span>
       <span className={styles.elTrack}>
         <span
@@ -49,15 +72,30 @@ function ElementBar({ el, count, total }: { el: string; count: number; total: nu
 }
 
 /** Lente Cuatro Pilares (Ba Zi / Saju). Pide /api/bazi (server, efemérides) y dibuja
- *  los 4 pilares tronco×rama, marca el Maestro del Día y el balance de elementos. */
+ *  los 4 pilares tronco×rama, marca el Maestro del Día y el balance de elementos.
+ *  Maestro-detalle (Task 4, espejo de /carta): todo lo tocable de la columna técnica
+ *  produce una PilarSelection que el panel derecho (desktop) o el bottom-sheet
+ *  (móvil) interpretan vía un renderizador único (PilaresInterpretation). */
 export function PilaresView() {
   const t = useTranslations();
+  const locale = useLocale();
+  const L = baziLabels(locale);
   const { active } = useProfiles();
   const [data, setData] = useState<BaZiData | null>(null);
   const [error, setError] = useState(false);
   const [pro, setPro] = useState(false);
   const [script, setScript] = useState<"hanzi" | "hangul">("hanzi");
   const [tab, setTab] = useState<PilaresTab>("nayin");
+  // Maestro-detalle: la selección viva del panel (desktop) y la del sheet (móvil).
+  const [selected, setSelected] = useState<PilarSelection>({ kind: "reading" });
+  const [sheetSel, setSheetSel] = useState<PilarSelection | null>(null);
+
+  // Router de selección: en móvil abre el bottom-sheet; en desktop escribe en el
+  // panel derecho. SSR-safe (isMobileViewport → false en servidor).
+  const select = (s: PilarSelection) => {
+    if (isMobileViewport()) setSheetSel(s);
+    else setSelected(s);
+  };
 
   useEffect(() => {
     if (!active) return;
@@ -83,6 +121,18 @@ export function PilaresView() {
     };
   }, [active]);
 
+  // Reset de la selección al cambiar de perfil (lección de /carta): el panel y el
+  // sheet vuelven a la Lectura para no mostrar el detalle del perfil anterior.
+  useEffect(() => {
+    setSelected({ kind: "reading" });
+    setSheetSel(null);
+  }, [active]);
+
+  // Si se apaga Pro con una tab pro-only activa, cae a la primera de lectura.
+  useEffect(() => {
+    if (!pro && !FREE_TABS.includes(tab)) setTab("nayin");
+  }, [pro, tab]);
+
   const pillars: Array<{ key: string; pillar: Pillar | null }> = [
     { key: "year", pillar: data?.year ?? null },
     { key: "month", pillar: data?.month ?? null },
@@ -90,10 +140,10 @@ export function PilaresView() {
     { key: "hour", pillar: data?.hour ?? null },
   ];
 
-  const counts: Record<string, number> = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
+  const counts: Record<Element, number> = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
   if (data) {
     const bump = (e: string) => {
-      counts[e] = (counts[e] ?? 0) + 1;
+      counts[e as Element] = (counts[e as Element] ?? 0) + 1;
     };
     for (const p of [data.year, data.month, data.day, data.hour]) {
       if (!p) continue;
@@ -102,6 +152,12 @@ export function PilaresView() {
     }
   }
   const totalEls = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+
+  // Set memoizado sobre `data` — lo comparten el panel y el sheet.
+  const set = useMemo<PillarSet | null>(
+    () => (data ? { year: data.year, month: data.month, day: data.day, hour: data.hour } : null),
+    [data],
+  );
 
   return (
     <main className={styles.wrap}>
@@ -119,35 +175,6 @@ export function PilaresView() {
         <p className={styles.note}>{t("pilares.loading")}</p>
       ) : (
         <div className={styles.deskCols}>
-          <div className={styles.pillarsCol}>
-            <div className={styles.grid}>
-              {pillars.map(({ key, pillar }, i) => {
-                if (!pillar) {
-                  return (
-                    <div key={key} className={styles.col}>
-                      <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
-                      <span className={styles.empty}>—</span>
-                    </div>
-                  );
-                }
-                const isDay = key === "day";
-                return (
-                  <PillarColumn
-                    key={key}
-                    posKey={key}
-                    pillar={pillar}
-                    isDay={isDay}
-                    dayMaster={data.day.stem}
-                    pro={pro}
-                    script={script}
-                    index={i}
-                    onSelect={() => {}} /* puente T3→T4: el router select() real llega en la Tarea 4 */
-                  />
-                );
-              })}
-            </div>
-          </div>
-
           <div className={styles.controlsGlobal}>
             <button
               type="button"
@@ -180,18 +207,45 @@ export function PilaresView() {
             </div>
           </div>
 
-          <div className={styles.readCol}>
+          <div className={styles.leftCol}>
+            <div className={styles.grid}>
+              {pillars.map(({ key, pillar }, i) => {
+                if (!pillar) {
+                  return (
+                    <div key={key} className={styles.col}>
+                      <span className={styles.colLabel}>{t(`pilares.${key}`)}</span>
+                      <span className={styles.empty}>—</span>
+                    </div>
+                  );
+                }
+                const isDay = key === "day";
+                return (
+                  <PillarColumn
+                    key={key}
+                    posKey={key}
+                    pillar={pillar}
+                    isDay={isDay}
+                    dayMaster={data.day.stem}
+                    pro={pro}
+                    script={script}
+                    index={i}
+                    onSelect={select}
+                  />
+                );
+              })}
+            </div>
+
             {!data.timeKnown && <p className={styles.note}>{t("pilares.noTime")}</p>}
 
             <h2 className={styles.section}>{t("pilares.balance")}</h2>
             <div className={styles.balance}>
               {ELEMENTS.map((el) => (
-                <ElementBar key={el} el={el} count={counts[el] ?? 0} total={totalEls} />
+                <ElementBar key={el} el={el} count={counts[el] ?? 0} total={totalEls} onSelect={select} />
               ))}
             </div>
 
             {active && (
-              <>
+              <div className={styles.readingMobile}>
                 <h2 className={styles.section}>{t("pilares.readingTitle")}</h2>
                 <section className={styles.reading}>
                   <BaziReadingView
@@ -200,17 +254,48 @@ export function PilaresView() {
                     profileName={active.name}
                   />
                 </section>
-              </>
+              </div>
             )}
 
             <div className={styles.tabsRow}>
-              <PilaresTabs active={tab} onSelect={setTab} />
-              {/* puente T3→T4: el router select() real llega en la Tarea 4 */}
-              <ProLamina data={data} script={script} pro={pro} tab={tab} onSelect={() => {}} />
+              <PilaresTabs active={tab} onSelect={setTab} pro={pro} />
+              <ProLamina data={data} script={script} pro={pro} tab={tab} onSelect={select} />
+            </div>
+          </div>
+
+          <div className={styles.interpCol}>
+            <div className={`card ${styles.interpPanel}`}>
+              <span className={styles.cardH2}>{t("pilares.interpTitle")}</span>
+              <PilaresInterpretation
+                selected={selected}
+                pro={pro}
+                set={set!}
+                profileId={active!.id}
+                profileName={active!.name}
+                script={script}
+              />
             </div>
           </div>
         </div>
       )}
+
+      <BottomSheet
+        open={!!sheetSel}
+        onClose={() => setSheetSel(null)}
+        center
+        title={sheetSel ? pilarSelectionTitle(sheetSel, t, L, locale) : ""}
+      >
+        {sheetSel && active && set && (
+          <PilaresInterpretation
+            selected={sheetSel}
+            pro={pro}
+            set={set}
+            profileId={active.id}
+            profileName={active.name}
+            script={script}
+          />
+        )}
+      </BottomSheet>
     </main>
   );
 }
