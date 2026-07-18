@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { cardById } from "@aluna/core";
@@ -217,5 +217,69 @@ describe("Ceremony (tirada de tres)", () => {
     fireEvent.pointerDown(deck);
     fireEvent.pointerUp(deck);
     expect((await screen.findAllByTestId("cut-pile")).length).toBe(3);
+  });
+
+  // Task 4 (split de layout del paso reading): el contenedor gana la clase
+  // .readingPane y las cartas quedan en el carril izquierdo mientras prosa +
+  // chat + guardar/volver quedan agrupadas en .readingSide — SOLO en este
+  // paso. Estructural (no depende de @media, solo de las clases/DOM).
+  it("el paso reading tiene .readingPane con .readingSide conteniendo prosa+chat+guardar", async () => {
+    mockFetch();
+    renderCeremony();
+    await advanceToReading();
+
+    const root = screen.getByTestId("ceremony");
+    const pane = root.querySelector('[class*="readingPane"]');
+    expect(pane).toBeInTheDocument();
+
+    const side = pane!.querySelector('[class*="readingSide"]') as HTMLElement | null;
+    expect(side).toBeInTheDocument();
+
+    // La prosa, el chat y el guardar/volver viven DENTRO de .readingSide.
+    expect(within(side!).getByTestId("reading-chat")).toBeInTheDocument();
+    expect(within(side!).getByRole("button", { name: es.tarot.saveReading })).toBeInTheDocument();
+    expect(within(side!).getByRole("button", { name: es.tarot.readingBack })).toBeInTheDocument();
+
+    // Las cartas quedan en el carril izquierdo, FUERA de .readingSide.
+    const cards = pane!.querySelector('[class*="readingCards"]');
+    expect(cards).toBeInTheDocument();
+    expect(side!.querySelector('[class*="readingCards"]')).toBeNull();
+  });
+
+  it("los pasos previos a reading NO llevan .readingPane", async () => {
+    mockFetch();
+    renderCeremony();
+    const root = screen.getByTestId("ceremony");
+
+    // question
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.questionSilent }));
+
+    // shuffle
+    await screen.findByRole("button", { name: es.tarot.shuffleForMe });
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.shuffleForMe }));
+
+    // cut
+    const piles = await screen.findAllByTestId("cut-pile");
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(piles[0]!);
+
+    // fan
+    const fanCards = await screen.findAllByTestId("fan-card");
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(fanCards[0]!);
+    fireEvent.click(fanCards[1]!);
+    fireEvent.click(fanCards[2]!);
+
+    // reveal
+    const slots = await screen.findAllByTestId("reveal-card");
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    for (const slot of slots) fireEvent.click(slot);
+
+    // reading (recién acá aparece)
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.revealRead }));
+    expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
+    expect(root.querySelector('[class*="readingPane"]')).toBeInTheDocument();
   });
 });

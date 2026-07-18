@@ -12,7 +12,6 @@ export type Selection =
   | { kind: "pattern"; pattern: Pattern }
   | { kind: "ascendant"; sign: string; degree: number; minute: number };
 
-/** ¿Viewport móvil? (bajo el bp desktop 1080 de R4a). SSR-safe: false en servidor. */
-export function isMobileViewport(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 1079px)").matches;
-}
+/** ¿Viewport móvil? Deuda de duplicación con pilares/selection.ts pagada:
+ *  extraído a lib/viewport.ts en la fase Números de la serie lentes-detalle. */
+export { isMobileViewport } from "@/lib/viewport";

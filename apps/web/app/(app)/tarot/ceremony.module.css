@@ -183,7 +183,13 @@
   transform: rotate(calc((var(--i) - 38.5) * 1.35deg));
   transition: transform 600ms var(--ease), opacity 600ms var(--ease), box-shadow 400ms var(--ease);
 }
-.fanCard:hover { box-shadow: var(--glow-soft); transform: rotate(calc((var(--i) - 38.5) * 1.35deg)) translateY(-10px); }
+.fanCard:hover,
+.fanCard:focus-visible {
+  box-shadow: var(--glow-soft);
+  transform: rotate(calc((var(--i) - 38.5) * 1.35deg)) translateY(-10px);
+  z-index: 2; /* por encima de los vecinos con z-index:auto, sin importar el orden del DOM */
+}
+.fanCard:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 /* La elegida "vuela": sube y se desvanece hacia su slot (el slot la recibe). */
 .fanCardPicked {
   opacity: 0;
@@ -240,7 +246,14 @@
 }
 .revealKeywords { color: var(--soft); font-size: var(--text-2xs); margin: 0; }
 
-/* ---------- reading ---------- */
+/* ---------- reading (Task 4: split técnica|prosa+chat en desktop) ---------- */
+/* .readingPane vive vacía en móvil: la clase se agrega al MISMO nodo que
+   .stepPane (que ya apila todo centrado) y solo cobra layout ≥1080. */
+.readingPane {}
+/* .readingSide (prosa+ReadingChat+guardar/volver): en móvil no debe introducir
+   un nivel de caja nuevo — display:contents deja que sus hijos fluyan como si
+   fueran hijos directos de .stepPane, igual que antes del split. */
+.readingSide { display: contents; }
 .readingQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0; }
 .readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
 .readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
@@ -270,12 +283,55 @@
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   .ceremony { padding: var(--sp-6) var(--sp-6); }
-  .fanArc { width: 940px; height: 210px; }
-  .fanCard { transform: rotate(calc((var(--i) - 38.5) * 1.05deg)); transform-origin: 50% 560%; }
-  .fanCard:hover { transform: rotate(calc((var(--i) - 38.5) * 1.05deg)) translateY(-10px); }
+
+  /* Requisito §E de Gio: abanico con blancos de toque cómodos en desktop.
+     Cartas más grandes (58×94 → 72×120, mismo ratio ~0.6) y franja EXPUESTA
+     por carta calibrada EN VIVO a ~15px (medida real del gate: con 0.82°/640%
+     quedaba en 10px — apretado): exposición ≈ radio × Δθ = (7.0×120px) ×
+     1.02° ≈ 15px; arco total 79.6° → cuerda ≈ 1075px, cabe en el contenedor.
+     El hover/focus sube z-index y levanta la carta (regla compartida + levante
+     desktop abajo). Mecánica intacta: mismos --i, mismo handler onClick. */
+  .fanArc { width: 1180px; height: 310px; }
+  .fanCard {
+    width: 72px;
+    height: 120px;
+    margin-left: -36px;
+    transform: rotate(calc((var(--i) - 38.5) * 1.02deg));
+    transform-origin: 50% 700%;
+  }
+  .fanCard:hover,
+  .fanCard:focus-visible {
+    transform: rotate(calc((var(--i) - 38.5) * 1.02deg)) translateY(-26px);
+    box-shadow: 0 0 0 2px var(--acc), var(--glow);
+  }
+
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
   .readingCardBody { align-items: center; text-align: center; }
+
+  /* ---- Task 4: split del paso reading — técnica (cartas) | prosa+chat ---- */
+  .readingPane {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+    text-align: left;
+  }
+  /* Título y pregunta van arriba, a lo ancho (fila 1, y fila 2 si hay pregunta;
+     el auto-placement de grid resuelve el resto por columna explícita). */
+  .readingPane > .stepTitle,
+  .readingPane > .readingQuestion {
+    grid-column: 1 / -1;
+  }
+  .readingCards { grid-column: 1; }
+  .readingSide {
+    grid-column: 2;
+    position: sticky;
+    top: 84px; /* header 66px + respiro, mismo valor que el resto de la serie */
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

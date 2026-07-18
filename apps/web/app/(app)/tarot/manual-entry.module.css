@@ -93,6 +93,11 @@
 .suitTab { font-size: var(--text-2xs); padding: var(--sp-1) var(--sp-3); cursor: pointer; border: 0; }
 .noResults { color: var(--soft); font-size: var(--text-xs); text-align: center; margin: var(--sp-3) 0; }
 
+/* Envuelve buscador+tabs (Task 4, requisito §E): en desktop se vuelve sticky
+   arriba del grid para que no se pierdan al scrollear una lista larga; en
+   móvil es un div sin estilo propio (mismo flujo/orden que antes). */
+.pickerFilters { display: flex; flex-direction: column; gap: var(--sp-3); }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
@@ -113,11 +118,22 @@
   cursor: pointer;
   transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
 }
-.gridCard:hover { border-color: var(--acc); box-shadow: var(--glow-soft); }
+.gridCard:hover,
+.gridCard:focus-visible { border-color: var(--acc); box-shadow: var(--glow-soft); }
+.gridCard:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .gridThumb { width: 100%; aspect-ratio: 0.6; object-fit: contain; }
 .gridName { color: var(--soft); font-size: var(--text-2xs); text-align: center; line-height: 1.3; }
 
-/* ---------- reading ---------- */
+/* ---------- reading (Task 4: split técnica|prosa+chat en desktop) ---------- */
+.readingPane {}
+/* Carril izquierdo del split: cartas + jumpers agrupados en UN solo hijo de
+   grid-column:1. Si jumpersReading quedara suelto como hijo directo del
+   grid, el auto-placement de CSS Grid lo empujaría a la fila SIGUIENTE libre
+   en columna 1 — que puede caer muy por debajo si la columna derecha
+   (prosa+chat) es más alta que las 3 cartas. Agrupándolos, ambos quedan
+   pegados sin importar la altura de .readingSide. */
+.readingLeft { display: contents; }
+.readingSide { display: contents; }
 .readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
 .readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
 .readingImg { width: 64px; height: 106px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); flex-shrink: 0; }
@@ -137,7 +153,50 @@
 
 @media (min-width: 1080px) {
   .manual { padding: var(--sp-6) var(--sp-6); }
+
+  /* Requisito §E de Gio: grid de 78 con celdas cómodas + buscador/tabs
+     visibles sin perderse al scrollear. */
+  .pickerFilters {
+    position: sticky;
+    top: 84px; /* header 66px + respiro, mismo valor que el resto de la serie */
+    z-index: 2;
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    padding: var(--sp-2) 0 var(--sp-3);
+    margin-bottom: calc(-1 * var(--sp-2));
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--sp-3);
+    max-height: 60vh;
+  }
+  .gridCard { padding: var(--sp-2); }
+
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
   .readingCardBody { align-items: center; text-align: center; }
+
+  /* ---- Task 4: split del paso reading — técnica (cartas+jumpers) | prosa+chat ---- */
+  .readingPane {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+    text-align: left;
+  }
+  .readingPane > .paneTitle { grid-column: 1 / -1; }
+  .readingLeft {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .readingSide {
+    grid-column: 2;
+    position: sticky;
+    top: 84px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
 }

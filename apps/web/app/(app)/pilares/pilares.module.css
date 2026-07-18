@@ -47,6 +47,22 @@
 }
 .animal { font-size: var(--text-2xs); color: var(--soft); margin-top: var(--sp-1); }
 .empty { font-size: var(--text-2xl); color: var(--soft); opacity: 0.5; }
+
+/* Maestro-detalle (T3): resets de los botones de selección de la columna
+   técnica. `.selBtn` para celdas/etiquetas sueltas (limpia fondo/borde/
+   padding, hereda tipografía y alineación). `.chipBtn` es DISTINTO del caso
+   de carta: aquí la piel del chip vive en el `<span class="chip">` EXTERIOR
+   y `.chipBtn` es el `<button>` anidado adentro — no es el mismo nodo que
+   lleva `.chip` (a diferencia de carta, donde chip y botón son un único
+   elemento y el reset debe dejar fondo/borde intactos). Por eso acá SÍ es un
+   reset completo: el botón interno queda desnudo (sin su propio borde/
+   padding nativos de <button>) y la piel visible sigue siendo la del span
+   exterior. Task 5 consolida esto junto al resto del CSS del panel de
+   interpretación. */
+.selBtn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+.selBtn:hover { color: var(--acc-text); }
+.chipBtn { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
+.selBtn:focus-visible, .chipBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
 /* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
 .dayTag {
   margin-top: var(--sp-1); font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase;
@@ -172,6 +188,14 @@
   font-family: var(--font-ui); font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase;
   color: var(--acc-text); margin: 0 0 var(--sp-3);
 }
+/* Título del panel de interpretación (Task 5): mismo look que .cardH, pero
+   sobre un <span> (no <h3>) y a la escala de .section (2xs) — el panel vive
+   fuera de .lamina/.card, así que necesita su propia receta de título en vez
+   de compartir literalmente .cardH/.section. */
+.cardH2 {
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+}
 .row { display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); } /* 6→sp-1 empate (fila de datos, apoyo) */
 .row:last-child { border-bottom: none; }
 .rowLabel { min-width: 64px; color: var(--soft); font-size: var(--text-sm); }
@@ -217,24 +241,27 @@
 }
 .annual { margin-top: var(--sp-2); } /* 10→sp-2 empate (apoyo) */
 
-/* Modo Pro en desktop (R4b-3, spec §7 — primero de los DOS lugares con
-   {pro && ...}): mismo mecanismo render-siempre + data-pro que carta
-   (ver carta.module.css .pro:not([data-pro])). En móvil, oculto salvo
-   Modo Pro (idéntico al comportamiento de hoy); el override que lo hace
-   SIEMPRE visible en desktop llega en Task 4, junto con el resto del layout. */
+/* Modo Pro en desktop (spec §7 — primero de los DOS lugares con {pro && ...}):
+   mismo mecanismo render-siempre + data-pro que carta (ver carta.module.css
+   .pro:not([data-pro])). Task 4 había agregado un override "siempre visible"
+   en desktop (el contenido Pro no requería el toggle); Task 5 (Contrato Pro
+   §4) lo revierte — esta base rige también en desktop, EXCEPTO `.god`, que
+   Task 5 mantiene visible sin Pro (ver excepción vinculante en el @media). */
 .col:not([data-pro]) .god,
 .col:not([data-pro]) .hidden { display: none; }
 
-/* ProLamina completa (R4b-3, spec §7 — segundo de los DOS lugares con
-   {pro && ...}): mismo mecanismo. El override "siempre visible" en desktop
-   llega en Task 4. */
+/* ProLamina completa (spec §7 — segundo de los DOS lugares con {pro && ...}):
+   mismo mecanismo. Ídem arriba: Task 4 agregó el override "siempre visible"
+   en desktop, Task 5 lo revierte — esta base vuelve a regir en desktop. */
 .lamina:not([data-pro]) { display: none; }
 
-/* Switch de escritura (R4b-3, spec §4.2/§7): promovido a "control global" en
+/* Switch de escritura (spec §4.2/§7): promovido a "control global" en
    desktop — arriba del split, siempre accesible, porque el toggle de Modo
    Pro desaparece ahí (ver nota de decisión al inicio de esta tarea). Mismo
    mecanismo render-siempre + data-pro que .col/.lamina arriba. En móvil el
-   comportamiento visual NO cambia (oculto salvo Modo Pro, igual que hoy). */
+   comportamiento visual NO cambia (oculto salvo Modo Pro, igual que hoy);
+   en desktop, Task 4 lo dejaba siempre visible — Task 5 (Contrato Pro §4)
+   revierte también este override: gatea igual que en móvil. */
 .scriptRow:not([data-pro]) { display: none; }
 
 .deskCols { display: contents; }
@@ -250,12 +277,39 @@
    incluía la regla. */
 .vtabs { display: none; }
 
+/* Panel de interpretación (maestro-detalle, Task 4): feature 100% desktop —
+   en móvil la interpretación la sirve el bottom-sheet y la card `.readingMobile`
+   de la columna izquierda, así que el panel derecho NO debe montarse visible
+   (duplicaría la Lectura). Mismo mecanismo que `.vtabs`/`.lamina` arriba: oculto
+   por defecto; la regla @media que lo muestra (grid 2-col + sticky) llega en
+   Task 5 junto con el resto del layout desktop. `.readingMobile` es el inverso:
+   visible por defecto (móvil), la oculta Task 5 dentro del @media desktop. */
+.interpCol { display: none; }
+.readingMobile { display: contents; } /* móvil: la card de Lectura fluye como hoy; desktop la reemplaza el panel */
+
+/* Contenido del panel de interpretación (Task 5, espejo de carta.module.css):
+   bloque de clases que interpretation-content.tsx consume para las 4 kinds de
+   PilarSelection (reading/term/element/decade) — reading usa .interpEssence +
+   .interpTechList; el resto usa .interpHead (glifo+nombre+sub) y .interpBody/
+   .interpTermH para el cuerpo del término. */
+.interpBlock { display: flex; flex-direction: column; gap: var(--sp-3); text-align: left; }
+.interpHead { display: flex; align-items: center; gap: var(--sp-3); }
+.interpGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc-text); line-height: 1; }
+.interpName { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
+.interpSub { font-size: var(--text-xs); color: var(--soft); margin-top: 2px; }
+.interpBody { margin: 0; font-size: var(--text-sm); line-height: 1.65; color: var(--soft); }
+.interpTermH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.interpEssence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.55; color: var(--ink); }
+.interpTechList { display: flex; flex-direction: column; gap: 5px; font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: var(--sp-2); }
+.interpTechH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.interpHintLine { margin: 0; font-style: italic; font-size: var(--text-2xs); color: var(--soft); }
+
 @media (min-width: 1080px) { /* bp desktop R4a */
   .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy */
 
   .deskCols {
     display: grid;
-    grid-template-columns: 8fr 12fr; /* spec R4b-3 §4.2: grilla compacta izq / lámina densa der */
+    grid-template-columns: 11fr 9fr; /* Task 5 (spec §4): la técnica gana ancho, la interpretación es columna fija a la derecha (antes 8fr/12fr, cuando la columna 2 era la lámina densa) */
     grid-template-rows: auto auto;
     gap: var(--sp-6);
     align-items: start;
@@ -265,17 +319,29 @@
     display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap;
   }
   .controlsGlobal .scriptRow { margin-top: 0; }
-  .pillarsCol { grid-column: 1; grid-row: 2; position: sticky; top: 84px; /* header 66px + respiro, mismo valor que carta */ }
-  .readCol { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: var(--sp-4); }
+  /* .proToggle vuelve a mostrarse en desktop (Contrato Pro §4, arriba): su
+     margin-top base es para el apilado móvil, sobra como flex-item de
+     .controlsGlobal — mismo criterio que .scriptRow en la línea anterior. */
+  .controlsGlobal .proToggle { margin-top: 0; }
+  /* .pillarsCol/.readCol (Task 4) desaparecieron: la grilla de pilares vive
+     directa en .leftCol y la columna 2 ahora es .interpCol, no la lámina.
+     Confirmado con grep — ningún .tsx de la carpeta produce ya esas clases. */
+  .leftCol { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: var(--sp-4); }
 
-  /* el toggle sobra: en desktop el contenido Pro es siempre accesible vía tabs */
-  .proToggle, .proHint { display: none; }
+  /* panel de interpretación: ahora es lo único sticky — la técnica de la
+     izquierda scrollea libre dentro de .leftCol (mismo mecanismo que carta,
+     carta.module.css .interpCol/.interpPanel). */
+  .interpCol { display: block; grid-column: 2; grid-row: 2; position: sticky; top: 84px; /* header 66px + respiro, mismo valor que carta */ }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+  .readingMobile { display: none; } /* desktop: el panel de la derecha reemplaza la card de Lectura móvil */
 
-  /* los DOS lugares del spec §7 + el switch de escritura: visibles siempre */
-  .col:not([data-pro]) .god,
-  .col:not([data-pro]) .hidden { display: flex; }
-  .scriptRow:not([data-pro]) { display: flex; }
-  .lamina:not([data-pro]) { display: grid; }
+  /* Contrato Pro (spec §4): en R4b-3 el desktop dejaba TODO el contenido Pro
+     siempre visible (el toggle "sobraba" porque el tab-strip ya daba acceso).
+     Task 5 revierte eso — Pro vuelve a gatear igual que en móvil, así que el
+     toggle se conserva y las reglas "siempre visible" desaparecen.
+     EXCEPCIÓN VINCULANTE: el dios del tronco (.god) sigue esencial sin Pro,
+     solo los troncos ocultos (.hidden) quedan tras el toggle. */
+  .col:not([data-pro]) .god { display: flex; }
 
   /* fila: riel de tabs verticales + lámina */
   .tabsRow { display: flex; gap: var(--sp-4); align-items: start; }
@@ -298,11 +364,20 @@
     box-shadow: 0 0 14px rgba(var(--acc-rgb), 0.55);
   }
   .lamina { flex: 1; max-width: none; margin-top: 0; }
+  /* desktop: la lámina esencial (tabs libres) es visible sin Pro — el filtrado
+     lo hacen las tabs; en móvil sigue tras el toggle */
+  .lamina:not([data-pro]) { display: grid; }
 
   /* panes: en desktop solo se ve la sección del tab activo; en móvil (fuera
-     del media) todas se ven apiladas, igual que hoy. */
-  .readCol .pane { display: none; }
-  .readCol .paneOn { display: block; }
+     del media) todas se ven apiladas, igual que hoy. Reescopeado de
+     `.readCol .pane`/`.readCol .paneOn` (Task 4, columna que ya no existe)
+     a `.lamina .pane`/`.lamina .paneOn`: `.lamina` es el contenedor directo
+     de las secciones-pane (pro-lamina.tsx) tras el recableado — mismo rol
+     que `.techCard .pane` en carta.module.css. Sin este reescopeado el
+     selector no matchea nada y los 7 panes quedan apilados siempre (el bug
+     que da pie a esta tarea), rompiendo el riel de tabs verticales. */
+  .lamina .pane { display: none; }
+  .lamina .paneOn { display: block; }
 }
 
 /* Entrada sobria al montar (Task 4): la lámina Pro y el riel de tabs verticales

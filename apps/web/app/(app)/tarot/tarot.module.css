@@ -3,6 +3,21 @@
 .wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px = alto del bottom-nav fijo */
 
 .head { margin-bottom: var(--sp-6); }
+
+/* Maestro-detalle (Task 3): en móvil el contenedor es un bloque plano (las
+   secciones se apilan); el grid 11fr/9fr + panel sticky solo aparece en desktop
+   (@media abajo). Mismo mecanismo/valores que numeros/carta/pilares. */
+.deskCols { display: block; }
+.leftCol { display: block; }
+/* Panel de interpretación: feature 100% desktop — en móvil la interpretación la
+   sirve el bottom-sheet, así que el panel NO se monta visible. */
+.interpCol { display: none; }
+/* Título del panel (sobre <span>, fuera de .card interno): escala de .cardH2 de
+   la serie. */
+.cardH2 {
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+}
 .eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
 .title { font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm)); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
 
@@ -83,10 +98,73 @@
 .freeLimitNote { color: var(--soft); font-size: var(--text-xs); text-align: center; margin: var(--sp-3) 0 0; }
 
 .sheetParagraph { color: var(--ink); font-size: var(--text-sm); line-height: 1.6; margin: 0 0 var(--sp-3); }
-.sheetQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0 0 var(--sp-3); }
-.sheetCardsLabel { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
-.sheetCardsList { list-style: none; margin: 0 0 var(--sp-4); padding: 0; display: flex; flex-direction: column; gap: var(--sp-1); color: var(--ink); font-size: var(--text-sm); }
+
+/* Contenido del panel de interpretación (Task 2, espejo de pilares.module.css
+   .interp*): bloque de clases que interpretation-content.tsx consume para las
+   3 kinds de TarotSelection (daily/saved/card) — mismo contenido que hoy
+   arman .daily* y .sheet* de arriba (dailyProse/openReadingProse en
+   tarot-view.tsx), ahora detrás de un renderizador único que compartirán el
+   bottom-sheet móvil y el futuro panel desktop sticky (Task 3). Reutiliza
+   .reversedTag (ya genérico, arriba) sin duplicarlo. */
+.interpBlock { display: flex; flex-direction: column; gap: var(--sp-3); text-align: left; }
+/* Imagen de la carta suelta en el panel/sheet (deuda b de T2): mismo lienzo
+   normalizado (object-fit:contain) que .cardImg; reusa .reversedImg para el giro. */
+.interpCardImg {
+  width: 150px; max-width: 60%; height: auto; align-self: center; display: block;
+  border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--glow-soft);
+  object-fit: contain;
+}
+.interpHintLine { margin: 0; font-style: italic; font-size: var(--text-2xs); color: var(--soft); }
+.interpName { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--ink); margin: 0; }
+.interpKeywords { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; }
+.interpEssence { color: var(--soft); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+.interpBody { color: var(--ink); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
+.interpQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0; }
+.interpTermH { font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase; color: var(--acc-text); margin: 0; }
+.interpCardsList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.interpCardBtn {
+  width: 100%; display: flex; align-items: center; gap: var(--sp-1);
+  background: none; border: 0; padding: var(--sp-1) 0; margin: 0;
+  font: inherit; color: var(--ink); font-size: var(--text-sm); text-align: left; cursor: pointer;
+}
+.interpCardBtn:hover { color: var(--acc-text); }
+.interpCardBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
+.interpBackBtn {
+  align-self: flex-start; margin-top: var(--sp-1); border: 1px solid var(--line); border-radius: 999px;
+  background: transparent; color: var(--acc-text); font-family: inherit; font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; padding: var(--sp-2) var(--sp-4);
+}
+.interpBackBtn:hover { border-color: var(--acc); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
-  .diaryList { display: grid; grid-template-columns: repeat(2, 1fr); }
+  /* Sin bottom-nav en desktop: sobra el clearance de 96px (paridad con la serie). */
+  .wrap { padding-bottom: var(--sp-7); }
+
+  /* Split maestro-detalle: técnica a la izquierda (11fr) + panel sticky a la
+     derecha (9fr). Mismos valores que numeros/carta/pilares. */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  /* Con una lectura en curso (ceremonia/manual) el panel se oculta (no se monta)
+     y la técnica ocupa todo el ancho — el split de la lectura llega en T4. */
+  .deskCols.readingActive { grid-template-columns: 1fr; }
+  .leftCol { min-width: 0; } /* evita el desborde de la grilla */
+
+  /* panel de interpretación: lo único sticky — la técnica scrollea libre dentro
+     de .leftCol (mismo mecanismo que la serie). */
+  .interpCol { display: block; position: sticky; top: 84px; /* header 66px + respiro */ }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+
+  /* El panel derecho ya rinde nombre/keywords/essence/prosa y el CTA "ver
+     lectura" (que en móvil abre el sheet) es un no-op en desktop: se ocultan
+     para no duplicar el hero. Queda la carta + su nombre como encabezado.
+     Mismo criterio que .tapHint oculto en numeros. */
+  .dailyKeywords, .dailyEssence, .dailyRevealBtn { display: none; }
+
+  /* .diaryList queda en 1 columna (no la grilla 2-col previa al split): dentro
+     del carril de 11fr los items respiran mejor en una sola columna (juicio
+     propio, resolución 5 del brief). */
 }

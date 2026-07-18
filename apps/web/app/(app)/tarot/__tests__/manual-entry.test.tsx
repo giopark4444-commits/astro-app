@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
@@ -146,5 +146,66 @@ describe("ManualEntry", () => {
     fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualJumpersContinue }));
     fireEvent.click(await screen.findByRole("button", { name: es.tarot.readingBack }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  // Task 4 (split de layout del paso reading), espejo de ceremony: el paso
+  // reading gana .readingPane con .readingSide (prosa+chat+guardar/volver);
+  // las cartas (y los jumpers, si hay) quedan en el carril izquierdo.
+  it("el paso reading tiene .readingPane con .readingSide conteniendo prosa+chat+guardar (con jumper)", async () => {
+    mockFetch();
+    renderManual();
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.manualTemplateContinue }));
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click((await screen.findAllByTestId("manual-card-option"))[0]!);
+    }
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualContinue }));
+    fireEvent.click((await screen.findAllByTestId("manual-card-option"))[0]!);
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualJumpersContinue }));
+
+    expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
+
+    const root = screen.getByTestId("manual-entry");
+    const pane = root.querySelector('[class*="readingPane"]');
+    expect(pane).toBeInTheDocument();
+
+    const side = pane!.querySelector('[class*="readingSide"]') as HTMLElement | null;
+    expect(side).toBeInTheDocument();
+    expect(within(side!).getByTestId("reading-chat")).toBeInTheDocument();
+    expect(within(side!).getByRole("button", { name: es.tarot.saveReading })).toBeInTheDocument();
+    expect(within(side!).getByRole("button", { name: es.tarot.readingBack })).toBeInTheDocument();
+
+    // Cartas y jumpers quedan en el carril izquierdo, fuera de .readingSide.
+    const left = pane!.querySelector('[class*="readingLeft"]') as HTMLElement | null;
+    expect(left).toBeInTheDocument();
+    expect(within(left!).getByText(es.tarot.manualJumpersReadingLabel)).toBeInTheDocument();
+    expect(side!.querySelector('[class*="readingCards"]')).toBeNull();
+    expect(side!.querySelector('[class*="jumpersReading"]')).toBeNull();
+  });
+
+  it("los pasos previos a reading NO llevan .readingPane", async () => {
+    mockFetch();
+    renderManual();
+    const root = screen.getByTestId("manual-entry");
+
+    // template
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.manualTemplateContinue }));
+
+    // select
+    expect(await screen.findByText(es.tarot.manualSelectTitle)).toBeInTheDocument();
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click((await screen.findAllByTestId("manual-card-option"))[0]!);
+    }
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualContinue }));
+
+    // jumpers
+    expect(await screen.findByText(es.tarot.manualJumpersTitle)).toBeInTheDocument();
+    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualJumpersContinue }));
+
+    // reading (recién acá aparece)
+    expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
+    expect(root.querySelector('[class*="readingPane"]')).toBeInTheDocument();
   });
 });

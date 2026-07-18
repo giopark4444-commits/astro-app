@@ -428,7 +428,9 @@
       "loading": "Aluna is reading you…",
       "gated": "The longer readings awaken when Aluna finds her inner voice. For now, her essence already speaks to you:",
       "error": "Something clouded the reading. Try again in a moment. Meanwhile, her essence:"
-    }
+    },
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap your life path or any lens to read its meaning."
   },
   "carta": {
     "title": "Birth Chart",
@@ -607,7 +609,11 @@
     "interactionsEmpty": "No major interactions between your pillars: a serene map.",
     "starsTitle": "Symbolic stars",
     "threePillarsNote": "Without a birth time the calculation uses 3 pillars; the hour pillar and its stars are omitted.",
-    "seasonState": "Seasonal state"
+    "seasonState": "Seasonal state",
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap a pillar, an element, or any symbol on the left to read what it means in your chart.",
+    "interpPillarsTech": "Your pillars, in data",
+    "decadeRange": "from age {from} to {to}"
   },
   "horoscopo": {
     "title": "Horoscope",
@@ -664,7 +670,9 @@
     "proHarmoniesHint": "Animals in 六合 with you: alliances that flow on their own.",
     "proMonthChange": "Solar month change",
     "proMonthChangeHint": "The 節 marks the monthly energy shift within the period.",
-    "proMethodEastern": "Period pillars sampled at local noon. Time zone: {tz}."
+    "proMethodEastern": "Period pillars sampled at local noon. Time zone: {tz}.",
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap an energy bar or any symbol to read what it means."
   },
   "billing": {
     "title": "Your plan",
@@ -801,7 +809,10 @@
     "chatDormantTitle": "The oracle still sleeps",
     "chatDormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your reading already speaks for itself.",
     "chatPlaceholder": "Type your reply…",
-    "chatSend": "Send"
+    "chatSend": "Send",
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap the card of the day or a journal reading to read it here.",
+    "backToReading": "Back to the reading"
   },
   "errors": {
     "notFoundTitle": "This constellation isn't on the map",

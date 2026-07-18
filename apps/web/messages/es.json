@@ -428,7 +428,9 @@
       "loading": "Aluna está leyéndote…",
       "gated": "Las lecturas más extensas se encienden cuando Aluna despierte su voz interior. Por ahora, su esencia ya te habla:",
       "error": "Algo se nubló al leerte. Vuelve a intentarlo en un momento. Mientras, su esencia:"
-    }
+    },
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca el camino de vida o cualquier lente para leer su significado."
   },
   "carta": {
     "title": "Carta Astral",
@@ -607,7 +609,11 @@
     "interactionsEmpty": "Sin interacciones mayores entre tus pilares: un mapa sereno.",
     "starsTitle": "Estrellas simbólicas",
     "threePillarsNote": "Sin hora de nacimiento el cálculo usa 3 pilares; el pilar de hora y sus estrellas se omiten.",
-    "seasonState": "Estado estacional"
+    "seasonState": "Estado estacional",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca un pilar, un elemento o cualquier símbolo de la izquierda para leer qué significa en tu carta.",
+    "interpPillarsTech": "Tus pilares, en datos",
+    "decadeRange": "de los {from} a los {to} años"
   },
   "horoscopo": {
     "title": "Horóscopo",
@@ -664,7 +670,9 @@
     "proHarmoniesHint": "Animales en 六合 contigo: alianzas que fluyen solas.",
     "proMonthChange": "Cambio de mes solar",
     "proMonthChangeHint": "El 節 marca el cambio de energía mensual dentro del periodo.",
-    "proMethodEastern": "Pilares del periodo a mediodía local. Zona horaria: {tz}."
+    "proMethodEastern": "Pilares del periodo a mediodía local. Zona horaria: {tz}.",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca una barra de energía o cualquier símbolo para leer qué significa."
   },
   "billing": {
     "title": "Tu plan",
@@ -801,7 +809,10 @@
     "chatDormantTitle": "El oráculo aún duerme",
     "chatDormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu lectura ya habla por sí sola.",
     "chatPlaceholder": "Escribe tu respuesta…",
-    "chatSend": "Enviar"
+    "chatSend": "Enviar",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca la carta del día o una lectura del diario para leerla aquí.",
+    "backToReading": "Volver a la lectura"
   },
   "errors": {
     "notFoundTitle": "Esta constelación no existe",

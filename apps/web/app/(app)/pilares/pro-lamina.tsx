@@ -24,9 +24,9 @@ import {
   type LuckSequence,
 } from "@aluna/core";
 import { baziLabels } from "@/lib/content/bazi-labels";
-import { Meaning } from "@/components/meaning";
 import type { BaZiData } from "./types";
 import type { PilaresTab } from "./pilares-tabs";
+import type { PilarSelection } from "./selection";
 import styles from "./pilares.module.css";
 
 type Script = "hanzi" | "hangul";
@@ -38,7 +38,19 @@ const godName = (t: ReturnType<typeof useTranslations>, key: TenGod) =>
 
 /** Lámina Pro de Cuatro Pilares: las 8 secciones (Na Yin, fuerza del DM, 喜用神,
  *  大運/流年, 12 etapas, interacciones, estrellas) sobre los pilares ya calculados. */
-export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: Script; pro: boolean; tab: PilaresTab }) {
+export function ProLamina({
+  data,
+  script,
+  pro,
+  tab,
+  onSelect,
+}: {
+  data: BaZiData;
+  script: Script;
+  pro: boolean;
+  tab: PilaresTab;
+  onSelect: (s: PilarSelection) => void;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const L = baziLabels(locale);
@@ -76,7 +88,11 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Na Yin */}
       <section className={`card ${pane("nayin")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.nayin">{t("pilares.nayinTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.nayin" })}>
+            {t("pilares.nayinTitle")}
+          </button>
+        </h3>
         {entries.map((e) => {
           const n = nayin(e.pillar);
           return (
@@ -93,7 +109,11 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Fuerza del DM */}
       <section className={`card ${pane("strength")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.strength">{t("pilares.strengthTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.strength" })}>
+            {t("pilares.strengthTitle")}
+          </button>
+        </h3>
         <div className={styles.meterRow}>
           <span className={styles.verdict}>{L.verdicts[strength.verdict]}</span>
           {/* El medidor usa `score` (0-100, capado); el número mostrado usa `raw`
@@ -115,7 +135,11 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Favorables */}
       <section className={`card ${pane("favor")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.favorable">{t("pilares.favorTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.favorable" })}>
+            {t("pilares.favorTitle")}
+          </button>
+        </h3>
         {strength.verdict === "balanced" ? (
           <p className={styles.note}>{t("pilares.balancedNote")}</p>
         ) : (
@@ -123,7 +147,9 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
             <div className={styles.chips}>
               {favor.favor.map((el) => (
                 <span key={el} className={`chip chip--pill ${styles[`elBg_${el}`] ?? ""}`}>
-                  <Meaning k={`bazi.element.${el}`}>{elName(el)}</Meaning>
+                  <button type="button" className={styles.chipBtn} onClick={() => onSelect({ kind: "term", key: `bazi.element.${el}` })}>
+                    {elName(el)}
+                  </button>
                 </span>
               ))}
             </div>
@@ -131,7 +157,9 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
             <div className={styles.chips}>
               {favor.avoid.map((el) => (
                 <span key={el} className={`chip chip--pill ${styles.chipDim}`}>
-                  <Meaning k={`bazi.element.${el}`}>{elName(el)}</Meaning>
+                  <button type="button" className={styles.chipBtn} onClick={() => onSelect({ kind: "term", key: `bazi.element.${el}` })}>
+                    {elName(el)}
+                  </button>
                 </span>
               ))}
             </div>
@@ -141,19 +169,27 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* 大運 */}
       <section className={`card ${pane("luck")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.luckpillars">{t("pilares.luckTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.luckpillars" })}>
+            {t("pilares.luckTitle")}
+          </button>
+        </h3>
         {data.gender === "neutral" && <p className={styles.note}>{t("pilares.luckNeutralNote")}</p>}
         {!data.timeKnown && <p className={styles.note}>{t("pilares.luckNoTimeNote")}</p>}
         {sequences.map((seq) => (
           <LuckRow key={seq.direction} seq={seq} nowYear={nowYear} glyphPillar={glyphPillar}
             godName={(g) => godName(t, g)} glyphGod={glyphGod} L={L} t={t}
-            open={openDecade} setOpen={setOpenDecade} natal={set} />
+            open={openDecade} setOpen={setOpenDecade} natal={set} onSelect={onSelect} />
         ))}
       </section>
 
       {/* 12 etapas */}
       <section className={`card ${pane("stages")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.twelvestages">{t("pilares.stagesTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.twelvestages" })}>
+            {t("pilares.stagesTitle")}
+          </button>
+        </h3>
         {entries.map((e) => {
           const st = lifeStage(data.day.stem, e.pillar.branch);
           const def = TWELVE_STAGES.find((x) => x.key === st)!;
@@ -169,7 +205,11 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Interacciones */}
       <section className={`card ${pane("interactions")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.interactions">{t("pilares.interactionsTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.interactions" })}>
+            {t("pilares.interactionsTitle")}
+          </button>
+        </h3>
         {interactions.length === 0 ? (
           <p className={styles.note}>{t("pilares.interactionsEmpty")}</p>
         ) : (
@@ -186,7 +226,11 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
 
       {/* Estrellas */}
       <section className={`card ${pane("stars")}`}>
-        <h3 className={styles.cardH}><Meaning k="bazi.term.symbolicstars">{t("pilares.starsTitle")}</Meaning></h3>
+        <h3 className={styles.cardH}>
+          <button type="button" className={styles.selBtn} onClick={() => onSelect({ kind: "term", key: "bazi.term.symbolicstars" })}>
+            {t("pilares.starsTitle")}
+          </button>
+        </h3>
         {stars.length === 0 ? (
           <p className={styles.note}>—</p>
         ) : (
@@ -206,11 +250,12 @@ export function ProLamina({ data, script, pro, tab }: { data: BaZiData; script: 
   );
 }
 
-function LuckRow({ seq, nowYear, glyphPillar, godName, glyphGod, L, t, open, setOpen, natal }: {
+function LuckRow({ seq, nowYear, glyphPillar, godName, glyphGod, L, t, open, setOpen, natal, onSelect }: {
   seq: LuckSequence; nowYear: number;
   glyphPillar: (p: Pillar) => string; godName: (g: TenGod) => string; glyphGod: (g: TenGod) => string;
   L: ReturnType<typeof baziLabels>; t: ReturnType<typeof useTranslations>;
   open: number | null; setOpen: (n: number | null) => void; natal: PillarSet;
+  onSelect: (s: PilarSelection) => void;
 }) {
   return (
     <div className={styles.luckBlock}>
@@ -225,7 +270,19 @@ function LuckRow({ seq, nowYear, glyphPillar, godName, glyphGod, L, t, open, set
           return (
             <button key={i} type="button"
               className={`${styles.luckCol} ${current ? styles.luckNow : ""} ${open === id ? styles.luckOpen : ""}`}
-              onClick={() => setOpen(open === id ? null : id)}>
+              onClick={() => {
+                // Acordeón (tabla anual, izquierda) y panel de significado (derecha)
+                // conviven en el mismo click — no se excluyen.
+                setOpen(open === id ? null : id);
+                onSelect({
+                  kind: "decade",
+                  glyph: glyphPillar(p.pillar),
+                  god: p.tenGod,
+                  nayinLabel: L.nayin[p.nayin.key]!,
+                  startYear: p.startYear,
+                  startAge: p.startAge,
+                });
+              }}>
               <span className={styles.luckAge}>{p.startAge} {t("pilares.age")}</span>
               <span className={styles.luckGlyph}>{glyphPillar(p.pillar)}</span>
               <span className={styles.luckGod}>{glyphGod(p.tenGod)} {godName(p.tenGod)}</span>

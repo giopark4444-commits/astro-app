@@ -149,7 +149,8 @@ describe("HoroscopoView — tab Oriental", () => {
 
   it("el subtítulo oriental habla del animal, no del signo (FIX 5)", async () => {
     renderView();
-    expect(screen.getByText("El cielo del periodo, leído para tu animal")).toBeInTheDocument();
+    // Esperar settling del ready antes de aserciones
+    await waitFor(() => expect(screen.getByText("El cielo del periodo, leído para tu animal")).toBeInTheDocument());
     expect(screen.queryByText("El cielo del periodo, leído para tu signo")).toBeNull();
   });
 
@@ -192,7 +193,10 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(triggers.length).toBeGreaterThan(0);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(triggers[0]!);
-    const dialog = screen.getByRole("dialog");
+    // findBy* (no getBy* síncrono): bajo carga de suite completa el diálogo del
+    // glosario puede montar un tick después del click — esperamos con timeout
+    // explícito en vez de leer el DOM en el mismo tick (endurecimiento flaky).
+    const dialog = await screen.findByRole("dialog", {}, { timeout: 4000 });
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveTextContent(/Choque/);
     expect(dialog).toHaveTextContent(/冲/);
