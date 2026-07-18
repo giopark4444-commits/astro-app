@@ -53,7 +53,7 @@ describe("NumerosInterpretation", () => {
     const meaningEssence =
       "Eres un número maestro: tu alma vino a ser canal. A iluminar, a inspirar y a recordarle a otros lo que no pueden ver solos. El 2 elevado a su máxima sensibilidad.";
     expect(screen.getByText(meaningEssence)).toBeTruthy();
-    expect(screen.getByText(es.numerology.tapHint)).toBeTruthy();
+    expect(screen.getByText(es.numerology.interpHint)).toBeTruthy();
   });
 
   it("meaning + pro: NumberReading completo (selector de niveles con tab 'Esencia')", () => {

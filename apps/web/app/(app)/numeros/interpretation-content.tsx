@@ -53,8 +53,8 @@ export function NumerosInterpretation({
         />
       ) : (
         <>
-          <p className={styles.essence}>{meaning.essence}</p>
-          <p className={styles.interpHintLine}>{t("tapHint")}</p>
+          <p className={styles.interpEssence}>{meaning.essence}</p>
+          <p className={styles.interpHintLine}>{t("interpHint")}</p>
         </>
       )}
     </div>
