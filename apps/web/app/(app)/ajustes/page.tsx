@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { getRole } from "@/lib/admin/roles";
 import type { SubscriptionStatus } from "@aluna/core";
 import { parseIntent, SUPPORT_EMAIL, SOCIAL_LINKS } from "@aluna/core";
 import { signOut } from "@/app/auth/actions";
@@ -67,6 +68,13 @@ export default async function AjustesPage({
       ? t("loginEmail")
       : provider.charAt(0).toUpperCase() + provider.slice(1);
 
+  // Rol del usuario: la entrada al panel de administración/colaborador SOLO
+  // aparece si tiene el permiso. getRole devuelve null para el usuario común
+  // (y también mientras la migración 0015 no esté aplicada → tabla `roles`
+  // inexistente), así que la sección no se muestra a nadie hasta que Gio
+  // aplique 0015 y asigne el rol. Espejo del gate de admin/page.tsx.
+  const role = await getRole(supabase);
+
   const visibleSocialLinks = SOCIAL_LINKS.filter((s) => s.href);
 
   // Código de referido ya aplicado (si lo hay) — RLS de referred_users (0017)
@@ -95,6 +103,23 @@ export default async function AjustesPage({
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
       </section>
+
+      {role !== null && (
+        <section className="card">
+          <h2 className={styles.eyebrow}>{t("adminSection")}</h2>
+          {role === "superadmin" ? (
+            <Link href="/admin" className={styles.rowLink}>
+              <span>{t("adminPanel")}</span>
+              <span className={styles.rowArrow} aria-hidden>→</span>
+            </Link>
+          ) : (
+            <Link href="/colab" className={styles.rowLink}>
+              <span>{t("collabPanel")}</span>
+              <span className={styles.rowArrow} aria-hidden>→</span>
+            </Link>
+          )}
+        </section>
+      )}
 
       <section className="card">
         <h2 className={styles.eyebrow}>{t("deckTitle")}</h2>
