@@ -37,6 +37,15 @@ describe("useSheetAutoClose", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("open=true: cruce inverso (matches:false) no cierra el sheet — guard contra cierre erróneo", () => {
+    const { listeners } = stubMatchMedia();
+    const onClose = vi.fn();
+    renderHook(() => useSheetAutoClose(true, onClose));
+
+    listeners.change?.({ matches: false });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("open=false: no registra ningún listener", () => {
     const { mql } = stubMatchMedia();
     renderHook(() => useSheetAutoClose(false, vi.fn()));
