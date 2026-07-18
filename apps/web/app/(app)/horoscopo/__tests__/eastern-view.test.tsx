@@ -149,7 +149,8 @@ describe("HoroscopoView — tab Oriental", () => {
 
   it("el subtítulo oriental habla del animal, no del signo (FIX 5)", async () => {
     renderView();
-    expect(screen.getByText("El cielo del periodo, leído para tu animal")).toBeInTheDocument();
+    // Esperar settling del ready antes de aserciones
+    await waitFor(() => expect(screen.getByText("El cielo del periodo, leído para tu animal")).toBeInTheDocument());
     expect(screen.queryByText("El cielo del periodo, leído para tu signo")).toBeNull();
   });
 
