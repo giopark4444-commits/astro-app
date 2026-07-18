@@ -364,7 +364,10 @@ export function Ceremony({
       )}
 
       {state.step === "reading" && (
-        <div className={styles.stepPane}>
+        // Task 4: split de layout ≥1080 — cartas a la izquierda, prosa+chat+
+        // guardar a la derecha (sticky). .stepPane sigue intacta para los
+        // demás pasos; .readingPane solo agrega el grid en este paso.
+        <div className={`${styles.stepPane} ${styles.readingPane}`}>
           <h3 className={styles.stepTitle}>{t("readingTitle")}</h3>
           {state.question && (
             <p className={styles.readingQuestion}>
@@ -397,42 +400,45 @@ export function Ceremony({
               );
             })}
           </div>
-          <div className={styles.readingProse}>
-            {prose.map((p, i) => (
-              <p key={i} className={tarot.sheetParagraph}>
-                {p}
+
+          <div className={styles.readingSide}>
+            <div className={styles.readingProse}>
+              {prose.map((p, i) => (
+                <p key={i} className={tarot.sheetParagraph}>
+                  {p}
+                </p>
+              ))}
+            </div>
+
+            <ReadingChat spreadId={SPREAD_ID} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
+
+            {state.save === "free_limit" ? (
+              // Nota suave, sin modal: el límite free no interrumpe el rito.
+              <p className={styles.freeLimit}>
+                {t("ceremonyFreeLimit")}{" "}
+                <Link href="/perfil" className={styles.freeLimitCta}>
+                  {t("ceremonyFreeLimitCta")}
+                </Link>
               </p>
-            ))}
+            ) : state.save === "saved" ? (
+              <p className={styles.savedOk}>{t("savedOk")}</p>
+            ) : (
+              <>
+                {state.save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={saveReading}
+                  disabled={state.save === "saving"}
+                >
+                  {t("saveReading")}
+                </button>
+              </>
+            )}
+            <button type="button" className={styles.ghostBtn} onClick={onClose}>
+              {t("readingBack")}
+            </button>
           </div>
-
-          <ReadingChat spreadId={SPREAD_ID} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
-
-          {state.save === "free_limit" ? (
-            // Nota suave, sin modal: el límite free no interrumpe el rito.
-            <p className={styles.freeLimit}>
-              {t("ceremonyFreeLimit")}{" "}
-              <Link href="/perfil" className={styles.freeLimitCta}>
-                {t("ceremonyFreeLimitCta")}
-              </Link>
-            </p>
-          ) : state.save === "saved" ? (
-            <p className={styles.savedOk}>{t("savedOk")}</p>
-          ) : (
-            <>
-              {state.save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
-              <button
-                type="button"
-                className={styles.primaryBtn}
-                onClick={saveReading}
-                disabled={state.save === "saving"}
-              >
-                {t("saveReading")}
-              </button>
-            </>
-          )}
-          <button type="button" className={styles.ghostBtn} onClick={onClose}>
-            {t("readingBack")}
-          </button>
         </div>
       )}
     </section>

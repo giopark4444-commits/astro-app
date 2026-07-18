@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
@@ -7,10 +7,11 @@ import {
   BRANCH_LABELS,
   hiddenStems,
   tenGod,
+  glossaryEntry,
   type Pillar,
   type TenGod,
 } from "@aluna/core";
-import { Meaning } from "@/components/meaning";
+import type { PilarSelection, PillarPos } from "./selection";
 import styles from "./pilares.module.css";
 
 /** Clave i18n del nombre de cada Dios (十神) en la sección `pilares`. Exportada
@@ -42,6 +43,7 @@ export function PillarColumn({
   pro,
   script,
   index,
+  onSelect,
 }: {
   posKey: string;
   pillar: Pillar;
@@ -50,8 +52,10 @@ export function PillarColumn({
   pro: boolean;
   script: "hanzi" | "hangul";
   index: number;
+  onSelect: (s: PilarSelection) => void;
 }) {
   const t = useTranslations();
+  const locale = useLocale();
   const stem = HEAVENLY_STEMS[pillar.stem]!;
   const branch = EARTHLY_BRANCHES[pillar.branch]!;
   return (
@@ -60,23 +64,39 @@ export function PillarColumn({
       data-pro={pro || undefined}
       style={{ ["--i" as string]: index }}
     >
-      <span className={styles.colLabel}>{t(`pilares.${posKey}`)}</span>
+      <button
+        type="button"
+        className={`${styles.colLabel} ${styles.selBtn}`}
+        onClick={() => onSelect({ kind: "pillar", which: posKey as PillarPos, pillar })}
+      >
+        {t(`pilares.${posKey}`)}
+      </button>
       <span className={`chip ${styles.god} ${isDay ? styles.godSelf : ""}`}>
-        {isDay ? (
-          <Meaning k="bazi.term.daymaster">{t("pilares.dayMasterHanzi")}</Meaning>
-        ) : (
-          <Meaning k={`bazi.god.${tenGod(dayMaster, pillar.stem)}`}>
-            {t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
-          </Meaning>
-        )}
+        <button
+          type="button"
+          className={styles.chipBtn}
+          onClick={() =>
+            onSelect({
+              kind: "term",
+              key: isDay ? "bazi.term.daymaster" : `bazi.god.${tenGod(dayMaster, pillar.stem)}`,
+            })
+          }
+        >
+          {isDay ? t("pilares.dayMasterHanzi") : t(`pilares.${GOD_KEY[tenGod(dayMaster, pillar.stem)]}`)}
+        </button>
       </span>
       <span
         className={`${styles.char} ${styles[`el_${stem.element}`] ?? ""} ${styles.charIgnite}`}
         style={{ ["--i" as string]: index + 4 }}
       >
-        <Meaning k={`bazi.stem.${stem.key}`}>
+        <button
+          type="button"
+          className={styles.selBtn}
+          aria-label={glossaryEntry(`bazi.stem.${stem.key}`, locale)?.title}
+          onClick={() => onSelect({ kind: "term", key: `bazi.stem.${stem.key}` })}
+        >
           {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
-        </Meaning>
+        </button>
       </span>
       <span className={styles.roman}>
         {script === "hangul" ? STEM_LABELS[pillar.stem]!.romanKo : STEM_LABELS[pillar.stem]!.pinyin}
@@ -85,36 +105,66 @@ export function PillarColumn({
         className={`${styles.char} ${styles[`el_${branch.element}`] ?? ""} ${styles.charIgnite}`}
         style={{ ["--i" as string]: index + 4.35 }}
       >
-        <Meaning k={`bazi.branch.${branch.key}`}>
+        <button
+          type="button"
+          className={styles.selBtn}
+          aria-label={glossaryEntry(`bazi.branch.${branch.key}`, locale)?.title}
+          onClick={() => onSelect({ kind: "term", key: `bazi.branch.${branch.key}` })}
+        >
           {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
-        </Meaning>
+        </button>
       </span>
       <span className={styles.roman}>
         {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.romanKo : BRANCH_LABELS[pillar.branch]!.pinyin}
       </span>
-      <span className={styles.animal}>
-        <Meaning k={`bazi.branch.${branch.key}`}>{t(`pilares.animal${cap(branch.animal)}`)}</Meaning>
-      </span>
+      <button
+        type="button"
+        className={`${styles.animal} ${styles.selBtn}`}
+        onClick={() => onSelect({ kind: "term", key: `bazi.branch.${branch.key}` })}
+      >
+        {t(`pilares.animal${cap(branch.animal)}`)}
+      </button>
       {isDay && (
         <span className={`chip ${styles.dayTag}`}>
-          <Meaning k="bazi.term.daymaster">{t("pilares.dayMaster")}</Meaning>
+          <button
+            type="button"
+            className={styles.chipBtn}
+            onClick={() => onSelect({ kind: "term", key: "bazi.term.daymaster" })}
+          >
+            {t("pilares.dayMaster")}
+          </button>
         </span>
       )}
       <div className={styles.hidden}>
-        <span className={styles.hiddenLabel}>
-          <Meaning k="bazi.term.hiddenstems">{t("pilares.hiddenStems")}</Meaning>
-        </span>
+        <button
+          type="button"
+          className={`${styles.hiddenLabel} ${styles.selBtn}`}
+          onClick={() => onSelect({ kind: "term", key: "bazi.term.hiddenstems" })}
+        >
+          {t("pilares.hiddenStems")}
+        </button>
         {hiddenStems(pillar.branch).map((hs, j) => {
           const hidden = HEAVENLY_STEMS[hs]!;
           return (
             <span key={j} className={styles.hiddenRow}>
               <span className={`${styles.hiddenChar} ${styles[`el_${hidden.element}`] ?? ""}`}>
-                <Meaning k={`bazi.stem.${hidden.key}`}>{hidden.hanzi}</Meaning>
+                <button
+                  type="button"
+                  className={styles.selBtn}
+                  aria-label={glossaryEntry(`bazi.stem.${hidden.key}`, locale)?.title}
+                  onClick={() => onSelect({ kind: "term", key: `bazi.stem.${hidden.key}` })}
+                >
+                  {hidden.hanzi}
+                </button>
               </span>
               <span className={styles.hiddenGod}>
-                <Meaning k={`bazi.god.${tenGod(dayMaster, hs)}`}>
+                <button
+                  type="button"
+                  className={styles.selBtn}
+                  onClick={() => onSelect({ kind: "term", key: `bazi.god.${tenGod(dayMaster, hs)}` })}
+                >
                   {t(`pilares.${GOD_KEY[tenGod(dayMaster, hs)]}`)}
-                </Meaning>
+                </button>
               </span>
             </span>
           );

@@ -138,6 +138,14 @@
 .reading { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14: empate → contenedor de bloques → mayor */
 .lens { margin: 0 0 var(--sp-1); /* 2px→sp-1: piso de la escala */ padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); font-size: var(--text-xs); /* 12.5: empate 12/13 → apoyo → menor */ font-style: italic; line-height: 1.55; color: var(--soft); text-align: center; }
 .essence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); /* 18→17 */ line-height: 1.5; color: var(--ink); }
+/* .interpEssence: desacoplada de .essence (usada por NumberReading en los tiers
+   Pro, arriba) — mismos valores hoy, pero conceptualmente independiente: esta es
+   la esencia sin-Pro del panel único de interpretación. Mismo patrón de
+   desacople que pilares.module.css .interpEssence/.brEssence (ola visual N4). */
+.interpEssence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.5; color: var(--ink); }
+/* Hint del renderizador único sin Pro (Task 2, receta de pilares.module.css
+   .interpHintLine): itálica suave bajo la esencia escrita a mano. */
+.interpHintLine { margin: 0; font-style: italic; font-size: var(--text-2xs); color: var(--soft); }
 .block { display: flex; flex-direction: column; gap: var(--sp-1); } /* 5→4 */
 .block p { margin: 0; font-size: var(--text-sm); /* 13.5→13 */ line-height: 1.62; color: var(--ink); }
 .blockH { font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
@@ -176,14 +184,44 @@
    className="card card--dashed ..." */
 .gatedNote { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; line-height: 1.6; color: var(--soft); padding: var(--sp-3) var(--sp-4); }
 
-@media (min-width: 1080px) { /* bp desktop R4a */
-  /* R4b-3 (patrón B, spec §4.1): columna ancha centrada — reemplaza el cap
-     intermedio de 760px (stopgap de R4a). 880px es punto de partida, a
-     calibrar contra contenido real (nombres largos EN) cuando se vea en
-     navegador, igual que hizo el spike de R2. */
-  .wrap { max-width: min(880px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
+/* Panel de interpretación (maestro-detalle, Task 3): feature 100% desktop —
+   en móvil la interpretación la sirve el bottom-sheet, así que el panel derecho
+   NO se monta visible (duplicaría la lectura). Oculto por defecto; la regla
+   @media de abajo lo muestra (grid 2-col + sticky). Mismo mecanismo y valores
+   que carta/pilares (carta.module.css .interpCol / pilares.module.css .cardH2). */
+.interpCol { display: none; }
+/* Título del panel de interpretación: mismo look que .cardH de la lámina Pro,
+   pero sobre un <span> (no <h3>) y a la escala de .cardH2 de pilares — el panel
+   vive fuera de .pro/.card, así que necesita su propia receta de título. */
+.cardH2 {
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+}
 
-  /* Núcleo: las 5 lentes en una sola fila en vez de 3 filas de 2. */
+@media (min-width: 1080px) { /* bp desktop R4a */
+  /* Ola visual N4: el cap centrado de 1120px quedaba fuera de la serie — carta
+     y pilares van full-bleed (sin max-width, solo ajustan el padding-bottom
+     porque desktop no tiene bottom-nav). Se alinea acá con el mismo enfoque
+     (ver carta.module.css / pilares.module.css .wrap del @media desktop); el
+     reflow interno de .leftCol (lentes fila de 5, pro 2×2) queda intacto. */
+  .wrap { padding-bottom: var(--sp-7); }
+
+  /* Split maestro-detalle: técnica a la izquierda (11fr) + panel sticky a la
+     derecha (9fr). Mismos valores que carta/pilares. */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .leftCol { min-width: 0; } /* evita el desborde de la grilla (contenido con nowrap) */
+
+  /* panel de interpretación: lo único sticky — la técnica de la izquierda
+     scrollea libre dentro de .leftCol (mismo mecanismo que carta/pilares). */
+  .interpCol { display: block; position: sticky; top: 84px; /* header 66px + respiro, mismo valor que carta/pilares */ }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+
+  /* Núcleo: las 5 lentes en una sola fila en vez de 3 filas de 2 (dentro de leftCol). */
   .lentes { grid-template-columns: repeat(5, 1fr); }
 
   /* Modo Pro: las 4 secciones (lecciones kármicas, inclusión, pináculos+desafíos,
@@ -193,4 +231,10 @@
      contenedor existente (no se usa el mecanismo display:contents de
      hub/carta: ese resuelve reordenar JSX, no es el caso aquí). */
   .pro { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+
+  /* Ola visual N4: en desktop el panel de interpretación ya enseña el patrón
+     "toca para leer" (.interpHintLine, siempre visible ahí) — el hint del pie
+     de .leftCol quedaba duplicado y, peor, circular (el cálculo que promete
+     ya está en el panel). Se oculta acá; en móvil (sin panel) sigue como hoy. */
+  .tapHint { display: none; }
 }

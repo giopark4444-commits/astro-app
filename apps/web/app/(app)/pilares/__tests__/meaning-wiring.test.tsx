@@ -54,7 +54,15 @@ function renderView() {
 }
 
 describe("PilaresView — capa de significados (troncos)", () => {
-  it('el carácter 甲 (tronco del pilar de año) es un botón que abre el glosario (dialog)', async () => {
+  // Skip (T3, maestro-detalle): el tronco ya NO abre un glosario standalone —
+  // ahora dispara onSelect({kind:"term",...}) para que el panel/sheet maestro-
+  // detalle lo interprete (ver pillar-column.tsx + __tests__/technical-select.test.tsx,
+  // que cubre ese cableado). `PilaresView` todavía no pasa `onSelect` (eso es
+  // Task 4 del plan 2026-07-17-pilares-maestro-detalle.md, línea 520, que
+  // reusa este mismo harness fetch+useProfiles como molde de
+  // `pilares-selection.test.tsx`); hasta entonces este test queda obsoleto —
+  // Task 4 lo reemplaza/retira.
+  it.skip('el carácter 甲 (tronco del pilar de año) es un botón que abre el glosario (dialog)', async () => {
     renderView();
     // El botón ahora lleva aria-label={entry.title} (fix de accesibilidad:
     // el glifo suelto no anunciaba nada por sí mismo) — el nombre accesible

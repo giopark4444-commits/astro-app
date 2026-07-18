@@ -206,26 +206,30 @@ export function ManualEntry({
 
         {picked.length < limit && (
           <>
-            <input
-              type="text"
-              className={styles.search}
-              placeholder={t("manualSearchPlaceholder")}
-              aria-label={t("manualSearchPlaceholder")}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div className={styles.suitTabs}>
-              {SUIT_TABS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`seg__item ${styles.suitTab} ${suitTab === s ? "seg__item--active" : ""}`}
-                  aria-pressed={suitTab === s}
-                  onClick={() => setSuitTab(s)}
-                >
-                  {t(SUIT_LABEL_KEY[s])}
-                </button>
-              ))}
+            {/* Task 4, §E: buscador+tabs agrupados en un wrapper — en desktop
+                se vuelve sticky arriba del grid (CSS-only, mismo orden DOM). */}
+            <div className={styles.pickerFilters}>
+              <input
+                type="text"
+                className={styles.search}
+                placeholder={t("manualSearchPlaceholder")}
+                aria-label={t("manualSearchPlaceholder")}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <div className={styles.suitTabs}>
+                {SUIT_TABS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`seg__item ${styles.suitTab} ${suitTab === s ? "seg__item--active" : ""}`}
+                    aria-pressed={suitTab === s}
+                    onClick={() => setSuitTab(s)}
+                  >
+                    {t(SUIT_LABEL_KEY[s])}
+                  </button>
+                ))}
+              </div>
             </div>
             {candidates.length === 0 ? (
               <p className={styles.noResults}>{t("manualNoResults")}</p>
@@ -358,90 +362,97 @@ export function ManualEntry({
       )}
 
       {step === "reading" && (
-        <div className={styles.pane}>
+        // Task 4: split de layout ≥1080, espejo de ceremony.tsx — cartas
+        // (+jumpers) a la izquierda, prosa+chat+guardar a la derecha (sticky).
+        <div className={`${styles.pane} ${styles.readingPane}`}>
           <h3 className={styles.paneTitle}>{t("readingTitle")}</h3>
-          <div className={styles.readingCards}>
-            {main.map((c) => {
-              const content = cardsDict[c.cardId];
-              const ambit = content ? (c.reversed ? content.reversed.path : content.upright.path) : "";
-              return (
-                <article key={c.cardId} className={`card card--tight ${styles.readingCard}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={cardImageUrl(c.cardId, deckCtx)}
-                    alt={content?.name ?? c.cardId}
-                    className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
-                  />
-                  <div className={styles.readingCardBody}>
-                    <span className={styles.readingPosition}>{positionLabel(c.position)}</span>
-                    <p className={styles.readingName}>
-                      {content?.name ?? c.cardId}
-                      {c.reversed && <span className={tarot.reversedTag}> {t("dailyReversed")}</span>}
-                    </p>
-                    <p className={styles.readingAmbit}>{ambit}</p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
 
-          {jumpers.length > 0 && (
-            <div className={styles.jumpersReading}>
-              <span className={styles.jumpersLabel}>{t("manualJumpersReadingLabel")}</span>
-              <div className={styles.readingCards}>
-                {jumpers.map((c) => {
-                  const content = cardsDict[c.cardId];
-                  return (
-                    <article key={c.cardId} className={`card card--dashed ${styles.readingCard}`}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={cardImageUrl(c.cardId, deckCtx)}
-                        alt={content?.name ?? c.cardId}
-                        className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
-                      />
-                      <div className={styles.readingCardBody}>
-                        <p className={styles.readingName}>
-                          {content?.name ?? c.cardId}
-                          {c.reversed && <span className={tarot.reversedTag}> {t("dailyReversed")}</span>}
-                        </p>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+          <div className={styles.readingLeft}>
+            <div className={styles.readingCards}>
+              {main.map((c) => {
+                const content = cardsDict[c.cardId];
+                const ambit = content ? (c.reversed ? content.reversed.path : content.upright.path) : "";
+                return (
+                  <article key={c.cardId} className={`card card--tight ${styles.readingCard}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cardImageUrl(c.cardId, deckCtx)}
+                      alt={content?.name ?? c.cardId}
+                      className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
+                    />
+                    <div className={styles.readingCardBody}>
+                      <span className={styles.readingPosition}>{positionLabel(c.position)}</span>
+                      <p className={styles.readingName}>
+                        {content?.name ?? c.cardId}
+                        {c.reversed && <span className={tarot.reversedTag}> {t("dailyReversed")}</span>}
+                      </p>
+                      <p className={styles.readingAmbit}>{ambit}</p>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-          )}
 
-          <div className={styles.readingProse}>
-            {prose.map((p, i) => (
-              <p key={i} className={tarot.sheetParagraph}>
-                {p}
-              </p>
-            ))}
+            {jumpers.length > 0 && (
+              <div className={styles.jumpersReading}>
+                <span className={styles.jumpersLabel}>{t("manualJumpersReadingLabel")}</span>
+                <div className={styles.readingCards}>
+                  {jumpers.map((c) => {
+                    const content = cardsDict[c.cardId];
+                    return (
+                      <article key={c.cardId} className={`card card--dashed ${styles.readingCard}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={cardImageUrl(c.cardId, deckCtx)}
+                          alt={content?.name ?? c.cardId}
+                          className={`${styles.readingImg} ${c.reversed ? tarot.reversedImg : ""}`}
+                        />
+                        <div className={styles.readingCardBody}>
+                          <p className={styles.readingName}>
+                            {content?.name ?? c.cardId}
+                            {c.reversed && <span className={tarot.reversedTag}> {t("dailyReversed")}</span>}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
-          <ReadingChat spreadId={template} cards={chatCards} />
+          <div className={styles.readingSide}>
+            <div className={styles.readingProse}>
+              {prose.map((p, i) => (
+                <p key={i} className={tarot.sheetParagraph}>
+                  {p}
+                </p>
+              ))}
+            </div>
 
-          {save === "free_limit" ? (
-            <p className={styles.freeLimit}>
-              {t("ceremonyFreeLimit")}{" "}
-              <Link href="/perfil" className={styles.freeLimitCta}>
-                {t("ceremonyFreeLimitCta")}
-              </Link>
-            </p>
-          ) : save === "saved" ? (
-            <p className={styles.savedOk}>{t("savedOk")}</p>
-          ) : (
-            <>
-              {save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
-              <button type="button" className={styles.primaryBtn} onClick={saveReading} disabled={save === "saving"}>
-                {t("saveReading")}
-              </button>
-            </>
-          )}
-          <button type="button" className={styles.ghostBtn} onClick={onClose}>
-            {t("readingBack")}
-          </button>
+            <ReadingChat spreadId={template} cards={chatCards} />
+
+            {save === "free_limit" ? (
+              <p className={styles.freeLimit}>
+                {t("ceremonyFreeLimit")}{" "}
+                <Link href="/perfil" className={styles.freeLimitCta}>
+                  {t("ceremonyFreeLimitCta")}
+                </Link>
+              </p>
+            ) : save === "saved" ? (
+              <p className={styles.savedOk}>{t("savedOk")}</p>
+            ) : (
+              <>
+                {save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
+                <button type="button" className={styles.primaryBtn} onClick={saveReading} disabled={save === "saving"}>
+                  {t("saveReading")}
+                </button>
+              </>
+            )}
+            <button type="button" className={styles.ghostBtn} onClick={onClose}>
+              {t("readingBack")}
+            </button>
+          </div>
         </div>
       )}
     </section>

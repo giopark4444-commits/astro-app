@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
@@ -21,7 +21,7 @@ const data: BaZiData = {
 function renderLamina(pro: boolean) {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <ProLamina data={data} script="hanzi" pro={pro} tab="nayin" />
+      <ProLamina data={data} script="hanzi" pro={pro} tab="nayin" onSelect={vi.fn()} />
     </NextIntlClientProvider>,
   );
 }
