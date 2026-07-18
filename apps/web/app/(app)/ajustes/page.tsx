@@ -13,6 +13,7 @@ import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
 import { DeckManager } from "./deck-manager";
+import { MemoriesCard } from "./memories-card";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -99,6 +100,8 @@ export default async function AjustesPage({
           intentUseInAI={intent?.useInAI ?? false}
         />
       </section>
+
+      <MemoriesCard userId={user.id} />
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />

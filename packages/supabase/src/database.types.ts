@@ -515,6 +515,32 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0018_memorias.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      user_memories: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          source: string;
+          user_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          source: string;
+          user_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          source?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
