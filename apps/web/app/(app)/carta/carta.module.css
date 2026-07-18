@@ -175,6 +175,9 @@
 .muted { font-size: var(--text-xs); color: var(--soft); margin: 0; }
 
 .tech { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; } /* 6→sp-1 empate (apoyo); 10.5→2xs piso (sub-11) */
+/* la cabecera técnica al pie de la rueda (Modo Pro, cualquier tab): mismo
+   separador que .ctrlRows para leerse como una fila más del pie */
+.techFoot { border-top: 1px solid rgba(var(--acc-rgb), 0.14); margin-top: 12px; padding-top: 12px; }
 
 /* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local.
    (.sheet/.sheetBig/.sheetSign/.sheetMeta se retiraron en R4a: el sheet unificado
@@ -209,6 +212,8 @@
 .interpSub { font-size: var(--text-xs); color: var(--soft); margin-top: 2px; }
 .interpBody { margin: 0; font-size: var(--text-sm); line-height: 1.65; color: var(--soft); }
 .interpTech { margin: 0; font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: var(--sp-2); }
+/* desglose técnico del núcleo (Pro): una línea por pilar Sol/Luna/Asc */
+.interpTechList { display: flex; flex-direction: column; gap: 5px; font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: var(--sp-2); }
 .interpHint { margin: 0; font-style: italic; font-size: var(--text-sm); color: var(--soft); text-align: center; padding: var(--sp-5) 0; }
 
 /* móvil: la lámina técnica (posiciones/aspectos/balance) solo se ve con el

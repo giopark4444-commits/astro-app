@@ -376,7 +376,8 @@
     "tabBalance": "Balance",
     "interpTitle": "Interpretation",
     "interpHint": "Tap any planet, aspect, or house on the left to read what it means in your chart.",
-    "interpAspectOf": "between"
+    "interpAspectOf": "between",
+    "interpCoreTech": "The core, in numbers"
   },
   "chat": {
     "title": "Ask Aluna",

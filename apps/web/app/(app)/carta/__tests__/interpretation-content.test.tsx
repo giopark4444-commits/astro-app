@@ -21,6 +21,25 @@ describe("InterpretationContent", () => {
     expect(screen.getByText(/brilla/)).toBeTruthy();
   });
 
+  it("core con pro: desglose técnico de Sol/Luna/Asc (y sin pro, no)", () => {
+    const coreData = {
+      sun: SUN,
+      moon: undefined,
+      asc: { sign: "pisces", degree: 26, minute: 6 },
+    };
+    const { rerender } = mount(<InterpretationContent selected={{ kind: "core" }} pro={false}
+      coreSegs={[{ t: "Tu esencia" }]} coreData={coreData} profileName="Gio" />);
+    expect(screen.queryByText("El núcleo, en datos")).toBeNull();
+    expect(screen.queryByText(/1\.01°\/d/)).toBeNull();
+    rerender(<NextIntlClientProvider locale="es" messages={es}>
+      <InterpretationContent selected={{ kind: "core" }} pro={true}
+        coreSegs={[{ t: "Tu esencia" }]} coreData={coreData} profileName="Gio" />
+    </NextIntlClientProvider>);
+    expect(screen.getByText("El núcleo, en datos")).toBeTruthy();
+    expect(screen.getByText(/1\.01°\/d/)).toBeTruthy(); // velocidad del Sol
+    expect(screen.getByText(/26°06′/)).toBeTruthy(); // ascendente
+  });
+
   it("core sin coreSegs: invita a tocar", () => {
     mount(<InterpretationContent selected={{ kind: "core" }} pro={false} coreSegs={null} profileName="Gio" />);
     expect(screen.getByText(/Toca cualquier planeta/)).toBeTruthy();
