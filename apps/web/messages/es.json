@@ -307,6 +307,19 @@
     "preferences": "Preferencias",
     "sinceAluna": "En Aluna desde {date} ✦︎"
   },
+  "lifetime": {
+    "eyebrow": "Tu mapa en el tiempo",
+    "title": "Camino de vida",
+    "seeMore": "Ver mi camino de vida",
+    "back": "Volver a tu perfil",
+    "hoy": "Hoy",
+    "future": "Por escribirse",
+    "past": "Lo vivido",
+    "expand": "+{n} más",
+    "loading": "Dibujando tu camino…",
+    "error": "No pudimos trazar tu camino de vida. Intenta de nuevo.",
+    "empty": "Todavía no hay hitos que mostrar en tu camino."
+  },
   "manifest": {
     "eyebrow": "Diario & manifestación",
     "title": "Manifestaciones",

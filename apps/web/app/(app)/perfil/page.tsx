@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PerfilHero } from "./perfil-hero";
+import { LifetimePreview } from "./lifetime-preview";
 import { Personas } from "./personas";
 import { Manifestations } from "./manifestations";
 import { Journal } from "./journal";
@@ -33,6 +34,7 @@ export default async function PerfilPage() {
   return (
     <main className={styles.page}>
       <PerfilHero userId={user.id} avatarUrl={publicUrl} since={since} />
+      <LifetimePreview />
       <Personas />
       <div className={styles.diarioGrid}>
         <Manifestations />

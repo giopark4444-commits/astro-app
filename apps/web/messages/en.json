@@ -307,6 +307,19 @@
     "preferences": "Preferences",
     "sinceAluna": "In Aluna since {date} ✦︎"
   },
+  "lifetime": {
+    "eyebrow": "Your map through time",
+    "title": "Life Path",
+    "seeMore": "See my life path",
+    "back": "Back to your profile",
+    "hoy": "Today",
+    "future": "Yet to be written",
+    "past": "Lived",
+    "expand": "+{n} more",
+    "loading": "Drawing your path…",
+    "error": "We couldn't trace your life path. Please try again.",
+    "empty": "There are no milestones to show on your path yet."
+  },
   "manifest": {
     "eyebrow": "Journal & manifestation",
     "title": "Manifestations",

@@ -1,0 +1,52 @@
+/* Preview de "Camino de vida" en /perfil (Task 5): mini-espina horizontal
+   con scroll propio en móvil, 5 anclas + HOY. */
+.preview { display: flex; flex-direction: column; gap: var(--sp-4); }
+.eyebrow {
+  font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0;
+}
+
+.skeleton {
+  height: 64px; border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--surface-2) 25%, rgba(var(--acc-rgb), 0.14) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: lifetime-preview-pulse 1.6s ease-in-out infinite;
+}
+@keyframes lifetime-preview-pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.spine {
+  display: flex; align-items: flex-start; gap: var(--sp-4);
+  overflow-x: auto; padding-bottom: 2px;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.spine::-webkit-scrollbar { display: none; }
+
+.anchor {
+  flex: none; width: 84px; display: flex; flex-direction: column; align-items: center;
+  gap: var(--sp-1); text-align: center; position: relative;
+}
+.anchor::before {
+  content: ""; position: absolute; top: 15px; left: -30%; width: 60%; height: 1px;
+  background: rgba(var(--acc-rgb), 0.25);
+}
+.anchor:first-child::before { display: none; }
+
+.year {
+  font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums;
+}
+.dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--surface); border: 2px solid rgba(var(--acc-rgb), 0.5);
+}
+.anchorTitle { font-size: var(--text-2xs); color: var(--ink); line-height: 1.25; }
+
+.today .year { color: var(--acc-text); font-weight: 700; }
+.dotToday {
+  width: 14px; height: 14px; background: var(--acc); border-color: var(--acc);
+  box-shadow: var(--glow);
+}
+.today .anchorTitle { color: var(--acc-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.cta {
+  align-self: flex-start; font-size: var(--text-xs); font-weight: 600; color: var(--acc-text);
+}

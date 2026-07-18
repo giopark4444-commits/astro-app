@@ -114,7 +114,8 @@ describe("timelineLabel — casos exactos de los kinds con formato", () => {
     expect(timelineLabel("es", FIXTURES["pinnacle-change"]).title).toBe("Cambia tu pináculo (al 7)");
     expect(timelineLabel("en", FIXTURES["pinnacle-change"]).title).toBe("Your pinnacle changes (to 7)");
     // Sin meta: título sigue siendo válido, sin "undefined".
-    const { meta: _omit, ...bare } = FIXTURES["pinnacle-change"];
+    const bare = { ...FIXTURES["pinnacle-change"] };
+    delete bare.meta;
     const t = timelineLabel("es", bare).title;
     expect(t.trim().length).toBeGreaterThan(2);
     expect(t.includes("undefined")).toBe(false);
