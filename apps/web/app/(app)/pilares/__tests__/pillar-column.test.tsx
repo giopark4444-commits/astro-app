@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { tenGod, type Pillar } from "@aluna/core";
@@ -19,6 +19,7 @@ function renderColumn(props: Partial<Parameters<typeof PillarColumn>[0]> = {}) {
         pro={props.pro ?? false}
         script={props.script ?? "hanzi"}
         index={props.index ?? 0}
+        onSelect={props.onSelect ?? vi.fn()}
       />
     </NextIntlClientProvider>,
   );
@@ -49,10 +50,10 @@ describe("PillarColumn", () => {
   it("los hanzi grandes (tronco y rama) llevan la clase de ignición local (glow currentColor, no dorado)", () => {
     const pillar: Pillar = { stem: 6, branch: 0 };
     renderColumn({ pillar, script: "hanzi" });
-    // .closest("span") en vez del elemento exacto: la capa de significados
-    // (Meaning) puede envolver el glifo en un <button> propio, así que la
-    // clase de ignición vive en el <span> ancestro, no siempre en el nodo
-    // de texto directo.
+    // .closest("span") en vez del elemento exacto: el glifo va envuelto en
+    // su propio <button> de selección (T3, maestro-detalle — antes era
+    // <Meaning>, misma forma), así que la clase de ignición vive en el
+    // <span> ancestro, no siempre en el nodo de texto directo.
     const stemChar = screen.getByText("庚").closest("span")!;
     const branchChar = screen.getByText("子").closest("span")!;
     expect(stemChar.className).toMatch(/charIgnite/);

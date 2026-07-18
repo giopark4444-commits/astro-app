@@ -47,6 +47,17 @@
 }
 .animal { font-size: var(--text-2xs); color: var(--soft); margin-top: var(--sp-1); }
 .empty { font-size: var(--text-2xl); color: var(--soft); opacity: 0.5; }
+
+/* Maestro-detalle (T3): resets de los botones de selección de la columna
+   técnica. `.selBtn` para celdas/etiquetas sueltas (limpia fondo/borde/
+   padding, hereda tipografía y alineación). `.chipBtn` es más angosto —
+   SOLO quita fondo/cursor y hereda tipografía — porque vive DENTRO de un
+   `chip` global (.god/.dayTag/chip--pill) y debe CONSERVAR su piel (lección
+   de carta: un reset completo mata el fondo/borde del chip). Task 5
+   consolida esto junto al resto del CSS del panel de interpretación. */
+.selBtn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+.chipBtn { background: none; font: inherit; color: inherit; cursor: pointer; }
+.selBtn:focus-visible, .chipBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
 /* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
 .dayTag {
   margin-top: var(--sp-1); font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase;
