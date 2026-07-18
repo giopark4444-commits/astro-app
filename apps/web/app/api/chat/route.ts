@@ -1,5 +1,5 @@
 import path from "node:path";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
 import { computeNumerology, signOfLongitude, parseIntent, type UserIntent } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
@@ -8,6 +8,7 @@ import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
+import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -119,17 +120,32 @@ export async function POST(request: NextRequest) {
   const intentLine = buildIntentLine(intent, locale);
   if (intentLine) system = `${system}\n\n${intentLine}`;
 
+  // "Aluna te conoce" (Task 2): recuerdos duraderos de conversaciones previas.
+  // Gobernado por el mismo toggle que la línea de intención — si la persona
+  // apagó useInAI, ni siquiera se consulta la tabla. Byte-igual si no hay
+  // recuerdos o el toggle está apagado (formatMemoryBlock devuelve null).
+  const useMemories = intent?.useInAI !== false;
+  if (useMemories) {
+    const memories = await fetchMemories(supabase, user.id);
+    const memoryBlock = formatMemoryBlock(memories, locale);
+    if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
+  }
+
   // Streaming token a token (efecto de tecleo). El proveedor emite trozos de texto;
   // los reenviamos como text/plain en streaming. Si el proveedor no soporta streaming,
   // su chatStream cae a entregar el resultado de chat() de una vez. Cualquier error
   // antes del primer byte se traduce a 502; una vez empezado el stream, se corta limpio.
   const provider = resolved.provider;
   const encoder = new TextEncoder();
+  let assistantReply = "";
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
         for await (const chunk of provider.chatStream({ system, messages, maxTokens: 1500 })) {
-          if (chunk) controller.enqueue(encoder.encode(chunk));
+          if (chunk) {
+            assistantReply += chunk;
+            controller.enqueue(encoder.encode(chunk));
+          }
         }
       } catch {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
@@ -137,6 +153,29 @@ export async function POST(request: NextRequest) {
       controller.close();
     },
   });
+
+  // Destilado post-conversación (fire-and-forget, best-effort total): solo si
+  // el toggle está encendido. `after()` corre una vez la respuesta terminó de
+  // enviarse (incluido el streaming), así que `assistantReply` ya está completo.
+  if (useMemories) {
+    after(async () => {
+      try {
+        if (!assistantReply.trim()) return;
+        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+          .slice(-6)
+          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+          .join("\n")
+          .slice(-8000);
+        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
+        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
+        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
+        const newMemories = parseDistilled(raw, existing);
+        await storeMemories(supabase, user.id, newMemories, "chat");
+      } catch {
+        // best effort: la destilación nunca rompe el flujo del chat
+      }
+    });
+  }
 
   return new Response(stream, {
     headers: {

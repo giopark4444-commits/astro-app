@@ -1,13 +1,14 @@
 import path from "node:path";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, after, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
-import { computeNumerology, signOfLongitude } from "@aluna/core";
+import { computeNumerology, signOfLongitude, parseIntent, type UserIntent } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildTarotContext, type TarotChatCardInput } from "@/lib/tarot/reading-chat-context";
+import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
 
 // Chat "Conversa esta tirada" (Tarot T3). Clon exacto de /api/chat: mismo
 // runtime/auth/proveedor/latencia. CABLEADO pero LATENTE: sin llave de
@@ -138,16 +139,29 @@ export async function POST(request: NextRequest) {
   }
 
   const context = buildTarotContext(locale, spreadId, cards, question, natalSummary);
-  const system = `${SYSTEM_INTRO[locale]}\n\n${context}`;
+  let system = `${SYSTEM_INTRO[locale]}\n\n${context}`;
+
+  // "Aluna te conoce" (Task 2): mismo cableado que /api/chat, mínimo posible.
+  const { data: settingsRow } = await supabase.from("settings").select("intent").eq("user_id", user.id).maybeSingle();
+  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
+  const useMemories = intent?.useInAI !== false;
+  if (useMemories) {
+    const memoryBlock = formatMemoryBlock(await fetchMemories(supabase, user.id), locale);
+    if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
+  }
 
   // Streaming token a token (efecto de tecleo), espejo exacto de /api/chat.
   const provider = resolved.provider;
   const encoder = new TextEncoder();
+  let assistantReply = "";
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
         for await (const chunk of provider.chatStream({ system, messages, maxTokens: 1500 })) {
-          if (chunk) controller.enqueue(encoder.encode(chunk));
+          if (chunk) {
+            assistantReply += chunk;
+            controller.enqueue(encoder.encode(chunk));
+          }
         }
       } catch {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
@@ -155,6 +169,26 @@ export async function POST(request: NextRequest) {
       controller.close();
     },
   });
+
+  if (useMemories) {
+    after(async () => {
+      try {
+        if (!assistantReply.trim()) return;
+        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+          .slice(-6)
+          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+          .join("\n")
+          .slice(-8000);
+        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
+        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
+        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
+        const newMemories = parseDistilled(raw, existing);
+        await storeMemories(supabase, user.id, newMemories, "tarot");
+      } catch {
+        // best effort: la destilación nunca rompe el flujo del tarot-chat
+      }
+    });
+  }
 
   return new Response(stream, {
     headers: {
