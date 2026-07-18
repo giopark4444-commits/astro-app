@@ -3,9 +3,9 @@
 // de la columna técnica produce una PilarSelection; el panel derecho (desktop)
 // o el bottom-sheet (móvil) la interpretan. Espejo del patrón de /carta
 // (rama carta-detalle) con los kinds propios de Ba Zi. Ver spec 2026-07-17.
-import type { Pillar, TenGod } from "@aluna/core";
+import type { Pillar, TenGod, PillarPos } from "@aluna/core";
 
-export type PillarPos = "year" | "month" | "day" | "hour";
+export type { PillarPos };
 
 export type PilarSelection =
   | { kind: "reading" }

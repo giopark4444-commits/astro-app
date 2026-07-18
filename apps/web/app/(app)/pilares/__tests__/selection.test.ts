@@ -1,6 +1,7 @@
 // apps/web/app/(app)/pilares/__tests__/selection.test.ts
 import { describe, it, expect } from "vitest";
 import type { PilarSelection } from "../selection";
+import { isMobileViewport } from "../selection";
 
 describe("PilarSelection", () => {
   it("discrimina por kind (compila y estrecha)", () => {
@@ -12,5 +13,12 @@ describe("PilarSelection", () => {
       { kind: "term", key: "bazi.term.daymaster" },
     ];
     expect(sels).toHaveLength(5);
+  });
+
+  it("isMobileViewport es ejecutable y devuelve boolean (runtime real, no solo tipos)", () => {
+    const orig = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: true, media: q })) as never;
+    expect(isMobileViewport()).toBe(true);
+    window.matchMedia = orig;
   });
 });
