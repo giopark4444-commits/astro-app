@@ -50,3 +50,11 @@
 .cta {
   align-self: flex-start; font-size: var(--text-xs); font-weight: 600; color: var(--acc-text);
 }
+
+/* Desktop (bp 1080, fix del gate perfil-detalle): la mini-espina participa del
+   grid 12-col del carril izquierdo del perfil pero no traía grid-column/order —
+   caía en order:0 (ANTES del santuario) y a ancho parcial. Pre-existente en
+   main, visible al angostar el carril a 11fr. Fila completa, después del hero. */
+@media (min-width: 1080px) {
+  .preview { grid-column: 1 / -1; order: 1; }
+}
