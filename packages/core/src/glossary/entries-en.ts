@@ -574,4 +574,38 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
     title: "Water", glyph: "水",
     body: "Water connects and descends: born of Metal, it nourishes Wood and quenches the Fire it controls. It is lived as wisdom, adaptability, the intelligence that flows where it can instead of insisting where it can't. It is the cycle's winter: apparent stillness, real depth.",
   },
+
+  // ——— Life Path (life timeline) ———
+  "timeline.saturnreturn": {
+    title: "Saturn Return", glyph: "♄",
+    body: "Every 29 and a half years, Saturn comes back to the exact degree it held when you were born. It is the sky's maturity exam: what you built truthfully consolidates, and what you were holding out of habit or fear comes apart on its own. The first (~29) makes you the adult of your own life; the second (~59) asks what legacy begins now. It is uncomfortable — and one of the most fertile transits there is.",
+  },
+  "timeline.jupiterreturn": {
+    title: "Jupiter Return", glyph: "♃",
+    body: "Every twelve years or so, Jupiter returns to the place it held at your birth and opens a new cycle of expansion: more world, more study, more faith in what's possible. It doesn't hand out prizes — it hands out doors, and walking through them is still your work. Read it as the beat that marks the growth chapters of your life.",
+  },
+  "timeline.uranusopposition": {
+    title: "Uranus Opposition", glyph: "♅",
+    body: "Around age 42, Uranus reaches the point exactly opposite its place at your birth: the famous midpoint of life. Everything you left unlived — to comply, to fit in, to wait — raises its hand at once. It isn't crisis for its own sake: it is the last great call to correct course with your strength intact. Those who listen tend to live the second half more their own than the first.",
+  },
+  "timeline.uranusreturn": {
+    title: "Uranus Return", glyph: "♅",
+    body: "Uranus takes 84 years to travel the whole zodiac, so its return is lived only once. It closes the great circle: looking at the whole life and recognizing what was authentically yours — and what freedom is still left to inaugurate. The traditions read it as the age of wisdom that no longer asks permission.",
+  },
+  "timeline.cycle9": {
+    title: "9-Year Cycle", glyph: "9",
+    body: "Numerology reads life in nine-year waves: seed (1), building (the middle years) and harvest-closure (9), then round again. Your personal year 1 is where the wave is reborn: what you plant there — habits, bonds, projects — tends to set the tone for nearly a decade. That is why cycle openings appear as milestones on your path.",
+  },
+  "timeline.pinnacle": {
+    title: "Pinnacle", glyph: "△",
+    body: "Pinnacles divide your life into four great learning stages, each ruled by a number calculated from your birth date. They are the major subjects of your life's school: the whole stage carries that number's themes, challenges and gifts. When a pinnacle changes, you don't lose what you learned — what changes is the lesson life places in front of you.",
+  },
+  "timeline.luckpillar": {
+    title: "Luck Pillar Change", glyph: "大運",
+    body: "In BaZi, life advances in decades, each ruled by a luck pillar (大運) with its own stem and branch. When the pillar changes, the background weather of the next ten years changes with it: which element blows in your favor, which one gives you homework, which area of life steps forward. You remain you — what rotates is the season you get to live yourself in.",
+  },
+  "timeline.confluence": {
+    title: "Confluence Year", glyph: "⧉",
+    body: "A year in which several of your cycles — Jupiter's beat, the nine-year wave, the luck pillar — turn at once. A confluence promises no outcomes: it describes a coincidence of clocks. But when several doors open in the same year, the moves you choose to make tend to meet less friction and more echo.",
+  },
 };

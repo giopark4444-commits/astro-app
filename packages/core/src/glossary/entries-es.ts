@@ -577,4 +577,38 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
     title: "Agua", glyph: "水",
     body: "El Agua conecta y desciende: nace del Metal, nutre a la Madera y apaga al Fuego que controla. Se vive como sabiduría, adaptabilidad, la inteligencia que fluye por donde puede en vez de insistir por donde no. Es el invierno del ciclo: quietud aparente, profundidad real.",
   },
+
+  // ——— Camino de vida (línea de tiempo vital) ———
+  "timeline.saturnreturn": {
+    title: "Retorno de Saturno", glyph: "♄",
+    body: "Cada 29 años y medio, Saturno vuelve al grado exacto donde estaba cuando naciste. Es el examen de madurez del cielo: lo que construiste con verdad se consolida, y lo que sostenías por costumbre o por miedo se desarma solo. El primero (~29) te estrena como adulto de tu propia vida; el segundo (~59) pregunta qué legado empieza ahora. Incomoda — y es de los tránsitos más fértiles que existen.",
+  },
+  "timeline.jupiterreturn": {
+    title: "Retorno de Júpiter", glyph: "♃",
+    body: "Cada casi 12 años, Júpiter regresa al lugar que ocupaba en tu nacimiento y abre un ciclo nuevo de expansión: más mundo, más estudio, más fe en lo posible. No reparte premios — reparte puertas, y cruzarlas sigue siendo trabajo tuyo. Míralo como el compás que marca los capítulos de crecimiento de tu vida.",
+  },
+  "timeline.uranusopposition": {
+    title: "Oposición de Urano", glyph: "♅",
+    body: "Hacia los 42 años, Urano llega al punto exactamente opuesto al de tu nacimiento: la famosa «mitad de la vida». Todo lo que dejaste sin vivir por cumplir, encajar o esperar levanta la mano a la vez. No es crisis por capricho — es la última gran llamada a corregir el rumbo con las fuerzas enteras. Quien la escucha suele vivir la segunda mitad más suya que la primera.",
+  },
+  "timeline.uranusreturn": {
+    title: "Retorno de Urano", glyph: "♅",
+    body: "Urano tarda 84 años en dar la vuelta completa al zodíaco, así que su retorno se vive una sola vez. Es el cierre del círculo grande: mirar la vida entera y reconocer qué fue auténticamente tuyo — y qué libertad todavía queda por estrenar. Las tradiciones lo leen como la edad de la sabiduría que ya no pide permiso.",
+  },
+  "timeline.cycle9": {
+    title: "Ciclo de 9", glyph: "9",
+    body: "La numerología lee la vida en ondas de nueve años: siembra (1), construcción (los del medio) y cosecha-cierre (9), y vuelta a empezar. Tu año personal 1 es el punto donde la onda renace: lo que plantas ahí — hábitos, vínculos, proyectos — tiende a marcar el tono de casi una década. Por eso los inicios de ciclo aparecen como hitos en tu camino.",
+  },
+  "timeline.pinnacle": {
+    title: "Pináculo", glyph: "△",
+    body: "Los pináculos dividen tu vida en cuatro grandes etapas de aprendizaje, cada una regida por un número calculado desde tu fecha de nacimiento. Son como las materias mayores de tu escuela vital: la etapa entera trae los temas, los retos y los dones de ese número. Cuando un pináculo cambia, no pierdes lo aprendido — cambia la lección que la vida te pone delante.",
+  },
+  "timeline.luckpillar": {
+    title: "Cambio de pilar de suerte", glyph: "大運",
+    body: "En BaZi, la vida avanza en décadas regidas cada una por un pilar de suerte (大運) con su propio tronco y rama. Cuando el pilar cambia, cambia el clima de fondo de los siguientes diez años: qué elemento sopla a favor, cuál te pone tarea, qué área de la vida pasa al frente. Tú sigues siendo tú — lo que rota es la estación en la que te toca vivirte.",
+  },
+  "timeline.confluence": {
+    title: "Año de confluencia", glyph: "⧉",
+    body: "Un año donde varios de tus ciclos — el compás de Júpiter, la onda de nueve años, el pilar de suerte — giran a la vez. La confluencia no promete resultados: describe una coincidencia de relojes. Pero cuando varias puertas se abren el mismo año, los movimientos que decides hacer suelen encontrar menos fricción y más eco.",
+  },
 };
