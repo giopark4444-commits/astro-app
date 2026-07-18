@@ -6,6 +6,10 @@
   "common": {
     "loading": "Un momento…"
   },
+  "voice": {
+    "listen": "Escuchar",
+    "stop": "Detener"
+  },
   "nav": {
     "carta": "Carta",
     "numeros": "Números",

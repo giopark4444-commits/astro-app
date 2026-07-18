@@ -8,6 +8,8 @@
 // persona, sin burbuja de usuario visible para ese turno invisible.
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSpeak } from "@/lib/voice";
+import { SpeakButton } from "@/components/speak-button";
 import styles from "./reading-chat.module.css";
 
 export interface ReadingChatCard {
@@ -33,6 +35,7 @@ export function ReadingChat({
 }) {
   const t = useTranslations("tarot");
   const locale = useLocale();
+  const { speakingId, toggle, supported } = useSpeak();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [st, setSt] = useState<St>("opening");
@@ -127,6 +130,14 @@ export function ReadingChat({
             {messages.map((m, i) => (
               <div key={i} className={`${styles.msg} ${m.role === "user" ? styles.user : styles.aluna}`}>
                 {m.content}
+                {m.role === "assistant" && supported && m.content.trim() && (
+                  <div>
+                    <SpeakButton
+                      speaking={speakingId === `r${i}`}
+                      onClick={() => toggle(`r${i}`, m.content, locale === "en" ? "en" : "es")}
+                    />
+                  </div>
+                )}
               </div>
             ))}
             {(st === "loading" || st === "opening") && <p className={styles.thinking}>{t("chatThinking")}</p>}

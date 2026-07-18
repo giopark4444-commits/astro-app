@@ -6,6 +6,10 @@
   "common": {
     "loading": "One moment…"
   },
+  "voice": {
+    "listen": "Listen",
+    "stop": "Stop"
+  },
   "nav": {
     "carta": "Chart",
     "numeros": "Numbers",

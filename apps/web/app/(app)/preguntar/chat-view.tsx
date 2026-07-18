@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { useSpeak } from "@/lib/voice";
+import { SpeakButton } from "@/components/speak-button";
 import styles from "./chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -13,6 +15,7 @@ type St = "idle" | "loading" | "dormant" | "error";
 export function ChatView() {
   const t = useTranslations("chat");
   const locale = useLocale();
+  const { speakingId, toggle, supported } = useSpeak();
   const { active } = useProfiles();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -102,6 +105,14 @@ export function ChatView() {
         {messages.map((m, i) => (
           <div key={i} className={`${styles.msg} ${m.role === "user" ? styles.user : styles.aluna}`}>
             {m.content}
+            {m.role === "assistant" && supported && m.content.trim() && (
+              <div>
+                <SpeakButton
+                  speaking={speakingId === `p${i}`}
+                  onClick={() => toggle(`p${i}`, m.content, locale === "en" ? "en" : "es")}
+                />
+              </div>
+            )}
           </div>
         ))}
         {st === "loading" && <p className={styles.thinking}>{t("thinking")}</p>}
