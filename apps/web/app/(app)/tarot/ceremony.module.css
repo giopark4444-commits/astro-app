@@ -285,22 +285,23 @@
   .ceremony { padding: var(--sp-6) var(--sp-6); }
 
   /* Requisito §E de Gio: abanico con blancos de toque cómodos en desktop.
-     Cartas más grandes (58×94 → 72×120, mismo ratio ~0.6) y arco más abierto
-     (menos grados por carta + origen de rotación más lejano) para que se
-     solapen menos; el hover/focus ya sube z-index arriba (regla compartida
-     con móvil) — acá solo se agranda el levante para que se note más con
-     mouse. Mecánica intacta: mismos --i, mismo handler onClick. */
-  .fanArc { width: 1180px; height: 260px; }
+     Cartas más grandes (58×94 → 72×120, mismo ratio ~0.6) y franja EXPUESTA
+     por carta calibrada EN VIVO a ~15px (medida real del gate: con 0.82°/640%
+     quedaba en 10px — apretado): exposición ≈ radio × Δθ = (7.0×120px) ×
+     1.02° ≈ 15px; arco total 79.6° → cuerda ≈ 1075px, cabe en el contenedor.
+     El hover/focus sube z-index y levanta la carta (regla compartida + levante
+     desktop abajo). Mecánica intacta: mismos --i, mismo handler onClick. */
+  .fanArc { width: 1180px; height: 310px; }
   .fanCard {
     width: 72px;
     height: 120px;
     margin-left: -36px;
-    transform: rotate(calc((var(--i) - 38.5) * 0.82deg));
-    transform-origin: 50% 640%;
+    transform: rotate(calc((var(--i) - 38.5) * 1.02deg));
+    transform-origin: 50% 700%;
   }
   .fanCard:hover,
   .fanCard:focus-visible {
-    transform: rotate(calc((var(--i) - 38.5) * 0.82deg)) translateY(-20px);
+    transform: rotate(calc((var(--i) - 38.5) * 1.02deg)) translateY(-26px);
     box-shadow: 0 0 0 2px var(--acc), var(--glow);
   }
 
