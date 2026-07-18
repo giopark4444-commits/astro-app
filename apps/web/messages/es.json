@@ -784,7 +784,10 @@
     "chatDormantTitle": "El oráculo aún duerme",
     "chatDormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu lectura ya habla por sí sola.",
     "chatPlaceholder": "Escribe tu respuesta…",
-    "chatSend": "Enviar"
+    "chatSend": "Enviar",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca la carta del día o una lectura del diario para leerla aquí.",
+    "backToReading": "Volver a la lectura"
   },
   "errors": {
     "notFoundTitle": "Esta constelación no existe",

@@ -784,7 +784,10 @@
     "chatDormantTitle": "The oracle still sleeps",
     "chatDormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your reading already speaks for itself.",
     "chatPlaceholder": "Type your reply…",
-    "chatSend": "Send"
+    "chatSend": "Send",
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap the card of the day or a journal reading to read it here.",
+    "backToReading": "Back to the reading"
   },
   "errors": {
     "notFoundTitle": "This constellation isn't on the map",
