@@ -33,9 +33,15 @@ type WesternViewProps = {
   period: HoroscopePeriod;
   onPeriodChange: (p: HoroscopePeriod) => void;
   tz: string;
+  // `sign` también se IZA al orquestador (fix de review de Task 2 — regresión
+  // del MOVE: en el monolito vivía en el componente raíz y persistía al
+  // cambiar de pestaña porque router.replace no remonta; en la subvista se
+  // desmontaba y se reseteaba). Mismo contrato que `pro`/`period`.
+  sign: string | null;
+  onSignChange: (s: string | null) => void;
 };
 
-export function WesternView({ pro, onProToggle, period, onPeriodChange, tz }: WesternViewProps) {
+export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign, onSignChange }: WesternViewProps) {
   const t = useTranslations("horoscopo");
   const th = useTranslations("hoy");
   const locale = useLocale();
@@ -43,9 +49,6 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz }: We
   const HOUSES = locale === "en" ? SOLAR_HOUSE_LABELS_EN : SOLAR_HOUSE_LABELS_ES;
   const { active } = useProfiles();
 
-  // Sin perfil arrancamos en Aries; con perfil, el backend resuelve el Sol natal
-  // en la PRIMERA carga (sign=null) y de ahí en adelante mandamos el elegido.
-  const [sign, setSign] = useState<string | null>(active ? null : "aries");
   // Ref (no useState: no debe disparar re-render ni ser dep del efecto) para
   // detectar la transición "el signo se acaba de resolver desde null" (fix de
   // T8 review: sin esto, setSign(p.sign) cambia `sign` en las deps del efecto,
@@ -82,15 +85,18 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz }: We
         if (!res.ok) throw new Error(String(res.status));
         const p = (await res.json()) as Payload;
         if (!alive) return;
-        setSign(p.sign);
+        onSignChange(p.sign);
         setState({ s: "ready", p });
       } catch {
         if (alive) setState({ s: "error" });
       }
     })();
     return () => { alive = false; };
-    // active?.id: si cambia el perfil activo, re-resolvemos el signo
-  }, [sign, period, tz, active?.id]);
+    // active?.id: si cambia el perfil activo, re-resolvemos el signo.
+    // onSignChange: bajado del orquestador como el setter de useState sin
+    // envolver (`onSignChange={setSign}`), así que es referencialmente
+    // estable entre renders — incluirlo no dispara reruns extra.
+  }, [sign, period, tz, active?.id, onSignChange]);
 
   const ready = state.s === "ready" ? state.p : null;
   const prose = ready ? composeWesternProse(locale === "en" ? "en" : "es", ready) : [];
@@ -111,7 +117,7 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz }: We
               <button type="button" role="radio" aria-checked={sign === s.key}
                 className={`chip--control ${sign === s.key ? "chip--control-on" : ""} ${styles.chipReveal}`}
                 style={{ ["--i" as string]: i }}
-                onClick={() => setSign(s.key)}>
+                onClick={() => onSignChange(s.key)}>
                 {SIGN_GLYPH[s.key]} {L.signs[s.key]}
               </button>
               <Meaning k={`sign.${s.key}`} ariaLabel={`Qué significa ${L.signs[s.key]}`}>

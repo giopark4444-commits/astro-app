@@ -40,9 +40,15 @@ type EasternViewProps = {
   period: HoroscopePeriod;
   onPeriodChange: (p: HoroscopePeriod) => void;
   tz: string;
+  // `animal` también se IZA al orquestador (fix de review de Task 2 — mismo
+  // motivo y mecánica que `sign` en western-view: persistía en el monolito
+  // original al cambiar de pestaña porque router.replace no remonta, y se
+  // había roto en el split porque la subvista se desmonta).
+  animal: string | null;
+  onAnimalChange: (a: string | null) => void;
 };
 
-export function EasternView({ pro, onProToggle, period, onPeriodChange, tz }: EasternViewProps) {
+export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, animal, onAnimalChange }: EasternViewProps) {
   const t = useTranslations("horoscopo");
   const th = useTranslations("hoy");
   const tp = useTranslations("pilares");
@@ -51,7 +57,6 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz }: Ea
 
   // Oriental: mismo patrón que occidental (state machine, ref anti-parpadeo,
   // resolución del animal desde el perfil en la 1ª carga).
-  const [animal, setAnimal] = useState<string | null>(active ? null : "rat");
   const prevAnimalRef = useRef<string | null>(animal);
   const [easternState, setEasternState] = useState<EasternState>({ s: "loading" });
   const [openAreaEastern, setOpenAreaEastern] = useState<string | null>(null);
@@ -77,14 +82,16 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz }: Ea
         if (!res.ok) throw new Error(String(res.status));
         const p = (await res.json()) as EasternPayload;
         if (!alive) return;
-        setAnimal(p.animal);
+        onAnimalChange(p.animal);
         setEasternState({ s: "ready", p });
       } catch {
         if (alive) setEasternState({ s: "error" });
       }
     })();
     return () => { alive = false; };
-  }, [animal, period, tz, active?.id]);
+    // onAnimalChange: mismo motivo que onSignChange en western-view.tsx — es
+    // el setter de useState sin envolver, referencialmente estable.
+  }, [animal, period, tz, active?.id, onAnimalChange]);
 
   const readyEastern = easternState.s === "ready" ? easternState.p : null;
   const proseEastern = readyEastern
@@ -119,7 +126,7 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz }: Ea
               <button type="button" role="radio" aria-checked={animal === a}
                 className={`chip--control ${animal === a ? "chip--control-on" : ""} ${styles.chipReveal}`}
                 style={{ ["--i" as string]: i }}
-                onClick={() => setAnimal(a)}>
+                onClick={() => onAnimalChange(a)}>
                 {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
               </button>
               <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[i]!.key}`} ariaLabel={`Qué significa ${tp(`animal${cap(a)}`)}`}>

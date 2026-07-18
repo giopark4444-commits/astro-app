@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { HoroscopePeriod } from "@/lib/horoscope/western";
+import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { Starfield } from "@/components/starfield";
 import { WesternView } from "./western-view";
 import { EasternView } from "./eastern-view";
@@ -16,6 +17,7 @@ export function HoroscopoView() {
   const t = useTranslations("horoscopo");
   const router = useRouter();
   const params = useSearchParams();
+  const { active } = useProfiles();
 
   const trad = params.get("trad") === "oriental" ? "oriental" : "occidental";
 
@@ -24,8 +26,17 @@ export function HoroscopoView() {
   // reinicia ni el periodo elegido ni el Modo Pro (comportamiento existente;
   // `pro` además prepara H4, donde gobernará el panel maestro-detalle). `tz` se
   // resuelve una vez y se pasa a la vista montada.
+  //
+  // `sign` y `animal` también se IZAN aquí (fix de review de Task 2: en el
+  // monolito original vivían en el componente raíz y sobrevivían al cambio de
+  // pestaña porque router.replace no remonta; tras el split habían quedado en
+  // cada subvista, que SÍ se desmonta al cambiar `trad` — regresión: elegir un
+  // signo, mirar la vista oriental y volver perdía la elección). Mismo patrón
+  // que `pro`/`period`: fuente de verdad aquí, la subvista solo la consume.
   const [pro, setPro] = useState(false);
   const [period, setPeriod] = useState<HoroscopePeriod>("today");
+  const [sign, setSign] = useState<string | null>(active ? null : "aries");
+  const [animal, setAnimal] = useState<string | null>(active ? null : "rat");
   const tz = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone ?? "utc", []);
 
   return (
@@ -49,11 +60,13 @@ export function HoroscopoView() {
         <EasternView
           pro={pro} onProToggle={() => setPro(!pro)}
           period={period} onPeriodChange={setPeriod} tz={tz}
+          animal={animal} onAnimalChange={setAnimal}
         />
       ) : (
         <WesternView
           pro={pro} onProToggle={() => setPro(!pro)}
           period={period} onPeriodChange={setPeriod} tz={tz}
+          sign={sign} onSignChange={setSign}
         />
       )}
     </main>
