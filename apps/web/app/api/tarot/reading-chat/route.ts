@@ -142,9 +142,12 @@ export async function POST(request: NextRequest) {
   let system = `${SYSTEM_INTRO[locale]}\n\n${context}`;
 
   // "Aluna te conoce" (Task 2): mismo cableado que /api/chat, mínimo posible.
+  // Opt-in explícito (review final): solo si la persona respondió el
+  // cuestionario Y activó useInAI a mano — mismo criterio que buildIntentLine
+  // (sin cuestionario no hay recolección de memoria).
   const { data: settingsRow } = await supabase.from("settings").select("intent").eq("user_id", user.id).maybeSingle();
   const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
-  const useMemories = intent?.useInAI !== false;
+  const useMemories = intent?.useInAI === true;
   if (useMemories) {
     const memoryBlock = formatMemoryBlock(await fetchMemories(supabase, user.id), locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;

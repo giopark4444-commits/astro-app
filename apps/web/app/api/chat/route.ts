@@ -121,10 +121,11 @@ export async function POST(request: NextRequest) {
   if (intentLine) system = `${system}\n\n${intentLine}`;
 
   // "Aluna te conoce" (Task 2): recuerdos duraderos de conversaciones previas.
-  // Gobernado por el mismo toggle que la línea de intención — si la persona
-  // apagó useInAI, ni siquiera se consulta la tabla. Byte-igual si no hay
+  // Opt-in explícito (review final): solo si la persona respondió el
+  // cuestionario Y activó useInAI a mano — mismo criterio que buildIntentLine
+  // (sin cuestionario no hay recolección de memoria). Byte-igual si no hay
   // recuerdos o el toggle está apagado (formatMemoryBlock devuelve null).
-  const useMemories = intent?.useInAI !== false;
+  const useMemories = intent?.useInAI === true;
   if (useMemories) {
     const memories = await fetchMemories(supabase, user.id);
     const memoryBlock = formatMemoryBlock(memories, locale);
@@ -157,6 +158,9 @@ export async function POST(request: NextRequest) {
   // Destilado post-conversación (fire-and-forget, best-effort total): solo si
   // el toggle está encendido. `after()` corre una vez la respuesta terminó de
   // enviarse (incluido el streaming), así que `assistantReply` ya está completo.
+  // Nota: corre en CADA turno (ruta stateless, sin señal de "fin de
+  // conversación"); debounce/dedupe semántico entre turnos queda como mejora
+  // futura conocida.
   if (useMemories) {
     after(async () => {
       try {

@@ -84,8 +84,8 @@ export async function deleteMemory(id: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("user_memories").delete().eq("id", id).eq("user_id", user.id);
+    revalidatePath("/ajustes");
   } catch {
     // best effort: no bloquear /ajustes por un fallo al borrar un recuerdo
   }
-  revalidatePath("/ajustes");
 }
