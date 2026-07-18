@@ -138,6 +138,9 @@
 .reading { display: flex; flex-direction: column; gap: var(--sp-4); } /* 14: empate → contenedor de bloques → mayor */
 .lens { margin: 0 0 var(--sp-1); /* 2px→sp-1: piso de la escala */ padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); font-size: var(--text-xs); /* 12.5: empate 12/13 → apoyo → menor */ font-style: italic; line-height: 1.55; color: var(--soft); text-align: center; }
 .essence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); /* 18→17 */ line-height: 1.5; color: var(--ink); }
+/* Hint del renderizador único sin Pro (Task 2, receta de pilares.module.css
+   .interpHintLine): itálica suave bajo la esencia escrita a mano. */
+.interpHintLine { margin: 0; font-style: italic; font-size: var(--text-2xs); color: var(--soft); }
 .block { display: flex; flex-direction: column; gap: var(--sp-1); } /* 5→4 */
 .block p { margin: 0; font-size: var(--text-sm); /* 13.5→13 */ line-height: 1.62; color: var(--ink); }
 .blockH { font-size: var(--text-2xs); /* 10→11 piso */ letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
