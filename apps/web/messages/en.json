@@ -305,7 +305,8 @@
     "compatibility": "Compatibility",
     "lifePath": "Life path",
     "preferences": "Preferences",
-    "sinceAluna": "In Aluna since {date} ✦︎"
+    "sinceAluna": "In Aluna since {date} ✦︎",
+    "chatTitle": "Ask Aluna"
   },
   "lifetime": {
     "eyebrow": "Your map through time",

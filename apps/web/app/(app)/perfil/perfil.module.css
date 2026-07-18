@@ -1,5 +1,39 @@
 .page { position: relative; padding: var(--sp-6) var(--sp-5) var(--sp-7); max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--sp-5); }
 
+/* — Maestro-detalle (T2): perfil a la izquierda, chat con Aluna sticky a la
+   derecha en desktop. En móvil el panel derecho no existe (display:none) y el
+   layout queda idéntico al anterior — ver @media (min-width: 1080px). */
+.deskCols { display: block; }
+/* .leftCol reproduce en móvil el ritmo vertical que daba `.page` (flex column +
+   gap sp-5): las 5 secciones se auto-espaciaban por el gap del padre flex, NO
+   por márgenes propios, así que un `display:block` colapsaría la separación
+   (numeros sí usa block porque sus secciones se auto-espacian con márgenes; las
+   de perfil no). En desktop se convierte en la retícula 12-col (ver @media). */
+.leftCol { display: flex; flex-direction: column; gap: var(--sp-5); }
+.interpCol { display: none; }
+/* Título del panel (span) — misma receta que la serie (numerology-view .cardH2). */
+.cardH2 {
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+}
+/* El panel: columna flex de alto fijo. Definido en base (no @media) para que el
+   key exista siempre en el CSS module y la cadena flex quede en un solo lugar;
+   en móvil su padre .interpCol es display:none, así que nunca se pinta. */
+.chatPanel {
+  display: flex; flex-direction: column;
+  height: calc(100vh - 100px);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface); padding: var(--sp-4);
+  overflow: hidden;
+}
+/* El único <div> hijo directo del panel es la envoltura `.wrapEmbedded` del
+   ChatView (el otro hijo es el <span> del título). Este flex:1 + min-height:0 es
+   el eslabón que faltaba en la cadena: PF1 ya puso min-height:0 en wrapEmbedded y
+   overflow-y:auto en su .thread, pero sin flex-grow aquí el wrapEmbedded tomaría
+   su height:100% y empujaría el título fuera del recorte. Con esto, .thread
+   scrollea y el .composer (input) se asienta abajo. */
+.chatPanel > div { flex: 1; min-height: 0; }
+
 .hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); text-align: center; }
 .identity { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
 .eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0; }
@@ -189,13 +223,35 @@
 .notesFormError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
+  /* .page ya NO es la grilla 12-col: ahora sólo centra el layout maestro-detalle
+     (deskCols). La retícula de 12 columnas se mudó íntegra a .leftCol (abajo). */
+  .page { max-width: min(1280px, calc(100% - 112px)); }
+
+  /* Split maestro-detalle: perfil (11fr) + chat sticky (9fr) — mismos valores
+     que la receta serie (carta/pilares/numerology-view .deskCols). */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+
   /* Retícula del mockup 06 §5: 12 columnas; hero y diario ocupan la fila
      completa; personas (ex 7 cols) pasa a fila completa propia al perder a
-     su vecina Preferencias (ésta y Plan se mudaron a /ajustes, brief T2/T4). */
-  .page {
+     su vecina Preferencias (ésta y Plan se mudaron a /ajustes, brief T2/T4).
+     Antes vivía en .page; ahora en .leftCol (el contenido va dentro del split).
+     Las reglas de grid-column/order de .hero/.diarioGrid/.people de abajo son
+     las mismas — sólo cambió el contenedor. min-width:0 evita que el contenido
+     nowrap desborde la columna 11fr. */
+  .leftCol {
     display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-5);
-    max-width: min(1280px, calc(100% - 112px));
+    min-width: 0;
   }
+
+  /* Panel derecho: lo único sticky — el perfil de la izquierda scrollea libre
+     (mismo mecanismo/offset que carta/pilares/numeros, top: 84px = header 66px
+     + respiro). */
+  .interpCol { display: block; position: sticky; top: 84px; }
   .hero { flex-direction: row; align-items: center; text-align: left; gap: var(--sp-6); grid-column: 1 / -1; order: 1; }
   .identity { align-items: flex-start; flex: 1; }
   .name { font-size: 44px; }

@@ -6,6 +6,7 @@ import { LifetimePreview } from "./lifetime-preview";
 import { Personas } from "./personas";
 import { Manifestations } from "./manifestations";
 import { Journal } from "./journal";
+import { PerfilChatPanel } from "./perfil-chat-panel";
 import styles from "./perfil.module.css";
 
 export default async function PerfilPage() {
@@ -31,14 +32,24 @@ export default async function PerfilPage() {
   // timestamp de Supabase Auth, siempre presente para un usuario ya logueado.
   const since = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(new Date(user.created_at));
 
+  // Maestro-detalle (T2): el perfil (izquierda) + el chat con Aluna sticky
+  // (derecha) en desktop. El orden interno de las 5 secciones no cambia; en
+  // móvil el panel derecho es display:none y el layout queda idéntico.
   return (
     <main className={styles.page}>
-      <PerfilHero userId={user.id} avatarUrl={publicUrl} since={since} />
-      <LifetimePreview />
-      <Personas />
-      <div className={styles.diarioGrid}>
-        <Manifestations />
-        <Journal />
+      <div className={styles.deskCols}>
+        <div className={styles.leftCol}>
+          <PerfilHero userId={user.id} avatarUrl={publicUrl} since={since} />
+          <LifetimePreview />
+          <Personas />
+          <div className={styles.diarioGrid}>
+            <Manifestations />
+            <Journal />
+          </div>
+        </div>
+        <div className={styles.interpCol}>
+          <PerfilChatPanel />
+        </div>
       </div>
     </main>
   );
