@@ -13,7 +13,7 @@ describe("TarotSelection", () => {
         { cardId: "fool", reversed: false, position: "past" },
         { cardId: "wands-03", reversed: true, position: "present", jumper: false },
       ],
-      createdAt: "2026-07-17T12:00:00.000Z",
+      created_at: "2026-07-17T12:00:00.000Z",
     };
 
     const sels: TarotSelection[] = [

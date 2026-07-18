@@ -14,7 +14,7 @@
 // tarot-view.tsx) que consume el diario: `id`+`spread` para la etiqueta de la
 // lista y el título del sheet (DIARY_SPREAD_KEY), `question` y `cards`
 // (`cardId`/`reversed`/`position`/`jumper`) para reconstruir la prosa con
-// `composeReadingProse` de `@aluna/core`, `createdAt` para la fecha en la
+// `composeReadingProse` de `@aluna/core`, `created_at` para la fecha en la
 // lista. Deliberadamente SIN `user_id`/`profile_id`/`deck`/`notes` — el
 // diario no los usa.
 export type SavedReadingLite = {
@@ -22,7 +22,7 @@ export type SavedReadingLite = {
   spread: string;
   question: string | null;
   cards: Array<{ cardId: string; reversed: boolean; position: string; jumper?: boolean }>;
-  createdAt: string;
+  created_at: string; // snake_case: fila cruda de Supabase, sin transformar (ver TarotReadingRow en tarot-view)
 };
 
 export type TarotSelection =
