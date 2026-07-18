@@ -576,7 +576,11 @@
     "interactionsEmpty": "Sin interacciones mayores entre tus pilares: un mapa sereno.",
     "starsTitle": "Estrellas simbólicas",
     "threePillarsNote": "Sin hora de nacimiento el cálculo usa 3 pilares; el pilar de hora y sus estrellas se omiten.",
-    "seasonState": "Estado estacional"
+    "seasonState": "Estado estacional",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca un pilar, un elemento o cualquier símbolo de la izquierda para leer qué significa en tu carta.",
+    "interpPillarsTech": "Tus pilares, en datos",
+    "decadeRange": "de los {from} a los {to} años"
   },
   "horoscopo": {
     "title": "Horóscopo",

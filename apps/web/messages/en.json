@@ -576,7 +576,11 @@
     "interactionsEmpty": "No major interactions between your pillars: a serene map.",
     "starsTitle": "Symbolic stars",
     "threePillarsNote": "Without a birth time the calculation uses 3 pillars; the hour pillar and its stars are omitted.",
-    "seasonState": "Seasonal state"
+    "seasonState": "Seasonal state",
+    "interpTitle": "Interpretation",
+    "interpHint": "Tap a pillar, an element, or any symbol on the left to read what it means in your chart.",
+    "interpPillarsTech": "Your pillars, in data",
+    "decadeRange": "from age {from} to {to}"
   },
   "horoscopo": {
     "title": "Horoscope",
