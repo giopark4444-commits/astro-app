@@ -8,6 +8,17 @@
 }
 .sky { position: absolute; inset: 0 0 auto; height: 220px; pointer-events: none; z-index: 0; }
 
+/* Modo embebido (panel de Perfil, T2 de este plan): sin padding de página, sin
+   cabecera/starfield (ver chat-view.tsx), toma el 100% de alto del panel
+   contenedor y deja que la lista de mensajes flexee mientras el input se
+   asienta abajo. */
+.wrapEmbedded {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; /* dentro de un flex/grid padre: permite que .thread encoja y scrollee en vez de desbordar */
+}
+
 .head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); } /* 10: empate 8/12 → separación → mayor */
 .eyebrow { font-family: var(--font-display); font-style: italic; font-size: var(--text-2xl); /* 22 → mayor (título) */ color: var(--ink); }
 .enso { color: var(--acc-text); display: inline-flex; opacity: 0.9; }

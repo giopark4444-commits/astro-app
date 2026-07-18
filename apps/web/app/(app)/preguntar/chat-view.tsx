@@ -12,21 +12,27 @@ import styles from "./chat.module.css";
 type Msg = { role: "user" | "assistant"; content: string };
 type St = "idle" | "loading" | "dormant" | "error";
 
-export function ChatView() {
+export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations("chat");
   const locale = useLocale();
   const { speakingId, toggle, supported } = useSpeak();
   const { active } = useProfiles();
+  // Se lee useSearchParams SIEMPRE (los hooks no pueden ser condicionales) e
+  // ignoramos su valor cuando embedded — más simple que extraer un
+  // subcomponente `PageSeed` y no viola las reglas de hooks.
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Msg[]>([]);
   // Precarga del input desde /hoy vía ?q= (mockup 06 §3.3): solo el valor
-  // inicial — NO auto-envía la pregunta.
-  const [input, setInput] = useState(() => searchParams.get("q") ?? "");
+  // inicial — NO auto-envía la pregunta. En modo embebido (panel de Perfil)
+  // no aplica: el chat ahí es general, no llega desde /hoy con una pregunta.
+  const [input, setInput] = useState(() => (embedded ? "" : searchParams.get("q") ?? ""));
   const [st, setSt] = useState<St>("idle");
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    // jsdom (tests) no implementa scrollIntoView: guard defensivo (mismo
+    // patrón que timeline-chat.tsx y reading-chat.tsx).
+    endRef.current?.scrollIntoView?.({ behavior: "smooth" });
   }, [messages, st]);
 
   if (!active) return null;
@@ -89,16 +95,20 @@ export function ChatView() {
   }
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.sky} aria-hidden>
-        <Starfield />
-      </div>
-      <div className={styles.head}>
-        <span className={styles.eyebrow}>{t("title")}</span>
-        <span className={styles.enso} aria-hidden>
-          <Icon name="enso" size={22} />
-        </span>
-      </div>
+    <div className={embedded ? styles.wrapEmbedded : styles.wrap}>
+      {!embedded && (
+        <>
+          <div className={styles.sky} aria-hidden>
+            <Starfield />
+          </div>
+          <div className={styles.head}>
+            <span className={styles.eyebrow}>{t("title")}</span>
+            <span className={styles.enso} aria-hidden>
+              <Icon name="enso" size={22} />
+            </span>
+          </div>
+        </>
+      )}
 
       <div className={styles.thread}>
         {messages.length === 0 && st !== "dormant" && <p className={styles.greeting}>{t("greeting")}</p>}
