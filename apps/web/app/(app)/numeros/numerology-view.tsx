@@ -6,6 +6,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { profileToNumerologyInput, formatReduction } from "@/lib/numerology";
 import { NumerosInterpretation } from "./interpretation-content";
 import { isMobileViewport, type NumSelection } from "./selection";
+import { useSheetAutoClose } from "@/lib/viewport";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -25,6 +26,7 @@ export function NumerologyView() {
   // La selección viva del panel (desktop) y la del sheet (móvil). null = default.
   const [selected, setSelected] = useState<NumSelection | null>(null);
   const [sheetSel, setSheetSel] = useState<NumSelection | null>(null);
+  useSheetAutoClose(!!sheetSel, () => setSheetSel(null));
 
   // Router de selección: en móvil abre el bottom-sheet; en desktop escribe el
   // panel derecho. SSR-safe (isMobileViewport → false en servidor).

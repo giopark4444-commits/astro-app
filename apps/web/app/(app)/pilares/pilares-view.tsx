@@ -17,6 +17,7 @@ import { PilaresTabs, FREE_TABS, type PilaresTab } from "./pilares-tabs";
 import { BaziReadingView } from "./bazi-reading";
 import { PilaresInterpretation, pilarSelectionTitle } from "./interpretation-content";
 import { isMobileViewport, type PilarSelection } from "./selection";
+import { useSheetAutoClose } from "@/lib/viewport";
 import type { BaZiData } from "./types";
 import styles from "./pilares.module.css";
 
@@ -87,6 +88,7 @@ export function PilaresView() {
   // Maestro-detalle: la selección viva del panel (desktop) y la del sheet (móvil).
   const [selected, setSelected] = useState<PilarSelection>({ kind: "reading" });
   const [sheetSel, setSheetSel] = useState<PilarSelection | null>(null);
+  useSheetAutoClose(!!sheetSel, () => setSheetSel(null));
 
   // Router de selección: en móvil abre el bottom-sheet; en desktop escribe en el
   // panel derecho. SSR-safe (isMobileViewport → false en servidor).

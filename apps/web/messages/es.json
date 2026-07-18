@@ -639,7 +639,9 @@
     "proHarmoniesHint": "Animales en 六合 contigo: alianzas que fluyen solas.",
     "proMonthChange": "Cambio de mes solar",
     "proMonthChangeHint": "El 節 marca el cambio de energía mensual dentro del periodo.",
-    "proMethodEastern": "Pilares del periodo a mediodía local. Zona horaria: {tz}."
+    "proMethodEastern": "Pilares del periodo a mediodía local. Zona horaria: {tz}.",
+    "interpTitle": "Interpretación",
+    "interpHint": "Toca una barra de energía o cualquier símbolo para leer qué significa."
   },
   "billing": {
     "title": "Tu plan",

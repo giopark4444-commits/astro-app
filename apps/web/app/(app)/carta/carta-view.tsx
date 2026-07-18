@@ -19,6 +19,7 @@ import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
 import { PLANET_GLYPH, SIGN_GLYPH } from "./glyphs";
 import { isMobileViewport, type Selection } from "./selection";
+import { useSheetAutoClose } from "@/lib/viewport";
 import { InterpretationContent, selectionTitle } from "./interpretation-content";
 import { PositionsTable } from "./positions-table";
 import { AspectList } from "./aspect-list";
@@ -54,6 +55,7 @@ export function CartaView() {
   // abre el bottom-sheet (móvil). El router `select` elige según viewport.
   const [selected, setSelected] = useState<Selection>({ kind: "core" });
   const [sheetSel, setSheetSel] = useState<Selection | null>(null);
+  useSheetAutoClose(!!sheetSel, () => setSheetSel(null));
   const [state, setState] = useState<State>({ s: "loading" });
   const cache = useRef<Map<string, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
     new Map(),
