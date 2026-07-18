@@ -70,7 +70,7 @@ export function assembleTimeline(profile: TimelineProfile, nowIso: string): Time
   };
 
   const numerology = numerologyEvents(birth, birth.year, horizonYear);
-  const bazi = baziEvents(luck, annual, birth.month);
+  const bazi = baziEvents(luck, annual, birth.month, baziNatal.gender === "neutral");
   const astro = astroTimelineEvents(natal, birthIso, toIso);
   const base = mergeTimeline([[birthEvent], numerology, bazi, astro]);
   const confluences = confluenceEvents(base, currentYear, horizonYear);

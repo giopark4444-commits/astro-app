@@ -91,7 +91,7 @@ describe("astroTimelineEvents", () => {
     }
     const saturnEvents = events.filter((e) => e.kind === "saturn-return");
     expect(saturnEvents.length).toBeGreaterThan(0);
-    expect(saturnEvents.length).toBeLessThanOrEqual(3); // maxOrdinal 3
+    expect(saturnEvents.length).toBeLessThanOrEqual(2); // maxOrdinal 2
     for (const e of saturnEvents) expect(e.weight).toBe(3);
 
     const jupiterEvents = events.filter((e) => e.kind === "jupiter-return");

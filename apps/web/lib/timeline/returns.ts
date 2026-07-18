@@ -45,7 +45,7 @@ export const RETURN_SPECS: Record<
     windowDays: 120,
     aspectAngle: 0,
     seedFactor: 1,
-    maxOrdinal: 3,
+    maxOrdinal: 2,
   },
   "uranus-opposition": {
     body: "uranus",

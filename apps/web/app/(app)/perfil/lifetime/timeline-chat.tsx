@@ -159,7 +159,7 @@ export function TimelineChatFab({ profileId }: { profileId?: string | undefined 
         {t("chatFab")}
       </button>
       <BottomSheet open={open} onClose={() => setOpen(false)} title={t("chatTitle")}>
-        {open && <TimelineChatBody profileId={profileId} />}
+        {open && <TimelineChatBody key={profileId} profileId={profileId} />}
       </BottomSheet>
     </>
   );

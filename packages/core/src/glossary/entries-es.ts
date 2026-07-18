@@ -601,7 +601,7 @@ export const GLOSSARY_ES: Record<string, GlossaryEntry> = {
   },
   "timeline.pinnacle": {
     title: "Pináculo", glyph: "△",
-    body: "Los pináculos dividen tu vida en cuatro grandes etapas de aprendizaje, cada una regida por un número calculado desde tu fecha de nacimiento. Son como las materias mayores de tu escuela vital: la etapa entera trae los temas, los retos y los dones de ese número. Cuando un pináculo cambia, no pierdes lo aprendido — cambia la lección que la vida te pone delante.",
+    body: "Los pináculos dividen tu vida en cuatro grandes etapas de aprendizaje, cada una regida por un número calculado desde tu fecha de nacimiento. Son como las materias mayores de tu escuela vital: la etapa entera trae los temas, los retos y los dones de ese número. Cuando un pináculo cambia, no pierdes lo aprendido — cambia la lección que la vida te pone delante. El año de cambio se cuenta desde tu año de nacimiento más la edad del pináculo: alrededor de tu cumpleaños puede correrse un año.",
   },
   "timeline.luckpillar": {
     title: "Cambio de pilar de suerte", glyph: "大運",

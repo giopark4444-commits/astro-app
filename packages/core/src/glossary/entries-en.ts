@@ -598,7 +598,7 @@ export const GLOSSARY_EN: Record<string, GlossaryEntry> = {
   },
   "timeline.pinnacle": {
     title: "Pinnacle", glyph: "△",
-    body: "Pinnacles divide your life into four great learning stages, each ruled by a number calculated from your birth date. They are the major subjects of your life's school: the whole stage carries that number's themes, challenges and gifts. When a pinnacle changes, you don't lose what you learned — what changes is the lesson life places in front of you.",
+    body: "Pinnacles divide your life into four great learning stages, each ruled by a number calculated from your birth date. They are the major subjects of your life's school: the whole stage carries that number's themes, challenges and gifts. When a pinnacle changes, you don't lose what you learned — what changes is the lesson life places in front of you. The change year is counted from your birth year plus the pinnacle's age: around your birthday it can shift by a year.",
   },
   "timeline.luckpillar": {
     title: "Luck Pillar Change", glyph: "大運",

@@ -5,7 +5,7 @@
 // necesitamos: POST /api/timeline + timelineLabel para el fraseo.
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { groupTimelineYears, type TimelineRow } from "@/lib/timeline/group";
 import type { TimelineResult } from "@/lib/timeline/types";
@@ -17,7 +17,6 @@ type Status = "loading" | "error" | "ready";
 
 export function LifetimeView() {
   const t = useTranslations("lifetime");
-  const locale = useLocale();
   const { active } = useProfiles();
   const [status, setStatus] = useState<Status>("loading");
   const [result, setResult] = useState<TimelineResult | null>(null);
@@ -85,7 +84,7 @@ export function LifetimeView() {
       {status === "ready" && rows.length === 0 && <p className={styles.empty}>{t("empty")}</p>}
 
       {status === "ready" && rows.length > 0 && (
-        <Spine rows={rows} birthYear={result!.birthYear} locale={locale} t={t} />
+        <Spine rows={rows} birthYear={result!.birthYear} t={t} />
       )}
 
       {status === "ready" && <TimelineChatFab profileId={active?.id} />}
@@ -100,7 +99,6 @@ function Spine({
 }: {
   rows: TimelineRow[];
   birthYear: number;
-  locale: string;
   t: ReturnType<typeof useTranslations>;
 }) {
   const [revealed, setRevealed] = useState<Set<number>>(new Set());

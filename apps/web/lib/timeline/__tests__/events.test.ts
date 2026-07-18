@@ -146,6 +146,15 @@ describe("baziEvents — luck-pillar-change + annual-clash", () => {
     for (const e of eventsFeb) expect(e.meta?.lichunAmbiguous).toBe(true);
     for (const e of eventsMar) expect(e.meta?.lichunAmbiguous).toBeUndefined();
   });
+
+  it("flags luckDirectionAssumed only when assumedDirection is true (neutral-gender natal input)", () => {
+    const assumed = baziEvents(luck!, [], BIRTH.month, true);
+    const notAssumed = baziEvents(luck!, [], BIRTH.month, false);
+    const omitted = baziEvents(luck!, [], BIRTH.month);
+    for (const e of assumed) expect(e.meta?.luckDirectionAssumed).toBe(true);
+    for (const e of notAssumed) expect(e.meta?.luckDirectionAssumed).toBeUndefined();
+    for (const e of omitted) expect(e.meta?.luckDirectionAssumed).toBeUndefined();
+  });
 });
 
 describe("confluenceEvents", () => {

@@ -62,6 +62,7 @@ export function baziEvents(
   luck: LuckSequence,
   annual: AnnualPillarItem[],
   birthMonth: number,
+  assumedDirection?: boolean,
 ): TimelineEvent[] {
   const lichunAmbiguous = birthMonth === 1 || birthMonth === 2;
   const events: TimelineEvent[] = [];
@@ -80,6 +81,7 @@ export function baziEvents(
         nayin: item.nayin.key,
         startAge: item.startAge,
         ...(lichunAmbiguous ? { lichunAmbiguous: true as const } : {}),
+        ...(assumedDirection ? { luckDirectionAssumed: true as const } : {}),
       },
     });
   });

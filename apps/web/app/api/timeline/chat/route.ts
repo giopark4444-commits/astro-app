@@ -17,7 +17,7 @@ import {
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { assembleTimeline, type TimelineProfile } from "@/lib/timeline/assemble";
-import { computeBaziNatal } from "@/lib/timeline/bazi-natal";
+import { computeBaziNatal, type BaziNatalResult } from "@/lib/timeline/bazi-natal";
 import { buildTimelineChatContext, type TimelineChatFacts } from "@/lib/timeline/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
@@ -69,9 +69,8 @@ function pillarHanzi(pillar: Pillar): string {
   return `${HEAVENLY_STEMS[pillar.stem]!.hanzi}${EARTHLY_BRANCHES[pillar.branch]!.hanzi}`;
 }
 
-function currentLuckLabel(locale: "es" | "en", profile: TimelineProfile, currentYear: number): string | undefined {
+function currentLuckLabel(locale: "es" | "en", baziNatal: BaziNatalResult, currentYear: number): string | undefined {
   try {
-    const baziNatal = computeBaziNatal(profile);
     const pillars: PillarSet = {
       year: baziNatal.year,
       month: baziNatal.month,
@@ -99,9 +98,8 @@ function currentLuckLabel(locale: "es" | "en", profile: TimelineProfile, current
   }
 }
 
-function currentAnnualLabel(locale: "es" | "en", profile: TimelineProfile, currentYear: number): string | undefined {
+function currentAnnualLabel(locale: "es" | "en", baziNatal: BaziNatalResult, currentYear: number): string | undefined {
   try {
-    const baziNatal = computeBaziNatal(profile);
     const pillars: PillarSet = {
       year: baziNatal.year,
       month: baziNatal.month,
@@ -145,6 +143,13 @@ function buildFacts(locale: "es" | "en", profile: TimelineProfile, nowIso: strin
     solarReturnIso = undefined;
   }
 
+  let baziNatal: BaziNatalResult | undefined;
+  try {
+    baziNatal = computeBaziNatal(profile);
+  } catch {
+    baziNatal = undefined;
+  }
+
   const facts: TimelineChatFacts = {
     events: timeline.events,
     birthYear: timeline.birthYear,
@@ -154,11 +159,13 @@ function buildFacts(locale: "es" | "en", profile: TimelineProfile, nowIso: strin
     monthly,
     ...(solarReturnIso ? { solarReturnIso } : {}),
     ...((): { currentLuckLabel?: string } => {
-      const label = currentLuckLabel(locale, profile, currentYear);
+      if (!baziNatal) return {};
+      const label = currentLuckLabel(locale, baziNatal, currentYear);
       return label ? { currentLuckLabel: label } : {};
     })(),
     ...((): { currentAnnualLabel?: string } => {
-      const label = currentAnnualLabel(locale, profile, currentYear);
+      if (!baziNatal) return {};
+      const label = currentAnnualLabel(locale, baziNatal, currentYear);
       return label ? { currentAnnualLabel: label } : {};
     })(),
   };
