@@ -102,7 +102,7 @@
 /* Contenido del panel de interpretación (Task 2, espejo de pilares.module.css
    .interp*): bloque de clases que interpretation-content.tsx consume para las
    3 kinds de TarotSelection (daily/saved/card) — mismo contenido que hoy
-   arman .daily*/.sheet* de arriba (dailyProse/openReadingProse en
+   arman .daily* y .sheet* de arriba (dailyProse/openReadingProse en
    tarot-view.tsx), ahora detrás de un renderizador único que compartirán el
    bottom-sheet móvil y el futuro panel desktop sticky (Task 3). Reutiliza
    .reversedTag (ya genérico, arriba) sin duplicarlo. */
