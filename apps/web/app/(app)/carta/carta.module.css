@@ -133,8 +133,6 @@
 .proDot[data-on] { background: rgba(var(--acc-rgb), 0.4); }
 .proDot[data-on]::after { transform: translateX(11px); background: var(--acc); }
 
-/* ---- Lámina Pro ---- */
-.pro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-3); } /* 11→sp-3 nearest; 10→sp-3 empate (jerarquía: entrada al bloque Pro, consistente con .lamina de pilares) */
 /* .card migrado al primitivo global card+card--tight — ver carta-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
 
@@ -145,6 +143,17 @@
 .posSign { color: var(--acc-text); font-variant-numeric: tabular-nums; }
 .posHouse { color: var(--soft); font-size: var(--text-2xs); } /* 10.5→2xs piso (sub-11) */
 .posDign { color: var(--soft); font-size: var(--text-2xs); text-align: right; } /* 10.5→2xs piso (sub-11) */
+
+/* celdas/filas seleccionables del maestro-detalle: botones desnudos que
+   heredan la tipografía de la tabla; el foco visible lo da el anillo acc */
+.selCell { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.selCell:hover { color: var(--acc-text); }
+.selRow { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+.selCell:focus-visible, .selRow:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
+
+/* chip clickeable del maestro-detalle: resetea el botón pero conserva la piel de .chip */
+.chipBtn { background: none; font: inherit; color: inherit; cursor: pointer; }
+.chipBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; }
 
 .distGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-1) var(--sp-3); } /* 5→sp-1 nearest; 14→sp-3 empate (apoyo, gap de grilla) */
 .distCell { font-size: var(--text-xs); color: var(--soft); }
@@ -167,12 +176,9 @@
 
 .tech { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; } /* 6→sp-1 empate (apoyo); 10.5→2xs piso (sub-11) */
 
-/* ---- Hoja de detalle ---- */
-.sheet { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; } /* 6→sp-1 empate (apoyo) */
-.sheetBig { font-family: var(--font-display); font-size: var(--text-3xl); color: var(--acc-text); line-height: 1; } /* 34→3xl (nearest, no empate; NO es el "sheet hero" del plan — ese vive en numerology-view.module.css .sheetN) */
-.sheetSign { font-size: var(--text-md); color: var(--ink); } /* 14→md empate (valor bajo el glifo, análogo a .rowValue de pilares) */
-.sheetMeta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-1); margin-top: var(--sp-1); } /* 6→sp-1 empate (apoyo) ×2 */
-/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
+/* R3: migrados al primitivo global .chip (globals.css) — solo lo que difiere queda local.
+   (.sheet/.sheetBig/.sheetSign/.sheetMeta se retiraron en R4a: el sheet unificado
+   reusa InterpretationContent — sin consumidor propio, ver T5.) */
 .tag { font-size: var(--text-2xs); color: var(--soft); padding: var(--sp-1) var(--sp-2); } /* 3→sp-1 nearest; 10→sp-2 empate (apoyo, padding de chip) */
 .tagWarn { border-color: rgba(var(--tone-caution-rgb), 0.6); color: var(--tone-caution); } /* R3: token --tone-caution (tokens.css), antes literal duplicado con numerology-view .chipWarn */
 
@@ -185,14 +191,35 @@
 .tierHint { margin: -4px 0 var(--sp-1); text-align: center; font-size: var(--text-2xs); font-style: italic; line-height: 1.5; color: var(--soft); } /* -4px excepción (ajuste de línea base negativo); 2→sp-1 piso */
 
 /* ---- Núcleo narrativo (mockup 06 §4.4): lectura, balance compacto, patrones, pie ---- */
-.coreExtra, .reading, .balPair, .balCap, .coreHint { display: none; } /* móvil: Núcleo queda como hoy */
+.balPair, .balCap { display: none; } /* móvil: Núcleo queda como hoy */
 
 /* ===== R4a desktop (mockup 06): 2 columnas 55/45, rueda sticky, tabs ===== */
 .deskCols { display: contents; }
 .dtabs { display: none; }
-/* móvil: la lámina pro solo se ve con el toggle encendido (mismo efecto que
-   el {pro && ...} que reemplazó — ver carta-view Step 6c) */
-.pro:not([data-pro]) { display: none; }
+
+/* ---- Maestro-detalle ---- */
+/* móvil: el panel derecho no existe (el sheet toma su lugar); la columna
+   técnica apila como siempre */
+.interpCol { display: none; }
+.techCard { display: contents; } /* móvil: los panes fluyen sueltos como hoy */
+.interpBlock { display: flex; flex-direction: column; gap: var(--sp-3); text-align: left; }
+.interpHead { display: flex; align-items: center; gap: var(--sp-3); }
+.interpGlyph { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--acc-text); line-height: 1; }
+.interpName { font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
+.interpSub { font-size: var(--text-xs); color: var(--soft); margin-top: 2px; }
+.interpBody { margin: 0; font-size: var(--text-sm); line-height: 1.65; color: var(--soft); }
+.interpTech { margin: 0; font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: var(--sp-2); }
+.interpHint { margin: 0; font-style: italic; font-size: var(--text-sm); color: var(--soft); text-align: center; padding: var(--sp-5) 0; }
+
+/* móvil: la lámina técnica (posiciones/aspectos/balance) solo se ve con el
+   toggle Pro encendido — mismo efecto que el {pro && ...} que reemplazó
+   (decisión de spec §5: en móvil el toggle sigue revelando la lámina como
+   hoy). En desktop es transparente: mandan las tabs (`.techCard .pane` /
+   `.paneOn` más abajo). */
+.mobileLamina { display: contents; }
+@media (max-width: 1079px) {
+  .mobileLamina:not([data-pro]) { display: none; }
+}
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* sin bottom-nav en desktop: sobra el clearance de 96px (paridad con hoy,
@@ -204,8 +231,12 @@
     gap: var(--sp-6);
     align-items: start;
   }
-  .wheelCol { position: sticky; top: 84px; /* header 66px + respiro */ }
-  .readCol { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .leftCol { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .wheelCol { position: static; } /* la rueda ya no es sticky: ahora lo fijo es la interpretación */
+  .techCard {
+    display: block; border: 1px solid var(--line); border-radius: var(--radius-lg);
+    background: var(--surface); backdrop-filter: blur(10px); overflow: hidden;
+  }
 
   /* tab-strip (mockup .dtabs) */
   .dtabs {
@@ -227,18 +258,24 @@
     box-shadow: 0 0 14px rgba(var(--acc-rgb), 0.55);
   }
 
-  /* panes: en desktop solo se ve el activo; en móvil (fuera del media) todos */
-  .readCol .pane { display: none; }
-  .readCol .paneOn { display: block; }
+  /* panes: en desktop solo se ve el activo; en móvil (fuera del media) todos.
+     Las secciones llevan la clase global `card` para el apilado móvil; dentro
+     del marco propio de `.techCard` en desktop ese borde/fondo/sombra
+     duplicaría el panel, así que se neutraliza el look de card aquí. */
+  .techCard .pane {
+    display: none; padding: var(--sp-4);
+    background: none; border: 0; box-shadow: none; border-radius: 0;
+  }
+  .techCard .paneOn { display: block; }
 
-  /* en desktop las secciones grandes de las tabs (posTable/aspectario/Balance)
-     se muestran SIEMPRE; solo tech/distGrid quedan detrás de Modo Pro (ver
-     carta-view.tsx: esas dos secciones pasaron a render condicional {pro &&}).
-     La lámina .pro es ahora un contenedor simple, siempre visible. */
-  .pro:not([data-pro]) { display: block; }
-  /* el toggle móvil (posición original en readCol) cede el lugar al del pie
-     de rueda (ChartControls.proToggle dentro de .ctrlRows). Doble clase:
-     debe ganarle a `.proToggle { display: inline-flex }` de más abajo. */
+  /* panel de interpretación: ahora es lo único sticky — la técnica de la
+     izquierda scrollea libre dentro de .leftCol */
+  .interpCol { display: block; position: sticky; top: 84px; /* header 66px + respiro (mismo valor que tenía la rueda) */ }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+
+  /* el toggle móvil (posición original en la columna técnica) cede el lugar
+     al del pie de rueda (ChartControls.proToggle dentro de .ctrlRows). Doble
+     clase: debe ganarle a `.proToggle { display: inline-flex }` de más abajo. */
   .proToggle.proToggleMobile { display: none; }
 
   .controlsMobile { display: none; }
@@ -268,17 +305,10 @@
   .proToggle { display: inline-flex; margin: 0; } /* reactivado en el pie de rueda */
 
   /* Núcleo narrativo (mockup 06 §4.4) */
-  .coreExtra { display: block; } /* wrapper del bloque de patrones dentro de Núcleo — sin clase .reading/.balPair/.balCap/.coreHint propia */
-  .chips.coreExtra { display: flex; } /* los chips de patrones conservan su flex/gap — .coreExtra{block} los pisaba (review final) */
-  .reading {
-    display: block; border: 1px solid rgba(var(--acc-rgb), 0.22); border-radius: var(--radius);
-    background: color-mix(in oklab, var(--bg) 65%, transparent); padding: 14px 17px; /* mockup .reading */
-  }
   .readingP { margin: 6px 0 0; font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.55; color: var(--ink); font-feature-settings: "lnum" 1; } /* mockup .reading p */
   .readingP b { color: var(--acc-text); font-weight: 600; }
   .balPair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); } /* mockup .bal */
   .balCap { display: block; margin: -6px 0 0; font-size: var(--text-2xs); color: var(--soft); } /* mockup .bal-cap */
-  .coreHint { display: block; margin: auto 0 0; text-align: center; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); } /* mockup .d-hint */
   .bigSub { font-variant-numeric: tabular-nums; }
   .bigTag { font-size: var(--text-2xs); padding: 1px 8px; border-radius: 999px; color: var(--tone-caution); border-color: rgba(var(--tone-caution-rgb), 0.4); margin-left: 4px; } /* mockup .warn */
   .bigTagGood { color: var(--acc-text); border-color: rgba(var(--acc-rgb), 0.4); } /* domicilio/exaltación: dorado suave en vez de tono-caution */
