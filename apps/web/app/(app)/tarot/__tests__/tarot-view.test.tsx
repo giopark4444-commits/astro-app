@@ -78,10 +78,14 @@ describe("TarotView", () => {
     const drawn = dailyCard(USER_ID, localDate, { reversals: true });
     const content = TAROT_CARDS_ES[drawn.card.id]!;
 
-    expect(await screen.findByText(content.name)).toBeInTheDocument();
-    expect(screen.getByText(content.essence)).toBeInTheDocument();
+    // nombre/keywords/essence viven ahora en DOS sitios en desktop (el hero de
+    // la carta del día + el panel de interpretación, maestro-detalle Task 3):
+    // se acotan a la <section> de la carta del día para no chocar con el panel.
+    const dailySection = (await screen.findByText(es.tarot.dailyTitle)).closest("section")!;
+    expect(within(dailySection).getByText(content.name)).toBeInTheDocument();
+    expect(within(dailySection).getByText(content.essence)).toBeInTheDocument();
     for (const kw of content.keywords) {
-      expect(screen.getByText(kw)).toBeInTheDocument();
+      expect(within(dailySection).getByText(kw)).toBeInTheDocument();
     }
 
     await waitFor(() => {
@@ -110,7 +114,10 @@ describe("TarotView", () => {
 
     const drawn = dailyCard(USER_ID, localDate, { reversals: true });
     const content = TAROT_CARDS_ES[drawn.card.id]!;
-    expect(await screen.findByText(content.name)).toBeInTheDocument();
+    // Acotado al hero de la carta del día (el nombre también sale en el panel).
+    await screen.findByText(es.tarot.dailyTitle);
+    const dailySection = screen.getByText(es.tarot.dailyTitle).closest("section")!;
+    expect(within(dailySection).getByText(content.name)).toBeInTheDocument();
 
     // Deja que cualquier microtask pendiente corra y confirma que no hubo POST.
     await waitFor(() => expect(calls.some((c) => c.init?.method === "GET")).toBe(true));
@@ -244,7 +251,10 @@ describe("TarotView", () => {
     );
     renderView();
 
-    expect(await screen.findByText(content.name)).toBeInTheDocument();
+    // Acotado al hero de la carta del día (el nombre también sale en el panel).
+    await screen.findByText(es.tarot.dailyTitle);
+    const dailySection = screen.getByText(es.tarot.dailyTitle).closest("section")!;
+    expect(within(dailySection).getByText(content.name)).toBeInTheDocument();
     await waitFor(() => expect(localStorage.getItem(`tarot-daily-${USER_ID}-${localDate}`)).toBe("1"));
     expect(localStorage.getItem(`tarot-daily-saved-${USER_ID}-${localDate}`)).toBe("1");
     expect(calls.some((c) => c.init?.method === "POST")).toBe(false);

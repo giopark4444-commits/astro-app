@@ -7,18 +7,18 @@
 // hoy arman dailyProse/openReadingProse en tarot-view.tsx, vía
 // composeReadingProse y el contenido core (TAROT_CARDS_ES/EN) de @aluna/core.
 import { useLocale, useTranslations } from "next-intl";
-import { cardById, type DrawnCard } from "@aluna/core";
+import { cardById, cardImageUrl, type DeckAssetCtx, type DrawnCard } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import type { TarotSelection } from "./selection";
 import styles from "./tarot.module.css";
 
-/** Mismo mapeo que DIARY_SPREAD_KEY en tarot-view.tsx: etiqueta i18n legible
- *  por `spread`, usada tanto por la fila de cartas (no aquí) como por el
- *  título del sheet/panel (tarotSelectionTitle, abajo). Duplicado deliberado
- *  y acotado (4 entradas) en vez de exportar/importar entre archivos — Task 3
- *  decide si tarot-view.tsx termina delegando en tarotSelectionTitle. */
-const DIARY_SPREAD_KEY: Record<string, string> = {
+/** Fuente única (Task 3, deuda b de T2): etiqueta i18n legible por `spread`,
+ *  usada por el título del sheet/panel (`tarotSelectionTitle`, abajo) y por la
+ *  lista del diario en tarot-view.tsx, que la importa de aquí en vez de
+ *  mantener su propia copia. Vive junto a `tarotSelectionTitle`, su consumidor
+ *  natural. */
+export const DIARY_SPREAD_KEY: Record<string, string> = {
   daily: "diarySpreadDaily",
   three: "diarySpreadThree",
   "celtic-cross": "diarySpreadCeltic",
@@ -31,12 +31,17 @@ export function TarotInterpretation({
   dailyCard,
   profileName,
   onSelect,
+  deckCtx,
 }: {
   selected: TarotSelection;
   revealed: boolean;
   dailyCard: DrawnCard;
   profileName: string;
   onSelect: (next: TarotSelection) => void;
+  // Deuda b de T2 (Task 3): el resolver de imágenes del mazo. Opcional para no
+  // acoplar el renderizador a él — sin ctx, la carta suelta no muestra imagen
+  // (los tests de T2 no lo pasan). tarot-view.tsx sí lo pasa (useDeckAssets).
+  deckCtx?: DeckAssetCtx;
 }) {
   // Reservado para una integración futura (p.ej. contexto del chat de lectura,
   // Task 4/5) — sin uso todavía. Mismo patrón que `void spreadId` en
@@ -140,6 +145,16 @@ export function TarotInterpretation({
       const backTo = selected.from;
       return (
         <div className={styles.interpBlock}>
+          {deckCtx && (
+            // Precedente exacto: paso reading de ceremony.tsx (cardImageUrl +
+            // reversedImg). Solo la carta suelta muestra imagen (deuda b de T2).
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={cardImageUrl(selected.id, deckCtx)}
+              alt={content.name}
+              className={`${styles.interpCardImg} ${selected.reversed ? styles.reversedImg : ""}`}
+            />
+          )}
           <p className={styles.interpName}>{content.name}</p>
           {selected.reversed && <span className={styles.reversedTag}>{t("dailyReversed")}</span>}
           <p className={styles.interpKeywords}>
