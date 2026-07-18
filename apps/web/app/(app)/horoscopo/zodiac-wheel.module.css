@@ -4,7 +4,7 @@
 
 .wrap {
   position: relative;
-  width: min(320px, 88vw);
+  width: min(340px, 92vw);
   margin: 0 auto var(--sp-2);
 }
 
@@ -18,6 +18,7 @@
   stroke-dasharray: 1;
   animation: wheelDraw 1100ms var(--ease) both;
 }
+.tick { stroke: var(--line); stroke-width: 0.75; opacity: 0.45; }
 .orbit {
   fill: none;
   stroke: rgba(var(--acc-rgb), 0.28);
@@ -33,7 +34,8 @@
 
 /* ---- sectores (puro dibujo; la interacción vive en .hits) ---- */
 .sector .sectorFill,
-.sector .glyph {
+.sector .glyph,
+.sector .name {
   transform-box: fill-box;
   transform-origin: center;
   animation: bloom 700ms var(--ease-spring, var(--ease)) both;
@@ -47,19 +49,42 @@
   stroke-width: 1;
 }
 
+/* Nombre curvado sobre el arco del sector */
+.name {
+  font-size: 9.5px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  fill: var(--soft);
+  text-anchor: middle;
+  dominant-baseline: central;
+  transition: fill 400ms var(--ease);
+}
+.nameOn { fill: var(--acc-text); }
+
 .glyph {
-  font-size: 15px;
+  font-size: 16px;
   text-anchor: middle;
   dominant-baseline: central;
   transition: fill 400ms var(--ease);
 }
 .glyphOn { filter: drop-shadow(0 0 6px rgba(var(--acc-rgb), 0.9)); }
 
-/* ---- capa de interacción: botones redondos reales sobre cada glifo ---- */
+/* halo del elegido: se traza cada vez que cambia el signo (key remonta) */
+.halo {
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  filter: drop-shadow(0 0 5px rgba(var(--acc-rgb), 0.7));
+  animation: wheelDraw 800ms var(--ease) both;
+}
+
+/* ---- capa de interacción: botones redondos reales sobre cada sector ---- */
 .hits { position: absolute; inset: 0; }
 .hit {
   position: absolute;
-  width: 13.5%;
+  width: 16%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border: 0;
@@ -78,18 +103,7 @@
   outline-offset: 2px;
 }
 
-/* halo del elegido: se traza cada vez que cambia el signo (key remonta) */
-.halo {
-  fill: none;
-  stroke: var(--acc);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  filter: drop-shadow(0 0 5px rgba(var(--acc-rgb), 0.7));
-  animation: wheelDraw 800ms var(--ease) both;
-}
-
-/* ---- el trono (centro) ---- */
+/* ---- el trono (centro): la ficha del signo elegido ---- */
 .throne {
   position: absolute;
   inset: 0;
@@ -104,7 +118,7 @@
 .throne :global(button) { pointer-events: auto; } /* …salvo el ⓘ del glosario */
 
 .throneGlyph {
-  font-size: clamp(40px, 13vw, 52px);
+  font-size: clamp(30px, 10vw, 38px);
   line-height: 1;
   color: var(--acc);
   animation: ignite 1400ms var(--ease) both;
@@ -121,24 +135,48 @@
   gap: 4px;
   font-family: var(--font-display);
   font-style: italic;
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   color: var(--ink);
-  animation: riseIn 900ms var(--ease) 150ms both;
+  animation: riseIn 900ms var(--ease) 120ms both;
 }
 .throneInfo { font-size: 0.7em; opacity: 0.7; }
 
+.throneDates {
+  font-size: var(--text-2xs);
+  color: var(--soft);
+  letter-spacing: 0.5px;
+  animation: riseIn 900ms var(--ease) 200ms both;
+}
+
 .throneElement {
   font-size: var(--text-2xs);
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   /* color elemental inline (ELEMENT_INK) — la misma tinta del glifo en la carta */
-  opacity: 0.85;
-  animation: riseIn 900ms var(--ease) 250ms both;
+  opacity: 0.9;
+  animation: riseIn 900ms var(--ease) 280ms both;
+}
+
+.throneRegent {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  color: var(--acc-text);
+  animation: riseIn 900ms var(--ease) 360ms both;
+}
+.throneRegentLabel {
+  font-size: var(--text-2xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--soft);
 }
 @keyframes riseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .ring, .orbit, .sector .sectorFill, .sector .glyph, .halo, .throneGlyph, .throneName, .throneElement {
+  .ring, .orbit, .sector .sectorFill, .sector .glyph, .sector .name, .halo,
+  .throneGlyph, .throneName, .throneDates, .throneElement, .throneRegent {
     animation: none;
   }
   .ring, .halo { stroke-dashoffset: 0; }
