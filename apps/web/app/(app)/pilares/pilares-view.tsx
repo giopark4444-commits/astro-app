@@ -9,7 +9,6 @@ import {
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { useCountUp } from "@/lib/motion/use-count-up";
-import { baziLabels } from "@/lib/content/bazi-labels";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ProLamina } from "./pro-lamina";
@@ -79,7 +78,6 @@ function ElementBar({
 export function PilaresView() {
   const t = useTranslations();
   const locale = useLocale();
-  const L = baziLabels(locale);
   const { active } = useProfiles();
   const [data, setData] = useState<BaZiData | null>(null);
   const [error, setError] = useState(false);
@@ -121,12 +119,14 @@ export function PilaresView() {
     };
   }, [active]);
 
-  // Reset de la selección al cambiar de perfil (lección de /carta): el panel y el
-  // sheet vuelven a la Lectura para no mostrar el detalle del perfil anterior.
+  // Reset de la selección al cambiar de perfil o de opciones (spec §2): el panel
+  // y el sheet vuelven a la Lectura para no mostrar el detalle stale. `script`
+  // entra a las deps porque el glifo de década horneado en la Selection quedaría
+  // stale al alternar hanzi↔hangul.
   useEffect(() => {
     setSelected({ kind: "reading" });
     setSheetSel(null);
-  }, [active]);
+  }, [active, script]);
 
   // Si se apaga Pro con una tab pro-only activa, cae a la primera de lectura.
   useEffect(() => {
@@ -286,7 +286,7 @@ export function PilaresView() {
         open={!!sheetSel}
         onClose={() => setSheetSel(null)}
         center
-        title={sheetSel ? pilarSelectionTitle(sheetSel, t, L, locale) : ""}
+        title={sheetSel ? pilarSelectionTitle(sheetSel, t, locale) : ""}
       >
         {sheetSel && set && (
           <PilaresInterpretation

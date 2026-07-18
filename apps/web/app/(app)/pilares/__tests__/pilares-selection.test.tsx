@@ -117,6 +117,26 @@ describe("PilaresView — maestro-detalle (panel/sheet)", () => {
     });
   });
 
+  it("cambiar de opciones (script) resetea la selección (spec §2)", async () => {
+    const { container } = renderView();
+    await screen.findByText(es.pilares.interpTitle);
+
+    // El switch de escritura solo es visible/relevante con Pro (spec §4.2) —
+    // encenderlo primero para poder alternarlo.
+    fireEvent.click(screen.getAllByRole("button", { name: /Modo Pro/ })[0]!);
+    await screen.findByText(es.pilares.interpPillarsTech);
+
+    // Seleccionar el pilar del día: el panel deja la Lectura.
+    fireEvent.click(screen.getByRole("button", { name: es.pilares.day }));
+    expect(within(getPanel(container)!).getByText(es.pilares.dayMaster)).toBeTruthy();
+
+    // Alternar hanzi → hangul (switch "Saju", role="tab" — ver scriptRow en
+    // pilares-view.tsx): el glifo horneado en la Selection quedaría stale, así
+    // que el panel debe volver a la Lectura.
+    fireEvent.click(screen.getByRole("tab", { name: "Saju" }));
+    expect(within(getPanel(container)!).queryByText(es.pilares.dayMaster)).toBeNull();
+  });
+
   it("el panel no renderiza si active es null (perfil borrado)", async () => {
     const { container, rerender } = renderView();
     await screen.findByText(es.pilares.interpTitle);

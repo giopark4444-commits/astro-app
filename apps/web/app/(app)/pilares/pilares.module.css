@@ -302,6 +302,7 @@
 .interpEssence { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.55; color: var(--ink); }
 .interpTechList { display: flex; flex-direction: column; gap: 5px; font-size: var(--text-2xs); color: var(--soft); font-variant-numeric: tabular-nums; border-top: 1px solid var(--line); padding-top: var(--sp-2); }
 .interpTechH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.interpHintLine { margin: 0; font-style: italic; font-size: var(--text-2xs); color: var(--soft); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy */
@@ -363,6 +364,9 @@
     box-shadow: 0 0 14px rgba(var(--acc-rgb), 0.55);
   }
   .lamina { flex: 1; max-width: none; margin-top: 0; }
+  /* desktop: la lámina esencial (tabs libres) es visible sin Pro — el filtrado
+     lo hacen las tabs; en móvil sigue tras el toggle */
+  .lamina:not([data-pro]) { display: grid; }
 
   /* panes: en desktop solo se ve la sección del tab activo; en móvil (fuera
      del media) todas se ven apiladas, igual que hoy. Reescopeado de

@@ -15,8 +15,8 @@ export type PilarSelection =
   | { kind: "term"; key: string };
 
 /** ¿Viewport móvil? (bajo el bp desktop 1080). SSR-safe: false en servidor.
- *  Duplicación consciente con carta/selection.ts (otra rama) — si ambas
- *  aterrizan en main, extraer a lib/viewport.ts. */
+ *  Duplicación consciente con carta/selection.ts (ya en main): extraer a
+ *  lib/viewport.ts en la fase Números de la serie lentes-detalle. */
 export function isMobileViewport(): boolean {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 1079px)").matches;
 }

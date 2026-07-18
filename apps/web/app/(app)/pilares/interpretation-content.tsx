@@ -56,7 +56,10 @@ export function PilaresInterpretation({
           {pro ? (
             <BaziReadingView pillars={set} profileId={profileId} profileName={profileName} />
           ) : (
-            <p className={styles.interpEssence}>{essence}</p>
+            <>
+              <p className={styles.interpEssence}>{essence}</p>
+              <p className={styles.interpHintLine}>{t("pilares.interpHint")}</p>
+            </>
           )}
           {pro && (
             <div className={styles.interpTechList}>
@@ -132,6 +135,9 @@ export function PilaresInterpretation({
     }
     case "element": {
       const entry = glossaryEntry(`bazi.element.${selected.element}`, locale);
+      // Total real de elementos del SET: 8 tronco+rama si hay hora conocida, 6
+      // si no (Minor #3 — antes hardcodeado a "/ 8", falso en cartas sin hora).
+      const totalEls = set.hour ? 8 : 6;
       return (
         <div className={styles.interpBlock}>
           <div className={styles.interpHead}>
@@ -140,7 +146,9 @@ export function PilaresInterpretation({
             </span>
             <div>
               <div className={styles.interpName}>{entry?.title}</div>
-              <div className={styles.interpSub}>{selected.count} / 8</div>
+              <div className={styles.interpSub}>
+                {selected.count} / {totalEls}
+              </div>
             </div>
           </div>
           {entry && <p className={styles.interpBody}>{entry.body}</p>}
@@ -196,7 +204,6 @@ export function pilarSelectionTitle(
   // esta forma SÍ acepta el `t` real de useTranslations() sin cast (la anterior,
   // `(k, v?: Record<string, unknown>)`, fallaba por contravarianza de values).
   t: (k: string) => string,
-  L: ReturnType<typeof baziLabels>,
   locale: string,
 ): string {
   switch (selected.kind) {

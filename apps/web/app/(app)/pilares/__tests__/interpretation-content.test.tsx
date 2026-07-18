@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { PilaresInterpretation, pilarSelectionTitle } from "../interpretation-content";
-import { baziLabels } from "@/lib/content/bazi-labels";
 
 // Set determinista: 2000-01-07 = día 甲子 (referencia documentada del repo).
 const SET = {
@@ -22,7 +21,7 @@ const wrap = (ui: React.ReactElement) =>
   );
 
 describe("PilaresInterpretation", () => {
-  it("reading sin pro: solo la esencia compuesta (sin tiers)", () => {
+  it("reading sin pro: solo la esencia compuesta (sin tiers) + el hint cableado", () => {
     wrap(
       <PilaresInterpretation
         selected={{ kind: "reading" }}
@@ -37,6 +36,9 @@ describe("PilaresInterpretation", () => {
     expect(screen.queryByText("Tus pilares, en datos")).toBeNull();
     // la esencia compuesta menciona al Maestro del Día (voz del tronco 甲)
     expect(document.body.textContent!.length).toBeGreaterThan(80);
+    // Minor #4: el hint (antes muerto en el catálogo i18n) ahora se cablea
+    // en el patrón tocable, sin Pro.
+    expect(screen.getByText(es.pilares.interpHint)).toBeTruthy();
   });
 
   it("reading con pro: BaziReadingView (tiers) + pilares en datos", () => {
@@ -128,35 +130,51 @@ describe("PilaresInterpretation", () => {
     );
     expect(document.body.textContent!.length).toBeGreaterThan(60); // cuerpo del glosario
   });
+
+  it("element: el total es el real del SET (Minor #3 — 6 sin hora, no 8 hardcodeado)", () => {
+    const SET_NO_HOUR = {
+      year: { stem: 5, branch: 3 },
+      month: { stem: 2, branch: 0 },
+      day: { stem: 0, branch: 0 },
+      hour: null,
+    } as never;
+    wrap(
+      <PilaresInterpretation
+        selected={{ kind: "element", element: "wood", count: 3 }}
+        pro={false}
+        set={SET_NO_HOUR}
+        profileId="p1"
+        profileName="Gio"
+        script="hanzi"
+      />,
+    );
+    expect(screen.getByText("3 / 6")).toBeTruthy();
+  });
 });
 
 describe("pilarSelectionTitle", () => {
   it("compone títulos por kind", () => {
-    const L = baziLabels("es");
     const t = (k: string) =>
       (({ "pilares.interpTitle": "Interpretación", "pilares.day": "Día" }) as Record<string, string>)[k] ?? k;
-    expect(pilarSelectionTitle({ kind: "reading" }, t as never, L, "es")).toBe("Interpretación");
+    expect(pilarSelectionTitle({ kind: "reading" }, t as never, "es")).toBe("Interpretación");
     expect(
       pilarSelectionTitle(
         { kind: "pillar", which: "day", pillar: { stem: 0, branch: 0 } as never },
         t as never,
-        L,
         "es",
       ),
     ).toContain("Día");
   });
 
-  it("resuelve el título de 'element' vía glosario, respetando el locale (4º parámetro)", () => {
-    const L = baziLabels("es");
+  it("resuelve el título de 'element' vía glosario, respetando el locale (3er parámetro)", () => {
     const t = (k: string) => k;
-    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, L, "es")).toBe("Madera");
-    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, L, "en")).toBe("Wood");
+    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, "es")).toBe("Madera");
+    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, "en")).toBe("Wood");
   });
 
   it("resuelve el título de 'term' vía glosario", () => {
-    const L = baziLabels("es");
     const t = (k: string) => k;
-    expect(pilarSelectionTitle({ kind: "term", key: "bazi.term.daymaster" }, t as never, L, "es")).toBe(
+    expect(pilarSelectionTitle({ kind: "term", key: "bazi.term.daymaster" }, t as never, "es")).toBe(
       "Maestro del Día",
     );
   });
