@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { PLANETS, ZODIAC_SIGNS, planetMeaningKey } from "@aluna/core";
+import { PLANETS, ZODIAC_SIGNS, planetMeaningKey, glossaryEntry } from "@aluna/core";
 import type { WesternPayload, HoroscopePeriod } from "@/lib/horoscope/western";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
@@ -271,6 +271,7 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
                               del signo (celda de al lado) se conserva. */}
                           <td className={styles.proGlyph}>
                             <button type="button" className={styles.selBtn}
+                              aria-label={glossaryEntry(planetMeaningKey(h.body), locale)?.title}
                               onClick={() => onSelect({ kind: "term", key: planetMeaningKey(h.body) })}>
                               {PLANET_GLYPH[h.body] ?? "•"}
                             </button>

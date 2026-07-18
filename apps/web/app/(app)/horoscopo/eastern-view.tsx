@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { EARTHLY_BRANCHES, interactionKey } from "@aluna/core";
+import { EARTHLY_BRANCHES, interactionKey, glossaryEntry } from "@aluna/core";
 import type { EasternPayload, EasternAnimal, EasternInteractionType } from "@/lib/horoscope/eastern";
 import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
@@ -266,6 +266,7 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
                               botón term del maestro-detalle (patrón pilares). */}
                           <td className={styles.proGlyph}>
                             <button type="button" className={styles.selBtn}
+                              aria-label={glossaryEntry(interactionKey(h.type), locale)?.title}
                               onClick={() => onSelect({ kind: "term", key: interactionKey(h.type) })}>
                               {animalHanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
                             </button>
