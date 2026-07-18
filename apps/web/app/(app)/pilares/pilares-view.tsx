@@ -132,20 +132,17 @@ export function PilaresView() {
                 }
                 const isDay = key === "day";
                 return (
-                  <>
-                    {/* puente T3→T4: el router select() real llega en la Tarea 4 */}
-                    <PillarColumn
-                      key={key}
-                      posKey={key}
-                      pillar={pillar}
-                      isDay={isDay}
-                      dayMaster={data.day.stem}
-                      pro={pro}
-                      script={script}
-                      index={i}
-                      onSelect={() => {}}
-                    />
-                  </>
+                  <PillarColumn
+                    key={key}
+                    posKey={key}
+                    pillar={pillar}
+                    isDay={isDay}
+                    dayMaster={data.day.stem}
+                    pro={pro}
+                    script={script}
+                    index={i}
+                    onSelect={() => {}} /* puente T3→T4: el router select() real llega en la Tarea 4 */
+                  />
                 );
               })}
             </div>

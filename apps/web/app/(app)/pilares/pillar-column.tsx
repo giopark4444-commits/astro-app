@@ -1,5 +1,5 @@
 "use client";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
@@ -7,6 +7,7 @@ import {
   BRANCH_LABELS,
   hiddenStems,
   tenGod,
+  glossaryEntry,
   type Pillar,
   type TenGod,
 } from "@aluna/core";
@@ -54,6 +55,7 @@ export function PillarColumn({
   onSelect: (s: PilarSelection) => void;
 }) {
   const t = useTranslations();
+  const locale = useLocale();
   const stem = HEAVENLY_STEMS[pillar.stem]!;
   const branch = EARTHLY_BRANCHES[pillar.branch]!;
   return (
@@ -90,6 +92,7 @@ export function PillarColumn({
         <button
           type="button"
           className={styles.selBtn}
+          aria-label={glossaryEntry(`bazi.stem.${stem.key}`, locale)?.title}
           onClick={() => onSelect({ kind: "term", key: `bazi.stem.${stem.key}` })}
         >
           {script === "hangul" ? STEM_LABELS[pillar.stem]!.hangul : stem.hanzi}
@@ -105,6 +108,7 @@ export function PillarColumn({
         <button
           type="button"
           className={styles.selBtn}
+          aria-label={glossaryEntry(`bazi.branch.${branch.key}`, locale)?.title}
           onClick={() => onSelect({ kind: "term", key: `bazi.branch.${branch.key}` })}
         >
           {script === "hangul" ? BRANCH_LABELS[pillar.branch]!.hangul : branch.hanzi}
@@ -147,6 +151,7 @@ export function PillarColumn({
                 <button
                   type="button"
                   className={styles.selBtn}
+                  aria-label={glossaryEntry(`bazi.stem.${hidden.key}`, locale)?.title}
                   onClick={() => onSelect({ kind: "term", key: `bazi.stem.${hidden.key}` })}
                 >
                   {hidden.hanzi}

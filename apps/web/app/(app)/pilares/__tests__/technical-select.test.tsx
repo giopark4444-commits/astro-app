@@ -18,7 +18,13 @@ describe("PillarColumn seleccionable", () => {
       script="hanzi" index={2} onSelect={onSelect} />);
     fireEvent.click(screen.getByRole("button", { name: "Día" }));
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "pillar", which: "day", pillar: DAY });
-    fireEvent.click(screen.getByRole("button", { name: /甲/ }));
+    // El botón del tronco 甲 anuncia el título real del glosario (fix de
+    // accesibilidad: un glifo suelto no anuncia nada por sí mismo) — el
+    // accessible name debe INCLUIR más que el carácter, no ser solo "甲"
+    // (título real de bazi.stem.jia en packages/core/src/glossary/entries-es.ts).
+    const stemBtn = screen.getByRole("button", { name: "Jiǎ · Madera yang" });
+    expect(stemBtn.getAttribute("aria-label")).not.toBe("甲");
+    fireEvent.click(stemBtn);
     expect(onSelect).toHaveBeenLastCalledWith({ kind: "term", key: "bazi.stem.jia" });
     // el chip 日主 (Día-Maestro) selecciona su término
     fireEvent.click(screen.getAllByRole("button", { name: /日主|Maestro/ })[0]!);
