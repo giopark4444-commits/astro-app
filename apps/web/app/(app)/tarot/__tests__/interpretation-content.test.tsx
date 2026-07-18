@@ -37,8 +37,8 @@ describe("TarotInterpretation", () => {
       expect(screen.queryByText(FOOL_CONTENT.essence)).toBeNull();
     });
 
-    it("revelada: nombre+keywords+essence+prosa (composeReadingProse) de la carta del día", () => {
-      wrap(
+    it("revelada: nombre+keywords+prosa (con la essence tejida adentro, sin duplicar)", () => {
+      const { container } = wrap(
         <TarotInterpretation
           selected={{ kind: "daily" }}
           revealed={true}
@@ -49,7 +49,10 @@ describe("TarotInterpretation", () => {
       );
       expect(screen.getByText(FOOL_CONTENT.name)).toBeTruthy();
       expect(screen.getByText(FOOL_CONTENT.keywords[0]!)).toBeTruthy();
-      expect(screen.getByText(FOOL_CONTENT.essence)).toBeTruthy();
+      // La essence llega UNA sola vez, dentro de la prosa ("…planta la escena: <essence>")
+      // — el párrafo suelto se retiró por duplicado (gate visual post-merge).
+      const apariciones = container.textContent!.split(FOOL_CONTENT.essence).length - 1;
+      expect(apariciones).toBe(1);
       expect(screen.queryByText(es.tarot.dailyReversed)).toBeNull();
 
       const prose = composeReadingProse("es", "daily", [{ cardId: "fool", reversed: false, position: "day" }]);

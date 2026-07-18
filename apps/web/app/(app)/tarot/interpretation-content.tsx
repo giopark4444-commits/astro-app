@@ -77,7 +77,9 @@ export function TarotInterpretation({
               </span>
             ))}
           </p>
-          <p className={styles.interpEssence}>{content.essence}</p>
+          {/* SIN párrafo de essence suelto: la prosa del día ya la teje adentro
+              ("…planta la escena: <essence>") — mostrarla dos veces se leía
+              duplicada (hallazgo visual del gate post-merge). */}
           {prose.map((p, i) => (
             <p key={i} className={styles.interpBody}>
               {p}
