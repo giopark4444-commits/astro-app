@@ -397,7 +397,8 @@
       "loading": "Aluna is reading you…",
       "gated": "The longer readings awaken when Aluna finds her inner voice. For now, her essence already speaks to you:",
       "error": "Something clouded the reading. Try again in a moment. Meanwhile, her essence:"
-    }
+    },
+    "interpTitle": "Interpretation"
   },
   "carta": {
     "title": "Birth Chart",

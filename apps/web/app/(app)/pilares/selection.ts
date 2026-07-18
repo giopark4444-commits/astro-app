@@ -14,9 +14,6 @@ export type PilarSelection =
   | { kind: "decade"; glyph: string; god: TenGod; nayinLabel: string; startYear: number; startAge: number }
   | { kind: "term"; key: string };
 
-/** ¿Viewport móvil? (bajo el bp desktop 1080). SSR-safe: false en servidor.
- *  Duplicación consciente con carta/selection.ts (ya en main): extraer a
- *  lib/viewport.ts en la fase Números de la serie lentes-detalle. */
-export function isMobileViewport(): boolean {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 1079px)").matches;
-}
+/** ¿Viewport móvil? Deuda de duplicación con carta/selection.ts pagada:
+ *  extraído a lib/viewport.ts en la fase Números de la serie lentes-detalle. */
+export { isMobileViewport } from "@/lib/viewport";

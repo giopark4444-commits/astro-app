@@ -397,7 +397,8 @@
       "loading": "Aluna está leyéndote…",
       "gated": "Las lecturas más extensas se encienden cuando Aluna despierte su voz interior. Por ahora, su esencia ya te habla:",
       "error": "Algo se nubló al leerte. Vuelve a intentarlo en un momento. Mientras, su esencia:"
-    }
+    },
+    "interpTitle": "Interpretación"
   },
   "carta": {
     "title": "Carta Astral",
