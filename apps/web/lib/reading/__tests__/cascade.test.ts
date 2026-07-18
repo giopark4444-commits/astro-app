@@ -199,6 +199,40 @@ describe("completeWithCascade", () => {
   });
 });
 
+describe("resolveReadingProvider — Hermes primero (patrón de cabecera)", () => {
+  it("con NOUS_API_KEY sola, el chat/lecturas resuelven a hermes", () => {
+    process.env.NOUS_API_KEY = "nous-key";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("hermes");
+  });
+
+  it("con NOUS y ANTHROPIC presentes, hermes gana (Claude queda de respaldo)", () => {
+    process.env.NOUS_API_KEY = "nous-key";
+    process.env.ANTHROPIC_API_KEY = "ant-key";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("hermes");
+  });
+
+  it("READING_PROVIDER=anthropic fuerza a Claude aunque haya llave de Nous", () => {
+    process.env.NOUS_API_KEY = "nous-key";
+    process.env.ANTHROPIC_API_KEY = "ant-key";
+    process.env.READING_PROVIDER = "anthropic";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("anthropic");
+  });
+
+  it("con NOUS_API_KEY y OLLAMA_ENABLED, hermes gana (ollama sigue de último)", () => {
+    process.env.NOUS_API_KEY = "nous-key";
+    process.env.OLLAMA_ENABLED = "1";
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(true);
+    if (resolved.available) expect(resolved.provider.name).toBe("hermes");
+  });
+});
+
 describe("resolveReadingProvider — Ollama (voz local)", () => {
   it("sin llaves y sin OLLAMA_ENABLED, sigue latente", () => {
     const resolved = resolveReadingProvider();

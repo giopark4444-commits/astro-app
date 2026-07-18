@@ -65,10 +65,13 @@ export type ResolvedProvider =
   | { available: true; provider: ReadingProvider }
   | { available: false };
 
-const ORDER = ["anthropic", "openai", "gemini"] as const;
+// Hermes PRIMERO a propósito (patrón de Gio: Hermes de cabecera ~100x más
+// barato, Claude de respaldo automático) — igual que la cascada de informes.
+const ORDER = ["hermes", "anthropic", "openai", "gemini"] as const;
 type ProviderName = (typeof ORDER)[number];
 
 function keyFor(name: ProviderName): string | undefined {
+  if (name === "hermes") return process.env.NOUS_API_KEY;
   if (name === "anthropic") return process.env.ANTHROPIC_API_KEY;
   if (name === "openai") return process.env.OPENAI_API_KEY;
   return process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
@@ -104,6 +107,7 @@ export function resolveReadingProvider(): ResolvedProvider {
 }
 
 function makeProvider(name: ProviderName, apiKey: string): ReadingProvider {
+  if (name === "hermes") return hermesProvider(apiKey, 60000);
   if (name === "openai") return openaiProvider(apiKey);
   if (name === "gemini") return geminiProvider(apiKey);
   return anthropicProvider(apiKey);
