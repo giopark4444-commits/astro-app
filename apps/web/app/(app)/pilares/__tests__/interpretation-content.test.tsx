@@ -40,7 +40,7 @@ describe("PilaresInterpretation", () => {
   });
 
   it("reading con pro: BaziReadingView (tiers) + pilares en datos", () => {
-    wrap(
+    const { rerender } = wrap(
       <PilaresInterpretation
         selected={{ kind: "reading" }}
         pro={true}
@@ -53,6 +53,23 @@ describe("PilaresInterpretation", () => {
     expect(screen.getByRole("tab", { name: /Esencia/i })).toBeTruthy();
     expect(screen.getByText("Tus pilares, en datos")).toBeTruthy();
     expect(screen.getByText(/甲子/)).toBeTruthy(); // glifo del pilar del día
+    // romanización junto al glifo (pinyin del pilar del día: 甲=jiǎ, 子=zǐ)
+    expect(screen.getByText(/jiǎ zǐ/)).toBeTruthy();
+    // con script="hangul" se usa .romanKo en vez de pinyin (갑=gap, 자=ja)
+    rerender(
+      <NextIntlClientProvider locale="es" messages={es}>
+        <PilaresInterpretation
+          selected={{ kind: "reading" }}
+          pro={true}
+          set={SET}
+          profileId="p1"
+          profileName="Gio"
+          script="hangul"
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText(/갑자/)).toBeTruthy();
+    expect(screen.getByText(/gap ja/)).toBeTruthy();
   });
 
   it("pillar: glosario de tronco y rama; ocultos solo con pro", () => {
@@ -62,13 +79,14 @@ describe("PilaresInterpretation", () => {
     );
     // bazi.stem.jia (甲, madera yang) y bazi.branch.zi (子, rata) — cuerpos del glosario
     expect(document.body.textContent).toMatch(/甲/);
-    const before = document.body.textContent!;
+    expect(screen.queryByText(/Troncos ocultos/i)).toBeNull(); // sin pro no hay técnico
     rerender(
       <NextIntlClientProvider locale="es" messages={es}>
         <PilaresInterpretation selected={sel} pro={true} set={SET} profileId="p1" profileName="Gio" script="hanzi" />
       </NextIntlClientProvider>,
     );
-    expect(document.body.textContent!.length).toBeGreaterThan(before.length); // pro añade ocultos/nayin/etapa
+    expect(screen.getByText(/Troncos ocultos/i)).toBeTruthy(); // pro añade ocultos
+    expect(screen.getByText(/Las 12 etapas/i)).toBeTruthy(); // pro añade la etapa
   });
 
   it("element / decade / term rinden su contenido", () => {
@@ -126,5 +144,20 @@ describe("pilarSelectionTitle", () => {
         "es",
       ),
     ).toContain("Día");
+  });
+
+  it("resuelve el título de 'element' vía glosario, respetando el locale (4º parámetro)", () => {
+    const L = baziLabels("es");
+    const t = (k: string) => k;
+    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, L, "es")).toBe("Madera");
+    expect(pilarSelectionTitle({ kind: "element", element: "wood", count: 3 }, t as never, L, "en")).toBe("Wood");
+  });
+
+  it("resuelve el título de 'term' vía glosario", () => {
+    const L = baziLabels("es");
+    const t = (k: string) => k;
+    expect(pilarSelectionTitle({ kind: "term", key: "bazi.term.daymaster" }, t as never, L, "es")).toBe(
+      "Maestro del Día",
+    );
   });
 });

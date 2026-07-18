@@ -45,6 +45,8 @@ export function PilaresInterpretation({
   const L = baziLabels(locale);
   const glyphStem = (i: number) => (script === "hangul" ? STEM_LABELS[i]!.hangul : HEAVENLY_STEMS[i]!.hanzi);
   const glyphBranch = (i: number) => (script === "hangul" ? BRANCH_LABELS[i]!.hangul : EARTHLY_BRANCHES[i]!.hanzi);
+  const romStem = (i: number) => (script === "hangul" ? STEM_LABELS[i]!.romanKo : STEM_LABELS[i]!.pinyin);
+  const romBranch = (i: number) => (script === "hangul" ? BRANCH_LABELS[i]!.romanKo : BRANCH_LABELS[i]!.pinyin);
 
   switch (selected.kind) {
     case "reading": {
@@ -68,7 +70,7 @@ export function PilaresInterpretation({
                 return (
                   <span key={k}>
                     {t(`pilares.${k}`)} · {glyphStem(p.stem)}
-                    {glyphBranch(p.branch)} · {god} · {L.nayin[n.key]}
+                    {glyphBranch(p.branch)} ({romStem(p.stem)} {romBranch(p.branch)}) · {god} · {L.nayin[n.key]}
                   </span>
                 );
               })}
