@@ -1,0 +1,183 @@
+/* Rueda zodiacal del horóscopo — hermana menor de la rueda de la carta.
+   TODOS los keyframes son locales al módulo (lección CSS Modules: un keyframe
+   global referenciado desde un .module.css se escala y muere en silencio). */
+
+.wrap {
+  position: relative;
+  width: min(340px, 92vw);
+  margin: 0 auto var(--sp-2);
+}
+
+.wheel { display: block; width: 100%; height: auto; }
+
+/* ---- estructura (idéntica en trazo a la carta) ---- */
+.ring {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  animation: wheelDraw 1100ms var(--ease) both;
+}
+.tick { stroke: var(--line); stroke-width: 0.75; opacity: 0.45; }
+.orbit {
+  fill: none;
+  stroke: rgba(var(--acc-rgb), 0.28);
+  stroke-width: 1;
+  stroke-dasharray: 0.004 0.016; /* punteada (pathLength=1) */
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: orbitSpin 90s linear infinite;
+}
+@keyframes wheelDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes orbitSpin { to { transform: rotate(-360deg); } }
+
+/* ---- sectores (puro dibujo; la interacción vive en .hits) ---- */
+.sector .sectorFill,
+.sector .glyph,
+.sector .name {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bloom 700ms var(--ease-spring, var(--ease)) both;
+  animation-delay: calc(180ms + var(--i, 0) * 55ms);
+}
+@keyframes bloom { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
+
+.sectorOn {
+  fill: rgba(var(--acc-rgb), 0.16) !important; /* pisa el fill elemental inline del sector elegido */
+  stroke: rgba(var(--acc-rgb), 0.55);
+  stroke-width: 1;
+}
+
+/* Nombre curvado sobre el arco del sector */
+.name {
+  font-size: 9.5px;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  fill: var(--soft);
+  text-anchor: middle;
+  dominant-baseline: central;
+  transition: fill 400ms var(--ease);
+}
+.nameOn { fill: var(--acc-text); }
+
+.glyph {
+  font-size: 16px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  transition: fill 400ms var(--ease);
+}
+.glyphOn { filter: drop-shadow(0 0 6px rgba(var(--acc-rgb), 0.9)); }
+
+/* halo del elegido: se traza cada vez que cambia el signo (key remonta) */
+.halo {
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  filter: drop-shadow(0 0 5px rgba(var(--acc-rgb), 0.7));
+  animation: wheelDraw 800ms var(--ease) both;
+}
+
+/* ---- capa de interacción: botones redondos reales sobre cada sector ---- */
+.hits { position: absolute; inset: 0; }
+.hit {
+  position: absolute;
+  width: 16%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background 300ms var(--ease), box-shadow 300ms var(--ease);
+}
+.hit:hover {
+  background: rgba(var(--acc-rgb), 0.10);
+  box-shadow: 0 0 14px rgba(var(--acc-rgb), 0.22);
+}
+.hit:focus-visible {
+  outline: 1px solid rgba(var(--acc-rgb), 0.8);
+  outline-offset: 2px;
+}
+
+/* ---- el trono (centro): la ficha del signo elegido ---- */
+.throne {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  pointer-events: none; /* los sectores de atrás siguen clicables… */
+}
+.throne :global(button) { pointer-events: auto; } /* …salvo el ⓘ del glosario */
+
+.throneGlyph {
+  font-size: clamp(30px, 10vw, 38px);
+  line-height: 1;
+  color: var(--acc);
+  animation: ignite 1400ms var(--ease) both;
+}
+@keyframes ignite {
+  0% { opacity: 0; transform: scale(0.8); text-shadow: 0 0 0 transparent; }
+  45% { opacity: 1; transform: scale(1.06); text-shadow: 0 0 26px currentColor; }
+  100% { opacity: 1; transform: scale(1); text-shadow: 0 0 10px rgba(var(--acc-rgb), 0.45); }
+}
+
+.throneName {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--ink);
+  animation: riseIn 900ms var(--ease) 120ms both;
+}
+.throneInfo { font-size: 0.7em; opacity: 0.7; }
+
+.throneDates {
+  font-size: var(--text-2xs);
+  color: var(--soft);
+  letter-spacing: 0.5px;
+  animation: riseIn 900ms var(--ease) 200ms both;
+}
+
+.throneElement {
+  font-size: var(--text-2xs);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  /* color elemental inline (ELEMENT_INK) — la misma tinta del glifo en la carta */
+  opacity: 0.9;
+  animation: riseIn 900ms var(--ease) 280ms both;
+}
+
+.throneRegent {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  color: var(--acc-text);
+  animation: riseIn 900ms var(--ease) 360ms both;
+}
+.throneRegentLabel {
+  font-size: var(--text-2xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+@keyframes riseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring, .orbit, .sector .sectorFill, .sector .glyph, .sector .name, .halo,
+  .throneGlyph, .throneName, .throneDates, .throneElement, .throneRegent {
+    animation: none;
+  }
+  .ring, .halo { stroke-dashoffset: 0; }
+}
