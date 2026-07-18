@@ -10,7 +10,8 @@ import { baziLabels } from "@/lib/content/bazi-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
 import { EasternSky } from "./eastern-sky";
-import { TEXT_VS, PERIODS, PERIOD_KEY, AREA_KEY, TONE_KEY } from "./horoscopo-shared";
+import { EasternWheel } from "./eastern-wheel";
+import { PERIODS, PERIOD_KEY, AREA_KEY, TONE_KEY } from "./horoscopo-shared";
 import type { AreaDriver, HoroscopoSelection } from "./selection";
 import styles from "./horoscopo.module.css";
 
@@ -132,24 +133,9 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
     <div className={styles.grid}>
       {/* Columna izquierda (sticky en desktop): selector + barras — espejo occidental */}
       <div className={styles.side}>
-        <div className={styles.signs} role="radiogroup" aria-label={t("animalAria")}>
-          {EASTERN_ANIMALS.map((a, i) => (
-            // role="radio" — mismo motivo que el picker de signos occidental:
-            // el afijo ⓘ del <Meaning> se envuelve aparte para no anidar un
-            // <button> dentro de otro <button>.
-            <span key={a} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-              <button type="button" role="radio" aria-checked={animal === a}
-                className={`chip--control ${animal === a ? "chip--control-on" : ""} ${styles.chipReveal}`}
-                style={{ ["--i" as string]: i }}
-                onClick={() => onAnimalChange(a)}>
-                {EARTHLY_BRANCHES[i]!.hanzi}{TEXT_VS} {tp(`animal${cap(a)}`)}
-              </button>
-              <Meaning k={`bazi.branch.${EARTHLY_BRANCHES[i]!.key}`} ariaLabel={`Qué significa ${tp(`animal${cap(a)}`)}`}>
-                <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
-              </Meaning>
-            </span>
-          ))}
-        </div>
+        {/* Rueda oriental (gemela de la zodiacal): reemplaza a las píldoras
+            planas. Mismo contrato a11y — radiogroup + 12 radios. */}
+        <EasternWheel animal={animal} onAnimalChange={onAnimalChange} />
         <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
           {PERIODS.map((p) => (
             <button key={p} type="button" role="tab" aria-selected={p === period}
