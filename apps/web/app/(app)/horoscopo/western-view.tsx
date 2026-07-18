@@ -12,6 +12,7 @@ import { Meaning } from "@/components/meaning";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
 import { HoroscopeReading } from "./horoscope-reading";
 import { TEXT_VS, PERIODS, PERIOD_KEY, AREA_KEY, TONE_KEY } from "./horoscopo-shared";
+import type { AreaDriver, HoroscopoSelection } from "./selection";
 import styles from "./horoscopo.module.css";
 
 const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -39,9 +40,15 @@ type WesternViewProps = {
   // desmontaba y se reseteaba). Mismo contrato que `pro`/`period`.
   sign: string | null;
   onSignChange: (s: string | null) => void;
+  // Maestro-detalle (Task 4): `onSelect` sube cada gesto tocable de la técnica
+  // (barra de área o símbolo de tabla Pro) al orquestador, que lo rinde en el
+  // panel/sheet; `onReady` sube el payload cargado para que el panel lea la
+  // prosa del periodo (la lectura salió de aquí — ver `.readingMobile`).
+  onSelect: (s: HoroscopoSelection) => void;
+  onReady: (p: WesternPayload) => void;
 };
 
-export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign, onSignChange }: WesternViewProps) {
+export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign, onSignChange, onSelect, onReady }: WesternViewProps) {
   const t = useTranslations("horoscopo");
   const th = useTranslations("hoy");
   const locale = useLocale();
@@ -99,6 +106,15 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
   }, [sign, period, tz, active?.id, onSignChange]);
 
   const ready = state.s === "ready" ? state.p : null;
+
+  // Sube el payload al orquestador cuando queda "ready": el panel maestro-detalle
+  // (desktop) lee la prosa del periodo desde ahí. `onReady` es un setState del
+  // orquestador (referencialmente estable), así que incluirlo en deps no dispara
+  // reruns extra. Dep [state]: solo re-notifica cuando cambia el estado local.
+  useEffect(() => {
+    if (state.s === "ready") onReady(state.p);
+  }, [state, onReady]);
+
   const prose = ready ? composeWesternProse(locale === "en" ? "en" : "es", ready) : [];
   const fmtExact = new Intl.DateTimeFormat(locale === "en" ? "en" : "es", {
     day: "numeric", month: "short", timeZone: tz,
@@ -140,7 +156,25 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
             <AreaBars
               calmText={th("calm")}
               open={openArea}
-              onToggle={(key) => setOpenArea((prev) => (prev === key ? null : key))}
+              // Maestro-detalle: el MISMO gesto que expande la barra sube el área
+              // al panel/sheet (AreaBars es compartido con /hoy y no expone un
+              // onSelect propio — el consumidor lo cablea en onToggle). Los
+              // drivers del payload se mapean a AreaDriver[] con SU glosario:
+              // planeta → planetMeaningKey, glifo del planeta; el body queda al
+              // panel (interpretation-content) que resuelve cada glossKey.
+              onToggle={(key) => {
+                setOpenArea((prev) => (prev === key ? null : key));
+                const a = ready.areas.find((x) => x.area === key);
+                if (!a) return;
+                onSelect({
+                  kind: "area", area: a.area, level: a.tone,
+                  drivers: a.drivers.map((d): AreaDriver => ({
+                    label: `${L.bodies[d.body] ?? d.body} — ${HOUSES[d.house]}`,
+                    glossKey: planetMeaningKey(d.body),
+                    glyph: PLANET_GLYPH[d.body] ?? null,
+                  })),
+                });
+              }}
               areas={ready.areas.map((a): BarArea => ({
                 key: a.area,
                 label: th(AREA_KEY[a.area] ?? a.area),
@@ -190,10 +224,18 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
               </section>
             )}
 
-            <section className={`card ${styles.section}`}>
-              <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
-              <HoroscopeReading sign={ready.sign} period={period} tz={tz} essence={prose} />
-            </section>
+            {/* La prosa del periodo se MOVIÓ al panel (maestro-detalle): el panel
+                derecho es el único lugar de lectura en desktop. Regresión-cero en
+                móvil: sin panel, la lectura debe seguir visible en el flujo — se
+                conserva el bloque EXACTO de hoy (HoroscopeReading con sus tiers)
+                envuelto en `.readingMobile` (display:contents en móvil,
+                display:none en desktop). */}
+            <div className={styles.readingMobile}>
+              <section className={`card ${styles.section}`}>
+                <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
+                <HoroscopeReading sign={ready.sign} period={period} tz={tz} essence={prose} />
+              </section>
+            </div>
 
             {ready.natalHits && ready.natalHits.length > 0 && (
               <section className={`card ${styles.section}`}>
@@ -223,8 +265,15 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
                     <tbody>
                       {ready.houses.map((h) => (
                         <tr key={h.body}>
+                          {/* Celda del símbolo principal (el planeta) → botón term
+                              del maestro-detalle: reemplaza el <Meaning> por un
+                              select al panel/sheet (patrón pilares). El <Meaning>
+                              del signo (celda de al lado) se conserva. */}
                           <td className={styles.proGlyph}>
-                            <Meaning k={planetMeaningKey(h.body)}>{PLANET_GLYPH[h.body] ?? "•"}</Meaning>
+                            <button type="button" className={styles.selBtn}
+                              onClick={() => onSelect({ kind: "term", key: planetMeaningKey(h.body) })}>
+                              {PLANET_GLYPH[h.body] ?? "•"}
+                            </button>
                           </td>
                           <td>{L.bodies[h.body] ?? h.body}</td>
                           <td><Meaning k={`sign.${h.sign}`}>{SIGN_GLYPH[h.sign]}</Meaning> {L.signs[h.sign]}</td>

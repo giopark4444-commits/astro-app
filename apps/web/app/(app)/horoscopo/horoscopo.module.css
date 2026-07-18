@@ -9,13 +9,44 @@
 
 .soonCard { position: relative; z-index: 1; text-align: center; color: var(--soft); padding: var(--sp-6); }
 
+/* `.grid` es la COLUMNA TÉCNICA (izquierda) del maestro-detalle: selector +
+   barras (.side) apilados sobre el cielo/tablas (.mainCol). En móvil fluye en
+   una sola columna (apilado intacto, regresión-cero); en desktop es la columna 1
+   de `.deskCols` (11fr). El viejo split 380px|1fr desapareció (Task 4): la
+   técnica ya no se subdivide, el ancho lo gana el panel de la derecha. */
 .grid { position: relative; z-index: 1; display: grid; gap: var(--sp-4); }
-@media (min-width: 1080px) {
-  .grid { grid-template-columns: 380px 1fr; align-items: start; }
-  .side { position: sticky; top: 96px; }
-}
-
 .side { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+/* Maestro-detalle (Task 4, receta numeros/pilares): `.deskCols` envuelve la
+   técnica (`.grid`) + el panel sticky (`.interpCol`). En móvil display:contents
+   = transparente, así que `.grid` y el panel (oculto) fluyen como hoy. */
+.deskCols { display: contents; }
+.interpCol { display: none; }
+/* `.readingMobile` (móvil) es el inverso del panel: la prosa fluye en `.mainCol`
+   como hoy; en desktop la reemplaza el panel derecho (ver @media). */
+.readingMobile { display: contents; }
+/* Título del panel de interpretación: mismo look que .sectionH pero sobre un
+   <span> (no <h2>) — el panel vive fuera de .section, con su propia receta. */
+.cardH2 { font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3); }
+/* Reset del botón de selección de la celda del símbolo principal de las tablas
+   Pro (posiciones/interacciones/armonías) → term del maestro-detalle. Copiado
+   de pilares.module.css `.selBtn`: limpia fondo/borde/padding, hereda tipografía
+   y alineación, con focus-visible accesible. Task 5 consolida el CSS del panel. */
+.selBtn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+.selBtn:hover { color: var(--acc-text); }
+.selBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
+
+@media (min-width: 1080px) {
+  /* Split de la serie: técnica (11fr) + panel de interpretación sticky (9fr).
+     `.grid` cae en la columna 1 por auto-flow; `.interpCol` en la 2. */
+  .deskCols { display: grid; grid-template-columns: 11fr 9fr; gap: var(--sp-6); align-items: start; }
+  .grid { grid-column: 1; }
+  /* `.side` deja de ser sticky: lo único sticky es el panel; la técnica scrollea
+     libre dentro de `.grid`. */
+  .interpCol { display: block; grid-column: 2; position: sticky; top: 84px; z-index: 1; }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+  .readingMobile { display: none; } /* desktop: el panel derecho reemplaza la prosa móvil */
+}
 .signs { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
 /* Entrada escalonada de los 12 chips (signos/animales): mismo mecanismo que
    `.reveal` global (globals.css, aluna-reveal + --i por índice) pero con un

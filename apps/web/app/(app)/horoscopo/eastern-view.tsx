@@ -11,6 +11,7 @@ import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
 import { EasternSky } from "./eastern-sky";
 import { TEXT_VS, PERIODS, PERIOD_KEY, AREA_KEY, TONE_KEY } from "./horoscopo-shared";
+import type { AreaDriver, HoroscopoSelection } from "./selection";
 import styles from "./horoscopo.module.css";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -46,9 +47,14 @@ type EasternViewProps = {
   // había roto en el split porque la subvista se desmonta).
   animal: string | null;
   onAnimalChange: (a: string | null) => void;
+  // Maestro-detalle (Task 4): `onSelect` sube cada gesto tocable de la técnica
+  // (barra de área o símbolo de tabla Pro) al orquestador para el panel/sheet;
+  // `onReady` sube el payload cargado para que el panel lea la prosa del periodo.
+  onSelect: (s: HoroscopoSelection) => void;
+  onReady: (p: EasternPayload) => void;
 };
 
-export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, animal, onAnimalChange }: EasternViewProps) {
+export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, animal, onAnimalChange, onSelect, onReady }: EasternViewProps) {
   const t = useTranslations("horoscopo");
   const th = useTranslations("hoy");
   const tp = useTranslations("pilares");
@@ -94,6 +100,15 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
   }, [animal, period, tz, active?.id, onAnimalChange]);
 
   const readyEastern = easternState.s === "ready" ? easternState.p : null;
+
+  // Sube el payload al orquestador cuando queda "ready": el panel maestro-detalle
+  // (desktop) lee la prosa del periodo desde ahí. `onReady` es un setState del
+  // orquestador (estable); dep [easternState] re-notifica solo al cambiar el
+  // estado local (mismo patrón que western-view).
+  useEffect(() => {
+    if (easternState.s === "ready") onReady(easternState.p);
+  }, [easternState, onReady]);
+
   const proseEastern = readyEastern
     ? composeEasternProse(locale === "en" ? "en" : "es", readyEastern)
     : [];
@@ -149,7 +164,24 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
             <AreaBars
               calmText={th("calm")}
               open={openAreaEastern}
-              onToggle={(key) => setOpenAreaEastern((prev) => (prev === key ? null : key))}
+              // Maestro-detalle: mismo gesto expande + sube el área al panel/sheet
+              // (AreaBars compartido, sin onSelect propio → cableado en onToggle).
+              // Drivers → AreaDriver[] con su glosario: interacción →
+              // interactionKey (todas las que emite branchPairInteractions
+              // resuelven), glifo = par en hanzi; el body lo resuelve el panel.
+              onToggle={(key) => {
+                setOpenAreaEastern((prev) => (prev === key ? null : key));
+                const a = readyEastern.areas.find((x) => x.area === key);
+                if (!a) return;
+                onSelect({
+                  kind: "area", area: a.area, level: a.tone,
+                  drivers: a.drivers.map((d): AreaDriver => ({
+                    label: `${interactionLabel(d.type)} · ${tp(d.pillar)} — ${tp(`animal${cap(d.withAnimal)}`)}`,
+                    glossKey: interactionKey(d.type),
+                    glyph: `${animalHanzi} ${INTERACTION_GLYPH[d.type]} ${EARTHLY_BRANCHES[d.withBranch]!.hanzi}`,
+                  })),
+                });
+              }}
               areas={readyEastern.areas.map((a): BarArea => ({
                 key: a.area,
                 label: th(AREA_KEY[a.area] ?? a.area),
@@ -178,10 +210,17 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
               <EasternSky payload={readyEastern} tz={tz} script={script} />
             </section>
 
-            <section className={`card ${styles.section}`}>
-              <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
-              {proseEastern.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)}
-            </section>
+            {/* La prosa del periodo se MOVIÓ al panel (maestro-detalle). Móvil
+                regresión-cero: sin panel, la lectura sigue visible en el flujo —
+                se conserva el bloque EXACTO de hoy envuelto en `.readingMobile`
+                (display:contents móvil / display:none desktop). El panel oriental
+                además gana tiers con Pro (Pro unificado, vía interpretation-content). */}
+            <div className={styles.readingMobile}>
+              <section className={`card ${styles.section}`}>
+                <h2 className={styles.sectionH}>{t("proseTitle")}</h2>
+                {proseEastern.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)}
+              </section>
+            </div>
 
             {/* Cruce personal (espejo de natalHits occidental): pilares
                 natales REALES vs pilares del periodo, con el par en hanzi. */}
@@ -223,8 +262,13 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
                     <tbody>
                       {readyEastern.interactions.map((h, i) => (
                         <tr key={i}>
+                          {/* Celda del símbolo principal (el par de interacción) →
+                              botón term del maestro-detalle (patrón pilares). */}
                           <td className={styles.proGlyph}>
-                            {animalHanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                            <button type="button" className={styles.selBtn}
+                              onClick={() => onSelect({ kind: "term", key: interactionKey(h.type) })}>
+                              {animalHanzi} {INTERACTION_GLYPH[h.type]} {EARTHLY_BRANCHES[h.withBranch]!.hanzi}
+                            </button>
                           </td>
                           <td>{tp(h.pillar)}</td>
                           <td>{interactionLabel(h.type)}</td>
@@ -247,7 +291,14 @@ export function EasternView({ pro, onProToggle, period, onPeriodChange, tz, anim
                         const b = EARTHLY_BRANCHES[idx]!;
                         return (
                           <span key={a}>
-                            <Meaning k={`bazi.branch.${b.key}`}>{b.hanzi} {tp(`animal${cap(a)}`)}</Meaning>
+                            {/* Símbolo principal de la fila de armonías (la rama en
+                                六合) → botón term del maestro-detalle: reemplaza el
+                                <Meaning> por un select al panel/sheet (patrón
+                                pilares; la clave sigue siendo la del glosario). */}
+                            <button type="button" className={styles.selBtn}
+                              onClick={() => onSelect({ kind: "term", key: `bazi.branch.${b.key}` })}>
+                              {b.hanzi} {tp(`animal${cap(a)}`)}
+                            </button>
                             {i < readyEastern.harmonies.length - 1 ? " · " : ""}
                           </span>
                         );
