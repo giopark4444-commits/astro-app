@@ -159,6 +159,9 @@ export function PilaresView() {
     [data],
   );
 
+  // sin perfil activo no hay carta que interpretar (y evita data stale post-logout).
+  if (!active) return null;
+
   return (
     <main className={styles.wrap}>
       <div className={styles.sky} aria-hidden>
@@ -270,8 +273,8 @@ export function PilaresView() {
                 selected={selected}
                 pro={pro}
                 set={set!}
-                profileId={active!.id}
-                profileName={active!.name}
+                profileId={active.id}
+                profileName={active.name}
                 script={script}
               />
             </div>
@@ -285,7 +288,7 @@ export function PilaresView() {
         center
         title={sheetSel ? pilarSelectionTitle(sheetSel, t, L, locale) : ""}
       >
-        {sheetSel && active && set && (
+        {sheetSel && set && (
           <PilaresInterpretation
             selected={sheetSel}
             pro={pro}

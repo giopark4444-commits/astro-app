@@ -116,4 +116,22 @@ describe("PilaresView — maestro-detalle (panel/sheet)", () => {
       expect(within(panel!).queryByText(es.pilares.dayMaster)).toBeNull();
     });
   });
+
+  it("el panel no renderiza si active es null (perfil borrado)", async () => {
+    const { container, rerender } = renderView();
+    await screen.findByText(es.pilares.interpTitle);
+
+    // Borrar el perfil activo → null.
+    mockState.active = null;
+    rerender(
+      <NextIntlClientProvider locale="es" messages={es}>
+        <PilaresView />
+      </NextIntlClientProvider>,
+    );
+
+    // El componente retorna null: no hay contenido, no hay error.
+    await waitFor(() => {
+      expect(container.firstChild).toBeNull();
+    });
+  });
 });
