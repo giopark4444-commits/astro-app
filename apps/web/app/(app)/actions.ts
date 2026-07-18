@@ -1,5 +1,6 @@
 "use server";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/locale";
 import { THEME_COOKIE, MODE_COOKIE } from "@/lib/theme/fouc-script";
@@ -69,4 +70,22 @@ export async function setIntentUseInAI(on: boolean) {
   if (!intent) return;
 
   await intentBuilder(supabase).update({ intent: { ...intent, useInAI: on } }).eq("user_id", user.id);
+}
+
+/**
+ * Borra un recuerdo propio ("Aluna te conoce", Task 3). RLS de user_memories
+ * (0018) ya acota el delete a la fila del usuario, pero el `.eq("user_id", …)`
+ * se mantiene explícito (mismo criterio defensivo que el resto del archivo).
+ * Best-effort: un fallo acá nunca debe romper /ajustes.
+ */
+export async function deleteMemory(id: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("user_memories").delete().eq("id", id).eq("user_id", user.id);
+  } catch {
+    // best effort: no bloquear /ajustes por un fallo al borrar un recuerdo
+  }
+  revalidatePath("/ajustes");
 }
