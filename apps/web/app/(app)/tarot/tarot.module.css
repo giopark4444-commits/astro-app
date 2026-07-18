@@ -168,3 +168,14 @@
      del carril de 11fr los items respiran mejor en una sola columna (juicio
      propio, resolución 5 del brief). */
 }
+
+/* Pulido visual del gate post-merge (hallazgos de Gio "no se ve bien"): */
+/* 1. El chip INVERTIDA dentro del panel es hijo directo de una flex-column —
+   sin esto se estira a lo ancho como una tira en vez de píldora. */
+.interpBlock .reversedTag { align-self: flex-start; }
+@media (min-width: 1080px) {
+  /* 2. En desktop el panel ya lleva nombre+chip+keywords de la carta del día:
+     el hero los repetía lado a lado. El hero queda como pieza ritual (la carta
+     sola); su texto vive en el panel. En móvil no cambia nada. */
+  .dailyRevealBody { display: none; }
+}

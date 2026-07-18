@@ -103,10 +103,11 @@ describe("TarotView — maestro-detalle (panel/sheet)", () => {
     const content = TAROT_CARDS_ES[drawn.card.id]!;
     expect(within(panel).queryByText(content.essence)).toBeNull();
 
-    // Flip: el panel (kind daily) se actualiza por props (revealed) y muestra la
-    // essence + el nombre de la carta del día.
+    // Flip: el panel (kind daily) se actualiza por props (revealed) y muestra el
+    // nombre + la prosa del día (la essence viaja DENTRO de la prosa — el
+    // párrafo suelto se retiró por duplicado, gate visual post-merge).
     fireEvent.click(screen.getByRole("button", { name: es.tarot.dailyFlipCta }));
-    await waitFor(() => expect(within(panel).getByText(content.essence)).toBeTruthy());
+    await waitFor(() => expect(panel.textContent).toContain(content.essence));
     expect(within(panel).getByText(content.name)).toBeTruthy();
   });
 
