@@ -42,4 +42,17 @@ describe("TopNav", () => {
     expect(perfil.getAttribute("href")).toBe("/perfil");
     expect(perfil.getAttribute("data-on")).toBe("true");
   });
+
+  it("respeta un `order` custom (panel /admin) y deja Perfil siempre al final", () => {
+    currentPath = "/hoy";
+    render(
+      <NextIntlClientProvider locale="es" messages={es}>
+        <TopNav order={["tarot", "hoy", "pilares", "carta", "numeros", "horoscopo"]} />
+      </NextIntlClientProvider>,
+    );
+    const labels = screen.getAllByRole("link").map((a) => a.textContent);
+    expect(labels).toEqual([
+      es.nav.tarot, es.nav.hoy, es.nav.pilares, es.nav.carta, es.nav.numeros, es.nav.horoscopo, es.nav.perfil,
+    ]);
+  });
 });

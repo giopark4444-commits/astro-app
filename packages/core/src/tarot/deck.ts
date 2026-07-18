@@ -90,10 +90,12 @@ function buildMinors(): TarotCard[] {
 /** El mazo completo de 78 cartas (Rider-Waite-Smith como referencia estructural). */
 export const TAROT_DECK: readonly TarotCard[] = [...buildMajors(), ...buildMinors()];
 
-/** Registro de mazos disponibles (assets). RWS activo; Aluna en flag hasta que el arte esté verificado. */
+/** Registro de mazos disponibles (assets). RWS activo; Aluna en flag hasta que el arte esté verificado;
+ *  custom (mazo propio por usuario, T4) habilitado — la VISIBILIDAD del selector se decide por-usuario. */
 export const TAROT_DECKS: readonly TarotDeckInfo[] = [
   { id: "rws", enabled: true },
   { id: "aluna", enabled: false },
+  { id: "custom", enabled: true },
 ];
 
 const DECK_BY_ID: ReadonlyMap<string, TarotCard> = new Map(TAROT_DECK.map((c) => [c.id, c]));

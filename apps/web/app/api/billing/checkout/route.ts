@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDodoClient, dodoProductId } from "@/lib/billing/dodo-client";
+import { resolveReferralMetadata } from "@/lib/billing/referral-checkout";
 
 // Crea la sesión de checkout de Aluna Plus. SOLO la web la llama (el móvil
 // nunca vende dentro de la app). El email sale de la sesión autenticada,
@@ -43,12 +44,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "already_subscribed" }, { status: 409 });
   }
 
+  // Referidos (brief T6, preparado/latente): si el usuario está referido por
+  // un código activo con descuento > 0, adjunta SIEMPRE el código en metadata
+  // como respaldo de atribución manual — nunca lanza, nunca bloquea el
+  // checkout (ver resolveReferralMetadata).
+  const referralMetadata = await resolveReferralMetadata(supabase);
+
   try {
     const session = await getDodoClient().checkoutSessions.create({
       product_cart: [{ product_id: dodoProductId(plan), quantity: 1 }],
       customer: { email: user.email },
       subscription_data: { trial_period_days: 14 },
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes?checkout=success`,
+      // TODO-Dodo: cuando haya DODO_PAYMENTS_API_KEY real y se hayan
+      // creado/mapeado discount codes reales en el dashboard de Dodo (uno por
+      // cada referral_codes.discount_pct), pasar acá el nuevo campo
+      // `discount_codes: string[]` de CheckoutSessionCreateParams (o el
+      // `discount_code` deprecado) para que Dodo aplique el % de verdad en el
+      // checkout. Ver docs.dodopayments.com — sección Discounts (endpoint
+      // POST /discounts para crearlos) — para el flujo de creación. Por ahora
+      // SOLO se manda `referral_code` en metadata: NO se llama la API de
+      // discounts sin llave (regla dura del brief).
+      ...(referralMetadata ? { metadata: referralMetadata } : {}),
     });
     if (!session.checkout_url) {
       return NextResponse.json({ error: "checkout_failed" }, { status: 500 });

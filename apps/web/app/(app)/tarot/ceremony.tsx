@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { drawCards, spreadById, type DrawnCard } from "@aluna/core";
+import { drawCards, spreadById, type DrawnCard, type DeckAssetCtx, cardImageUrl, cardBackUrl, rwsCtx } from "@aluna/core";
 import { gestureRng } from "@/lib/tarot/rng";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
@@ -85,7 +85,15 @@ function reducer(state: CeremonyState, action: CeremonyAction): CeremonyState {
   }
 }
 
-export function Ceremony({ onClose }: { onClose: () => void }) {
+export function Ceremony({
+  deckCtx = rwsCtx(""),
+  onClose,
+}: {
+  /** Ctx del resolver de assets (Task 7); default rws — preserva el
+   *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
+  deckCtx?: DeckAssetCtx;
+  onClose: () => void;
+}) {
   const t = useTranslations("tarot");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
@@ -148,7 +156,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         spread: SPREAD_ID,
-        deck: "rws",
+        deck: deckCtx.activeDeck,
         ...(state.question !== undefined ? { question: state.question } : {}),
         cards: readingCards,
       }),
@@ -224,7 +232,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                   onPointerLeave={() => setHolding(false)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/tarot/rws/back.webp" alt="" className={tarot.cardImg} draggable={false} />
+                  <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                 </button>
               </div>
               <p className={styles.stepHint}>{t("shuffleHint")}</p>
@@ -251,7 +259,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                 onClick={() => dispatch({ type: "cut" })}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/tarot/rws/back.webp" alt="" className={tarot.cardImg} draggable={false} />
+                <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
               </button>
             ))}
           </div>
@@ -279,7 +287,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                     onClick={() => dispatch({ type: "pick", fanIndex: i })}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/tarot/rws/back.webp" alt="" className={tarot.cardImg} draggable={false} />
+                    <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                   </button>
                 );
               })}
@@ -292,7 +300,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                 <div className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}>
                   {i < state.picked.length && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src="/tarot/rws/back.webp" alt="" className={tarot.cardImg} draggable={false} />
+                    <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                   )}
                 </div>
                 <span className={styles.slotLabel}>{t(POSITION_KEY[pos.key] ?? "positionPast")}</span>
@@ -323,12 +331,12 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                   >
                     <span className={`${tarot.face} ${tarot.faceBack}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/tarot/rws/back.webp" alt="" className={tarot.cardImg} draggable={false} />
+                      <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                     </span>
                     <span className={`${tarot.face} ${tarot.faceFront}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/tarot/rws/${d.card.id}.webp`}
+                        src={cardImageUrl(d.card.id, deckCtx)}
                         alt={content.name}
                         className={`${tarot.cardImg} ${d.reversed ? tarot.reversedImg : ""}`}
                         draggable={false}
@@ -371,7 +379,7 @@ export function Ceremony({ onClose }: { onClose: () => void }) {
                 <article key={d.card.id} className={`card card--tight ${styles.readingCard}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/tarot/rws/${d.card.id}.webp`}
+                    src={cardImageUrl(d.card.id, deckCtx)}
                     alt={content.name}
                     className={`${styles.readingImg} ${d.reversed ? tarot.reversedImg : ""}`}
                   />

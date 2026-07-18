@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { answersToInsert, draftToIntent, type IntentDraft, type OnboardingAnswers } from "@/lib/onboarding";
 import type { TablesInsert } from "@aluna/supabase";
 import { parseIntent, type UserIntent } from "@aluna/core";
+import { redeemFromCookie } from "@/lib/referrals/actions";
 
 // exactOptionalPropertyTypes hace que postgrest-js infiera el arg de insert() como
 // `never`. Casteamos solo el builder a un shim tipado; el valor sigue type-checked.
@@ -30,6 +31,12 @@ export async function createBirthProfile(answers: OnboardingAnswers, intentDraft
       // best effort: la intención nunca bloquea crear el perfil
     }
   }
+
+  // Punto de enganche del canje de referido (brief T3): justo tras completar
+  // el onboarding. redeemFromCookie() nunca lanza (código inválido/ya
+  // canjeado/migración 0016 sin aplicar -> silencioso) — jamás debe romper
+  // la creación del perfil.
+  await redeemFromCookie();
 
   redirect("/numeros");
 }

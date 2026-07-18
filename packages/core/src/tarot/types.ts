@@ -21,6 +21,6 @@ export interface TarotCard {
 }
 
 export interface TarotDeckInfo {
-  id: "rws" | "aluna";
-  enabled: boolean; // aluna: false hasta que el arte esté verificado
+  id: "rws" | "aluna" | "custom";
+  enabled: boolean; // aluna: false hasta que el arte esté verificado; custom: visibilidad del selector se decide por-usuario, no por este flag
 }

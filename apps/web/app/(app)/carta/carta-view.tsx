@@ -2,30 +2,28 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
-  ZODIAC_SIGNS, PLANETS, signOfLongitude,
-  planetMeaningKey, dignityMeaningKey, patternMeaningKey,
+  signOfLongitude,
   type ChartResult, type BodyPosition, type HouseSystem, type Zodiac, type Aspect,
 } from "@aluna/core";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { useCountUp } from "@/lib/motion/use-count-up";
-import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
-import { composeBodyReading as composeReadingEs } from "@/lib/content/astrology-readings-es";
-import { composeBodyReading as composeReadingEn } from "@/lib/content/astrology-readings-en";
+import { astroLabels } from "@/lib/content/astrology-labels";
 import { composeCoreReading as composeCoreEs } from "@/lib/content/core-reading-es";
 import { composeCoreReading as composeCoreEn } from "@/lib/content/core-reading-en";
 import { ChartWheel } from "./chart-wheel";
-import { BodyReadingView } from "./body-reading";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
+import { PLANET_GLYPH, SIGN_GLYPH } from "./glyphs";
+import { isMobileViewport, type Selection } from "./selection";
+import { InterpretationContent, selectionTitle } from "./interpretation-content";
+import { PositionsTable } from "./positions-table";
+import { AspectList } from "./aspect-list";
 import styles from "./carta.module.css";
 
-const TEXT_VS = "︎"; // U+FE0E: presentación de texto (no emoji) en los glifos
-const SIGN_GLYPH = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
-const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + TEXT_VS]));
 type ChartKind = "natal" | "transits" | "solar_return" | "progressed";
 const CHART_KINDS: ChartKind[] = ["natal", "transits", "solar_return", "progressed"];
 const KIND_KEY: Record<ChartKind, string> = {
@@ -35,7 +33,6 @@ const KIND_KEY: Record<ChartKind, string> = {
   progressed: "Progressed",
 };
 const pad = (n: number) => String(n).padStart(2, "0");
-const dms = (b: BodyPosition) => `${b.degree}°${pad(b.minute)}′${pad(b.second)}″`;
 
 type State =
   | { s: "loading" }
@@ -53,7 +50,10 @@ export function CartaView() {
   const [kind, setKind] = useState<ChartKind>("natal");
   const [pro, setPro] = useState(false);
   const [tab, setTab] = useState<ChartTab>("nucleo");
-  const [sheet, setSheet] = useState<BodyPosition | null>(null);
+  // Maestro-detalle: `selected` pinta el panel derecho (desktop); `sheetSel`
+  // abre el bottom-sheet (móvil). El router `select` elige según viewport.
+  const [selected, setSelected] = useState<Selection>({ kind: "core" });
+  const [sheetSel, setSheetSel] = useState<Selection | null>(null);
   const [state, setState] = useState<State>({ s: "loading" });
   const cache = useRef<Map<string, { chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined }>>(
     new Map(),
@@ -115,7 +115,15 @@ export function CartaView() {
     if (ready !== null) ceremonyPlayed.current = true;
   }, [ready]);
 
+  // El contexto de la carta cambió (perfil/casas/zodíaco/tipo): la selección
+  // apuntaba al chart anterior — el panel vuelve al Núcleo y el sheet se cierra.
+  useEffect(() => {
+    setSelected({ kind: "core" });
+    setSheetSel(null);
+  }, [active, houseSystem, zodiac, kind]);
+
   // Núcleo narrativo (mockup 06 §4.4): teje sol+luna+ascendente en un párrafo.
+  // Se lee en el panel derecho (o el sheet) como interpretación por defecto.
   const coreSegs = useMemo(() => {
     const sun = byKey.get("sun");
     const moon = byKey.get("moon");
@@ -128,7 +136,18 @@ export function CartaView() {
     });
   }, [byKey, ascSign, locale]);
 
+  // Router único de selección: TODO lo tocable de la columna técnica pasa por
+  // acá. Desktop pinta el panel derecho; móvil abre el sheet con el MISMO
+  // renderizador (InterpretationContent) — spec §5.
+  const select = (s: Selection) => {
+    if (isMobileViewport()) setSheetSel(s);
+    else setSelected(s);
+  };
+
   if (!active) return null;
+
+  const sun = byKey.get("sun");
+  const moon = byKey.get("moon");
 
   return (
     <div className={styles.wrap}>
@@ -172,171 +191,150 @@ export function CartaView() {
 
       {ready && (
         <div className={styles.deskCols}>
-          <div className={styles.wheelCol}>
-            {ready.solar && <p className={styles.solar}>☉ {t("solarNotice")}</p>}
+          {/* columna técnica: rueda + tabs + panes (desktop scrollea; móvil apila) */}
+          <div className={styles.leftCol}>
+            <div className={styles.wheelCol}>
+              {ready.solar && <p className={styles.solar}>☉ {t("solarNotice")}</p>}
 
-            <div className={`${styles.wheelWrap} ${playCeremony ? "" : "reveal"}`} style={{ ["--i" as string]: 1 }}>
-              <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={setSheet} animated={playCeremony} />
+              <div className={`${styles.wheelWrap} ${playCeremony ? "" : "reveal"}`} style={{ ["--i" as string]: 1 }}>
+                <ChartWheel chart={ready.chart} solar={ready.solar} onSelect={(b) => select({ kind: "body", body: b })} animated={playCeremony} />
+              </div>
+              <p className={styles.tapHint}>{t("tapHint")}</p>
+
+              {/* controles al pie de la rueda (desktop, mockup .ctrl-rows) */}
+              <div className={styles.ctrlRows}>
+                <ChartControls
+                  houseSystem={houseSystem} onHouseSystem={setHouseSystem}
+                  zodiac={zodiac} onZodiac={setZodiac}
+                  labeled
+                  proToggle={
+                    <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
+                      <span className={styles.proDot} data-on={pro || undefined} />
+                      {t("pro")}
+                    </button>
+                  }
+                />
+              </div>
             </div>
-            <p className={styles.tapHint}>{t("tapHint")}</p>
 
-            {/* controles al pie de la rueda (desktop, mockup .ctrl-rows) */}
-            <div className={styles.ctrlRows}>
-              <ChartControls
-                houseSystem={houseSystem} onHouseSystem={setHouseSystem}
-                zodiac={zodiac} onZodiac={setZodiac}
-                labeled
-                proToggle={
-                  <button className={styles.proToggle} onClick={() => setPro(!pro)} aria-pressed={pro}>
-                    <span className={styles.proDot} data-on={pro || undefined} />
-                    {t("pro")}
+            <div className={styles.techCard}>
+              <ChartTabs active={tab} onSelect={setTab} />
+
+              {/* núcleo: Sol / Luna / Ascendente (cada tarjeta selecciona su cuerpo) */}
+              <div className={pane("nucleo")}>
+                <div className={styles.bigThree}>
+                  {sun && (
+                    <button type="button" className={styles.selRow} onClick={() => select({ kind: "body", body: sun })}>
+                      <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
+                        sign={L.signs[sun.sign]!} signGlyph={SIGN_GLYPH[sun.sign]!}
+                        degMin={`${sun.degree}°${pad(sun.minute)}′`}
+                        house={sun.house} houseLabel={t("house")}
+                        dignity={sun.dignity ? L.dignities[sun.dignity] : undefined}
+                        dignityKey={sun.dignity} />
+                    </button>
+                  )}
+                  {moon && (
+                    <button type="button" className={styles.selRow} onClick={() => select({ kind: "body", body: moon })}>
+                      <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
+                        sign={L.signs[moon.sign]!} signGlyph={SIGN_GLYPH[moon.sign]!}
+                        degMin={`${moon.degree}°${pad(moon.minute)}′`}
+                        house={moon.house} houseLabel={t("house")}
+                        dignity={moon.dignity ? L.dignities[moon.dignity] : undefined}
+                        dignityKey={moon.dignity} />
+                    </button>
+                  )}
+                  <button type="button" className={styles.selRow}
+                    onClick={() => select({ kind: "ascendant", sign: ascSign, degree: ascPos?.degree ?? 0, minute: ascPos?.minute ?? 0 })}>
+                    <BigCard glyph="Asc" name={t("ascendant")}
+                      sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
+                      degMin={`${ascPos?.degree ?? 0}°${pad(ascPos?.minute ?? 0)}′`} dim={ready.solar} />
                   </button>
-                }
-              />
-            </div>
-          </div>
+                </div>
 
-          <div className={styles.readCol}>
-            <ChartTabs active={tab} onSelect={setTab} />
+                <div className={styles.balPair}>
+                  <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
+                    dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
+                  <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
+                    dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
+                </div>
+                <p className={styles.balCap}>
+                  {t("dominantsCaption")} — {L.elements[ready.chart.distribution.dominantElement]} {L.modalities[ready.chart.distribution.dominantModality]}.
+                </p>
 
-            {/* núcleo: Sol / Luna / Ascendente */}
-            <div className={pane("nucleo")}>
-              <div className={styles.bigThree}>
-                {byKey.get("sun") && (
-                  <BigCard glyph={PLANET_GLYPH.sun!} name={L.bodies.sun!}
-                    signKey={byKey.get("sun")!.sign} sign={L.signs[byKey.get("sun")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("sun")!.sign]!}
-                    degMin={`${byKey.get("sun")!.degree}°${pad(byKey.get("sun")!.minute)}′`}
-                    house={byKey.get("sun")!.house} houseLabel={t("house")}
-                    dignity={byKey.get("sun")!.dignity ? L.dignities[byKey.get("sun")!.dignity!] : undefined}
-                    dignityKey={byKey.get("sun")!.dignity} />
+                {ready.chart.patterns.length > 0 && (
+                  <>
+                    {/* mockup 06 §4.4: los patrones llevan su rótulo PATRONES; cada
+                        chip selecciona su patrón para el panel/sheet. */}
+                    <h3 className={styles.cardH}>{t("patterns")}</h3>
+                    <div className={styles.chips}>
+                      {ready.chart.patterns.map((p, i) => (
+                        <button key={i} type="button" className={`chip ${styles.chip} ${styles.chipBtn}`}
+                          onClick={() => select({ kind: "pattern", pattern: p })}>
+                          {L.patterns[p.type]}:{" "}
+                          {p.bodies.map((k, j) => (
+                            <span key={k}>
+                              {j > 0 && " "}
+                              {PLANET_GLYPH[k] ?? k}
+                            </span>
+                          ))}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
-                {byKey.get("moon") && (
-                  <BigCard glyph={PLANET_GLYPH.moon!} name={L.bodies.moon!}
-                    signKey={byKey.get("moon")!.sign} sign={L.signs[byKey.get("moon")!.sign]!} signGlyph={SIGN_GLYPH[byKey.get("moon")!.sign]!}
-                    degMin={`${byKey.get("moon")!.degree}°${pad(byKey.get("moon")!.minute)}′`}
-                    house={byKey.get("moon")!.house} houseLabel={t("house")}
-                    dignity={byKey.get("moon")!.dignity ? L.dignities[byKey.get("moon")!.dignity!] : undefined}
-                    dignityKey={byKey.get("moon")!.dignity} />
-                )}
-                <BigCard glyph="Asc" name={<Meaning k="point.ascendant">{t("ascendant")}</Meaning>}
-                  signKey={ascSign} sign={L.signs[ascSign]!} signGlyph={SIGN_GLYPH[ascSign]!}
-                  degMin={`${ascPos?.degree ?? 0}°${pad(ascPos?.minute ?? 0)}′`} dim={ready.solar} />
               </div>
 
-              {coreSegs && (
-                <section className={styles.reading}>
-                  <span className={styles.cardH}>{t("coreReadingTitle")}</span>
-                  <p className={styles.readingP}>
-                    {coreSegs.map((s, i) => (s.b ? <b key={i}>{s.b}</b> : <span key={i}>{s.t}</span>))}
-                  </p>
+              {/* Tu Clima: aspectos tránsito-a-natal (sección propia, pane núcleo) */}
+              {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
+                <section className={`card card--tight fade-in ${pane("nucleo")}`}>
+                  <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
+                  <AspectList aspects={ready.transitAspects} pro={pro} onSelect={select} transit />
                 </section>
               )}
 
-              <div className={styles.balPair}>
+              {/* Modo Pro (móvil: posición original, oculto ≥1080 — el pie de
+                  rueda toma el relevo ahí vía ChartControls.proToggle) */}
+              <button className={`${styles.proToggle} ${styles.proToggleMobile}`} onClick={() => setPro(!pro)} aria-pressed={pro}>
+                <span className={styles.proDot} data-on={pro || undefined} />
+                {t("pro")}
+              </button>
+
+              {/* lámina técnica: en móvil apila posiciones/aspectos/balance siempre
+                  (data-pro solo gradúa la profundidad); en desktop cada pane se
+                  filtra por su tab. */}
+              <div className={styles.mobileLamina} data-pro={pro || undefined}>
+                {/* posiciones */}
+                <section className={`card card--tight fade-in ${pane("posiciones")}`}>
+                  <h3 className={styles.cardH}>{t("positions")}</h3>
+                  <PositionsTable bodies={ready.chart.bodies} pro={pro} onSelect={select} />
+                  {/* cabecera técnica (extra técnico: solo con Modo Pro) */}
+                  {pro && (
+                    <div className={styles.tech}>
+                      <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
+                      <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
+                      <span>{t(ready.chart.meta.zodiac)}</span>
+                      <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
+                    </div>
+                  )}
+                </section>
+
+                {/* aspectario */}
+                <section className={`card card--tight fade-in ${pane("aspectos")}`}>
+                  <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
+                  <AspectList aspects={ready.chart.aspects} pro={pro} onSelect={select} />
+                </section>
+              </div>
+
+              {/* balance de elementos y modalidades + distribución (Pro): FUERA de
+                  .mobileLamina (spec review Fable ítem 1) — en móvil sin Pro las
+                  barras de Elementos/Modalidades deben verse igual que en main;
+                  {pro && distGrid} adentro sigue siendo el único gate Pro. */}
+              <section className={`card card--tight fade-in ${pane("balance")}`}>
                 <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
                   dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
                 <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
                   dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
-              </div>
-              <p className={styles.balCap}>
-                {t("dominantsCaption")} — {L.elements[ready.chart.distribution.dominantElement]} {L.modalities[ready.chart.distribution.dominantModality]}.
-              </p>
-
-              {ready.chart.patterns.length > 0 && (
-                <>
-                  {/* mockup 06 §4.4: los patrones llevan su rótulo PATRONES (barrido T9) */}
-                  <h3 className={`${styles.cardH} ${styles.coreExtra}`}>{t("patterns")}</h3>
-                  <div className={`${styles.chips} ${styles.coreExtra}`}>
-                    {ready.chart.patterns.map((p, i) => (
-                      <span key={i} className={`chip ${styles.chip}`}>
-                        <Meaning k={patternMeaningKey(p.type)}>{L.patterns[p.type]}</Meaning>:{" "}
-                        {p.bodies.map((k, j) => (
-                          <span key={k}>
-                            {j > 0 && " "}
-                            <Meaning k={planetMeaningKey(k)}>{PLANET_GLYPH[k] ?? k}</Meaning>
-                          </span>
-                        ))}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              <p className={styles.coreHint}>{t("coreHint")}</p>
-            </div>
-
-            {/* balance de elementos y modalidades */}
-            <div className={pane("balance")}>
-              <Balance title={t("elements")} kind="element" entries={ELEMENTS.map((k) => ({ k, label: L.elements[k]!, n: ready.chart.distribution.elements[k] }))}
-                dominant={ready.chart.distribution.dominantElement} dominantLabel={t("dominant")} />
-              <Balance title={t("modalities")} kind="modality" entries={MODALITIES.map((k) => ({ k, label: L.modalities[k]!, n: ready.chart.distribution.modalities[k] }))}
-                dominant={ready.chart.distribution.dominantModality} dominantLabel={t("dominant")} />
-            </div>
-
-            {/* Tu Clima: aspectos tránsito-a-natal */}
-            {kind === "transits" && ready.transitAspects && ready.transitAspects.length > 0 && (
-              <section className={`card card--tight fade-in ${pane("nucleo")}`}>
-                <h3 className={styles.cardH}>{t("weatherTitle")}</h3>
-                <div className={styles.aspList}>
-                  {ready.transitAspects.map((a, i) => (
-                    <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
-                      <span className={styles.aspPair}>
-                        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
-                        <span className={styles.aspGlyph}>{ASPECT_GLYPHS[a.aspect]}</span>{" "}
-                        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
-                      </span>
-                      <span className={styles.aspName}>
-                        {L.bodies[a.a]} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>{" "}
-                        {t("yourPossessive")} {L.bodies[a.b]}
-                      </span>
-                      <span className={styles.aspOrb}>
-                        {a.orb.toFixed(1)}° ·{" "}
-                        <Meaning k={a.applying ? "term.applying" : "term.separating"}>
-                          {a.applying ? t("applying") : t("separating")}
-                        </Meaning>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Modo Pro (móvil: posición original, oculto ≥1080 — el pie de
-                rueda toma el relevo ahí vía ChartControls.proToggle) */}
-            <button className={`${styles.proToggle} ${styles.proToggleMobile}`} onClick={() => setPro(!pro)} aria-pressed={pro}>
-              <span className={styles.proDot} data-on={pro || undefined} />
-              {t("pro")}
-            </button>
-
-            <div className={styles.pro} data-pro={pro || undefined}>
-              {/* posiciones */}
-              <section className={`card card--tight fade-in ${pane("posiciones")}`}>
-                <h3 className={styles.cardH}>{t("positions")}</h3>
-                <div className={styles.posTable}>
-                  {ready.chart.bodies.map((b) => (
-                    <div key={b.body} className={styles.posRow}>
-                      <span className={styles.posBody}>
-                        <Meaning k={planetMeaningKey(b.body)}>{PLANET_GLYPH[b.body] ?? "•"} {L.bodies[b.body] ?? b.body}</Meaning>
-                      </span>
-                      <span className={styles.posSign}>
-                        <Meaning k={`sign.${b.sign}`}>{SIGN_GLYPH[b.sign]}</Meaning> {dms(b)}
-                      </span>
-                      <span className={styles.posHouse}>
-                        <Meaning k={`house.${b.house}`}>{t("house")} {b.house}</Meaning>
-                      </span>
-                      <span className={styles.posDign}>
-                        {b.dignity && <Meaning k={dignityMeaningKey(b.dignity)}>{L.dignities[b.dignity]}</Meaning>}
-                        {b.retrograde ? <Meaning k="term.retrograde"> ℞</Meaning> : ""}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* distribución (extra técnico: solo con Modo Pro) */}
-              {pro && (
-                <section className={`card card--tight fade-in ${pane("balance")}`}>
-                  <h3 className={styles.cardH}>{t("distribution")}</h3>
+                {pro && (
                   <div className={styles.distGrid}>
                     {ELEMENTS.map((k) => (
                       <span key={k} className={styles.distCell}>
@@ -349,103 +347,26 @@ export function CartaView() {
                       </span>
                     ))}
                   </div>
-                </section>
-              )}
-
-              {/* aspectario */}
-              <section className={`card card--tight fade-in ${pane("aspectos")}`}>
-                <h3 className={styles.cardH}>{t("aspectsTitle")}</h3>
-                <div className={styles.aspList}>
-                  {ready.chart.aspects.map((a, i) => (
-                    <div key={i} className={`${styles.aspRow} ${styles[`harm_${a.harmony}`] ?? ""}`}>
-                      <span className={styles.aspPair}>
-                        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
-                        <span className={styles.aspGlyph}>{(ASPECT_GLYPHS[a.aspect] ?? "") + TEXT_VS}</span>{" "}
-                        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
-                      </span>
-                      <span className={styles.aspName}>
-                        <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>
-                      </span>
-                      <span className={styles.aspOrb}>
-                        <Meaning k="term.orb">{t("orb")}</Meaning> {a.orb.toFixed(1)}° ·{" "}
-                        <Meaning k={a.applying ? "term.applying" : "term.separating"}>
-                          {a.applying ? t("applying") : t("separating")}
-                        </Meaning>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* patrones */}
-              <section className={`card card--tight fade-in ${pane("balance")}`}>
-                <h3 className={styles.cardH}>{t("patterns")}</h3>
-                {ready.chart.patterns.length ? (
-                  <div className={styles.chips}>
-                    {ready.chart.patterns.map((p, i) => (
-                      <span key={i} className={`chip ${styles.chip}`}>
-                        <Meaning k={patternMeaningKey(p.type)}>{L.patterns[p.type]}</Meaning>:{" "}
-                        {p.bodies.map((k, j) => (
-                          <span key={k}>
-                            {j > 0 && " "}
-                            <Meaning k={planetMeaningKey(k)}>{PLANET_GLYPH[k] ?? k}</Meaning>
-                          </span>
-                        ))}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.muted}>{t("noPatterns")}</p>
                 )}
               </section>
+            </div>
+          </div>
 
-              {/* cabecera técnica (extra técnico: solo con Modo Pro) */}
-              {pro && (
-                <section className={`card card--tight fade-in ${pane("posiciones")}`}>
-                  <div className={styles.tech}>
-                    <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
-                    <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
-                    <span>{t(ready.chart.meta.zodiac)}</span>
-                    <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
-                  </div>
-                </section>
-              )}
+          {/* panel de interpretación (desktop; sticky — oculto en móvil, que usa el sheet) */}
+          <div className={styles.interpCol}>
+            <div className={`card ${styles.interpPanel}`}>
+              <span className={styles.cardH}>{t("interpTitle")}</span>
+              <InterpretationContent selected={selected} pro={pro} coreSegs={coreSegs} profileName={active.name} />
             </div>
           </div>
         </div>
       )}
 
-      <BottomSheet open={!!sheet} onClose={() => setSheet(null)} center
-        title={sheet ? `${PLANET_GLYPH[sheet.body] ?? ""} ${L.bodies[sheet.body] ?? sheet.body}` : ""}>
-        {sheet && (
-          <div className={styles.sheet}>
-            <div className={styles.sheetBig}>{SIGN_GLYPH[sheet.sign]} {dms(sheet)}</div>
-            <div className={styles.sheetSign}>{L.signs[sheet.sign]} · {t("house")} {sheet.house}</div>
-            <div className={styles.sheetMeta}>
-              {sheet.dignity && (
-                <Meaning k={dignityMeaningKey(sheet.dignity)}>
-                  <span className={`chip ${styles.tag}`}>{L.dignities[sheet.dignity]}</span>
-                </Meaning>
-              )}
-              {sheet.retrograde && <span className={`chip ${styles.tag} ${styles.tagWarn}`}><Meaning k="term.retrograde">{t("retrograde")} ℞</Meaning></span>}
-              <span className={`chip ${styles.tag}`}>{t("speed")} {sheet.speed.toFixed(2)}°/d</span>
-            </div>
-            {(() => {
-                const compose = locale === "en" ? composeReadingEn : composeReadingEs;
-                const r = compose(sheet.body, sheet.sign, sheet.house, sheet.dignity);
-                if (!r) return null;
-                return (
-                  <BodyReadingView
-                    base={r}
-                    body={sheet.body}
-                    sign={sheet.sign}
-                    house={sheet.house}
-                    dignity={sheet.dignity}
-                    profileName={active.name}
-                  />
-                );
-              })()}
-          </div>
+      {/* sheet unificado (móvil): mismo renderizador que el panel derecho */}
+      <BottomSheet open={!!sheetSel} onClose={() => setSheetSel(null)} center
+        title={sheetSel ? selectionTitle(sheetSel, L, t) : ""}>
+        {sheetSel && (
+          <InterpretationContent selected={sheetSel} pro={pro} coreSegs={coreSegs} profileName={active.name} />
         )}
       </BottomSheet>
     </div>
@@ -455,8 +376,8 @@ export function CartaView() {
 const ELEMENTS = ["fire", "earth", "air", "water"] as const;
 const MODALITIES = ["cardinal", "fixed", "mutable"] as const;
 
-function BigCard({ glyph, name, signKey, sign, signGlyph, degMin, house, houseLabel, dignity, dignityKey, dim }: {
-  glyph: string; name: React.ReactNode; signKey: string; sign: string; signGlyph: string; degMin: string;
+function BigCard({ glyph, name, sign, signGlyph, degMin, house, houseLabel, dignity, dignityKey, dim }: {
+  glyph: string; name: React.ReactNode; sign: string; signGlyph: string; degMin: string;
   house?: number | undefined; houseLabel?: string | undefined;
   dignity?: string | undefined; dignityKey?: string | null | undefined; dim?: boolean;
 }) {
@@ -466,15 +387,13 @@ function BigCard({ glyph, name, signKey, sign, signGlyph, degMin, house, houseLa
       <span className={styles.bigGlyph}>{glyph}</span>
       <span className={styles.bigName}>{name}</span>
       <span className={styles.bigSign}>
-        {signGlyph} <Meaning k={`sign.${signKey}`}>{sign}</Meaning>
+        {signGlyph} {sign}
       </span>
       <span className={styles.bigSub}>
         {degMin}
-        {house !== undefined && houseLabel && <> · <Meaning k={`house.${house}`}>{houseLabel} {house}</Meaning></>}
+        {house !== undefined && houseLabel && <> · {houseLabel} {house}</>}
         {dignity && dignityKey && (
-          <Meaning k={dignityMeaningKey(dignityKey)}>
-            <span className={`chip ${styles.bigTag} ${good ? styles.bigTagGood : ""}`}>{dignity}</span>
-          </Meaning>
+          <span className={`chip ${styles.bigTag} ${good ? styles.bigTagGood : ""}`}>{dignity}</span>
         )}
       </span>
     </div>

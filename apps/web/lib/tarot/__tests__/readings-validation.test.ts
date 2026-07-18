@@ -98,6 +98,12 @@ describe("validateReadingPayload", () => {
     if (!result.ok) expect(result.error).toBe("invalid_deck");
   });
 
+  it("deck 'custom' (mazo propio del usuario, habilitado) → ok", () => {
+    const result = validateReadingPayload(validThreePayload({ deck: "custom" }));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.deck).toBe("custom");
+  });
+
   it("deck desconocido → error", () => {
     const result = validateReadingPayload(validThreePayload({ deck: "tarot-de-marsella" }));
     expect(result.ok).toBe(false);

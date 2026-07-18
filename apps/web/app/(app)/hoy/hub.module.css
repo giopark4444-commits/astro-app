@@ -83,19 +83,22 @@
 .askCta { display: none; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
+  /* Rediseño 2col (Gio): DOS columnas iguales en todo — IZQUIERDA la información
+     técnica (datos, números), DERECHA su lectura (predicciones, consejos). Cada
+     fila empareja un dato con su interpretación y las alturas quedan sincronizadas. */
   .deskGrid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: var(--sp-5); /* mockup: 20px */
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-5);
     position: relative; z-index: 1;
   }
-  .heroEnergy { display: block; grid-column: span 5; order: 1; }
-  .heroWeather { grid-column: span 4; order: 2; margin-bottom: 0; }
-  .heroDay { display: block; grid-column: span 3; order: 3; }
-  .section.gridFull { grid-column: 1 / -1; order: 4; margin-top: var(--sp-4); }
+  .heroEnergy { display: block; grid-column: 1; order: 1; }
+  .heroWeather { grid-column: 2; order: 2; margin-bottom: 0; }
+  .heroDay { display: block; grid-column: 1; order: 3; }
+  .section.gridFull { grid-column: 1 / -1; order: 5; margin-top: var(--sp-4); }
   .askCta {
     display: flex; flex-direction: column; gap: var(--sp-2); justify-content: center;
-    grid-column: span 6; order: 5; padding: var(--sp-5);
+    grid-column: 2; order: 4; padding: var(--sp-5);
     /* mockup .p-energy: superficie dorada dominante del CTA */
     background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
     border-color: rgba(var(--acc-rgb), 0.34);
@@ -124,7 +127,7 @@
     transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
   }
   .askSugChip:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
-  .lenses { grid-column: span 6; order: 6; grid-template-columns: repeat(4, 1fr); } /* adaptación: mockup trae 3 tiles, el producto tiene 4 lentes */
+  .lenses { grid-column: 1 / -1; order: 6; grid-template-columns: repeat(5, 1fr); } /* fila completa; 5 lentes desde que Tarot entró */
   .tileIcon {
     width: 40px; height: 40px; border-radius: 12px; /* mockup .tile-ic */
     background: rgba(var(--acc-rgb), 0.1); border: 1px solid rgba(var(--acc-rgb), 0.3);

@@ -6,6 +6,7 @@ import { LoginForm } from "./login-form";
 import { authMessageKey } from "../auth/auth-error";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
+import { ReferralCapture } from "@/components/referral-capture";
 import styles from "@/components/auth.module.css";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -18,6 +19,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const msgKey = authMessageKey(error);
   return (
     <main className={styles.shell}>
+      <ReferralCapture />
       <div className={styles.sky} aria-hidden><Starfield /></div>
       <div className={styles.center}>
         <div className={styles.mark}>
