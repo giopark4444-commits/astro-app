@@ -147,6 +147,10 @@
   letter-spacing: 0.5px;
   animation: riseIn 900ms var(--ease) 200ms both;
 }
+/* La fila de 5 años del animal: más compacta para caber en el centro. */
+.throneYears { font-size: 10px; letter-spacing: 0; white-space: nowrap; }
+/* El año POR VENIR, atenuado para leerse como futuro. */
+.throneYearNext { opacity: 0.55; }
 
 .throneElement {
   font-size: var(--text-2xs);

@@ -29,13 +29,15 @@ const WUXING_LABEL_KEY: Record<string, string> = {
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** Los 3 años recientes del animal (rama i): años y con (y - 4) % 12 === i.
- *  1900 fue año Rata (子) y (1900-4)%12 === 0 ancla la cuenta. Indicativo:
- *  el año chino real arranca en el Año Nuevo lunar, no el 1 de enero. */
-function recentYears(branchIndex: number, now: number): number[] {
+/** Años del animal (rama i): años y con (y - 4) % 12 === i; 1900 fue año Rata
+ *  (子) y (1900-4)%12 === 0 ancla la cuenta. Devuelve 5: cuatro pasados (tres
+ *  ciclos hacia atrás desde el más reciente) + el PRÓXIMO por venir, que la
+ *  ficha atenúa para leerse como futuro. Indicativo: el año chino real arranca
+ *  en el Año Nuevo lunar, no el 1 de enero. */
+function animalYears(branchIndex: number, now: number): { past: number[]; next: number } {
   let y = now;
   while (((y - 4) % 12 + 12) % 12 !== branchIndex) y--;
-  return [y - 24, y - 12, y];
+  return { past: [y - 36, y - 24, y - 12, y], next: y + 12 };
 }
 
 /** Doble-hora que rige la rama: 子 23–01, 丑 01–03, … */
@@ -71,7 +73,7 @@ export function EasternWheel({
   const idx = EARTHLY_BRANCHES.findIndex((b) => b.animal === animal);
   const branch = idx >= 0 ? EARTHLY_BRANCHES[idx]! : null;
   const years = useMemo(
-    () => (idx >= 0 ? recentYears(idx, new Date().getFullYear()) : null),
+    () => (idx >= 0 ? animalYears(idx, new Date().getFullYear()) : null),
     [idx],
   );
 
@@ -94,7 +96,12 @@ export function EasternWheel({
                 <span aria-hidden className={styles.throneInfo}>ⓘ</span>
               </Meaning>
             </span>
-            {years && <span className={styles.throneDates}>{years.join(" · ")}</span>}
+            {years && (
+              <span className={`${styles.throneDates} ${styles.throneYears}`}>
+                {years.past.join(" · ")} ·{" "}
+                <span className={styles.throneYearNext}>{years.next}</span>
+              </span>
+            )}
             <span className={styles.throneElement} style={{ color: WUXING_INK[branch.element] }}>
               {tp(WUXING_LABEL_KEY[branch.element] ?? "elWood")} · {branch.yin ? "Yin" : "Yang"}
             </span>
