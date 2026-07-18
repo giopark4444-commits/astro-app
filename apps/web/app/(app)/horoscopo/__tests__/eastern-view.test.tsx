@@ -192,7 +192,10 @@ describe("HoroscopoView — tab Oriental", () => {
     expect(triggers.length).toBeGreaterThan(0);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(triggers[0]!);
-    const dialog = screen.getByRole("dialog");
+    // findBy* (no getBy* síncrono): bajo carga de suite completa el diálogo del
+    // glosario puede montar un tick después del click — esperamos con timeout
+    // explícito en vez de leer el DOM en el mismo tick (endurecimiento flaky).
+    const dialog = await screen.findByRole("dialog", {}, { timeout: 4000 });
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveTextContent(/Choque/);
     expect(dialog).toHaveTextContent(/冲/);
