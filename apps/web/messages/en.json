@@ -318,7 +318,15 @@
     "expand": "+{n} more",
     "loading": "Drawing your path…",
     "error": "We couldn't trace your life path. Please try again.",
-    "empty": "There are no milestones to show on your path yet."
+    "empty": "There are no milestones to show on your path yet.",
+    "chatFab": "Ask your path ✦",
+    "chatTitle": "Ask your path",
+    "chatThinking": "Aluna is reading your path…",
+    "chatError": "Something clouded over. Try again.",
+    "chatDormantTitle": "The oracle still sleeps",
+    "chatDormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your path already speaks for itself.",
+    "chatPlaceholder": "Type your reply…",
+    "chatSend": "Send"
   },
   "manifest": {
     "eyebrow": "Journal & manifestation",

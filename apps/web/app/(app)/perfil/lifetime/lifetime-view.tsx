@@ -10,6 +10,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { groupTimelineYears, type TimelineRow } from "@/lib/timeline/group";
 import type { TimelineResult } from "@/lib/timeline/types";
 import { EventCard, EventRow } from "./timeline-event-card";
+import { TimelineChatFab } from "./timeline-chat";
 import styles from "./lifetime.module.css";
 
 type Status = "loading" | "error" | "ready";
@@ -86,6 +87,8 @@ export function LifetimeView() {
       {status === "ready" && rows.length > 0 && (
         <Spine rows={rows} birthYear={result!.birthYear} locale={locale} t={t} />
       )}
+
+      {status === "ready" && <TimelineChatFab profileId={active?.id} />}
     </main>
   );
 }

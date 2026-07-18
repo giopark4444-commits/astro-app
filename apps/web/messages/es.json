@@ -318,7 +318,15 @@
     "expand": "+{n} más",
     "loading": "Dibujando tu camino…",
     "error": "No pudimos trazar tu camino de vida. Intenta de nuevo.",
-    "empty": "Todavía no hay hitos que mostrar en tu camino."
+    "empty": "Todavía no hay hitos que mostrar en tu camino.",
+    "chatFab": "Pregúntale a tu camino ✦",
+    "chatTitle": "Pregúntale a tu camino",
+    "chatThinking": "Aluna está leyendo tu camino…",
+    "chatError": "Algo se nubló. Inténtalo de nuevo.",
+    "chatDormantTitle": "El oráculo aún duerme",
+    "chatDormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu camino ya habla por sí solo.",
+    "chatPlaceholder": "Escribe tu respuesta…",
+    "chatSend": "Enviar"
   },
   "manifest": {
     "eyebrow": "Diario & manifestación",
