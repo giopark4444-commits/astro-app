@@ -60,7 +60,7 @@ i18n al final del namespace `tarot`: `interpTitle` ("Interpretación"/"Interpret
 - El contenedor del paso reading gana clase adicional `readingPane` (junto a `.stepPane`, sin tocarla): `<div className={`${styles.stepPane} ${styles.readingPane}`}>`.
 - CSS base: `.readingPane {}` vacío móvil. En `@media (min-width:1080px)`: `.readingPane { display:grid; grid-template-columns: 11fr 9fr; gap: var(--sp-6); align-items:start; text-align:left; }` + `.readingCards { grid-column:1; }` (conserva su grid 3-across interno) + wrapper nuevo `.readingSide { grid-column:2; position:sticky; top:84px; display:flex; flex-direction:column; gap:var(--sp-3); }` envolviendo prosa+chat+guardar/volver en el JSX (móvil: `display:contents`).
 - Título/pregunta del paso quedan arriba a lo ancho (`grid-column: 1 / -1`).
-- CERO cambios en los otros pasos; CERO cambios de contenido/orden en móvil.
+- CERO cambios en los otros pasos EXCEPTO el requisito §E del spec (despliegue cómodo): en el paso `fan` de ceremony y el `select` del manual, calibrar SOLO CSS de tamaño/solape/hover-focus de las cartas a ≥1080 (mecánica intacta: mismos handlers, índices y RNG); móvil sin cambios salvo que haya solape real hoy.
 - [ ] Test: estructural jsdom (el paso reading renderiza `.readingSide` conteniendo prosa+chat+save; los otros pasos NO tienen readingPane) — usar los tests existentes de ceremony/manual como harness (los hay: T3 los creó; leerlos) → implementar → GREEN + suite completa + typecheck + eslint → commit `feat(tarot): paso de lectura a dos columnas en desktop — cartas | prosa y chat (ritual intacto)`.
 
 ---

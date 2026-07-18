@@ -47,3 +47,14 @@ como omisión. Si algún día hay "lectura profunda IA" del tarot, el toggle ent
 ### Fuera de alcance
 Ritual/gestos/RNG; cruz celta; chat en el diario (hoy no existe — no se inventa); ruta del chat;
 prosa nueva; móvil más allá del router.
+
+### E. Requisito de Gio (2026-07-18, en vivo): despliegue de cartas CÓMODO
+"Asegurate de diagramar bien para que cuando estén todas las cartas desplegadas se pueda escoger de
+manera cómoda, sin entorpecer la funcionalidad." Aplica a:
+1. **Abanico de la ceremonia (78 cartas, paso fan):** en desktop el abanico debe ofrecer blancos de
+   toque cómodos — revisar solapamiento/tamaño a ≥1080 y dar hover/focus feedback claro de qué carta
+   se va a elegir; SIN cambiar la mecánica (tocar 3, índices, RNG ya sellado).
+2. **Picker del modo manual (grid de 78):** grid con blancos cómodos, buscador/tabs visibles sin
+   scroll excesivo en desktop.
+Verificación OBLIGATORIA en el gate: elegir 3 cartas del abanico y 3 del picker en vivo, a 1440px y
+en móvil, confirmando que ninguna carta queda imposible o incómoda de tocar.
