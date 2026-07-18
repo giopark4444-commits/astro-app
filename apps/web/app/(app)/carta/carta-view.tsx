@@ -217,6 +217,18 @@ export function CartaView() {
                   }
                 />
               </div>
+
+              {/* cabecera técnica del chart (Modo Pro): al pie de la rueda,
+                  visible en CUALQUIER tab — el toggle debe tener efecto
+                  inmediato donde aterrizás, no solo en Posiciones. */}
+              {pro && (
+                <div className={`${styles.tech} ${styles.techFoot}`}>
+                  <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
+                  <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
+                  <span>{t(ready.chart.meta.zodiac)}</span>
+                  <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
+                </div>
+              )}
             </div>
 
             <div className={styles.techCard}>
@@ -309,15 +321,6 @@ export function CartaView() {
                 <section className={`card card--tight fade-in ${pane("posiciones")}`}>
                   <h3 className={styles.cardH}>{t("positions")}</h3>
                   <PositionsTable bodies={ready.chart.bodies} pro={pro} onSelect={select} />
-                  {/* cabecera técnica (extra técnico: solo con Modo Pro) */}
-                  {pro && (
-                    <div className={styles.tech}>
-                      <span>{t("ut")} {ready.chart.meta.utcHour.toFixed(2)}h</span>
-                      <span>{t("julianDay")} {ready.chart.meta.julianDayUt.toFixed(4)}</span>
-                      <span>{t(ready.chart.meta.zodiac)}</span>
-                      <span>{t(`houseSystems.${ready.chart.houses.system}`)}</span>
-                    </div>
-                  )}
                 </section>
 
                 {/* aspectario */}
@@ -358,7 +361,9 @@ export function CartaView() {
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
               <span className={styles.cardH}>{t("interpTitle")}</span>
-              <InterpretationContent selected={selected} pro={pro} coreSegs={coreSegs} profileName={active.name} />
+              <InterpretationContent selected={selected} pro={pro} coreSegs={coreSegs}
+                coreData={{ sun, moon, asc: ascPos ? { sign: ascSign, degree: ascPos.degree, minute: ascPos.minute } : null }}
+                profileName={active.name} />
             </div>
           </div>
         </div>
@@ -368,7 +373,9 @@ export function CartaView() {
       <BottomSheet open={!!sheetSel} onClose={() => setSheetSel(null)} center
         title={sheetSel ? selectionTitle(sheetSel, L, t) : ""}>
         {sheetSel && (
-          <InterpretationContent selected={sheetSel} pro={pro} coreSegs={coreSegs} profileName={active.name} />
+          <InterpretationContent selected={sheetSel} pro={pro} coreSegs={coreSegs}
+            coreData={{ sun, moon, asc: ascPos ? { sign: ascSign, degree: ascPos.degree, minute: ascPos.minute } : null }}
+            profileName={active.name} />
         )}
       </BottomSheet>
     </div>

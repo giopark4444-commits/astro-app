@@ -12,8 +12,16 @@ import { BodyReadingView } from "./body-reading";
 import { PLANET_GLYPH, pointGlyph, SIGN_GLYPH, TEXT_VS } from "./glyphs";
 import type { Selection } from "./selection";
 import styles from "./carta.module.css";
+import type { BodyPosition } from "@aluna/core";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Datos crudos del núcleo para el desglose técnico Pro (kind "core"). */
+export type CoreData = {
+  sun?: BodyPosition | undefined;
+  moon?: BodyPosition | undefined;
+  asc?: { sign: string; degree: number; minute: number } | null | undefined;
+};
 
 // L.bodies (astrology-labels) solo cubre planetas: los aspectos a los ángulos
 // AC/MC (claves "ascendant"/"midheaven", ver glyphs.ts:pointGlyph) necesitan
@@ -22,10 +30,11 @@ function pointName(k: string, L: ReturnType<typeof astroLabels>, t: (k: string) 
   return L.bodies[k] ?? (k === "ascendant" ? t("ascendant") : k === "midheaven" ? t("midheaven") : k);
 }
 
-export function InterpretationContent({ selected, pro, coreSegs, profileName }: {
+export function InterpretationContent({ selected, pro, coreSegs, coreData, profileName }: {
   selected: Selection;
   pro: boolean;
   coreSegs: Array<{ t?: string; b?: string }> | null;
+  coreData?: CoreData | null;
   profileName: string;
 }) {
   const t = useTranslations("carta");
@@ -34,17 +43,42 @@ export function InterpretationContent({ selected, pro, coreSegs, profileName }: 
   const compose = locale === "en" ? composeEn : composeEs;
 
   switch (selected.kind) {
-    case "core":
-      return coreSegs ? (
-        <div className={styles.interpBlock}>
-          <span className={styles.cardH}>{t("coreReadingTitle")}</span>
-          <p className={styles.readingP}>
-            {coreSegs.map((s, i) => (s.b ? <b key={i}>{s.b}</b> : <span key={i}>{s.t}</span>))}
-          </p>
-        </div>
-      ) : (
-        <p className={styles.interpHint}>{t("interpHint")}</p>
+    case "core": {
+      // Línea técnica de un cuerpo del núcleo (solo Pro): signo exacto, casa,
+      // dignidad y velocidad — el toggle debe profundizar TAMBIÉN el aterrizaje.
+      const techLine = (b: BodyPosition) => (
+        <span>
+          {PLANET_GLYPH[b.body]} {L.bodies[b.body]} · {SIGN_GLYPH[b.sign]} {b.degree}°{pad(b.minute)}′{pad(b.second)}″ · {t("house")} {b.house}
+          {b.dignity ? ` · ${L.dignities[b.dignity]}` : ""}{b.retrograde ? " ℞" : ""} · {b.speed.toFixed(2)}°/d
+        </span>
       );
+      return (
+        <div className={styles.interpBlock}>
+          {coreSegs ? (
+            <>
+              <span className={styles.cardH}>{t("coreReadingTitle")}</span>
+              <p className={styles.readingP}>
+                {coreSegs.map((s, i) => (s.b ? <b key={i}>{s.b}</b> : <span key={i}>{s.t}</span>))}
+              </p>
+            </>
+          ) : (
+            <p className={styles.interpHint}>{t("interpHint")}</p>
+          )}
+          {pro && coreData && (coreData.sun || coreData.moon || coreData.asc) && (
+            <div className={styles.interpTechList}>
+              <span className={styles.brH}>{t("interpCoreTech")}</span>
+              {coreData.sun && techLine(coreData.sun)}
+              {coreData.moon && techLine(coreData.moon)}
+              {coreData.asc && (
+                <span>
+                  {pointName("ascendant", L, t)} · {SIGN_GLYPH[coreData.asc.sign]} {L.signs[coreData.asc.sign]} {coreData.asc.degree}°{pad(coreData.asc.minute)}′
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
 
     case "body": {
       const b = selected.body;

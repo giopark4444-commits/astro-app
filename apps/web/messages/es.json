@@ -494,7 +494,8 @@
     "tabBalance": "Balance",
     "interpTitle": "Interpretación",
     "interpHint": "Toca cualquier planeta, aspecto o casa a la izquierda para leer qué significa en tu carta.",
-    "interpAspectOf": "entre"
+    "interpAspectOf": "entre",
+    "interpCoreTech": "El núcleo, en datos"
   },
   "chat": {
     "title": "Pregúntale a Aluna",

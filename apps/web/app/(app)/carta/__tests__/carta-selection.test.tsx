@@ -106,6 +106,19 @@ describe("CartaView maestro-detalle", () => {
     expect(await screen.findByText(/Tu Sol es tu identidad esencial/)).toBeInTheDocument();
   });
 
+  it("Modo Pro tiene efecto inmediato en el estado inicial (Núcleo + Lectura del Núcleo)", async () => {
+    renderView();
+    await screen.findByText("Interpretación");
+    // Aterrizaje: tab Núcleo + lectura del núcleo, SIN tocar nada más.
+    expect(screen.queryByText(/Día juliano/)).not.toBeInTheDocument();
+    expect(screen.queryByText("El núcleo, en datos")).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: "Modo Pro" })[0]!);
+    // Izquierda: la cabecera técnica del chart aparece al pie de la rueda (sin cambiar de tab).
+    expect(await screen.findByText(/Día juliano/)).toBeInTheDocument();
+    // Derecha: la Lectura del Núcleo gana su desglose técnico.
+    expect(await screen.findByText("El núcleo, en datos")).toBeInTheDocument();
+  });
+
   it("Modo Pro revela dignidades/velocidad en la tabla y tiers en el panel", async () => {
     renderView();
     await screen.findByText("Interpretación");
