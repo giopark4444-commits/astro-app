@@ -60,6 +60,7 @@
    exterior. Task 5 consolida esto junto al resto del CSS del panel de
    interpretación. */
 .selBtn { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: inherit; cursor: pointer; }
+.selBtn:hover { color: var(--acc-text); }
 .chipBtn { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
 .selBtn:focus-visible, .chipBtn:focus-visible { outline: 2px solid rgba(var(--acc-rgb), 0.6); outline-offset: 2px; border-radius: 6px; }
 /* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
