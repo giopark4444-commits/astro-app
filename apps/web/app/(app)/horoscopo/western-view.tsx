@@ -10,6 +10,7 @@ import { SOLAR_HOUSE_LABELS_EN } from "@/lib/content/horoscope-en";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
 import { SkyEvents, type SkyEventJson } from "./sky-events";
+import { ZodiacWheel } from "./zodiac-wheel";
 import { HoroscopeReading } from "./horoscope-reading";
 import { TEXT_VS, PERIODS, PERIOD_KEY, AREA_KEY, TONE_KEY } from "./horoscopo-shared";
 import type { AreaDriver, HoroscopoSelection } from "./selection";
@@ -124,24 +125,9 @@ export function WesternView({ pro, onProToggle, period, onPeriodChange, tz, sign
     <div className={styles.grid}>
       {/* Columna izquierda (sticky en desktop): selector + barras */}
       <div className={styles.side}>
-        <div className={styles.signs} role="radiogroup" aria-label={t("signAria")}>
-          {ZODIAC_SIGNS.map((s, i) => (
-            // role="radio" — envolver el botón entero anidaría un <button>
-            // del <Meaning> dentro de otro <button> (mismo problema que
-            // housesystem/zodiac en /carta): afijo ⓘ envuelto aparte.
-            <span key={s.key} role="presentation" style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
-              <button type="button" role="radio" aria-checked={sign === s.key}
-                className={`chip--control ${sign === s.key ? "chip--control-on" : ""} ${styles.chipReveal}`}
-                style={{ ["--i" as string]: i }}
-                onClick={() => onSignChange(s.key)}>
-                {SIGN_GLYPH[s.key]} {L.signs[s.key]}
-              </button>
-              <Meaning k={`sign.${s.key}`} ariaLabel={`Qué significa ${L.signs[s.key]}`}>
-                <span aria-hidden style={{ fontSize: "0.8em", opacity: 0.7 }}>ⓘ</span>
-              </Meaning>
-            </span>
-          ))}
-        </div>
+        {/* Rueda zodiacal (hermana menor de la rueda de la carta): reemplaza a
+            las píldoras planas. Mismo contrato a11y — radiogroup + 12 radios. */}
+        <ZodiacWheel sign={sign} onSignChange={onSignChange} />
         <div className={styles.periods} role="tablist" aria-label={t("periodAria")}>
           {PERIODS.map((p) => (
             <button key={p} type="button" role="tab" aria-selected={p === period}
