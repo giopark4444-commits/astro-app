@@ -506,7 +506,22 @@
     "thinking": "Aluna is feeling your question…",
     "error": "Something clouded over. Try again.",
     "dormantTitle": "The oracle still sleeps",
-    "dormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your chart and numbers already speak to you in their sections."
+    "dormantBody": "The chat with Aluna lights up when you connect her AI voice. Meanwhile, your chart and numbers already speak to you in their sections.",
+    "lensAstros": "Stars",
+    "lensNumeros": "Numbers",
+    "lensPilares": "Pillars",
+    "lensTarot": "Tarot",
+    "lensFocusHint": "The guidance focuses only on what you leave on.",
+    "tarotChooseTitle": "How would you like your card?",
+    "tarotDraw": "Draw a card",
+    "tarotManual": "I have my card",
+    "tarotPickTitle": "Choose your card",
+    "tarotSearchPlaceholder": "Search a card…",
+    "tarotNoResults": "No results for your search",
+    "tarotReversed": "Reversed",
+    "tarotCancel": "Cancel",
+    "tarotPinnedLead": "Your card",
+    "tarotAnother": "Another card"
   },
   "synastry": {
     "title": "Compatibility",

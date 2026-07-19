@@ -1,0 +1,167 @@
+/* Chat palancas de enfoque (CT2). Estilos base sobre la escala tokenizada
+   (tokens.css) — funcionales y coherentes; CT3 hace el pulido fino cuando monte
+   las palancas en ChatView. Los chips reusan el primitivo global
+   `chip chip--control` (globals.css R3); aquí solo se estilan el contenedor, la
+   carta fijada y el mini-flujo. */
+
+.lenses {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--soft);
+}
+
+/* Carta fijada bajo las palancas: nombre + reversa + "otra carta". */
+.pinned {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.pinnedLead {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--soft);
+}
+.pinnedName {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+.pinnedReversed {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--acc-text);
+}
+.anotherBtn {
+  margin-left: auto;
+}
+
+/* Mini-flujo (choose / pick): tarjeta suave que aparece bajo las palancas. */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.flowTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--ink);
+}
+.flowRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.flowBtn {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-4);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--ink-on-acc);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft);
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.flowBtn:hover {
+  opacity: 0.9;
+}
+.cancelBtn {
+  padding: var(--sp-2) var(--sp-3);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+.cancelBtn:hover {
+  color: var(--ink);
+}
+
+.pickHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.search {
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  font-family: inherit;
+  font-size: var(--text-md);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.search::placeholder {
+  color: var(--soft);
+}
+.search:focus {
+  border-color: rgba(var(--acc-rgb), 0.5);
+}
+.noResults {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--soft);
+}
+
+/* Grid de las 78: compacto, scrollea vertical dentro del flujo. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--sp-2);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.gridCard {
+  padding: var(--sp-2) var(--sp-3);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.gridCard:hover {
+  border-color: rgba(var(--acc-rgb), 0.5);
+  color: var(--acc-text);
+}

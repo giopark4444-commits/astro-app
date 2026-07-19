@@ -506,7 +506,22 @@
     "thinking": "Aluna está sintiendo tu pregunta…",
     "error": "Algo se nubló. Inténtalo de nuevo.",
     "dormantTitle": "El oráculo aún duerme",
-    "dormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu carta y tus números ya te hablan en sus secciones."
+    "dormantBody": "El chat con Aluna se enciende cuando conectes su voz de IA. Mientras, tu carta y tus números ya te hablan en sus secciones.",
+    "lensAstros": "Astros",
+    "lensNumeros": "Números",
+    "lensPilares": "Pilares",
+    "lensTarot": "Tarot",
+    "lensFocusHint": "El consejo se enfoca solo en lo que dejes encendido.",
+    "tarotChooseTitle": "¿Cómo quieres tu carta?",
+    "tarotDraw": "Sacar carta",
+    "tarotManual": "Tengo mi carta",
+    "tarotPickTitle": "Elige tu carta",
+    "tarotSearchPlaceholder": "Busca una carta…",
+    "tarotNoResults": "Sin resultados para tu búsqueda",
+    "tarotReversed": "Invertida",
+    "tarotCancel": "Cancelar",
+    "tarotPinnedLead": "Tu carta",
+    "tarotAnother": "Otra carta"
   },
   "synastry": {
     "title": "Compatibilidad",
