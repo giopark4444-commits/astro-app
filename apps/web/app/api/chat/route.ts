@@ -9,6 +9,7 @@ import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiv
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
+import { ensureThread, appendMessage } from "@/lib/chat-archive";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -49,6 +50,9 @@ export async function POST(request: NextRequest) {
   if (!profileId || messages.length === 0) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
+  // Archivo del hilo (Fase 1B): threadId opcional que el cliente reenvía a
+  // partir del 2º turno (lo aprendió del header x-thread-id del 1er turno).
+  const requestedThreadId = typeof body.threadId === "string" && body.threadId ? body.threadId : null;
 
   // Palancas de enfoque (Task 1): las lentes activas deciden qué disciplinas entran
   // al contexto; sin lentes → las 3 base. La carta de tarot es opt-in y se valida
@@ -118,7 +122,18 @@ export async function POST(request: NextRequest) {
   // por defecto (`!== false`, no `=== true`). Byte-igual si no hay memoria
   // acumulada (buildMemoryBlocks devuelve "").
   const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
+  // Archivo del hilo (Fase 1B): mismo gate que la memoria (0019 lo agrupa
+  // como una sola casilla — "archivo del hilo" es la pieza 2 de la memoria de
+  // largo plazo, junto a las entidades). threadId puede quedar en null si
+  // algo falla — best-effort total, ver chat-archive.ts.
+  let threadId: string | null = null;
   if (memoryEnabled) {
+    threadId = await ensureThread(supabase, user.id, "chat", profileId, requestedThreadId);
+    const lastMessage = messages[messages.length - 1];
+    if (threadId && lastMessage && lastMessage.role === "user") {
+      await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);
+    }
+
     const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
@@ -155,6 +170,7 @@ export async function POST(request: NextRequest) {
   if (memoryEnabled) {
     after(async () => {
       if (!assistantReply.trim()) return;
+      if (threadId) await appendMessage(supabase, user.id, threadId, "assistant", assistantReply);
       const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
         .slice(-6)
         .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
@@ -164,11 +180,12 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  return new Response(stream, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "no-store, no-transform",
-      "x-accel-buffering": "no",
-    },
-  });
+  const headers: Record<string, string> = {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store, no-transform",
+    "x-accel-buffering": "no",
+  };
+  if (threadId) headers["x-thread-id"] = threadId;
+
+  return new Response(stream, { headers });
 }

@@ -24,10 +24,24 @@ function dormantResponse() {
   return { ok: true, headers: { get: () => "application/json" }, json: async () => ({ available: false }) };
 }
 
+/** Respuesta del GET /api/chat/thread (Fase 1B, retomar): sin hilo por
+ *  defecto, para que ningún test existente vea la conversación precargada. */
+function emptyThreadResponse() {
+  return { ok: true, headers: { get: () => "application/json" }, json: async () => ({ threadId: null, messages: [] }) };
+}
+
+/** Solo las llamadas POST (a /api/chat) — el mount de ChatView SIEMPRE dispara
+ *  además un GET a /api/chat/thread (retomar), que estos helpers ignoran. */
+function postCalls() {
+  return (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(([, init]) => (init as RequestInit | undefined)?.method === "POST");
+}
+
 beforeEach(() => {
   mockActive.current = { id: "profile-1" };
   mockQuery.current = null;
-  global.fetch = vi.fn(async () => dormantResponse()) as unknown as typeof fetch;
+  global.fetch = vi.fn(async (url: unknown) =>
+    typeof url === "string" && url.includes("/api/chat/thread") ? emptyThreadResponse() : dormantResponse(),
+  ) as unknown as typeof fetch;
 });
 
 function renderView(props: { embedded?: boolean } = {}) {
@@ -45,10 +59,11 @@ describe("ChatView — modo página (default, sin prop embedded)", () => {
 
     // Precarga: mismo comportamiento documentado en chat-view.tsx desde
     // e693c28 ("NO auto-envía la pregunta") — solo por montar, sin
-    // interacción, no debe haber llamada a /api/chat.
+    // interacción, no debe haber llamada a /api/chat (el único fetch del
+    // montaje es el GET de retomar, /api/chat/thread — ver postCalls()).
     const input = screen.getByPlaceholderText(es.chat.placeholder) as HTMLInputElement;
     expect(input.value).toBe("hola");
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(postCalls()).toHaveLength(0);
   });
 
   it("muestra la cabecera de página y usa el contenedor styles.wrap (no wrapEmbedded)", () => {
@@ -65,8 +80,8 @@ describe("ChatView — modo página (default, sin prop embedded)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
     expect(body.messages).toEqual([{ role: "user", content: "hola" }]);
   });
 
@@ -95,8 +110,8 @@ describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
     fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
     expect(body.lenses).toEqual(["astros", "numeros", "pilares"]);
     expect(body.tarotCard).toBeNull();
   });
@@ -108,8 +123,8 @@ describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
     fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
     expect(body.lenses).toEqual(["astros", "pilares"]);
   });
 
@@ -121,11 +136,69 @@ describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
     fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
 
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
-    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
     expect(body.lenses).toContain("tarot");
     expect(body.tarotCard).not.toBeNull();
     expect(typeof body.tarotCard.id).toBe("string");
+  });
+});
+
+describe("ChatView — retomar el hilo (Fase 1B)", () => {
+  it("precarga la conversación del hilo reciente al montar, sin pisar el ?q=", async () => {
+    mockQuery.current = "hola de nuevo";
+    global.fetch = vi.fn(async (url: unknown) =>
+      typeof url === "string" && url.includes("/api/chat/thread")
+        ? {
+            ok: true,
+            headers: { get: () => "application/json" },
+            json: async () => ({
+              threadId: "thread-1",
+              messages: [
+                { role: "user", content: "¿qué significa mi luna?" },
+                { role: "assistant", content: "Tu luna habla de tu mundo emocional." },
+              ],
+            }),
+          }
+        : dormantResponse(),
+    ) as unknown as typeof fetch;
+
+    renderView();
+
+    await waitFor(() => expect(screen.getByText("¿qué significa mi luna?")).toBeInTheDocument());
+    expect(screen.getByText("Tu luna habla de tu mundo emocional.")).toBeInTheDocument();
+    // El ?q= sigue precargado en el input — retomar no lo pisa.
+    const input = screen.getByPlaceholderText(es.chat.placeholder) as HTMLInputElement;
+    expect(input.value).toBe("hola de nuevo");
+  });
+
+  it("sin hilo previo, arranca vacío como hoy (sin romper por el fetch de retomar)", () => {
+    renderView();
+    expect(screen.getByText(es.chat.greeting)).toBeInTheDocument();
+  });
+
+  it("el threadId retomado viaja en el siguiente POST a /api/chat", async () => {
+    global.fetch = vi.fn(async (url: unknown, init?: RequestInit) => {
+      if (typeof url === "string" && url.includes("/api/chat/thread")) {
+        return {
+          ok: true,
+          headers: { get: () => "application/json" },
+          json: async () => ({ threadId: "thread-1", messages: [{ role: "user", content: "hola" }] }),
+        };
+      }
+      void init;
+      return dormantResponse();
+    }) as unknown as typeof fetch;
+
+    renderView();
+    await waitFor(() => expect(screen.getByText("hola")).toBeInTheDocument());
+
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "otra pregunta" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
+    expect(body.threadId).toBe("thread-1");
   });
 });
 
@@ -136,7 +209,7 @@ describe("ChatView — modo embebido (<ChatView embedded />)", () => {
 
     const input = screen.getByPlaceholderText(es.chat.placeholder) as HTMLInputElement;
     expect(input.value).toBe("");
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(postCalls()).toHaveLength(0);
   });
 
   it("no renderiza la cabecera de página; contenedor raíz usa styles.wrapEmbedded", () => {
