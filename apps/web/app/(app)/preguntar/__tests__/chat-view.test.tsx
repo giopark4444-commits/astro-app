@@ -79,6 +79,56 @@ describe("ChatView — modo página (default, sin prop embedded)", () => {
   });
 });
 
+describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
+  it("monta ChatLenses sobre el hilo en modo página", () => {
+    renderView();
+    expect(screen.getByTestId("chat-lenses")).toBeInTheDocument();
+  });
+
+  it("monta ChatLenses sobre el hilo también en modo embebido", () => {
+    renderView({ embedded: true });
+    expect(screen.getByTestId("chat-lenses")).toBeInTheDocument();
+  });
+
+  it("el POST a /api/chat incluye lenses (default astros/numeros/pilares) y tarotCard:null", async () => {
+    renderView();
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    expect(body.lenses).toEqual(["astros", "numeros", "pilares"]);
+    expect(body.tarotCard).toBeNull();
+  });
+
+  it("apagar una palanca antes de enviar viaja reflejado en el body del POST", async () => {
+    renderView();
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensNumeros }));
+
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    expect(body.lenses).toEqual(["astros", "pilares"]);
+  });
+
+  it("sacar una carta de tarot antes de enviar viaja tarotCard en el body del POST", async () => {
+    renderView();
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensTarot }));
+    fireEvent.click(screen.getByRole("button", { name: es.chat.tarotDraw }));
+
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    const body = JSON.parse((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string);
+    expect(body.lenses).toContain("tarot");
+    expect(body.tarotCard).not.toBeNull();
+    expect(typeof body.tarotCard.id).toBe("string");
+  });
+});
+
 describe("ChatView — modo embebido (<ChatView embedded />)", () => {
   it("ignora ?q= (input arranca vacío) y no auto-envía", () => {
     mockQuery.current = "hola";

@@ -7,6 +7,7 @@ import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
+import { ChatLenses, type TarotCardRef } from "./chat-lenses";
 import styles from "./chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -28,6 +29,10 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   const [input, setInput] = useState(() => (embedded ? "" : searchParams.get("q") ?? ""));
   const [st, setSt] = useState<St>("idle");
   const endRef = useRef<HTMLDivElement>(null);
+  // Palancas de enfoque (Task 3): default = las 3 lentes base encendidas, sin
+  // carta de tarot fijada. Viajan en cada POST a /api/chat (CT1 las resuelve).
+  const [lenses, setLenses] = useState<string[]>(["astros", "numeros", "pilares"]);
+  const [tarotCard, setTarotCard] = useState<TarotCardRef | null>(null);
 
   useEffect(() => {
     // jsdom (tests) no implementa scrollIntoView: guard defensivo (mismo
@@ -49,7 +54,7 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profileId: activeId, locale, messages: next }),
+        body: JSON.stringify({ profileId: activeId, locale, messages: next, lenses, tarotCard }),
       });
 
       // Latente (sin llave) o error de validación → JSON { available:false }. Sin
@@ -109,6 +114,16 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
           </div>
         </>
       )}
+
+      <div className={styles.lensesSlot}>
+        <ChatLenses
+          value={{ lenses, tarotCard }}
+          onChange={(next) => {
+            setLenses(next.lenses);
+            setTarotCard(next.tarotCard);
+          }}
+        />
+      </div>
 
       <div className={styles.thread}>
         {messages.length === 0 && st !== "dormant" && <p className={styles.greeting}>{t("greeting")}</p>}
