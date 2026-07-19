@@ -227,11 +227,12 @@
      (deskCols). La retícula de 12 columnas se mudó íntegra a .leftCol (abajo). */
   .page { max-width: min(1280px, calc(100% - 112px)); }
 
-  /* Split maestro-detalle: perfil (11fr) + chat sticky (9fr) — mismos valores
-     que la receta serie (carta/pilares/numerology-view .deskCols). */
+  /* Split maestro-detalle: DOS mitades iguales (pedido de Gio: perfil y chat
+     del mismo ancho). Se aparta del 11/9 de los lentes de datos porque acá el
+     chat merece tanto espacio como el perfil. */
   .deskCols {
     display: grid;
-    grid-template-columns: 11fr 9fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--sp-6);
     align-items: start;
   }
