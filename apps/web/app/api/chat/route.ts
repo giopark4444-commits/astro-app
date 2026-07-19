@@ -1,11 +1,11 @@
 import path from "node:path";
 import { NextResponse, after, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
-import { computeNumerology, signOfLongitude, parseIntent, type UserIntent } from "@aluna/core";
+import { computeNumerology, parseIntent, type UserIntent } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
-import { astroLabels } from "@/lib/content/astrology-labels";
+import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard } from "@/lib/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
 import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
@@ -17,8 +17,6 @@ import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeM
 export const runtime = "nodejs";
 
 setEphePath(path.join(process.cwd(), "..", "..", "packages", "ephemeris", "ephe"));
-
-const MAIN_BODIES = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"];
 
 const SYSTEM_INTRO: Record<"es" | "en", string> = {
   es: `Eres Aluna: una guía de autoconocimiento que conversa con la persona apoyándose en SU carta astral y SU numerología (que conoces; van más abajo). Astrología EVOLUTIVA: hablas del propósito del alma, no de predicción.
@@ -32,37 +30,6 @@ Your voice: warm, close, and poetic, yet clear and useful; compassionate but hon
 
 Answer what they ask GROUNDED in their data: relate the question to their specific planets, houses, and numbers (e.g. "your Sun in Aquarius in the 11th house explains..."). If the question isn't about their chart or self-knowledge, lovingly steer it back there. Answers with body but conversational (not long essays). Plain text, no markdown.`,
 };
-
-function buildContext(
-  profile: { name: string; birth_date: string; gender: string },
-  chart: ReturnType<typeof computeChart>,
-  numerology: ReturnType<typeof computeNumerology>,
-  locale: "es" | "en",
-): string {
-  const L = astroLabels(locale);
-  const asc = signOfLongitude(chart.houses.ascendant).sign;
-  const mc = signOfLongitude(chart.houses.midheaven).sign;
-  const placements = chart.bodies
-    .filter((b) => MAIN_BODIES.includes(b.body))
-    .map((b) => `${L.bodies[b.body]} ${L.signs[b.sign]} ${locale === "en" ? "h" : "casa"}${b.house}${b.dignity ? ` (${L.dignities[b.dignity]})` : ""}`)
-    .join("; ");
-  const patterns =
-    chart.patterns.map((p) => `${L.patterns[p.type]} (${p.bodies.map((k) => L.bodies[k] ?? k).join(", ")})`).join("; ") ||
-    (locale === "en" ? "none" : "ninguno");
-  const c = numerology.core;
-  const num =
-    locale === "en"
-      ? `Life Path ${c.lifePath.value}, Expression ${c.expression.value}, Soul Urge ${c.soulUrge.value}, Personality ${c.personality.value}, Maturity ${c.maturity.value}`
-      : `Camino de Vida ${c.lifePath.value}, Expresión ${c.expression.value}, Anhelo del Alma ${c.soulUrge.value}, Personalidad ${c.personality.value}, Madurez ${c.maturity.value}`;
-
-  return locale === "en"
-    ? `DATA FOR ${profile.name} (gender: ${profile.gender}):
-Birth chart — Ascendant ${L.signs[asc]}, Midheaven ${L.signs[mc]}. ${placements}. Patterns: ${patterns}.
-Numerology — ${num}.`
-    : `DATOS DE ${profile.name} (género: ${profile.gender}):
-Carta natal — Ascendente ${L.signs[asc]}, Medio Cielo ${L.signs[mc]}. ${placements}. Patrones: ${patterns}.
-Numerología — ${num}.`;
-}
 
 export async function POST(request: NextRequest) {
   let raw: unknown;
@@ -83,6 +50,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
 
+  // Palancas de enfoque (Task 1): las lentes activas deciden qué disciplinas entran
+  // al contexto; sin lentes → las 3 base. La carta de tarot es opt-in y se valida
+  // contra el mazo. Ambos se resuelven en @/lib/chat-context (testeable en aislado).
+  const lenses = resolveLenses(body.lenses);
+  const tarotCard = parseTarotCard(body.tarotCard);
+
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ available: false, error: "unauthorized" }, { status: 401 });
 
@@ -101,9 +74,12 @@ export async function POST(request: NextRequest) {
 
   let system: string;
   try {
-    const chart = computeChart(profileToChartInput(profile));
-    const numerology = computeNumerology(profileToNumerologyInput(profile));
-    system = `${SYSTEM_INTRO[locale]}\n\n${buildContext(profile, chart, numerology, locale)}`;
+    // computeChart/computeNumerology solo si su lente está activa (perf). Ba Zi lo
+    // arma buildFocusedContext por dentro (computeBaziNatal) cuando 'pilares' entra.
+    const chart = lenses.includes("astros") ? computeChart(profileToChartInput(profile)) : undefined;
+    const numerology = lenses.includes("numeros") ? computeNumerology(profileToNumerologyInput(profile)) : undefined;
+    const context = buildFocusedContext({ profile, chart, numerology, lenses, tarotCard, locale });
+    system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(lenses, tarotCard, locale)}`;
   } catch {
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
