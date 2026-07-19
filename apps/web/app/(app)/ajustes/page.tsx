@@ -14,6 +14,7 @@ import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
 import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
+import { EntitiesCard } from "./entities-card";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -52,13 +53,16 @@ export default async function AjustesPage({
     .maybeSingle();
   const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
 
-  // Estado inicial del toggle "Aluna te conoce" (ver settings-controls.tsx).
+  // Estado inicial de los toggles "Aluna te conoce" y memoria (ver
+  // settings-controls.tsx). memory_enabled default true en la migración 0019;
+  // el `?? true` cubre además la fila sin esa columna todavía (dev sin migrar).
   const { data: intentRow } = await supabase
     .from("settings")
-    .select("intent")
+    .select("intent, memory_enabled")
     .eq("user_id", user.id)
     .maybeSingle();
   const intent = parseIntent((intentRow as { intent: unknown } | null)?.intent);
+  const memoryEnabled = (intentRow as { memory_enabled: boolean | null } | null)?.memory_enabled ?? true;
 
   // Método de acceso: Supabase Auth guarda el proveedor en app_metadata.
   // "email" (usuario/contraseña) se muestra con copy propio; cualquier otro
@@ -98,10 +102,13 @@ export default async function AjustesPage({
           currentLocale={locale}
           hasIntent={intent !== null}
           intentUseInAI={intent?.useInAI ?? false}
+          memoryEnabled={memoryEnabled}
         />
       </section>
 
       <MemoriesCard userId={user.id} />
+
+      <EntitiesCard userId={user.id} />
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />

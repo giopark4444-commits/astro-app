@@ -71,6 +71,57 @@
   transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 .memoryDeleteBtn:hover { color: var(--tone-warm); border-color: rgba(var(--acc-rgb), 0.45); }
+.memoryRowActions { flex: none; display: flex; gap: var(--sp-2); }
+.memoryEditBtn {
+  flex: none; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--soft); font-family: inherit;
+  font-size: var(--text-2xs); font-weight: 600; cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.memoryEditBtn:hover { color: var(--acc-text); border-color: rgba(var(--acc-rgb), 0.45); }
+.memoryEditBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Edición inline de un recuerdo/entidad (Fase 1C: panel de control de
+   memoria) — mismo primitivo de textarea/input que .referralInput, ocupando
+   toda la fila (a diferencia de esta, que es un form corto en línea). */
+.memoryEditForm { display: flex; flex-direction: column; gap: var(--sp-2); width: 100%; }
+.memoryTextarea, .entityNameInput {
+  width: 100%; padding: var(--sp-3) var(--sp-4); font-family: inherit; font-size: var(--text-sm);
+  color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+  outline: none; resize: vertical; transition: border-color var(--dur-fast) var(--ease);
+}
+.entityNameInput { font-weight: 700; resize: none; }
+.memoryTextarea:focus, .entityNameInput:focus { border-color: rgba(var(--acc-rgb), 0.5); }
+.memoryEditActions { display: flex; gap: var(--sp-2); }
+.memorySaveBtn {
+  flex: none; height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 700;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.memorySaveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.memoryCancelBtn {
+  flex: none; height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--soft); font-family: inherit; font-size: var(--text-xs); font-weight: 600;
+  cursor: pointer; transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.memoryCancelBtn:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+
+/* Tarjeta de entidades — agrupada por kind (encabezado sobre cada grupo,
+   mismo estilo .eyebrow pero un tono menos gritado), filas espejo de
+   .memoryRow con nombre+resumen en vez de contenido plano. */
+.entityGroup { display: flex; flex-direction: column; gap: var(--sp-1); }
+.entityGroup + .entityGroup { margin-top: var(--sp-2); }
+.entityGroupTitle {
+  margin: var(--sp-2) 0 0; font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft);
+}
+.entityRow { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-3) 0; }
+.entityRow + .entityRow { border-top: 1px solid var(--line); }
+.entityText { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: var(--text-sm); color: var(--ink); }
+.entityName { display: flex; align-items: center; gap: var(--sp-2); font-weight: 700; }
+.entityPinnedBadge { color: var(--acc-text); font-size: var(--text-xs); }
+.entitySummary { color: var(--soft); font-size: var(--text-xs); }
 
 /* Cerrar sesión — fila propia al final, estilo sobrio (patrón .out heredado
    de settings.module.css: sin relleno, hover a --tone-warm). */
