@@ -4,7 +4,9 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/admin/roles";
 import type { SubscriptionStatus } from "@aluna/core";
+import type { AlunaSupabaseClient } from "@aluna/supabase";
 import { parseIntent, SUPPORT_EMAIL, SOCIAL_LINKS } from "@aluna/core";
+import { fetchIntentAndMemorySettings } from "@/lib/settings";
 import { signOut } from "@/app/auth/actions";
 import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@aluna/core";
 import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
@@ -55,15 +57,15 @@ export default async function AjustesPage({
   const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
 
   // Estado inicial de los toggles "Aluna te conoce" y memoria (ver
-  // settings-controls.tsx). memory_enabled default true en la migración 0019;
-  // el `?? true` cubre además la fila sin esa columna todavía (dev sin migrar).
-  const { data: intentRow } = await supabase
-    .from("settings")
-    .select("intent, memory_enabled")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const intent = parseIntent((intentRow as { intent: unknown } | null)?.intent);
-  const memoryEnabled = (intentRow as { memory_enabled: boolean | null } | null)?.memory_enabled ?? true;
+  // settings-controls.tsx). fetchIntentAndMemorySettings degrada a leer solo
+  // `intent` si `memory_enabled` (0019) todavía no está migrada — sin esto, un
+  // select combinado que falla entero también tiraba la intentLine de otras
+  // rutas (review Fable); memoryEnabled default true en ambos casos. Mismo
+  // cast que memories-card.tsx: exactOptionalPropertyTypes hace que el
+  // Database inferido de createClient() no calce estructuralmente con
+  // AlunaSupabaseClient (bug upstream de postgrest-js/supabase-js).
+  const { intent: rawIntent, memoryEnabled } = await fetchIntentAndMemorySettings(supabase as unknown as AlunaSupabaseClient, user.id);
+  const intent = parseIntent(rawIntent);
 
   // Método de acceso: Supabase Auth guarda el proveedor en app_metadata.
   // "email" (usuario/contraseña) se muestra con copy propio; cualquier otro

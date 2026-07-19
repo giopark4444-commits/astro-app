@@ -134,10 +134,14 @@ export async function editMemory(id: string, content: string) {
  * necesite re-renderizar de inmediato).
  */
 export async function setMemoryEnabled(on: boolean) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await settingsBuilder(supabase).update({ memory_enabled: on }).eq("user_id", user.id);
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await settingsBuilder(supabase).update({ memory_enabled: on }).eq("user_id", user.id);
+  } catch {
+    // best effort: no bloquear /ajustes por un fallo al prender/apagar la memoria
+  }
 }
 
 // Mismo shim que UserMemoriesBuilder arriba, para memory_entities.

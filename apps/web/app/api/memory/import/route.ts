@@ -12,19 +12,39 @@ import { validateImportPayload, dedupeMemories, dedupeEntities } from "@/lib/mem
 // entidades por (kind, nombre) case-insensitive — nunca duplica lo que ya
 // está. Best-effort: un item de basura se descarta sin abortar el resto
 // (ver validateImportPayload); un fallo de BD cae a 500.
+//
+// Orden deliberado (review Fable): autentica ANTES de tocar el body — un
+// anónimo no debe poder gastar CPU parseando JSON. Y el body tiene un tope de
+// tamaño (MAX_IMPORT_BODY_BYTES) chequeado por Content-Length primero (sin
+// leer nada) y de nuevo sobre el texto ya leído (defensa en profundidad:
+// Content-Length puede faltar o mentir, p.ej. chunked transfer-encoding).
 
 export const runtime = "nodejs";
 
+// ~1 MB: un export real de una cuenta (memorias+entidades, ambas con tope
+// duro en validateImportPayload) pesa un fracción de esto; el tope existe
+// para frenar un body adversarial, no para limitar un import legítimo.
+const MAX_IMPORT_BODY_BYTES = 1_000_000;
+
 export async function POST(request: NextRequest) {
+  const { supabase, user } = await authenticateRoute(request);
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const contentLength = Number(request.headers.get("content-length") ?? "");
+  if (Number.isFinite(contentLength) && contentLength > MAX_IMPORT_BODY_BYTES) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+  }
+
   let raw: unknown;
   try {
-    raw = await request.json();
+    const text = await request.text();
+    if (text.length > MAX_IMPORT_BODY_BYTES) {
+      return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
+    }
+    raw = JSON.parse(text);
   } catch {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
-
-  const { supabase, user } = await authenticateRoute(request);
-  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const parsed = validateImportPayload(raw);
   if (!parsed) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });

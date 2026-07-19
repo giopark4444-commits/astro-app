@@ -33,8 +33,21 @@ import { POST } from "../route";
 
 const USER_ID = "user-abc-123";
 
-function fakeRequest(body: unknown): NextRequest {
-  return { json: async () => body } as unknown as NextRequest;
+// La ruta ahora lee `request.text()` + headers (Content-Length), no
+// `request.json()` (review Fable: tope de tamaño antes/después de parsear).
+function fakeRequest(body: unknown, opts: { contentLength?: string } = {}): NextRequest {
+  const text = JSON.stringify(body);
+  return {
+    headers: { get: (name: string) => (name.toLowerCase() === "content-length" ? (opts.contentLength ?? String(text.length)) : null) },
+    text: async () => text,
+  } as unknown as NextRequest;
+}
+
+function fakeRawRequest(text: string, opts: { contentLength?: string } = {}): NextRequest {
+  return {
+    headers: { get: (name: string) => (name.toLowerCase() === "content-length" ? (opts.contentLength ?? String(text.length)) : null) },
+    text: async () => text,
+  } as unknown as NextRequest;
 }
 
 const VALID_PAYLOAD = {
@@ -55,17 +68,50 @@ describe("POST /api/memory/import", () => {
     authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: USER_ID } });
   });
 
-  it("sin usuario → 401, no toca la BD", async () => {
+  it("sin usuario → 401, no toca la BD ni siquiera lee el body", async () => {
     authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: null });
-    const res = await POST(fakeRequest(VALID_PAYLOAD));
+    const textMock = vi.fn(async () => JSON.stringify(VALID_PAYLOAD));
+    const req = { headers: { get: () => null }, text: textMock } as unknown as NextRequest;
+    const res = await POST(req);
     expect(res.status).toBe(401);
     expect(insertMemoriesMock).not.toHaveBeenCalled();
+    expect(textMock).not.toHaveBeenCalled(); // auth corre ANTES de tocar el body
   });
 
   it("JSON inválido en el body → 400", async () => {
-    const badReq = { json: async () => { throw new Error("bad json"); } } as unknown as NextRequest;
-    const res = await POST(badReq);
+    const res = await POST(fakeRawRequest("{not json"));
     expect(res.status).toBe(400);
+  });
+
+  it("Content-Length > 1MB → 413, no llega a leer el body", async () => {
+    const textMock = vi.fn(async () => JSON.stringify(VALID_PAYLOAD));
+    const req = { headers: { get: (n: string) => (n.toLowerCase() === "content-length" ? "2000000" : null) }, text: textMock } as unknown as NextRequest;
+    const res = await POST(req);
+    expect(res.status).toBe(413);
+    expect(textMock).not.toHaveBeenCalled();
+  });
+
+  it("sin Content-Length pero el texto leído supera 1MB → 413 (defensa en profundidad)", async () => {
+    const hugeContent = "x".repeat(1_100_000);
+    const res = await POST(fakeRawRequest(hugeContent, { contentLength: "" }));
+    expect(res.status).toBe(413);
+    expect(insertMemoriesMock).not.toHaveBeenCalled();
+  });
+
+  it("más de 500 memorias o 1000 entidades en el body: se truncan al tope, no se rechaza el import", async () => {
+    memoriesData = [];
+    entitiesData = [];
+    const bigPayload = {
+      version: 1,
+      memories: Array.from({ length: 600 }, (_, i) => ({ content: `memoria ${i}` })),
+      entities: Array.from({ length: 1200 }, (_, i) => ({ kind: "person", name: `persona ${i}` })),
+    };
+    const res = await POST(fakeRequest(bigPayload));
+    expect(res.status).toBe(200);
+    const [memRows] = insertMemoriesMock.mock.calls[0] as unknown as [unknown[]];
+    const [entRows] = insertEntitiesMock.mock.calls[0] as unknown as [unknown[]];
+    expect(memRows).toHaveLength(500);
+    expect(entRows).toHaveLength(1000);
   });
 
   it("payload sin version 1 → 400 invalid_payload", async () => {

@@ -167,16 +167,19 @@ describe("appendMessage", () => {
 });
 
 describe("fetchRecentThread", () => {
-  it("arma { threadId, messages } del hilo más reciente de la superficie", async () => {
+  it("arma { threadId, messages } del hilo más reciente, pidiendo la COLA (desc+limit) y devolviéndola en orden cronológico", async () => {
+    // Orden cronológico (lo que la UI espera de vuelta): m1 antes que m2.
     const messages = [
       { id: "m1", role: "user", content: "¿qué significa mi luna?", created_at: "2026-07-01T00:00:00Z" },
       { id: "m2", role: "assistant", content: "Tu luna habla de tu mundo emocional.", created_at: "2026-07-01T00:01:00Z" },
     ];
     const captureThreadSelect: Record<string, unknown> = {};
+    const captureMessagesSelect: Record<string, unknown> = {};
     const fromMock = vi
       .fn()
       .mockReturnValueOnce(chain({ data: { id: "thread-1" }, error: null }, captureThreadSelect))
-      .mockReturnValueOnce(chain({ data: messages, error: null }));
+      // La query real pide desc+limit (la COLA); el mock simula esa forma.
+      .mockReturnValueOnce(chain({ data: [...messages].reverse(), error: null }, captureMessagesSelect));
     const supabase = { from: fromMock } as never;
 
     const recent = await fetchRecentThread(supabase, "u1", "chat");
@@ -185,6 +188,8 @@ describe("fetchRecentThread", () => {
     expect(fromMock).toHaveBeenNthCalledWith(1, "chat_threads");
     expect(fromMock).toHaveBeenNthCalledWith(2, "chat_messages");
     expect(captureThreadSelect.eqCalls).toEqual([["user_id", "u1"], ["surface", "chat"]]);
+    expect(captureMessagesSelect.orderArgs).toEqual(["created_at", { ascending: false }]);
+    expect(captureMessagesSelect.limitArgs).toEqual([50]);
   });
 
   it("null si no hay ningún hilo para esa superficie", async () => {

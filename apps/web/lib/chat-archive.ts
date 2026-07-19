@@ -17,6 +17,12 @@ import type { AlunaSupabaseClient, TablesInsert } from "@aluna/supabase";
 export type ChatSurface = "chat" | "tarot" | "timeline";
 export type ChatRole = "user" | "assistant";
 
+/** Tope de mensajes que fetchRecentThread trae para "retomar" (review Fable):
+ *  sin límite, un hilo viejo y largo crece sin freno en cada carga. Se pide
+ *  la COLA (los más recientes) con order desc + limit, y se revierte a orden
+ *  cronológico antes de devolver — la UI espera oldest-first. */
+export const RECENT_THREAD_MESSAGE_CAP = 50;
+
 export interface ArchivedMessage {
   id: string;
   role: ChatRole;
@@ -95,7 +101,10 @@ export async function appendMessage(
 ): Promise<void> {
   if (!content.trim()) return;
   try {
-    const row: TablesInsert<"chat_messages"> = { thread_id: threadId, user_id: userId, role, content };
+    // Re-slice defensivo (0019 agregó `check (char_length(content) <= 4000)`):
+    // sin este corte, una respuesta larga de Aluna fallaría el insert entero
+    // en silencio (best-effort de abajo lo traga) y el hilo perdería ese turno.
+    const row: TablesInsert<"chat_messages"> = { thread_id: threadId, user_id: userId, role, content: content.slice(0, 4000) };
     const { error } = await supabase.from("chat_messages").insert(row);
     if (error) return;
 
@@ -134,14 +143,19 @@ export async function fetchRecentThread(
     if (!thread) return null;
     const threadId = (thread as { id: string }).id;
 
+    // Pide la COLA (más recientes primero + limit) y revierte en memoria: así
+    // el tope realmente acota los últimos N en vez de siempre los primeros N
+    // de un hilo viejo.
     const { data: messages } = await supabase
       .from("chat_messages")
       .select("id, role, content, created_at")
       .eq("thread_id", threadId)
       .eq("user_id", userId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false })
+      .limit(RECENT_THREAD_MESSAGE_CAP);
 
-    return { threadId, messages: (messages ?? []) as ArchivedMessage[] };
+    const chronological = ((messages ?? []) as ArchivedMessage[]).slice().reverse();
+    return { threadId, messages: chronological };
   } catch {
     return null;
   }

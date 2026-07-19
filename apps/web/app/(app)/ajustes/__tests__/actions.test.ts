@@ -11,7 +11,8 @@ const state: {
   user: { id: string } | null;
   updateCalls: Array<{ table: string; v: unknown; eqs: [string, string][] }>;
   deleteCalls: Array<{ table: string; eqs: [string, string][] }>;
-} = { user: null, updateCalls: [], deleteCalls: [] };
+  throwOnFrom: boolean;
+} = { user: null, updateCalls: [], deleteCalls: [], throwOnFrom: false };
 
 function singleEqBuilder(record: (eqs: [string, string][]) => void) {
   return {
@@ -49,7 +50,10 @@ function makeFrom(table: string) {
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: state.user } }) },
-    from: (table: string) => makeFrom(table),
+    from: (table: string) => {
+      if (state.throwOnFrom) throw new Error("boom");
+      return makeFrom(table);
+    },
   }),
 }));
 
@@ -62,6 +66,7 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
     state.user = { id: "u1" };
     state.updateCalls = [];
     state.deleteCalls = [];
+    state.throwOnFrom = false;
     vi.mocked(revalidatePath).mockClear();
   });
 
@@ -80,6 +85,11 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
       state.user = null;
       await setMemoryEnabled(true);
       expect(state.updateCalls).toHaveLength(0);
+    });
+
+    it("best-effort: no lanza si la BD explota", async () => {
+      state.throwOnFrom = true;
+      await expect(setMemoryEnabled(true)).resolves.toBeUndefined();
     });
   });
 

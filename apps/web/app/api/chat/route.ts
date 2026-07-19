@@ -10,6 +10,7 @@ import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider
 import { buildIntentLine } from "@/lib/intent-line";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 import { ensureThread, appendMessage } from "@/lib/chat-archive";
+import { fetchIntentAndMemorySettings } from "@/lib/settings";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -103,14 +104,12 @@ export async function POST(request: NextRequest) {
   // Línea de intención opcional (Task 13): solo se anexa si la persona
   // respondió el cuestionario Y activó useInAI. `settings.intent` viaja como
   // Json; `parseIntent` lo lee tolerante y devuelve null si no hay señal útil.
-  // `memory_enabled` (0019) viaja en el MISMO select — gate independiente,
-  // ver comentario más abajo.
-  const { data: settingsRow } = await supabase
-    .from("settings")
-    .select("intent, memory_enabled")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
+  // `memory_enabled` (0019) viaja en la MISMA lectura combinada — gate
+  // independiente, ver comentario más abajo. fetchIntentAndMemorySettings
+  // degrada solo a `intent` si la columna `memory_enabled` aún no está
+  // migrada, para no perder la intentLine por eso (review Fable).
+  const { intent: rawIntent, memoryEnabled } = await fetchIntentAndMemorySettings(supabase, user.id);
+  const intent = parseIntent(rawIntent) as UserIntent | null;
   const intentLine = buildIntentLine(intent, locale);
   if (intentLine) system = `${system}\n\n${intentLine}`;
 
@@ -121,7 +120,6 @@ export async function POST(request: NextRequest) {
   // segura: sin fila settings o columna sin migrar todavía, se trata como ON
   // por defecto (`!== false`, no `=== true`). Byte-igual si no hay memoria
   // acumulada (buildMemoryBlocks devuelve "").
-  const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
   // Archivo del hilo (Fase 1B): mismo gate que la memoria (0019 lo agrupa
   // como una sola casilla — "archivo del hilo" es la pieza 2 de la memoria de
   // largo plazo, junto a las entidades). threadId puede quedar en null si

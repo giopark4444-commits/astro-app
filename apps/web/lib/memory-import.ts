@@ -31,13 +31,28 @@ export interface ParsedImport {
   entities: ImportedEntity[];
 }
 
+// Topes duros del import (review Fable): sin esto, un JSON adversarial de
+// miles de items podría insertar en una sola llamada mucho más de lo que
+// cualquier cuenta real acumula (fetchMemories ya cap-ea a MEMORY_CAP=24 en
+// lectura; fetchEntities no tiene cap porque las entidades duran, pero decenas
+// es lo normal, nunca miles). 500/1000 son deliberadamente generosos frente al
+// uso real — existen para frenar un ataque, no para limitar un uso legítimo —
+// y 10 aliases por entidad es más que cualquier apodo real necesita. El
+// excedente se TRUNCA (se descarta en silencio, mismo criterio best-effort
+// por ítem que el resto de esta función) en vez de rechazar el import entero.
+export const MAX_IMPORT_MEMORIES = 500;
+export const MAX_IMPORT_ENTITIES = 1000;
+export const MAX_IMPORT_ALIASES_PER_ENTITY = 10;
+
 /**
  * Valida la forma del JSON exportado y recorta cada campo a los mismos
  * límites que los CHECK de la BD (content<=280, name 1-120, summary<=2000,
- * kind∈ENTITY_KINDS — mismos topes que memories.ts/memory-entities.ts).
- * `null` si el documento entero no es importable (no es objeto, version
- * distinta de 1, o memories/entities no son arrays). Dentro de cada array,
- * los items inválidos se descartan uno a uno sin invalidar el resto.
+ * kind∈ENTITY_KINDS — mismos topes que memories.ts/memory-entities.ts), más
+ * los topes duros de cantidad de arriba. `null` si el documento entero no es
+ * importable (no es objeto, version distinta de 1, o memories/entities no son
+ * arrays). Dentro de cada array, los items inválidos se descartan uno a uno
+ * sin invalidar el resto; pasado el tope de cantidad, el resto del array se
+ * ignora (truncado, no error).
  */
 export function validateImportPayload(raw: unknown): ParsedImport | null {
   if (!raw || typeof raw !== "object") return null;
@@ -47,6 +62,7 @@ export function validateImportPayload(raw: unknown): ParsedImport | null {
 
   const memories: ImportedMemory[] = [];
   for (const item of obj.memories) {
+    if (memories.length >= MAX_IMPORT_MEMORIES) break;
     if (!item || typeof item !== "object") continue;
     const { content, source } = item as Record<string, unknown>;
     if (typeof content !== "string") continue;
@@ -58,19 +74,24 @@ export function validateImportPayload(raw: unknown): ParsedImport | null {
 
   const entities: ImportedEntity[] = [];
   for (const item of obj.entities) {
+    if (entities.length >= MAX_IMPORT_ENTITIES) break;
     if (!item || typeof item !== "object") continue;
     const { kind, name, summary, aliases, pinned } = item as Record<string, unknown>;
     if (typeof kind !== "string" || !(ENTITY_KINDS as readonly string[]).includes(kind)) continue;
     if (typeof name !== "string") continue;
-    const cleanName = name.trim().slice(0, 120);
+    // Colapsa whitespace interno (saltos de línea incluidos) ANTES de recortar
+    // — un name/summary/alias con \n podría falsificar la estructura del
+    // bloque que formatEntityBlock inyecta al prompt (review Fable).
+    const cleanName = name.replace(/\s+/g, " ").trim().slice(0, 120);
     if (!cleanName) continue;
-    const cleanSummary = typeof summary === "string" ? summary.trim().slice(0, 2000) : "";
+    const cleanSummary = typeof summary === "string" ? summary.replace(/\s+/g, " ").trim().slice(0, 2000) : "";
 
     const cleanAliases: string[] = [];
     if (Array.isArray(aliases)) {
       for (const a of aliases) {
+        if (cleanAliases.length >= MAX_IMPORT_ALIASES_PER_ENTITY) break;
         if (typeof a !== "string") continue;
-        const alias = a.trim().slice(0, 120);
+        const alias = a.replace(/\s+/g, " ").trim().slice(0, 120);
         if (!alias || cleanAliases.some((x) => x.toLowerCase() === alias.toLowerCase())) continue;
         cleanAliases.push(alias);
       }

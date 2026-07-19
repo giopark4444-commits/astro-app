@@ -252,14 +252,18 @@ export function parseDistilledEntities(raw: string): DistilledEntity[] {
     const { kind, name, summary, aliases } = item as Record<string, unknown>;
     if (typeof kind !== "string" || !(ENTITY_KINDS as readonly string[]).includes(kind)) continue;
     if (typeof name !== "string") continue;
-    const cleanName = name.trim().slice(0, 120);
+    // Colapsa whitespace interno (saltos de línea incluidos) ANTES de recortar
+    // — el modelo podría devolver un name/summary/alias con \n que falsifique
+    // la estructura del bloque que formatEntityBlock inyecta al prompt
+    // (review Fable, defensa en profundidad ante el propio destilado).
+    const cleanName = name.replace(/\s+/g, " ").trim().slice(0, 120);
     if (!cleanName) continue;
-    const cleanSummary = typeof summary === "string" ? summary.trim().slice(0, 2000) : "";
+    const cleanSummary = typeof summary === "string" ? summary.replace(/\s+/g, " ").trim().slice(0, 2000) : "";
     const cleanAliases: string[] = [];
     if (Array.isArray(aliases)) {
       for (const a of aliases) {
         if (typeof a !== "string") continue;
-        const alias = a.trim().slice(0, 120);
+        const alias = a.replace(/\s+/g, " ").trim().slice(0, 120);
         if (!alias || cleanAliases.some((x) => x.toLowerCase() === alias.toLowerCase())) continue;
         cleanAliases.push(alias);
       }
