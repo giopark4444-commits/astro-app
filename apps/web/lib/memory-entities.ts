@@ -45,6 +45,7 @@ export interface MemoryEntity {
   pinned: boolean;
   salience: number;
   last_referenced_at: string;
+  created_at: string;
 }
 
 /** Entidad tal como sale del destilado (aún sin id: puede ser nueva o fusión).
@@ -68,7 +69,7 @@ export async function fetchEntities(supabase: AlunaSupabaseClient, userId: strin
   try {
     const { data, error } = await supabase
       .from("memory_entities")
-      .select("id, kind, name, summary, aliases, pinned, salience, last_referenced_at")
+      .select("id, kind, name, summary, aliases, pinned, salience, last_referenced_at, created_at")
       .eq("user_id", userId)
       .order("pinned", { ascending: false })
       .order("last_referenced_at", { ascending: false });
@@ -80,7 +81,11 @@ export async function fetchEntities(supabase: AlunaSupabaseClient, userId: strin
 }
 
 // Encabezados de grupo por kind, en el mismo registro MAYÚSCULO del resto del
-// system prompt (ver formatMemoryBlock / buildFocusedContext).
+// system prompt (ver formatMemoryBlock / buildFocusedContext). Nota: NO es el
+// mismo diccionario que usan /ajustes (entities-card.tsx, vía
+// messages/*.json entityKindPerson...) ni memory-export.ts (documento
+// Markdown legible) — esos van en registro Título, este es el grito para el
+// modelo.
 const KIND_HEADERS: Record<EntityKind, Record<Locale, string>> = {
   person: { es: "PERSONAS", en: "PEOPLE" },
   pet: { es: "MASCOTAS", en: "PETS" },

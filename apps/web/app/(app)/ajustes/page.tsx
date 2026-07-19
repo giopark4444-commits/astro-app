@@ -15,6 +15,7 @@ import { ReferralRedeem } from "./referral-redeem";
 import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
 import { EntitiesCard } from "./entities-card";
+import { MemoryDataCard } from "./memory-data-card";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -109,6 +110,8 @@ export default async function AjustesPage({
       <MemoriesCard userId={user.id} />
 
       <EntitiesCard userId={user.id} />
+
+      <MemoryDataCard />
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />

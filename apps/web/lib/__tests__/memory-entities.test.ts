@@ -20,6 +20,7 @@ function entity(over: Partial<MemoryEntity> & { name: string }): MemoryEntity {
     pinned: over.pinned ?? false,
     salience: over.salience ?? 0,
     last_referenced_at: over.last_referenced_at ?? "2026-07-01T00:00:00Z",
+    created_at: over.created_at ?? "2026-07-01T00:00:00Z",
   };
 }
 
