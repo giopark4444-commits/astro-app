@@ -8,7 +8,7 @@ import { profileToNumerologyInput } from "@/lib/numerology";
 import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiveLenses } from "@/lib/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
-import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
+import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -99,24 +99,27 @@ export async function POST(request: NextRequest) {
   // Línea de intención opcional (Task 13): solo se anexa si la persona
   // respondió el cuestionario Y activó useInAI. `settings.intent` viaja como
   // Json; `parseIntent` lo lee tolerante y devuelve null si no hay señal útil.
+  // `memory_enabled` (0019) viaja en el MISMO select — gate independiente,
+  // ver comentario más abajo.
   const { data: settingsRow } = await supabase
     .from("settings")
-    .select("intent")
+    .select("intent, memory_enabled")
     .eq("user_id", user.id)
     .maybeSingle();
   const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
   const intentLine = buildIntentLine(intent, locale);
   if (intentLine) system = `${system}\n\n${intentLine}`;
 
-  // "Aluna te conoce" (Task 2): recuerdos duraderos de conversaciones previas.
-  // Opt-in explícito (review final): solo si la persona respondió el
-  // cuestionario Y activó useInAI a mano — mismo criterio que buildIntentLine
-  // (sin cuestionario no hay recolección de memoria). Byte-igual si no hay
-  // recuerdos o el toggle está apagado (formatMemoryBlock devuelve null).
-  const useMemories = intent?.useInAI === true;
-  if (useMemories) {
-    const memories = await fetchMemories(supabase, user.id);
-    const memoryBlock = formatMemoryBlock(memories, locale);
+  // "Aluna te conoce" (Fase 1A): recuerdos + entidades duraderas de
+  // conversaciones previas. Gate PROPIO (0019): settings.memory_enabled, ya
+  // NO intent.useInAI (ese sigue gobernando solo intentLine, arriba) — la
+  // memoria ya no depende de haber respondido el cuestionario. Degradación
+  // segura: sin fila settings o columna sin migrar todavía, se trata como ON
+  // por defecto (`!== false`, no `=== true`). Byte-igual si no hay memoria
+  // acumulada (buildMemoryBlocks devuelve "").
+  const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
+  if (memoryEnabled) {
+    const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
 
@@ -144,28 +147,20 @@ export async function POST(request: NextRequest) {
   });
 
   // Destilado post-conversación (fire-and-forget, best-effort total): solo si
-  // el toggle está encendido. `after()` corre una vez la respuesta terminó de
-  // enviarse (incluido el streaming), así que `assistantReply` ya está completo.
-  // Nota: corre en CADA turno (ruta stateless, sin señal de "fin de
-  // conversación"); debounce/dedupe semántico entre turnos queda como mejora
-  // futura conocida.
-  if (useMemories) {
+  // el gate de memoria está encendido. `after()` corre una vez la respuesta
+  // terminó de enviarse (incluido el streaming), así que `assistantReply` ya
+  // está completo. Nota: corre en CADA turno (ruta stateless, sin señal de
+  // "fin de conversación"); debounce/dedupe semántico entre turnos queda como
+  // mejora futura conocida.
+  if (memoryEnabled) {
     after(async () => {
-      try {
-        if (!assistantReply.trim()) return;
-        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
-          .slice(-6)
-          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
-          .join("\n")
-          .slice(-8000);
-        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
-        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
-        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
-        const newMemories = parseDistilled(raw, existing);
-        await storeMemories(supabase, user.id, newMemories, "chat");
-      } catch {
-        // best effort: la destilación nunca rompe el flujo del chat
-      }
+      if (!assistantReply.trim()) return;
+      const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+        .slice(-6)
+        .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+        .join("\n")
+        .slice(-8000);
+      await runDistillation(provider, supabase, user.id, transcript, locale, "chat");
     });
   }
 
