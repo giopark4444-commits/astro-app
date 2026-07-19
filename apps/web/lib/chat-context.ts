@@ -5,9 +5,9 @@
 // `buildContext` monolítico que vivía en /api/chat/route.ts para que sea testeable en
 // aislado; los bloques de astros y números quedan BYTE-EQUIVALENTES a la prosa previa
 // (se extrajeron, no se reescribieron). Ba Zi y Tarot son adiciones nuevas al consejo.
-// Frontera server-only explícita (no solo convención): este módulo importa
-// `@aluna/ephemeris`/`computeBaziNatal`, que arrastran el binding nativo sweph.
-import "server-only";
+// SERVER-only: este módulo importa `@aluna/ephemeris`/`computeBaziNatal` (vía
+// bazi-natal.ts), que arrastran el binding nativo sweph — misma convención que
+// lib/timeline/bazi-natal.ts (comentario de frontera, no el paquete `server-only`).
 import type { computeChart } from "@aluna/ephemeris";
 import {
   computeNumerology,

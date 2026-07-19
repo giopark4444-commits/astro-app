@@ -217,4 +217,65 @@ describe("effectiveLenses", () => {
       }
     }
   });
+
+  it("es idempotente: pasarle su propia salida (mismo tarotCard) no la cambia", () => {
+    const cases: Array<{ lenses: Lens[]; tarotCard?: TarotCardRef }> = [
+      { lenses: ["tarot"] },
+      { lenses: [] },
+      { lenses: ["astros", "numeros"] },
+      { lenses: ["astros", "tarot"] },
+      { lenses: BASE_LENSES },
+      { lenses: ["tarot"], tarotCard: { id: "fool", reversed: false } },
+    ];
+    for (const { lenses, tarotCard } of cases) {
+      const once = effectiveLenses(lenses, tarotCard);
+      const twice = effectiveLenses(once, tarotCard);
+      expect(twice).toEqual(once);
+    }
+  });
+
+  it("re-review (Important): la lista efectiva decide QUÉ SE COMPUTA, no `lenses` crudo — de lo contrario datos e instrucción divergen", () => {
+    // Reproduce el bug de route.ts: con lenses:["tarot"] sin tarotCard, la
+    // instrucción (focusLine, ya construida sobre effectiveLenses) le pide al
+    // modelo anclarse en las 3 base, pero si el gate de chart/numerology se
+    // decide con `lenses` crudo (bug), esos bloques quedan afuera del contexto.
+    const lenses: Lens[] = ["tarot"];
+    const tarotCard = undefined;
+    const active = effectiveLenses(lenses, tarotCard);
+    expect(active).toEqual(BASE_LENSES); // astros, numeros, pilares
+
+    // Gate ROTO (lo que hacía route.ts antes del fix): decide con `lenses` crudo.
+    const brokenChart = lenses.includes("astros") ? chart : undefined;
+    const brokenNumerology = lenses.includes("numeros") ? numerology : undefined;
+    const brokenCtx = buildFocusedContext({
+      profile: PROFILE,
+      chart: brokenChart,
+      numerology: brokenNumerology,
+      lenses,
+      tarotCard,
+      locale: "es",
+    });
+    const line = focusLine(lenses, tarotCard, "es");
+    // La instrucción promete las 3 disciplinas...
+    expect(line).toContain("Astrología, Numerología y Cuatro Pilares (Ba Zi)");
+    // ...pero el contexto roto NO trae astros/numeros (el gate crudo los dejó afuera).
+    expect(brokenCtx).not.toContain("Carta natal —");
+    expect(brokenCtx).not.toContain("Numerología —");
+
+    // Gate CORRECTO (el fix): decide con la lista EFECTIVA.
+    const fixedChart = active.includes("astros") ? chart : undefined;
+    const fixedNumerology = active.includes("numeros") ? numerology : undefined;
+    const fixedCtx = buildFocusedContext({
+      profile: PROFILE,
+      chart: fixedChart,
+      numerology: fixedNumerology,
+      lenses: active,
+      tarotCard,
+      locale: "es",
+    });
+    // Ahora sí: lo que promete la instrucción está presente en el contexto.
+    expect(fixedCtx).toContain("Carta natal —");
+    expect(fixedCtx).toContain("Numerología —");
+    expect(fixedCtx).toContain("Cuatro Pilares (Ba Zi) —");
+  });
 });

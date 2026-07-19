@@ -5,7 +5,7 @@ import { computeNumerology, parseIntent, type UserIntent } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
-import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard } from "@/lib/chat-context";
+import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiveLenses } from "@/lib/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
 import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
@@ -55,6 +55,17 @@ export async function POST(request: NextRequest) {
   // contra el mazo. Ambos se resuelven en @/lib/chat-context (testeable en aislado).
   const lenses = resolveLenses(body.lenses);
   const tarotCard = parseTarotCard(body.tarotCard);
+  // Lista EFECTIVA (re-review): la MISMA que usan buildFocusedContext/focusLine
+  // por dentro. Decidimos con ESTA lista si computar chart/numerology — no con
+  // `lenses` crudo — para que los datos calculados y la instrucción de enfoque
+  // NUNCA diverjan. Bug que esto corrige: body {lenses:["tarot"]} sin tarotCard
+  // → effectiveLenses cae a BASE_LENSES (focusLine ya lo hacía), pero con
+  // `lenses` crudo chart/numerology quedaban `undefined` (raw no incluye
+  // "astros"/"numeros") y el contexto no traía esos bloques pese a que la
+  // focusLine le pedía al modelo anclarse en ellos. effectiveLenses es
+  // idempotente (mismo tarotCard) así que volver a pasarle `activeLenses` a
+  // buildFocusedContext/focusLine no cambia el resultado.
+  const activeLenses = effectiveLenses(lenses, tarotCard);
 
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ available: false, error: "unauthorized" }, { status: 401 });
@@ -76,10 +87,11 @@ export async function POST(request: NextRequest) {
   try {
     // computeChart/computeNumerology solo si su lente está activa (perf). Ba Zi lo
     // arma buildFocusedContext por dentro (computeBaziNatal) cuando 'pilares' entra.
-    const chart = lenses.includes("astros") ? computeChart(profileToChartInput(profile)) : undefined;
-    const numerology = lenses.includes("numeros") ? computeNumerology(profileToNumerologyInput(profile)) : undefined;
-    const context = buildFocusedContext({ profile, chart, numerology, lenses, tarotCard, locale });
-    system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(lenses, tarotCard, locale)}`;
+    // Decidido con `activeLenses` (no `lenses` crudo): ver comentario más arriba.
+    const chart = activeLenses.includes("astros") ? computeChart(profileToChartInput(profile)) : undefined;
+    const numerology = activeLenses.includes("numeros") ? computeNumerology(profileToNumerologyInput(profile)) : undefined;
+    const context = buildFocusedContext({ profile, chart, numerology, lenses: activeLenses, tarotCard, locale });
+    system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(activeLenses, tarotCard, locale)}`;
   } catch {
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
