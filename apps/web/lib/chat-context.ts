@@ -5,6 +5,9 @@
 // `buildContext` monolítico que vivía en /api/chat/route.ts para que sea testeable en
 // aislado; los bloques de astros y números quedan BYTE-EQUIVALENTES a la prosa previa
 // (se extrajeron, no se reescribieron). Ba Zi y Tarot son adiciones nuevas al consejo.
+// Frontera server-only explícita (no solo convención): este módulo importa
+// `@aluna/ephemeris`/`computeBaziNatal`, que arrastran el binding nativo sweph.
+import "server-only";
 import type { computeChart } from "@aluna/ephemeris";
 import {
   computeNumerology,
@@ -203,14 +206,35 @@ export interface FocusedContextArgs {
 }
 
 /**
+ * DEFENSA EN PROFUNDIDAD: lista efectiva de lentes que van a aportar bloque de
+ * datos. El cliente NO debería mandar `lenses:["tarot"]` sin `tarotCard`, pero si
+ * lo hace, filtrar tarot acá dejaría la selección activa VACÍA → contexto sin
+ * bloques (solo el header) y una focusLine rota ("...ÚNICAMENTE en: . No
+ * introduzcas..."). Por eso: se filtra tarot cuando no hay carta y, si la lista
+ * activa queda vacía tras ese filtro, se cae a `BASE_LENSES` (astros/numeros/
+ * pilares) — el contexto NUNCA queda sin datos.
+ *
+ * astros/numeros no se validan acá contra chart/numerology: su disponibilidad la
+ * garantiza el llamador (`/api/chat/route.ts` solo activa esas lentes cuando ya
+ * computó el dato correspondiente), así que "lente activa" ya implica "va a
+ * aportar bloque". Exportada para que `buildFocusedContext` y `focusLine` operen
+ * sobre la MISMA lista y nunca puedan divergir en qué disciplinas mencionan.
+ */
+export function effectiveLenses(lenses: Lens[], tarotCard: TarotCardRef | undefined): Lens[] {
+  const active = new Set(lenses);
+  const effective = LENS_ORDER.filter((l) => active.has(l) && (l !== "tarot" || !!tarotCard));
+  return effective.length ? effective : [...BASE_LENSES];
+}
+
+/**
  * Contexto enfocado: encabeza con "DATOS DE <name>" y concatena SOLO los bloques de
- * las lentes activas, en orden canónico. Tarot solo si hay carta. Cuando astros y
+ * las lentes EFECTIVAS (`effectiveLenses`), en orden canónico. Cuando astros y
  * números están ambos activos, el resultado es byte-equivalente al `buildContext`
  * previo salvo por los bloques nuevos (Ba Zi/Tarot) añadidos al final.
  */
 export function buildFocusedContext(args: FocusedContextArgs): string {
   const { profile, chart, numerology, lenses, tarotCard, locale } = args;
-  const active = new Set(lenses);
+  const active = new Set(effectiveLenses(lenses, tarotCard));
   const header =
     locale === "en"
       ? `DATA FOR ${profile.name} (gender: ${profile.gender}):`
@@ -231,15 +255,13 @@ export function buildFocusedContext(args: FocusedContextArgs): string {
 
 /**
  * Línea de enfoque que se AÑADE al system: "Aconseja apoyándote ÚNICAMENTE en:
- * <disciplinas activas>. No introduzcas las demás." Tarot solo entra en la lista si
- * hay carta (sin carta no hay nada de tarot que leer).
+ * <disciplinas efectivas>. No introduzcas las demás." Usa la MISMA
+ * `effectiveLenses` que `buildFocusedContext` — nunca lista vacío (": .") ni
+ * menciona Tarot sin carta, y siempre coincide con las disciplinas que de verdad
+ * tienen bloque en el contexto.
  */
 export function focusLine(lenses: Lens[], tarotCard: TarotCardRef | undefined, locale: Locale): string {
-  const active = new Set(lenses);
-  const names = LENS_ORDER
-    .filter((l) => active.has(l))
-    .filter((l) => l !== "tarot" || !!tarotCard)
-    .map((l) => DISCIPLINE[locale][l]);
+  const names = effectiveLenses(lenses, tarotCard).map((l) => DISCIPLINE[locale][l]);
   const list = joinList(names, locale);
   return locale === "en"
     ? `Advise drawing ONLY on: ${list}. Do not bring in the others.`

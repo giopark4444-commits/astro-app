@@ -9,8 +9,11 @@ import {
   buildTarotBlock,
   resolveLenses,
   parseTarotCard,
+  effectiveLenses,
   BASE_LENSES,
   type ChatContextProfile,
+  type Lens,
+  type TarotCardRef,
 } from "@/lib/chat-context";
 
 // Perfil fijo (Ba Zi resuelve con computeBaziNatal → efemérides reales para la
@@ -76,11 +79,15 @@ describe("buildFocusedContext — por lente", () => {
     expect(ctx).not.toContain("Numerología —");
   });
 
-  it("['tarot'] sin carta → SIN bloque tarot", () => {
+  it("['tarot'] sin carta → defensa en profundidad: cae a las 3 base (nunca vacío)", () => {
+    // El cliente NO debería mandar esto, pero si llega lenses:["tarot"] sin
+    // tarotCard, la lista efectiva (tarot filtrado por falta de carta) queda
+    // vacía → cae a BASE_LENSES en vez de emitir un contexto sin bloques.
     const ctx = buildFocusedContext({ profile: PROFILE, chart, numerology, lenses: ["tarot"], locale: "es" });
     expect(ctx).not.toContain("Tarot —");
-    // Solo queda el encabezado, sin bloques.
-    expect(ctx).toBe("DATOS DE Gio (género: masculine):");
+    expect(ctx).toContain("Carta natal —");
+    expect(ctx).toContain("Numerología —");
+    expect(ctx).toContain("Cuatro Pilares (Ba Zi) —");
   });
 
   it("default 3 base → carta + numerología + Ba Zi, sin tarot", () => {
@@ -146,12 +153,68 @@ describe("focusLine", () => {
   });
 
   it("tarot entra en la lista solo si hay carta", () => {
-    expect(focusLine(["tarot"], undefined, "es")).toBe("Aconseja apoyándote ÚNICAMENTE en: . No introduzcas las demás.");
     expect(focusLine(["tarot"], { id: "fool", reversed: false }, "es")).toContain("Tarot");
+  });
+
+  it("['tarot'] sin carta → defensa en profundidad: cae a las 3 base, nunca lista vacía", () => {
+    const line = focusLine(["tarot"], undefined, "es");
+    expect(line).not.toContain(": .");
+    expect(line).toBe(
+      "Aconseja apoyándote ÚNICAMENTE en: Astrología, Numerología y Cuatro Pilares (Ba Zi). No introduzcas las demás.",
+    );
+  });
+
+  it("nunca produce una lista vacía (': .'), ni con lenses totalmente vacío", () => {
+    expect(focusLine([], undefined, "es")).not.toContain(": .");
+    expect(focusLine(["tarot"], undefined, "es")).not.toContain(": .");
+    expect(focusLine(["tarot"], undefined, "en")).not.toContain(": .");
   });
 
   it("EN traduce las disciplinas", () => {
     const line = focusLine(["astros", "pilares"], undefined, "en");
     expect(line).toBe("Advise drawing ONLY on: Astrology and Four Pillars (Ba Zi). Do not bring in the others.");
+  });
+});
+
+describe("effectiveLenses", () => {
+  it("filtra tarot sin carta y cae a BASE_LENSES si queda vacío", () => {
+    expect(effectiveLenses(["tarot"], undefined)).toEqual(BASE_LENSES);
+    expect(effectiveLenses([], undefined)).toEqual(BASE_LENSES);
+  });
+
+  it("mantiene tarot cuando hay carta", () => {
+    expect(effectiveLenses(["tarot"], { id: "fool", reversed: false })).toEqual(["tarot"]);
+  });
+
+  it("no filtra nada si ya hay lentes base activas junto a tarot sin carta", () => {
+    expect(effectiveLenses(["astros", "tarot"], undefined)).toEqual(["astros"]);
+  });
+
+  it("buildFocusedContext y focusLine coinciden en las disciplinas para el mismo input (incl. el caso roto)", () => {
+    const cases: Array<{ lenses: Lens[]; tarotCard?: TarotCardRef }> = [
+      { lenses: ["tarot"] }, // el caso roto: cae a BASE_LENSES en ambas funciones
+      { lenses: [] },
+      { lenses: ["astros", "numeros"] },
+      { lenses: ["tarot"], tarotCard: { id: "fool", reversed: false } },
+    ];
+    const MARKER: Record<Exclude<Lens, "tarot">, string> = {
+      astros: "Carta natal —",
+      numeros: "Numerología —",
+      pilares: "Cuatro Pilares (Ba Zi) —",
+    };
+    const NAME: Record<Exclude<Lens, "tarot">, string> = {
+      astros: "Astrología",
+      numeros: "Numerología",
+      pilares: "Cuatro Pilares (Ba Zi)",
+    };
+    for (const { lenses, tarotCard } of cases) {
+      const ctx = buildFocusedContext({ profile: PROFILE, chart, numerology, lenses, tarotCard, locale: "es" });
+      const line = focusLine(lenses, tarotCard, "es");
+      for (const lens of effectiveLenses(lenses, tarotCard)) {
+        if (lens === "tarot") continue; // el bloque tarot exige `content`, no solo el id; ya cubierto en otros tests
+        expect(ctx).toContain(MARKER[lens]);
+        expect(line).toContain(NAME[lens]);
+      }
+    }
   });
 });
