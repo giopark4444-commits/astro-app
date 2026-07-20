@@ -245,7 +245,15 @@
     "moonLastQuarter": "Last Quarter",
     "moonWaningCrescent": "Waning Moon",
     "moonInSign": "{phase} in {sign}",
-    "headerPersonalDay": "your personal day is {n}"
+    "headerPersonalDay": "your personal day is {n}",
+    "proactive": {
+      "title": "Aluna's holding these for you",
+      "manifestationHarvest": "Your manifestation “{intention}” comes to harvest on {date}.",
+      "genericReminder": "Aluna's keeping this close: “{description}”.",
+      "dismiss": "Dismiss",
+      "talkAbout": "Talk about this",
+      "talkAboutQuestion": "Let's talk about my manifestation “{intention}”"
+    }
   },
   "onboarding": {
     "progress": "Step {n} of {total}",

@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/locale";
 import { THEME_COOKIE, MODE_COOKIE } from "@/lib/theme/fouc-script";
 import { parseIntent, type UserIntent } from "@aluna/core";
-import type { TablesUpdate } from "@aluna/supabase";
+import type { AlunaSupabaseClient, TablesUpdate } from "@aluna/supabase";
+import { dismissCommitment } from "@/lib/memory-commitments";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -204,5 +205,27 @@ export async function pinEntity(id: string, pinned: boolean) {
     revalidatePath("/ajustes");
   } catch {
     // best effort: no bloquear /ajustes por un fallo al fijar una entidad
+  }
+}
+
+/**
+ * Descarta un compromiso (Fase 2 T4, tarjeta "Aluna te recuerda" de /hoy): la
+ * persona dice "ya no" / "no me interesa". dismissCommitment (lib/
+ * memory-commitments.ts) ya es best-effort por dentro (nunca lanza); el
+ * try/catch de acá cubre además createClient()/getUser(), mismo criterio
+ * defensivo que deleteMemory/deleteEntity arriba. HubView ya aplica el
+ * patrón optimista en el cliente (quita el item al instante) — esta acción
+ * solo persiste; revalidatePath asegura que la próxima carga de /hoy no
+ * vuelva a traer el compromiso descartado.
+ */
+export async function dismissCommitmentAction(id: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await dismissCommitment(supabase as unknown as AlunaSupabaseClient, user.id, id);
+    revalidatePath("/hoy");
+  } catch {
+    // best effort: no bloquear /hoy por un fallo al descartar un compromiso
   }
 }

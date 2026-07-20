@@ -245,7 +245,15 @@
     "moonLastQuarter": "Cuarto menguante",
     "moonWaningCrescent": "Luna menguante",
     "moonInSign": "{phase} en {sign}",
-    "headerPersonalDay": "tu día personal es {n}"
+    "headerPersonalDay": "tu día personal es {n}",
+    "proactive": {
+      "title": "Aluna te recuerda",
+      "manifestationHarvest": "Tu manifestación «{intention}» se cosecha el {date}.",
+      "genericReminder": "Aluna guarda esto para ti: «{description}».",
+      "dismiss": "Descartar",
+      "talkAbout": "Hablar de esto",
+      "talkAboutQuestion": "Hablemos de mi manifestación «{intention}»"
+    }
   },
   "onboarding": {
     "progress": "Paso {n} de {total}",
