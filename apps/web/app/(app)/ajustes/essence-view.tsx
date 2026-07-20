@@ -18,7 +18,7 @@ export function EssenceView({
   onClear,
 }: {
   essence: EssenceDetail;
-  onRegenerate: () => Promise<{ ok: boolean; reason?: "no_provider" }>;
+  onRegenerate: () => Promise<{ ok: boolean; reason?: "no_provider" | "memory_off" }>;
   onEdit: (portrait: string) => Promise<void>;
   onClear: () => Promise<void>;
 }) {
@@ -31,6 +31,7 @@ export function EssenceView({
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [needsKey, setNeedsKey] = useState(false);
+  const [memoryOff, setMemoryOff] = useState(false);
   const [clearing, setClearing] = useState(false);
 
   const busy = saving || regenerating || clearing;
@@ -48,9 +49,11 @@ export function EssenceView({
   async function handleRegenerate() {
     setRegenerating(true);
     setNeedsKey(false);
+    setMemoryOff(false);
     try {
       const res = await onRegenerate();
       if (!res.ok && res.reason === "no_provider") setNeedsKey(true);
+      if (!res.ok && res.reason === "memory_off") setMemoryOff(true);
     } finally {
       setRegenerating(false);
     }
@@ -137,6 +140,7 @@ export function EssenceView({
       </div>
 
       {needsKey && <p className={styles.essenceNotice}>{t("essence.needsKey")}</p>}
+      {memoryOff && <p className={styles.essenceNotice}>{t("essence.memoryOff")}</p>}
     </>
   );
 }

@@ -89,12 +89,19 @@ export async function POST(request: NextRequest) {
     }
 
     // v2: solo toca memory_essence si el payload trae retrato (parsed.essence
-    // no-null) — un import v1 no dispara esta query.
+    // no-null) — un import v1 no dispara esta query. generated_at/model_used
+    // se limpian a null (igual que clearEssence en actions.ts): si ya había
+    // una esencia regenerada, el retrato importado la reemplaza por completo
+    // y no debe arrastrar la fecha/modelo de la esencia vieja en la línea
+    // "Formado el {fecha}" de la tarjeta.
     if (parsed.essence) {
       const now = new Date().toISOString();
       const { error } = await supabase
         .from("memory_essence")
-        .upsert({ user_id: user.id, portrait: parsed.essence, status: "idle", updated_at: now }, { onConflict: "user_id" });
+        .upsert(
+          { user_id: user.id, portrait: parsed.essence, status: "idle", generated_at: null, model_used: null, updated_at: now },
+          { onConflict: "user_id" },
+        );
       if (error) throw error;
     }
 

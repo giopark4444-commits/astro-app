@@ -72,8 +72,9 @@ vi.mock("next-intl/server", () => ({ getLocale: async () => "es" }));
 // resolveReadingProvider/regenerateEssence (Fase 2 T5): se mockean aparte
 // (ya están cubiertos por sus propios tests — lib/reading/__tests__ y
 // lib/__tests__/memory-essence.test.ts) para que este archivo solo verifique
-// que regenerateEssenceAction los conecta bien: sin proveedor → degrada, con
-// proveedor → llama a regenerateEssence forzando minAgeSeconds=0.
+// que regenerateEssenceAction los conecta bien: sin memoria → degrada antes
+// de tocar el proveedor, sin proveedor → degrada, con proveedor → llama a
+// regenerateEssence forzando minAgeSeconds=0.
 const resolveReadingProviderMock = vi.fn();
 vi.mock("@/lib/reading/provider", () => ({
   resolveReadingProvider: () => resolveReadingProviderMock(),
@@ -83,6 +84,16 @@ const regenerateEssenceMock = vi.fn(async (...args: unknown[]) => {
 });
 vi.mock("@/lib/memory-essence", () => ({
   regenerateEssence: (...args: unknown[]) => regenerateEssenceMock(...args),
+}));
+
+// fetchIntentAndMemorySettings (review Fable, minor #1): regenerateEssenceAction
+// ahora gatea por memory_enabled ANTES de resolver el proveedor — se mockea
+// aparte (ya cubierto por sus propios tests en lib/__tests__/settings.test.ts)
+// con memoryEnabled:true por defecto para no romper los tests existentes que
+// ejercitan la rama "con proveedor".
+const fetchIntentAndMemorySettingsMock = vi.fn();
+vi.mock("@/lib/settings", () => ({
+  fetchIntentAndMemorySettings: (...args: unknown[]) => fetchIntentAndMemorySettingsMock(...args),
 }));
 
 import {
@@ -105,6 +116,7 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
     vi.mocked(revalidatePath).mockClear();
     resolveReadingProviderMock.mockReset();
     regenerateEssenceMock.mockReset().mockResolvedValue(undefined);
+    fetchIntentAndMemorySettingsMock.mockReset().mockResolvedValue({ intent: null, memoryEnabled: true });
   });
 
   describe("setMemoryEnabled", () => {
@@ -262,9 +274,18 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
       expect(revalidatePath).toHaveBeenCalledWith("/ajustes");
     });
 
-    it("sin usuario → {ok:false}, ni siquiera resuelve el proveedor", async () => {
+    it("review Fable (minor #1): con memory_enabled=false → {ok:false, reason:'memory_off'}, ni resuelve el proveedor ni llama a regenerateEssence ni revalida", async () => {
+      fetchIntentAndMemorySettingsMock.mockResolvedValue({ intent: null, memoryEnabled: false });
+      await expect(regenerateEssenceAction()).resolves.toEqual({ ok: false, reason: "memory_off" });
+      expect(resolveReadingProviderMock).not.toHaveBeenCalled();
+      expect(regenerateEssenceMock).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
+    it("sin usuario → {ok:false}, ni siquiera lee la casilla de memoria ni resuelve el proveedor", async () => {
       state.user = null;
       await expect(regenerateEssenceAction()).resolves.toEqual({ ok: false });
+      expect(fetchIntentAndMemorySettingsMock).not.toHaveBeenCalled();
       expect(resolveReadingProviderMock).not.toHaveBeenCalled();
     });
 

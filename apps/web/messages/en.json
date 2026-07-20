@@ -101,6 +101,7 @@
       "regenerate": "Regenerate now",
       "regenerating": "Forming your portrait…",
       "needsKey": "Needs an active AI key to form. Try again once one's connected.",
+      "memoryOff": "Memory is off right now, so there's nothing to regenerate from. Turn it back on and Aluna will pick up where it left off.",
       "edit": "Edit",
       "save": "Save",
       "cancel": "Cancel",

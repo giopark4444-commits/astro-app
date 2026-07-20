@@ -10,6 +10,7 @@ import type { AlunaSupabaseClient, TablesUpdate } from "@aluna/supabase";
 import { dismissCommitment } from "@/lib/memory-commitments";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { regenerateEssence } from "@/lib/memory-essence";
+import { fetchIntentAndMemorySettings } from "@/lib/settings";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -243,16 +244,29 @@ export async function dismissCommitmentAction(id: string) {
  * disponible (sin llave), NO llama a regenerateEssence — devuelve
  * {ok:false, reason:'no_provider'} para que la tarjeta lo muestre con un
  * mensaje amable en vez de fallar en silencio; resolveReadingProvider() jamás
- * lanza sin llave (ver lib/reading/provider.ts). El locale se resuelve igual
- * que en las páginas server (getLocale de next-intl/server, ver
- * ajustes/page.tsx) — resolveLocale() lo acota al tipo Locale por si la
- * cookie trae un valor no soportado.
+ * lanza sin llave (ver lib/reading/provider.ts).
+ *
+ * Hallazgo del review Fable: a diferencia del disparo automático de
+ * runDistillation (que sí gatea por memory_enabled), este clic manual NO
+ * miraba la casilla — con la memoria apagada, "Regenerar ahora" igual
+ * disparaba el modelo y reescribía el retrato, contradiciendo la casilla.
+ * Ahora se lee memory_enabled ANTES de resolver el proveedor (mismo criterio
+ * de "no gastar CPU/llamar al proveedor si no hace falta" que el resto de
+ * esta acción) — si está apagada, devuelve {ok:false, reason:'memory_off'}
+ * sin tocar el proveedor ni el modelo.
+ *
+ * El locale se resuelve igual que en las páginas server (getLocale de
+ * next-intl/server, ver ajustes/page.tsx) — resolveLocale() lo acota al tipo
+ * Locale por si la cookie trae un valor no soportado.
  */
-export async function regenerateEssenceAction(): Promise<{ ok: boolean; reason?: "no_provider" }> {
+export async function regenerateEssenceAction(): Promise<{ ok: boolean; reason?: "no_provider" | "memory_off" }> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { ok: false };
+
+    const { memoryEnabled } = await fetchIntentAndMemorySettings(supabase as unknown as AlunaSupabaseClient, user.id);
+    if (!memoryEnabled) return { ok: false, reason: "memory_off" };
 
     const resolved = resolveReadingProvider();
     if (!resolved.available) return { ok: false, reason: "no_provider" };

@@ -101,6 +101,7 @@
       "regenerate": "Regenerar ahora",
       "regenerating": "Formando tu retrato…",
       "needsKey": "Necesita una llave de IA activa para formarse. Vuelve a intentarlo cuando esté conectada.",
+      "memoryOff": "La memoria está apagada; enciéndela para que Aluna vuelva a formar tu retrato.",
       "edit": "Editar",
       "save": "Guardar",
       "cancel": "Cancelar",
