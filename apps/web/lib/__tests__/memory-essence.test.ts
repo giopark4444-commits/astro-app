@@ -13,7 +13,7 @@ vi.mock("../memory-entities", () => ({
   fetchEntities: (...args: unknown[]) => fetchEntitiesMock(...args),
 }));
 
-import { fetchEssence, formatEssenceBlock, regenerateEssence } from "../memory-essence";
+import { fetchEssence, fetchEssenceDetail, formatEssenceBlock, regenerateEssence, ESSENCE_LOCK_SECONDS, ESSENCE_MIN_AGE_SECONDS } from "../memory-essence";
 
 describe("formatEssenceBlock", () => {
   it("null cuando no hay retrato (null, vacío, o solo espacios)", () => {
@@ -75,13 +75,39 @@ describe("fetchEssence", () => {
   });
 });
 
+describe("fetchEssenceDetail", () => {
+  it("devuelve portrait + metadato cuando hay fila", async () => {
+    const supabase = fakeSelectSupabase({
+      data: { portrait: "Un retrato", generated_at: "2026-07-01T00:00:00.000Z", model_used: "hermes" },
+    });
+    expect(await fetchEssenceDetail(supabase, "u1")).toEqual({
+      portrait: "Un retrato",
+      generatedAt: "2026-07-01T00:00:00.000Z",
+      modelUsed: "hermes",
+    });
+  });
+
+  it("fila vacía (portrait/metadato en blanco) si no hay fila, hay error, o el cliente explota", async () => {
+    const empty = { portrait: "", generatedAt: null, modelUsed: null };
+    expect(await fetchEssenceDetail(fakeSelectSupabase({ data: null }), "u1")).toEqual(empty);
+    expect(
+      await fetchEssenceDetail(fakeSelectSupabase({ data: { portrait: "x" }, error: { message: "x" } }), "u1"),
+    ).toEqual(empty);
+    expect(await fetchEssenceDetail(throwingSupabase(), "u1")).toEqual(empty);
+  });
+});
+
 interface Capture {
   fromArgs?: string[];
   updatePayload?: Record<string, unknown>;
+  rpcArgs?: { p_min_age_seconds: number; p_lock_seconds: number };
 }
 
 function fakeEssenceSupabase(opts: { claim?: string | null; claimError?: { message: string } | null }, capture: Capture = {}) {
-  const rpc = vi.fn().mockResolvedValue({ data: opts.claim ?? null, error: opts.claimError ?? null });
+  const rpc = vi.fn((_fn: string, args: { p_min_age_seconds: number; p_lock_seconds: number }) => {
+    capture.rpcArgs = args;
+    return Promise.resolve({ data: opts.claim ?? null, error: opts.claimError ?? null });
+  });
   const from = vi.fn((table: string) => {
     (capture.fromArgs ??= []).push(table);
     return {
@@ -108,6 +134,22 @@ describe("regenerateEssence", () => {
     await regenerateEssence({ name: "hermes", complete } as never, supabase, "u1", "es");
     expect(complete).not.toHaveBeenCalled();
     expect(capture.fromArgs).toBeUndefined();
+  });
+
+  it("sin 5º argumento, el claim pide la cadencia por defecto (ESSENCE_MIN_AGE_SECONDS) — el disparo automático de runDistillation no cambia", async () => {
+    const capture: Capture = {};
+    const supabase = fakeEssenceSupabase({ claim: "fresh" }, capture);
+    await regenerateEssence({ name: "hermes", complete: vi.fn() } as never, supabase, "u1", "es");
+    expect(capture.rpcArgs).toEqual({ p_min_age_seconds: ESSENCE_MIN_AGE_SECONDS, p_lock_seconds: ESSENCE_LOCK_SECONDS });
+  });
+
+  it("minAgeSeconds:0 (Fase 2 T5 — «regenerar ahora») fuerza el claim con p_min_age_seconds:0", async () => {
+    const capture: Capture = {};
+    const supabase = fakeEssenceSupabase({ claim: "claimed" }, capture);
+    const complete = vi.fn().mockResolvedValue("Eres alguien reflexivo.");
+    await regenerateEssence({ name: "hermes", complete } as never, supabase, "u1", "es", 0);
+    expect(capture.rpcArgs).toEqual({ p_min_age_seconds: 0, p_lock_seconds: ESSENCE_LOCK_SECONDS });
+    expect(complete).toHaveBeenCalledTimes(1);
   });
 
   it('claim "generating" → no llama al provider ni escribe', async () => {

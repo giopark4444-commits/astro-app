@@ -1,12 +1,15 @@
 "use server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { LOCALE_COOKIE, resolveLocale } from "@/i18n/locale";
 import { THEME_COOKIE, MODE_COOKIE } from "@/lib/theme/fouc-script";
 import { parseIntent, type UserIntent } from "@aluna/core";
 import type { AlunaSupabaseClient, TablesUpdate } from "@aluna/supabase";
 import { dismissCommitment } from "@/lib/memory-commitments";
+import { resolveReadingProvider } from "@/lib/reading/provider";
+import { regenerateEssence } from "@/lib/memory-essence";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -227,5 +230,90 @@ export async function dismissCommitmentAction(id: string) {
     revalidatePath("/hoy");
   } catch {
     // best effort: no bloquear /hoy por un fallo al descartar un compromiso
+  }
+}
+
+/**
+ * "Regenerar ahora" (Fase 2 T5, tarjeta "Tu esencia" de Ajustes): a
+ * diferencia del disparo automático de runDistillation (cadencia de
+ * ESSENCE_MIN_AGE_SECONDS ≈ 1/día, ver memory-pipeline.ts), esta acción pasa
+ * minAgeSeconds=0 a regenerateEssence para saltarse esa cadencia y reclamar
+ * de inmediato — el lock de 'generating' que ya trae claim_essence_regeneration
+ * sigue protegiendo contra dos clics simultáneos. Sin proveedor de IA
+ * disponible (sin llave), NO llama a regenerateEssence — devuelve
+ * {ok:false, reason:'no_provider'} para que la tarjeta lo muestre con un
+ * mensaje amable en vez de fallar en silencio; resolveReadingProvider() jamás
+ * lanza sin llave (ver lib/reading/provider.ts). El locale se resuelve igual
+ * que en las páginas server (getLocale de next-intl/server, ver
+ * ajustes/page.tsx) — resolveLocale() lo acota al tipo Locale por si la
+ * cookie trae un valor no soportado.
+ */
+export async function regenerateEssenceAction(): Promise<{ ok: boolean; reason?: "no_provider" }> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { ok: false };
+
+    const resolved = resolveReadingProvider();
+    if (!resolved.available) return { ok: false, reason: "no_provider" };
+
+    const locale = resolveLocale(await getLocale());
+    await regenerateEssence(resolved.provider, supabase as unknown as AlunaSupabaseClient, user.id, locale, 0);
+    revalidatePath("/ajustes");
+    return { ok: true };
+  } catch {
+    // best effort: un fallo acá nunca debe romper /ajustes
+    return { ok: false };
+  }
+}
+
+// Mismo shim que UserMemoriesBuilder/MemoryEntitiesBuilder arriba, para
+// memory_essence (Fase 2 T5).
+type MemoryEssenceBuilder = {
+  update: (v: TablesUpdate<"memory_essence">) => {
+    eq: (col: string, val: string) => Promise<unknown>;
+  };
+};
+function memoryEssenceBuilder(supabase: Awaited<ReturnType<typeof createClient>>): MemoryEssenceBuilder {
+  return supabase.from("memory_essence") as unknown as MemoryEssenceBuilder;
+}
+
+/**
+ * Edita el retrato a mano (Fase 2 T5, tarjeta "Tu esencia"): mismo recorte
+ * que regenerateEssence al guardar (CHECK char_length(portrait) <= 4000,
+ * migración 0020). Best-effort: un fallo acá nunca debe romper /ajustes.
+ */
+export async function editEssence(portrait: string) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const clean = portrait.trim().slice(0, 4000);
+    await memoryEssenceBuilder(supabase).update({ portrait: clean }).eq("user_id", user.id);
+    revalidatePath("/ajustes");
+  } catch {
+    // best effort: no bloquear /ajustes por un fallo al editar la esencia
+  }
+}
+
+/**
+ * Limpia el retrato (Fase 2 T5, botón "Limpiar" con confirm ligero en la
+ * tarjeta). Vacía portrait + el metadato de cuándo/con qué se formó (en vez
+ * de borrar la fila): claim_essence_regeneration hace
+ * `insert ... on conflict do nothing` sobre esa fila, así que conservarla
+ * (con status/lock intactos) es más simple que recrearla en el próximo claim.
+ * Best-effort.
+ */
+export async function clearEssence() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await memoryEssenceBuilder(supabase)
+      .update({ portrait: "", generated_at: null, model_used: null })
+      .eq("user_id", user.id);
+    revalidatePath("/ajustes");
+  } catch {
+    // best effort: no bloquear /ajustes por un fallo al limpiar la esencia
   }
 }

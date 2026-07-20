@@ -37,11 +37,16 @@ function doubleEqBuilder(record: (eqs: [string, string][]) => void) {
   };
 }
 
+// memory_essence (Fase 2 T5) actualiza filtrado SOLO por user_id (no hay id
+// de fila propia — una fila por usuario, como settings), así que encadena UN
+// solo .eq() igual que settingsBuilder.
+const SINGLE_EQ_TABLES = new Set(["settings", "memory_essence"]);
+
 function makeFrom(table: string) {
   return {
     update: (v: unknown) => {
       const record = (eqs: [string, string][]) => state.updateCalls.push({ table, v, eqs });
-      return table === "settings" ? singleEqBuilder(record) : doubleEqBuilder(record);
+      return SINGLE_EQ_TABLES.has(table) ? singleEqBuilder(record) : doubleEqBuilder(record);
     },
     delete: () => doubleEqBuilder((eqs) => state.deleteCalls.push({ table, eqs })),
   };
@@ -59,7 +64,35 @@ vi.mock("@/lib/supabase/server", () => ({
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-import { setMemoryEnabled, editMemory, editEntity, deleteEntity, pinEntity } from "../../actions";
+// getLocale (Fase 2 T5, regenerateEssenceAction): sin un request real de
+// Next.js en el entorno de test, next-intl/server no tiene de dónde leer el
+// locale — se mockea fijo a "es" (mismo criterio que next/cache arriba).
+vi.mock("next-intl/server", () => ({ getLocale: async () => "es" }));
+
+// resolveReadingProvider/regenerateEssence (Fase 2 T5): se mockean aparte
+// (ya están cubiertos por sus propios tests — lib/reading/__tests__ y
+// lib/__tests__/memory-essence.test.ts) para que este archivo solo verifique
+// que regenerateEssenceAction los conecta bien: sin proveedor → degrada, con
+// proveedor → llama a regenerateEssence forzando minAgeSeconds=0.
+const resolveReadingProviderMock = vi.fn();
+vi.mock("@/lib/reading/provider", () => ({
+  resolveReadingProvider: () => resolveReadingProviderMock(),
+}));
+const regenerateEssenceMock = vi.fn(async (..._args: unknown[]) => {});
+vi.mock("@/lib/memory-essence", () => ({
+  regenerateEssence: (...args: unknown[]) => regenerateEssenceMock(...args),
+}));
+
+import {
+  setMemoryEnabled,
+  editMemory,
+  editEntity,
+  deleteEntity,
+  pinEntity,
+  regenerateEssenceAction,
+  editEssence,
+  clearEssence,
+} from "../../actions";
 
 describe("acciones del panel de control de memoria (Fase 1C)", () => {
   beforeEach(() => {
@@ -68,6 +101,8 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
     state.deleteCalls = [];
     state.throwOnFrom = false;
     vi.mocked(revalidatePath).mockClear();
+    resolveReadingProviderMock.mockReset();
+    regenerateEssenceMock.mockReset().mockResolvedValue(undefined);
   });
 
   describe("setMemoryEnabled", () => {
@@ -206,6 +241,93 @@ describe("acciones del panel de control de memoria (Fase 1C)", () => {
       state.user = null;
       await pinEntity("e1", false);
       expect(state.updateCalls).toHaveLength(0);
+    });
+  });
+
+  describe("regenerateEssenceAction (Fase 2 T5)", () => {
+    it("sin proveedor de IA disponible → {ok:false, reason:'no_provider'}, no llama a regenerateEssence ni revalida", async () => {
+      resolveReadingProviderMock.mockReturnValue({ available: false });
+      await expect(regenerateEssenceAction()).resolves.toEqual({ ok: false, reason: "no_provider" });
+      expect(regenerateEssenceMock).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+    });
+
+    it("con proveedor disponible → llama a regenerateEssence forzando minAgeSeconds=0 y revalida /ajustes", async () => {
+      const provider = { name: "hermes" };
+      resolveReadingProviderMock.mockReturnValue({ available: true, provider });
+      await expect(regenerateEssenceAction()).resolves.toEqual({ ok: true });
+      expect(regenerateEssenceMock).toHaveBeenCalledWith(provider, expect.anything(), "u1", "es", 0);
+      expect(revalidatePath).toHaveBeenCalledWith("/ajustes");
+    });
+
+    it("sin usuario → {ok:false}, ni siquiera resuelve el proveedor", async () => {
+      state.user = null;
+      await expect(regenerateEssenceAction()).resolves.toEqual({ ok: false });
+      expect(resolveReadingProviderMock).not.toHaveBeenCalled();
+    });
+
+    it("best-effort: si regenerateEssence explota, no lanza y devuelve {ok:false}", async () => {
+      resolveReadingProviderMock.mockReturnValue({ available: true, provider: { name: "hermes" } });
+      regenerateEssenceMock.mockRejectedValueOnce(new Error("boom"));
+      await expect(regenerateEssenceAction()).resolves.toEqual({ ok: false });
+    });
+  });
+
+  describe("editEssence (Fase 2 T5)", () => {
+    it("actualiza portrait filtrado por user_id, y revalida /ajustes", async () => {
+      await editEssence("  Eres alguien reflexivo.  ");
+      expect(state.updateCalls).toEqual([
+        { table: "memory_essence", v: { portrait: "Eres alguien reflexivo." }, eqs: [["user_id", "u1"]] },
+      ]);
+      expect(revalidatePath).toHaveBeenCalledWith("/ajustes");
+    });
+
+    it("recorta a 4000 caracteres (mismo CHECK que la migración 0020)", async () => {
+      const long = "a".repeat(4500);
+      await editEssence(long);
+      const v = state.updateCalls[0]!.v as { portrait: string };
+      expect(v.portrait).toHaveLength(4000);
+    });
+
+    it("a diferencia de editMemory/editEntity, un portrait vacío tras el trim SÍ actualiza (equivale a limpiarlo a mano)", async () => {
+      await editEssence("   ");
+      expect(state.updateCalls).toEqual([{ table: "memory_essence", v: { portrait: "" }, eqs: [["user_id", "u1"]] }]);
+    });
+
+    it("sin usuario no llama a update", async () => {
+      state.user = null;
+      await editEssence("algo");
+      expect(state.updateCalls).toHaveLength(0);
+    });
+
+    it("best-effort: no lanza si la BD explota", async () => {
+      state.throwOnFrom = true;
+      await expect(editEssence("algo")).resolves.toBeUndefined();
+    });
+  });
+
+  describe("clearEssence (Fase 2 T5)", () => {
+    it("vacía portrait + metadato (generated_at, model_used) filtrado por user_id, y revalida /ajustes", async () => {
+      await clearEssence();
+      expect(state.updateCalls).toEqual([
+        {
+          table: "memory_essence",
+          v: { portrait: "", generated_at: null, model_used: null },
+          eqs: [["user_id", "u1"]],
+        },
+      ]);
+      expect(revalidatePath).toHaveBeenCalledWith("/ajustes");
+    });
+
+    it("sin usuario no llama a update", async () => {
+      state.user = null;
+      await clearEssence();
+      expect(state.updateCalls).toHaveLength(0);
+    });
+
+    it("best-effort: no lanza si la BD explota", async () => {
+      state.throwOnFrom = true;
+      await expect(clearEssence()).resolves.toBeUndefined();
     });
   });
 });

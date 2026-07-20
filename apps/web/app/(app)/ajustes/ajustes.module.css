@@ -137,6 +137,30 @@
 .entityPinnedBadge { color: var(--acc-text); font-size: var(--text-xs); }
 .entitySummary { color: var(--soft); font-size: var(--text-xs); }
 
+/* Tarjeta de esencia (Fase 2 T5) — el retrato vivo que Aluna forma de la
+   persona. Superficie teñida con el acento de marca (mismo criterio que
+   .proactiveCard de hoy/hub.module.css: regla de Gio "color en superficies
+   grandes, no solo un ícono suelto") — el retrato es el dato más personal de
+   la tarjeta, así que merece destacarse igual que el nudge de /hoy. */
+.essenceCard {
+  position: relative;
+  background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.12), rgba(var(--acc-rgb), 0.03) 55%, var(--surface));
+  border-color: rgba(var(--acc-rgb), 0.3);
+}
+.essencePortrait { margin: var(--sp-2) 0 0; font-size: var(--text-sm); color: var(--ink); line-height: 1.6; white-space: pre-wrap; }
+.essenceMeta { margin: var(--sp-2) 0 0; font-size: var(--text-2xs); color: var(--soft); }
+.essenceNotice { margin: var(--sp-2) 0 0; font-size: var(--text-xs); color: var(--tone-caution); }
+.essenceActions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+/* Mismo primitivo pill que .memoryEditBtn; "Regenerar" usa el degradado de
+   acento (acción primaria de la tarjeta), el resto son secundarias. */
+.essenceRegenBtn {
+  flex: none; height: 36px; padding: 0 var(--sp-4); border-radius: 999px; border: 0; cursor: pointer;
+  background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 700;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.essenceRegenBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* Cerrar sesión — fila propia al final, estilo sobrio (patrón .out heredado
    de settings.module.css: sin relleno, hover a --tone-warm). */
 .signOut { margin-top: var(--sp-2); display: flex; justify-content: center; }

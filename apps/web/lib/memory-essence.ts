@@ -68,6 +68,43 @@ export async function fetchEssence(supabase: AlunaSupabaseClient, userId: string
   }
 }
 
+/** Retrato + metadato de cuándo/con qué proveedor se formó (Fase 2 T5,
+ *  tarjeta "Tu esencia" de Ajustes) — a diferencia de `fetchEssence` (solo el
+ *  portrait, para inyectar en el prompt), esta trae lo que la UI necesita
+ *  mostrar. `generatedAt`/`modelUsed` son `null` si nunca se generó. */
+export interface EssenceDetail {
+  portrait: string;
+  generatedAt: string | null;
+  modelUsed: string | null;
+}
+
+/**
+ * Lee el retrato + metadato para la tarjeta de Ajustes. best-effort: fila
+ * "vacía" ({portrait: "", generatedAt: null, modelUsed: null}) si aún no
+ * existe fila (nadie ha reclamado una regeneración todavía), el portrait está
+ * vacío, o cualquier fallo (tabla sin migrar, red, RLS) — mismo criterio que
+ * fetchEssence, nunca lanza.
+ */
+export async function fetchEssenceDetail(supabase: AlunaSupabaseClient, userId: string): Promise<EssenceDetail> {
+  const empty: EssenceDetail = { portrait: "", generatedAt: null, modelUsed: null };
+  try {
+    const { data, error } = await supabase
+      .from("memory_essence")
+      .select("portrait, generated_at, model_used")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error || !data) return empty;
+    const row = data as { portrait: string | null; generated_at: string | null; model_used: string | null };
+    return {
+      portrait: row.portrait?.trim() ?? "",
+      generatedAt: row.generated_at ?? null,
+      modelUsed: row.model_used ?? null,
+    };
+  } catch {
+    return empty;
+  }
+}
+
 /**
  * Bloque de contexto listo para anexar al `system`, COMPACTO (una sola pieza
  * de prosa, no una lista). `null` si no hay retrato aún, para que el llamador
@@ -140,24 +177,32 @@ async function releaseLock(supabase: AlunaSupabaseClient, userId: string): Promi
 
 /**
  * Intenta regenerar el retrato. Reclama atómicamente con
- * claim_essence_regeneration (86400s de cadencia, 300s de lock) para que solo
- * UNA request de todas las que llaman a esto en el día realmente dispare una
- * llamada al modelo: si el claim devuelve 'fresh' (reciente) o 'generating'
- * (otra request en curso) o hay error, no hace nada. Solo con 'claimed' reúne
- * memorias+entidades, pide el retrato con UNA llamada a `provider.complete` y
- * lo guarda. best-effort total: nunca lanza; cualquier fallo DESPUÉS del claim
- * (proveedor caído, texto vacío, escritura fallida) libera el lock explícito.
+ * claim_essence_regeneration (por defecto ESSENCE_MIN_AGE_SECONDS de
+ * cadencia, 300s de lock) para que solo UNA request de todas las que llaman a
+ * esto realmente dispare una llamada al modelo: si el claim devuelve 'fresh'
+ * (reciente) o 'generating' (otra request en curso) o hay error, no hace
+ * nada. Solo con 'claimed' reúne memorias+entidades, pide el retrato con UNA
+ * llamada a `provider.complete` y lo guarda. best-effort total: nunca lanza;
+ * cualquier fallo DESPUÉS del claim (proveedor caído, texto vacío, escritura
+ * fallida) libera el lock explícito.
+ *
+ * `minAgeSeconds` (Fase 2 T5, default ESSENCE_MIN_AGE_SECONDS): el disparo
+ * automático desde `runDistillation` NO lo pasa, así que sigue con la
+ * cadencia de ~1/día de siempre. La acción "regenerar ahora" de Ajustes pasa
+ * 0 para saltarse esa cadencia y forzar el claim de inmediato — el lock de
+ * 'generating' sigue protegiendo contra dos regeneraciones simultáneas.
  */
 export async function regenerateEssence(
   provider: ReadingProvider,
   supabase: AlunaSupabaseClient,
   userId: string,
   locale: Locale,
+  minAgeSeconds: number = ESSENCE_MIN_AGE_SECONDS,
 ): Promise<void> {
   let claimed = false;
   try {
     const { data: claim, error: claimError } = await rpcClient(supabase).rpc("claim_essence_regeneration", {
-      p_min_age_seconds: ESSENCE_MIN_AGE_SECONDS,
+      p_min_age_seconds: minAgeSeconds,
       p_lock_seconds: ESSENCE_LOCK_SECONDS,
     });
     if (claimError || claim !== "claimed") return; // fresh / generating / error: nada que hacer
