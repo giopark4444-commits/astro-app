@@ -94,6 +94,22 @@
     "memoryImport": "Import",
     "memoryImportOk": "Imported {memories} memories and {entities} entities.",
     "memoryImportError": "Couldn't import the file. Check that it's a JSON exported from Aluna.",
+    "essence": {
+      "title": "Your essence",
+      "description": "The portrait Aluna is forming of you from your conversations: who you are, your circle, your current themes. It forms on its own — here you can view it, edit it, or ask Aluna to form it again.",
+      "empty": "No portrait yet — it'll take shape as you talk with Aluna.",
+      "regenerate": "Regenerate now",
+      "regenerating": "Forming your portrait…",
+      "needsKey": "Needs an active AI key to form. Try again once one's connected.",
+      "memoryOff": "Memory is off right now, so there's nothing to regenerate from. Turn it back on and Aluna will pick up where it left off.",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "clear": "Clear",
+      "clearConfirm": "Clear your portrait? Aluna will form it again from scratch on your next conversation.",
+      "generatedAt": "Formed on {date}",
+      "viaModel": "via {model}"
+    },
     "adminSection": "Administration",
     "adminPanel": "Admin panel",
     "collabPanel": "Collaborator panel",
@@ -245,7 +261,15 @@
     "moonLastQuarter": "Last Quarter",
     "moonWaningCrescent": "Waning Moon",
     "moonInSign": "{phase} in {sign}",
-    "headerPersonalDay": "your personal day is {n}"
+    "headerPersonalDay": "your personal day is {n}",
+    "proactive": {
+      "title": "Aluna's holding these for you",
+      "manifestationHarvest": "Your manifestation “{intention}” comes to harvest on {date}.",
+      "genericReminder": "Aluna's keeping this close: “{description}”.",
+      "dismiss": "Dismiss",
+      "talkAbout": "Talk about this",
+      "talkAboutQuestion": "Let's talk about my manifestation “{intention}”"
+    }
   },
   "onboarding": {
     "progress": "Step {n} of {total}",

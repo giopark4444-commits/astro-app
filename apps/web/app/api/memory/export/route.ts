@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { fetchMemories } from "@/lib/memories";
 import { fetchEntities } from "@/lib/memory-entities";
+import { fetchEssence } from "@/lib/memory-essence";
+import { fetchCommitmentsForExport } from "@/lib/memory-commitments";
 import { buildMemoryExport, formatMemoryExportMarkdown } from "@/lib/memory-export";
 import type { Locale } from "@/lib/settings";
 
@@ -20,11 +22,13 @@ export async function GET(request: NextRequest) {
 
     const format = request.nextUrl.searchParams.get("format") === "md" ? "md" : "json";
 
-    const [memories, entities] = await Promise.all([
+    const [memories, entities, essence, commitments] = await Promise.all([
       fetchMemories(supabase, user.id),
       fetchEntities(supabase, user.id),
+      fetchEssence(supabase, user.id),
+      fetchCommitmentsForExport(supabase, user.id),
     ]);
-    const payload = buildMemoryExport(memories, entities);
+    const payload = buildMemoryExport(memories, entities, essence, commitments);
 
     if (format === "md") {
       // Respeta el idioma guardado en settings; si la lectura falla (tabla sin

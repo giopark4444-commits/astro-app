@@ -17,6 +17,7 @@ import { ReferralRedeem } from "./referral-redeem";
 import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
 import { EntitiesCard } from "./entities-card";
+import { EssenceCard } from "./essence-card";
 import { MemoryDataCard } from "./memory-data-card";
 import styles from "./ajustes.module.css";
 
@@ -108,6 +109,10 @@ export default async function AjustesPage({
           memoryEnabled={memoryEnabled}
         />
       </section>
+
+      {/* Esencia primero (Fase 2 T5): mismo orden que buildMemoryBlocks en
+          memory-pipeline.ts, donde el retrato ancla el resto del contexto. */}
+      <EssenceCard userId={user.id} />
 
       <MemoriesCard userId={user.id} />
 

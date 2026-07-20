@@ -661,6 +661,73 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0020_memoria_fase2.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      memory_essence: {
+        Row: {
+          generated_at: string | null;
+          model_used: string | null;
+          portrait: string;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          generated_at?: string | null;
+          model_used?: string | null;
+          portrait?: string;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          generated_at?: string | null;
+          model_used?: string | null;
+          portrait?: string;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0020_memoria_fase2.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      memory_threads: {
+        Row: {
+          created_at: string;
+          description: string;
+          due_at: string | null;
+          id: string;
+          kind: string;
+          source_ref: string | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          description: string;
+          due_at?: string | null;
+          id?: string;
+          kind?: string;
+          source_ref?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string;
+          due_at?: string | null;
+          id?: string;
+          kind?: string;
+          source_ref?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la

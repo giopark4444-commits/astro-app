@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -10,6 +10,8 @@ import { reorderByNavOrder } from "@/lib/admin/nav-order";
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { transitPhrase as phraseEs } from "@/lib/content/transit-phrases-es";
 import { transitPhrase as phraseEn } from "@/lib/content/transit-phrases-en";
+import type { Commitment } from "@/lib/memory-commitments";
+import { dismissCommitmentAction } from "../actions";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
 import { Starfield } from "@/components/starfield";
@@ -22,6 +24,30 @@ const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "�
 // Referencia estable, ver nota en energy-panel.tsx (NO_FOCUS): un default `= []`
 // inline recrea el array en cada render y rompería la memoización aguas abajo.
 const NO_FOCUS: LifeArea[] = [];
+// Mismo criterio de referencia estable que NO_FOCUS, para la prop commitments
+// (Fase 2 T4: tarjeta proactiva "Aluna te recuerda").
+const NO_COMMITMENTS: Commitment[] = [];
+
+/**
+ * Texto del nudge para un compromiso (Fase 2 T4). Hoy la única fuente
+ * estructurada es `manifestations` (ver memory-commitments.ts) — cuando trae
+ * due_at se narra como cosecha; el texto genérico cubre cualquier otro caso
+ * (compromiso sin fecha, o un `kind` futuro que hoy no existe todavía).
+ * due_at es timestamptz a medianoche UTC (mismo patrón que target_date en
+ * perfil/manifestations.tsx): se parsea como medianoche LOCAL para no correr
+ * un día atrás en zonas UTC- (Bogotá) — mismo bug documentado ahí.
+ */
+function commitmentText(
+  c: Commitment,
+  t: ReturnType<typeof useTranslations>,
+  dateFmt: Intl.DateTimeFormat,
+): string {
+  if (c.kind === "manifestation" && c.due_at) {
+    const date = dateFmt.format(new Date(`${c.due_at.slice(0, 10)}T00:00:00`));
+    return t("hoy.proactive.manifestationHarvest", { intention: c.description, date });
+  }
+  return t("hoy.proactive.genericReminder", { description: c.description });
+}
 
 type IconName = "grid3" | "wheel" | "pillars" | "sun" | "aries" | "cards";
 const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }> = [
@@ -34,7 +60,10 @@ const LENSES: Array<{ key: string; icon: IconName; href: string; soon: boolean }
   { key: "tarot", icon: "cards", href: "/tarot", soon: false },
 ];
 
-export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
+export function HubView({
+  focus = NO_FOCUS,
+  commitments = NO_COMMITMENTS,
+}: { focus?: LifeArea[]; commitments?: Commitment[] } = {}) {
   const t = useTranslations();
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -44,6 +73,27 @@ export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
   const router = useRouter();
   const [weather, setWeather] = useState<Aspect[] | null>(null);
   const [q, setQ] = useState("");
+
+  // Descarte optimista (Fase 2 T4): el item desaparece al instante, la
+  // server action corre en paralelo best-effort (dismissCommitment ya nunca
+  // lanza — ver memory-commitments.ts). Un Set de ids en vez de filtrar
+  // `commitments` en el padre: la prop viene del server y no se vuelve a
+  // pedir hasta la próxima navegación/revalidación.
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => new Set());
+  const visibleCommitments = commitments.filter((c) => !dismissedIds.has(c.id));
+  const dateFmt = useMemo(
+    () => new Intl.DateTimeFormat(locale === "en" ? "en" : "es", { day: "numeric", month: "long" }),
+    [locale],
+  );
+
+  function handleDismissCommitment(id: string) {
+    setDismissedIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    void dismissCommitmentAction(id);
+  }
 
   useEffect(() => {
     if (!active) return;
@@ -81,6 +131,37 @@ export function HubView({ focus = NO_FOCUS }: { focus?: LifeArea[] } = {}) {
       </div>
 
       <div className={styles.deskGrid}>
+        {/* "Aluna te recuerda" (Fase 2 T4): compromisos abiertos sincronizados
+            desde manifestations (memory_threads, gated por memory_enabled en
+            page.tsx). Primer hijo del grid → prominente, antes del clima. */}
+        {visibleCommitments.length > 0 && (
+          <section className={`card ${styles.proactiveCard} reveal`} style={{ ["--i" as string]: 0 }}>
+            <h2 className={styles.proactiveTitle}>✦ {t("hoy.proactive.title")}</h2>
+            <ul className={styles.proactiveList}>
+              {visibleCommitments.map((c) => (
+                <li key={c.id} className={styles.proactiveItem}>
+                  <p className={styles.proactiveText}>{commitmentText(c, t, dateFmt)}</p>
+                  <div className={styles.proactiveActions}>
+                    <Link
+                      href={`/preguntar?q=${encodeURIComponent(t("hoy.proactive.talkAboutQuestion", { intention: c.description }))}`}
+                      className={styles.proactiveTalk}
+                    >
+                      {t("hoy.proactive.talkAbout")} →
+                    </Link>
+                    <button
+                      type="button"
+                      className={styles.proactiveDismiss}
+                      onClick={() => handleDismissCommitment(c.id)}
+                    >
+                      {t("hoy.proactive.dismiss")}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {weather && weather.length > 0 && (
           <section className={`card ${styles.weatherCard} ${styles.heroWeather} reveal`} style={{ ["--i" as string]: 1 }}>
             <div className={styles.weatherHead}>

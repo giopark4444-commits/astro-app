@@ -94,6 +94,22 @@
     "memoryImport": "Importar",
     "memoryImportOk": "Importados {memories} recuerdos y {entities} entidades.",
     "memoryImportError": "No se pudo importar el archivo. Revisa que sea un JSON exportado desde Aluna.",
+    "essence": {
+      "title": "Tu esencia",
+      "description": "El retrato que Aluna va formando de ti a partir de tus conversaciones: quién eres, tu círculo, tus temas del momento. Se forma solo — aquí puedes verlo, editarlo o pedirle a Aluna que lo forme de nuevo.",
+      "empty": "Aún no hay retrato — se irá formando a medida que converses con Aluna.",
+      "regenerate": "Regenerar ahora",
+      "regenerating": "Formando tu retrato…",
+      "needsKey": "Necesita una llave de IA activa para formarse. Vuelve a intentarlo cuando esté conectada.",
+      "memoryOff": "La memoria está apagada; enciéndela para que Aluna vuelva a formar tu retrato.",
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "clear": "Limpiar",
+      "clearConfirm": "¿Borrar tu retrato? Aluna lo volverá a formar desde cero en tu próxima conversación.",
+      "generatedAt": "Formado el {date}",
+      "viaModel": "vía {model}"
+    },
     "adminSection": "Administración",
     "adminPanel": "Panel de administración",
     "collabPanel": "Panel de colaborador",
@@ -245,7 +261,15 @@
     "moonLastQuarter": "Cuarto menguante",
     "moonWaningCrescent": "Luna menguante",
     "moonInSign": "{phase} en {sign}",
-    "headerPersonalDay": "tu día personal es {n}"
+    "headerPersonalDay": "tu día personal es {n}",
+    "proactive": {
+      "title": "Aluna te recuerda",
+      "manifestationHarvest": "Tu manifestación «{intention}» se cosecha el {date}.",
+      "genericReminder": "Aluna guarda esto para ti: «{description}».",
+      "dismiss": "Descartar",
+      "talkAbout": "Hablar de esto",
+      "talkAboutQuestion": "Hablemos de mi manifestación «{intention}»"
+    }
   },
   "onboarding": {
     "progress": "Paso {n} de {total}",

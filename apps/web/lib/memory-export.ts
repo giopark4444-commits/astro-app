@@ -8,14 +8,21 @@
 //
 // Nota: los hilos de chat (chat_threads/chat_messages, 0019) NO se leen
 // todavía — quedan para otra tarea. El payload es un objeto plano versionado
-// (version: 1) para que sumar un campo "threads" el día de mañana sea aditivo
-// y no rompa exports/imports viejos.
+// para que sumar un campo el día de mañana sea aditivo y no rompa
+// exports/imports viejos.
+//
+// v2 (Fase 2 T6): suma `essence` (el retrato, opcional — se omite del payload
+// si la persona todavía no tiene uno) y `commitments` (los hilos no
+// descartados, ver memory-commitments.ts:fetchCommitmentsForExport). Aditivo
+// a propósito: memory-import.ts sigue aceptando v1 (sin estos campos) tal
+// cual siempre lo hizo — ver validateImportPayload.
 
 import type { Memory } from "./memories";
 import { ENTITY_KINDS, type EntityKind, type MemoryEntity } from "./memory-entities";
+import type { Commitment } from "./memory-commitments";
 import type { Locale } from "./settings";
 
-export const MEMORY_EXPORT_VERSION = 1;
+export const MEMORY_EXPORT_VERSION = 2;
 
 export interface MemoryExportMemory {
   content: string;
@@ -32,16 +39,36 @@ export interface MemoryExportEntity {
   created_at: string;
 }
 
+export interface MemoryExportCommitment {
+  description: string;
+  kind: string;
+  status: string;
+  due_at: string | null;
+  source_ref: string | null;
+  created_at: string;
+}
+
 export interface MemoryExportPayload {
-  version: 1;
+  version: number;
   exportedAt: string;
   memories: MemoryExportMemory[];
   entities: MemoryExportEntity[];
+  commitments: MemoryExportCommitment[];
+  /** El retrato (memory-essence.ts). Ausente (no `null`, no `""`) cuando la
+   *  persona todavía no tiene uno — así un `"essence" in payload` distingue
+   *  "sin esencia" de "esencia vacía" y el import puede usar el mismo chequeo. */
+  essence?: string;
 }
 
 /** Arma el objeto exportable a partir de las filas ya leídas de la BD. */
-export function buildMemoryExport(memories: Memory[], entities: MemoryEntity[], now: Date = new Date()): MemoryExportPayload {
-  return {
+export function buildMemoryExport(
+  memories: Memory[],
+  entities: MemoryEntity[],
+  essence: string | null,
+  commitments: Commitment[],
+  now: Date = new Date(),
+): MemoryExportPayload {
+  const payload: MemoryExportPayload = {
     version: MEMORY_EXPORT_VERSION,
     exportedAt: now.toISOString(),
     memories: memories.map((m) => ({ content: m.content, source: m.source, created_at: m.created_at })),
@@ -53,7 +80,18 @@ export function buildMemoryExport(memories: Memory[], entities: MemoryEntity[], 
       pinned: e.pinned,
       created_at: e.created_at,
     })),
+    commitments: commitments.map((c) => ({
+      description: c.description,
+      kind: c.kind,
+      status: c.status,
+      due_at: c.due_at,
+      source_ref: c.source_ref,
+      created_at: c.created_at,
+    })),
   };
+  const trimmedEssence = essence?.trim();
+  if (trimmedEssence) payload.essence = trimmedEssence;
+  return payload;
 }
 
 const MD_TITLE: Record<Locale, string> = {
@@ -66,6 +104,8 @@ const MD_INTRO: Record<Locale, string> = {
 };
 const MD_ABOUT_YOU: Record<Locale, string> = { es: "Sobre ti", en: "About you" };
 const MD_NO_MEMORIES: Record<Locale, string> = { es: "(sin recuerdos todavía)", en: "(no memories yet)" };
+const MD_ESSENCE_HEADER: Record<Locale, string> = { es: "Tu esencia", en: "Your essence" };
+const MD_COMMITMENTS_HEADER: Record<Locale, string> = { es: "Compromisos", en: "Commitments" };
 
 // Encabezado de sección por kind, en registro Título — mismo texto que las
 // claves entityKindPerson... de messages/es.json y en.json (la etiqueta que
@@ -83,13 +123,44 @@ const MD_KIND_HEADERS: Record<EntityKind, Record<Locale, string>> = {
 };
 
 /**
+ * Fecha de un compromiso en prosa legible, timezone UTC fija (due_at siempre
+ * se guarda a medianoche UTC — ver memory-commitments.ts:dateToDueAtIso, así
+ * que formatearla en la zona local del que exporta podría correrla un día).
+ * Si el string no es una fecha válida, cae al recorte ISO plano en vez de
+ * reventar el documento entero.
+ */
+function formatCommitmentDate(dueAt: string, locale: Locale): string {
+  const parsed = new Date(dueAt);
+  if (Number.isNaN(parsed.getTime())) return dueAt.slice(0, 10);
+  try {
+    return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(parsed);
+  } catch {
+    return dueAt.slice(0, 10);
+  }
+}
+
+/**
  * Documento Markdown legible ("Lo que Aluna sabe de ti"): título, intro
- * corta, sección "Sobre ti" con los recuerdos en viñetas, y una sección por
+ * corta, sección "Tu esencia" con el retrato (v2, se omite si no hay una
+ * todavía), sección "Sobre ti" con los recuerdos en viñetas, una sección por
  * kind de entidad (encabezado traducido, ver MD_KIND_HEADERS) con cada
- * entidad como `**{name}** — {summary}`.
+ * entidad como `**{name}** — {summary}`, y "Compromisos" (v2, se omite si no
+ * hay ninguno) con `{descripción} — {fecha}` (o solo la descripción si el
+ * compromiso no tiene fecha).
  */
 export function formatMemoryExportMarkdown(payload: MemoryExportPayload, locale: Locale = "es"): string {
-  const lines: string[] = [`# ${MD_TITLE[locale]}`, "", MD_INTRO[locale], "", `## ${MD_ABOUT_YOU[locale]}`, ""];
+  const lines: string[] = [`# ${MD_TITLE[locale]}`, "", MD_INTRO[locale]];
+
+  if (payload.essence) {
+    lines.push("", `## ${MD_ESSENCE_HEADER[locale]}`, "", payload.essence);
+  }
+
+  lines.push("", `## ${MD_ABOUT_YOU[locale]}`, "");
 
   if (payload.memories.length === 0) {
     lines.push(MD_NO_MEMORIES[locale]);
@@ -103,6 +174,14 @@ export function formatMemoryExportMarkdown(payload: MemoryExportPayload, locale:
     lines.push("", `## ${MD_KIND_HEADERS[kind][locale]}`, "");
     for (const e of group) {
       lines.push(e.summary ? `- **${e.name}** — ${e.summary}` : `- **${e.name}**`);
+    }
+  }
+
+  if (payload.commitments.length > 0) {
+    lines.push("", `## ${MD_COMMITMENTS_HEADER[locale]}`, "");
+    for (const c of payload.commitments) {
+      const date = c.due_at ? formatCommitmentDate(c.due_at, locale) : null;
+      lines.push(date ? `- ${c.description} — ${date}` : `- ${c.description}`);
     }
   }
 

@@ -19,21 +19,31 @@ import {
   parseDistilledEntities,
   upsertEntities,
 } from "./memory-entities";
+import { fetchEssence, formatEssenceBlock, regenerateEssence } from "./memory-essence";
 
 /**
- * Bloque de contexto combinado (recuerdos planos + entidades) listo para
- * anexar al `system`. Concatena con "\n\n" los bloques no-nulos; "" si no hay
- * nada (recuerdos y entidades vacíos) para que el llamador pueda hacer
- * `if (block) system = ...` y el prompt quede BYTE-IDÉNTICO cuando la persona
- * aún no tiene memoria. Best-effort: un fallo en cualquiera de los dos fetch
- * no debe tumbar al otro ni la respuesta del chat.
+ * Bloque de contexto combinado (esencia + recuerdos planos + entidades) listo
+ * para anexar al `system`. La esencia va PRIMERO (Fase 2 T2): es el retrato
+ * compacto que Aluna ya tiene formado de la persona, así que ancla el resto
+ * del contexto en vez de competir con él. Concatena con "\n\n" los bloques
+ * no-nulos; "" si no hay nada (esencia, recuerdos y entidades vacíos) para que
+ * el llamador pueda hacer `if (block) system = ...` y el prompt quede
+ * BYTE-IDÉNTICO cuando la persona aún no tiene memoria. Best-effort: un fallo
+ * en cualquiera de los tres fetch no debe tumbar a los otros ni la respuesta
+ * del chat.
  */
 export async function buildMemoryBlocks(supabase: AlunaSupabaseClient, userId: string, locale: Locale): Promise<string> {
   try {
-    const [memories, entities] = await Promise.all([fetchMemories(supabase, userId), fetchEntities(supabase, userId)]);
-    const blocks = [formatMemoryBlock(memories, locale), formatEntityBlock(entities, locale)].filter(
-      (b): b is string => b !== null,
-    );
+    const [essence, memories, entities] = await Promise.all([
+      fetchEssence(supabase, userId),
+      fetchMemories(supabase, userId),
+      fetchEntities(supabase, userId),
+    ]);
+    const blocks = [
+      formatEssenceBlock(essence, locale),
+      formatMemoryBlock(memories, locale),
+      formatEntityBlock(entities, locale),
+    ].filter((b): b is string => b !== null);
     return blocks.join("\n\n");
   } catch {
     return "";
@@ -84,5 +94,21 @@ export async function runDistillation(
     ]);
   } catch {
     // best effort: la destilación nunca rompe el flujo del chat/tarot/timeline
+  }
+
+  // Fase 2 T2: intento de regenerar la esencia (el retrato vivo), DESAPEGADO
+  // del try/catch de arriba a propósito — no depende de que la destilación de
+  // memorias/entidades haya tenido éxito. `regenerateEssence` es best-effort
+  // (nunca lanza) y el claim interno (cadencia ESSENCE_MIN_AGE_SECONDS) evita
+  // que dispare una llamada al modelo más de ~1 vez/día aunque
+  // `runDistillation` corra en cada turno. Sin gate nuevo: reusa el mismo
+  // `if (memoryEnabled)` que ya envuelve esta función en las 3 rutas (chat,
+  // tarot/reading-chat, timeline/chat).
+  try {
+    await regenerateEssence(provider, supabase, userId, locale);
+  } catch {
+    // best effort: regenerateEssence ya nunca lanza, pero por defensa en
+    // profundidad (mismo espíritu que el resto del módulo) no confiamos en
+    // que eso siga siendo cierto para siempre sin red de seguridad aquí.
   }
 }
