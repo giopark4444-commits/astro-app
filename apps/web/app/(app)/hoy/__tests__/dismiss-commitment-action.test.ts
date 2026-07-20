@@ -6,7 +6,10 @@ import { revalidatePath } from "next/cache";
 // vive en @/lib/memory-commitments y se mockea aparte) + mocks de
 // next/cache y next/headers para poder importar "../../actions" en jsdom.
 const state: { user: { id: string } | null } = { user: null };
-const dismissCommitmentMock = vi.fn((..._args: unknown[]) => Promise.resolve());
+const dismissCommitmentMock = vi.fn((...args: unknown[]) => {
+  void args;
+  return Promise.resolve();
+});
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({

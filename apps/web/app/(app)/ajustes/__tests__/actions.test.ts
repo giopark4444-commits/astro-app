@@ -78,7 +78,9 @@ const resolveReadingProviderMock = vi.fn();
 vi.mock("@/lib/reading/provider", () => ({
   resolveReadingProvider: () => resolveReadingProviderMock(),
 }));
-const regenerateEssenceMock = vi.fn(async (..._args: unknown[]) => {});
+const regenerateEssenceMock = vi.fn(async (...args: unknown[]) => {
+  void args;
+});
 vi.mock("@/lib/memory-essence", () => ({
   regenerateEssence: (...args: unknown[]) => regenerateEssenceMock(...args),
 }));
