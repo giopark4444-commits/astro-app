@@ -208,6 +208,7 @@ export type Database = {
           intent: Json | null;
           language: string;
           light_mode: string;
+          memory_enabled: boolean;
           reading_style: string;
           theme: string;
           updated_at: string;
@@ -221,6 +222,7 @@ export type Database = {
           intent?: Json | null;
           language?: string;
           light_mode?: string;
+          memory_enabled?: boolean;
           reading_style?: string;
           theme?: string;
           updated_at?: string;
@@ -234,6 +236,7 @@ export type Database = {
           intent?: Json | null;
           language?: string;
           light_mode?: string;
+          memory_enabled?: boolean;
           reading_style?: string;
           theme?: string;
           updated_at?: string;
@@ -537,6 +540,123 @@ export type Database = {
           created_at?: string;
           id?: string;
           source?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0019_memoria.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      memory_entities: {
+        Row: {
+          aliases: string[];
+          attributes: Json;
+          created_at: string;
+          id: string;
+          kind: string;
+          last_referenced_at: string;
+          name: string;
+          pinned: boolean;
+          profile_id: string | null;
+          salience: number;
+          source: string;
+          summary: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          aliases?: string[];
+          attributes?: Json;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          last_referenced_at?: string;
+          name: string;
+          pinned?: boolean;
+          profile_id?: string | null;
+          salience?: number;
+          source?: string;
+          summary?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          aliases?: string[];
+          attributes?: Json;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          last_referenced_at?: string;
+          name?: string;
+          pinned?: boolean;
+          profile_id?: string | null;
+          salience?: number;
+          source?: string;
+          summary?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0019_memoria.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      chat_threads: {
+        Row: {
+          created_at: string;
+          id: string;
+          last_message_at: string;
+          profile_id: string | null;
+          surface: string;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string;
+          profile_id?: string | null;
+          surface: string;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string;
+          profile_id?: string | null;
+          surface?: string;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0019_memoria.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      chat_messages: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          role: string;
+          thread_id: string;
+          user_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          role: string;
+          thread_id: string;
+          user_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          role?: string;
+          thread_id?: string;
           user_id?: string;
         };
         Relationships: [];

@@ -1,12 +1,15 @@
-// Card "Aluna te conoce" (Task 3 del plan de memoria): lista los recuerdos
-// que Aluna destiló de las conversaciones (chat + tarot) y deja borrarlos uno
-// a uno. Server component: fetchMemories ya es RLS-scoped (fetchMemories
-// filtra por user_id y además la política de user_memories acota a la fila
-// propia), y el borrado es un form action de servidor (deleteMemory).
+// Card "Aluna te conoce" (Task 3 del plan de memoria; Fase 1C sumó editar):
+// lista los recuerdos que Aluna destiló de las conversaciones (chat + tarot)
+// y deja editarlos/borrarlos uno a uno. Server component: fetchMemories ya es
+// RLS-scoped (fetchMemories filtra por user_id y además la política de
+// user_memories acota a la fila propia); edit/delete son server actions que
+// se pasan tal cual al client component MemoryRow (necesita estado local para
+// el toggle vista/edición).
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { fetchMemories } from "@/lib/memories";
-import { deleteMemory } from "../actions";
+import { deleteMemory, editMemory } from "../actions";
+import { MemoryRow } from "./memory-row";
 import styles from "./ajustes.module.css";
 import type { AlunaSupabaseClient } from "@aluna/supabase";
 
@@ -28,19 +31,7 @@ export async function MemoriesCard({ userId }: { userId: string }) {
       ) : (
         <ul className={styles.memoriesList}>
           {memories.map((m) => (
-            <li key={m.id} className={styles.memoryRow}>
-              <div className={styles.memoryText}>
-                <span>{m.content}</span>
-                <span className={styles.memorySource}>
-                  {t(m.source === "tarot" ? "memoriesSourceTarot" : "memoriesSourceChat")}
-                </span>
-              </div>
-              <form action={deleteMemory.bind(null, m.id)}>
-                <button type="submit" className={styles.memoryDeleteBtn}>
-                  {t("memoriesDelete")}
-                </button>
-              </form>
-            </li>
+            <MemoryRow key={m.id} memory={m} onEdit={editMemory} onDelete={deleteMemory} />
           ))}
         </ul>
       )}

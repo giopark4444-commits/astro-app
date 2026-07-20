@@ -8,7 +8,9 @@ import { profileToNumerologyInput } from "@/lib/numerology";
 import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiveLenses } from "@/lib/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildIntentLine } from "@/lib/intent-line";
-import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
+import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
+import { ensureThread, appendMessage } from "@/lib/chat-archive";
+import { fetchIntentAndMemorySettings } from "@/lib/settings";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -49,6 +51,9 @@ export async function POST(request: NextRequest) {
   if (!profileId || messages.length === 0) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
+  // Archivo del hilo (Fase 1B): threadId opcional que el cliente reenvía a
+  // partir del 2º turno (lo aprendió del header x-thread-id del 1er turno).
+  const requestedThreadId = typeof body.threadId === "string" && body.threadId ? body.threadId : null;
 
   // Palancas de enfoque (Task 1): las lentes activas deciden qué disciplinas entran
   // al contexto; sin lentes → las 3 base. La carta de tarot es opt-in y se valida
@@ -99,24 +104,35 @@ export async function POST(request: NextRequest) {
   // Línea de intención opcional (Task 13): solo se anexa si la persona
   // respondió el cuestionario Y activó useInAI. `settings.intent` viaja como
   // Json; `parseIntent` lo lee tolerante y devuelve null si no hay señal útil.
-  const { data: settingsRow } = await supabase
-    .from("settings")
-    .select("intent")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
+  // `memory_enabled` (0019) viaja en la MISMA lectura combinada — gate
+  // independiente, ver comentario más abajo. fetchIntentAndMemorySettings
+  // degrada solo a `intent` si la columna `memory_enabled` aún no está
+  // migrada, para no perder la intentLine por eso (review Fable).
+  const { intent: rawIntent, memoryEnabled } = await fetchIntentAndMemorySettings(supabase, user.id);
+  const intent = parseIntent(rawIntent) as UserIntent | null;
   const intentLine = buildIntentLine(intent, locale);
   if (intentLine) system = `${system}\n\n${intentLine}`;
 
-  // "Aluna te conoce" (Task 2): recuerdos duraderos de conversaciones previas.
-  // Opt-in explícito (review final): solo si la persona respondió el
-  // cuestionario Y activó useInAI a mano — mismo criterio que buildIntentLine
-  // (sin cuestionario no hay recolección de memoria). Byte-igual si no hay
-  // recuerdos o el toggle está apagado (formatMemoryBlock devuelve null).
-  const useMemories = intent?.useInAI === true;
-  if (useMemories) {
-    const memories = await fetchMemories(supabase, user.id);
-    const memoryBlock = formatMemoryBlock(memories, locale);
+  // "Aluna te conoce" (Fase 1A): recuerdos + entidades duraderas de
+  // conversaciones previas. Gate PROPIO (0019): settings.memory_enabled, ya
+  // NO intent.useInAI (ese sigue gobernando solo intentLine, arriba) — la
+  // memoria ya no depende de haber respondido el cuestionario. Degradación
+  // segura: sin fila settings o columna sin migrar todavía, se trata como ON
+  // por defecto (`!== false`, no `=== true`). Byte-igual si no hay memoria
+  // acumulada (buildMemoryBlocks devuelve "").
+  // Archivo del hilo (Fase 1B): mismo gate que la memoria (0019 lo agrupa
+  // como una sola casilla — "archivo del hilo" es la pieza 2 de la memoria de
+  // largo plazo, junto a las entidades). threadId puede quedar en null si
+  // algo falla — best-effort total, ver chat-archive.ts.
+  let threadId: string | null = null;
+  if (memoryEnabled) {
+    threadId = await ensureThread(supabase, user.id, "chat", profileId, requestedThreadId);
+    const lastMessage = messages[messages.length - 1];
+    if (threadId && lastMessage && lastMessage.role === "user") {
+      await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);
+    }
+
+    const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
 
@@ -144,36 +160,30 @@ export async function POST(request: NextRequest) {
   });
 
   // Destilado post-conversación (fire-and-forget, best-effort total): solo si
-  // el toggle está encendido. `after()` corre una vez la respuesta terminó de
-  // enviarse (incluido el streaming), así que `assistantReply` ya está completo.
-  // Nota: corre en CADA turno (ruta stateless, sin señal de "fin de
-  // conversación"); debounce/dedupe semántico entre turnos queda como mejora
-  // futura conocida.
-  if (useMemories) {
+  // el gate de memoria está encendido. `after()` corre una vez la respuesta
+  // terminó de enviarse (incluido el streaming), así que `assistantReply` ya
+  // está completo. Nota: corre en CADA turno (ruta stateless, sin señal de
+  // "fin de conversación"); debounce/dedupe semántico entre turnos queda como
+  // mejora futura conocida.
+  if (memoryEnabled) {
     after(async () => {
-      try {
-        if (!assistantReply.trim()) return;
-        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
-          .slice(-6)
-          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
-          .join("\n")
-          .slice(-8000);
-        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
-        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
-        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
-        const newMemories = parseDistilled(raw, existing);
-        await storeMemories(supabase, user.id, newMemories, "chat");
-      } catch {
-        // best effort: la destilación nunca rompe el flujo del chat
-      }
+      if (!assistantReply.trim()) return;
+      if (threadId) await appendMessage(supabase, user.id, threadId, "assistant", assistantReply);
+      const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+        .slice(-6)
+        .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+        .join("\n")
+        .slice(-8000);
+      await runDistillation(provider, supabase, user.id, transcript, locale, "chat");
     });
   }
 
-  return new Response(stream, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "no-store, no-transform",
-      "x-accel-buffering": "no",
-    },
-  });
+  const headers: Record<string, string> = {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store, no-transform",
+    "x-accel-buffering": "no",
+  };
+  if (threadId) headers["x-thread-id"] = threadId;
+
+  return new Response(stream, { headers });
 }

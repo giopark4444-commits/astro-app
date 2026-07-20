@@ -6,11 +6,9 @@ import {
   personalCycles,
   luckPillars,
   annualPillars,
-  parseIntent,
   HEAVENLY_STEMS,
   EARTHLY_BRANCHES,
   type BirthDate,
-  type UserIntent,
   type PillarSet,
   type Pillar,
 } from "@aluna/core";
@@ -20,13 +18,14 @@ import { assembleTimeline, type TimelineProfile } from "@/lib/timeline/assemble"
 import { computeBaziNatal, type BaziNatalResult } from "@/lib/timeline/bazi-natal";
 import { buildTimelineChatContext, type TimelineChatFacts } from "@/lib/timeline/chat-context";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
-import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
+import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
+import { ensureThread, appendMessage } from "@/lib/chat-archive";
 
 // "Pregúntale a tu camino" (Camino de vida T6) — clon estructural de
 // /api/tarot/reading-chat: auth → hechos server-side (aquí: el "Camino de
 // vida" completo de assembleTimeline + año-personal/mes-personal/大運/pilar
 // anual vigentes) → SYSTEM_INTRO con la voz de Aluna → resolveReadingProvider
-// → stream → after() con destilado de memoria (gate intent.useInAI === true).
+// → stream → after() con destilado de memoria (gate settings.memory_enabled).
 // Igual que el tarot, CABLEADO pero LATENTE: sin llave de proveedor responde
 // { available: false } y el cliente muestra el estado dormido.
 
@@ -190,8 +189,13 @@ export async function POST(request: NextRequest) {
     .filter((m): m is { role: string; content: string } => !!m && typeof (m as { content?: unknown }).content === "string")
     .slice(-20)
     .map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content).slice(0, 2000) }));
+  // Archivo del hilo (Fase 1B): si el turno 0 no trae mensajes reales, el que
+  // se agrega abajo es el OPENING_TRIGGER invisible — no debe persistirse
+  // como si fuera algo que la persona escribió.
+  const hasRealUserMessage = messages.length > 0;
   // Primer turno: sin mensajes, la UI espera que Aluna abra ella misma.
   if (messages.length === 0) messages.push({ role: "user", content: OPENING_TRIGGER[locale] });
+  const requestedThreadId = typeof body.threadId === "string" && body.threadId ? body.threadId : null;
 
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ available: false, error: "unauthorized" }, { status: 401 });
@@ -221,13 +225,28 @@ export async function POST(request: NextRequest) {
 
   let system = `${SYSTEM_INTRO[locale]}\n\n${context}`;
 
-  // "Aluna te conoce": mismo cableado que el tarot — opt-in explícito, solo si
-  // la persona respondió el cuestionario Y activó useInAI a mano.
-  const { data: settingsRow } = await supabase.from("settings").select("intent").eq("user_id", user.id).maybeSingle();
-  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
-  const useMemories = intent?.useInAI === true;
-  if (useMemories) {
-    const memoryBlock = formatMemoryBlock(await fetchMemories(supabase, user.id), locale);
+  // "Aluna te conoce" (Fase 1A): mismo cableado que el tarot. Gate PROPIO
+  // (0019): settings.memory_enabled, ya no intent.useInAI — esta ruta no usa
+  // intentLine, así que ya no necesita leer `intent` en absoluto. Degradación
+  // segura: sin fila settings o columna sin migrar, ON por defecto (`!==
+  // false`, no `=== true`).
+  const { data: settingsRow } = await supabase
+    .from("settings")
+    .select("memory_enabled")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
+  // Archivo del hilo (Fase 1B): persiste pero sin UI de retomar todavía
+  // (diferido); mismo gate que la memoria — ver comentario en /api/chat.
+  let threadId: string | null = null;
+  if (memoryEnabled) {
+    threadId = await ensureThread(supabase, user.id, "timeline", profileId, requestedThreadId);
+    const lastMessage = messages[messages.length - 1];
+    if (threadId && hasRealUserMessage && lastMessage && lastMessage.role === "user") {
+      await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);
+    }
+
+    const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
 
@@ -251,31 +270,25 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (useMemories) {
+  if (memoryEnabled) {
     after(async () => {
-      try {
-        if (!assistantReply.trim()) return;
-        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
-          .slice(-6)
-          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
-          .join("\n")
-          .slice(-8000);
-        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
-        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
-        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
-        const newMemories = parseDistilled(raw, existing);
-        await storeMemories(supabase, user.id, newMemories, "chat");
-      } catch {
-        // best effort: la destilación nunca rompe el flujo del chat del camino
-      }
+      if (!assistantReply.trim()) return;
+      if (threadId) await appendMessage(supabase, user.id, threadId, "assistant", assistantReply);
+      const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+        .slice(-6)
+        .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+        .join("\n")
+        .slice(-8000);
+      await runDistillation(provider, supabase, user.id, transcript, locale, "chat");
     });
   }
 
-  return new Response(stream, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "no-store, no-transform",
-      "x-accel-buffering": "no",
-    },
-  });
+  const headers: Record<string, string> = {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store, no-transform",
+    "x-accel-buffering": "no",
+  };
+  if (threadId) headers["x-thread-id"] = threadId;
+
+  return new Response(stream, { headers });
 }

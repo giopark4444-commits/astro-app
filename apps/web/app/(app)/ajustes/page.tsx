@@ -4,7 +4,9 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/admin/roles";
 import type { SubscriptionStatus } from "@aluna/core";
+import type { AlunaSupabaseClient } from "@aluna/supabase";
 import { parseIntent, SUPPORT_EMAIL, SOCIAL_LINKS } from "@aluna/core";
+import { fetchIntentAndMemorySettings } from "@/lib/settings";
 import { signOut } from "@/app/auth/actions";
 import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@aluna/core";
 import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
@@ -14,6 +16,8 @@ import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
 import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
+import { EntitiesCard } from "./entities-card";
+import { MemoryDataCard } from "./memory-data-card";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -52,13 +56,16 @@ export default async function AjustesPage({
     .maybeSingle();
   const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
 
-  // Estado inicial del toggle "Aluna te conoce" (ver settings-controls.tsx).
-  const { data: intentRow } = await supabase
-    .from("settings")
-    .select("intent")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const intent = parseIntent((intentRow as { intent: unknown } | null)?.intent);
+  // Estado inicial de los toggles "Aluna te conoce" y memoria (ver
+  // settings-controls.tsx). fetchIntentAndMemorySettings degrada a leer solo
+  // `intent` si `memory_enabled` (0019) todavía no está migrada — sin esto, un
+  // select combinado que falla entero también tiraba la intentLine de otras
+  // rutas (review Fable); memoryEnabled default true en ambos casos. Mismo
+  // cast que memories-card.tsx: exactOptionalPropertyTypes hace que el
+  // Database inferido de createClient() no calce estructuralmente con
+  // AlunaSupabaseClient (bug upstream de postgrest-js/supabase-js).
+  const { intent: rawIntent, memoryEnabled } = await fetchIntentAndMemorySettings(supabase as unknown as AlunaSupabaseClient, user.id);
+  const intent = parseIntent(rawIntent);
 
   // Método de acceso: Supabase Auth guarda el proveedor en app_metadata.
   // "email" (usuario/contraseña) se muestra con copy propio; cualquier otro
@@ -98,10 +105,15 @@ export default async function AjustesPage({
           currentLocale={locale}
           hasIntent={intent !== null}
           intentUseInAI={intent?.useInAI ?? false}
+          memoryEnabled={memoryEnabled}
         />
       </section>
 
       <MemoriesCard userId={user.id} />
+
+      <EntitiesCard userId={user.id} />
+
+      <MemoryDataCard />
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />

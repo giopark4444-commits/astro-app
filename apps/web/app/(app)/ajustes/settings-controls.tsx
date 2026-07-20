@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { THEMES, MODES, type Theme } from "@/lib/theme/themes";
-import { setLanguage, setIntentUseInAI } from "../actions";
+import { setLanguage, setIntentUseInAI, setMemoryEnabled } from "../actions";
 import styles from "./settings.module.css";
 
 const SWATCH: Record<Theme, string> = {
@@ -17,10 +17,12 @@ export function SettingsControls({
   currentLocale,
   hasIntent,
   intentUseInAI,
+  memoryEnabled,
 }: {
   currentLocale: string;
   hasIntent: boolean;
   intentUseInAI: boolean;
+  memoryEnabled: boolean;
 }) {
   const t = useTranslations("settings");
   const router = useRouter();
@@ -29,6 +31,10 @@ export function SettingsControls({
   // sentirse instantáneo (setIntentUseInAI es fire-and-forget del lado
   // servidor, igual que setTheme/setMode arriba).
   const [useInAI, setUseInAI] = useState(intentUseInAI);
+  // Casilla dedicada de memoria (Fase 1C): mismo patrón optimista que arriba,
+  // pero SIN disabled — a diferencia del cuestionario, la memoria no depende
+  // de que exista otro dato previo.
+  const [memOn, setMemOn] = useState(memoryEnabled);
 
   return (
     <>
@@ -89,6 +95,26 @@ export function SettingsControls({
             ))}
           </div>
         </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.label}>{t("memoryToggle")}</h3>
+          <p>{t("memoryToggleHint")}</p>
+          <div className="seg" role="group" aria-label={t("memoryToggle")}>
+            {([true, false] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`seg__item ${styles.segItem} ${memOn === on ? "seg__item--active" : ""}`}
+                aria-pressed={memOn === on}
+                onClick={async () => {
+                  setMemOn(on);
+                  await setMemoryEnabled(on);
+                }}
+              >
+                {t(on ? "memoryOn" : "memoryOff")}
+              </button>
+            ))}
+          </div>
+        </section>
       </div>
 
       {/* Desktop (≥1080px): filas compactas — mockup 06 §5.3 (.pf-prow).
@@ -144,6 +170,26 @@ export function SettingsControls({
                 }}
               >
                 {t(on ? "intentAIOn" : "intentAIOff")}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Toggle de memoria (Fase 1C): misma fila compacta, SIN disabled. */}
+        <div className={styles.prow} title={t("memoryToggleHint")}>
+          <span className={styles.plab}>{t("memoryToggle")}</span>
+          <div className={`seg ${styles.segCompactWrap}`} role="group" aria-label={t("memoryToggle")}>
+            {([true, false] as const).map((on) => (
+              <button
+                key={String(on)}
+                className={`seg__item ${styles.segItem} ${styles.segCompact} ${memOn === on ? "seg__item--active" : ""}`}
+                aria-pressed={memOn === on}
+                onClick={async () => {
+                  setMemOn(on);
+                  await setMemoryEnabled(on);
+                }}
+              >
+                {t(on ? "memoryOn" : "memoryOff")}
               </button>
             ))}
           </div>

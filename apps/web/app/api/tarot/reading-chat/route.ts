@@ -1,14 +1,15 @@
 import path from "node:path";
 import { NextResponse, after, type NextRequest } from "next/server";
 import { computeChart, setEphePath } from "@aluna/ephemeris";
-import { computeNumerology, signOfLongitude, parseIntent, type UserIntent } from "@aluna/core";
+import { computeNumerology, signOfLongitude } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { buildTarotContext, type TarotChatCardInput } from "@/lib/tarot/reading-chat-context";
-import { fetchMemories, formatMemoryBlock, distillPrompt, parseDistilled, storeMemories } from "@/lib/memories";
+import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
+import { ensureThread, appendMessage } from "@/lib/chat-archive";
 
 // Chat "Conversa esta tirada" (Tarot T3). Clon exacto de /api/chat: mismo
 // runtime/auth/proveedor/latencia. CABLEADO pero LATENTE: sin llave de
@@ -103,8 +104,13 @@ export async function POST(request: NextRequest) {
     .filter((m): m is { role: string; content: string } => !!m && typeof (m as { content?: unknown }).content === "string")
     .slice(-20)
     .map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content).slice(0, 2000) }));
+  // Archivo del hilo (Fase 1B): si el turno 0 no trae mensajes reales, el que
+  // se agrega abajo es el OPENING_TRIGGER invisible — no debe persistirse
+  // como si fuera algo que la persona escribió.
+  const hasRealUserMessage = messages.length > 0;
   // Primer turno: sin mensajes, la UI espera que Aluna abra ella misma.
   if (messages.length === 0) messages.push({ role: "user", content: OPENING_TRIGGER[locale] });
+  const requestedThreadId = typeof body.threadId === "string" && body.threadId ? body.threadId : null;
 
   if (!spreadId || !cards) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
@@ -141,15 +147,28 @@ export async function POST(request: NextRequest) {
   const context = buildTarotContext(locale, spreadId, cards, question, natalSummary);
   let system = `${SYSTEM_INTRO[locale]}\n\n${context}`;
 
-  // "Aluna te conoce" (Task 2): mismo cableado que /api/chat, mínimo posible.
-  // Opt-in explícito (review final): solo si la persona respondió el
-  // cuestionario Y activó useInAI a mano — mismo criterio que buildIntentLine
-  // (sin cuestionario no hay recolección de memoria).
-  const { data: settingsRow } = await supabase.from("settings").select("intent").eq("user_id", user.id).maybeSingle();
-  const intent = parseIntent((settingsRow as { intent: unknown } | null)?.intent) as UserIntent | null;
-  const useMemories = intent?.useInAI === true;
-  if (useMemories) {
-    const memoryBlock = formatMemoryBlock(await fetchMemories(supabase, user.id), locale);
+  // "Aluna te conoce" (Fase 1A): mismo cableado que /api/chat, mínimo posible.
+  // Gate PROPIO (0019): settings.memory_enabled, ya no intent.useInAI — esta
+  // ruta no usa intentLine, así que ya no necesita leer `intent` en absoluto.
+  // Degradación segura: sin fila settings o columna sin migrar, ON por
+  // defecto (`!== false`, no `=== true`).
+  const { data: settingsRow } = await supabase
+    .from("settings")
+    .select("memory_enabled")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
+  // Archivo del hilo (Fase 1B): persiste pero sin UI de retomar todavía
+  // (diferido); mismo gate que la memoria — ver comentario en /api/chat.
+  let threadId: string | null = null;
+  if (memoryEnabled) {
+    threadId = await ensureThread(supabase, user.id, "tarot", profileId, requestedThreadId);
+    const lastMessage = messages[messages.length - 1];
+    if (threadId && hasRealUserMessage && lastMessage && lastMessage.role === "user") {
+      await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);
+    }
+
+    const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
 
@@ -173,31 +192,25 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (useMemories) {
+  if (memoryEnabled) {
     after(async () => {
-      try {
-        if (!assistantReply.trim()) return;
-        const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
-          .slice(-6)
-          .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
-          .join("\n")
-          .slice(-8000);
-        const existing = (await fetchMemories(supabase, user.id)).map((m) => m.content);
-        const { system: distillSystem, prompt: distillPromptText } = distillPrompt(transcript, existing, locale);
-        const raw = await provider.complete({ system: distillSystem, prompt: distillPromptText, maxTokens: 300 });
-        const newMemories = parseDistilled(raw, existing);
-        await storeMemories(supabase, user.id, newMemories, "tarot");
-      } catch {
-        // best effort: la destilación nunca rompe el flujo del tarot-chat
-      }
+      if (!assistantReply.trim()) return;
+      if (threadId) await appendMessage(supabase, user.id, threadId, "assistant", assistantReply);
+      const transcript = [...messages, { role: "assistant" as const, content: assistantReply }]
+        .slice(-6)
+        .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
+        .join("\n")
+        .slice(-8000);
+      await runDistillation(provider, supabase, user.id, transcript, locale, "tarot");
     });
   }
 
-  return new Response(stream, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "no-store, no-transform",
-      "x-accel-buffering": "no",
-    },
-  });
+  const headers: Record<string, string> = {
+    "content-type": "text/plain; charset=utf-8",
+    "cache-control": "no-store, no-transform",
+    "x-accel-buffering": "no",
+  };
+  if (threadId) headers["x-thread-id"] = threadId;
+
+  return new Response(stream, { headers });
 }

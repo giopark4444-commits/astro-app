@@ -33,12 +33,43 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   // carta de tarot fijada. Viajan en cada POST a /api/chat (CT1 las resuelve).
   const [lenses, setLenses] = useState<string[]>(["astros", "numeros", "pilares"]);
   const [tarotCard, setTarotCard] = useState<TarotCardRef | null>(null);
+  // Archivo del hilo (Fase 1B): id del hilo activo. Se aprende del header
+  // x-thread-id del primer turno, o se precarga al RETOMAR abajo.
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   useEffect(() => {
     // jsdom (tests) no implementa scrollIntoView: guard defensivo (mismo
     // patrón que timeline-chat.tsx y reading-chat.tsx).
     endRef.current?.scrollIntoView?.({ behavior: "smooth" });
   }, [messages, st]);
+
+  useEffect(() => {
+    // Retomar (Fase 1B): al montar, trae el hilo 'chat' más reciente y
+    // precarga la conversación — no pisa el ?q= (eso vive en `input`, esto
+    // solo toca `messages`/`threadId`). Guard funcional en setMessages: si la
+    // persona ya empezó a escribir/enviar antes de que esto resuelva, no le
+    // pisamos la conversación en curso. Best-effort total: cualquier fallo
+    // (red, 401, sin hilo) deja el chat arrancando vacío, como hoy.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/chat/thread");
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { threadId: string | null; messages: Msg[] };
+        if (cancelled || !data.threadId || data.messages.length === 0) return;
+        const nextMessages = data.messages;
+        const nextThreadId = data.threadId;
+        setMessages((current) => (current.length === 0 ? nextMessages : current));
+        setThreadId((current) => current ?? nextThreadId);
+      } catch {
+        // best-effort: sin hilo que retomar, se empieza vacío como hoy
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!active) return null;
   const activeId = active.id;
@@ -54,8 +85,12 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profileId: activeId, locale, messages: next, lenses, tarotCard }),
+        body: JSON.stringify({ profileId: activeId, locale, messages: next, lenses, tarotCard, threadId }),
       });
+      // El primer turno crea el hilo server-side; lo aprendemos del header
+      // para que los turnos siguientes lo reenvíen (Fase 1B).
+      const returnedThreadId = res.headers.get("x-thread-id");
+      if (returnedThreadId) setThreadId(returnedThreadId);
 
       // Latente (sin llave) o error de validación → JSON { available:false }. Sin
       // stream que consumir: mostramos el estado dormido / de error.

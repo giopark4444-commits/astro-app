@@ -12,12 +12,14 @@ vi.mock("@/lib/theme/theme-provider", () => ({
 }));
 vi.mock("../actions", () => ({
   setLanguage: vi.fn(),
+  setIntentUseInAI: vi.fn(),
+  setMemoryEnabled: vi.fn(),
 }));
 
 function renderControls() {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <SettingsControls currentLocale="es" hasIntent intentUseInAI={false} />
+      <SettingsControls currentLocale="es" hasIntent intentUseInAI={false} memoryEnabled />
     </NextIntlClientProvider>,
   );
 }
