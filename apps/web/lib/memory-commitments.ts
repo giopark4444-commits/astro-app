@@ -12,7 +12,11 @@
 
 import type { AlunaSupabaseClient, Tables, TablesInsert } from "@aluna/supabase";
 
-export type CommitmentKind = "commitment" | "manifestation" | "followup" | "other";
+/** Kinds válidos — espejo exacto del CHECK de la migración 0020. Runtime
+ *  array (no solo tipo) para poder validar contra ella en memory-import.ts,
+ *  mismo patrón que ENTITY_KINDS en memory-entities.ts. */
+export const COMMITMENT_KINDS = ["commitment", "manifestation", "followup", "other"] as const;
+export type CommitmentKind = (typeof COMMITMENT_KINDS)[number];
 export type CommitmentStatus = "open" | "done" | "dismissed";
 
 export interface Commitment {
@@ -169,6 +173,30 @@ export async function fetchOpenCommitments(
       .eq("status", "open")
       .or(`due_at.is.null,and(due_at.gte.${today},due_at.lte.${end})`)
       .order("due_at", { ascending: true, nullsFirst: false });
+    if (error || !data) return [];
+    return data as Commitment[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * TODOS los hilos no descartados del usuario (open + done), sin ventana de
+ * fecha, orden created_at ascendente — pensado para portabilidad
+ * (export/import, Fase 2 T6), a diferencia de fetchOpenCommitments (pensado
+ * para /hoy: solo próximos y abiertos). Los `dismissed` quedan afuera a
+ * propósito: son ruido que la persona ya descartó, no algo que un
+ * export/import deba resucitar en otra instalación. `[]` en cualquier error
+ * (best-effort).
+ */
+export async function fetchCommitmentsForExport(supabase: AlunaSupabaseClient, userId: string): Promise<Commitment[]> {
+  try {
+    const { data, error } = await supabase
+      .from("memory_threads")
+      .select("id, description, kind, status, due_at, source_ref, created_at")
+      .eq("user_id", userId)
+      .neq("status", "dismissed")
+      .order("created_at", { ascending: true });
     if (error || !data) return [];
     return data as Commitment[];
   } catch {

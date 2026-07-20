@@ -11,6 +11,7 @@ vi.mock("@/lib/supabase/route-auth", () => ({
 function chain(data: unknown) {
   const obj = {
     eq: () => obj,
+    not: () => obj,
     order: () => obj,
     limit: () => obj,
     then: (resolve: (v: { data: unknown; error: null }) => void) => resolve({ data, error: null }),
@@ -20,12 +21,19 @@ function chain(data: unknown) {
 
 let memoriesData: unknown[] = [];
 let entitiesData: unknown[] = [];
+// v2 (Fase 2 T6): source_refs ya existentes en memory_threads, para el dedupe
+// de dedupeCommitments — por defecto vacío (ningún compromiso previo).
+let existingThreadRefs: unknown[] = [];
 const insertMemoriesMock = vi.fn((): Promise<{ error: { message: string } | null }> => Promise.resolve({ error: null }));
 const insertEntitiesMock = vi.fn((): Promise<{ error: { message: string } | null }> => Promise.resolve({ error: null }));
+const upsertEssenceMock = vi.fn((): Promise<{ error: { message: string } | null }> => Promise.resolve({ error: null }));
+const insertCommitmentsMock = vi.fn((): Promise<{ error: { message: string } | null }> => Promise.resolve({ error: null }));
 
 const fromMock = vi.fn((table: string) => {
   if (table === "user_memories") return { select: () => chain(memoriesData), insert: insertMemoriesMock };
   if (table === "memory_entities") return { select: () => chain(entitiesData), insert: insertEntitiesMock };
+  if (table === "memory_essence") return { upsert: upsertEssenceMock };
+  if (table === "memory_threads") return { select: () => chain(existingThreadRefs), insert: insertCommitmentsMock };
   throw new Error(`unexpected table ${table}`);
 });
 
@@ -65,6 +73,7 @@ describe("POST /api/memory/import", () => {
     vi.clearAllMocks();
     memoriesData = [{ id: "m1", content: "Vive en Quito", source: "chat", created_at: "2026-07-01T00:00:00Z" }];
     entitiesData = [];
+    existingThreadRefs = [];
     authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: USER_ID } });
   });
 
@@ -136,9 +145,16 @@ describe("POST /api/memory/import", () => {
       { user_id: USER_ID, kind: "person", name: "María", summary: "hermana", aliases: [], pinned: false, source: "import" },
     ]);
 
-    const body = (await res.json()) as { imported: { memories: number; entities: number }; skipped: { memories: number; entities: number } };
-    expect(body.imported).toEqual({ memories: 1, entities: 1 });
-    expect(body.skipped).toEqual({ memories: 1, entities: 0 });
+    const body = (await res.json()) as {
+      imported: { memories: number; entities: number; commitments: number };
+      skipped: { memories: number; entities: number; commitments: number };
+    };
+    expect(body.imported).toEqual({ memories: 1, entities: 1, commitments: 0 });
+    expect(body.skipped).toEqual({ memories: 1, entities: 0, commitments: 0 });
+    // v1 (VALID_PAYLOAD no trae essence/commitments): ni memory_essence ni
+    // memory_threads se tocan — retrocompat exacta con el comportamiento previo a T6.
+    expect(upsertEssenceMock).not.toHaveBeenCalled();
+    expect(insertCommitmentsMock).not.toHaveBeenCalled();
   });
 
   it("todo duplicado: no inserta nada, conteos en 0/skipped", async () => {
@@ -149,14 +165,75 @@ describe("POST /api/memory/import", () => {
     expect(res.status).toBe(200);
     expect(insertMemoriesMock).not.toHaveBeenCalled();
     expect(insertEntitiesMock).not.toHaveBeenCalled();
-    const body = (await res.json()) as { imported: { memories: number; entities: number }; skipped: { memories: number; entities: number } };
-    expect(body.imported).toEqual({ memories: 0, entities: 0 });
-    expect(body.skipped).toEqual({ memories: 1, entities: 1 });
+    const body = (await res.json()) as {
+      imported: { memories: number; entities: number; commitments: number };
+      skipped: { memories: number; entities: number; commitments: number };
+    };
+    expect(body.imported).toEqual({ memories: 0, entities: 0, commitments: 0 });
+    expect(body.skipped).toEqual({ memories: 1, entities: 1, commitments: 0 });
   });
 
   it("error de BD al insertar → 500", async () => {
     insertMemoriesMock.mockResolvedValueOnce({ error: { message: "boom" } });
     const res = await POST(fakeRequest(VALID_PAYLOAD));
     expect(res.status).toBe(500);
+  });
+
+  // --- v2 (Fase 2 T6): essence + commitments ---
+
+  it("v2: essence presente hace upsert en memory_essence (status idle, user_id de la sesión)", async () => {
+    const res = await POST(
+      fakeRequest({ version: 2, memories: [], entities: [], essence: "Un retrato cálido y compacto." }),
+    );
+    expect(res.status).toBe(200);
+    expect(upsertEssenceMock).toHaveBeenCalledTimes(1);
+    const [row, opts] = upsertEssenceMock.mock.calls[0] as unknown as [
+      { user_id: string; portrait: string; status: string },
+      { onConflict: string },
+    ];
+    expect(row).toMatchObject({ user_id: USER_ID, portrait: "Un retrato cálido y compacto.", status: "idle" });
+    expect(opts).toEqual({ onConflict: "user_id" });
+  });
+
+  it("v2: commitments se insertan en memory_threads, deduplicados por source_ref existente", async () => {
+    existingThreadRefs = [{ source_ref: "manifestation:existing" }];
+    const res = await POST(
+      fakeRequest({
+        version: 2,
+        memories: [],
+        entities: [],
+        commitments: [
+          { description: "Ya existe", kind: "manifestation", status: "open", due_at: null, source_ref: "manifestation:existing" },
+          { description: "Nuevo", kind: "commitment", status: "open", due_at: null, source_ref: null },
+        ],
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(insertCommitmentsMock).toHaveBeenCalledTimes(1);
+    const [rows] = insertCommitmentsMock.mock.calls[0] as unknown as [
+      { user_id: string; description: string; source_ref: string | null }[],
+    ];
+    expect(rows).toEqual([
+      { user_id: USER_ID, description: "Nuevo", kind: "commitment", status: "open", due_at: null, source_ref: null },
+    ]);
+
+    const body = (await res.json()) as { imported: { commitments: number }; skipped: { commitments: number } };
+    expect(body.imported.commitments).toBe(1);
+    expect(body.skipped.commitments).toBe(1);
+  });
+
+  it("v2: status 'dismissed' en el body nunca llega a insertarse (lo descarta validateImportPayload)", async () => {
+    const res = await POST(
+      fakeRequest({
+        version: 2,
+        memories: [],
+        entities: [],
+        commitments: [{ description: "No debería resucitar", kind: "commitment", status: "dismissed" }],
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(insertCommitmentsMock).not.toHaveBeenCalled();
+    const body = (await res.json()) as { imported: { commitments: number } };
+    expect(body.imported.commitments).toBe(0);
   });
 });
