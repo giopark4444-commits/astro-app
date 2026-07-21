@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { cardById } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
@@ -67,7 +68,9 @@ function mockFetch(postStatus = 201): { calls: FetchCall[] } {
 function renderCeremony(onClose = vi.fn()) {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <Ceremony onClose={onClose} />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <Ceremony onClose={onClose} />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
   return onClose;

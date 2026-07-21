@@ -16,8 +16,11 @@
    la serie. */
 .cardH2 {
   font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+  color: var(--acc-text); font-weight: 700; margin: 0;
 }
+/* Fase 6 (share cards): fila título + ShareButton — el margen que antes vivía
+   en .cardH2 pasa a la fila. */
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin: 0 0 var(--sp-3); }
 .eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
 .title { font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm)); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
 

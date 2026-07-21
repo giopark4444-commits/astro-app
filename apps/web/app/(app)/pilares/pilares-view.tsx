@@ -11,6 +11,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { useCountUp } from "@/lib/motion/use-count-up";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { ShareButton } from "@/components/share/share-button";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
 import { PilaresTabs, FREE_TABS, type PilaresTab } from "./pilares-tabs";
@@ -270,7 +271,10 @@ export function PilaresView() {
 
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
-              <span className={styles.cardH2}>{t("pilares.interpTitle")}</span>
+              <div className={styles.titleRow}>
+                <span className={styles.cardH2}>{t("pilares.interpTitle")}</span>
+                <ShareButton params={{ lens: "pilares", dayStem: HEAVENLY_STEMS[data.day.stem]!.key }} />
+              </div>
               <PilaresInterpretation
                 selected={selected}
                 pro={pro}

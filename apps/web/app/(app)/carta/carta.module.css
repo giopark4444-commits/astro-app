@@ -135,6 +135,11 @@
 
 /* .card migrado al primitivo global card+card--tight — ver carta-view.tsx: className="card card--tight fade-in" */
 .cardH { margin: 0 0 var(--sp-2); font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; } /* 10→sp-2 empate (apoyo, cierre de encabezado pequeño); 10→2xs piso (sub-11) */
+/* Fase 6 (share cards): fila título + ShareButton (solo el panel de
+   interpretación usa esto — las demás .cardH sueltas conservan su propio
+   margen de arriba). */
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin: 0 0 var(--sp-2); }
+.titleRow .cardH { margin: 0; }
 
 .posTable { display: flex; flex-direction: column; gap: var(--sp-1); } /* 2→sp-1 piso */
 .posRow { display: grid; grid-template-columns: 1.3fr 1.1fr 0.7fr 0.9fr; align-items: center; gap: var(--sp-1); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); font-size: var(--text-2xs); } /* 6→sp-1 empate (apoyo); 4→sp-1 nearest; 11.5→2xs empate (apoyo) */

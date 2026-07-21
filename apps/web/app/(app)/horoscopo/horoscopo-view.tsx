@@ -8,6 +8,7 @@ import { useProfiles } from "@/lib/profiles/profiles-provider";
 import { useSheetAutoClose } from "@/lib/viewport";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { ShareButton } from "@/components/share/share-button";
 import { WesternView } from "./western-view";
 import { EasternView } from "./eastern-view";
 import { HoroscopoInterpretation, horoscopoSelectionTitle } from "./interpretation-content";
@@ -77,6 +78,11 @@ export function HoroscopoView() {
     setSheetSel(null);
   }, [active, trad, sign, animal, period]);
 
+  // Fase 6 (share cards): la lente horóscopo solo soporta el signo occidental
+  // (sin fecha — el server pone "hoy"); mismo default "aries" que el estado
+  // inicial sin perfil, para cuando `sign` aún no llegó (p.ej. pestaña oriental).
+  const shareParams = { lens: "horoscopo", sign: sign ?? "aries" } as const;
+
   return (
     <main className={styles.wrap}>
       <div className={styles.sky} aria-hidden><Starfield /></div>
@@ -115,7 +121,10 @@ export function HoroscopoView() {
             prosa de `.readingMobile` en la técnica + el bottom-sheet de abajo. */}
         <div className={styles.interpCol}>
           <div className={`card ${styles.interpPanel}`}>
-            <span className={styles.cardH2}>{t("interpTitle")}</span>
+            <div className={styles.titleRow}>
+              <span className={styles.cardH2}>{t("interpTitle")}</span>
+              <ShareButton params={shareParams} />
+            </div>
             <HoroscopoInterpretation
               selected={selected ?? { kind: "reading" }}
               pro={pro} trad={trad}

@@ -9,6 +9,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { PilaresView } from "../pilares-view";
 import type { BaZiData } from "../types";
@@ -48,7 +49,9 @@ beforeEach(() => {
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <PilaresView />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <PilaresView />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -105,7 +108,9 @@ describe("PilaresView — maestro-detalle (panel/sheet)", () => {
     mockState.active = { id: "p2", name: "Otro" };
     rerender(
       <NextIntlClientProvider locale="es" messages={es}>
-        <PilaresView />
+        <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+          <PilaresView />
+        </ThemeProvider>
       </NextIntlClientProvider>,
     );
 
@@ -145,7 +150,9 @@ describe("PilaresView — maestro-detalle (panel/sheet)", () => {
     mockState.active = null;
     rerender(
       <NextIntlClientProvider locale="es" messages={es}>
-        <PilaresView />
+        <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+          <PilaresView />
+        </ThemeProvider>
       </NextIntlClientProvider>,
     );
 

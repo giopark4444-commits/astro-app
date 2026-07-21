@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { HoroscopoView } from "../horoscopo-view";
 
@@ -64,7 +65,9 @@ const byNodeText = (re: RegExp) => (_: string, node: Element | null) => re.test(
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <HoroscopoView />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <HoroscopoView />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }

@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { TAROT_DECK, spreadById, type TarotCard, type DeckAssetCtx, cardImageUrl, rwsCtx } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
+import { ShareModal } from "@/components/share/share-modal";
 import { ReadingChat } from "./reading-chat";
 import tarot from "./tarot.module.css";
 import styles from "./manual-entry.module.css";
@@ -64,6 +65,7 @@ export function ManualEntry({
   onClose: () => void;
 }) {
   const t = useTranslations("tarot");
+  const tShare = useTranslations("share");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
 
@@ -75,6 +77,8 @@ export function ManualEntry({
   const [query, setQuery] = useState("");
   const [suitTab, setSuitTab] = useState<SuitTab>("all");
   const [save, setSave] = useState<SaveState>("idle");
+  // Fase 6 (share cards): comparte la primera carta de la tirada.
+  const [shareOpen, setShareOpen] = useState(false);
 
   const positions = useMemo(() => {
     if (template === "free") return Array.from({ length: freeCount }, (_, i) => `free-${i + 1}`);
@@ -449,11 +453,24 @@ export function ManualEntry({
                 </button>
               </>
             )}
+            {main[0] && (
+              <button type="button" className={styles.ghostBtn} onClick={() => setShareOpen(true)}>
+                {tShare("share")}
+              </button>
+            )}
             <button type="button" className={styles.ghostBtn} onClick={onClose}>
               {t("readingBack")}
             </button>
           </div>
         </div>
+      )}
+
+      {main[0] && (
+        <ShareModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          params={{ lens: "tarot", cardId: main[0].cardId, reversed: main[0].reversed }}
+        />
       )}
     </section>
   );

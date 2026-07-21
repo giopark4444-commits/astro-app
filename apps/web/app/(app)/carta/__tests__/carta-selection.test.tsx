@@ -4,6 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import type { BodyPosition, ChartResult } from "@aluna/core";
 import es from "@/messages/es.json";
 import { CartaView } from "../carta-view";
@@ -75,7 +76,9 @@ beforeEach(() => {
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <CartaView />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <CartaView />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }

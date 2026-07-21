@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { ManualEntry } from "../manual-entry";
@@ -37,7 +38,9 @@ function mockFetch() {
 function renderManual(onClose = vi.fn()) {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <ManualEntry onClose={onClose} />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <ManualEntry onClose={onClose} />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
   return onClose;

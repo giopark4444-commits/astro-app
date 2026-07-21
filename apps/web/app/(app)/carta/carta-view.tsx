@@ -15,6 +15,8 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
+import { ShareButton } from "@/components/share/share-button";
+import type { ShareLensParams } from "@/lib/share/types";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
 import { PLANET_GLYPH, SIGN_GLYPH } from "./glyphs";
@@ -150,6 +152,20 @@ export function CartaView() {
 
   const sun = byKey.get("sun");
   const moon = byKey.get("moon");
+
+  // Fase 6 (share cards): si la selección activa del panel es sol/luna/asc,
+  // la usamos; si no (aspecto/casa/patrón/núcleo), sol por defecto — mismo
+  // criterio que el resto de la serie ("selected ?? default"). Sin el signo
+  // correspondiente todavía cargado (edge case de datos), no se muestra el
+  // botón — mejor nada que una card sin signo.
+  const shareBody: "sun" | "moon" | "asc" =
+    selected.kind === "ascendant"
+      ? "asc"
+      : selected.kind === "body" && (selected.body.body === "sun" || selected.body.body === "moon")
+        ? selected.body.body
+        : "sun";
+  const shareSign = shareBody === "sun" ? sun?.sign : shareBody === "moon" ? moon?.sign : ascSign || undefined;
+  const shareParams: ShareLensParams | null = shareSign ? { lens: "carta", body: shareBody, sign: shareSign } : null;
 
   return (
     <div className={styles.wrap}>
@@ -360,7 +376,10 @@ export function CartaView() {
           {/* panel de interpretación (desktop; sticky — oculto en móvil, que usa el sheet) */}
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
-              <span className={styles.cardH}>{t("interpTitle")}</span>
+              <div className={styles.titleRow}>
+                <span className={styles.cardH}>{t("interpTitle")}</span>
+                {shareParams && <ShareButton params={shareParams} />}
+              </div>
               <InterpretationContent selected={selected} pro={pro} coreSegs={coreSegs}
                 coreData={{ sun, moon, asc: ascPos ? { sign: ascSign, degree: ascPos.degree, minute: ascPos.minute } : null }}
                 profileName={active.name} />

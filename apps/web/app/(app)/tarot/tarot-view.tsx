@@ -5,6 +5,7 @@ import { dailyCard, cardImageUrl, cardBackUrl } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { ShareButton } from "@/components/share/share-button";
 import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
 import { useSheetAutoClose } from "@/lib/viewport";
 import { Ceremony } from "./ceremony";
@@ -382,7 +383,10 @@ export function TarotView({ userId }: { userId: string }) {
         {!readingOpen && (
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
-              <span className={styles.cardH2}>{t("interpTitle")}</span>
+              <div className={styles.titleRow}>
+                <span className={styles.cardH2}>{t("interpTitle")}</span>
+                <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+              </div>
               <TarotInterpretation
                 selected={selected ?? { kind: "daily" }}
                 revealed={revealed}

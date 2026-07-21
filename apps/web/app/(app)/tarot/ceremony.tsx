@@ -10,6 +10,7 @@ import { drawCards, spreadById, type DrawnCard, type DeckAssetCtx, cardImageUrl,
 import { gestureRng } from "@/lib/tarot/rng";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
+import { ShareModal } from "@/components/share/share-modal";
 import { ReadingChat } from "./reading-chat";
 import tarot from "./tarot.module.css";
 import styles from "./ceremony.module.css";
@@ -95,6 +96,7 @@ export function Ceremony({
   onClose: () => void;
 }) {
   const t = useTranslations("tarot");
+  const tShare = useTranslations("share");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
   const spread = spreadById(SPREAD_ID)!;
@@ -102,6 +104,8 @@ export function Ceremony({
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const [questionDraft, setQuestionDraft] = useState("");
   const [holding, setHolding] = useState(false);
+  // Fase 6 (share cards): comparte la primera carta de la tirada (pasado).
+  const [shareOpen, setShareOpen] = useState(false);
 
   // prefers-reduced-motion: cada paso ofrece su resultado inmediato (sin danza
   // de barajado ni vuelo de cartas). Se lee una vez al montar: la ceremonia es
@@ -435,11 +439,24 @@ export function Ceremony({
                 </button>
               </>
             )}
+            {state.drawn[0] && (
+              <button type="button" className={styles.ghostBtn} onClick={() => setShareOpen(true)}>
+                {tShare("share")}
+              </button>
+            )}
             <button type="button" className={styles.ghostBtn} onClick={onClose}>
               {t("readingBack")}
             </button>
           </div>
         </div>
+      )}
+
+      {state.drawn[0] && (
+        <ShareModal
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          params={{ lens: "tarot", cardId: state.drawn[0].card.id, reversed: state.drawn[0].reversed }}
+        />
       )}
     </section>
   );

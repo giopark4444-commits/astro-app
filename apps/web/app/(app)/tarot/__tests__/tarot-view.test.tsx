@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { dailyCard } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
@@ -23,7 +24,9 @@ function localDateKey(): string {
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <TarotView userId={USER_ID} />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <TarotView userId={USER_ID} />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }

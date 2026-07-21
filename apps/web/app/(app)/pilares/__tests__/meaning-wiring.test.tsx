@@ -6,6 +6,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { PilaresView } from "../pilares-view";
 import type { BaZiData } from "../types";
@@ -48,7 +49,9 @@ beforeEach(() => {
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <PilaresView />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <PilaresView />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }

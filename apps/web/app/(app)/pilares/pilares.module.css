@@ -194,8 +194,11 @@
    de compartir literalmente .cardH/.section. */
 .cardH2 {
   font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+  color: var(--acc-text); font-weight: 700; margin: 0;
 }
+/* Fase 6 (share cards): fila título + ShareButton — el margen que antes vivía
+   en .cardH2 pasa a la fila. */
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin: 0 0 var(--sp-3); }
 .row { display: flex; align-items: baseline; gap: var(--sp-3); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line); } /* 6→sp-1 empate (fila de datos, apoyo) */
 .row:last-child { border-bottom: none; }
 .rowLabel { min-width: 64px; color: var(--soft); font-size: var(--text-sm); }

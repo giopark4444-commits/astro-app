@@ -27,7 +27,10 @@
 .readingMobile { display: contents; }
 /* Título del panel de interpretación: mismo look que .sectionH pero sobre un
    <span> (no <h2>) — el panel vive fuera de .section, con su propia receta. */
-.cardH2 { font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3); }
+.cardH2 { font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; margin: 0; }
+/* Fase 6 (share cards): fila título + ShareButton — el margen que antes vivía
+   en .cardH2 pasa a la fila. */
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin: 0 0 var(--sp-3); }
 /* Reset del botón de selección de la celda del símbolo principal de las tablas
    Pro (posiciones/interacciones/armonías) → term del maestro-detalle. Copiado
    de pilares.module.css `.selBtn`: limpia fondo/borde/padding, hereda tipografía
