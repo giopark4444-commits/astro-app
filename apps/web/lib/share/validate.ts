@@ -2,7 +2,7 @@
 // Parseo + whitelist ESTRICTA de los query params de una tarjeta compartible.
 // Cada campo tiene su propio código de error (nunca un "bad_request" genérico)
 // para que el caller pueda dar feedback específico. Puro: sin I/O, sin React.
-import { DAY_MASTER_VOICE, HEAVENLY_STEMS, TAROT_CARDS_ES, TAROT_SPREADS, ZODIAC_SIGNS } from "@aluna/core";
+import { DAY_MASTER_VOICE, TAROT_CARDS_ES, TAROT_SPREADS, ZODIAC_SIGNS } from "@aluna/core";
 import { HOROSCOPE_SIGNS_ES } from "../content/horoscope-es";
 import { SHARE_FORMATS, SHARE_THEMES, type ShareFormat, type ShareTheme } from "./palette";
 import type {
@@ -27,8 +27,6 @@ const NUM_LABEL_KEYS = ["lifePath", "expression", "soulUrge", "personality", "bi
 
 /** 1-9 + los 3 números maestros (11/22/33) — mismo criterio que isMaster de @aluna/core. */
 const NUM_VALID_NUMBERS = new Set<number>([1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33]);
-
-const CARTA_BODIES = ["sun", "moon", "asc"] as const;
 
 const ZODIAC_KEYS = new Set(ZODIAC_SIGNS.map((s) => s.key));
 

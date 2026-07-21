@@ -6,7 +6,7 @@ import { DAY_MASTER_VOICE, HEAVENLY_STEMS, TAROT_CARDS_ES, TAROT_CARDS_EN } from
 import { NUMBER_MEANINGS_ES } from "../../content/numerology-es";
 import { NUMBER_MEANINGS_EN } from "../../content/numerology-en";
 import { SUN_FRAGMENT as SUN_ES, MOON_FRAGMENT as MOON_ES, ASC_FRAGMENT as ASC_ES } from "../../content/core-reading-es";
-import { SUN_FRAGMENT as SUN_EN, MOON_FRAGMENT as MOON_EN, ASC_FRAGMENT as ASC_EN } from "../../content/core-reading-en";
+import { MOON_FRAGMENT as MOON_EN } from "../../content/core-reading-en";
 import { HOROSCOPE_SIGNS_ES } from "../../content/horoscope-es";
 import { HOROSCOPE_SIGNS_EN } from "../../content/horoscope-en";
 import { resolveInsight } from "../resolve-insight";

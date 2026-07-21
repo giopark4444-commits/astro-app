@@ -157,6 +157,7 @@ describe("parseShareParams — casos válidos por lente", () => {
 describe("parseShareParams — rechazos, un código por campo", () => {
   it("lens ausente -> bad_lens", () => {
     const { lens: _lens, ...rest } = VALID.numeros;
+    void _lens;
     expect(parseShareParams(sp(rest))).toEqual({ error: "bad_lens" });
   });
 
