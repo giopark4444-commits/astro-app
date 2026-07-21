@@ -54,6 +54,16 @@ export type ShareCardParams =
 
 export type ShareLens = ShareCardParams["lens"];
 
+/** Distribuye `Omit` sobre la unión (a diferencia de `Omit` liso, que colapsa
+ *  `keyof` de una unión a la intersección de claves y perdería los campos
+ *  propios de cada variante). */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+/** Lo que un ShareButton necesita del caller: solo los campos de dominio de la
+ *  lente (sin PII, ver arriba) — nunca format/theme/detail/locale, que el
+ *  propio modal decide vía use-share-image (estado de usuario, no del dato). */
+export type ShareLensParams = DistributiveOmit<ShareCardParams, "format" | "theme" | "detail" | "locale">;
+
 /** Contenido ya resuelto, listo para pintar — todo el texto sale de las capas
  *  de contenido existentes (numerology-es/en, core-reading-es/en, DAY_MASTER_VOICE,
  *  TAROT_CARDS_ES/EN, HOROSCOPE_SIGNS_ES/EN). Nunca texto libre. */

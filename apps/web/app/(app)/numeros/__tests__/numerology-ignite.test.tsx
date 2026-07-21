@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { computeNumerology } from "@aluna/core";
 import { profileToNumerologyInput } from "@/lib/numerology";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { NumerologyView } from "../numerology-view";
 
 // Pedido de Gio: los números se ENCIENDEN (ignite: opacity+glow escalonado),
@@ -23,7 +24,9 @@ vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ activ
 function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NextIntlClientProvider locale="es" messages={es}>
-      {children}
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        {children}
+      </ThemeProvider>
     </NextIntlClientProvider>
   );
 }

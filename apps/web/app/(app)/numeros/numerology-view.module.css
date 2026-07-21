@@ -195,8 +195,11 @@
    vive fuera de .pro/.card, así que necesita su propia receta de título. */
 .cardH2 {
   font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+  color: var(--acc-text); font-weight: 700; margin: 0;
 }
+/* Fase 5 (share cards): fila título + ShareButton — el margen que antes vivía
+   en .cardH2 pasa a la fila. */
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin: 0 0 var(--sp-3); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* Ola visual N4: el cap centrado de 1120px quedaba fuera de la serie — carta

@@ -13,6 +13,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { NextIntlClientProvider } from "next-intl";
 import { computeNumerology } from "@aluna/core";
 import { profileToNumerologyInput, formatReduction } from "@/lib/numerology";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { NumerologyView } from "../numerology-view";
 
@@ -33,7 +34,9 @@ const resultOf = (p: { name: string; birth_date: string }) =>
 function renderView() {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <NumerologyView />
+      <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+        <NumerologyView />
+      </ThemeProvider>
     </NextIntlClientProvider>,
   );
 }
@@ -114,7 +117,9 @@ describe("NumerologyView — maestro-detalle (panel/sheet)", () => {
     mockState.active = PROFILE_B;
     rerender(
       <NextIntlClientProvider locale="es" messages={es}>
-        <NumerologyView />
+        <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
+          <NumerologyView />
+        </ThemeProvider>
       </NextIntlClientProvider>,
     );
 

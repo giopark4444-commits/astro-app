@@ -47,3 +47,10 @@
   max-height: 82dvh;
   animation: aluna-rise-in var(--dur) var(--ease) both;
 }
+
+/* Variante ancha del modal centrado (ej. compartir: preview + controles lado a
+   lado en desktop). El propio contenido decide cuándo pasar a fila (media
+   query interna) — este modificador solo levanta el techo de max-width. */
+.wide {
+  max-width: 680px;
+}

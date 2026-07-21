@@ -899,12 +899,22 @@
     "privacyNote": "La imagen nunca incluye tu nombre ni tus datos de nacimiento.",
     "shareError": "No pudimos generar la imagen. Intenta de nuevo.",
     "generating": "Generando tu tarjeta…",
+    "retry": "Reintentar",
+    "previewAlt": "Vista previa de tu tarjeta para compartir",
     "captionCta": {
       "numeros": "Descubre tu numerología en Aluna",
       "carta": "Descubre tu carta natal en Aluna",
       "pilares": "Descubre tus Cuatro Pilares en Aluna",
       "tarot": "Descubre tu lectura de tarot en Aluna",
       "horoscopo": "Descubre tu horóscopo en Aluna"
+    },
+    "themeNames": {
+      "observatory": "Observatorio",
+      "aurora": "Aurora",
+      "cosmic": "Cósmico",
+      "selva": "Selva",
+      "alba": "Alba",
+      "eclipse": "Eclipse"
     }
   },
   "errors": {

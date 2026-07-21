@@ -899,12 +899,22 @@
     "privacyNote": "The image never includes your name or birth details.",
     "shareError": "We couldn't generate the image. Please try again.",
     "generating": "Generating your card…",
+    "retry": "Try again",
+    "previewAlt": "Preview of your shareable card",
     "captionCta": {
       "numeros": "Discover your numerology on Aluna",
       "carta": "Discover your birth chart on Aluna",
       "pilares": "Discover your Four Pillars on Aluna",
       "tarot": "Discover your tarot reading on Aluna",
       "horoscopo": "Discover your horoscope on Aluna"
+    },
+    "themeNames": {
+      "observatory": "Observatory",
+      "aurora": "Aurora",
+      "cosmic": "Cosmic",
+      "selva": "Jungle",
+      "alba": "Dawn",
+      "eclipse": "Eclipse"
     }
   },
   "errors": {

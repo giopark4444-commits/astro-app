@@ -10,6 +10,8 @@ import { useSheetAutoClose } from "@/lib/viewport";
 import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { ShareButton } from "@/components/share/share-button";
+import type { ShareLensParams } from "@/lib/share/types";
 import styles from "./numerology-view.module.css";
 
 type CoreKey = "expression" | "soulUrge" | "personality" | "birthday" | "maturity";
@@ -68,6 +70,11 @@ export function NumerologyView() {
     glossKey: "glossLifePath",
     trace: core.lifePath,
   };
+
+  // Fase 5 (share cards): la lente activa del panel de interpretación —
+  // mismo criterio que NumerosInterpretation abajo (selected ?? lifePathSel).
+  const activeSel = selected ?? lifePathSel;
+  const shareParams: ShareLensParams = { lens: "numeros", number: activeSel.trace.value, labelKey: activeSel.labelKey };
 
   return (
     <div className={styles.wrap}>
@@ -191,8 +198,11 @@ export function NumerologyView() {
 
         <div className={styles.interpCol}>
           <div className={`card ${styles.interpPanel}`}>
-            <span className={styles.cardH2}>{t("interpTitle")}</span>
-            <NumerosInterpretation selected={selected ?? lifePathSel} pro={pro} profileName={active.name} />
+            <div className={styles.titleRow}>
+              <span className={styles.cardH2}>{t("interpTitle")}</span>
+              <ShareButton params={shareParams} />
+            </div>
+            <NumerosInterpretation selected={activeSel} pro={pro} profileName={active.name} />
           </div>
         </div>
       </div>

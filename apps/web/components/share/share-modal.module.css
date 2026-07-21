@@ -1,0 +1,156 @@
+/* Modal de compartir — ver share-modal.tsx para la referencia de diseño.
+   Mobile-first: preview arriba, controles abajo; ≥640px pasa a fila (preview
+   a la izquierda, controles a la derecha) como el mockup aprobado. */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.prev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: var(--ar, 0.5625);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--elev);
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--line) 50%, var(--surface) 75%);
+  background-size: 300% 100%;
+  animation: aluna-shimmer 1.6s ease-in-out infinite;
+}
+
+.errorBox {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  text-align: center;
+}
+.errorText { font-size: var(--text-sm); color: var(--soft); margin: 0; }
+.retryBtn {
+  padding: 6px 16px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--acc-text); font-family: inherit;
+  font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.retryBtn:hover { border-color: var(--acc); color: var(--acc); }
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  color: var(--ink);
+  margin: 0;
+}
+
+.field { display: flex; flex-direction: column; gap: var(--sp-2); }
+.label {
+  font-size: var(--text-2xs); font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--soft);
+}
+
+.dots { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.dot {
+  width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent;
+  padding: 0; cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.dot:hover { transform: scale(1.06); }
+.dotOn { border-color: var(--acc); box-shadow: var(--glow-soft); }
+
+.toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 0; background: transparent; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: var(--text-md); color: var(--ink);
+}
+.sw {
+  position: relative; width: 42px; height: 24px; border-radius: 100px; flex: none;
+  background: var(--line); transition: background var(--dur-fast) var(--ease);
+}
+.sw::after {
+  content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--surface);
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.sw[data-on] { background: rgba(var(--acc-rgb), 0.55); }
+.sw[data-on]::after { transform: translateX(18px); background: var(--acc); }
+
+.actions { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-1); }
+.btnPri, .btnGho {
+  border-radius: 14px; padding: 12px 0; text-align: center; font-weight: 700;
+  font-size: var(--text-md); font-family: inherit; cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.btnPri { border: 0; background: var(--acc); color: var(--ink-on-acc); box-shadow: var(--glow-soft); }
+.btnPri:hover { opacity: 0.9; }
+.btnGho { border: 1px solid var(--line); background: transparent; color: var(--acc-text); }
+.btnGho:hover { border-color: var(--acc); color: var(--acc); }
+
+.linkRow { display: flex; gap: var(--sp-2); }
+.linkBtn {
+  flex: 1; border: 1px solid var(--line); border-radius: 14px; background: transparent; color: var(--acc-text);
+  text-decoration: none; text-align: center; font-size: var(--text-sm); font-weight: 700; padding: 10px 0;
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.linkBtn:hover { border-color: var(--acc); color: var(--acc); }
+
+.note { font-size: var(--text-2xs); color: var(--soft); line-height: 1.5; margin: 0; }
+
+/* Foco visible (teclado) en todo lo interactivo del modal, incluidos los
+   primitivos globales .seg__item que no traen su propio outline. */
+.dot:focus-visible,
+.btnPri:focus-visible,
+.btnGho:focus-visible,
+.linkBtn:focus-visible,
+.retryBtn:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+.field :global(.seg__item):focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+  .body { flex-direction: row; align-items: stretch; gap: var(--sp-6); }
+  .prev { flex: 0 0 240px; }
+  .side { flex: 1; }
+}
