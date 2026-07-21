@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { NextRequest } from "next/server";
 
 const authenticateRouteMock = vi.fn();
@@ -147,5 +147,40 @@ describe("POST /api/scores", () => {
     expect(json.general).toHaveLength(6);
     // week muestrea 7 fechas → scoreLifeAreas se llama al menos por muestra.
     expect(scoreLifeAreasMock.mock.calls.length).toBeGreaterThanOrEqual(7);
+  });
+
+  describe("fecha civil de hoy: tz del PERFIL, no del proceso server", () => {
+    // 2026-07-21T04:00:00Z = 2026-07-20 23:00 en Bogotá (UTC-5): mismo instante,
+    // día civil distinto según la zona. Si la ruta usara la tz del servidor (UTC,
+    // como en Vercel) en vez de la del perfil, pilares/números usarían el 21, no
+    // el 20 — el bug que este fix corrige.
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-07-21T04:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("usa el día civil de Bogotá (20), no el de UTC (21), para pilares y números", async () => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: { ...PROFILE, time_zone: "America/Bogota" } });
+
+      await POST(fakeRequest({ profileId: "profile-1" }));
+
+      expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 20);
+      const cyclesCall = personalCyclesMock.mock.calls[0]!;
+      expect(cyclesCall[1]).toEqual({ year: 2026, month: 7, day: 20 });
+    });
+
+    it("perfil en UTC usa el 21 (mismo instante, otra tz)", async () => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: { ...PROFILE, time_zone: "UTC" } });
+
+      await POST(fakeRequest({ profileId: "profile-1" }));
+
+      expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 21);
+    });
   });
 });

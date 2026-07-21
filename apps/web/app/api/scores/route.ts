@@ -17,7 +17,7 @@ import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { computeBaziNatal } from "@/lib/timeline/bazi-natal";
 import { assembleHoyScores } from "@/lib/hoy/scores";
-import { todayCivil } from "@/lib/hoy/today-birth";
+import { todayCivilInZone } from "@/lib/hoy/today-birth";
 
 // "Tu energía de hoy" (dashboard): puntúa 6 áreas de vida (0..100) por las cuatro
 // disciplinas. `astros` = clima de tránsitos al natal, y responde al PERIODO
@@ -146,8 +146,10 @@ export async function POST(request: NextRequest) {
       .map((b) => ({ key: b.body, longitude: b.longitude, speed: 0 }));
 
     // Disciplinas del DÍA (no dependen del periodo). La fecha civil de hoy alimenta
-    // numerología y el pilar del día; los aspectos de ahora, los astros del día.
-    const asOf = todayCivil();
+    // numerología y el pilar del día; los aspectos de ahora, los astros del día. Se
+    // resuelve en la tz del PERFIL (no la del proceso server, que en Vercel es UTC) —
+    // si no, un usuario en UTC-5 ve el día siguiente desde ~19:00 hora local.
+    const asOf = todayCivilInZone(profile.time_zone);
     const birth = { year: input.year, month: input.month, day: input.day };
     const cycles = personalCycles(birth, asOf);
     const natal = computeBaziNatal(profile);
