@@ -884,6 +884,29 @@
     "interpHint": "Tap the card of the day or a journal reading to read it here.",
     "backToReading": "Back to the reading"
   },
+  "share": {
+    "title": "Share this reading",
+    "format": "Format",
+    "formatStory": "Story",
+    "formatFeed": "Feed",
+    "formatSquare": "Square",
+    "theme": "Theme",
+    "showDetail": "Show detail",
+    "share": "Share",
+    "download": "Download",
+    "copyCaption": "Copy caption",
+    "copied": "Copied!",
+    "privacyNote": "The image never includes your name or birth details.",
+    "shareError": "We couldn't generate the image. Please try again.",
+    "generating": "Generating your card…",
+    "captionCta": {
+      "numeros": "Discover your numerology on Aluna",
+      "carta": "Discover your birth chart on Aluna",
+      "pilares": "Discover your Four Pillars on Aluna",
+      "tarot": "Discover your tarot reading on Aluna",
+      "horoscopo": "Discover your horoscope on Aluna"
+    }
+  },
   "errors": {
     "notFoundTitle": "This constellation isn't on the map",
     "notFoundBody": "That page got lost among the stars. Let's head back to familiar ground.",
