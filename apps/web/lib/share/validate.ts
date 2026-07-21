@@ -43,6 +43,11 @@ const TAROT_POSITION_ROLES = new Set(TAROT_SPREADS.flatMap((spread) => spread.po
  *  pero se calcula explícitamente por si algún día divergen). */
 const HOROSCOPE_SIGN_KEYS = new Set([...ZODIAC_KEYS].filter((key) => key in HOROSCOPE_SIGNS_ES));
 
+/** UUID v-cualquiera (no se exige el nibble de versión) — basta con el shape,
+ *  la propiedad real la verifica la query server-side (`.eq("user_id", ...)`
+ *  en route.ts). */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // --- Helpers -----------------------------------------------------------
 
 function isError<T>(v: T | ShareParamsError): v is ShareParamsError {
@@ -54,6 +59,8 @@ interface ShareCommonFields {
   format: ShareFormat;
   detail: boolean;
   locale: ShareLocale;
+  showName: boolean;
+  profileId?: string;
 }
 
 function parseCommonFields(searchParams: URLSearchParams): ShareCommonFields | ShareParamsError {
@@ -69,11 +76,27 @@ function parseCommonFields(searchParams: URLSearchParams): ShareCommonFields | S
   const locale = searchParams.get("locale");
   if (locale !== "es" && locale !== "en") return { error: "bad_locale" };
 
+  // `name`: toggle "Mostrar el nombre" — ausente = false (default OFF). Nunca
+  // lleva el nombre en sí (eso lo resuelve el server, ver route.ts); solo 0/1.
+  const nameRaw = searchParams.get("name");
+  if (nameRaw !== null && nameRaw !== "0" && nameRaw !== "1") return { error: "bad_name" };
+  const showName = nameRaw === "1";
+
+  // `profileId`: opcional, UUID del birth_profile a nombrar (si distinto al
+  // de la cuenta). Ausente → el server cae al display_name de la cuenta.
+  const profileIdRaw = searchParams.get("profileId");
+  if (profileIdRaw !== null && !UUID_RE.test(profileIdRaw)) return { error: "bad_profile" };
+
   return {
     theme: theme as ShareTheme,
     format: format as ShareFormat,
     detail: detailRaw === "1",
     locale,
+    showName,
+    // Spread condicional (no `profileId: undefined`): exactOptionalPropertyTypes
+    // distingue "la clave no está" de "está con valor undefined" — mismo
+    // criterio que resolve-insight.ts/render.ts para campos opcionales.
+    ...(profileIdRaw !== null ? { profileId: profileIdRaw } : {}),
   };
 }
 

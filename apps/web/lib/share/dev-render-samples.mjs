@@ -36,76 +36,92 @@ const OUT_DIR =
 
 const MIN_BYTES = 30_000;
 
-/** @type {Array<{ name: string; params: import("./types").ShareCardParams; eyebrowDate?: string }>} */
+/** @type {Array<{ name: string; params: import("./types").ShareCardParams; eyebrowDate?: string; personName?: string }>} */
 const SAMPLES = [
   {
     name: "numeros-7-observatory-story",
-    params: { lens: "numeros", number: 7, labelKey: "lifePath", format: "story", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "numeros", number: 7, labelKey: "lifePath", format: "story", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "numeros-1-aurora-story", // esencia larga (201 car.)
-    params: { lens: "numeros", number: 1, labelKey: "lifePath", format: "story", theme: "aurora", detail: true, locale: "es" },
+    params: { lens: "numeros", number: 1, labelKey: "lifePath", format: "story", theme: "aurora", detail: true, locale: "es", showName: false },
   },
   {
     name: "numeros-11-cosmic-story", // número maestro, con chip
-    params: { lens: "numeros", number: 11, labelKey: "expression", format: "story", theme: "cosmic", detail: true, locale: "es" },
+    params: { lens: "numeros", number: 11, labelKey: "expression", format: "story", theme: "cosmic", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-sun-leo-alba-feed",
-    params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "alba", detail: true, locale: "es" },
+    params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "alba", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-sun-leo-observatory-story", // rueda natal HERO — glowzone
-    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-sun-leo-alba-story", // rueda natal HERO, tema claro
-    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "alba", detail: true, locale: "es" },
+    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "alba", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-moon-cancer-cosmic-square", // rueda natal FONDO full-bleed
-    params: { lens: "carta", body: "moon", sign: "cancer", format: "square", theme: "cosmic", detail: true, locale: "es" },
+    params: { lens: "carta", body: "moon", sign: "cancer", format: "square", theme: "cosmic", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-sun-leo-observatory-feed", // rueda natal FONDO, feed 3:4
-    params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-asc-scorpio-observatory-story", // rueda natal HERO, foco ASC (glifo de texto)
-    params: { lens: "carta", body: "asc", sign: "scorpio", format: "story", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "carta", body: "asc", sign: "scorpio", format: "story", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "pilares-jia-observatory-story",
-    params: { lens: "pilares", dayStem: "jia", format: "story", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "pilares", dayStem: "jia", format: "story", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "pilares-yi-selva-feed",
-    params: { lens: "pilares", dayStem: "yi", format: "feed", theme: "selva", detail: true, locale: "es" },
+    params: { lens: "pilares", dayStem: "yi", format: "feed", theme: "selva", detail: true, locale: "es", showName: false },
   },
   {
     name: "tarot-fool-selva-feed",
-    params: { lens: "tarot", cardId: "fool", reversed: false, format: "feed", theme: "selva", detail: true, locale: "es" },
+    params: { lens: "tarot", cardId: "fool", reversed: false, format: "feed", theme: "selva", detail: true, locale: "es", showName: false },
   },
   {
     name: "tarot-moon-reversed-cosmic-story",
-    params: { lens: "tarot", cardId: "moon", reversed: true, format: "story", theme: "cosmic", detail: true, locale: "es" },
+    params: { lens: "tarot", cardId: "moon", reversed: true, format: "story", theme: "cosmic", detail: true, locale: "es", showName: false },
   },
   {
     name: "horoscopo-aries-eclipse-story",
-    params: { lens: "horoscopo", sign: "aries", format: "story", theme: "eclipse", detail: true, locale: "es" },
+    params: { lens: "horoscopo", sign: "aries", format: "story", theme: "eclipse", detail: true, locale: "es", showName: false },
     eyebrowDate: "21 DE JULIO",
   },
   {
     name: "tarot-fool-cosmic-square", // layout horizontal (tarot + square)
-    params: { lens: "tarot", cardId: "fool", reversed: false, format: "square", theme: "cosmic", detail: true, locale: "es" },
+    params: { lens: "tarot", cardId: "fool", reversed: false, format: "square", theme: "cosmic", detail: true, locale: "es", showName: false },
   },
   {
     name: "numeros-7-observatory-square",
-    params: { lens: "numeros", number: 7, labelKey: "lifePath", format: "square", theme: "observatory", detail: true, locale: "es" },
+    params: { lens: "numeros", number: 7, labelKey: "lifePath", format: "square", theme: "observatory", detail: true, locale: "es", showName: false },
   },
   {
     name: "carta-moon-cancer-aurora-story",
-    params: { lens: "carta", body: "moon", sign: "cancer", format: "story", theme: "aurora", detail: true, locale: "es" },
+    params: { lens: "carta", body: "moon", sign: "cancer", format: "story", theme: "aurora", detail: true, locale: "es", showName: false },
+  },
+  {
+    // Toggle "Mostrar el nombre" ON — placa (placement A) arriba del eyebrow.
+    name: "numeros-7-observatory-story-name",
+    params: { lens: "numeros", number: 7, labelKey: "lifePath", format: "story", theme: "observatory", detail: true, locale: "es", showName: true },
+    personName: "GIOVANNI",
+  },
+  {
+    name: "carta-sun-leo-observatory-story-name", // placa + rueda natal HERO
+    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "observatory", detail: true, locale: "es", showName: true },
+    personName: "GIOVANNI",
+  },
+  {
+    name: "carta-moon-cancer-cosmic-square-name", // placa + rueda natal FONDO
+    params: { lens: "carta", body: "moon", sign: "cancer", format: "square", theme: "cosmic", detail: true, locale: "es", showName: true },
+    personName: "GIOVANNI",
   },
 ];
 
@@ -115,7 +131,10 @@ async function main() {
 
   const results = [];
   for (const sample of SAMPLES) {
-    const buf = await renderShareCardImage(sample.params, sample.eyebrowDate);
+    const buf = await renderShareCardImage(sample.params, {
+      ...(sample.eyebrowDate !== undefined ? { eyebrowDate: sample.eyebrowDate } : {}),
+      ...(sample.personName !== undefined ? { personName: sample.personName } : {}),
+    });
     const filePath = `${OUT_DIR}/${sample.name}.jpg`;
     writeFileSync(filePath, buf);
     const kb = (buf.length / 1024).toFixed(1);

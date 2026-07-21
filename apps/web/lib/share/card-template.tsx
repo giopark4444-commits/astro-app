@@ -33,6 +33,12 @@ export interface BuildCardTreeOptions {
    *  no puede cargarlo porque ResolvedInsight es puro/sin I/O; solo se usa cuando
    *  insight.glyph.kind === "tarot". */
   tarotArtDataUri?: string;
+  /** Nombre de la persona YA resuelto+saneado por el caller (route.ts, desde
+   *  el perfil autenticado) — este módulo solo lo pinta (placement A: placa
+   *  arriba del eyebrow, mayúsculas espaciadas), nunca lo resuelve ni valida.
+   *  undefined/vacío → sin placa (toggle "Mostrar el nombre" apagado, o sin
+   *  nombre que mostrar). */
+  personName?: string;
 }
 
 // --- Constantes por formato (cita la regla CSS de la galería) ---------------
@@ -147,6 +153,19 @@ const CHIP_SIZE: Record<ShareFormat, { fontSize: number; paddingV: number; paddi
   story: { fontSize: 24, paddingV: 12, paddingH: 28 },
   feed: { fontSize: 24, paddingV: 12, paddingH: 28 },
   square: { fontSize: 21, paddingV: 10, paddingH: 22 },
+};
+
+/** `.namePlate{margin-bottom:34px}` + `.npName{font-size:30px;letter-spacing:
+ *  10px}` + `.npRule{width:40px}` — valores de story literales de
+ *  aluna-share-diseno/index.html, sección "Nombre de la persona" opción A
+ *  (placement A: placa arriba). La galería solo maqueta story; feed/square son
+ *  una reducción proporcional propia (mismo criterio de escalado que
+ *  EYEBROW_TXT/TTL_SIZE: más chico en feed, más chico aún en square), no un
+ *  valor calcado de la galería. */
+const NAME_PLATE: Record<ShareFormat, { fontSize: number; letterSpacing: number; ruleWidth: number; marginBottom: number }> = {
+  story: { fontSize: 30, letterSpacing: 10, ruleWidth: 40, marginBottom: 34 },
+  feed: { fontSize: 25, letterSpacing: 8, ruleWidth: 34, marginBottom: 28 },
+  square: { fontSize: 21, letterSpacing: 6, ruleWidth: 28, marginBottom: 22 },
 };
 
 /** `.brand svg` / `.name` / `.url` — solo square achica (feed usa el base). */
@@ -402,6 +421,24 @@ function renderGlyph(insight: ResolvedInsight, format: ShareFormat, palette: Sha
   }
 }
 
+/** Placement A (aprobado): nombre en mayúsculas espaciadas con una regla fina
+ *  a cada lado, ENCIMA del eyebrow. Server-side-resolved únicamente (ver
+ *  `BuildCardTreeOptions.personName`) — este componente no sabe de dónde salió
+ *  el nombre, solo lo pinta ya uppercase. */
+function renderNamePlate(personName: string, format: ShareFormat, accText: string): ReactNode {
+  const p = NAME_PLATE[format];
+  const ruleStyle: CSSProperties = { width: p.ruleWidth, height: 1, background: accText, opacity: 0.5, display: "flex" };
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: p.marginBottom, width: "100%" }}>
+      <div key="np-rule-left" style={ruleStyle} />
+      <div style={{ fontFamily: "Quicksand", fontWeight: 600, fontSize: p.fontSize, letterSpacing: p.letterSpacing, color: accText, display: "flex" }}>
+        {personName.toUpperCase()}
+      </div>
+      <div key="np-rule-right" style={ruleStyle} />
+    </div>
+  );
+}
+
 function renderEyebrow(text: string, format: ShareFormat, line: string, accText: string, withRules: boolean): ReactNode {
   const t = EYEBROW_TXT[format];
   const txt = (
@@ -544,6 +581,7 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
         paddingLeft: pad.left,
       }}
     >
+      {opts.personName ? renderNamePlate(opts.personName, opts.format, palette.accText) : null}
       {renderEyebrow(eyebrowText, opts.format, palette.line, palette.accText, true)}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, position: "relative", width: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
@@ -602,15 +640,20 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
 function renderTarotSquareBody(insight: ResolvedInsight, opts: BuildCardTreeOptions, palette: SharePalette): ReactNode {
   const dims = ARCH_DIMS.square;
 
-  return (
+  // El layout base es una fila (glifo + columna de texto alineada a la
+  // izquierda) — la placa del nombre, en cambio, va centrada arriba del todo
+  // (mismo criterio "encima de todo" que el resto de lentes/formatos), así
+  // que se envuelve en una columna exterior propia en vez de sumarse a la
+  // fila (que la habría dejado pegada al glifo, a la izquierda).
+  const row: ReactNode = (
     <div
       style={{
         position: "relative",
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
+        flex: 1,
         width: "100%",
-        height: "100%",
         gap: 60,
         paddingTop: 100,
         paddingBottom: 100,
@@ -652,6 +695,17 @@ function renderTarotSquareBody(insight: ResolvedInsight, opts: BuildCardTreeOpti
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  if (!opts.personName) return row;
+
+  return (
+    <div style={{ position: "relative", display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "center", width: "100%", paddingTop: 56 }}>
+        {renderNamePlate(opts.personName, "square", palette.accText)}
+      </div>
+      {row}
     </div>
   );
 }

@@ -19,8 +19,13 @@ import type { ShareCardParams } from "../types";
 
 const MAX_BYTES = 500_000;
 
-async function expectValidCard(params: ShareCardParams, eyebrowDate?: string) {
-  const buf = await renderShareCardImage(params, eyebrowDate);
+interface ExpectValidCardOptions {
+  eyebrowDate?: string;
+  personName?: string;
+}
+
+async function expectValidCard(params: ShareCardParams, options: ExpectValidCardOptions = {}) {
+  const buf = await renderShareCardImage(params, options);
   const meta = await sharp(buf).metadata();
   const dims = SHARE_FORMAT_DIMENSIONS[params.format];
   expect(meta.width).toBe(dims.w);
@@ -32,7 +37,7 @@ async function expectValidCard(params: ShareCardParams, eyebrowDate?: string) {
 }
 
 function numeros(format: ShareFormat, theme: ShareTheme, number: number, labelKey = "lifePath"): ShareCardParams {
-  return { lens: "numeros", number, labelKey, format, theme, detail: true, locale: "es" };
+  return { lens: "numeros", number, labelKey, format, theme, detail: true, locale: "es", showName: false };
 }
 
 describe("renderShareCardImage — un formato × una lente representativa", () => {
@@ -65,6 +70,7 @@ describe("renderShareCardImage — casos de estrés", () => {
       theme: "cosmic",
       detail: true,
       locale: "es",
+      showName: false,
     };
     await expectValidCard(params);
   });
@@ -77,6 +83,7 @@ describe("renderShareCardImage — casos de estrés", () => {
       theme: "observatory",
       detail: true,
       locale: "es",
+      showName: false,
     };
     await expectValidCard(params);
   });
@@ -89,14 +96,15 @@ describe("renderShareCardImage — casos de estrés", () => {
       theme: "eclipse",
       detail: true,
       locale: "es",
+      showName: false,
     };
-    await expectValidCard(params, "21 DE JULIO");
+    await expectValidCard(params, { eyebrowDate: "21 DE JULIO" });
   });
 });
 
 describe("renderShareCardImage — carta (rueda natal: HERO en story, FONDO en feed/square)", () => {
   function carta(format: ShareFormat, body: "sun" | "moon" | "asc", sign: string): ShareCardParams {
-    return { lens: "carta", body, sign, format, theme: "observatory", detail: true, locale: "es" };
+    return { lens: "carta", body, sign, format, theme: "observatory", detail: true, locale: "es", showName: false };
   }
 
   it.each([
@@ -126,6 +134,7 @@ describe("renderShareCardImage — variante horizontal (tarot + square)", () => 
       theme: "cosmic",
       detail: true,
       locale: "es",
+      showName: false,
     };
     await expectValidCard(params);
   });
@@ -134,5 +143,25 @@ describe("renderShareCardImage — variante horizontal (tarot + square)", () => 
 describe("renderShareCardImage — detail:false oculta los chips (no revienta sin ellos)", () => {
   it("numeros 11 (maestro) con detail:false sigue produciendo un JPEG válido", async () => {
     await expectValidCard({ ...numeros("story", "cosmic", 11, "expression"), detail: false });
+  });
+});
+
+describe("renderShareCardImage — personName (placa del nombre, placement A)", () => {
+  it("numeros — story, con personName: sigue produciendo un JPEG válido de dims exactas", async () => {
+    await expectValidCard(numeros("story", "observatory", 7), { personName: "GIOVANNI" });
+  });
+
+  it("tarot horizontal — square, con personName: sigue produciendo un JPEG válido de dims exactas", async () => {
+    const params: ShareCardParams = {
+      lens: "tarot",
+      cardId: "fool",
+      reversed: false,
+      format: "square",
+      theme: "cosmic",
+      detail: true,
+      locale: "es",
+      showName: false,
+    };
+    await expectValidCard(params, { personName: "GIOVANNI" });
   });
 });

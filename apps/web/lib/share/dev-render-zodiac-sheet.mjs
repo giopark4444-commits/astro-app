@@ -38,8 +38,8 @@ async function main() {
   const crops = [];
   for (const sign of ZODIAC_GLYPH_KEYS) {
     const buf = await renderShareCardImage(
-      { lens: "horoscopo", sign, format: "story", theme: "observatory", detail: true, locale: "es" },
-      "21 DE JULIO",
+      { lens: "horoscopo", sign, format: "story", theme: "observatory", detail: true, locale: "es", showName: false },
+      { eyebrowDate: "21 DE JULIO" },
     );
     const cropped = await sharp(buf).extract({ left: 0, top: CROP.top, width: CARD_WIDTH, height: CROP.height }).toBuffer();
     crops.push({ sign, buf: cropped });

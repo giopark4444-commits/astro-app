@@ -12,7 +12,7 @@ import { HOROSCOPE_SIGNS_EN } from "../../content/horoscope-en";
 import { resolveInsight } from "../resolve-insight";
 import type { ShareCardParams } from "../types";
 
-const COMMON = { format: "story", theme: "observatory", detail: true } as const;
+const COMMON = { format: "story", theme: "observatory", detail: true, showName: false } as const;
 
 function stemOf(key: string) {
   const stem = HEAVENLY_STEMS.find((s) => s.key === key);

@@ -29,6 +29,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -55,6 +56,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -76,6 +78,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -96,6 +99,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -110,6 +114,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -129,6 +134,7 @@ describe("parseShareParams — casos válidos por lente", () => {
       format: "story",
       detail: true,
       locale: "es",
+      showName: false,
     } satisfies ShareCardParams);
   });
 
@@ -151,6 +157,48 @@ describe("parseShareParams — casos válidos por lente", () => {
     const result = parseShareParams(sp({ ...VALID.numeros, detail: "0" }));
     expect("error" in result).toBe(false);
     expect((result as { detail: boolean }).detail).toBe(false);
+  });
+
+  describe("name (toggle 'Mostrar el nombre') — nunca lleva el nombre en sí", () => {
+    it("ausente -> showName:false (default OFF)", () => {
+      const result = parseShareParams(sp(VALID.numeros));
+      expect("error" in result).toBe(false);
+      expect((result as { showName: boolean }).showName).toBe(false);
+    });
+
+    it("name=0 -> showName:false", () => {
+      const result = parseShareParams(sp({ ...VALID.numeros, name: "0" }));
+      expect("error" in result).toBe(false);
+      expect((result as { showName: boolean }).showName).toBe(false);
+    });
+
+    it("name=1 -> showName:true", () => {
+      const result = parseShareParams(sp({ ...VALID.numeros, name: "1" }));
+      expect("error" in result).toBe(false);
+      expect((result as { showName: boolean }).showName).toBe(true);
+    });
+  });
+
+  describe("profileId (UUID opcional del birth_profile a nombrar)", () => {
+    const UUID = "0c9f3c9e-6f1a-4b3e-9a3e-3b1c2d4e5f6a";
+
+    it("ausente -> profileId no está en el resultado", () => {
+      const result = parseShareParams(sp(VALID.numeros));
+      expect("error" in result).toBe(false);
+      expect("profileId" in result).toBe(false);
+    });
+
+    it("UUID válido -> se cuela intacto", () => {
+      const result = parseShareParams(sp({ ...VALID.numeros, profileId: UUID }));
+      expect("error" in result).toBe(false);
+      expect((result as { profileId?: string }).profileId).toBe(UUID);
+    });
+
+    it("no-UUID -> bad_profile", () => {
+      expect(parseShareParams(sp({ ...VALID.numeros, profileId: "no-soy-un-uuid" }))).toEqual({
+        error: "bad_profile",
+      });
+    });
   });
 });
 
@@ -219,5 +267,13 @@ describe("parseShareParams — rechazos, un código por campo", () => {
 
   it("locale inválido -> bad_locale", () => {
     expect(parseShareParams(sp({ ...VALID.numeros, locale: "fr" }))).toEqual({ error: "bad_locale" });
+  });
+
+  it("name inválido (ni '0' ni '1') -> bad_name", () => {
+    expect(parseShareParams(sp({ ...VALID.numeros, name: "yes" }))).toEqual({ error: "bad_name" });
+  });
+
+  it("profileId con formato no-UUID -> bad_profile", () => {
+    expect(parseShareParams(sp({ ...VALID.numeros, profileId: "123" }))).toEqual({ error: "bad_profile" });
   });
 });

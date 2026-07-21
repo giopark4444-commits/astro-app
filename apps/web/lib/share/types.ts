@@ -14,6 +14,17 @@ interface ShareCardCommon {
   theme: ShareTheme;
   detail: boolean;
   locale: ShareLocale;
+  /** Toggle "Mostrar el nombre" del modal — default false. El cliente SOLO
+   *  manda este booleano (`name=0|1`); el nombre en sí jamás viaja como texto
+   *  libre. El server resuelve quién es (perfil autenticado + `profileId`
+   *  opcional de abajo) y sanea antes de pintarlo — ver route.ts. */
+  showName: boolean;
+  /** UUID opcional de un birth_profile del usuario — permite mostrar el
+   *  nombre DE ESE perfil (en vez del display_name de la cuenta) cuando la
+   *  card corresponde a un perfil distinto al de la cuenta. Solo un id: el
+   *  server resuelve el nombre real y verifica propiedad (nunca texto libre,
+   *  ver arriba). */
+  profileId?: string;
 }
 
 export interface ShareCardNumeros extends ShareCardCommon {
@@ -60,9 +71,14 @@ export type ShareLens = ShareCardParams["lens"];
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 /** Lo que un ShareButton necesita del caller: solo los campos de dominio de la
- *  lente (sin PII, ver arriba) — nunca format/theme/detail/locale, que el
- *  propio modal decide vía use-share-image (estado de usuario, no del dato). */
-export type ShareLensParams = DistributiveOmit<ShareCardParams, "format" | "theme" | "detail" | "locale">;
+ *  lente (sin PII, ver arriba) — nunca format/theme/detail/locale/showName,
+ *  que el propio modal decide vía use-share-image (estado de usuario, no del
+ *  dato). `profileId` SÍ queda: es la vista quien sabe cuál es el perfil
+ *  activo (ver numerology-view.tsx `active.id`), el modal solo lo reenvía. */
+export type ShareLensParams = DistributiveOmit<
+  ShareCardParams,
+  "format" | "theme" | "detail" | "locale" | "showName"
+>;
 
 /** Contenido ya resuelto, listo para pintar — todo el texto sale de las capas
  *  de contenido existentes (numerology-es/en, core-reading-es/en, DAY_MASTER_VOICE,

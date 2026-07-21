@@ -16,6 +16,31 @@ vi.mock("@/lib/share/render", () => ({
   renderShareCardImage: (...args: unknown[]) => renderShareCardImageMock(...args),
 }));
 
+// Mock de supabase, una cadena por tabla: `.from("birth_profiles").select(...)
+// .eq(...).eq(...).maybeSingle()` y `.from("profiles_user").select(...)
+// .eq(...).maybeSingle()` — `eq` es auto-referencial (devuelve la misma
+// cadena) para tolerar 1 o 2 `.eq()` encadenados sin dos mocks distintos.
+const birthProfilesMaybeSingle = vi.fn();
+const birthProfilesEq = vi.fn();
+const birthProfilesChain = { eq: birthProfilesEq, maybeSingle: birthProfilesMaybeSingle };
+birthProfilesEq.mockReturnValue(birthProfilesChain);
+const birthProfilesSelect = vi.fn(() => birthProfilesChain);
+const birthProfilesFrom = { select: birthProfilesSelect };
+
+const profilesUserMaybeSingle = vi.fn();
+const profilesUserEq = vi.fn();
+const profilesUserChain = { eq: profilesUserEq, maybeSingle: profilesUserMaybeSingle };
+profilesUserEq.mockReturnValue(profilesUserChain);
+const profilesUserSelect = vi.fn(() => profilesUserChain);
+const profilesUserFrom = { select: profilesUserSelect };
+
+const fromMock = vi.fn((table: string) => {
+  if (table === "birth_profiles") return birthProfilesFrom;
+  if (table === "profiles_user") return profilesUserFrom;
+  throw new Error(`tabla inesperada en el mock: ${table}`);
+});
+const supabaseMock = { from: fromMock };
+
 import { GET } from "../route";
 
 const USER_ID = "user-abc-123";
@@ -37,12 +62,14 @@ const VALID_QS = {
 describe("GET /api/share-card", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    authenticateRouteMock.mockResolvedValue({ supabase: {}, user: { id: USER_ID } });
+    authenticateRouteMock.mockResolvedValue({ supabase: supabaseMock, user: { id: USER_ID } });
     renderShareCardImageMock.mockResolvedValue(FAKE_JPEG);
+    birthProfilesMaybeSingle.mockResolvedValue({ data: null });
+    profilesUserMaybeSingle.mockResolvedValue({ data: null });
   });
 
   it("sin sesión → 401, ni siquiera intenta renderizar", async () => {
-    authenticateRouteMock.mockResolvedValue({ supabase: {}, user: null });
+    authenticateRouteMock.mockResolvedValue({ supabase: supabaseMock, user: null });
     const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}`));
     expect(res.status).toBe(401);
     const body = (await res.json()) as { error: string };
@@ -51,7 +78,7 @@ describe("GET /api/share-card", () => {
   });
 
   it("sin sesión con params también inválidos → 401 (auth va primero)", async () => {
-    authenticateRouteMock.mockResolvedValue({ supabase: {}, user: null });
+    authenticateRouteMock.mockResolvedValue({ supabase: supabaseMock, user: null });
     const res = await GET(fakeRequest("http://localhost/api/share-card?lens=bogus"));
     expect(res.status).toBe(401);
     expect(renderShareCardImageMock).not.toHaveBeenCalled();
@@ -67,6 +94,8 @@ describe("GET /api/share-card", () => {
       ["theme", VALID_QS.numeros.replace("theme=observatory", "theme=bogus"), "bad_theme"],
       ["format", VALID_QS.numeros.replace("format=story", "format=bogus"), "bad_format"],
       ["locale", VALID_QS.numeros.replace("locale=es", "locale=bogus"), "bad_locale"],
+      ["name", `${VALID_QS.numeros}&name=yes`, "bad_name"],
+      ["profileId", `${VALID_QS.numeros}&profileId=no-es-un-uuid`, "bad_profile"],
     ];
 
     it.each(cases)("%s inválido → 400 %s", async (_name, qs, expectedError) => {
@@ -98,31 +127,31 @@ describe("GET /api/share-card", () => {
       const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.horoscopo}&date=2026-07-21`));
       expect(res.status).toBe(200);
       expect(renderShareCardImageMock).toHaveBeenCalledTimes(1);
-      const [, eyebrowDate] = renderShareCardImageMock.mock.calls[0] as [unknown, string];
-      expect(eyebrowDate).toBe("21 DE JULIO");
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { eyebrowDate?: string }];
+      expect(options.eyebrowDate).toBe("21 DE JULIO");
     });
 
     it("date válida (en): eyebrowDate formateado 'MONTH D' en mayúsculas", async () => {
       const qs = VALID_QS.horoscopo.replace("locale=es", "locale=en") + "&date=2026-07-21";
       const res = await GET(fakeRequest(`http://localhost/api/share-card?${qs}`));
       expect(res.status).toBe(200);
-      const [, eyebrowDate] = renderShareCardImageMock.mock.calls[0] as [unknown, string];
-      expect(eyebrowDate).toBe("JULY 21");
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { eyebrowDate?: string }];
+      expect(options.eyebrowDate).toBe("JULY 21");
     });
 
     it("horóscopo sin date → usa la fecha actual del server sin romper", async () => {
       const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.horoscopo}`));
       expect(res.status).toBe(200);
-      const [, eyebrowDate] = renderShareCardImageMock.mock.calls[0] as [unknown, string | undefined];
-      expect(typeof eyebrowDate).toBe("string");
-      expect((eyebrowDate as string).length).toBeGreaterThan(0);
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { eyebrowDate?: string }];
+      expect(typeof options.eyebrowDate).toBe("string");
+      expect((options.eyebrowDate as string).length).toBeGreaterThan(0);
     });
 
     it("lentes que no son horóscopo ignoran date (no lo validan, no lo pasan)", async () => {
       const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&date=bogus`));
       expect(res.status).toBe(200);
-      const [, eyebrowDate] = renderShareCardImageMock.mock.calls[0] as [unknown, string | undefined];
-      expect(eyebrowDate).toBeUndefined();
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { eyebrowDate?: string }];
+      expect(options.eyebrowDate).toBeUndefined();
     });
   });
 
@@ -145,8 +174,9 @@ describe("GET /api/share-card", () => {
           format: "story",
           detail: true,
           locale: "es",
+          showName: false,
         },
-        undefined,
+        {},
       );
     });
 
@@ -162,8 +192,9 @@ describe("GET /api/share-card", () => {
           format: "story",
           detail: true,
           locale: "es",
+          showName: false,
         },
-        undefined,
+        {},
       );
     });
   });
@@ -175,5 +206,92 @@ describe("GET /api/share-card", () => {
     const body = (await res.json()) as { error: string };
     expect(body.error).toBe("render_failed");
     expect(JSON.stringify(body)).not.toContain("detalle interno sensible");
+  });
+
+  describe("nombre (toggle 'Mostrar el nombre') — resuelto SIEMPRE server-side, nunca de searchParams", () => {
+    const VALID_PROFILE_ID = "0c9f3c9e-6f1a-4b3e-9a3e-3b1c2d4e5f6a";
+
+    it("showName=0 → no consulta la DB, personName undefined", async () => {
+      const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=0`));
+      expect(res.status).toBe(200);
+      expect(fromMock).not.toHaveBeenCalled();
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBeUndefined();
+    });
+
+    it("showName=1 + profileId → consulta birth_profiles con eq(id) + eq(user_id) y pasa el name saneado", async () => {
+      birthProfilesMaybeSingle.mockResolvedValue({ data: { name: "Giovanni" } });
+      const res = await GET(
+        fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=1&profileId=${VALID_PROFILE_ID}`),
+      );
+      expect(res.status).toBe(200);
+      expect(fromMock).toHaveBeenCalledWith("birth_profiles");
+      expect(birthProfilesSelect).toHaveBeenCalledWith("name");
+      expect(birthProfilesEq).toHaveBeenCalledWith("id", VALID_PROFILE_ID);
+      expect(birthProfilesEq).toHaveBeenCalledWith("user_id", USER_ID);
+      expect(profilesUserSelect).not.toHaveBeenCalled();
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBe("Giovanni");
+    });
+
+    it("showName=1 sin profileId → cae a profiles_user.display_name", async () => {
+      profilesUserMaybeSingle.mockResolvedValue({ data: { display_name: "Gio" } });
+      const res = await GET(fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=1`));
+      expect(res.status).toBe(200);
+      expect(fromMock).toHaveBeenCalledWith("profiles_user");
+      expect(profilesUserSelect).toHaveBeenCalledWith("display_name");
+      expect(profilesUserEq).toHaveBeenCalledWith("id", USER_ID);
+      expect(birthProfilesSelect).not.toHaveBeenCalled();
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBe("Gio");
+    });
+
+    it("showName=1 pero la query devuelve null → personName undefined, sigue en 200 (no rompe)", async () => {
+      birthProfilesMaybeSingle.mockResolvedValue({ data: null });
+      const res = await GET(
+        fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=1&profileId=${VALID_PROFILE_ID}`),
+      );
+      expect(res.status).toBe(200);
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBeUndefined();
+    });
+
+    it("showName=1 pero la query de supabase revienta → personName undefined, sigue en 200 (no rompe el render)", async () => {
+      birthProfilesMaybeSingle.mockRejectedValue(new Error("boom: supabase down"));
+      const res = await GET(
+        fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=1&profileId=${VALID_PROFILE_ID}`),
+      );
+      expect(res.status).toBe(200);
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBeUndefined();
+    });
+
+    it("nombre con saltos de línea y más de 24 caracteres → saneado (colapsado + truncado con '…')", async () => {
+      birthProfilesMaybeSingle.mockResolvedValue({ data: { name: "  Giovanni\n\nAlejandro   Park   Gomez  " } });
+      const res = await GET(
+        fakeRequest(`http://localhost/api/share-card?${VALID_QS.numeros}&name=1&profileId=${VALID_PROFILE_ID}`),
+      );
+      expect(res.status).toBe(200);
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBeDefined();
+      const personName = options.personName as string;
+      expect(personName.length).toBeLessThanOrEqual(25); // 24 + "…"
+      expect(personName).not.toMatch(/\n/);
+      expect(personName).not.toMatch(/ {2}/); // sin espacios dobles
+    });
+
+    it("el nombre NUNCA se toma de searchParams, ni siquiera si el cliente manda uno", async () => {
+      birthProfilesMaybeSingle.mockResolvedValue({ data: { name: "Nombre Real De BD" } });
+      const res = await GET(
+        fakeRequest(
+          `http://localhost/api/share-card?${VALID_QS.numeros}&name=1&profileId=${VALID_PROFILE_ID}&personName=HACKER&nombre=INTRUSO`,
+        ),
+      );
+      expect(res.status).toBe(200);
+      const [, options] = renderShareCardImageMock.mock.calls[0] as [unknown, { personName?: string }];
+      expect(options.personName).toBe("Nombre Real De BD");
+      expect(options.personName).not.toContain("HACKER");
+      expect(options.personName).not.toContain("INTRUSO");
+    });
   });
 });

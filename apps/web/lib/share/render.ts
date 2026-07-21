@@ -14,11 +14,23 @@ import { resolveInsight } from "./resolve-insight";
 import { loadTarotArt } from "./tarot-art";
 import type { ShareCardParams } from "./types";
 
-/** Renderiza una tarjeta compartible ya validada a un Buffer JPEG.
- *  `eyebrowDate` es un string ya formateado por el caller (route de la API) —
- *  este módulo nunca instancia Date, para que el render siga siendo testeable de
- *  forma determinista sin mockear el reloj. */
-export async function renderShareCardImage(params: ShareCardParams, eyebrowDate?: string): Promise<Buffer> {
+export interface RenderShareCardOptions {
+  /** Fecha ya formateada por el caller (route de la API) — este módulo nunca
+   *  instancia Date, para que el render siga siendo testeable de forma
+   *  determinista sin mockear el reloj. */
+  eyebrowDate?: string;
+  /** Nombre de la persona YA resuelto+saneado server-side (route.ts, desde el
+   *  perfil autenticado) — este módulo sigue sin tocar DB ni recibir texto
+   *  libre del cliente; solo pinta el string que le pasan. */
+  personName?: string;
+}
+
+/** Renderiza una tarjeta compartible ya validada a un Buffer JPEG. */
+export async function renderShareCardImage(
+  params: ShareCardParams,
+  options: RenderShareCardOptions = {},
+): Promise<Buffer> {
+  const { eyebrowDate, personName } = options;
   const insight = resolveInsight(params);
   const { w, h } = SHARE_FORMAT_DIMENSIONS[params.format];
 
@@ -34,6 +46,7 @@ export async function renderShareCardImage(params: ShareCardParams, eyebrowDate?
     // que resolve-insight.ts para accentChipIndex).
     ...(eyebrowDate !== undefined ? { eyebrowDate } : {}),
     ...(tarotArtDataUri !== undefined ? { tarotArtDataUri } : {}),
+    ...(personName !== undefined ? { personName } : {}),
   });
 
   const response = new ImageResponse(tree, {
