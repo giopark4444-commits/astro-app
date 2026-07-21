@@ -64,17 +64,17 @@ describe("parseQuickQuestions", () => {
     expect(out).toHaveLength(2);
     expect(out[0]).toHaveLength(6);
     expect(out[1]).toHaveLength(6);
-    expect(out[0][0]).toBe(DEFAULT_QUICK_QUESTIONS.es[0][0]); // "" → default
-    expect(out[0][1]).toBe(DEFAULT_QUICK_QUESTIONS.es[0][1]); // 5 → default
-    expect(out[0][2]).toBe("c3"); // se conserva
-    expect(out[1][0]).toBe("d1");
-    expect(out[1][1]).toBe(DEFAULT_QUICK_QUESTIONS.es[1][1]); // faltante → default
+    expect(out[0]![0]).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![0]); // "" → default
+    expect(out[0]![1]).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![1]); // 5 → default
+    expect(out[0]![2]).toBe("c3"); // se conserva
+    expect(out[1]![0]).toBe("d1");
+    expect(out[1]![1]).toBe(DEFAULT_QUICK_QUESTIONS.es[1]![1]); // faltante → default
   });
 
   it("recorta a MAX_LEN", () => {
     const long = "x".repeat(MAX_LEN + 50);
     const out = parseQuickQuestions({ pages: [[long]] }, "es");
-    expect(out[0][0]).toHaveLength(MAX_LEN);
+    expect(out[0]![0]).toHaveLength(MAX_LEN);
   });
 });
 
@@ -83,7 +83,7 @@ describe("normalizeForSave", () => {
     const out = normalizeForSave([["solo-una"]], "es");
     expect(out.pages).toHaveLength(2);
     expect(out.pages[0]).toHaveLength(6);
-    expect(out.pages[0][0]).toBe("solo-una");
-    expect(out.pages[0][1]).toBe(DEFAULT_QUICK_QUESTIONS.es[0][1]);
+    expect(out.pages[0]![0]).toBe("solo-una");
+    expect(out.pages[0]![1]).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![1]);
   });
 });
