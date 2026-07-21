@@ -80,4 +80,36 @@ describe("QuickQuestions", () => {
     const restored = screen.getByRole("textbox", { name: "Pregunta 1" }) as HTMLInputElement;
     expect(restored.value).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![0]);
   });
+
+  it("el '+' agrega una página nueva en blanco y guarda una pregunta propia en ella", async () => {
+    renderQ();
+    await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });
+    fireEvent.click(screen.getByRole("button", { name: "Agregar página" }));
+    // entró en edición sobre la página nueva (en blanco)
+    const input = screen.getByRole("textbox", { name: "Pregunta 1" }) as HTMLInputElement;
+    expect(input.value).toBe("");
+    fireEvent.change(input, { target: { value: "Mi pregunta nueva" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(1));
+    const saved = saveMock.mock.calls[0]![0] as string[][];
+    expect(saved).toHaveLength(3);
+    expect(saved[2]![0]).toBe("Mi pregunta nueva");
+  });
+
+  it("vaciar una página extra y guardar la elimina (el pager vuelve a 2)", async () => {
+    renderQ();
+    await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });
+    // agrega la página 3 con una pregunta y guarda
+    fireEvent.click(screen.getByRole("button", { name: "Agregar página" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Pregunta 1" }), { target: { value: "temporal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("button", { name: "Página 3 de 3" })).toBeInTheDocument();
+    // edita, vacía la pregunta de la página 3 y guarda → la página se elimina
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Pregunta 1" }), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("button", { name: /Página 3/ })).toBeNull());
+  });
 });
