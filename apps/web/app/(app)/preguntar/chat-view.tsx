@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { ChatLenses, type TarotCardRef } from "./chat-lenses";
+import { QuickQuestions } from "./quick-questions";
 import styles from "./chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -78,12 +79,11 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   if (!active) return null;
   const activeId = active.id;
 
-  async function send() {
-    const text = input.trim();
+  async function sendText(raw: string) {
+    const text = raw.trim();
     if (!text || st === "loading") return;
     const next: Msg[] = [...messages, { role: "user", content: text }];
     setMessages(next);
-    setInput("");
     setSt("loading");
     try {
       const res = await fetch("/api/chat", {
@@ -136,6 +136,13 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
     } catch {
       setSt("error");
     }
+  }
+
+  function send() {
+    const text = input.trim();
+    if (!text || st === "loading") return;
+    setInput("");
+    void sendText(text);
   }
 
   return (
@@ -191,6 +198,8 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
           </div>
         )}
       </div>
+
+      <QuickQuestions onSend={(q) => void sendText(q)} />
 
       <div className={styles.composer}>
         <input
