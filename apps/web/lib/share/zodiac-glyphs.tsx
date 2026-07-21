@@ -6,14 +6,14 @@
 // verificación en el commit: cmap de CormorantGaramond_500Medium.ttf y
 // Quicksand_400Regular.ttf no tiene ningún code point en el rango 2648-2653).
 //
-// La app NO tiene un set de 12 glifos-path reusable: la rueda de horóscopo
-// (horoscopo/selector-wheel.tsx) pinta los signos como TEXTO Unicode + selector de
-// variación (glyph + TEXT_VS), no como paths SVG; components/icon.tsx solo trae UN
-// glifo zodiacal ("aries", los cuernos de carnero, usado como ícono genérico de nav
-// para toda la sección horóscopo). Se reutiliza ese path para Aries (consistencia de
-// marca) y se crean los 11 restantes en el mismo lenguaje visual: línea fina
-// (stroke, sin relleno), viewBox 0 0 24 24, mismos stroke-linecap/linejoin
-// redondeados que el enso — igual que pide la iconografía de línea de Aluna.
+// Glifos zodiacales derivados de Tabler Icons (MIT) — https://tabler.io/icons
+// (set "zodiac-<sign>", outline, viewBox 24×24). Se descargó cada SVG oficial
+// (unpkg @tabler/icons/icons/outline/zodiac-<sign>.svg) y se extrajeron sus
+// <path> de dibujo, descartando el primer path invisible que trae cada ícono
+// Tabler (`stroke="none" d="M0 0h24v24H0z" fill="none"` — un hitbox de fondo,
+// no forma parte del glifo). El stroke-width se afinó de 2 (default Tabler) a
+// 1.3 para casar con el lenguaje hairline del resto del set de línea de Aluna
+// (mismo criterio que el enso / SepStar de card-template.tsx).
 //
 // Cada glifo es un ARRAY de elementos SVG (nunca `<>...</>`): satori no resuelve
 // React.Fragment como hijo de <svg> — falla en runtime con "Cannot convert a
@@ -23,60 +23,67 @@
 import type { ReactElement } from "react";
 
 const ZODIAC_PATHS: Record<string, ReactElement[]> = {
-  // Cuernos de carnero — path idéntico al "aries" de components/icon.tsx.
-  aries: [<path key="a" d="M4 19.5C4 9.5 6 5.5 8.6 5.5c2.1 0 3.4 2.4 3.4 6 0-3.6 1.3-6 3.4-6C18 5.5 20 9.5 20 19.5" />],
-  // Cabeza de toro: círculo (testuz) + dos cuernos curvos.
+  aries: [
+    <path key="a" d="M12 5a5 5 0 1 0 -4 8" />,
+    <path key="b" d="M16 13a5 5 0 1 0 -4 -8" />,
+    <path key="c" d="M12 21l0 -16" />,
+  ],
   taurus: [
-    <circle key="a" cx="12" cy="15.3" r="5" />,
-    <path key="b" d="M7 4.5c-2.2 2-2.2 5.6 0 7.8M17 4.5c2.2 2 2.2 5.6 0 7.8" />,
+    <path key="a" d="M6 3a6 6 0 0 0 12 0" />,
+    <path key="b" d="M6 15a6 6 0 1 0 12 0a6 6 0 1 0 -12 0" />,
   ],
-  // Gemelos: dos columnas con travesaños arriba y abajo.
-  gemini: [<path key="a" d="M6 5h12M6 19h12M9 5v14M15 5v14" />],
-  // Cangrejo: dos espirales enfrentadas (69 clásico del glifo).
+  gemini: [
+    <path key="a" d="M3 3a21 21 0 0 0 18 0" />,
+    <path key="b" d="M3 21a21 21 0 0 1 18 0" />,
+    <path key="c" d="M7 4.5l0 15" />,
+    <path key="d" d="M17 4.5l0 15" />,
+  ],
   cancer: [
-    <circle key="a" cx="8" cy="8.3" r="2.3" />,
-    <path key="b" d="M8 10.6c0 3.5 3 5.6 6 5.6" />,
-    <circle key="c" cx="16" cy="15.7" r="2.3" />,
-    <path key="d" d="M16 13.4c0-3.5-3-5.6-6-5.6" />,
+    <path key="a" d="M3 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />,
+    <path key="b" d="M15 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />,
+    <path key="c" d="M3 12a10 6.5 0 0 1 14 -6.5" />,
+    <path key="d" d="M21 12a10 6.5 0 0 1 -14 6.5" />,
   ],
-  // León: círculo (cuerpo) + cola que se enrosca en un rizo.
   leo: [
-    <circle key="a" cx="8.6" cy="8" r="3.2" />,
-    <path key="b" d="M8.6 11.2c0 5.3 3.4 7.8 6.6 7.3a3 3 0 1 0-2.8-4.2" />,
+    <path key="a" d="M13 17a4 4 0 1 0 8 0" />,
+    <path key="b" d="M3 16a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />,
+    <path key="c" d="M7 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />,
+    <path key="d" d="M7 7c0 3 2 5 2 9" />,
+    <path key="e" d="M15 7c0 4 -2 6 -2 10" />,
   ],
-  // Virgo: tres trazos verticales (m) que terminan en un rizo cruzado.
   virgo: [
-    <path key="a" d="M5 6v13" />,
-    <path key="b" d="M5 8c0-1.8 3-1.8 3 0v11" />,
-    <path key="c" d="M8 8c0-1.8 3-1.8 3 0v7" />,
-    <path key="d" d="M11 8c0-1.8 3-1.8 3 5v3.3a2.6 2.6 0 1 0 2.6-2.6" />,
+    <path key="a" d="M3 4a2 2 0 0 1 2 2v9" />,
+    <path key="b" d="M5 6a2 2 0 0 1 4 0v9" />,
+    <path key="c" d="M9 6a2 2 0 0 1 4 0v10a7 5 0 0 0 7 5" />,
+    <path key="d" d="M12 21a7 5 0 0 0 7 -5v-2a3 3 0 0 0 -6 0" />,
   ],
-  // Libra: viga + platillo (arco) + base — la balanza.
-  libra: [<path key="a" d="M5 8h14" />, <path key="b" d="M5 15A7 3.4 0 0 1 19 15" />, <path key="c" d="M5 19h14" />],
-  // Escorpio: igual que Virgo, pero la cola termina en aguijón (flecha).
+  libra: [
+    <path key="a" d="M5 20l14 0" />,
+    <path key="b" d="M5 17h5v-.3a7 7 0 1 1 4 0v.3h5" />,
+  ],
   scorpio: [
-    <path key="a" d="M5 6v13" />,
-    <path key="b" d="M5 8c0-1.8 3-1.8 3 0v11" />,
-    <path key="c" d="M8 8c0-1.8 3-1.8 3 0v7" />,
-    <path key="d" d="M11 8c0-1.8 3-1.8 3 5v6" />,
-    <path key="e" d="M14 19l4-4" />,
-    <path key="f" d="M18 15v3.6" />,
-    <path key="g" d="M18 15h-3.6" />,
+    <path key="a" d="M3 4a2 2 0 0 1 2 2v9" />,
+    <path key="b" d="M5 6a2 2 0 0 1 4 0v9" />,
+    <path key="c" d="M9 6a2 2 0 0 1 4 0v10a3 3 0 0 0 3 3h5l-3 -3m0 6l3 -3" />,
   ],
-  // Sagitario: flecha diagonal con astil cruzado (plumas del arquero).
-  sagittarius: [<path key="a" d="M6 18 18 6" />, <path key="b" d="M11 6h7v7" />, <path key="c" d="M9.5 12.5l-2 2" />],
-  // Capricornio: cuerno en V que se enrosca en cola de pez.
-  capricorn: [<path key="a" d="M5 7l4 11 4-11" />, <path key="b" d="M13 18c0-3 2-5 4-5a2.4 2.4 0 1 1-2 3.8" />],
-  // Acuario: dos ondas apiladas — el agua que se vierte.
+  sagittarius: [
+    <path key="a" d="M4 20l16 -16" />,
+    <path key="b" d="M13 4h7v7" />,
+    <path key="c" d="M6.5 12.5l5 5" />,
+  ],
+  capricorn: [
+    <path key="a" d="M4 4a3 3 0 0 1 3 3v9" />,
+    <path key="b" d="M7 7a3 3 0 0 1 6 0v11a3 3 0 0 1 -3 3" />,
+    <path key="c" d="M13 17a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />,
+  ],
   aquarius: [
-    <path key="a" d="M4 9l3.5-2.5L11 9l3.5-2.5L18 9l2-1.5" />,
-    <path key="b" d="M4 16l3.5-2.5L11 16l3.5-2.5L18 16l2-1.5" />,
+    <path key="a" d="M3 10l3 -3l3 3l3 -3l3 3l3 -3l3 3" />,
+    <path key="b" d="M3 17l3 -3l3 3l3 -3l3 3l3 -3l3 3" />,
   ],
-  // Piscis: dos arcos (peces) enfrentados, unidos por una línea.
   pisces: [
-    <path key="a" d="M8 4c-3 3-3 13 0 16" />,
-    <path key="b" d="M16 4c3 3 3 13 0 16" />,
-    <path key="c" d="M5 12h14" />,
+    <path key="a" d="M5 3a21 21 0 0 1 0 18" />,
+    <path key="b" d="M19 3a21 21 0 0 0 0 18" />,
+    <path key="c" d="M5 12l14 0" />,
   ],
 };
 
@@ -112,7 +119,7 @@ export function ZodiacGlyph({ sign, size, color }: { sign: string; size: number;
       viewBox="0 0 24 24"
       fill="none"
       stroke={color}
-      strokeWidth={1.5}
+      strokeWidth={1.3}
       strokeLinecap="round"
       strokeLinejoin="round"
     >
