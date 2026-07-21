@@ -7,7 +7,7 @@ function insight(quote: string): ResolvedInsight {
   return { eyebrow: "X", quote, glyph: { kind: "number", value: "7" }, chips: [] };
 }
 
-const APP_URL = "https://aluna.app";
+const APP_URL = "https://www.aluna.plus";
 
 describe("buildCaption — formato exacto", () => {
   it("español: comillas angulares + em dash + cta + url con utm", () => {
@@ -19,7 +19,7 @@ describe("buildCaption — formato exacto", () => {
       "Descubre tu numerología en Aluna",
     );
     expect(result).toBe(
-      "«Tu camino es la exploración.» — Descubre tu numerología en Aluna https://aluna.app?utm_source=share&utm_medium=card&utm_campaign=numeros",
+      "«Tu camino es la exploración.» — Descubre tu numerología en Aluna https://www.aluna.plus?utm_source=share&utm_medium=card&utm_campaign=numeros",
     );
   });
 
@@ -32,7 +32,7 @@ describe("buildCaption — formato exacto", () => {
       "Discover your numerology on Aluna",
     );
     expect(result).toBe(
-      "“Your path is exploration.” — Discover your numerology on Aluna https://aluna.app?utm_source=share&utm_medium=card&utm_campaign=numeros",
+      "“Your path is exploration.” — Discover your numerology on Aluna https://www.aluna.plus?utm_source=share&utm_medium=card&utm_campaign=numeros",
     );
   });
 });

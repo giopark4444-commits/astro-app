@@ -108,7 +108,7 @@ describe("ShareModal", () => {
     renderModal();
     fireEvent.click(screen.getByRole("button", { name: es.share.copyCaption }));
     await waitFor(() => expect(writeTextMock).toHaveBeenCalledTimes(1));
-    expect(writeTextMock.mock.calls[0]![0]).toContain("aluna.app");
+    expect(writeTextMock.mock.calls[0]![0]).toContain("aluna.plus");
     await waitFor(() => expect(screen.getByRole("button", { name: es.share.copied })).toBeInTheDocument());
   });
 });

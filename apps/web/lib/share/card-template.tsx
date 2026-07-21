@@ -549,7 +549,7 @@ function renderFooter(format: ShareFormat, palette: SharePalette): ReactNode {
         </div>
       </div>
       <div style={{ fontFamily: "Quicksand", fontSize: b.url, fontWeight: 500, letterSpacing: 4, color: palette.soft, display: "flex" }}>
-        aluna.app
+        www.aluna.plus
       </div>
     </div>
   );
@@ -696,7 +696,7 @@ function renderTarotSquareBody(insight: ResolvedInsight, opts: BuildCardTreeOpti
             Aluna
           </div>
           <div style={{ fontFamily: "Quicksand", fontSize: 18, letterSpacing: 3, color: palette.soft, marginLeft: 8, display: "flex" }}>
-            · aluna.app
+            · www.aluna.plus
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ import { resolveInsight } from "@/lib/share/resolve-insight";
 import type { ShareCardParams, ShareLensParams, ShareLocale } from "@/lib/share/types";
 
 // Mismo fallback que app/(app)/colab/referral-section.tsx y api/billing/*.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://aluna.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.aluna.plus";
 
 function isShareTheme(value: string): value is ShareTheme {
   return (SHARE_THEMES as readonly string[]).includes(value);
