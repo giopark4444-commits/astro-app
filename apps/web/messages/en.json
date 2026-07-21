@@ -252,6 +252,7 @@
     "tarotFanTitle": "Today's deck",
     "tarotFanHint": "Pick a card and turn it over",
     "tarotFanCta": "Full reading",
+    "tarotFanManual": "With my own deck",
     "tarotFanCardAria": "Card {n}, face down. Tap to reveal it.",
     "lensSub": {
       "tarot": "Your card and your spreads"

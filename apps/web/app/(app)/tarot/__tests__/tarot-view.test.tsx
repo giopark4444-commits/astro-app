@@ -7,6 +7,12 @@ import { dailyCard } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TarotView } from "../tarot-view";
 
+// TarotView lee useSearchParams (deep-link ?mode=manual). Sin sesión de router
+// en el test, se mockea con params vacíos → mode null → nada auto-abre.
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(""),
+}));
+
 // userId fijo por test; localDate se calcula con el reloj REAL (nunca fake
 // timers: rompen `waitFor`/`findBy*` de RTL, que dependen de timers reales
 // para su polling). El componente y el test calculan la MISMA fecha con la

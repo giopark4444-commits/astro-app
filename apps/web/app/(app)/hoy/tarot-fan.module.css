@@ -40,19 +40,24 @@
      alineación de inicio cuando el contenido no entra, garantizando que todo
      el arco —dorso izquierdo incluido— quede alcanzable por scroll. */
   justify-content: safe center;
-  padding: var(--sp-4) 0 var(--sp-1);
+  padding: var(--sp-4) 0 var(--sp-2);
 }
 .fanArc {
   position: relative;
   flex: none;
   width: 360px;
-  height: 176px;
+  /* Más alto + cartas levantadas de la base (`.slot bottom`): las cartas de los
+     extremos rotan ~26° desde un origen muy abajo y su borde inferior CAE ~30px
+     bajo la línea base; con el arco pegado a `bottom:0` esa caída quedaba fuera
+     del box y `overflow-x:auto` de `.fanScroll` (que fuerza overflow-y a auto)
+     la recortaba. Con este colchón el arco entero respira dentro de la ventana. */
+  height: 216px;
   margin: 0 auto;
 }
 .slot {
   position: absolute;
   left: 50%;
-  bottom: 0;
+  bottom: 44px;
   width: 76px;
   height: 122px;
   margin-left: -38px;
@@ -167,9 +172,15 @@
   line-height: 1.55;
   color: var(--ink);
 }
-.cta {
-  align-self: center;
+.ctaRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
   margin-top: var(--sp-1);
+  flex-wrap: wrap;
+}
+.cta {
   font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -178,4 +189,17 @@
 }
 .cta:hover {
   color: var(--ink);
+}
+/* Opción secundaria: usar tu propia baraja física (deep-link al modo manual). */
+.ctaAlt {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--soft);
+  border-left: 1px solid var(--line);
+  padding-left: var(--sp-3);
+  transition: color var(--dur-fast) var(--ease);
+}
+.ctaAlt:hover {
+  color: var(--acc-text);
 }

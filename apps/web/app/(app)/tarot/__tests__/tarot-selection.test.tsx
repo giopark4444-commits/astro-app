@@ -21,6 +21,12 @@ import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import es from "@/messages/es.json";
 import { TarotView } from "../tarot-view";
 
+// TarotView lee useSearchParams (deep-link ?mode=manual): mock con params
+// vacíos → mode null → el maestro-detalle se comporta igual que antes.
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(""),
+}));
+
 const USER_ID = "user-1";
 
 function localDateKey(): string {

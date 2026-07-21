@@ -124,9 +124,14 @@ export function TarotFan({ profileId }: { profileId: string }) {
         <p className={styles.hint}>{t("hoy.tarotFanHint")}</p>
       )}
 
-      <Link href="/tarot" className={styles.cta}>
-        {t("hoy.tarotFanCta")} →
-      </Link>
+      <div className={styles.ctaRow}>
+        <Link href="/tarot" className={styles.cta}>
+          {t("hoy.tarotFanCta")} →
+        </Link>
+        <Link href="/tarot?mode=manual" className={styles.ctaAlt}>
+          {t("hoy.tarotFanManual")}
+        </Link>
+      </div>
     </section>
   );
 }

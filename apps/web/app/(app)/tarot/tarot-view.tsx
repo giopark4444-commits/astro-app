@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { dailyCard, cardImageUrl, cardBackUrl } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
@@ -85,6 +86,13 @@ export function TarotView({ userId }: { userId: string }) {
   // Modo manual (T3): independiente de la ceremonia digital — su propio rito.
   const [manualOpen, setManualOpen] = useState(false);
   const postedDailyRef = useRef(false);
+
+  // Deep-link "usa tu propia baraja física": /tarot?mode=manual abre el modo
+  // manual al montar (ej. desde la CTA "Con mi baraja" del abanico de /hoy).
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("mode") === "manual") setManualOpen(true);
+  }, [searchParams]);
 
   const [diary, setDiary] = useState<DiaryState>({ s: "loading" });
 

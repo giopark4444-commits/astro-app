@@ -252,6 +252,7 @@
     "tarotFanTitle": "La baraja de hoy",
     "tarotFanHint": "Elige una carta y voltéala",
     "tarotFanCta": "Tirada completa",
+    "tarotFanManual": "Con mi baraja física",
     "tarotFanCardAria": "Carta {n}, boca abajo. Toca para revelarla.",
     "lensSub": {
       "tarot": "Tu carta y tus tiradas"
