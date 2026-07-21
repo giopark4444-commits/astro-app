@@ -144,9 +144,12 @@ export function useShareImage(lensParams: ShareLensParams) {
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      // Revoke diferido: revocar síncrono tras click() puede cancelar la
+      // descarga en Firefox/Safari.
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
-      setError(true);
+      // Silencioso, como shareNative/copyCaption: un fallo de descarga no debe
+      // secuestrar el estado de error del preview (la imagen sí se generó).
     }
   }, [fetchBlob, params.lens]);
 

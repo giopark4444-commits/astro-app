@@ -37,6 +37,14 @@
   transition: opacity var(--dur-fast) var(--ease);
 }
 
+/* Keyframe LOCAL a este módulo: referenciar un @keyframes definido en otro
+   .module.css muere silencioso (lección recurrente del repo — CSS Modules
+   scopea los nombres). */
+@keyframes aluna-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
 .shimmer {
   position: absolute;
   inset: 0;

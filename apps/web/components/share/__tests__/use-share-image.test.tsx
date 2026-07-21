@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
@@ -81,7 +81,10 @@ describe("useShareImage", () => {
     expect(fetch).toHaveBeenCalledWith(result.current.imageUrl);
     expect(URL.createObjectURL).toHaveBeenCalled();
     expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+    // El revoke es diferido (setTimeout 1s): revocar síncrono tras click()
+    // puede cancelar la descarga en Firefox/Safari.
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    await waitFor(() => expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-url"), { timeout: 2000 });
   });
 
   it("shareNative(): solo llama navigator.share si canShare da luz verde", async () => {

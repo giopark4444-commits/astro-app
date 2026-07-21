@@ -385,7 +385,11 @@ export function TarotView({ userId }: { userId: string }) {
             <div className={`card ${styles.interpPanel}`}>
               <div className={styles.titleRow}>
                 <span className={styles.cardH2}>{t("interpTitle")}</span>
-                <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+                {/* Gate por revealed: compartir antes de voltear la carta del
+                    día spoilearía el arte/esencia que el panel aún oculta. */}
+                {revealed && (
+                  <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+                )}
               </div>
               <TarotInterpretation
                 selected={selected ?? { kind: "daily" }}

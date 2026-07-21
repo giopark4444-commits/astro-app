@@ -123,7 +123,9 @@ export function HoroscopoView() {
           <div className={`card ${styles.interpPanel}`}>
             <div className={styles.titleRow}>
               <span className={styles.cardH2}>{t("interpTitle")}</span>
-              <ShareButton params={shareParams} />
+              {/* Solo occidental: la card comparte un signo zodiacal; en la
+                  pestaña oriental no aplica (esa identidad la cubre Pilares). */}
+              {trad === "occidental" && <ShareButton params={shareParams} />}
             </div>
             <HoroscopoInterpretation
               selected={selected ?? { kind: "reading" }}
