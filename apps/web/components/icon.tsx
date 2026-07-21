@@ -1,8 +1,10 @@
 const PATHS: Record<string, React.ReactNode> = {
-  // Clave histórica "enso" = la MARCA de Aluna; desde el rebrand 2026 dibuja el
-  // monograma "A" (travesaño curvo). Se conserva el nombre de clave para heredar
-  // el logo nuevo en los ~15 call-sites (auth, onboarding, cabeceras) sin tocarlos.
-  enso: (<><path d="M5.5 20 12 5l6.5 15" /><path d="M8.4 13.6a4.2 2.6 0 0 0 7.2 0" /></>),
+  // Clave histórica "enso" = la MARCA de Aluna; desde el rebrand 2026 dibuja la
+  // ESTRELLA DE 7 PUNTAS (los 7 planetas clásicos de la astrología). Se conserva
+  // el nombre de clave para heredar el logo en los ~15 call-sites (auth,
+  // onboarding, cabeceras) sin tocarlos. El ESPIRAL abierto queda reservado como
+  // motivo vivo (animaciones de carga / ceremonia) — siguiente etapa.
+  enso: (<path d="M12.0 1.5 L9.83 7.5 L3.79 5.45 L7.13 10.89 L1.76 14.34 L8.09 15.12 L7.44 21.46 L12.0 17.0 L16.56 21.46 L15.91 15.12 L22.24 14.34 L16.87 10.89 L20.21 5.45 L14.17 7.5 Z" />),
   check: (<path d="M5 12.5 10 17.5 19 7" />),
   wheel: (<><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3.2" /><path d="M12 3v3.4M12 17.6V21M3 12h3.4M17.6 12H21" /></>),
   grid3: (<>{[6, 12, 18].flatMap((y) => [6, 12, 18].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1" />))}</>),

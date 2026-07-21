@@ -30,8 +30,7 @@ export default function Icon() {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M5.5 20 12 5l6.5 15" />
-          <path d="M8.4 13.6a4.2 2.6 0 0 0 7.2 0" />
+          <path d="M12.0 1.5 L9.83 7.5 L3.79 5.45 L7.13 10.89 L1.76 14.34 L8.09 15.12 L7.44 21.46 L12.0 17.0 L16.56 21.46 L15.91 15.12 L22.24 14.34 L16.87 10.89 L20.21 5.45 L14.17 7.5 Z" />
         </svg>
       </div>
     ),
