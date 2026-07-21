@@ -250,6 +250,13 @@
     "askButton": "Ask ✦︎",
     "askSug1": "How do I make the most of today's sky?",
     "askSug2": "What does my personal day ask of me?",
+    "summaryChartTitle": "Your chart",
+    "summaryChartCta": "See your chart",
+    "summaryHoroscopeWesternTitle": "Western horoscope",
+    "summaryHoroscopeEasternTitle": "Eastern horoscope",
+    "summaryHoroscopeCta": "See your horoscope",
+    "summaryPillarsTitle": "Your pillars",
+    "summaryPillarsCta": "See your pillars",
     "lensSub": {
       "numeros": "Your personal cycles and vibrations",
       "carta": "Your birth sky, alive",

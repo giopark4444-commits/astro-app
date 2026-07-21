@@ -250,6 +250,13 @@
     "askButton": "Preguntar ✦︎",
     "askSug1": "¿Cómo aprovecho el cielo de hoy?",
     "askSug2": "¿Qué me pide mi día personal?",
+    "summaryChartTitle": "Tu carta",
+    "summaryChartCta": "Ver tu carta",
+    "summaryHoroscopeWesternTitle": "Horóscopo occidental",
+    "summaryHoroscopeEasternTitle": "Horóscopo oriental",
+    "summaryHoroscopeCta": "Ver tu horóscopo",
+    "summaryPillarsTitle": "Tus pilares",
+    "summaryPillarsCta": "Ver tus pilares",
     "lensSub": {
       "numeros": "Tus ciclos y vibraciones personales",
       "carta": "Tu cielo de nacimiento, vivo",
