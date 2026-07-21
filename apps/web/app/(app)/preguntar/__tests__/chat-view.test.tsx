@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
@@ -126,6 +128,39 @@ describe("ChatView — auto-scroll del hilo (no arrastra la ventana)", () => {
 
     scrollToSpy.mockRestore();
     scrollIntoViewSpy.mockRestore();
+  });
+});
+
+// Regresión: el auto-scroll de arriba scrollea styles.thread por scrollTop —
+// pero eso es un no-op si .thread nunca DESBORDA. En modo PÁGINA (.wrap, no
+// .wrapEmbedded), .wrap tenía `min-height` (crece con el contenido, nunca
+// desborda) mientras /hoy y /perfil embeben el chat en un panel de alto
+// ACOTADO (.chatPanel, height: calc(100vh - 100px)) donde .thread sí desborda
+// y scrollea. jsdom no aplica layout real de CSS Modules (mismo motivo por el
+// que hub.module.css se verifica sobre la fuente en dashboard.test.tsx) — se
+// verifica aquí sobre la fuente de chat.module.css que .wrap (página) tiene
+// alto acotado (height, no min-height) + overflow:hidden, mismo mecanismo que
+// .wrapEmbedded/.chatPanel, para que .thread sea el único que desborda/scrollea.
+describe("chat.module.css — .wrap (modo página) con alto acotado, no min-height", () => {
+  const css = readFileSync(resolve(process.cwd(), "app/(app)/preguntar/chat.module.css"), "utf8");
+  // Primer bloque `.wrap { ... }` del archivo (el de modo página base/móvil);
+  // \.wrap\s*\{ no matchea `.wrapEmbedded {` (a `.wrap` le sigue "E", no
+  // espacio/llave), así que este bloque nunca es el de wrapEmbedded.
+  const wrapBlock = css.match(/\.wrap\s*\{[^}]*\}/)![0];
+
+  it("no usa min-height (así .thread SÍ desborda y scrollea, en vez de crecer con .wrap)", () => {
+    expect(wrapBlock).not.toMatch(/min-height/);
+  });
+
+  it("usa height acotado + overflow:hidden, igual mecanismo que .wrapEmbedded/.chatPanel", () => {
+    expect(wrapBlock).toMatch(/height:\s*calc\(100dvh/);
+    expect(wrapBlock).toMatch(/overflow:\s*hidden/);
+  });
+
+  it(".thread sigue siendo el contenedor scrollable (flex:1 + overflow-y:auto) en los 3 modos", () => {
+    const threadBlock = css.match(/\.thread\s*\{[^}]*\}/)![0];
+    expect(threadBlock).toMatch(/flex:\s*1/);
+    expect(threadBlock).toMatch(/overflow-y:\s*auto/);
   });
 });
 

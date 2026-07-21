@@ -194,4 +194,48 @@ describe("POST /api/scores", () => {
       expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 21);
     });
   });
+
+  describe("tz del CLIENTE (body.tz): coherente con el resto del dashboard (header, horóscopo)", () => {
+    // Mismo instante que arriba: perfil (nacimiento) en UTC → día 21 si nadie
+    // manda tz. Si el cliente manda su tz ACTUAL (Bogotá), el día civil de hoy
+    // (números/pilares/general) debe alinearse con esa tz, no con la de
+    // nacimiento — la incoherencia que este fix corrige.
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-07-21T04:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("tz válida del body gana sobre profile.time_zone", async () => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: { ...PROFILE, time_zone: "UTC" } });
+
+      await POST(fakeRequest({ profileId: "profile-1", tz: "America/Bogota" }));
+
+      expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 20);
+      const cyclesCall = personalCyclesMock.mock.calls[0]!;
+      expect(cyclesCall[1]).toEqual({ year: 2026, month: 7, day: 20 });
+    });
+
+    it("tz inválida en el body cae a profile.time_zone (no rompe, no la usa)", async () => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: { ...PROFILE, time_zone: "America/Bogota" } });
+
+      await POST(fakeRequest({ profileId: "profile-1", tz: "no-es-una-tz-valida" }));
+
+      expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 20);
+    });
+
+    it("sin tz en el body, cae a profile.time_zone (comportamiento previo intacto)", async () => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: { ...PROFILE, time_zone: "America/Bogota" } });
+
+      await POST(fakeRequest({ profileId: "profile-1" }));
+
+      expect(dayPillarMock).toHaveBeenCalledWith(2026, 7, 20);
+    });
+  });
 });

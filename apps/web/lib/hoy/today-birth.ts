@@ -29,6 +29,17 @@ export function civilTodayInZone(zone: string, nowUtc: Date): BirthDate | null {
 }
 
 /**
+ * True si `tz` es una zona horaria IANA válida para luxon (y de largo razonable).
+ * Misma validación que `isValidTz` de lib/horoscope/western.ts — duplicada aquí
+ * (en vez de importada) para que /api/scores no arrastre las dependencias pesadas
+ * de ese módulo (@aluna/ephemeris/@aluna/core), que rompen sus mocks parciales en
+ * route.test.ts al evaluarse ZODIAC_SIGNS a nivel de módulo.
+ */
+export function isValidTz(tz: string): boolean {
+  return typeof tz === "string" && tz.length > 0 && tz.length <= 64 && DateTime.now().setZone(tz).isValid;
+}
+
+/**
  * Hoy como fecha civil en la timezone del PERFIL (usuario), no la del proceso server
  * (que en Vercel/producción es siempre UTC). Sin esto, un usuario en UTC-5 ve el
  * pilar/número del día SIGUIENTE desde ~19:00 hasta medianoche hora local. Si

@@ -99,7 +99,10 @@ export function EnergyPanel({
         const res = await fetch("/api/scores", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ profileId }),
+          // tz ACTUAL del navegador (no la de nacimiento): así "hoy" en
+          // números/pilares/general queda coherente con el resto del
+          // dashboard (header, horóscopo), que también usa esta tz.
+          body: JSON.stringify({ profileId, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
         });
         const data = (await res.json()) as Partial<ScoresByDiscipline>;
         if (alive) {

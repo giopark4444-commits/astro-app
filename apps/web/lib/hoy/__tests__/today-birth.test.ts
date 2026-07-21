@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { civilTodayInZone, parseBirth, todayCivilInZone } from "../today-birth";
+import { civilTodayInZone, isValidTz, parseBirth, todayCivilInZone } from "../today-birth";
 
 describe("civilTodayInZone", () => {
   // 2026-07-21T04:00:00Z es 2026-07-20 23:00 en Bogotá (UTC-5): mismo instante,
@@ -43,6 +43,20 @@ describe("todayCivilInZone", () => {
 
   it("timeZone inválida → cae al fallback (no revienta)", () => {
     expect(() => todayCivilInZone("Not/AZone", NOW_UTC)).not.toThrow();
+  });
+});
+
+describe("isValidTz", () => {
+  it("acepta una IANA válida", () => {
+    expect(isValidTz("America/Bogota")).toBe(true);
+  });
+
+  it("rechaza una zona inexistente", () => {
+    expect(isValidTz("No/Existe")).toBe(false);
+  });
+
+  it("rechaza vacío/no-string sin explotar", () => {
+    expect(isValidTz("")).toBe(false);
   });
 });
 

@@ -17,7 +17,7 @@ import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { computeBaziNatal } from "@/lib/timeline/bazi-natal";
 import { assembleHoyScores } from "@/lib/hoy/scores";
-import { todayCivilInZone } from "@/lib/hoy/today-birth";
+import { todayCivilInZone, isValidTz } from "@/lib/hoy/today-birth";
 
 // "Tu energía de hoy" (dashboard): puntúa 6 áreas de vida (0..100) por las cuatro
 // disciplinas. `astros` = clima de tránsitos al natal, y responde al PERIODO
@@ -126,6 +126,11 @@ export async function POST(request: NextRequest) {
   const period: Period = (PERIODS as readonly string[]).includes(String(body.period))
     ? (body.period as Period)
     : "today";
+  // tz del CLIENTE (como /api/horoscope/*, misma validación isValidTz): sin ella
+  // caemos a profile.time_zone (tz de NACIMIENTO), que puede diferir de la tz
+  // ACTUAL del usuario y desalinear el "hoy" de números/pilares/general con el
+  // resto del dashboard (header, horóscopo), que sí usa la tz del navegador.
+  const clientTz = isValidTz(String(body.tz ?? "")) ? String(body.tz) : null;
 
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -147,9 +152,11 @@ export async function POST(request: NextRequest) {
 
     // Disciplinas del DÍA (no dependen del periodo). La fecha civil de hoy alimenta
     // numerología y el pilar del día; los aspectos de ahora, los astros del día. Se
-    // resuelve en la tz del PERFIL (no la del proceso server, que en Vercel es UTC) —
-    // si no, un usuario en UTC-5 ve el día siguiente desde ~19:00 hora local.
-    const asOf = todayCivilInZone(profile.time_zone);
+    // resuelve en la tz ACTUAL del cliente (coherente con el resto del dashboard);
+    // si no llega o es inválida, cae a la tz del PERFIL (nacimiento) y de ahí a la
+    // del proceso server (que en Vercel es UTC) — si no, un usuario en UTC-5 ve el
+    // día siguiente desde ~19:00 hora local.
+    const asOf = todayCivilInZone(clientTz ?? profile.time_zone);
     const birth = { year: input.year, month: input.month, day: input.day };
     const cycles = personalCycles(birth, asOf);
     const natal = computeBaziNatal(profile);

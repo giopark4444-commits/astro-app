@@ -33,7 +33,13 @@
   width: 100%;
   overflow-x: auto;
   display: flex;
-  justify-content: center;
+  /* `safe center`: en viewports angostos donde el arco (360px) excede el
+     contenedor, un `center` puro corta el extremo IZQUIERDO del arco fuera del
+     área de scroll (el navegador centra el overflow simétrico, dejando ese
+     borde inalcanzable incluso arrastrando al máximo). `safe` degrada a
+     alineación de inicio cuando el contenido no entra, garantizando que todo
+     el arco —dorso izquierdo incluido— quede alcanzable por scroll. */
+  justify-content: safe center;
   padding: var(--sp-4) 0 var(--sp-1);
 }
 .fanArc {

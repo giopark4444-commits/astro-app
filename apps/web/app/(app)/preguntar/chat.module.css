@@ -1,9 +1,17 @@
 /* R2: valores sobre la escala tokenizada (ver tokens.css) */
+/* Alto ACOTADO (no min-height): igual mecanismo que .wrapEmbedded/.chatPanel
+   (ver hub.module.css/perfil.module.css) — con min-height el .thread nunca
+   desbordaba dentro de .wrap, así que su scrollTop era un no-op y retomar un
+   hilo largo aterrizaba en el INICIO en vez del final (regresión cazada en
+   review Fable). overflow:hidden evita que el contenido empuje a .wrap más
+   allá del viewport; .thread (flex:1 + overflow-y:auto, abajo) es quien
+   scrollea internamente en los 3 modos (página/embebido perfil/embebido hoy). */
 .wrap {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 150px);
+  height: calc(100dvh - 150px);
+  overflow: hidden;
   padding: var(--sp-5) var(--sp-5) var(--sp-3); /* 18 contenedor → sp-5 */
 }
 .sky { position: absolute; inset: 0 0 auto; height: 220px; pointer-events: none; z-index: 0; }
@@ -81,7 +89,7 @@
      conversaciones persistido (fuera de alcance, spec §6). */
   .wrap { max-width: min(720px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
 
-  /* .wrap usa `min-height: calc(100dvh - 150px)` en móvil: esos 150px son
+  /* .wrap usa `height: calc(100dvh - 150px)` en móvil: esos 150px son
      header móvil + el clearance del bottom-nav fijo (96px) que en desktop NO
      existe (mismo hallazgo que carta/hoy en la review de R4a). En desktop el
      chat debe reclamar el resto del viewport bajo el header real de
@@ -91,5 +99,5 @@
      respiro) — no una resta derivada del valor móvil (150-96), que por
      coincidencia numérica da un resultado parecido pero no es la cantidad
      correcta. */
-  .wrap { min-height: calc(100dvh - 66px); }
+  .wrap { height: calc(100dvh - 66px); }
 }

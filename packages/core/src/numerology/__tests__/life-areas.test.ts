@@ -19,4 +19,29 @@ describe("scoreLifeAreasNumerology", () => {
     expect(money.score).toBeGreaterThan(50);
     expect(money.score).toBeGreaterThan(love.score);
   });
+
+  it("un día personal MAESTRO (11/22/33) pesa más que el mismo dígito no-maestro en sus áreas afines", () => {
+    // toDigit reduce el maestro al lookup de afinidad (11→2, 22→4, 33→6) pero
+    // isMaster suma un pico extra (+6, MASTER_PEAK) a esas mismas áreas — así
+    // que el maestro debe superar al dígito llano equivalente, no solo a neutral.
+    // personalMonth/personalYear fijos en 1 (work/mood) en ambas ramas: no tocan
+    // las áreas comparadas (love/work/health) y no afectan la comparación.
+    const build = (dayValue: number, isMaster: boolean) => ({
+      personalYear: { value: 1, isMaster: false } as never,
+      personalMonth: { value: 1, isMaster: false } as never,
+      personalDay: { value: dayValue, isMaster } as never,
+    });
+
+    const cases: Array<{ master: number; digit: number; area: "love" | "work" | "health" }> = [
+      { master: 11, digit: 2, area: "love" }, // toDigit(11)=2 → love/mood
+      { master: 22, digit: 4, area: "work" }, // toDigit(22)=4 → work/health
+      { master: 33, digit: 6, area: "health" }, // toDigit(33)=6 → love/health
+    ];
+
+    for (const { master, digit, area } of cases) {
+      const masterScore = scoreLifeAreasNumerology(build(master, true) as never).find((s) => s.area === area)!;
+      const digitScore = scoreLifeAreasNumerology(build(digit, false) as never).find((s) => s.area === area)!;
+      expect(masterScore.score).toBeGreaterThan(digitScore.score);
+    }
+  });
 });
