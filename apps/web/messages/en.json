@@ -257,6 +257,10 @@
     "summaryHoroscopeCta": "See your horoscope",
     "summaryPillarsTitle": "Your pillars",
     "summaryPillarsCta": "See your pillars",
+    "tarotFanTitle": "Today's deck",
+    "tarotFanHint": "Pick a card and turn it over",
+    "tarotFanCta": "Full reading",
+    "tarotFanCardAria": "Card {n}, face down. Tap to reveal it.",
     "lensSub": {
       "numeros": "Your personal cycles and vibrations",
       "carta": "Your birth sky, alive",

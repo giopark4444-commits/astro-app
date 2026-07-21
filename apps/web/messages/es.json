@@ -257,6 +257,10 @@
     "summaryHoroscopeCta": "Ver tu horóscopo",
     "summaryPillarsTitle": "Tus pilares",
     "summaryPillarsCta": "Ver tus pilares",
+    "tarotFanTitle": "La baraja de hoy",
+    "tarotFanHint": "Elige una carta y voltéala",
+    "tarotFanCta": "Tirada completa",
+    "tarotFanCardAria": "Carta {n}, boca abajo. Toca para revelarla.",
     "lensSub": {
       "numeros": "Tus ciclos y vibraciones personales",
       "carta": "Tu cielo de nacimiento, vivo",
