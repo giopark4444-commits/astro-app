@@ -68,8 +68,12 @@ export type ShareLensParams = DistributiveOmit<ShareCardParams, "format" | "them
  *  de contenido existentes (numerology-es/en, core-reading-es/en, DAY_MASTER_VOICE,
  *  TAROT_CARDS_ES/EN, HOROSCOPE_SIGNS_ES/EN). Nunca texto libre. */
 export interface ResolvedGlyph {
-  kind: "number" | "zodiac" | "hanzi" | "tarot";
+  kind: "number" | "zodiac" | "hanzi" | "tarot" | "chart";
   value: string;
+  /** Solo para kind "chart": el signo del sector natal donde va el foco (el
+   *  `sign` de ShareCardCarta, sin más — sigue sin ser PII). El resto de kinds
+   *  nunca la define. */
+  sign?: string;
 }
 
 export interface ResolvedInsight {

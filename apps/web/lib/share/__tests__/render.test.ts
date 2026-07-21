@@ -94,6 +94,28 @@ describe("renderShareCardImage — casos de estrés", () => {
   });
 });
 
+describe("renderShareCardImage — carta (rueda natal: HERO en story, FONDO en feed/square)", () => {
+  function carta(format: ShareFormat, body: "sun" | "moon" | "asc", sign: string): ShareCardParams {
+    return { lens: "carta", body, sign, format, theme: "observatory", detail: true, locale: "es" };
+  }
+
+  it.each([
+    ["sun", "leo"],
+    ["moon", "cancer"],
+    ["asc", "scorpio"],
+  ] as const)("body %s en %s — story (rueda HERO en la glowzone)", async (body, sign) => {
+    await expectValidCard(carta("story", body, sign));
+  });
+
+  it.each([
+    ["sun", "leo"],
+    ["moon", "cancer"],
+    ["asc", "scorpio"],
+  ] as const)("body %s en %s — square (rueda de FONDO full-bleed + glifo del planeta)", async (body, sign) => {
+    await expectValidCard(carta("square", body, sign));
+  });
+});
+
 describe("renderShareCardImage — variante horizontal (tarot + square)", () => {
   it("tarot derecha (El Loco) — square, cosmic: layout horizontal, sigue siendo un JPEG válido", async () => {
     const params: ShareCardParams = {

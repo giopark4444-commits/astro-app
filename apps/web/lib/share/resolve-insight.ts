@@ -133,7 +133,9 @@ function resolveCarta(p: ShareCardCarta): ResolvedInsight {
     eyebrow: bodyLabel.toUpperCase(),
     title,
     quote,
-    glyph: { kind: "zodiac", value: p.sign },
+    // "chart" (no "zodiac"): la lente carta pinta una rueda natal decorativa,
+    // no el glifo de signo liso que comparte con horóscopo — ver chart-motif.tsx.
+    glyph: { kind: "chart", value: p.body, sign: p.sign },
     chips,
     accentChipIndex: 0,
   };

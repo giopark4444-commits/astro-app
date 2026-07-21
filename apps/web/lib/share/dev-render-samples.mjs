@@ -13,7 +13,22 @@
 // sesión que generó este archivo). Puede sobreescribirse por argv para correr
 // el script en cualquier otra sesión/máquina.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { renderShareCardImage } from "./render.ts";
+import { fileURLToPath } from "node:url";
+
+// fonts.ts/tarot-art.ts resuelven sus rutas vía una constante de módulo
+// `join(process.cwd(), ...)` asumiendo cwd=apps/web (así corren bajo `next
+// dev`/`next start` — ver el comentario de fonts.ts, commit "cargar fuentes y
+// arte con process.cwd()"), pero ESTE script necesita cwd=apps/web/lib/share
+// para que tsx encuentre el tsconfig.json local (ver comentario de arriba) —
+// dos asunciones de cwd incompatibles. Se corrige el cwd en runtime ANTES de
+// importar render.ts: como esa constante se calcula en el top-level del
+// módulo (se evalúa en cuanto se importa, no perezosamente), un `import`
+// estático de render.ts al principio del archivo se resolvería ANTES de que
+// corriera este chdir (los módulos importados se evalúan antes que el cuerpo
+// del que importa) — por eso el import es dinámico, para que se difiera hasta
+// después del chdir.
+process.chdir(fileURLToPath(new URL("../..", import.meta.url)));
+const { renderShareCardImage } = await import("./render.ts");
 
 const OUT_DIR =
   process.argv[2] ??
@@ -38,6 +53,26 @@ const SAMPLES = [
   {
     name: "carta-sun-leo-alba-feed",
     params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "alba", detail: true, locale: "es" },
+  },
+  {
+    name: "carta-sun-leo-observatory-story", // rueda natal HERO — glowzone
+    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "observatory", detail: true, locale: "es" },
+  },
+  {
+    name: "carta-sun-leo-alba-story", // rueda natal HERO, tema claro
+    params: { lens: "carta", body: "sun", sign: "leo", format: "story", theme: "alba", detail: true, locale: "es" },
+  },
+  {
+    name: "carta-moon-cancer-cosmic-square", // rueda natal FONDO full-bleed
+    params: { lens: "carta", body: "moon", sign: "cancer", format: "square", theme: "cosmic", detail: true, locale: "es" },
+  },
+  {
+    name: "carta-sun-leo-observatory-feed", // rueda natal FONDO, feed 3:4
+    params: { lens: "carta", body: "sun", sign: "leo", format: "feed", theme: "observatory", detail: true, locale: "es" },
+  },
+  {
+    name: "carta-asc-scorpio-observatory-story", // rueda natal HERO, foco ASC (glifo de texto)
+    params: { lens: "carta", body: "asc", sign: "scorpio", format: "story", theme: "observatory", detail: true, locale: "es" },
   },
   {
     name: "pilares-jia-observatory-story",

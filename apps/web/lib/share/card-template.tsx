@@ -15,6 +15,7 @@
 // traen U+2726 ni U+2648-2653 — verificado con el cmap de cada .ttf en el commit) →
 // se pintan como SVG de línea, nunca como texto Unicode.
 import type { CSSProperties, ReactElement, ReactNode } from "react";
+import { ChartWheel, PlanetGlyph, type ChartBody } from "./chart-motif";
 import { SHARE_FORMAT_DIMENSIONS, SHARE_PALETTES, type ShareFormat, type SharePalette, type ShareTheme } from "./palette";
 import type { ResolvedInsight, ShareLocale } from "./types";
 import { ZodiacGlyph } from "./zodiac-glyphs";
@@ -88,6 +89,23 @@ const GLOW_SIZE: Record<ShareFormat, number> = { story: 720, feed: 720, square: 
 const GLYPH_NUM_SIZE: Record<ShareFormat, number> = { story: 430, feed: 360, square: 300 };
 const GLYPH_ZOD_SIZE: Record<ShareFormat, number> = { story: 290, feed: 250, square: 210 };
 const GLYPH_HANZI_SIZE: Record<ShareFormat, number> = { story: 330, feed: 330, square: 230 };
+
+/** `.chartHero{width:660px;height:660px}` — la rueda natal HERO (glyph.kind
+ *  "chart") solo existe en story: reemplaza el glow+glifo de la glowzone
+ *  entero (ver `renderStandardBody`). feed/square usan la rueda como capa de
+ *  FONDO full-bleed (`renderChartBackground`) + este mismo GLYPH_ZOD_SIZE para
+ *  el <PlanetGlyph> grande que va al frente, en la glowzone normal. */
+const CHART_HERO_SIZE = 660;
+
+/** Fondo de la rueda de carta astral (feed/square) — `side` cuadrado que cubre
+ *  el card entero tipo `background-size:cover` (ver chart-motif.tsx para la
+ *  derivación matemática: reemplaza `width:118%;height:118%`+`preserveAspectRatio
+ *  :slice`, que satori no soporta, sin cambiar el resultado visual). */
+function chartBackgroundBox(format: ShareFormat): { side: number; left: number; top: number } {
+  const { w, h } = SHARE_FORMAT_DIMENSIONS[format];
+  const side = Math.max(w, h) * 1.18;
+  return { side, left: (w - side) / 2, top: (h - side) / 2 };
+}
 
 /** `.arch` — carta de tarot COMPLETA, ratio real 3:5 de las RWS. */
 const ARCH_DIMS: Record<ShareFormat, { w: number; h: number; radius: number; padding: number; imgRadius: number }> = {
@@ -329,6 +347,16 @@ function renderGlyph(insight: ResolvedInsight, format: ShareFormat, palette: Sha
           <ZodiacGlyph sign={insight.glyph.value} size={GLYPH_ZOD_SIZE[format]} color={palette.acc} />
         </div>
       );
+    case "chart":
+      // Solo se llega aquí en feed/square (modo "background" — el cielo
+      // detallado ya va detrás como capa full-bleed, ver `renderChartBackground`
+      // en buildCardTree). En story, renderStandardBody sustituye este bloque
+      // entero por <ChartWheel mode="hero"> antes de llamar a renderGlyph.
+      return (
+        <div style={{ position: "relative", display: "flex" }}>
+          <PlanetGlyph body={insight.glyph.value as ChartBody} size={GLYPH_ZOD_SIZE[format]} color={palette.acc} />
+        </div>
+      );
     case "hanzi":
       return (
         <div
@@ -495,6 +523,11 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
   const pad = CBODY_PADDING[opts.format];
   const ttl = TTL_SIZE[opts.format];
   const showChips = opts.detail && insight.chips.length > 0;
+  // Carta astral en story = HERO: la rueda natal grande ocupa la glowzone
+  // entera (sustituye glow+glifo, no los complementa) — feed/square siguen el
+  // flujo normal (glow + PlanetGlyph grande, con el cielo detrás como fondo
+  // full-bleed añadido aparte en buildCardTree).
+  const isChartHero = insight.glyph.kind === "chart" && opts.format === "story";
 
   return (
     <div
@@ -514,8 +547,20 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
       {renderEyebrow(eyebrowText, opts.format, palette.line, palette.accText, true)}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, position: "relative", width: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          {renderGlow(opts.format, palette.accRgb)}
-          {renderGlyph(insight, opts.format, palette, opts.tarotArtDataUri)}
+          {isChartHero ? (
+            <ChartWheel
+              palette={palette}
+              focusSign={insight.glyph.sign ?? insight.glyph.value}
+              focusBody={insight.glyph.value as ChartBody}
+              mode="hero"
+              size={CHART_HERO_SIZE}
+            />
+          ) : (
+            <>
+              {renderGlow(opts.format, palette.accRgb)}
+              {renderGlyph(insight, opts.format, palette, opts.tarotArtDataUri)}
+            </>
+          )}
         </div>
         {insight.title ? (
           <div
@@ -611,6 +656,28 @@ function renderTarotSquareBody(insight: ResolvedInsight, opts: BuildCardTreeOpti
   );
 }
 
+// --- Fondo constelación (SOLO carta + feed/square) --------------------------
+
+/** Capa full-bleed de la rueda natal, DETRÁS de todo (estrellas, marco,
+ *  diamantes, cuerpo) — por eso se pinta como el primer hijo del card, nunca
+ *  después. Solo aplica a la lente carta en feed/square (story usa el modo
+ *  "hero" dentro de la glowzone en vez de esto — ver `renderStandardBody`). */
+function renderChartBackground(insight: ResolvedInsight, format: ShareFormat, palette: SharePalette): ReactNode {
+  if (insight.glyph.kind !== "chart") return null;
+  const { side, left, top } = chartBackgroundBox(format);
+  return (
+    <div style={{ position: "absolute", left, top, width: side, height: side, display: "flex" }}>
+      <ChartWheel
+        palette={palette}
+        focusSign={insight.glyph.sign ?? insight.glyph.value}
+        focusBody={insight.glyph.value as ChartBody}
+        mode="background"
+        size={side}
+      />
+    </div>
+  );
+}
+
 // --- Punto de entrada -----------------------------------------------------
 
 /** Construye el árbol JSX completo de una tarjeta compartible, listo para pasar a
@@ -624,9 +691,11 @@ export function buildCardTree(insight: ResolvedInsight, opts: BuildCardTreeOptio
   // cuadrado — el resto de combinaciones lente×formato usa la composición
   // vertical estándar (incluido tarot en story/feed).
   const isTarotSquareHorizontal = insight.glyph.kind === "tarot" && opts.format === "square";
+  const isChartBackground = insight.glyph.kind === "chart" && opts.format !== "story";
 
   return (
     <div style={cardBaseStyle(opts.format, palette)}>
+      {isChartBackground ? renderChartBackground(insight, opts.format, palette) : null}
       {renderStars(opts.format, palette.ink, palette.stars)}
       {renderFrame(opts.format, palette.line)}
       {opts.format === "story" ? renderDiamonds(palette.acc) : null}

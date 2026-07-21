@@ -17,6 +17,11 @@ export interface SharePalette {
   accRgb: string;
   accText: string;
   stars: number;
+  /** `--tone-warm` de tokens.css (#e0795a) — semántico de "tenso" NO tematizado
+   *  por tema (mismo hex en los 6 temas, como en la app: ver tokens.css línea 46).
+   *  Solo lo usa hoy la telaraña de aspectos de la rueda de carta astral
+   *  (chart-motif.tsx, línea "t" de tensión) — el resto de lentes no lo necesita. */
+  toneWarm: string;
 }
 
 export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
@@ -29,6 +34,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "231,201,134",
     accText: "#e7c986",
     stars: 0.5,
+    toneWarm: "#e0795a",
   },
   aurora: {
     bg: "linear-gradient(170deg, #f6f2fb 0%, #fdf3ec 100%)",
@@ -39,6 +45,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "155,143,192",
     accText: "#736a8e",
     stars: 0,
+    toneWarm: "#e0795a",
   },
   cosmic: {
     bg: "linear-gradient(165deg, #1c0529 0%, #3d0b54 70%, #6d1a6b 100%)",
@@ -49,6 +56,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "255,138,224",
     accText: "#ff8ae0",
     stars: 0.4,
+    toneWarm: "#e0795a",
   },
   selva: {
     bg: "linear-gradient(165deg, #07231d 0%, #0d3b31 55%, #155345 100%)",
@@ -59,6 +67,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "146,216,184",
     accText: "#92d8b8",
     stars: 0.3,
+    toneWarm: "#e0795a",
   },
   alba: {
     bg: "linear-gradient(170deg, #fdf6ec 0%, #fae5d8 100%)",
@@ -69,6 +78,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "208,133,79",
     accText: "#a05a33",
     stars: 0,
+    toneWarm: "#e0795a",
   },
   eclipse: {
     bg: "radial-gradient(120% 90% at 50% -10%, #232330 0%, #141419 52%, #08080c 100%)",
@@ -79,6 +89,7 @@ export const SHARE_PALETTES: Record<ShareTheme, SharePalette> = {
     accRgb: "202,204,222",
     accText: "#caccde",
     stars: 0.55,
+    toneWarm: "#e0795a",
   },
 };
 

@@ -127,3 +127,14 @@ export function ZodiacGlyph({ sign, size, color }: { sign: string; size: number;
     </svg>
   );
 }
+
+/** Mismos <path> que ZodiacGlyph, sin envolver en su propio <svg> — para
+ *  componerlos dentro de OTRA <svg> ya abierta (p.ej. la rueda natal de
+ *  chart-motif.tsx) vía un <g transform="translate(...) scale(...)">. Anidar
+ *  <svg> dentro de <svg> es terreno no verificado en satori (a diferencia de
+ *  <svg> dentro de <div>, que sí está probado por ZodiacGlyph en el resto de
+ *  card-template.tsx); un <g> con transform es la misma primitiva que satori ya
+ *  usa internamente para posicionar cualquier nodo, así que es la vía segura. */
+export function zodiacGlyphPaths(sign: string): ReactElement[] | undefined {
+  return ZODIAC_PATHS[sign];
+}

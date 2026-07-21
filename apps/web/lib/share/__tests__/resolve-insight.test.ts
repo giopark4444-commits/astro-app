@@ -66,7 +66,9 @@ describe("resolveInsight — carta", () => {
     const raw = SUN_ES.leo!;
     expect(raw.endsWith(".")).toBe(false); // fuente en minúscula sin punto, confirma que el test capitaliza de verdad
     expect(insight.quote).toBe(`${raw[0]!.toUpperCase()}${raw.slice(1)}.`);
-    expect(insight.glyph).toEqual({ kind: "zodiac", value: "leo" });
+    // "chart" (no "zodiac"): la lente carta pinta la rueda natal decorativa de
+    // chart-motif.tsx — value = body, sign = signo del sector donde va el foco.
+    expect(insight.glyph).toEqual({ kind: "chart", value: "sun", sign: "leo" });
     expect(insight.chips).toEqual(["Fuego", "Fijo"]);
   });
 
@@ -76,6 +78,7 @@ describe("resolveInsight — carta", () => {
     expect(insight.title).toBe("Luna en Cáncer");
     const raw = MOON_ES.cancer!;
     expect(insight.quote).toBe(`${raw[0]!.toUpperCase()}${raw.slice(1)}.`);
+    expect(insight.glyph).toEqual({ kind: "chart", value: "moon", sign: "cancer" });
     expect(insight.chips).toEqual(["Agua", "Cardinal"]);
   });
 
@@ -86,6 +89,7 @@ describe("resolveInsight — carta", () => {
     const raw = ASC_ES.scorpio!;
     expect(insight.quote).toBe(`${raw[0]!.toUpperCase()}${raw.slice(1)}.`);
     expect(insight.eyebrow).toBe("ASCENDENTE");
+    expect(insight.glyph).toEqual({ kind: "chart", value: "asc", sign: "scorpio" });
   });
 
   it("EN moon in Cancer", () => {
@@ -95,6 +99,7 @@ describe("resolveInsight — carta", () => {
     const raw = MOON_EN.cancer!;
     expect(insight.quote).toBe(`${raw[0]!.toUpperCase()}${raw.slice(1)}.`);
     expect(insight.eyebrow).toBe("MOON");
+    expect(insight.glyph).toEqual({ kind: "chart", value: "moon", sign: "cancer" });
   });
 });
 
