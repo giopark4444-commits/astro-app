@@ -5,17 +5,27 @@ import {
   detectAspectsBetween,
   scoreLifeAreas,
   scoreTone,
+  personalCycles,
+  dayPillar,
   LIFE_AREAS,
+  type ChartInput,
   type LifeArea,
+  type LifeAreaScore,
   type AreaDriver,
 } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
+import { computeBaziNatal } from "@/lib/timeline/bazi-natal";
+import { assembleHoyScores } from "@/lib/hoy/scores";
+import { todayCivil } from "@/lib/hoy/today-birth";
 
-// "Tu energía de hoy" (Fase 2): puntúa 6 áreas de vida (0..100) a partir de los
-// tránsitos al natal. Determinista (motor scoreLifeAreas de @aluna/core), server-only
-// por el motor nativo sweph. profileId VALIDADO contra birth_profiles del usuario
-// autenticado (RLS); nunca se confía en lat/lng del body.
+// "Tu energía de hoy" (dashboard): puntúa 6 áreas de vida (0..100) por las cuatro
+// disciplinas. `astros` = clima de tránsitos al natal, y responde al PERIODO
+// (today/week/month/year, como antes). `numeros`, `pilares` y `general` son SIEMPRE
+// del día (no dependen del periodo): numerología del día, pilares (八字/사주) con el
+// pilar de hoy, y el promedio de las tres. Determinista; server-only por el motor
+// nativo sweph. profileId VALIDADO contra birth_profiles del usuario autenticado
+// (RLS); nunca se confía en lat/lng del body.
 
 export const runtime = "nodejs";
 
@@ -48,6 +58,61 @@ function sampleDates(period: Period, from = Date.now()): string[] {
   return Array.from({ length: 12 }, (_, i) => at(i * 30)); // year
 }
 
+type FixedBody = { key: string; longitude: number; speed: number };
+
+/** Aspectos tránsito→natal en un instante (ISO): planetas móviles vs. natal fijo. */
+function aspectsAt(input: ChartInput, fixed: FixedBody[], iso: string) {
+  const moving = computeDerivedChart(input, "transits", iso).bodies
+    .filter((b) => WEATHER_BODIES.has(b.body))
+    .map((b) => ({ key: b.body, longitude: b.longitude, speed: b.speed }));
+  return detectAspectsBetween(moving, fixed, { orbs: SCORE_ORBS });
+}
+
+/**
+ * Astros por periodo: promedia el puntaje de cada área sobre las muestras del periodo
+ * y ordena los drivers por PERSISTENCIA (cuántas muestras los incluyen) — así afloran
+ * los planetas lentos, verdaderos motores del clima. (El día usa el ensamblador puro,
+ * que ordena drivers por magnitud; aquí importa la persistencia multi-muestra.)
+ */
+function scoreAstrosOverDates(
+  input: ChartInput,
+  fixed: FixedBody[],
+  dates: string[],
+): LifeAreaScore[] {
+  const totals: Record<LifeArea, number> = {
+    love: 0, money: 0, work: 0, health: 0, mood: 0, luck: 0,
+  };
+  const drivers = new Map<string, { area: LifeArea; driver: AreaDriver; count: number }>();
+
+  for (const iso of dates) {
+    for (const s of scoreLifeAreas(aspectsAt(input, fixed, iso))) {
+      totals[s.area] += s.score;
+      for (const d of s.drivers) {
+        const key = `${s.area}:${d.transit}:${d.natal}:${d.aspect}`;
+        const prev = drivers.get(key);
+        if (prev) prev.count += 1;
+        else drivers.set(key, { area: s.area, driver: d, count: 1 });
+      }
+    }
+  }
+
+  const n = dates.length;
+  const all = [...drivers.values()];
+  return LIFE_AREAS.map((area) => {
+    const score = Math.round(totals[area] / n);
+    return {
+      area,
+      score,
+      tone: scoreTone(score),
+      drivers: all
+        .filter((x) => x.area === area)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3)
+        .map((x) => x.driver),
+    };
+  });
+}
+
 export async function POST(request: NextRequest) {
   let raw: unknown;
   try {
@@ -75,53 +140,39 @@ export async function POST(request: NextRequest) {
 
   try {
     const input = profileToChartInput(profile, {});
-    const natal = computeChart(input);
-    const fixed = natal.bodies
+    const natalChart = computeChart(input);
+    const fixed = natalChart.bodies
       .filter((b) => WEATHER_BODIES.has(b.body))
       .map((b) => ({ key: b.body, longitude: b.longitude, speed: 0 }));
 
-    const dates = sampleDates(period);
-    const totals: Record<LifeArea, number> = {
-      love: 0, money: 0, work: 0, health: 0, mood: 0, luck: 0,
-    };
-    // Cuenta cuántas muestras incluye cada driver: los persistentes (planetas lentos)
-    // aparecen en muchas → afloran como los verdaderos motores del periodo.
-    const drivers = new Map<string, { area: LifeArea; driver: AreaDriver; count: number }>();
+    // Disciplinas del DÍA (no dependen del periodo). La fecha civil de hoy alimenta
+    // numerología y el pilar del día; los aspectos de ahora, los astros del día.
+    const asOf = todayCivil();
+    const birth = { year: input.year, month: input.month, day: input.day };
+    const cycles = personalCycles(birth, asOf);
+    const natal = computeBaziNatal(profile);
+    const todayPillar = dayPillar(asOf.year, asOf.month, asOf.day);
+    const todayAspects = aspectsAt(input, fixed, new Date().toISOString());
 
-    for (const iso of dates) {
-      const transit = computeDerivedChart(input, "transits", iso);
-      const moving = transit.bodies
-        .filter((b) => WEATHER_BODIES.has(b.body))
-        .map((b) => ({ key: b.body, longitude: b.longitude, speed: b.speed }));
-      const aspects = detectAspectsBetween(moving, fixed, { orbs: SCORE_ORBS });
-      for (const s of scoreLifeAreas(aspects)) {
-        totals[s.area] += s.score;
-        for (const d of s.drivers) {
-          const key = `${s.area}:${d.transit}:${d.natal}:${d.aspect}`;
-          const prev = drivers.get(key);
-          if (prev) prev.count += 1;
-          else drivers.set(key, { area: s.area, driver: d, count: 1 });
-        }
-      }
-    }
-
-    const n = dates.length;
-    const all = [...drivers.values()];
-    const areas = LIFE_AREAS.map((area) => {
-      const score = Math.round(totals[area] / n);
-      return {
-        area,
-        score,
-        tone: scoreTone(score),
-        drivers: all
-          .filter((x) => x.area === area)
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 3)
-          .map((x) => x.driver),
-      };
+    const day = assembleHoyScores({
+      aspects: todayAspects,
+      cycles,
+      natal,
+      dayPillar: todayPillar,
     });
 
-    return NextResponse.json({ period, areas });
+    // El periodo aplica SOLO a astros. Para "today" reusamos los astros del día ya
+    // computados (mismos aspectos); para periodos más largos, muestreamos.
+    const astros =
+      period === "today" ? day.astros : scoreAstrosOverDates(input, fixed, sampleDates(period));
+
+    return NextResponse.json({
+      period,
+      general: day.general,
+      astros,
+      numeros: day.numeros,
+      pilares: day.pilares,
+    });
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }
