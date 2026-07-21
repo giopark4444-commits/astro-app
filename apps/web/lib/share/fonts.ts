@@ -3,14 +3,17 @@
 // Copiadas como .ttf de los paquetes @expo-google-fonts que ya usa apps/mobile
 // (ver fonts/ para el origen exacto de cada archivo — detallado en el commit).
 //
-// Rutas LITERALES por archivo (nada de rutas dinámicas): el file-tracing de Next
-// analiza estáticamente las llamadas a fs para decidir qué incluir en el output
-// serverless — una ruta construida en runtime (p.ej. concatenando un nombre de
-// variable) no se traza y el .ttf queda fuera del deploy. Mismo principio que el
-// caveat de sweph en next.config.ts (ahí es un addon nativo, aquí son fuentes,
-// pero el mecanismo de trace es el mismo).
+// Ruta base vía process.cwd() (= apps/web bajo `next dev`/`next start`): el
+// patrón `fileURLToPath(new URL("./x", import.meta.url))` funciona en Node/vitest
+// pero REVIENTA bajo el runtime de Next ("Received an instance of URL" — el URL
+// que produce webpack no es el que fileURLToPath espera). El tracing para el
+// output serverless se garantiza aparte, con outputFileTracingIncludes en
+// next.config.ts para /api/share-card (igual que sweph).
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+
+const FONTS_DIR = join(process.cwd(), "lib", "share", "fonts");
+const readFont = (file: string): Buffer => readFileSync(join(FONTS_DIR, file));
 
 export type ShareFontWeight = 400 | 500 | 600;
 export type ShareFontStyle = "normal" | "italic";
@@ -31,37 +34,37 @@ export function loadShareFonts(): ShareFont[] {
   cached = [
     {
       name: "Cormorant Garamond",
-      data: readFileSync(fileURLToPath(new URL("./fonts/CormorantGaramond_500Medium.ttf", import.meta.url))),
+      data: readFont("CormorantGaramond_500Medium.ttf"),
       weight: 500,
       style: "normal",
     },
     {
       name: "Cormorant Garamond",
-      data: readFileSync(fileURLToPath(new URL("./fonts/CormorantGaramond_600SemiBold.ttf", import.meta.url))),
+      data: readFont("CormorantGaramond_600SemiBold.ttf"),
       weight: 600,
       style: "normal",
     },
     {
       name: "Cormorant Garamond",
-      data: readFileSync(fileURLToPath(new URL("./fonts/CormorantGaramond_500Medium_Italic.ttf", import.meta.url))),
+      data: readFont("CormorantGaramond_500Medium_Italic.ttf"),
       weight: 500,
       style: "italic",
     },
     {
       name: "Cormorant Garamond",
-      data: readFileSync(fileURLToPath(new URL("./fonts/CormorantGaramond_600SemiBold_Italic.ttf", import.meta.url))),
+      data: readFont("CormorantGaramond_600SemiBold_Italic.ttf"),
       weight: 600,
       style: "italic",
     },
     {
       name: "Quicksand",
-      data: readFileSync(fileURLToPath(new URL("./fonts/Quicksand_400Regular.ttf", import.meta.url))),
+      data: readFont("Quicksand_400Regular.ttf"),
       weight: 400,
       style: "normal",
     },
     {
       name: "Quicksand",
-      data: readFileSync(fileURLToPath(new URL("./fonts/Quicksand_600SemiBold.ttf", import.meta.url))),
+      data: readFont("Quicksand_600SemiBold.ttf"),
       weight: 600,
       style: "normal",
     },
@@ -75,7 +78,7 @@ export function loadShareFonts(): ShareFont[] {
       // familia que puede pintar el hanzi (ver zodiac-glyphs.tsx para el mismo
       // razonamiento aplicado a los glifos zodiacales).
       name: "Noto Serif SC",
-      data: readFileSync(fileURLToPath(new URL("./fonts/NotoSerifSC-hanzi-subset.ttf", import.meta.url))),
+      data: readFont("NotoSerifSC-hanzi-subset.ttf"),
       weight: 500,
       style: "normal",
     },

@@ -96,12 +96,16 @@
 
 .dots { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
 .dot {
-  width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent;
+  width: 32px; height: 32px; border-radius: 50%;
+  /* Anillo doble: contorno propio siempre visible (los temas claros como aurora
+     o alba se perdían contra el fondo del modal) + halo exterior para el activo. */
+  border: 1px solid var(--ink);
+  outline: 2px solid transparent; outline-offset: 2px;
   padding: 0; cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  transition: outline-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .dot:hover { transform: scale(1.06); }
-.dotOn { border-color: var(--acc); box-shadow: var(--glow-soft); }
+.dotOn { outline-color: var(--acc); box-shadow: var(--glow-soft); }
 
 .toggle {
   display: flex; align-items: center; justify-content: space-between;

@@ -15,8 +15,10 @@
 // de rotación de una imagen con radius+padding) y además sharp ya es una dependencia
 // obligada de este módulo (conversión webp→png para satori, que no decodifica webp).
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import sharp from "sharp";
+
+const RWS_DIR = join(process.cwd(), "public", "tarot", "rws");
 
 const cache = new Map<string, Promise<string>>();
 
@@ -33,13 +35,12 @@ export function loadTarotArt(cardId: string, reversed: boolean): Promise<string>
   if (cached) return cached;
 
   const promise = (async () => {
-    // Ruta LITERAL relativa al módulo (mismo motivo y patrón que fonts.ts: el
-    // file-tracing de Next necesita ver la llamada a fs de forma estática — una
-    // ruta construida en runtime no se traza y el archivo queda fuera del deploy).
+    // Ruta vía process.cwd() (= apps/web bajo Next): el patrón
+    // fileURLToPath(new URL(..., import.meta.url)) revienta bajo el runtime de Next
+    // (ver fonts.ts). El tracing serverless se cubre con outputFileTracingIncludes.
     // cardId ya viene validado contra TAROT_CARD_IDS (validate.ts) antes de llegar
     // aquí, así que no hay riesgo de path traversal vía este template string.
-    const filePath = fileURLToPath(new URL(`../../public/tarot/rws/${cardId}.webp`, import.meta.url));
-    const webp = readFileSync(filePath);
+    const webp = readFileSync(join(RWS_DIR, `${cardId}.webp`));
     let pipeline = sharp(webp);
     if (reversed) pipeline = pipeline.rotate(180);
     const png = await pipeline.png().toBuffer();

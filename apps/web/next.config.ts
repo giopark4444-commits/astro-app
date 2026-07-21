@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
     "/api/synastry": ["../../node_modules/.pnpm/**/sweph/prebuilds/**", "../../node_modules/.pnpm/**/sweph/*.js"],
     "/api/scores": ["../../node_modules/.pnpm/**/sweph/prebuilds/**", "../../node_modules/.pnpm/**/sweph/*.js"],
     "/api/chat": ["../../node_modules/.pnpm/**/sweph/prebuilds/**", "../../node_modules/.pnpm/**/sweph/*.js"],
+    // share-card lee .ttf vendorizados y el arte RWS con fs vía process.cwd();
+    // el trace no ve esas rutas dinámicas, así que las incluimos explícitamente.
+    "/api/share-card": ["./lib/share/fonts/**", "./public/tarot/rws/**"],
   },
   // sweph se importa a través de @aluna/ephemeris (transpilado), así que
   // serverExternalPackages no basta para mantenerlo fuera del bundle. Lo
