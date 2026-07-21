@@ -417,6 +417,13 @@ function renderQuote(quote: string, format: ShareFormat, ink: string, extra?: CS
   );
 }
 
+/** `.chip` en la galería aprobada siempre va en mayúsculas ("MADERA · YANG",
+ *  "FUEGO · FIJO") — se fuerza aquí con `.toUpperCase()` en vez de en cada
+ *  resolver: tarot/numeros ya arman sus chips en mayúsculas (quedan intactos,
+ *  `.toUpperCase()` es idempotente) pero carta/pilares devuelven los labels de
+ *  elemento/modalidad en Title Case (p.ej. "Fuego", "Fijo") para reusarlos
+ *  también como prosa en otras vistas — normalizar solo en el render de la
+ *  tarjeta evita tocar esos labels compartidos. */
 function renderChips(chips: string[], accentChipIndex: number | undefined, format: ShareFormat, palette: SharePalette): ReactNode {
   const size = CHIP_SIZE[format];
   return (
@@ -441,7 +448,7 @@ function renderChips(chips: string[], accentChipIndex: number | undefined, forma
               color: isAccent ? palette.accText : palette.soft,
             }}
           >
-            {chip}
+            {chip.toUpperCase()}
           </div>
         );
       })}
