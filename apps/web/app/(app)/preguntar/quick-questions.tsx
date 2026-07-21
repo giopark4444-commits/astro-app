@@ -7,6 +7,7 @@ import {
   localeKey,
   MAX_LEN,
   MAX_PAGES,
+  PAGES,
   PER_PAGE,
   parseQuickQuestions,
 } from "@/lib/quick-questions";
@@ -60,19 +61,30 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
     setEditing(false);
     setPage((p) => Math.min(p, pages.length - 1));
   }
+  // Restaurar: repone las PAGES base a sus defaults del locale PERO conserva las
+  // páginas extra del usuario (restaurar los defaults ≠ borrar tus páginas).
   function restore() {
-    setDrafts(DEFAULT_QUICK_QUESTIONS[localeKey(locale)].map((p) => [...p]));
-    setPage((p) => Math.min(p, DEFAULT_QUICK_QUESTIONS[localeKey(locale)].length - 1));
+    const def = DEFAULT_QUICK_QUESTIONS[localeKey(locale)];
+    setDrafts((d) => [...def.map((p) => [...p]), ...d.slice(def.length).map((p) => [...p])]);
   }
   function editChip(i: number, value: string) {
     setDrafts((d) => d.map((p, pi) => (pi === safePage ? p.map((q, qi) => (qi === i ? value : q)) : p)));
   }
   // "+" del pager: agrega una página EXTRA en blanco y entra en edición sobre
   // ella. Parte de drafts si ya se está editando (no pisa lo escrito) o de
-  // pages si no. Tope MAX_PAGES.
+  // pages si no. Gate `loaded` (igual que el lápiz): no dejar editar antes de
+  // que el GET asiente, o snapshotearíamos los defaults placeholder y guardar
+  // borraría lo guardado. Tope MAX_PAGES; si ya hay una extra vacía al final,
+  // salta a ella en vez de agregar otra (evita dobles-taps).
   function addPage() {
+    if (!loaded) return;
     const base = editing ? drafts : pages;
     if (base.length >= MAX_PAGES) return;
+    const last = base[base.length - 1];
+    if (editing && base.length > PAGES && last && last.every((q) => !q.trim())) {
+      setPage(base.length - 1);
+      return;
+    }
     const next = [...base.map((p) => [...p]), Array.from({ length: PER_PAGE }, () => "")];
     setDrafts(next);
     setEditing(true);
@@ -134,6 +146,7 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
               type="button"
               className={`${styles.pageTab} ${styles.pageAdd}`}
               onClick={addPage}
+              disabled={!loaded}
               aria-label={t("quickAddPage")}
             >
               +

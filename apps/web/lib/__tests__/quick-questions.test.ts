@@ -133,4 +133,10 @@ describe("normalizeForSave", () => {
     expect(out.pages[2]![0]).toBe("mi extra");
     expect(out.pages[2]![1]).toBe("");
   });
+
+  it("no guarda más de MAX_PAGES páginas", () => {
+    const one = ["q"];
+    const out = normalizeForSave([[], [], one, one, one, one, one, one], "es");
+    expect(out.pages).toHaveLength(MAX_PAGES);
+  });
 });

@@ -102,7 +102,7 @@
   .wrap { height: calc(100dvh - 66px); }
 }
 
-/* Accesos rápidos (2 páginas de 6 chips + edición inline) */
+/* Accesos rápidos (páginas base con defaults + páginas extra del usuario, edición inline) */
 .quickWrap {
   display: flex;
   flex-direction: column;
@@ -197,6 +197,12 @@
 .pageAdd:hover {
   opacity: 1;
   background: rgba(var(--acc-rgb), 0.1);
+}
+.pageTab:disabled,
+.editBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
 }
 .editBtn,
 .saveBtn,

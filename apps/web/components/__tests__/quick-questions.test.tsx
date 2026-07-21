@@ -95,4 +95,21 @@ describe("QuickQuestions", () => {
     expect(saved).toHaveLength(3);
     expect(saved[2]![0]).toBe("Mi pregunta nueva");
   });
+
+  it("vaciar una página extra y guardar la elimina (el pager vuelve a 2)", async () => {
+    renderQ();
+    await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });
+    // agrega la página 3 con una pregunta y guarda
+    fireEvent.click(screen.getByRole("button", { name: "Agregar página" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Pregunta 1" }), { target: { value: "temporal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("button", { name: "Página 3 de 3" })).toBeInTheDocument();
+    // edita, vacía la pregunta de la página 3 y guarda → la página se elimina
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Pregunta 1" }), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("button", { name: /Página 3/ })).toBeNull());
+  });
 });
