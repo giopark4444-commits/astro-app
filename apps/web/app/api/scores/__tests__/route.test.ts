@@ -136,6 +136,17 @@ describe("POST /api/scores", () => {
     expect(assembleHoyScoresMock).toHaveBeenCalledOnce();
   });
 
+  it("retrocompat: 'areas' es alias de 'astros' para el móvil", async () => {
+    authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+    maybeSingleMock.mockResolvedValue({ data: PROFILE });
+    const res = await POST(fakeRequest({ profileId: "profile-1" }));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.areas).toBeDefined();
+    expect(json.astros).toBeDefined();
+    expect(json.areas).toEqual(json.astros);
+  });
+
   it("periodo != today: astros se muestrea (6 áreas) pero general/numeros/pilares son del día", async () => {
     authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
     maybeSingleMock.mockResolvedValue({ data: PROFILE });

@@ -168,8 +168,11 @@ export async function POST(request: NextRequest) {
     const astros =
       period === "today" ? day.astros : scoreAstrosOverDates(input, fixed, sampleDates(period));
 
+    // `areas` es alias de `astros` por retrocompatibilidad con el móvil (apps/mobile)
+    // hasta que migre a los sets por disciplina (general/astros/numeros/pilares).
     return NextResponse.json({
       period,
+      areas: astros,
       general: day.general,
       astros,
       numeros: day.numeros,
