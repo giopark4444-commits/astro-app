@@ -109,31 +109,33 @@
   gap: 8px;
   padding: 8px 0;
 }
+/* Una pregunta por línea: chips apilados a lo ancho, nunca dos en la misma fila. */
 .quickRow {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
 }
 .chip {
+  width: 100%;
+  text-align: left;
   border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
   background: var(--surface-2, rgba(255, 255, 255, 0.04));
   color: inherit;
-  border-radius: 999px;
-  padding: 6px 12px;
+  border-radius: 12px;
+  padding: 8px 12px;
   font-size: 0.82rem;
-  line-height: 1.2;
+  line-height: 1.3;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .chip:hover {
-  background: var(--surface-3, rgba(255, 255, 255, 0.09));
-  border-color: var(--accent, rgba(255, 255, 255, 0.3));
+  background: rgba(var(--acc-rgb), 0.1);
+  border-color: var(--acc);
 }
 .chipInput {
-  flex: 1 1 45%;
-  min-width: 160px;
-  border: 1px solid var(--accent, rgba(255, 255, 255, 0.3));
-  background: var(--surface-1, rgba(0, 0, 0, 0.2));
+  width: 100%;
+  border: 1px solid var(--acc);
+  background: var(--surface);
   color: inherit;
   border-radius: 10px;
   padding: 6px 10px;
@@ -150,17 +152,51 @@
   display: flex;
   gap: 6px;
 }
-.pageDot {
-  width: 8px;
-  height: 8px;
-  padding: 0;
-  border-radius: 999px;
-  border: none;
-  background: var(--line, rgba(255, 255, 255, 0.25));
+/* Segmentado "1 · 2": pastillas numeradas, la activa rellena con el color de
+   marca (--acc) + glow tenue; inactiva con borde tenue. Reemplaza los dots
+   casi imperceptibles. aria-label sigue siendo "Página N de M". */
+.pageTab {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  opacity: 0.72;
   cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    opacity 0.15s ease, box-shadow 0.15s ease;
 }
-.pageDotOn {
-  background: var(--accent, rgba(255, 255, 255, 0.7));
+.pageTab:hover {
+  opacity: 1;
+  border-color: var(--acc);
+}
+.pageTabOn {
+  opacity: 1;
+  border-color: transparent;
+  background: var(--acc);
+  color: var(--ink-on-acc);
+  box-shadow: var(--glow-soft);
+}
+/* "+" para agregar una página nueva: acento de marca, borde punteado, sin
+   relleno (se distingue de las pastillas numeradas). */
+.pageAdd {
+  color: var(--acc-text);
+  border-style: dashed;
+  border-color: var(--acc);
+  opacity: 0.9;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.pageAdd:hover {
+  opacity: 1;
+  background: rgba(var(--acc-rgb), 0.1);
 }
 .editBtn,
 .saveBtn,
@@ -179,8 +215,8 @@
   gap: 6px;
 }
 .saveBtn {
-  border-color: var(--accent, rgba(255, 255, 255, 0.3));
-  background: var(--accent-soft, rgba(255, 255, 255, 0.08));
+  border-color: var(--acc);
+  background: rgba(var(--acc-rgb), 0.14);
 }
 .saveBtn:disabled {
   opacity: 0.5;

@@ -6,6 +6,7 @@ import {
   localeKey,
   PAGES,
   PER_PAGE,
+  MAX_PAGES,
   MAX_LEN,
 } from "../quick-questions";
 
@@ -81,6 +82,28 @@ describe("parseQuickQuestions", () => {
     const out = parseQuickQuestions({ pages: [["  hola  "]] }, "es");
     expect(out[0]![0]).toBe("hola");
   });
+
+  it("conserva una página extra (3+) con lo que el usuario escribió, padded a PER_PAGE", () => {
+    const out = parseQuickQuestions({ pages: [[], [], ["extra 1", "extra 2"]] }, "es");
+    expect(out).toHaveLength(3);
+    expect(out[2]).toHaveLength(PER_PAGE);
+    expect(out[2]![0]).toBe("extra 1");
+    expect(out[2]![1]).toBe("extra 2");
+    expect(out[2]![2]).toBe(""); // resto vacío, sin default
+    // las 2 base siguen con sus defaults
+    expect(out[0]).toEqual(DEFAULT_QUICK_QUESTIONS.es[0]);
+  });
+
+  it("descarta una página extra totalmente vacía", () => {
+    const out = parseQuickQuestions({ pages: [[], [], ["", "", ""]] }, "es");
+    expect(out).toHaveLength(2);
+  });
+
+  it("no pasa de MAX_PAGES páginas", () => {
+    const one = ["q"];
+    const out = parseQuickQuestions({ pages: [[], [], one, one, one, one, one, one] }, "es");
+    expect(out).toHaveLength(MAX_PAGES);
+  });
 });
 
 describe("normalizeForSave", () => {
@@ -101,5 +124,13 @@ describe("normalizeForSave", () => {
     const out = normalizeForSave(withDefault, "es");
     expect(out.pages[0]![0]).toBe("");
     expect(out.pages[0]![1]).toBe("custom");
+  });
+
+  it("conserva una página extra con contenido y descarta las extra vacías", () => {
+    const out = normalizeForSave([[], [], ["mi extra"], ["", ""]], "es");
+    expect(out.pages).toHaveLength(3); // 2 base + la extra con contenido; la vacía se descarta
+    expect(out.pages[2]).toHaveLength(PER_PAGE);
+    expect(out.pages[2]![0]).toBe("mi extra");
+    expect(out.pages[2]![1]).toBe("");
   });
 });

@@ -80,4 +80,19 @@ describe("QuickQuestions", () => {
     const restored = screen.getByRole("textbox", { name: "Pregunta 1" }) as HTMLInputElement;
     expect(restored.value).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![0]);
   });
+
+  it("el '+' agrega una página nueva en blanco y guarda una pregunta propia en ella", async () => {
+    renderQ();
+    await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });
+    fireEvent.click(screen.getByRole("button", { name: "Agregar página" }));
+    // entró en edición sobre la página nueva (en blanco)
+    const input = screen.getByRole("textbox", { name: "Pregunta 1" }) as HTMLInputElement;
+    expect(input.value).toBe("");
+    fireEvent.change(input, { target: { value: "Mi pregunta nueva" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(1));
+    const saved = saveMock.mock.calls[0]![0] as string[][];
+    expect(saved).toHaveLength(3);
+    expect(saved[2]![0]).toBe("Mi pregunta nueva");
+  });
 });

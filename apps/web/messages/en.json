@@ -582,6 +582,7 @@
     "quickCancel": "Cancel",
     "quickRestore": "Restore",
     "quickPage": "Page {n} of {total}",
+    "quickAddPage": "Add page",
     "quickEditLabel": "Question {n}"
   },
   "synastry": {
