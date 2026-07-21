@@ -106,6 +106,14 @@ const TTL_SIZE: Record<ShareFormat, { fontSize: number; marginTop: number }> = {
 /** `.sep{margin:36px 0}` + overrides. */
 const SEP_MARGIN: Record<ShareFormat, number> = { story: 36, feed: 28, square: 24 };
 
+/** Margen EXTRA (encima del `SEP_MARGIN` normal) cuando el separador sigue
+ *  directo a un glifo numérico (lente números: nunca define `title`, así que
+ *  el separador queda pegado al glifo) — la cursiva de Cormorant Garamond
+ *  tiene descendentes largos en 7/9 que rozan la regla sin este respiro.
+ *  Escala igual que `SEP_MARGIN` (más grande en story, que también tiene el
+ *  glifo más grande — ver `GLYPH_NUM_SIZE`), siempre dentro de 24-28px. */
+const SEP_EXTRA_MARGIN_AFTER_NUMBER: Record<ShareFormat, number> = { story: 28, feed: 26, square: 24 };
+
 /** `.eyebrow .txt` — solo square tiene override (26/7 → 23/6); feed usa el base. */
 const EYEBROW_TXT: Record<ShareFormat, { fontSize: number; letterSpacing: number }> = {
   story: { fontSize: 26, letterSpacing: 7 },
@@ -385,9 +393,17 @@ function renderEyebrow(text: string, format: ShareFormat, line: string, accText:
   );
 }
 
-function renderSep(format: ShareFormat, line: string, accText: string): ReactNode {
+function renderSep(format: ShareFormat, line: string, accText: string, extraMarginTop = 0): ReactNode {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: SEP_MARGIN[format], marginBottom: SEP_MARGIN[format] }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 18,
+        marginTop: SEP_MARGIN[format] + extraMarginTop,
+        marginBottom: SEP_MARGIN[format],
+      }}
+    >
       <div style={{ width: 46, height: 1, background: line, display: "flex" }} />
       <SepStar color={accText} />
       <div style={{ width: 46, height: 1, background: line, display: "flex" }} />
@@ -518,7 +534,16 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
             {insight.title}
           </div>
         ) : null}
-        {renderSep(opts.format, palette.line, palette.accText)}
+        {renderSep(
+          opts.format,
+          palette.line,
+          palette.accText,
+          // El glifo numérico (Cormorant cursiva) tiene descendentes largos en
+          // 7/9 — sin `title` de por medio (números nunca lo define) el
+          // separador queda pegado a la cola del dígito. Con título de por
+          // medio ya hay respiro de sobra (TTL_SIZE.marginTop).
+          insight.glyph.kind === "number" && !insight.title ? SEP_EXTRA_MARGIN_AFTER_NUMBER[opts.format] : 0,
+        )}
         {renderQuote(insight.quote, opts.format, palette.ink)}
         {showChips ? renderChips(insight.chips, insight.accentChipIndex, opts.format, palette) : null}
       </div>
