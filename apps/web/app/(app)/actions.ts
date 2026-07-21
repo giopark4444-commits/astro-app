@@ -11,6 +11,7 @@ import { dismissCommitment } from "@/lib/memory-commitments";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { regenerateEssence } from "@/lib/memory-essence";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
+import { normalizeForSave } from "@/lib/quick-questions";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -31,6 +32,15 @@ type IntentBuilder = {
 };
 function intentBuilder(supabase: Awaited<ReturnType<typeof createClient>>): IntentBuilder {
   return supabase.from("settings") as unknown as IntentBuilder;
+}
+
+// Mismo shim acotado que settingsBuilder/intentBuilder (ver nota arriba):
+// quick_questions es jsonb con forma { pages: string[][] }.
+type QuickQuestionsBuilder = {
+  update: (v: { quick_questions: { pages: string[][] } }) => { eq: (col: string, val: string) => Promise<unknown> };
+};
+function quickQuestionsBuilder(supabase: Awaited<ReturnType<typeof createClient>>): QuickQuestionsBuilder {
+  return supabase.from("settings") as unknown as QuickQuestionsBuilder;
 }
 
 /**
@@ -330,4 +340,18 @@ export async function clearEssence() {
   } catch {
     // best effort: no bloquear /ajustes por un fallo al limpiar la esencia
   }
+}
+
+/**
+ * Guarda los accesos rápidos del chat (2 páginas de 6). Normaliza SIEMPRE a
+ * 2×6 en el server (vacíos → default del locale, recorte de largo) antes de
+ * persistir, así el jsonb guardado nunca queda malformado. Fire-and-forget.
+ */
+export async function saveQuickQuestions(pages: string[][]) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const locale = await getLocale();
+  const normalized = normalizeForSave(pages, locale);
+  await quickQuestionsBuilder(supabase).update({ quick_questions: normalized }).eq("user_id", user.id);
 }

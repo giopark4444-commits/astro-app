@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { AreaDriver, LifeArea, ScoreTone } from "@aluna/core";
 import es from "@/messages/es.json";
 import { EnergyPanel } from "../energy-panel";
 
-// Regresión T6 (review gap): AreaBars por sí sola quedó como componente
-// controlado y no puede reproducir el bug original (vivía en la interacción
-// entre el ternario de carga de EnergyPanel -que desmonta/remonta AreaBars al
-// cambiar de periodo- y el estado "qué área está abierta"). Esta prueba monta
-// EnergyPanel de verdad, con fetch mockeado, y ejercita ese camino completo.
+// HD4: el panel de energía gana palancas de DISCIPLINA (general/astros/números/
+// pilares) en vez del selector de periodo. /api/scores (HD3) trae los 4 sets en
+// una sola llamada — cambiar de disciplina solo reindexa datos ya en memoria, sin
+// refetch. El periodo (today/week/month/year) se saca del dashboard (decisión: el
+// hub vive siempre en "hoy"; quien quiera periodos va a /horoscopo).
 
 interface AreaScoreFixture {
   area: LifeArea;
@@ -18,42 +18,38 @@ interface AreaScoreFixture {
   drivers: AreaDriver[];
 }
 
-const TODAY_AREAS: AreaScoreFixture[] = [
+// Solo `astros` trae drivers reales (ver lib/hoy/scores.ts); general/numeros/
+// pilares siempre drivers: [] — así que uso valores distintos por disciplina
+// para poder aserir cuál set está pintado, y dejo intactos los drivers vacíos
+// donde el ensamblador real los deja vacíos.
+const GENERAL_AREAS: AreaScoreFixture[] = [
+  { area: "love", score: 55, tone: "mixed", drivers: [] },
+  { area: "money", score: 60, tone: "high", drivers: [] },
+];
+const ASTROS_AREAS: AreaScoreFixture[] = [
   {
-    area: "money",
-    score: 66,
+    area: "love",
+    score: 70,
     tone: "high",
     drivers: [{ transit: "jupiter", natal: "venus", aspect: "trine", favorable: true }],
   },
-  { area: "love", score: 50, tone: "mixed", drivers: [] },
+  { area: "money", score: 66, tone: "high", drivers: [] },
+];
+const NUMEROS_AREAS: AreaScoreFixture[] = [
+  { area: "love", score: 40, tone: "low", drivers: [] },
+  { area: "money", score: 45, tone: "low", drivers: [] },
+];
+const PILARES_AREAS: AreaScoreFixture[] = [
+  { area: "love", score: 80, tone: "high", drivers: [] },
+  { area: "money", score: 35, tone: "low", drivers: [] },
 ];
 
-const WEEK_AREAS: AreaScoreFixture[] = [
-  {
-    area: "money",
-    score: 40,
-    tone: "low",
-    drivers: [{ transit: "saturn", natal: "venus", aspect: "square", favorable: false }],
-  },
-  { area: "love", score: 50, tone: "mixed", drivers: [] },
-];
-
-// Texto exacto que arma EnergyPanel para un driver: `${L.bodies[transit]}
-// ${L.aspects[aspect]} ${t("carta.yourPossessive")} ${L.bodies[natal]}` (ver
-// energy-panel.tsx). Lo recalculamos aquí desde los mismos mensajes es.json
-// para no hardcodear traducciones que puedan cambiar por su cuenta.
 function driverText(transit: string, aspect: string, natal: string): string {
-  const bodies: Record<string, string> = {
-    jupiter: "Júpiter",
-    saturn: "Saturno",
-    venus: "Venus",
-  };
-  const aspects: Record<string, string> = { trine: "Trígono", square: "Cuadratura" };
+  const bodies: Record<string, string> = { jupiter: "Júpiter", venus: "Venus" };
+  const aspects: Record<string, string> = { trine: "Trígono" };
   return `${bodies[transit]} ${aspects[aspect]} ${es.carta.yourPossessive} ${bodies[natal]}`;
 }
-
-const TODAY_MONEY_DRIVER = driverText("jupiter", "trine", "venus");
-const WEEK_MONEY_DRIVER = driverText("saturn", "square", "venus");
+const LOVE_DRIVER_TEXT = driverText("jupiter", "trine", "venus");
 
 function renderPanel() {
   return render(
@@ -63,43 +59,89 @@ function renderPanel() {
   );
 }
 
-describe("EnergyPanel — la expansión sobrevive un cambio de periodo (T6 review gap)", () => {
+describe("EnergyPanel — palancas de disciplina (general/astros/números/pilares)", () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+
   beforeEach(() => {
-    global.fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
-      const body = JSON.parse(String(init?.body)) as { period?: string };
-      const areas = body.period === "week" ? WEEK_AREAS : TODAY_AREAS;
-      return {
-        ok: true,
-        json: async () => ({ areas }),
-      } as unknown as Response;
-    }) as unknown as typeof fetch;
+    // reduced-motion: useCountUp devuelve el target de inmediato (mismo patrón
+    // que area-bars.test.tsx), sin lo cual el score tardaría frames en asentar.
+    vi.stubGlobal("matchMedia", (q: string) => ({
+      matches: q.includes("prefers-reduced-motion"),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        period: "today",
+        general: GENERAL_AREAS,
+        astros: ASTROS_AREAS,
+        numeros: NUMEROS_AREAS,
+        pilares: PILARES_AREAS,
+      }),
+    })) as unknown as ReturnType<typeof vi.fn>;
+    global.fetch = fetchMock as unknown as typeof fetch;
   });
 
-  it("mantiene la tarjeta de Dinero expandida al cambiar de 'hoy' a 'semana'", async () => {
+  it("muestra General por defecto, con las 4 disciplinas como pestañas", async () => {
     renderPanel();
 
-    // 1. Carga inicial ("hoy"): expande la tarjeta de Dinero y confirma que
-    // muestra el driver de ESTE periodo.
-    await waitFor(() => expect(screen.getByText(es.hoy.areaMoney)).toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: /Dinero/ }));
-    await waitFor(() => expect(screen.getByText(TODAY_MONEY_DRIVER)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(es.hoy.areaLove)).toBeInTheDocument());
+    expect(screen.getByText("55")).toBeInTheDocument(); // score de "love" en general
 
-    // 2. Cambia de periodo. Esto dispara un nuevo fetch: EnergyPanel pone
-    // areas=null (muestra el estado de carga, desmontando AreaBars) y luego
-    // remonta AreaBars con los datos de la semana. EnergyPanel mismo nunca se
-    // desmonta, así que `open` (elevado a EnergyPanel tras el fix) debe
-    // sobrevivir intacto.
-    fireEvent.click(screen.getByRole("tab", { name: es.hoy.periodWeek }));
-
-    // 3. Sin volver a hacer clic en la tarjeta: una vez cargan los datos de la
-    // semana, el driver de Dinero de la NUEVA data debe estar visible. Esta es
-    // exactamente la propiedad que la regresión original rompía.
-    await waitFor(() => expect(screen.getByText(WEEK_MONEY_DRIVER)).toBeInTheDocument());
-    expect(screen.queryByText(TODAY_MONEY_DRIVER)).not.toBeInTheDocument();
-
-    // La pestaña "Semana" queda marcada activa y la de "Hoy" ya no.
-    expect(screen.getByRole("tab", { name: es.hoy.periodWeek }).getAttribute("aria-selected")).toBe(
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      es.hoy.disciplineGeneral,
+      es.hoy.disciplineAstros,
+      es.hoy.disciplineNumeros,
+      es.hoy.disciplinePilares,
+    ]);
+    expect(screen.getByRole("tab", { name: es.hoy.disciplineGeneral }).getAttribute("aria-selected")).toBe(
       "true",
     );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("cambia a Números sin volver a pedir datos al servidor", async () => {
+    renderPanel();
+    await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("tab", { name: es.hoy.disciplineNumeros }));
+
+    // El set de "numeros" (love=40) reemplaza al de "general" (love=55) sin un
+    // segundo fetch: los 4 sets ya viven en memoria desde la carga inicial.
+    await waitFor(() => expect(screen.getByText("40")).toBeInTheDocument());
+    expect(screen.queryByText("55")).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("tab", { name: es.hoy.disciplineNumeros }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+  });
+
+  it("solo astros trae el 'por qué'; las demás disciplinas no rompen sin drivers", async () => {
+    renderPanel();
+    await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
+
+    // Expande "Amor" en General (sin drivers) → texto genérico, no el de astros.
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(es.hoy.areaLove) }));
+    await waitFor(() => expect(screen.getByText(es.hoy.calmGeneric)).toBeInTheDocument());
+    expect(screen.queryByText(es.hoy.calm)).not.toBeInTheDocument();
+
+    // Sin volver a hacer clic en la tarjeta: cambia a Astros. El estado
+    // "expandido" (elevado a EnergyPanel, componente controlado) sobrevive el
+    // cambio de disciplina — ahora sí hay drivers para "love" y deben verse.
+    fireEvent.click(screen.getByRole("tab", { name: es.hoy.disciplineAstros }));
+    await waitFor(() => expect(screen.getByText(LOVE_DRIVER_TEXT)).toBeInTheDocument());
+    expect(screen.queryByText(es.hoy.calmGeneric)).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("el toggle de periodo ya no vive en el dashboard (siempre 'hoy')", async () => {
+    renderPanel();
+    await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
+    expect(screen.queryByRole("tab", { name: es.hoy.periodWeek })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: es.hoy.periodMonth })).not.toBeInTheDocument();
+    // Y el header de la sección saluda, no anuncia "periodo".
+    expect(within(screen.getByRole("heading", { level: 2 })).getByText(es.hoy.energyTitle)).toBeInTheDocument();
   });
 });

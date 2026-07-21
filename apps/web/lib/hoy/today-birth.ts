@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import type { BirthDate } from "@aluna/core";
 
 /** Parsea "YYYY-MM-DD" (fecha civil de nacimiento) a BirthDate, o null si no cuadra. */
@@ -7,8 +8,48 @@ export function parseBirth(date: string): BirthDate | null {
   return { year: y, month: m, day: d };
 }
 
-/** Hoy como fecha civil local (la numerología usa la fecha del calendario, sin TZ). */
+/**
+ * Hoy como fecha civil de la timezone del PROCESO (server). En Vercel eso es UTC, no
+ * la del usuario — solo sirve como fallback cuando no hay una zona de perfil válida.
+ */
 export function todayCivil(): BirthDate {
   const now = new Date();
   return { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+}
+
+/**
+ * Fecha civil de "hoy" resuelta en una zona horaria IANA, a partir de un instante UTC
+ * dado. Función pura (nowUtc inyectable) para poder testearla sin mockear el reloj
+ * global. Devuelve null si `zone` no es una IANA válida para luxon.
+ */
+export function civilTodayInZone(zone: string, nowUtc: Date): BirthDate | null {
+  const dt = DateTime.fromJSDate(nowUtc, { zone: "utc" }).setZone(zone);
+  if (!dt.isValid) return null;
+  return { year: dt.year, month: dt.month, day: dt.day };
+}
+
+/**
+ * True si `tz` es una zona horaria IANA válida para luxon (y de largo razonable).
+ * Misma validación que `isValidTz` de lib/horoscope/western.ts — duplicada aquí
+ * (en vez de importada) para que /api/scores no arrastre las dependencias pesadas
+ * de ese módulo (@aluna/ephemeris/@aluna/core), que rompen sus mocks parciales en
+ * route.test.ts al evaluarse ZODIAC_SIGNS a nivel de módulo.
+ */
+export function isValidTz(tz: string): boolean {
+  return typeof tz === "string" && tz.length > 0 && tz.length <= 64 && DateTime.now().setZone(tz).isValid;
+}
+
+/**
+ * Hoy como fecha civil en la timezone del PERFIL (usuario), no la del proceso server
+ * (que en Vercel/producción es siempre UTC). Sin esto, un usuario en UTC-5 ve el
+ * pilar/número del día SIGUIENTE desde ~19:00 hasta medianoche hora local. Si
+ * `timeZone` es null/undefined/inválida, cae a `todayCivil()` (tz del servidor) como
+ * fallback documentado.
+ */
+export function todayCivilInZone(timeZone: string | null | undefined, nowUtc = new Date()): BirthDate {
+  if (timeZone) {
+    const civil = civilTodayInZone(timeZone, nowUtc);
+    if (civil) return civil;
+  }
+  return todayCivil();
 }

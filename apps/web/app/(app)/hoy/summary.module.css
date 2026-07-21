@@ -1,0 +1,55 @@
+/* R2: valores sobre la escala tokenizada (ver tokens.css) */
+/* Task 5: secciones-resumen del dashboard (carta, horóscopo occidental/oriental,
+   pilares) — tarjeta compacta compartida por los 3 componentes: título + resumen
+   breve (1-2 párrafos) + CTA a su lente completa. HD7 hace el layout fino del
+   dashboard (grid, orden, tintes por dominio como .heroWeather en hub.module.css);
+   este módulo solo resuelve cada tarjeta en aislamiento, sin asumir su posición. */
+.card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-lg);
+  color: var(--acc-text);
+}
+.note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--soft);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.chip {
+  font-size: var(--text-xs);
+}
+.summaryP {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--ink);
+}
+.summaryP b {
+  color: var(--acc-text);
+}
+.cta {
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: var(--sp-1);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--acc-text);
+  transition: color var(--dur-fast) var(--ease);
+}
+.cta:hover {
+  color: var(--ink);
+}

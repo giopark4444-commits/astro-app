@@ -209,6 +209,7 @@ export type Database = {
           language: string;
           light_mode: string;
           memory_enabled: boolean;
+          quick_questions: Json | null;
           reading_style: string;
           theme: string;
           updated_at: string;
@@ -223,6 +224,7 @@ export type Database = {
           language?: string;
           light_mode?: string;
           memory_enabled?: boolean;
+          quick_questions?: Json | null;
           reading_style?: string;
           theme?: string;
           updated_at?: string;
@@ -237,6 +239,7 @@ export type Database = {
           language?: string;
           light_mode?: string;
           memory_enabled?: boolean;
+          quick_questions?: Json | null;
           reading_style?: string;
           theme?: string;
           updated_at?: string;

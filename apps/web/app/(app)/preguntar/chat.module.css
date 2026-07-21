@@ -1,9 +1,17 @@
 /* R2: valores sobre la escala tokenizada (ver tokens.css) */
+/* Alto ACOTADO (no min-height): igual mecanismo que .wrapEmbedded/.chatPanel
+   (ver hub.module.css/perfil.module.css) — con min-height el .thread nunca
+   desbordaba dentro de .wrap, así que su scrollTop era un no-op y retomar un
+   hilo largo aterrizaba en el INICIO en vez del final (regresión cazada en
+   review Fable). overflow:hidden evita que el contenido empuje a .wrap más
+   allá del viewport; .thread (flex:1 + overflow-y:auto, abajo) es quien
+   scrollea internamente en los 3 modos (página/embebido perfil/embebido hoy). */
 .wrap {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 150px);
+  height: calc(100dvh - 150px);
+  overflow: hidden;
   padding: var(--sp-5) var(--sp-5) var(--sp-3); /* 18 contenedor → sp-5 */
 }
 .sky { position: absolute; inset: 0 0 auto; height: 220px; pointer-events: none; z-index: 0; }
@@ -81,7 +89,7 @@
      conversaciones persistido (fuera de alcance, spec §6). */
   .wrap { max-width: min(720px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
 
-  /* .wrap usa `min-height: calc(100dvh - 150px)` en móvil: esos 150px son
+  /* .wrap usa `height: calc(100dvh - 150px)` en móvil: esos 150px son
      header móvil + el clearance del bottom-nav fijo (96px) que en desktop NO
      existe (mismo hallazgo que carta/hoy en la review de R4a). En desktop el
      chat debe reclamar el resto del viewport bajo el header real de
@@ -91,5 +99,132 @@
      respiro) — no una resta derivada del valor móvil (150-96), que por
      coincidencia numérica da un resultado parecido pero no es la cantidad
      correcta. */
-  .wrap { min-height: calc(100dvh - 66px); }
+  .wrap { height: calc(100dvh - 66px); }
+}
+
+/* Accesos rápidos (páginas base con defaults + páginas extra del usuario, edición inline) */
+.quickWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+/* Una pregunta por línea: chips apilados a lo ancho, nunca dos en la misma fila. */
+.quickRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chip {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+  background: var(--surface-2, rgba(255, 255, 255, 0.04));
+  color: inherit;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  background: rgba(var(--acc-rgb), 0.1);
+  border-color: var(--acc);
+}
+.chipInput {
+  width: 100%;
+  border: 1px solid var(--acc);
+  background: var(--surface);
+  color: inherit;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.82rem;
+}
+.quickBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.quickNav {
+  display: flex;
+  gap: 6px;
+}
+/* Segmentado "1 · 2": pastillas numeradas, la activa rellena con el color de
+   marca (--acc) + glow tenue; inactiva con borde tenue. Reemplaza los dots
+   casi imperceptibles. aria-label sigue siendo "Página N de M". */
+.pageTab {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  opacity: 0.72;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+    opacity 0.15s ease, box-shadow 0.15s ease;
+}
+.pageTab:hover {
+  opacity: 1;
+  border-color: var(--acc);
+}
+.pageTabOn {
+  opacity: 1;
+  border-color: transparent;
+  background: var(--acc);
+  color: var(--ink-on-acc);
+  box-shadow: var(--glow-soft);
+}
+/* "+" para agregar una página nueva: acento de marca, borde punteado, sin
+   relleno (se distingue de las pastillas numeradas). */
+.pageAdd {
+  color: var(--acc-text);
+  border-style: dashed;
+  border-color: var(--acc);
+  opacity: 0.9;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.pageAdd:hover {
+  opacity: 1;
+  background: rgba(var(--acc-rgb), 0.1);
+}
+.pageTab:disabled,
+.editBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+.editBtn,
+.saveBtn,
+.cancelBtn,
+.restoreBtn {
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.quickActions {
+  display: flex;
+  gap: 6px;
+}
+.saveBtn {
+  border-color: var(--acc);
+  background: rgba(var(--acc-rgb), 0.14);
+}
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

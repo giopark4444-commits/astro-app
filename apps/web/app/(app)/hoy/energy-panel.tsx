@@ -14,10 +14,23 @@ import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
 import styles from "./energy.module.css";
 
-type Period = "today" | "week" | "month" | "year";
-const PERIODS: readonly Period[] = ["today", "week", "month", "year"];
+// HD4: las cuatro disciplinas que puntúan "tu energía de hoy" (ver /api/scores,
+// HD3) — general = promedio del día; astros = clima de tránsitos; numeros =
+// numerología del día; pilares = 八字/사주 con el pilar de hoy. Un solo fetch
+// trae los 4 sets; el toggle solo reindexa datos ya en memoria, sin refetch.
+//
+// DECISIÓN (brief HD4, punto 2): el selector de periodo (today/week/month/year)
+// se saca de este panel — el dashboard vive siempre en "hoy". Solo `astros`
+// respondía al periodo (ver route.ts); quien quiera explorar otros periodos va
+// a /horoscopo, que sí lo conserva. Las claves i18n `hoy.period*` no se tocan
+// porque horoscopo-shared.ts las sigue usando.
+type Discipline = "general" | "astros" | "numeros" | "pilares";
+const DISCIPLINES: readonly Discipline[] = ["general", "astros", "numeros", "pilares"];
+
 // Referencia estable: un default `= []` inline crearía un array nuevo en cada
-// render y el useEffect de abajo (que depende de `focus`) reentraría en loop.
+// render. Ya no es dependencia del fetch (el orden se calcula en cada render,
+// no al llegar la data), pero se mantiene estable por si algún consumidor la
+// memoiza aguas abajo.
 const NO_FOCUS: LifeArea[] = [];
 
 interface AreaScore {
@@ -26,6 +39,15 @@ interface AreaScore {
   tone: ScoreTone;
   drivers: AreaDriver[];
 }
+
+interface ScoresByDiscipline {
+  general: AreaScore[];
+  astros: AreaScore[];
+  numeros: AreaScore[];
+  pilares: AreaScore[];
+}
+
+const EMPTY_SCORES: ScoresByDiscipline = { general: [], astros: [], numeros: [], pilares: [] };
 
 const PLANET_GLYPH: Record<string, string> = Object.fromEntries(
   PLANETS.map((p) => [p.key, p.glyph + "︎"]),
@@ -39,11 +61,11 @@ const AREA_KEY: Record<LifeArea, string> = {
   mood: "areaMood",
   luck: "areaLuck",
 };
-const PERIOD_KEY: Record<Period, string> = {
-  today: "periodToday",
-  week: "periodWeek",
-  month: "periodMonth",
-  year: "periodYear",
+const DISCIPLINE_KEY: Record<Discipline, string> = {
+  general: "disciplineGeneral",
+  astros: "disciplineAstros",
+  numeros: "disciplineNumeros",
+  pilares: "disciplinePilares",
 };
 const TONE_KEY: Record<ScoreTone, string> = {
   high: "toneHigh",
@@ -51,9 +73,10 @@ const TONE_KEY: Record<ScoreTone, string> = {
   low: "toneLow",
 };
 
-/** "Tu energía": barras de 6 áreas de vida por periodo, alimentadas por /api/scores
- *  (clima de tránsitos al natal). Cada barra abre el "por qué" (los tránsitos que la
- *  mueven) para que nunca se sienta arbitraria. */
+/** "¿Cómo estás hoy?": barras de 6 áreas de vida por disciplina, alimentadas por
+ *  un solo fetch a /api/scores (trae general/astros/numeros/pilares juntos).
+ *  Cada barra abre el "por qué"; solo astros trae tránsitos reales — las demás
+ *  disciplinas muestran el puntaje sin desglose (ver AREA_KEY/calmGeneric). */
 export function EnergyPanel({
   profileId,
   focus = NO_FOCUS,
@@ -64,46 +87,61 @@ export function EnergyPanel({
   const t = useTranslations();
   const locale = useLocale();
   const L = astroLabels(locale);
-  const [period, setPeriod] = useState<Period>("today");
-  const [areas, setAreas] = useState<AreaScore[] | null>(null);
+  const [discipline, setDiscipline] = useState<Discipline>("general");
+  const [scores, setScores] = useState<ScoresByDiscipline | null>(null);
   const [open, setOpen] = useState<LifeArea | null>(null);
 
   useEffect(() => {
     let alive = true;
-    setAreas(null);
+    setScores(null);
     void (async () => {
       try {
         const res = await fetch("/api/scores", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ profileId, period }),
+          // tz ACTUAL del navegador (no la de nacimiento): así "hoy" en
+          // números/pilares/general queda coherente con el resto del
+          // dashboard (header, horóscopo), que también usa esta tz.
+          body: JSON.stringify({ profileId, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
         });
-        const data = (await res.json()) as { areas?: AreaScore[] };
-        if (alive) setAreas(orderAreasByFocus(data.areas ?? [], focus));
+        const data = (await res.json()) as Partial<ScoresByDiscipline>;
+        if (alive) {
+          setScores({
+            general: data.general ?? [],
+            astros: data.astros ?? [],
+            numeros: data.numeros ?? [],
+            pilares: data.pilares ?? [],
+          });
+        }
       } catch {
-        if (alive) setAreas([]);
+        if (alive) setScores(EMPTY_SCORES);
       }
     })();
     return () => {
       alive = false;
     };
-  }, [profileId, period, focus]);
+  }, [profileId]);
+
+  // El orden por foco se calcula en cada render (no al llegar la data): cambiar
+  // de disciplina no dispara fetch, así que no hay "data" nueva que reordenar,
+  // solo un índice distinto sobre lo que ya está en memoria.
+  const areas = scores ? orderAreasByFocus(scores[discipline], focus) : null;
 
   return (
     <section className={`card ${styles.panel}`}>
       <div className={styles.head}>
         <h2 className={styles.title}>{t("hoy.energyTitle")}</h2>
-        <div className={styles.periods} role="tablist" aria-label={t("hoy.energyTitle")}>
-          {PERIODS.map((p) => (
+        <div className={styles.disciplines} role="tablist" aria-label={t("hoy.energyTitle")}>
+          {DISCIPLINES.map((d) => (
             <button
-              key={p}
+              key={d}
               type="button"
               role="tab"
-              aria-selected={p === period}
-              className={`seg__item ${styles.period} ${p === period ? "seg__item--active" : ""}`}
-              onClick={() => setPeriod(p)}
+              aria-selected={d === discipline}
+              className={`seg__item ${styles.discipline} ${d === discipline ? "seg__item--active" : ""}`}
+              onClick={() => setDiscipline(d)}
             >
-              {t(`hoy.${PERIOD_KEY[p]}`)}
+              {t(`hoy.${DISCIPLINE_KEY[d]}`)}
             </button>
           ))}
         </div>
@@ -113,7 +151,7 @@ export function EnergyPanel({
         <p className={styles.loading}>{t("hoy.energyLoading")}</p>
       ) : areas.length > 0 ? (
         <AreaBars
-          calmText={t("hoy.calm")}
+          calmText={discipline === "astros" ? t("hoy.calm") : t("hoy.calmGeneric")}
           open={open}
           onToggle={(key) => setOpen((prev) => (prev === key ? null : (key as LifeArea)))}
           areas={areas.map((a): BarArea => ({

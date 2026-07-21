@@ -1,64 +1,34 @@
 /* R2: valores sobre la escala tokenizada (ver tokens.css) */
+/* HD7: /hoy es un dashboard maestro-detalle (patrón de la serie, como perfil):
+   izquierda = 8 secciones apiladas (leftCol); derecha = el chat de Aluna sticky
+   (interpCol). El ocultado del chat en móvil es puro CSS (interpCol display:none),
+   no matchMedia — así el render es idéntico en servidor y cliente (sin desajuste
+   de hidratación), igual que carta/pilares/numeros. */
 .wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px: clearance del bottom-nav (excepción del plan); 24→sp-6 por precedente pilares */
 .sky { position: absolute; inset: 0 0 auto; height: 280px; pointer-events: none; z-index: 0; }
 
+/* Encabezado compacto: nombre + DayHeader (fecha/fase lunar/día personal). Sin
+   el "Hola" (HD7 §4). */
 .greet {
-  position: relative; z-index: 1; margin-bottom: var(--sp-6); /* 26→28: paso más cercano */
+  position: relative; z-index: 1; margin-bottom: var(--sp-6);
   display: flex; flex-direction: column; gap: var(--sp-2);
 }
-.hello { font-size: var(--text-xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
 .name { font-size: clamp(32px, 9vw, 42px); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; } /* clamp responsivo: excepción (no es un paso fijo) */
 
 /* DayHeader: fecha + fase lunar/signo + día personal (mockup 06). Apilado bajo
-   el saludo en móvil; a la derecha de la fila en desktop. */
+   el nombre en móvil; a la derecha de la fila en desktop. */
 .dateMeta { font-size: var(--text-xs); color: var(--soft); line-height: 1.6; }
 .dateLine { margin: 0; }
 .moonLine { margin: 0; }
 .moonGlyph { color: var(--acc-text); }
 
-@media (min-width: 1080px) { /* bp desktop R4a */
-  .greet { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
-  .dateMeta { text-align: right; }
-  .hello { font-size: 15px; letter-spacing: 0; text-transform: none; color: var(--soft); } /* mockup .hello */
-  .name {
-    font-size: 52px; line-height: 1.02; color: var(--acc-text); /* mockup .greet h1 em: itálica dorada */
-    text-shadow: 0 0 24px rgba(var(--acc-rgb), 0.35);
-  }
-}
-
-.section { position: relative; z-index: 1; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase; color: var(--soft); font-weight: 700; margin: 0 0 var(--sp-3); }
-.lenses { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); } /* 11→12: paso más cercano */
-
-/* .tile migrado al primitivo global card+card--interactive — ver hub-view.tsx:
-   className="card card--interactive ..." (el hover ahora sale de .card--interactive:hover) */
-.tile {
-  display: flex; flex-direction: column; gap: var(--sp-3);
-  min-height: 116px;
-  padding: var(--sp-4); /* 15→16: paso más cercano */
-  position: relative;
-}
-.tileIcon { color: var(--acc-text); display: inline-flex; }
-.tileName { margin-top: auto; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); } /* 18→17: paso más cercano */
-.tileSub { display: none; } /* móvil intacto (mockup 06 §3.3): el subtítulo es solo desktop */
-.soon { opacity: 0.55; }
-/* R3: migrado al primitivo global .chip (globals.css) — solo lo que difiere queda local. */
-.badge {
-  position: absolute; top: var(--sp-3); right: var(--sp-3); /* 13→12: paso más cercano */
-  font-size: var(--text-2xs); letter-spacing: 0.5px; text-transform: uppercase; /* 8.5→11: piso de la escala */
-  color: var(--soft); background: var(--surface-2);
-  border-radius: 6px; padding: var(--sp-1) var(--sp-2); /* 2px/6px→sp-1/sp-2: pasos más cercanos */
-}
-
 /* "Aluna te recuerda" (Fase 2 T4): tarjeta proactiva de compromisos abiertos
-   (memory_threads, sincronizados desde manifestations en page.tsx). Mismo
-   lenguaje visual que .askCta más abajo — superficie teñida con el acento de
-   marca (feedback de Gio: color en superficies grandes, no solo un ícono
-   suelto) — para que se sienta "de Aluna" y no un banner genérico. Tinte en
-   la regla base (no solo en el media query desktop): la tarjeta es tan
-   prioritaria en móvil como en escritorio. */
+   (memory_threads, sincronizados desde manifestations en page.tsx). Superficie
+   teñida con el acento de marca (feedback de Gio: color en superficies grandes,
+   no solo un ícono suelto) para que se sienta "de Aluna". */
 .proactiveCard {
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-3);
-  padding: var(--sp-4); margin-bottom: var(--sp-6);
+  padding: var(--sp-4);
   background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
   border-color: rgba(var(--acc-rgb), 0.34);
 }
@@ -79,14 +49,13 @@
 }
 .proactiveDismiss:hover { color: var(--tone-warm); border-color: rgba(var(--acc-rgb), 0.45); }
 
-/* Tu clima de hoy (tránsitos al abrir) — ya no es un <Link> completo, es un
-   <section> con un Link de cabecera (.weatherLink). En móvil ese link se
-   estira sobre toda la tarjeta (stretched-link, invisible) para restaurar el
-   tap completo; en desktop vuelve a ser el link de texto visible de la
-   cabecera (mockup .p-head a). */
+/* Tu clima de hoy (tránsitos al abrir) — un <section> con un Link de cabecera
+   (.weatherLink). En móvil ese link se estira sobre toda la tarjeta
+   (stretched-link, invisible) para restaurar el tap completo; en desktop vuelve
+   a ser el link de texto visible de la cabecera (mockup .p-head a). */
 .weatherCard {
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); /* 9→8: paso más cercano */
-  padding: var(--sp-4); margin-bottom: var(--sp-6); /* 24→28: empate sp-6/sp-5 diff 4/4 → mayor (separación de sección, jerarquía) */
+  padding: var(--sp-4);
 }
 .weatherHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
 .weatherH { font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
@@ -106,85 +75,72 @@
 .harm_hard .weatherAsp { color: var(--tone-warm); }
 .harm_soft .weatherAsp { color: var(--tone-cool); }
 
-/* ===== R4a desktop (mockup 06): fila hero 5/4/3 + CTA + lentes ===== */
-/* En móvil los wrappers no existen visualmente y el CTA está oculto. */
-.deskGrid { display: contents; }
-.heroDay, .heroEnergy { display: contents; }
-.askCta { display: none; }
+/* ===== Maestro-detalle (HD7) ===== */
+/* Móvil: una sola columna. deskCols fluye en bloque (el carril derecho es
+   display:none), y leftCol reproduce el ritmo vertical con flex+gap (el gap del
+   padre manda; los márgenes propios de cada tarjeta se anulan abajo para no
+   sumarse al gap). */
+.deskCols { display: block; }
+.leftCol { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+/* El gap de leftCol es el único que separa las secciones: se anula el
+   margin-bottom propio de las tarjetas (proactiveCard/weatherCard y el .panel
+   de energy.module.css) para que el ritmo quede uniforme en móvil y desktop. */
+.leftCol > * { margin-bottom: 0; }
+.interpCol { display: none; }
+
+/* Título del panel de chat (span) — misma receta que la serie (perfil .cardH2 /
+   numerology-view .cardH2). */
+.cardH2 {
+  font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
+}
+/* El panel de chat: columna flex de alto fijo (mismo mecanismo que
+   perfil.module.css .chatPanel). Definido en base para que la clave exista
+   siempre en el módulo; en móvil su padre .interpCol es display:none. */
+.chatPanel {
+  display: flex; flex-direction: column;
+  height: calc(100vh - 100px);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface); padding: var(--sp-4);
+  overflow: hidden;
+}
+/* El único <div> hijo directo del panel es la envoltura `.wrapEmbedded` del
+   ChatView (el otro hijo es el <span> del título). flex:1 + min-height:0 = el
+   eslabón que deja al hilo scrollear y al composer asentarse abajo (misma
+   cadena documentada en perfil.module.css). */
+.chatPanel > div { flex: 1; min-height: 0; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
-  /* Rediseño 2col (Gio): DOS columnas iguales en todo — IZQUIERDA la información
-     técnica (datos, números), DERECHA su lectura (predicciones, consejos). Cada
-     fila empareja un dato con su interpretación y las alturas quedan sincronizadas. */
-  .deskGrid {
+  /* Encabezado en fila: nombre a la izquierda, fecha/fase lunar a la derecha. */
+  .greet { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); }
+  .dateMeta { text-align: right; }
+  .name {
+    font-size: 52px; line-height: 1.02; color: var(--acc-text); /* mockup .greet h1 em: itálica dorada */
+    text-shadow: 0 0 24px rgba(var(--acc-rgb), 0.35);
+  }
+
+  /* Split maestro-detalle: DOS mitades iguales (50/50, como perfil — a calibrar
+     en el gate HD8 si el chat queda muy vacío frente al contenido denso). */
+  .deskCols {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--sp-5);
+    gap: var(--sp-6);
+    align-items: start; /* el carril derecho no se estira → sticky funciona */
     position: relative; z-index: 1;
   }
-  /* Compromisos: fila completa, primero de todos (order 0) — prominente
-     antes del clima/energía, mismo criterio "gridFull" que el título de
-     lentes más abajo. margin-bottom:0 porque el espaciado ya lo da `gap`. */
-  .proactiveCard { grid-column: 1 / -1; order: 0; margin-bottom: 0; }
-  .heroEnergy { display: block; grid-column: 1; order: 1; }
-  .heroWeather { grid-column: 2; order: 2; margin-bottom: 0; }
-  .heroDay { display: block; grid-column: 1; order: 3; }
-  .section.gridFull { grid-column: 1 / -1; order: 5; margin-top: var(--sp-4); }
-  .askCta {
-    display: flex; flex-direction: column; gap: var(--sp-2); justify-content: center;
-    grid-column: 2; order: 4; padding: var(--sp-5);
-    /* mockup .p-energy: superficie dorada dominante del CTA */
-    background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
-    border-color: rgba(var(--acc-rgb), 0.34);
-  }
-  .askHead { display: flex; align-items: baseline; gap: var(--sp-3); }
-  .askTitle { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
-  .askHint { font-size: var(--text-xs); color: var(--soft); }
-  .askRow { display: flex; gap: 10px; } /* mockup .ask-row */
-  .askInput {
-    flex: 1; height: 44px; border-radius: 999px; padding: 0 18px; /* mockup .ask-input */
-    border: 1px solid var(--line); background: color-mix(in oklab, var(--bg) 62%, transparent);
-    color: var(--ink); font-family: inherit; font-size: var(--text-sm); outline: none;
-    transition: border-color var(--dur-fast) var(--ease);
-  }
-  .askInput::placeholder { color: var(--soft); }
-  .askInput:focus { border-color: rgba(var(--acc-rgb), 0.5); }
-  .askBtn {
-    height: 44px; padding: 0 24px; border-radius: 999px; border: 0; cursor: pointer; /* mockup .ask-btn */
-    background: linear-gradient(90deg, var(--acc), rgba(var(--acc-rgb), 0.8)); color: var(--ink-on-acc);
-    font-family: inherit; font-size: var(--text-sm); font-weight: 700; box-shadow: var(--glow-soft);
-  }
-  .askSug { display: flex; gap: 8px; } /* mockup .ask-sug */
-  .askSugChip {
-    border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer;
-    background: var(--surface-2); color: var(--soft); font-family: inherit; font-size: var(--text-2xs);
-    transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
-  }
-  .askSugChip:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
-  .lenses { grid-column: 1 / -1; order: 6; grid-template-columns: repeat(5, 1fr); } /* fila completa; 5 lentes desde que Tarot entró */
-  .tileIcon {
-    width: 40px; height: 40px; border-radius: 12px; /* mockup .tile-ic */
-    background: rgba(var(--acc-rgb), 0.1); border: 1px solid rgba(var(--acc-rgb), 0.3);
-    display: grid; place-items: center;
-  }
-  .tileName { font-family: var(--font-ui); font-size: 15px; font-weight: 700; margin-top: auto; }
-  .tileSub { display: block; font-size: var(--text-2xs); color: var(--soft); line-height: 1.45; }
+  .leftCol { gap: var(--sp-5); }
 
-  /* tintes por dominio (mockup: energía oro / clima azul / numerología violeta).
-     .wrap .heroEnergy > * = especificidad (0,2,0): gana al .panel del módulo del
-     componente sin importar el orden de carga (regla R3: override por especificidad). */
-  .wrap .heroEnergy > * {
-    background: linear-gradient(150deg, rgba(var(--acc-rgb), 0.14), rgba(var(--acc-rgb), 0.035) 55%, var(--surface));
-    border-color: rgba(var(--acc-rgb), 0.34);
-    height: 100%;
-  }
-  .wrap .heroWeather {
-    background: linear-gradient(155deg, rgba(122, 170, 224, 0.14), rgba(122, 170, 224, 0.04) 55%, var(--surface)); /* mockup: --tone-cool 7aaae0 */
+  /* Carril derecho: lo único sticky — la izquierda scrollea libre. top: 84px =
+     header 66px + respiro (mismo offset que carta/pilares/numeros/perfil). */
+  .interpCol { display: block; position: sticky; top: 84px; }
+
+  /* Clima: tinte azul (mockup: --tone-cool 7aaae0) + subtítulo y tarjetas .asp
+     ricas (orbe + frase) — solo en desktop. */
+  .weatherCard.heroWeather {
+    background: linear-gradient(155deg, rgba(122, 170, 224, 0.14), rgba(122, 170, 224, 0.04) 55%, var(--surface));
     border-color: rgba(122, 170, 224, 0.34);
   }
-
-  /* ── clima rico desktop (mockup 06 §3.2): subtítulo + tarjetas .asp con orbe y frase ── */
-  /* desktop: vuelve a ser el link de texto normal de la cabecera (mockup .p-head a) */
+  /* desktop: el link vuelve a ser el de texto normal de la cabecera (mockup .p-head a) */
   .weatherLink { position: static; inset: auto; z-index: auto; overflow: visible; text-indent: 0; display: inline; font-size: var(--text-2xs); color: var(--soft); }
   .weatherLink:hover { color: var(--ink); }
   .weatherSub { display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--soft); margin: -8px 0 0; } /* mockup .w-sub (-8px: pega el subtítulo a la cabecera) */
@@ -197,10 +153,6 @@
   .aspCard[data-harm="soft"] { border-left-color: var(--tone-cool); }
   .aspOrb { display: inline; font-size: var(--text-2xs); color: var(--soft); margin-left: auto; } /* mockup .asp-meta */
   .aspWhy { display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); line-height: 1.45; color: var(--soft); } /* mockup .asp-why */
-  .wrap .heroDay > * {
-    background: linear-gradient(160deg, rgba(150, 140, 214, 0.14), rgba(150, 140, 214, 0.04) 60%, var(--surface)); /* mockup: violeta numerología */
-    border-color: rgba(150, 140, 214, 0.34);
-    height: 100%;
-  }
+
   .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav no hace falta el clearance de 96px */
 }

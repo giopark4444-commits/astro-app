@@ -7,18 +7,19 @@
 }
 .title { font-family: var(--font-display); font-size: var(--text-xl); /* 19→20: paso más cercano */ color: var(--ink); margin: 0; }
 
-/* Selector de periodo: píldora segmentada — R3: item migrado al primitivo
-   global .seg__item/.seg__item--active (globals.css); .periods se queda local
-   porque su track es una píldora 999px (no el radio --radius de 16px de
+/* Selector de disciplina (HD4: general/astros/números/pilares, reemplaza al
+   selector de periodo): píldora segmentada — R3: item migrado al primitivo
+   global .seg__item/.seg__item--active (globals.css); .disciplines se queda
+   local porque su track es una píldora 999px (no el radio --radius de 16px de
    .seg), así que no consume .seg, solo aporta fondo/borde/radio propios.
    El hex de ink-sobre-acento local (azul marino) que vivía en .periodOn fue
    retirado → var(--ink-on-acc): cambio visual real navy→marrón en dark por
    defecto; tarea 12 lo refina por tema×modo. */
-.periods {
+.disciplines {
   display: inline-flex; gap: var(--sp-1); padding: var(--sp-1); /* 2px/3px→sp-1: piso de la escala */
   border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
 }
-.period {
+.discipline {
   font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 0.3px; /* 11.5: empate → apoyo → menor */
   padding: var(--sp-1) var(--sp-3); /* 5→4 */ border-radius: 999px;
 }

@@ -10,6 +10,7 @@ export {
 export { personalCycles, pinnacles, challenges } from "./numerology/cycles";
 export { inclusionTable, karmicLessons, hiddenPassion } from "./numerology/karmic";
 export { reduce, reduceWithTrace, digitsSum, isMaster } from "./numerology/reduction";
+export { scoreLifeAreasNumerology } from "./numerology/life-areas";
 
 // Constantes de astrología (para los planes 2+)
 export * from "./constants/astrology";
@@ -92,6 +93,7 @@ export {
   composeBaziReading, DAY_MASTER_VOICE,
   type BaziReading, type BaziReadingLocale,
 } from "./bazi/reading";
+export { scoreLifeAreasBazi, combineLifeAreas } from "./bazi/life-areas";
 
 // Facturación (Aluna Plus / Dodo Payments) — puro, compartido web+móvil
 export { isPlusActive, type SubscriptionStatus, type SubscriptionRow } from "./billing/subscription";
