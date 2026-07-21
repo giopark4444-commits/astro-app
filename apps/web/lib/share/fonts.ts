@@ -24,7 +24,7 @@ export interface ShareFont {
 
 let cached: ShareFont[] | null = null;
 
-/** Devuelve las 6 fuentes en formato satori/ImageResponse. Memoizado en singleton
+/** Devuelve las 7 fuentes en formato satori/ImageResponse. Memoizado en singleton
  *  de módulo: los .ttf se leen del disco una sola vez por proceso. */
 export function loadShareFonts(): ShareFont[] {
   if (cached) return cached;
@@ -63,6 +63,20 @@ export function loadShareFonts(): ShareFont[] {
       name: "Quicksand",
       data: readFileSync(fileURLToPath(new URL("./fonts/Quicksand_600SemiBold.ttf", import.meta.url))),
       weight: 600,
+      style: "normal",
+    },
+    {
+      // Subset de Noto Serif SC (OFL) con SOLO los 10 troncos celestes usados por
+      // el glifo hanzi de la lente "pilares" (甲乙丙丁戊己庚辛壬癸) — generado con
+      // la API de subsetting de Google Fonts (css2?family=Noto+Serif+SC&text=...),
+      // que devuelve un .ttf ya recortado a esos code points (3.6KB, no los ~10MB
+      // del CJK completo). Cormorant Garamond no trae glifos CJK y satori no cae a
+      // fuentes del sistema como un navegador — por eso este subset es la única
+      // familia que puede pintar el hanzi (ver zodiac-glyphs.tsx para el mismo
+      // razonamiento aplicado a los glifos zodiacales).
+      name: "Noto Serif SC",
+      data: readFileSync(fileURLToPath(new URL("./fonts/NotoSerifSC-hanzi-subset.ttf", import.meta.url))),
+      weight: 500,
       style: "normal",
     },
   ];

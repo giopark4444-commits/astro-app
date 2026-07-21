@@ -1,0 +1,17 @@
+{
+  // Solo para ejecutar dev-render-samples.mjs con `npx tsx` (o cualquier otro
+  // runner basado en esbuild) — NUNCA se usa para el build/typecheck real de la
+  // app (esos siguen leyendo apps/web/tsconfig.json explícitamente).
+  //
+  // apps/web/tsconfig.json declara "jsx":"preserve" porque el compilador SWC de
+  // Next hace su propia transformación JSX (runtime automático) sin mirar este
+  // campo. esbuild (lo que usa tsx) SÍ lo mira, y "preserve" lo deja sin
+  // transformar → Node no puede ejecutar JSX crudo. Herramientas como tsx
+  // resuelven el tsconfig más cercano al directorio de trabajo (CWD), no al
+  // archivo que se ejecuta — de ahí que este archivo viva aquí mismo, para que
+  // `cd apps/web/lib/share && npx tsx dev-render-samples.mjs` lo encuentre solo.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}

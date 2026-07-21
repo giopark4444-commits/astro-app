@@ -68,4 +68,10 @@ export interface ResolvedInsight {
   quote: string;
   glyph: ResolvedGlyph;
   chips: string[];
+  /** Índice del chip que se pinta en acento (chip--acc: elemento/maestro/invertida)
+   *  — undefined si ningún chip es acento. Se calcula aquí (no en card-template,
+   *  que ya no conoce la lente original) porque la regla difiere por lente: en
+   *  numeros/carta/pilares el chip 0 siempre es acento; en tarot SOLO cuando la
+   *  carta está invertida (el chip "INVERTIDA" que resolveTarot antepone). */
+  accentChipIndex?: number;
 }

@@ -109,6 +109,9 @@ function resolveNumeros(p: ShareCardNumeros): ResolvedInsight {
     quote,
     glyph: { kind: "number", value: String(p.number) },
     chips,
+    // Spread condicional (no `accentChipIndex: undefined`): exactOptionalPropertyTypes
+    // distingue "la clave no está" de "la clave está con valor undefined".
+    ...(chips.length > 0 ? { accentChipIndex: 0 } : {}),
   };
 }
 
@@ -132,6 +135,7 @@ function resolveCarta(p: ShareCardCarta): ResolvedInsight {
     quote,
     glyph: { kind: "zodiac", value: p.sign },
     chips,
+    accentChipIndex: 0,
   };
 }
 
@@ -152,6 +156,7 @@ function resolvePilares(p: ShareCardPilares): ResolvedInsight {
     quote,
     glyph: { kind: "hanzi", value: stemDef.hanzi },
     chips: [elementLabel, polarityLabel],
+    accentChipIndex: 0,
   };
 }
 
@@ -167,6 +172,7 @@ function resolveTarot(p: ShareCardTarot): ResolvedInsight {
     quote: card.essence,
     glyph: { kind: "tarot", value: p.cardId },
     chips,
+    ...(p.reversed ? { accentChipIndex: 0 } : {}),
   };
 }
 
