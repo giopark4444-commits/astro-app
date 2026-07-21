@@ -94,6 +94,41 @@ describe("ChatView — modo página (default, sin prop embedded)", () => {
   });
 });
 
+describe("ChatView — auto-scroll del hilo (no arrastra la ventana)", () => {
+  // Bug: scrollIntoView con block:"start" (default) escala hasta el scroll de
+  // la VENTANA. En /hoy (chat embebido en un panel bajo el header) esto hacía
+  // que la página cargara ya scrolleada, tapando el encabezado. El fix
+  // scrollea el CONTENEDOR del hilo (styles.thread) por scrollTop, sin tocar
+  // la ventana — verificado acá espiando window.scrollTo/scrollIntoView.
+  it("pega el hilo a su fondo por scrollTop, sin llamar scrollIntoView ni scrollTo de la ventana", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    // jsdom no implementa scrollIntoView (por eso el código original la
+    // invocaba con optional chaining) — se lo stubeamos para poder espiarlo.
+    if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = () => {};
+    const scrollIntoViewSpy = vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {});
+
+    const { container } = renderView();
+    const thread = container.querySelector(`.${CSS.escape(chatStyles.thread!)}`) as HTMLDivElement;
+    expect(thread).not.toBeNull();
+    // jsdom no calcula layout: scrollHeight es siempre 0. Lo mockeamos para
+    // poder verificar que el efecto lo usa como destino de scrollTop.
+    Object.defineProperty(thread, "scrollHeight", { value: 1234, configurable: true });
+    thread.scrollTop = 0;
+
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(screen.getByText(es.chat.dormantTitle)).toBeInTheDocument());
+
+    expect(thread.scrollTop).toBe(1234);
+    expect(scrollToSpy).not.toHaveBeenCalled();
+    expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+
+    scrollToSpy.mockRestore();
+    scrollIntoViewSpy.mockRestore();
+  });
+});
+
 describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
   it("monta ChatLenses sobre el hilo en modo página", () => {
     renderView();

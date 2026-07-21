@@ -28,7 +28,7 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   // no aplica: el chat ahí es general, no llega desde /hoy con una pregunta.
   const [input, setInput] = useState(() => (embedded ? "" : searchParams.get("q") ?? ""));
   const [st, setSt] = useState<St>("idle");
-  const endRef = useRef<HTMLDivElement>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
   // Palancas de enfoque (Task 3): default = las 3 lentes base encendidas, sin
   // carta de tarot fijada. Viajan en cada POST a /api/chat (CT1 las resuelve).
   const [lenses, setLenses] = useState<string[]>(["astros", "numeros", "pilares"]);
@@ -38,9 +38,13 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   const [threadId, setThreadId] = useState<string | null>(null);
 
   useEffect(() => {
-    // jsdom (tests) no implementa scrollIntoView: guard defensivo (mismo
-    // patrón que timeline-chat.tsx y reading-chat.tsx).
-    endRef.current?.scrollIntoView?.({ behavior: "smooth" });
+    // Pega el HILO a su propio final por scrollTop, no scrollIntoView: ese
+    // método escala hasta el scroll de la VENTANA (block:"start" default),
+    // lo que en /hoy (chat en un panel bajo el header) arrastraba toda la
+    // página al montar. Scrollear el contenedor directamente no toca la
+    // ventana. Guard defensivo: jsdom (tests) no rompe con scrollTop, pero
+    // el ref puede no estar montado aún.
+    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
   }, [messages, st]);
 
   useEffect(() => {
@@ -160,7 +164,7 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
         />
       </div>
 
-      <div className={styles.thread}>
+      <div className={styles.thread} ref={threadRef}>
         {messages.length === 0 && st !== "dormant" && <p className={styles.greeting}>{t("greeting")}</p>}
         {messages.map((m, i) => (
           <div key={i} className={`${styles.msg} ${m.role === "user" ? styles.user : styles.aluna}`}>
@@ -186,7 +190,6 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
             <p className={styles.dormantBody}>{t("dormantBody")}</p>
           </div>
         )}
-        <div ref={endRef} />
       </div>
 
       <div className={styles.composer}>
