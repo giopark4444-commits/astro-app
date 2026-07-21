@@ -233,15 +233,6 @@ function wheelFocusElements(palette: SharePalette, focusSign: string, focusBody:
   ];
 }
 
-/** Solo un punto sutil en el sector del signo, para el modo "background": ahí el
- *  foco ya lo lleva el glifo grande del planeta al frente, así que la rueda de
- *  fondo no debe repetir halo+línea+glifo (redundante y choca con el eyebrow). */
-function wheelFocusDot(palette: SharePalette, focusSign: string): ReactElement[] {
-  const angle = SIGN_SECTOR_ANGLE[focusSign] ?? 15;
-  const p = pt(R_PLANET, angle);
-  return [<circle key="focus-dot" cx={p.x} cy={p.y} r={4} fill={palette.acc} />];
-}
-
 export interface ChartWheelProps {
   palette: SharePalette;
   /** Signo del sector natal donde se coloca el foco (p.ej. "leo" si el body es
@@ -270,15 +261,15 @@ export function ChartWheel({ palette, focusSign, focusBody, mode, size }: ChartW
       <g key="base" opacity={baseOpacity}>
         {wheelBaseElements(palette, skipDecorKey)}
       </g>
+      {/* El marcador de foco (halo+línea+glifo) solo en HERO. En background
+          (feed/square = FONDO+TÍTULO, opción B) la rueda queda puramente
+          decorativa: sin marcador, para no dejar un punto suelto que se lea
+          accidental al lado del título protagonista. */}
       {mode === "hero" ? (
         <g key="focus" opacity={1}>
           {wheelFocusElements(palette, focusSign, focusBody)}
         </g>
-      ) : (
-        <g key="focus" opacity={0.6}>
-          {wheelFocusDot(palette, focusSign)}
-        </g>
-      )}
+      ) : null}
     </svg>
   );
 }

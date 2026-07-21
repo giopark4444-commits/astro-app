@@ -15,7 +15,7 @@
 // traen U+2726 ni U+2648-2653 — verificado con el cmap de cada .ttf en el commit) →
 // se pintan como SVG de línea, nunca como texto Unicode.
 import type { CSSProperties, ReactElement, ReactNode } from "react";
-import { ChartWheel, PlanetGlyph, type ChartBody } from "./chart-motif";
+import { ChartWheel, type ChartBody } from "./chart-motif";
 import { SHARE_FORMAT_DIMENSIONS, SHARE_PALETTES, type ShareFormat, type SharePalette, type ShareTheme } from "./palette";
 import type { ResolvedInsight, ShareLocale } from "./types";
 import { ZodiacGlyph } from "./zodiac-glyphs";
@@ -126,6 +126,11 @@ const TTL_SIZE: Record<ShareFormat, { fontSize: number; marginTop: number }> = {
   feed: { fontSize: 64, marginTop: 32 },
   square: { fontSize: 58, marginTop: 30 },
 };
+
+/** Carta en feed/square = FONDO+TÍTULO (opción B aprobada por Gio): sin glifo
+ *  central (el "☉" grande y solo se leía como una dona); la rueda va tenue de
+ *  fondo y el título es el protagonista, así que va más grande que TTL_SIZE. */
+const CHART_BG_TITLE_SIZE: Record<ShareFormat, number> = { story: 76, feed: 92, square: 82 };
 
 /** `.sep{margin:36px 0}` + overrides. */
 const SEP_MARGIN: Record<ShareFormat, number> = { story: 36, feed: 28, square: 24 };
@@ -367,15 +372,11 @@ function renderGlyph(insight: ResolvedInsight, format: ShareFormat, palette: Sha
         </div>
       );
     case "chart":
-      // Solo se llega aquí en feed/square (modo "background" — el cielo
-      // detallado ya va detrás como capa full-bleed, ver `renderChartBackground`
-      // en buildCardTree). En story, renderStandardBody sustituye este bloque
-      // entero por <ChartWheel mode="hero"> antes de llamar a renderGlyph.
-      return (
-        <div style={{ position: "relative", display: "flex" }}>
-          <PlanetGlyph body={insight.glyph.value as ChartBody} size={GLYPH_ZOD_SIZE[format]} color={palette.acc} />
-        </div>
-      );
+      // Carta NUNCA pinta un glifo central: en story la glowzone la ocupa la
+      // rueda HERO; en feed/square es FONDO+TÍTULO (sin glifo — el "☉" grande y
+      // solo se leía como una dona, opción B de Gio). renderStandardBody no
+      // llega aquí para "chart"; devolvemos null por si acaso (nunca una dona).
+      return null;
     case "hanzi":
       return (
         <div
@@ -560,11 +561,13 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
   const pad = CBODY_PADDING[opts.format];
   const ttl = TTL_SIZE[opts.format];
   const showChips = opts.detail && insight.chips.length > 0;
-  // Carta astral en story = HERO: la rueda natal grande ocupa la glowzone
-  // entera (sustituye glow+glifo, no los complementa) — feed/square siguen el
-  // flujo normal (glow + PlanetGlyph grande, con el cielo detrás como fondo
-  // full-bleed añadido aparte en buildCardTree).
+  // Carta astral, dos tratamientos según formato:
+  //  · story = HERO: la rueda natal grande ocupa la glowzone entera.
+  //  · feed/square = FONDO+TÍTULO (opción B): SIN glifo central (nada de glow +
+  //    PlanetGlyph — ese "☉" grande y solo se leía como una dona); la rueda va
+  //    tenue de fondo (renderChartBackground) y el título manda grande.
   const isChartHero = insight.glyph.kind === "chart" && opts.format === "story";
+  const isChartBackground = insight.glyph.kind === "chart" && opts.format !== "story";
 
   return (
     <div
@@ -584,30 +587,32 @@ function renderStandardBody(insight: ResolvedInsight, opts: BuildCardTreeOptions
       {opts.personName ? renderNamePlate(opts.personName, opts.format, palette.accText) : null}
       {renderEyebrow(eyebrowText, opts.format, palette.line, palette.accText, true)}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, position: "relative", width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-          {isChartHero ? (
-            <ChartWheel
-              palette={palette}
-              focusSign={insight.glyph.sign ?? insight.glyph.value}
-              focusBody={insight.glyph.value as ChartBody}
-              mode="hero"
-              size={CHART_HERO_SIZE}
-            />
-          ) : (
-            <>
-              {renderGlow(opts.format, palette.accRgb)}
-              {renderGlyph(insight, opts.format, palette, opts.tarotArtDataUri)}
-            </>
-          )}
-        </div>
+        {isChartBackground ? null : (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+            {isChartHero ? (
+              <ChartWheel
+                palette={palette}
+                focusSign={insight.glyph.sign ?? insight.glyph.value}
+                focusBody={insight.glyph.value as ChartBody}
+                mode="hero"
+                size={CHART_HERO_SIZE}
+              />
+            ) : (
+              <>
+                {renderGlow(opts.format, palette.accRgb)}
+                {renderGlyph(insight, opts.format, palette, opts.tarotArtDataUri)}
+              </>
+            )}
+          </div>
+        )}
         {insight.title ? (
           <div
             style={{
               fontFamily: "Cormorant Garamond",
               fontWeight: 600,
-              fontSize: ttl.fontSize,
+              fontSize: isChartBackground ? CHART_BG_TITLE_SIZE[opts.format] : ttl.fontSize,
               color: palette.ink,
-              marginTop: ttl.marginTop,
+              marginTop: isChartBackground ? 0 : ttl.marginTop,
               textAlign: "center",
               letterSpacing: 1,
               lineHeight: 1.1,
