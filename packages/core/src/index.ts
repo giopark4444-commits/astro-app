@@ -93,6 +93,7 @@ export {
   composeBaziReading, DAY_MASTER_VOICE,
   type BaziReading, type BaziReadingLocale,
 } from "./bazi/reading";
+export { scoreLifeAreasBazi, combineLifeAreas } from "./bazi/life-areas";
 
 // Facturación (Aluna Plus / Dodo Payments) — puro, compartido web+móvil
 export { isPlusActive, type SubscriptionStatus, type SubscriptionRow } from "./billing/subscription";
