@@ -576,7 +576,13 @@
     "tarotReversed": "Reversed",
     "tarotCancel": "Cancel",
     "tarotPinnedLead": "Your card",
-    "tarotAnother": "Another card"
+    "tarotAnother": "Another card",
+    "quickEdit": "Edit",
+    "quickSave": "Save",
+    "quickCancel": "Cancel",
+    "quickRestore": "Restore",
+    "quickPage": "Page {n} of {total}",
+    "quickEditLabel": "Question {n}"
   },
   "synastry": {
     "title": "Compatibility",

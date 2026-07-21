@@ -101,3 +101,88 @@
      correcta. */
   .wrap { height: calc(100dvh - 66px); }
 }
+
+/* Accesos rápidos (2 páginas de 6 chips + edición inline) */
+.quickWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+.quickRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+  background: var(--surface-2, rgba(255, 255, 255, 0.04));
+  color: inherit;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  background: var(--surface-3, rgba(255, 255, 255, 0.09));
+  border-color: var(--accent, rgba(255, 255, 255, 0.3));
+}
+.chipInput {
+  flex: 1 1 45%;
+  min-width: 160px;
+  border: 1px solid var(--accent, rgba(255, 255, 255, 0.3));
+  background: var(--surface-1, rgba(0, 0, 0, 0.2));
+  color: inherit;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 0.82rem;
+}
+.quickBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.quickNav {
+  display: flex;
+  gap: 6px;
+}
+.pageDot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  background: var(--line, rgba(255, 255, 255, 0.25));
+  cursor: pointer;
+}
+.pageDotOn {
+  background: var(--accent, rgba(255, 255, 255, 0.7));
+}
+.editBtn,
+.saveBtn,
+.cancelBtn,
+.restoreBtn {
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.14));
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.quickActions {
+  display: flex;
+  gap: 6px;
+}
+.saveBtn {
+  border-color: var(--accent, rgba(255, 255, 255, 0.3));
+  background: var(--accent-soft, rgba(255, 255, 255, 0.08));
+}
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
