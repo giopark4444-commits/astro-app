@@ -65,6 +65,32 @@ describe("useShareImage", () => {
     expect(result.current.imageUrl).toMatch(/position=present/);
   });
 
+  it("showName arranca en false (name=0) y nunca manda el nombre en sí, solo el toggle", () => {
+    const { result } = renderHook(() => useShareImage({ lens: "numeros", number: 7, labelKey: "lifePath" }), { wrapper });
+    expect(result.current.showName).toBe(false);
+    expect(result.current.imageUrl).toMatch(/name=0/);
+  });
+
+  it("setShowName(true) actualiza la query string a name=1", () => {
+    const { result } = renderHook(() => useShareImage({ lens: "numeros", number: 7, labelKey: "lifePath" }), { wrapper });
+    act(() => result.current.setShowName(true));
+    expect(result.current.showName).toBe(true);
+    expect(result.current.imageUrl).toMatch(/name=1/);
+  });
+
+  it("profileId de los lensParams se reenvía intacto en la query string", () => {
+    const { result } = renderHook(
+      () => useShareImage({ lens: "numeros", number: 7, labelKey: "lifePath", profileId: "11111111-1111-1111-1111-111111111111" }),
+      { wrapper },
+    );
+    expect(result.current.imageUrl).toMatch(/profileId=11111111-1111-1111-1111-111111111111/);
+  });
+
+  it("sin profileId en los lensParams, no aparece en la query string", () => {
+    const { result } = renderHook(() => useShareImage({ lens: "numeros", number: 7, labelKey: "lifePath" }), { wrapper });
+    expect(result.current.imageUrl).not.toMatch(/profileId=/);
+  });
+
   it("shareLinks arma wa.me / t.me / twitter.com con el caption codificado", () => {
     const { result } = renderHook(() => useShareImage({ lens: "numeros", number: 7, labelKey: "lifePath" }), { wrapper });
     expect(result.current.shareLinks.whatsapp).toMatch(/^https:\/\/wa\.me\/\?text=/);

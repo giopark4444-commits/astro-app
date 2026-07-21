@@ -165,7 +165,12 @@ export function CartaView() {
         ? selected.body.body
         : "sun";
   const shareSign = shareBody === "sun" ? sun?.sign : shareBody === "moon" ? moon?.sign : ascSign || undefined;
-  const shareParams: ShareLensParams | null = shareSign ? { lens: "carta", body: shareBody, sign: shareSign } : null;
+  // `active` ya está garantizado no-null acá (guard `if (!active) return null;`
+  // más arriba) — el perfil activo permite al server resolver su nombre real
+  // si el usuario prende "Mostrar el nombre" en el modal.
+  const shareParams: ShareLensParams | null = shareSign
+    ? { lens: "carta", body: shareBody, sign: shareSign, profileId: active.id }
+    : null;
 
   return (
     <div className={styles.wrap}>

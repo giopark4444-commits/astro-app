@@ -97,6 +97,11 @@ export function ShareModal({
             <span className={styles.sw} data-on={share.detail || undefined} aria-hidden />
           </button>
 
+          <button type="button" className={styles.toggle} aria-pressed={share.showName} onClick={() => share.setShowName(!share.showName)}>
+            <span>{t("showName")}</span>
+            <span className={styles.sw} data-on={share.showName || undefined} aria-hidden />
+          </button>
+
           <div className={styles.actions}>
             {share.canShareFiles ? (
               <button type="button" className={styles.btnPri} onClick={() => void share.shareNative()}>

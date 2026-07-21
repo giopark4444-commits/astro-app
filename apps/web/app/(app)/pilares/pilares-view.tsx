@@ -273,7 +273,13 @@ export function PilaresView() {
             <div className={`card ${styles.interpPanel}`}>
               <div className={styles.titleRow}>
                 <span className={styles.cardH2}>{t("pilares.interpTitle")}</span>
-                <ShareButton params={{ lens: "pilares", dayStem: HEAVENLY_STEMS[data.day.stem]!.key }} />
+                {/* `active` ya está garantizado no-null acá (guard `if (!active)
+                    return null;` más arriba) — el perfil activo permite al
+                    server resolver su nombre real si el usuario prende
+                    "Mostrar el nombre" en el modal. */}
+                <ShareButton
+                  params={{ lens: "pilares", dayStem: HEAVENLY_STEMS[data.day.stem]!.key, profileId: active.id }}
+                />
               </div>
               <PilaresInterpretation
                 selected={selected}

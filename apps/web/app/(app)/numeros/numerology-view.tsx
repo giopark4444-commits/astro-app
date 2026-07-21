@@ -74,7 +74,15 @@ export function NumerologyView() {
   // Fase 5 (share cards): la lente activa del panel de interpretación —
   // mismo criterio que NumerosInterpretation abajo (selected ?? lifePathSel).
   const activeSel = selected ?? lifePathSel;
-  const shareParams: ShareLensParams = { lens: "numeros", number: activeSel.trace.value, labelKey: activeSel.labelKey };
+  // `active` ya está garantizado no-null acá (guard `if (!active ...) return null;`
+  // más arriba) — el perfil activo permite al server resolver su nombre real
+  // si el usuario prende "Mostrar el nombre" en el modal.
+  const shareParams: ShareLensParams = {
+    lens: "numeros",
+    number: activeSel.trace.value,
+    labelKey: activeSel.labelKey,
+    profileId: active.id,
+  };
 
   return (
     <div className={styles.wrap}>

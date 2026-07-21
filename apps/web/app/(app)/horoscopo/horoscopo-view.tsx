@@ -9,6 +9,7 @@ import { useSheetAutoClose } from "@/lib/viewport";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ShareButton } from "@/components/share/share-button";
+import type { ShareLensParams } from "@/lib/share/types";
 import { WesternView } from "./western-view";
 import { EasternView } from "./eastern-view";
 import { HoroscopoInterpretation, horoscopoSelectionTitle } from "./interpretation-content";
@@ -81,7 +82,14 @@ export function HoroscopoView() {
   // Fase 6 (share cards): la lente horóscopo solo soporta el signo occidental
   // (sin fecha — el server pone "hoy"); mismo default "aries" que el estado
   // inicial sin perfil, para cuando `sign` aún no llegó (p.ej. pestaña oriental).
-  const shareParams = { lens: "horoscopo", sign: sign ?? "aries" } as const;
+  // `active` puede ser null acá (esta vista admite signo suelto sin perfil) —
+  // sin profileId el server cae al display_name de la cuenta si el usuario
+  // prende "Mostrar el nombre".
+  const shareParams: ShareLensParams = {
+    lens: "horoscopo",
+    sign: sign ?? "aries",
+    ...(active ? { profileId: active.id } : {}),
+  };
 
   return (
     <main className={styles.wrap}>

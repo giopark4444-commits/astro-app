@@ -66,6 +66,29 @@ describe("ShareModal", () => {
     expect(previewSrc()).toMatch(/detail=0/);
   });
 
+  it("'Mostrar el nombre' arranca apagado (default OFF, name=0) y no se consulta profileId sin uno", () => {
+    renderModal();
+    expect(previewSrc()).toMatch(/name=0/);
+    expect(screen.getByRole("button", { name: es.share.showName })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("prender 'Mostrar el nombre' actualiza el src del preview (name=1)", () => {
+    renderModal();
+    fireEvent.click(screen.getByRole("button", { name: es.share.showName }));
+    expect(previewSrc()).toMatch(/name=1/);
+    expect(screen.getByRole("button", { name: es.share.showName })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("con profileId en los params de la lente, se reenvía en el src del preview", () => {
+    renderModal({ lens: "numeros", number: 7, labelKey: "lifePath", profileId: "11111111-1111-1111-1111-111111111111" });
+    expect(previewSrc()).toMatch(/profileId=11111111-1111-1111-1111-111111111111/);
+  });
+
+  it("la nota de privacidad nunca promete nombre — solo excluye fecha/hora/lugar", () => {
+    renderModal();
+    expect(screen.getByText(es.share.privacyNote)).toBeInTheDocument();
+  });
+
   it("sin soporte de compartir archivos, muestra los 3 links de escritorio en vez de 'Compartir'", () => {
     renderModal();
     expect(screen.queryByRole("button", { name: es.share.share })).not.toBeInTheDocument();

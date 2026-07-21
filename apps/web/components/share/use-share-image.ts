@@ -29,7 +29,11 @@ function toQueryString(params: ShareCardParams): string {
     theme: params.theme,
     detail: params.detail ? "1" : "0",
     locale: params.locale,
+    // Toggle "Mostrar el nombre" — nunca el nombre en sí (eso lo resuelve el
+    // server desde el perfil autenticado, ver app/api/share-card/route.ts).
+    name: params.showName ? "1" : "0",
   });
+  if (params.profileId) qs.set("profileId", params.profileId);
   switch (params.lens) {
     case "numeros":
       qs.set("number", String(params.number));
@@ -62,6 +66,9 @@ export function useShareImage(lensParams: ShareLensParams) {
   const [format, setFormat] = useState<ShareFormat>("story");
   const [theme, setTheme] = useState<ShareTheme>(() => (isShareTheme(appTheme) ? appTheme : "observatory"));
   const [detail, setDetail] = useState(true);
+  // Toggle "Mostrar el nombre" — default OFF (spec aprobado por Gio). Solo
+  // este booleano viaja al server; el nombre en sí nunca sale del cliente.
+  const [showName, setShowName] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -74,8 +81,8 @@ export function useShareImage(lensParams: ShareLensParams) {
   }, []);
 
   const params = useMemo<ShareCardParams>(
-    () => ({ ...lensParams, format, theme, detail, locale }) as ShareCardParams,
-    [lensParams, format, theme, detail, locale],
+    () => ({ ...lensParams, format, theme, detail, locale, showName }) as ShareCardParams,
+    [lensParams, format, theme, detail, locale, showName],
   );
 
   const imageUrl = useMemo(() => {
@@ -171,6 +178,8 @@ export function useShareImage(lensParams: ShareLensParams) {
     setTheme,
     detail,
     setDetail,
+    showName,
+    setShowName,
     imageUrl,
     loading,
     error,
