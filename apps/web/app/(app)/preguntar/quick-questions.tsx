@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { saveQuickQuestions } from "../actions";
-import { DEFAULT_QUICK_QUESTIONS, localeKey, MAX_LEN } from "@/lib/quick-questions";
+import { DEFAULT_QUICK_QUESTIONS, localeKey, MAX_LEN, parseQuickQuestions } from "@/lib/quick-questions";
 import styles from "./chat.module.css";
 
 // Accesos rápidos: 2 páginas de 6 preguntas. Tocás un chip → onSend. El lápiz
@@ -17,6 +17,7 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
   const [editing, setEditing] = useState(false);
   const [drafts, setDrafts] = useState<string[][]>(() => DEFAULT_QUICK_QUESTIONS[localeKey(locale)]);
   const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,6 +29,8 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
         if (!cancelled && Array.isArray(data.pages)) setPages(data.pages);
       } catch {
         // best-effort: nos quedamos con los defaults ya cargados
+      } finally {
+        if (!cancelled) setLoaded(true);
       }
     })();
     return () => {
@@ -53,8 +56,10 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
     setSaving(true);
     try {
       await saveQuickQuestions(drafts);
-      setPages(drafts.map((p) => [...p]));
+      setPages(parseQuickQuestions(drafts, locale));
       setEditing(false);
+    } catch {
+      // best-effort: si falla (red/DB) dejamos la edición abierta para reintentar
     } finally {
       setSaving(false);
     }
@@ -89,7 +94,7 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
                 type="button"
                 className={`${styles.pageDot} ${p === safePage ? styles.pageDotOn : ""}`}
                 onClick={() => setPage(p)}
-                aria-current={p === safePage}
+                aria-current={p === safePage ? "page" : undefined}
                 aria-label={t("quickPage", { n: p + 1, total })}
               />
             ))}
@@ -107,7 +112,7 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
             </button>
           </div>
         ) : (
-          <button type="button" className={styles.editBtn} onClick={startEdit}>
+          <button type="button" className={styles.editBtn} onClick={startEdit} disabled={!loaded}>
             <span aria-hidden>✎</span> {t("quickEdit")}
           </button>
         )}

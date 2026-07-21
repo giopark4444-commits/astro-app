@@ -76,6 +76,11 @@ describe("parseQuickQuestions", () => {
     const out = parseQuickQuestions({ pages: [[long]] }, "es");
     expect(out[0]![0]).toHaveLength(MAX_LEN);
   });
+
+  it("recorta espacios de una string válida", () => {
+    const out = parseQuickQuestions({ pages: [["  hola  "]] }, "es");
+    expect(out[0]![0]).toBe("hola");
+  });
 });
 
 describe("normalizeForSave", () => {
@@ -84,6 +89,17 @@ describe("normalizeForSave", () => {
     expect(out.pages).toHaveLength(2);
     expect(out.pages[0]).toHaveLength(6);
     expect(out.pages[0]![0]).toBe("solo-una");
-    expect(out.pages[0]![1]).toBe(DEFAULT_QUICK_QUESTIONS.es[0]![1]);
+  });
+
+  it("un slot faltante se guarda como '' (centinela de default), no como el texto default", () => {
+    const out = normalizeForSave([["solo-una"]], "es");
+    expect(out.pages[0]![1]).toBe("");
+  });
+
+  it("un slot idéntico al default del locale se guarda como '' (centinela)", () => {
+    const withDefault = [[DEFAULT_QUICK_QUESTIONS.es[0]![0]!, "custom"]];
+    const out = normalizeForSave(withDefault, "es");
+    expect(out.pages[0]![0]).toBe("");
+    expect(out.pages[0]![1]).toBe("custom");
   });
 });

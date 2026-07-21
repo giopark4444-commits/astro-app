@@ -55,6 +55,21 @@ describe("QuickQuestions", () => {
     expect(saved[0]![0]).toBe("Mi pregunta propia");
   });
 
+  it("editar en la página 2 guarda el cambio en el slot correcto (no en la página 1)", async () => {
+    renderQ();
+    await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Página 2 de 2" }));
+    const input = screen.getByRole("textbox", { name: "Pregunta 1" }) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "Pregunta custom página 2" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(1));
+    const saved = saveMock.mock.calls[0]![0] as string[][];
+    expect(saved).toHaveLength(2);
+    expect(saved[1]).toHaveLength(6);
+    expect(saved[1]![0]).toBe("Pregunta custom página 2");
+  });
+
   it("Restaurar vuelve los inputs a los defaults", async () => {
     renderQ();
     await screen.findByRole("button", { name: DEFAULT_QUICK_QUESTIONS.es[0]![0]! });

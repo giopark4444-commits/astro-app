@@ -75,7 +75,24 @@ export function parseQuickQuestions(raw: unknown, locale: string): string[][] {
   });
 }
 
-/** Envoltura para persistir en la columna jsonb. */
+/**
+ * Prepara las 2×6 para persistir. Un slot vacío O idéntico al default del
+ * locale se guarda como "" (centinela "usa el default"): al leer se rellena
+ * con el default del locale VIGENTE, así los accesos por defecto siguen el
+ * idioma en vez de congelarse en el idioma en que se guardaron. Los slots
+ * personalizados se guardan recortados a MAX_LEN.
+ */
 export function normalizeForSave(pages: string[][], locale: string): { pages: string[][] } {
-  return { pages: parseQuickQuestions(pages, locale) };
+  const def = DEFAULT_QUICK_QUESTIONS[localeKey(locale)];
+  const rows = asPages(pages);
+  return {
+    pages: def.map((defPage, p) => {
+      const row = Array.isArray(rows[p]) ? (rows[p] as unknown[]) : [];
+      return defPage.map((defQ, i) => {
+        const candidate = typeof row[i] === "string" ? (row[i] as string).trim() : "";
+        if (!candidate || candidate === defQ) return "";
+        return candidate.slice(0, MAX_LEN);
+      });
+    }),
+  };
 }
