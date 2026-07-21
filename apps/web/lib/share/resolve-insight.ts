@@ -165,11 +165,15 @@ function resolveTarot(p: ShareCardTarot): ResolvedInsight {
   const card = cards[p.cardId]!;
   const keywordChips = card.keywords.slice(0, 3).map((k) => k.toUpperCase());
   const chips = p.reversed ? [REVERSED_CHIP[p.locale], ...keywordChips] : keywordChips;
+  // Invertida usa su propio texto corto (`reversed.path`, el que Gio aprobó en
+  // la galería) — no la esencia general de la carta, que solo describe el
+  // sentido derecho. Derecha sigue usando `essence`.
+  const quote = p.reversed ? card.reversed.path : card.essence;
 
   return {
     eyebrow: TAROT_EYEBROW,
     title: card.name,
-    quote: card.essence,
+    quote,
     glyph: { kind: "tarot", value: p.cardId },
     chips,
     ...(p.reversed ? { accentChipIndex: 0 } : {}),

@@ -144,24 +144,47 @@ describe("resolveInsight — tarot", () => {
     expect(insight.chips).toEqual(card.keywords.slice(0, 3).map((k) => k.toUpperCase()));
   });
 
-  it("ES invertida: INVERTIDA va primero en los chips", () => {
+  it("ES invertida: INVERTIDA va primero en los chips, quote == reversed.path (no essence)", () => {
     const params: ShareCardParams = {
       lens: "tarot", cardId: "fool", reversed: true, locale: "es", ...COMMON,
     };
     const insight = resolveInsight(params);
     const card = TAROT_CARDS_ES.fool!;
     expect(insight.chips).toEqual(["INVERTIDA", ...card.keywords.slice(0, 3).map((k) => k.toUpperCase())]);
+    expect(insight.quote).toBe(card.reversed.path);
+    expect(insight.quote).not.toBe(card.essence);
   });
 
-  it("EN invertida: REVERSED va primero", () => {
+  it("EN invertida: REVERSED va primero, quote == reversed.path (no essence)", () => {
     const params: ShareCardParams = {
       lens: "tarot", cardId: "magician", reversed: true, locale: "en", ...COMMON,
     };
     const insight = resolveInsight(params);
     const card = TAROT_CARDS_EN.magician!;
     expect(insight.title).toBe(card.name);
-    expect(insight.quote).toBe(card.essence);
+    expect(insight.quote).toBe(card.reversed.path);
+    expect(insight.quote).not.toBe(card.essence);
     expect(insight.chips).toEqual(["REVERSED", ...card.keywords.slice(0, 3).map((k) => k.toUpperCase())]);
+  });
+
+  it("ES derecha: quote == essence (no reversed.path)", () => {
+    const params: ShareCardParams = {
+      lens: "tarot", cardId: "moon", reversed: false, locale: "es", ...COMMON,
+    };
+    const insight = resolveInsight(params);
+    const card = TAROT_CARDS_ES.moon!;
+    expect(insight.quote).toBe(card.essence);
+    expect(insight.quote).not.toBe(card.reversed.path);
+  });
+
+  it("EN derecha: quote == essence (no reversed.path)", () => {
+    const params: ShareCardParams = {
+      lens: "tarot", cardId: "moon", reversed: false, locale: "en", ...COMMON,
+    };
+    const insight = resolveInsight(params);
+    const card = TAROT_CARDS_EN.moon!;
+    expect(insight.quote).toBe(card.essence);
+    expect(insight.quote).not.toBe(card.reversed.path);
   });
 });
 
