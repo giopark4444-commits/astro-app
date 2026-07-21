@@ -21,7 +21,11 @@ const { mockActive, dismissCommitmentAction } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: mockActive.current }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+// HubView ahora monta <ChatView embedded/>, que lee useSearchParams.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(""),
+}));
 // "../../actions" (NO "../actions"): este test vive un nivel más adentro
 // (__tests__/) que hub-view.tsx — el specifier de vi.mock se resuelve
 // relativo al archivo que lo declara, así que tiene que apuntar al mismo

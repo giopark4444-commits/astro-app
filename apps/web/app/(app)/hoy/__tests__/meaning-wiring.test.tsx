@@ -13,7 +13,11 @@ import { HubView } from "../hub-view";
 const FIXTURE_PROFILE = { id: "profile-1", name: "Gio", birth_date: "1990-01-01" };
 
 vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: FIXTURE_PROFILE }) }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+// HubView ahora monta <ChatView embedded/>, que lee useSearchParams.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(""),
+}));
 
 const TRANSIT_ASPECT: Aspect = {
   a: "sun", b: "moon", aspect: "trine", angle: 120, orb: 1.2, applying: true, harmony: "soft",
