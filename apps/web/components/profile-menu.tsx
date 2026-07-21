@@ -26,7 +26,7 @@ export function ProfileMenu() {
               onClick={() => { setActive(p.id); setOpen(false); }}>
               <span className={styles.rowAvatar}>{p.name[0]?.toUpperCase()}</span>
               <span className={styles.rowName}>{p.name}</span>
-              {active?.id === p.id && <span className={styles.rowCheck} aria-hidden><Icon name="enso" size={16} /></span>}
+              {active?.id === p.id && <span className={styles.rowCheck} aria-hidden><Icon name="check" size={16} /></span>}
             </button>
           ))}
         </div>

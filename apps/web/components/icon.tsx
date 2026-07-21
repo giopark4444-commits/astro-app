@@ -1,5 +1,9 @@
 const PATHS: Record<string, React.ReactNode> = {
-  enso: (<><path d="M16.5 5.5a8 8 0 1 0 3 7.5" /><path d="M19 4.5a4 4 0 0 0 0 6 5 5 0 0 1 0-6Z" /></>),
+  // Clave histórica "enso" = la MARCA de Aluna; desde el rebrand 2026 dibuja el
+  // monograma "A" (travesaño curvo). Se conserva el nombre de clave para heredar
+  // el logo nuevo en los ~15 call-sites (auth, onboarding, cabeceras) sin tocarlos.
+  enso: (<><path d="M5.5 20 12 5l6.5 15" /><path d="M8.4 13.6a4.2 2.6 0 0 0 7.2 0" /></>),
+  check: (<path d="M5 12.5 10 17.5 19 7" />),
   wheel: (<><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3.2" /><path d="M12 3v3.4M12 17.6V21M3 12h3.4M17.6 12H21" /></>),
   grid3: (<>{[6, 12, 18].flatMap((y) => [6, 12, 18].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1" />))}</>),
   sun: (<><circle cx="12" cy="12" r="4" /><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6" /></>),

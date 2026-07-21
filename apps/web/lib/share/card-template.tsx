@@ -221,16 +221,17 @@ export function quoteSizeFor(length: number, format: ShareFormat): { fontSize: n
   return { fontSize: QUOTE_FONT_SIZE[format][tier], maxWidth: QUOTE_MAX_WIDTH[format][tier] };
 }
 
-// --- Enso (marca) — mismos paths que components/icon.tsx (name="enso") -----
+// --- Marca (monograma "A") — mismos paths que components/icon.tsx (name="enso",
+// clave histórica que hoy dibuja la "A" del rebrand 2026) ------------------
 // No se importa el componente Icon de components/icon.tsx directamente: ese
 // componente pinta stroke="currentColor" y aquí es más robusto pasar el color ya
 // resuelto (mismo criterio que zodiac-glyphs.tsx) que confiar en que satori
 // propague `color` heredado a un <svg> anidado en varios niveles de <div>.
-function EnsoGlyph({ size, color }: { size: number; color: string }) {
+function BrandMark({ size, color }: { size: number; color: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16.5 5.5a8 8 0 1 0 3 7.5" />
-      <path d="M19 4.5a4 4 0 0 0 0 6 5 5 0 0 1 0-6Z" />
+      <path d="M5.5 20 12 5l6.5 15" />
+      <path d="M8.4 13.6a4.2 2.6 0 0 0 7.2 0" />
     </svg>
   );
 }
@@ -543,7 +544,7 @@ function renderFooter(format: ShareFormat, palette: SharePalette): ReactNode {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <EnsoGlyph size={b.svg} color={palette.accText} />
+        <BrandMark size={b.svg} color={palette.accText} />
         <div style={{ fontFamily: "Cormorant Garamond", fontWeight: 600, fontSize: b.name, letterSpacing: 3, color: palette.ink, display: "flex" }}>
           Aluna
         </div>
@@ -691,7 +692,7 @@ function renderTarotSquareBody(insight: ResolvedInsight, opts: BuildCardTreeOpti
         ) : null}
         {renderQuote(insight.quote, "square", palette.ink, { textAlign: "left", fontSize: 34, marginTop: 14, maxWidth: dims.w + 260 })}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28, color: palette.accText }}>
-          <EnsoGlyph size={30} color={palette.accText} />
+          <BrandMark size={30} color={palette.accText} />
           <div style={{ fontFamily: "Cormorant Garamond", fontWeight: 600, fontSize: 30, color: palette.ink, letterSpacing: 2, display: "flex" }}>
             Aluna
           </div>
