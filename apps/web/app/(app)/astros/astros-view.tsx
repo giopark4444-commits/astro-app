@@ -25,7 +25,7 @@ export function AstrosView() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.tabs} role="tablist" aria-label={t("cartaTitle")}>
+      <div className={styles.tabs} role="tablist" aria-label={t("tablist")}>
         {TABS.map((tab) => {
           const active = (tab.trad ?? "carta") === view;
           const href = tab.trad ? `/astros?trad=${tab.trad}` : "/astros";

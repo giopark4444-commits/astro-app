@@ -48,4 +48,11 @@ describe("AstrosView", () => {
     expect(screen.getByText("HORO_MOCK")).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: es.astros.horoscopoOccidental }).getAttribute("aria-selected")).toBe("true");
   });
+
+  it("trad basura (?trad=foo) cae en la Carta astral", () => {
+    renderView("foo");
+    expect(screen.getByText("CARTA_MOCK")).toBeInTheDocument();
+    expect(screen.queryByText("HORO_MOCK")).toBeNull();
+    expect(screen.getByRole("tab", { name: es.astros.cartaTitle }).getAttribute("aria-selected")).toBe("true");
+  });
 });

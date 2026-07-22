@@ -22,6 +22,7 @@
     "mainNav": "Navegación principal"
   },
   "astros": {
+    "tablist": "Astros",
     "cartaTitle": "Carta astral",
     "horoscopoOccidental": "Horóscopo occidental",
     "horoscopoOriental": "Horóscopo oriental"
