@@ -11,7 +11,7 @@ import { dismissCommitment } from "@/lib/memory-commitments";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { regenerateEssence } from "@/lib/memory-essence";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
-import { normalizeForSave } from "@/lib/quick-questions";
+import { normalizeForSave, rawQuickQuestionsPages } from "@/lib/quick-questions";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -36,7 +36,14 @@ function intentBuilder(supabase: Awaited<ReturnType<typeof createClient>>): Inte
 
 // Mismo shim acotado que settingsBuilder/intentBuilder (ver nota arriba):
 // quick_questions es jsonb con forma { enabled: boolean; pages: string[][] }.
+// select además de update: setQuickQuestionsEnabled lee las páginas guardadas
+// para preservarlas al cambiar solo el flag (read-modify-write server-side).
 type QuickQuestionsBuilder = {
+  select: (cols: string) => {
+    eq: (col: string, val: string) => {
+      maybeSingle: () => Promise<{ data: { quick_questions: unknown } | null }>;
+    };
+  };
   update: (v: { quick_questions: { enabled: boolean; pages: string[][] } }) => {
     eq: (col: string, val: string) => Promise<unknown>;
   };
@@ -350,7 +357,7 @@ export async function clearEssence() {
  * vacías descartadas, recorte de largo) antes de persistir, así el jsonb nunca
  * queda malformado. `enabled` por defecto true. Fire-and-forget.
  */
-export async function saveQuickQuestions(pages: string[][], enabled: boolean = true) {
+export async function saveQuickQuestions(pages: string[][], enabled: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -358,5 +365,27 @@ export async function saveQuickQuestions(pages: string[][], enabled: boolean = t
   const normalized = normalizeForSave(pages, locale);
   await quickQuestionsBuilder(supabase)
     .update({ quick_questions: { enabled, pages: normalized.pages } })
+    .eq("user_id", user.id);
+}
+
+/**
+ * Cambia SOLO el flag de visibilidad de los accesos rápidos, sin tocar las
+ * páginas. Read-modify-write server-side (mismo patrón que setIntentUseInAI):
+ * lee las páginas guardadas y las reescribe verbatim con el nuevo `enabled`.
+ * Así togglear NUNCA puede reescribir `pages` desde un estado placeholder del
+ * cliente (p.ej. si el GET falló y el cliente mostraba defaults) — el toggle es
+ * un clic casual y no debe poder borrar preguntas. Fire-and-forget.
+ */
+export async function setQuickQuestionsEnabled(enabled: boolean) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data } = await quickQuestionsBuilder(supabase)
+    .select("quick_questions")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const pages = rawQuickQuestionsPages(data?.quick_questions ?? null);
+  await quickQuestionsBuilder(supabase)
+    .update({ quick_questions: { enabled, pages } })
     .eq("user_id", user.id);
 }

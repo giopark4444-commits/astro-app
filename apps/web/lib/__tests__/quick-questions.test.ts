@@ -9,6 +9,7 @@ import {
   MAX_PAGES,
   MAX_LEN,
   parseQuickQuestionsEnabled,
+  rawQuickQuestionsPages,
 } from "../quick-questions";
 
 describe("quick-questions defaults", () => {
@@ -153,5 +154,19 @@ describe("parseQuickQuestionsEnabled", () => {
   });
   it("enabled:true explícito → true", () => {
     expect(parseQuickQuestionsEnabled({ enabled: true, pages: [] })).toBe(true);
+  });
+});
+
+describe("rawQuickQuestionsPages", () => {
+  it("preserva las páginas guardadas verbatim (incluye centinelas '')", () => {
+    const raw = { enabled: false, pages: [["", "custom", ""], ["extra"]] };
+    expect(rawQuickQuestionsPages(raw)).toEqual([["", "custom", ""], ["extra"]]);
+  });
+  it("acepta array pelado y sanea no-strings a ''", () => {
+    expect(rawQuickQuestionsPages([["a", 5, null]])).toEqual([["a", "", ""]]);
+  });
+  it("null / basura → []", () => {
+    expect(rawQuickQuestionsPages(null)).toEqual([]);
+    expect(rawQuickQuestionsPages(42)).toEqual([]);
   });
 });

@@ -136,3 +136,14 @@ export function parseQuickQuestionsEnabled(raw: unknown): boolean {
   }
   return true;
 }
+
+/**
+ * Extrae las páginas TAL COMO están guardadas (sin resolver defaults), para
+ * operaciones que solo cambian el flag `enabled` y deben preservar `pages`
+ * verbatim (read-modify-write server-side, sin reescribir desde el cliente).
+ */
+export function rawQuickQuestionsPages(raw: unknown): string[][] {
+  return asPages(raw).map((p) =>
+    Array.isArray(p) ? (p as unknown[]).map((q) => (typeof q === "string" ? q : "")) : [],
+  );
+}

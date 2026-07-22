@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { saveQuickQuestions } from "../actions";
+import { saveQuickQuestions, setQuickQuestionsEnabled } from "../actions";
 import {
   DEFAULT_QUICK_QUESTIONS,
   localeKey,
@@ -101,7 +101,9 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
   function toggleEnabled(on: boolean) {
     setEnabled(on);
     if (!on) setEditing(false);
-    void saveQuickQuestions(pages, on).catch(() => {});
+    // Acción dedicada que SOLO cambia el flag en el servidor (no reescribe las
+    // páginas desde el cliente): togglear nunca puede borrar preguntas.
+    void setQuickQuestionsEnabled(on).catch(() => {});
   }
   async function save() {
     setSaving(true);
@@ -148,7 +150,7 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
             <input
               type="checkbox"
               checked={enabled}
-              disabled={!loaded}
+              disabled={!loaded || saving}
               onChange={(e) => toggleEnabled(e.target.checked)}
             />
             <span>{t("quickToggle")}</span>
