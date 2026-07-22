@@ -41,7 +41,7 @@ function intentBuilder(supabase: Awaited<ReturnType<typeof createClient>>): Inte
 type QuickQuestionsBuilder = {
   select: (cols: string) => {
     eq: (col: string, val: string) => {
-      maybeSingle: () => Promise<{ data: { quick_questions: unknown } | null }>;
+      maybeSingle: () => Promise<{ data: { quick_questions: unknown } | null; error: unknown }>;
     };
   };
   update: (v: { quick_questions: { enabled: boolean; pages: string[][] } }) => {
@@ -380,10 +380,16 @@ export async function setQuickQuestionsEnabled(enabled: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { data } = await quickQuestionsBuilder(supabase)
+  const { data, error } = await quickQuestionsBuilder(supabase)
     .select("quick_questions")
     .eq("user_id", user.id)
     .maybeSingle();
+  // Lectura ambigua/fallida (supabase-js devuelve {data:null,error} SIN lanzar):
+  // abortar el write. Si no, `rawQuickQuestionsPages(null)` daría [] y
+  // sobrescribiríamos las páginas reales con vacío — el mismo hazard que se
+  // arregló arriba, pero en este read interno. `data` null SIN error (usuario
+  // nuevo sin fila) sí puede escribir (no hay nada que perder).
+  if (error) return;
   const pages = rawQuickQuestionsPages(data?.quick_questions ?? null);
   await quickQuestionsBuilder(supabase)
     .update({ quick_questions: { enabled, pages } })
