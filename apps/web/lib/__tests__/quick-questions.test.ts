@@ -8,6 +8,7 @@ import {
   PER_PAGE,
   MAX_PAGES,
   MAX_LEN,
+  parseQuickQuestionsEnabled,
 } from "../quick-questions";
 
 describe("quick-questions defaults", () => {
@@ -138,5 +139,19 @@ describe("normalizeForSave", () => {
     const one = ["q"];
     const out = normalizeForSave([[], [], one, one, one, one, one, one], "es");
     expect(out.pages).toHaveLength(MAX_PAGES);
+  });
+});
+
+describe("parseQuickQuestionsEnabled", () => {
+  it("por defecto true: null, array pelado, o { pages } sin la clave", () => {
+    expect(parseQuickQuestionsEnabled(null)).toBe(true);
+    expect(parseQuickQuestionsEnabled([["a"]])).toBe(true);
+    expect(parseQuickQuestionsEnabled({ pages: [] })).toBe(true);
+  });
+  it("enabled:false explícito → false", () => {
+    expect(parseQuickQuestionsEnabled({ enabled: false, pages: [] })).toBe(false);
+  });
+  it("enabled:true explícito → true", () => {
+    expect(parseQuickQuestionsEnabled({ enabled: true, pages: [] })).toBe(true);
   });
 });

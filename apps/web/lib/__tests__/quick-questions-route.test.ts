@@ -73,4 +73,16 @@ describe("GET /api/quick-questions", () => {
     const body = (await res.json()) as { pages: string[][] };
     expect(body.pages).toEqual(DEFAULT_QUICK_QUESTIONS.en);
   });
+
+  it("enabled por defecto true; enabled:false guardado → false", async () => {
+    const fromDefault = vi.fn().mockReturnValue(chain({ data: { quick_questions: null }, error: null }));
+    authenticateRouteMock.mockResolvedValue({ supabase: { from: fromDefault }, user: { id: "u1" } });
+    let body = (await (await GET(req())).json()) as { enabled: boolean };
+    expect(body.enabled).toBe(true);
+
+    const fromOff = vi.fn().mockReturnValue(chain({ data: { quick_questions: { enabled: false, pages: [] } }, error: null }));
+    authenticateRouteMock.mockResolvedValue({ supabase: { from: fromOff }, user: { id: "u1" } });
+    body = (await (await GET(req())).json()) as { enabled: boolean };
+    expect(body.enabled).toBe(false);
+  });
 });

@@ -35,9 +35,11 @@ function intentBuilder(supabase: Awaited<ReturnType<typeof createClient>>): Inte
 }
 
 // Mismo shim acotado que settingsBuilder/intentBuilder (ver nota arriba):
-// quick_questions es jsonb con forma { pages: string[][] }.
+// quick_questions es jsonb con forma { enabled: boolean; pages: string[][] }.
 type QuickQuestionsBuilder = {
-  update: (v: { quick_questions: { pages: string[][] } }) => { eq: (col: string, val: string) => Promise<unknown> };
+  update: (v: { quick_questions: { enabled: boolean; pages: string[][] } }) => {
+    eq: (col: string, val: string) => Promise<unknown>;
+  };
 };
 function quickQuestionsBuilder(supabase: Awaited<ReturnType<typeof createClient>>): QuickQuestionsBuilder {
   return supabase.from("settings") as unknown as QuickQuestionsBuilder;
@@ -343,15 +345,18 @@ export async function clearEssence() {
 }
 
 /**
- * Guarda los accesos rápidos del chat (2 páginas de 6). Normaliza SIEMPRE a
- * 2×6 en el server (vacíos → default del locale, recorte de largo) antes de
- * persistir, así el jsonb guardado nunca queda malformado. Fire-and-forget.
+ * Guarda los accesos rápidos del chat: el flag de visibilidad (`enabled`) + las
+ * páginas. Normaliza SIEMPRE las páginas en el server (base con defaults, extra
+ * vacías descartadas, recorte de largo) antes de persistir, así el jsonb nunca
+ * queda malformado. `enabled` por defecto true. Fire-and-forget.
  */
-export async function saveQuickQuestions(pages: string[][]) {
+export async function saveQuickQuestions(pages: string[][], enabled: boolean = true) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   const locale = await getLocale();
   const normalized = normalizeForSave(pages, locale);
-  await quickQuestionsBuilder(supabase).update({ quick_questions: normalized }).eq("user_id", user.id);
+  await quickQuestionsBuilder(supabase)
+    .update({ quick_questions: { enabled, pages: normalized.pages } })
+    .eq("user_id", user.id);
 }
