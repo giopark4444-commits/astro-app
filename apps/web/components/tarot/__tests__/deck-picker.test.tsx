@@ -23,7 +23,7 @@ describe("DeckPicker", () => {
     window.localStorage.clear();
   });
 
-  it("renders the 4 preset decks with their localized names", () => {
+  it("renders the ready preset decks (visconti oculto hasta tener assets)", () => {
     renderPicker();
     expect(screen.getByRole("button", { name: new RegExp(es.settings.deckPresetRwsName) })).toBeInTheDocument();
     expect(
@@ -32,9 +32,10 @@ describe("DeckPicker", () => {
     expect(
       screen.getByRole("button", { name: new RegExp(es.settings.deckPresetMarseilleName) }),
     ).toBeInTheDocument();
+    // Visconti no se muestra todavía (sin assets) — ver READY_DECKS en deck-picker.tsx.
     expect(
-      screen.getByRole("button", { name: new RegExp(es.settings.deckPresetViscontiName) }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: new RegExp(es.settings.deckPresetViscontiName) }),
+    ).toBeNull();
   });
 
   it("renders in English when given the en message bundle", () => {
@@ -51,9 +52,9 @@ describe("DeckPicker", () => {
   });
 
   it("picks up an already-persisted deck as selected", () => {
-    window.localStorage.setItem(KEY, "visconti");
+    window.localStorage.setItem(KEY, "marseille");
     renderPicker();
-    const viscontiBtn = screen.getByRole("button", { name: new RegExp(es.settings.deckPresetViscontiName) });
+    const viscontiBtn = screen.getByRole("button", { name: new RegExp(es.settings.deckPresetMarseilleName) });
     expect(viscontiBtn).toHaveAttribute("aria-pressed", "true");
   });
 

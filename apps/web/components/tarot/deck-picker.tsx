@@ -9,10 +9,16 @@
 // Si un mazo todavía no tiene sus assets subidos (marseille/visconti en
 // construcción), la imagen simplemente rompe (404) hasta que existan los
 // .webp — no es un bug de este componente.
-import { PRESET_DECKS, type PresetDeckId } from "@aluna/core";
+import { type PresetDeckId } from "@aluna/core";
 import { useTranslations } from "next-intl";
 import { usePresetDeck } from "@/lib/tarot/use-preset-deck";
 import styles from "./deck-picker.module.css";
+
+// Solo los mazos con sus 78 .webp ya subidos a public/tarot/{deck}/. Visconti
+// aún no tiene assets (Wikimedia + 4 cartas faltantes) → se muestra cuando
+// existan. El resolver/PRESET_DECKS en core ya lo contemplan; esto es solo la
+// visibilidad en el selector, para no mostrar una miniatura rota (404).
+const READY_DECKS: readonly PresetDeckId[] = ["rws", "aluna-noche", "marseille"];
 
 const NAME_KEY: Record<PresetDeckId, string> = {
   rws: "deckPresetRwsName",
@@ -34,7 +40,7 @@ export function DeckPicker() {
 
   return (
     <div className={styles.grid} role="group" aria-label={t("deckPresetTitle")}>
-      {PRESET_DECKS.map((id) => {
+      {READY_DECKS.map((id) => {
         const on = deck === id;
         return (
           <button
