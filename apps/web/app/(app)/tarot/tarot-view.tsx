@@ -231,14 +231,11 @@ export function TarotView({ userId }: { userId: string }) {
     [locale],
   );
 
-  // Con una lectura en curso (ceremonia o modo manual) el panel derecho se
-  // oculta y la técnica ocupa todo el ancho: la lectura manda (su split llega
-  // en T4). El resto del umbral se conserva montado inline como hoy.
-  const readingOpen = ceremony !== null || manualOpen;
-  // Ancho completo SOLO en el resultado de la lectura (su split cartas|prosa
-  // necesita el ancho) o en el modo manual. Durante los pasos de la ceremonia
-  // (barajar/cortar/abanico/revelar) se conserva el split de dos paneles —
-  // pedido de Gio: la pantalla no debe desplegarse a ambos lados al tirar.
+  // Ancho completo (colapsa el split y oculta el panel derecho) SOLO en el
+  // resultado de la lectura (su propio split cartas|prosa necesita el ancho) o
+  // en el modo manual. Durante los pasos de la ceremonia (barajar/cortar/
+  // abanico/revelar) se conserva el split de dos paneles — pedido de Gio: la
+  // pantalla no debe desplegarse a ambos lados al tirar.
   const readingResultFull = manualOpen || (ceremony !== null && ceremonyStep === "reading");
 
   return (
