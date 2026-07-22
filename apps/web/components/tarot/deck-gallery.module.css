@@ -1,0 +1,22 @@
+/* Rejilla de las 78 cartas del mazo dentro del modal (BottomSheet wide). El
+   sheet ya hace scroll vertical (max-height + overflow-y auto), así que aquí
+   solo maquetamos la grilla responsive. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: var(--sp-2);
+}
+.cell {
+  display: flex;
+  aspect-ratio: 372 / 620;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.card {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

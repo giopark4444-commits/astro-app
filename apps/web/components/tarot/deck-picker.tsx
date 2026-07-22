@@ -9,9 +9,11 @@
 // Si un mazo todavía no tiene sus assets subidos (marseille/visconti en
 // construcción), la imagen simplemente rompe (404) hasta que existan los
 // .webp — no es un bug de este componente.
+import { useState } from "react";
 import { type PresetDeckId } from "@aluna/core";
 import { useTranslations } from "next-intl";
 import { usePresetDeck } from "@/lib/tarot/use-preset-deck";
+import { DeckGallery } from "./deck-gallery";
 import styles from "./deck-picker.module.css";
 
 // Solo los mazos con sus 78 .webp ya subidos a public/tarot/{deck}/. Visconti
@@ -37,28 +39,42 @@ const DESC_KEY: Record<PresetDeckId, string> = {
 export function DeckPicker() {
   const t = useTranslations("settings");
   const { deck, setDeck } = usePresetDeck();
+  // Mazo cuya galería (78 cartas) está abierta. Elegir un mazo lo selecciona Y
+  // abre su visor completo (pedido de Gio: "ver todas las cartas del mazo").
+  const [gallery, setGallery] = useState<PresetDeckId | null>(null);
 
   return (
-    <div className={styles.grid} role="group" aria-label={t("deckPresetTitle")}>
-      {READY_DECKS.map((id) => {
-        const on = deck === id;
-        return (
-          <button
-            key={id}
-            type="button"
-            className={`${styles.card} ${on ? styles.cardOn : ""}`}
-            aria-pressed={on}
-            onClick={() => setDeck(id)}
-          >
-            <span className={styles.thumbWrap}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/tarot/${id}/star.webp`} alt="" className={styles.thumb} />
-            </span>
-            <span className={styles.name}>{t(NAME_KEY[id])}</span>
-            <span className={styles.desc}>{t(DESC_KEY[id])}</span>
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div className={styles.grid} role="group" aria-label={t("deckPresetTitle")}>
+        {READY_DECKS.map((id) => {
+          const on = deck === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`${styles.card} ${on ? styles.cardOn : ""}`}
+              aria-pressed={on}
+              onClick={() => {
+                setDeck(id);
+                setGallery(id);
+              }}
+            >
+              <span className={styles.thumbWrap}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/tarot/${id}/star.webp`} alt="" className={styles.thumb} />
+              </span>
+              <span className={styles.name}>{t(NAME_KEY[id])}</span>
+              <span className={styles.desc}>{t(DESC_KEY[id])}</span>
+            </button>
+          );
+        })}
+      </div>
+      <DeckGallery
+        deck={gallery}
+        name={gallery ? t(NAME_KEY[gallery]) : ""}
+        open={gallery !== null}
+        onClose={() => setGallery(null)}
+      />
+    </>
   );
 }
