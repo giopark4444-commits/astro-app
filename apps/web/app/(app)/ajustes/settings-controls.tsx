@@ -11,6 +11,9 @@ const SWATCH: Record<Theme, string> = {
   observatory: "linear-gradient(135deg, #1a2150, #e7c986)",
   aurora: "linear-gradient(135deg, #fdf3ec, #ffb86b)",
   cosmic: "linear-gradient(135deg, #2a0f4a, #b86bff)",
+  selva: "linear-gradient(135deg, #0d3b31, #92d8b8)",
+  alba: "linear-gradient(135deg, #fdf0e2, #d0854f)",
+  eclipse: "linear-gradient(135deg, #232330, #caccde)",
 };
 
 export function SettingsControls({

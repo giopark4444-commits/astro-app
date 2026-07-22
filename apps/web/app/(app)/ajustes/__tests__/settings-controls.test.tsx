@@ -41,6 +41,6 @@ describe("SettingsControls", () => {
     const groups = screen.getAllByRole("group", { name: "Tema" });
     // el segundo grupo (filas compactas) trae los <i> de glifo con data-theme-dot
     const compactGroup = groups[1]!;
-    expect(within(compactGroup).getAllByRole("button")).toHaveLength(3);
+    expect(within(compactGroup).getAllByRole("button")).toHaveLength(6);
   });
 });

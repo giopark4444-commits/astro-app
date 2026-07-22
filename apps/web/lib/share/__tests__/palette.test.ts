@@ -40,8 +40,12 @@ function parseNumberList(value: string): number[] {
     .map((s) => parseFloat(s.trim()));
 }
 
-const MIRROR_THEMES = ["observatory", "aurora", "cosmic"] as const;
-const EXCLUSIVE_THEMES = ["selva", "alba", "eclipse"] as const;
+// Los 6 temas ahora tienen equivalente en tokens.css (selva/alba/eclipse
+// dejaron de ser exclusivos del share): el bloque RAÍZ de cada uno debe
+// coincidir con su paleta (anti-drift share↔app). Los 2 temas de primario
+// CLARO (aurora/alba) además fijan --acc-text en la raíz.
+const PARITY_THEMES = SHARE_THEMES;
+const LIGHT_PRIMARY_THEMES = ["aurora", "alba"] as const;
 
 const HEX_RE = /^#[0-9a-f]{3,8}$/i;
 const RGBA_RE = /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*\)$/i;
@@ -63,7 +67,7 @@ describe("SHARE_THEMES / SHARE_FORMATS", () => {
   });
 });
 
-describe.each(MIRROR_THEMES)("paridad SHARE_PALETTES.%s vs tokens.css", (theme) => {
+describe.each(PARITY_THEMES)("paridad SHARE_PALETTES.%s vs tokens.css", (theme) => {
   const block = extractRootBlock(tokensCss, theme);
   const palette = SHARE_PALETTES[theme];
 
@@ -92,16 +96,16 @@ describe.each(MIRROR_THEMES)("paridad SHARE_PALETTES.%s vs tokens.css", (theme) 
   });
 });
 
-describe("paridad SHARE_PALETTES.aurora.accText vs tokens.css", () => {
-  it("--acc-text del bloque raíz de aurora coincide", () => {
-    const block = extractRootBlock(tokensCss, "aurora");
+describe.each(LIGHT_PRIMARY_THEMES)("paridad SHARE_PALETTES.%s.accText vs tokens.css", (theme) => {
+  it("--acc-text del bloque raíz coincide (tema de primario claro)", () => {
+    const block = extractRootBlock(tokensCss, theme);
     const tokenAccText = extractVar(block, "acc-text");
     expect(tokenAccText).not.toBeNull();
-    expect(tokenAccText!.toLowerCase()).toBe(SHARE_PALETTES.aurora.accText.toLowerCase());
+    expect(tokenAccText!.toLowerCase()).toBe(SHARE_PALETTES[theme].accText.toLowerCase());
   });
 });
 
-describe.each(EXCLUSIVE_THEMES)("SHARE_PALETTES.%s (exclusivo del share, sin paridad)", (theme) => {
+describe.each(SHARE_THEMES)("formato de datos de SHARE_PALETTES.%s", (theme) => {
   const palette = SHARE_PALETTES[theme];
 
   it("bg es un gradiente bien formado", () => {

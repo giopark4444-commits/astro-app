@@ -136,3 +136,87 @@
   --stars: 0;
   --elev: 0 18px 44px rgba(154, 107, 255, 0.2);
 }
+
+/* ---------------- SELVA (jade nocturno) ----------------
+   Antes exclusivo del share (lib/share/palette.ts). Primario OSCURO; el bloque
+   raíz espeja la paleta del share, [data-mode="light"] es el override derivado. */
+[data-theme="selva"] {
+  --bg: linear-gradient(165deg, #07231d 0%, #0d3b31 55%, #155345 100%);
+  --surface: rgba(150, 190, 170, 0.07);
+  --surface-2: rgba(146, 216, 184, 0.06);
+  --ink: #eaf6f0;
+  --soft: rgba(234, 246, 240, 0.6);
+  --line: rgba(146, 216, 184, 0.25);
+  --acc: #92d8b8;
+  --acc-rgb: 146, 216, 184;
+  --stars: 0.3;
+}
+[data-theme="selva"][data-mode="light"] {
+  --bg: linear-gradient(170deg, #f0f7f2 0%, #e4f1ea 100%);
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-2: rgba(47, 115, 87, 0.08);
+  --ink: #26382f;
+  --soft: rgba(38, 56, 47, 0.62);
+  --line: rgba(60, 150, 115, 0.25);
+  --acc: #3f9673;
+  --acc-rgb: 63, 150, 115;
+  --acc-text: #2f7357; /* WCAG: jade profundo para texto sobre fondo claro (≈5:1) */
+  --stars: 0;
+  --elev: 0 18px 44px rgba(40, 120, 90, 0.18);
+}
+
+/* ---------------- ALBA (amanecer cálido) ----------------
+   Antes exclusivo del share. Primario CLARO; [data-mode="dark"] es el override. */
+[data-theme="alba"] {
+  --bg: linear-gradient(170deg, #fdf6ec 0%, #fae5d8 100%);
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-2: rgba(208, 133, 79, 0.08);
+  --ink: #4a3833;
+  --soft: rgba(74, 56, 51, 0.62);
+  --line: rgba(203, 124, 82, 0.28);
+  --acc: #d0854f;
+  --acc-rgb: 208, 133, 79;
+  --acc-text: #a05a33; /* WCAG: cobre profundo para texto sobre fondo claro */
+  --stars: 0;
+  --elev: 0 18px 44px rgba(200, 130, 80, 0.2);
+}
+[data-theme="alba"][data-mode="dark"] {
+  --bg: linear-gradient(170deg, #241811 0%, #3a271c 100%);
+  --surface: rgba(210, 180, 160, 0.08);
+  --surface-2: rgba(224, 150, 100, 0.07);
+  --ink: #f7ece2;
+  --soft: rgba(247, 236, 226, 0.6);
+  --line: rgba(224, 150, 100, 0.24);
+  --acc: #e6a06a;
+  --acc-rgb: 230, 160, 106;
+  --acc-text: var(--acc); /* alba-dark: reset al acento vibrante (fondo oscuro) */
+  --stars: 0.25;
+  --elev: 0 18px 50px rgba(6, 8, 24, 0.45);
+}
+
+/* ---------------- ECLIPSE (tinta y plata) ----------------
+   Antes exclusivo del share. Primario OSCURO; [data-mode="light"] es el override. */
+[data-theme="eclipse"] {
+  --bg: radial-gradient(120% 90% at 50% -10%, #232330 0%, #141419 52%, #08080c 100%);
+  --surface: rgba(180, 182, 200, 0.07);
+  --surface-2: rgba(202, 204, 222, 0.06);
+  --ink: #ededf4;
+  --soft: rgba(237, 237, 244, 0.6);
+  --line: rgba(202, 204, 222, 0.22);
+  --acc: #caccde;
+  --acc-rgb: 202, 204, 222;
+  --stars: 0.55;
+}
+[data-theme="eclipse"][data-mode="light"] {
+  --bg: radial-gradient(120% 90% at 50% -10%, #f6f6f9 0%, #ececf1 60%, #e5e5ec 100%);
+  --surface: rgba(255, 255, 255, 0.62);
+  --surface-2: rgba(120, 122, 145, 0.08);
+  --ink: #2b2b33;
+  --soft: rgba(43, 43, 51, 0.62);
+  --line: rgba(120, 122, 145, 0.28);
+  --acc: #8a8ca6;
+  --acc-rgb: 138, 140, 166;
+  --acc-text: #565a72; /* WCAG: pizarra profunda para texto (la plata clara fallaba en claro) */
+  --stars: 0;
+  --elev: 0 18px 44px rgba(90, 92, 120, 0.18);
+}

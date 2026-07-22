@@ -48,6 +48,9 @@
 .pswDot[data-theme-dot="observatory"] { background: radial-gradient(circle at 32% 28%, #2b3570, #0a0d24 72%); border-color: rgba(231, 201, 134, 0.7); } /* mockup 06: .obs */
 .pswDot[data-theme-dot="aurora"] { background: linear-gradient(140deg, #f3ecff, #cdb9f2 60%, #f7d9c4); } /* mockup 06: .aur */
 .pswDot[data-theme-dot="cosmic"] { background: linear-gradient(140deg, #3d1d63, #7a2f8f 55%, #e56ca4); } /* mockup 06: .cos */
+.pswDot[data-theme-dot="selva"] { background: radial-gradient(circle at 32% 28%, #1c5a49, #07231d 72%); border-color: rgba(146, 216, 184, 0.6); }
+.pswDot[data-theme-dot="alba"] { background: linear-gradient(140deg, #fdf6ec, #f0c29c 55%, #d0854f); }
+.pswDot[data-theme-dot="eclipse"] { background: radial-gradient(circle at 32% 28%, #34343f, #08080c 72%); border-color: rgba(202, 204, 222, 0.6); }
 /* Modo/idioma reusan el .seg global — en la fila compacta es "pill al
    contenido", no full-width (brief T8 Step 2). */
 .segCompactWrap { width: auto; }

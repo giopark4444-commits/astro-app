@@ -1,4 +1,8 @@
-export const THEMES = ["observatory", "aurora", "cosmic"] as const;
+// Los 3 originales (observatory/aurora/cosmic) + los 3 que vivían solo en la
+// ventana de compartir (selva/alba/eclipse, ver lib/share/palette.ts), ahora
+// también como temas completos de la app. tokens.css define para cada uno su
+// modo primario (bloque raíz) + el override del modo opuesto.
+export const THEMES = ["observatory", "aurora", "cosmic", "selva", "alba", "eclipse"] as const;
 export const MODES = ["light", "dark", "auto"] as const;
 
 export type Theme = (typeof THEMES)[number];
