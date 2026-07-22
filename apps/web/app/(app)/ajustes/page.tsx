@@ -14,6 +14,7 @@ import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
+import { DeckPicker } from "@/components/tarot/deck-picker";
 import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
 import { EntitiesCard } from "./entities-card";
@@ -140,6 +141,11 @@ export default async function AjustesPage({
           )}
         </section>
       )}
+
+      <section className="card">
+        <h2 className={styles.eyebrow}>{t("deckPresetTitle")}</h2>
+        <DeckPicker />
+      </section>
 
       <section className="card">
         <h2 className={styles.eyebrow}>{t("deckTitle")}</h2>

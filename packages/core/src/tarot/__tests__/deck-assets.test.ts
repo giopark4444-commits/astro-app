@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { cardBackUrl, cardImageUrl, deckCtxFromManifest, rwsCtx, type DeckAssetCtx } from "../deck-assets";
+import {
+  cardBackUrl,
+  cardImageUrl,
+  deckCtxFromManifest,
+  presetCtx,
+  PRESET_DECKS,
+  rwsCtx,
+  type DeckAssetCtx,
+} from "../deck-assets";
 
 describe("rwsCtx", () => {
   it("builds a pure rws context from a base", () => {
@@ -169,5 +177,114 @@ describe("deckCtxFromManifest", () => {
     expect(deckCtxFromManifest({ available: false }, "https://api.example.com")).toEqual(
       rwsCtx("https://api.example.com"),
     );
+  });
+
+  it("falls back to the chosen preset (not rws) when latente and presetDeck is given", () => {
+    expect(deckCtxFromManifest({ available: false }, "", "marseille")).toEqual(presetCtx("", "marseille"));
+  });
+
+  it("falls back to the chosen preset when inactive with a presetDeck", () => {
+    expect(
+      deckCtxFromManifest({ available: true, active: false, cardIds: ["fool"], cardBase: "u1" }, "", "visconti"),
+    ).toEqual(presetCtx("", "visconti"));
+  });
+
+  it("falls back to the chosen preset when active without content", () => {
+    expect(
+      deckCtxFromManifest({ available: true, active: true, cardIds: [], cardBase: null }, "", "aluna-noche"),
+    ).toEqual(presetCtx("", "aluna-noche"));
+  });
+
+  it("passing presetDeck: 'rws' is byte-identical to no presetDeck at all (no-op)", () => {
+    expect(deckCtxFromManifest({ available: false }, "", "rws")).toEqual(rwsCtx(""));
+  });
+
+  it("without a 3rd argument, behavior is 100% unchanged (back-compat)", () => {
+    expect(deckCtxFromManifest({ available: false }, "")).toEqual(rwsCtx(""));
+  });
+
+  it("carries presetDeck as the fallback layer inside a custom-active ctx, and omits it entirely when the preset is rws", () => {
+    const withPreset = deckCtxFromManifest(
+      { available: true, active: true, cardIds: ["fool"], cardBase: "https://storage.example.com/u1" },
+      "",
+      "marseille",
+    );
+    expect(withPreset).toEqual({
+      base: "",
+      activeDeck: "custom",
+      customCardIds: new Set(["fool"]),
+      customBase: "https://storage.example.com/u1",
+      customBack: null,
+      presetDeck: "marseille",
+    });
+    // "fool" está en el custom → gana el custom; "magician" no está → cae al
+    // preset "marseille" (no directo a rws).
+    expect(cardImageUrl("fool", withPreset)).toBe("https://storage.example.com/u1/fool.webp");
+    expect(cardImageUrl("magician", withPreset)).toBe("/tarot/marseille/magician.webp");
+
+    const withRwsPreset = deckCtxFromManifest(
+      { available: true, active: true, cardIds: ["fool"], cardBase: "https://storage.example.com/u1" },
+      "",
+      "rws",
+    );
+    // Mismo shape EXACTO que sin 3er argumento — "rws" no ensucia el ctx.
+    expect(withRwsPreset).toEqual({
+      base: "",
+      activeDeck: "custom",
+      customCardIds: new Set(["fool"]),
+      customBase: "https://storage.example.com/u1",
+      customBack: null,
+    });
+  });
+});
+
+describe("PRESET_DECKS / presetCtx", () => {
+  it("lists exactly the 4 preset decks, rws first", () => {
+    expect(PRESET_DECKS).toEqual(["rws", "aluna-noche", "marseille", "visconti"]);
+  });
+
+  it("presetCtx('rws', ...) is shape-identical to rwsCtx", () => {
+    expect(presetCtx("", "rws")).toEqual(rwsCtx(""));
+    expect(presetCtx("https://api.example.com", "rws")).toEqual(rwsCtx("https://api.example.com"));
+  });
+
+  it.each(["aluna-noche", "marseille", "visconti"] as const)(
+    "resolves card + back URLs under /tarot/%s/ for a preset ctx",
+    (deck) => {
+      const ctx = presetCtx("", deck);
+      expect(ctx).toEqual({ base: "", activeDeck: deck });
+      expect(cardImageUrl("fool", ctx)).toBe(`/tarot/${deck}/fool.webp`);
+      expect(cardImageUrl("wands-01", ctx)).toBe(`/tarot/${deck}/wands-01.webp`);
+      expect(cardBackUrl(ctx)).toBe(`/tarot/${deck}/back.webp`);
+    },
+  );
+
+  it("preserves base (mobile apiUrl prefix) for preset decks too", () => {
+    const ctx = presetCtx("https://api.example.com", "marseille");
+    expect(cardImageUrl("fool", ctx)).toBe("https://api.example.com/tarot/marseille/fool.webp");
+    expect(cardBackUrl(ctx)).toBe("https://api.example.com/tarot/marseille/back.webp");
+  });
+
+  it("a custom ctx with no presetDeck falls straight to rws for uncovered cards/back (unchanged precedence)", () => {
+    const ctx: DeckAssetCtx = {
+      base: "",
+      activeDeck: "custom",
+      customCardIds: new Set(["fool"]),
+      customBase: "https://storage.example.com/u1",
+    };
+    expect(cardImageUrl("magician", ctx)).toBe("/tarot/rws/magician.webp");
+    expect(cardBackUrl(ctx)).toBe("/tarot/rws/back.webp");
+  });
+
+  it("a custom ctx with presetDeck: 'rws' behaves exactly like no presetDeck at all", () => {
+    const ctx: DeckAssetCtx = {
+      base: "",
+      activeDeck: "custom",
+      customCardIds: new Set(["fool"]),
+      customBase: "https://storage.example.com/u1",
+      presetDeck: "rws",
+    };
+    expect(cardImageUrl("magician", ctx)).toBe("/tarot/rws/magician.webp");
+    expect(cardBackUrl(ctx)).toBe("/tarot/rws/back.webp");
   });
 });

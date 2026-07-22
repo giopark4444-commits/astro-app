@@ -120,8 +120,8 @@ export type { Rng, DrawnCard } from "./tarot/shuffle";
 export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
 export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
-export { cardImageUrl, cardBackUrl, rwsCtx, deckCtxFromManifest } from "./tarot/deck-assets";
-export type { DeckAssetCtx, DeckManifestLike } from "./tarot/deck-assets";
+export { cardImageUrl, cardBackUrl, rwsCtx, presetCtx, deckCtxFromManifest, PRESET_DECKS } from "./tarot/deck-assets";
+export type { DeckAssetCtx, DeckManifestLike, PresetDeckId } from "./tarot/deck-assets";
 export { buildBackSvg } from "./tarot/back-svg";
 export type { BackConfig, BackSymbol } from "./tarot/back-svg";
 export {

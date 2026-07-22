@@ -64,3 +64,61 @@ describe("useDeckAssets", () => {
     );
   });
 });
+
+// Tarot T5: el mazo preset elegido en Ajustes (usePresetDeck, localStorage)
+// se combina con el manifiesto custom. Sin elección guardada, presetDeck
+// default es "rws" y el bloque de arriba (sin tocar localStorage) ya cubre
+// el caso 100% back-compat. Este bloque cubre la integración con un preset
+// real guardado.
+describe("useDeckAssets + usePresetDeck (mazo preset elegido en Ajustes)", () => {
+  beforeEach(() => {
+    global.fetch = vi.fn();
+    window.localStorage.clear();
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+    window.localStorage.clear();
+  });
+
+  it("falls back to the chosen preset (not rws) when the manifest is latente", async () => {
+    window.localStorage.setItem("aluna.tarotDeck", "marseille");
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      json: async () => ({ available: false }),
+    });
+    const { result } = renderHook(() => useDeckAssets());
+    await waitFor(() => expect(result.current).toEqual({ base: "", activeDeck: "marseille" }));
+  });
+
+  it("falls back to the chosen preset when active without content", async () => {
+    window.localStorage.setItem("aluna.tarotDeck", "visconti");
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      json: async () => ({ available: true, active: false, cardIds: [], backUrl: null }),
+    });
+    const { result } = renderHook(() => useDeckAssets());
+    await waitFor(() => expect(result.current).toEqual({ base: "", activeDeck: "visconti" }));
+  });
+
+  it("carries the chosen preset as the fallback layer when a custom deck is active too", async () => {
+    window.localStorage.setItem("aluna.tarotDeck", "aluna-noche");
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      json: async () => ({
+        available: true,
+        active: true,
+        cardIds: ["fool"],
+        cardBase: "https://storage.example.com/u1",
+        backUrl: null,
+      }),
+    });
+    const { result } = renderHook(() => useDeckAssets());
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        base: "",
+        activeDeck: "custom",
+        customCardIds: new Set(["fool"]),
+        customBase: "https://storage.example.com/u1",
+        customBack: null,
+        presetDeck: "aluna-noche",
+      }),
+    );
+  });
+});
