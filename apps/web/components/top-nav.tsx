@@ -29,14 +29,24 @@ export function TopNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
   const path = usePathname();
   const t = useTranslations("nav");
   const items = reorderByNavOrder(ITEMS, order);
+  // Carta + Horóscopo se agrupan en una sola pestaña "Astros" (→ /astros): se
+  // renderiza en el lugar de "carta" y se omite "horoscopo" (absorbido). Así el
+  // orden del admin sigue funcionando (Astros toma la posición de carta) sin
+  // tocar NAV_KEYS ni el panel /admin.
   return (
     <nav className={styles.tabs} aria-label={t("mainNav")}>
       {items.map((it) => {
-        const active = path === it.href || path.startsWith(it.href + "/");
+        if (it.key === "horoscopo") return null;
+        const isAstros = it.key === "carta";
+        const href = isAstros ? "/astros" : it.href;
+        const label = isAstros ? t("astros") : t(it.key);
+        const active = isAstros
+          ? ["/astros", "/carta", "/horoscopo"].some((h) => path === h || path.startsWith(h + "/"))
+          : path === it.href || path.startsWith(it.href + "/");
         const inner = (
           <>
             <Icon name={it.icon} size={16} />
-            {t(it.key)}
+            {label}
           </>
         );
         return it.soon ? (
@@ -44,7 +54,7 @@ export function TopNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
             {inner}
           </span>
         ) : (
-          <Link key={it.key} href={it.href} className={styles.tab} data-on={active || undefined}>
+          <Link key={it.key} href={href} className={styles.tab} data-on={active || undefined}>
             {inner}
           </Link>
         );

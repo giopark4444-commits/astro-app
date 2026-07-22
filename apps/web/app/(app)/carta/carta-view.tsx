@@ -42,7 +42,7 @@ type State =
   | { s: "error" }
   | { s: "ready"; chart: ChartResult; solar: boolean; transitAspects?: Aspect[] | undefined };
 
-export function CartaView() {
+export function CartaView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations("carta");
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -176,11 +176,16 @@ export function CartaView() {
     <div className={styles.wrap}>
       <div className={styles.sky} aria-hidden><Starfield /></div>
 
-      <div className={styles.head}>
-        <span className={styles.eyebrow}>{t("title")}</span>
-        <span className={styles.enso} aria-hidden><Icon name="enso" size={22} /></span>
-      </div>
-      <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
+      {/* Embebido en /astros: el título lo aportan las pestañas de AstrosView. */}
+      {!embedded && (
+        <>
+          <div className={styles.head}>
+            <span className={styles.eyebrow}>{t("title")}</span>
+            <span className={styles.enso} aria-hidden><Icon name="enso" size={22} /></span>
+          </div>
+          <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
+        </>
+      )}
 
       {/* tipo de carta */}
       <div className={styles.wrapKind}>
