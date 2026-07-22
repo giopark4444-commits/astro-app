@@ -51,8 +51,22 @@ describe("resolveNavOrder", () => {
     expect(resolveNavOrder({ value: perm }, null)).toEqual(perm);
   });
 
-  it("con fila guardada pero value basura, sanea al default completo (no null: SÍ hay fila)", () => {
-    expect(resolveNavOrder({ value: "no-es-un-array" }, null)).toEqual([...DEFAULT_NAV_ORDER]);
+  it("con value basura (no reordena las ventanas actuales) devuelve null", () => {
+    expect(resolveNavOrder({ value: "no-es-un-array" }, null)).toBeNull();
+    expect(resolveNavOrder({ value: ["basura", 1, null] }, null)).toBeNull();
+  });
+
+  it("ignora un nav_order legado (llaves viejas) → null, no fuerza 'tarot' al frente", () => {
+    // Antes del rubro "Otras lecturas", un superadmin pudo guardar este orden.
+    // "tarot" es la única llave que sobrevive al set nuevo: sanearlo lo dejaría
+    // liderando la barra. Debe ignorarse (null) y caer al default.
+    expect(
+      resolveNavOrder({ value: ["hoy", "carta", "horoscopo", "numeros", "pilares", "tarot"] }, null),
+    ).toBeNull();
+  });
+
+  it("ignora un orden parcial al que le falta una ventana actual", () => {
+    expect(resolveNavOrder({ value: ["astros", "tarot"] }, null)).toBeNull();
   });
 });
 

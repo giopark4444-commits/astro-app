@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/admin/roles";
-import { DEFAULT_NAV_ORDER, sanitizeNavOrder, type NavKey } from "@/lib/admin/nav-order";
+import { DEFAULT_NAV_ORDER, resolveNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import { NavOrderEditor } from "./nav-order-editor";
 import { CollaboratorsPanel } from "./collaborators-panel";
 import { ReferralsPanel } from "./referrals-panel";
@@ -22,7 +22,9 @@ export default async function AdminPage() {
   let initialOrder: NavKey[] = [...DEFAULT_NAV_ORDER];
   try {
     const { data } = await supabase.from("app_config").select("value").eq("key", "nav_order").maybeSingle();
-    initialOrder = sanitizeNavOrder((data as { value: unknown } | null)?.value);
+    // Mismo criterio que layout.tsx: un orden legado/parcial se ignora (null) y
+    // el editor arranca del default, no de un orden que nadie eligió.
+    initialOrder = resolveNavOrder(data as { value: unknown } | null, null) ?? [...DEFAULT_NAV_ORDER];
   } catch {
     // tabla/columna sin aplicar todavía: el default ya está asignado arriba.
   }

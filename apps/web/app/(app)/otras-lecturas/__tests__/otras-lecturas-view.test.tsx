@@ -57,6 +57,15 @@ describe("OtrasLecturasView", () => {
     expect(screen.getByRole("tab", { name: es.otrasLecturas.numerosTitle }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("lente=mano: muestra el panel 'pronto' y deja la pestaña Mano seleccionada", () => {
+    renderView("mano");
+    expect(screen.getByText(es.otrasLecturas.manoSoon)).toBeInTheDocument();
+    expect(screen.queryByText("NUMEROS_MOCK")).toBeNull();
+    expect(screen.queryByText("PILARES_MOCK")).toBeNull();
+    const manoTab = screen.getByText(es.otrasLecturas.manoTitle).closest('[role="tab"]');
+    expect(manoTab!.getAttribute("aria-selected")).toBe("true");
+  });
+
   it("la pestaña Mano está marcada como deshabilitada/pronto y no navega", () => {
     renderView(null);
     const manoTab = screen.getByText(es.otrasLecturas.manoTitle).closest('[role="tab"]');

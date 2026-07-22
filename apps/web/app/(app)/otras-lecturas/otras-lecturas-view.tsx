@@ -20,7 +20,7 @@ export function OtrasLecturasView() {
   const t = useTranslations("otrasLecturas");
   const params = useSearchParams();
   const raw = params.get("lente");
-  const view = raw === "pilares" ? "pilares" : "numeros";
+  const view = raw === "pilares" ? "pilares" : raw === "mano" ? "mano" : "numeros";
 
   return (
     <div className={styles.wrap}>
@@ -43,12 +43,18 @@ export function OtrasLecturasView() {
         {/* Mano: no existe todavía. No es un <Link> — no navega — y queda
             marcada como deshabilitada con un chip "pronto". Título y chip van
             en spans propios para que cada texto sea consultable por separado. */}
-        <span role="tab" aria-disabled="true" aria-selected={false} className={`${styles.tab} ${styles.tabSoon}`}>
+        <span role="tab" aria-disabled="true" aria-selected={view === "mano"} className={`${styles.tab} ${styles.tabSoon}`}>
           <span>{t("manoTitle")}</span>
           <span className={styles.soon}>{t("soon")}</span>
         </span>
       </div>
-      {view === "pilares" ? <PilaresView embedded /> : <NumerologyView embedded />}
+      {view === "mano" ? (
+        <p className={styles.soonPanel}>{t("manoSoon")}</p>
+      ) : view === "pilares" ? (
+        <PilaresView embedded />
+      ) : (
+        <NumerologyView embedded />
+      )}
     </div>
   );
 }

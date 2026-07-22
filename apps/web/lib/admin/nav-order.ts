@@ -53,11 +53,22 @@ export function sanitizeNavOrder(input: unknown): NavKey[] {
  * app fuerza a aplicar (eso cambiaba el orden real de BottomNav/hub-view
  * apenas se aplicara la migración, sin que nadie tocara /admin); con `null`,
  * cada consumidor (TopNav/BottomNav/hub-view) cae en su propio orden
- * histórico hasta que alguien guarde de verdad en /admin.
+ * histórico hasta que alguien guarde de verdad en /admin. Un value que NO sea
+ * un reordenamiento completo de las ventanas actuales (p.ej. un nav_order
+ * legado con las llaves viejas) también devuelve `null` — ver el cuerpo.
  */
 export function resolveNavOrder(data: { value: unknown } | null | undefined, error: unknown): NavKey[] | null {
   if (error || !data) return null;
-  return sanitizeNavOrder(data.value);
+  // Solo honramos un orden que sea un reordenamiento COMPLETO de las ventanas
+  // ACTUALES. Un nav_order legado (guardado antes del rubro "Otras lecturas")
+  // solo comparte "tarot" con el set nuevo; sanearlo lo dejaría liderando la
+  // barra — un orden que nadie eligió (Tarot primero). Si al value le falta
+  // cualquier ventana actual (legado, parcial o basura) es "sin opinión" ->
+  // null, y cada nav cae en su default. El editor /admin siempre guarda las 3
+  // llaves actuales, así que un guardado real nunca cae acá.
+  const value = data.value;
+  if (!Array.isArray(value) || !NAV_KEYS.every((k) => value.includes(k))) return null;
+  return sanitizeNavOrder(value);
 }
 
 /**
