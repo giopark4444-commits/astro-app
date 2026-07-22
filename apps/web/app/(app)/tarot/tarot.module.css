@@ -39,7 +39,7 @@
   display: flex; flex-direction: column; align-items: center; gap: var(--sp-4);
 }
 .flipCard {
-  position: relative; width: 160px; height: 260px;
+  position: relative; width: 210px; height: 340px;
   perspective: 1000px; background: none; border: 0; padding: 0; cursor: pointer;
 }
 .face {
@@ -113,7 +113,7 @@
 /* Imagen de la carta suelta en el panel/sheet (deuda b de T2): mismo lienzo
    normalizado (object-fit:contain) que .cardImg; reusa .reversedImg para el giro. */
 .interpCardImg {
-  width: 150px; max-width: 60%; height: auto; align-self: center; display: block;
+  width: 200px; max-width: 70%; height: auto; align-self: center; display: block;
   border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--glow-soft);
   object-fit: contain;
 }
