@@ -284,26 +284,11 @@
 @media (min-width: 1080px) { /* bp desktop R4a */
   .ceremony { padding: var(--sp-6) var(--sp-6); }
 
-  /* Requisito §E de Gio: abanico con blancos de toque cómodos en desktop.
-     Cartas más grandes (58×94 → 72×120, mismo ratio ~0.6) y franja EXPUESTA
-     por carta calibrada EN VIVO a ~15px (medida real del gate: con 0.82°/640%
-     quedaba en 10px — apretado): exposición ≈ radio × Δθ = (7.0×120px) ×
-     1.02° ≈ 15px; arco total 79.6° → cuerda ≈ 1075px, cabe en el contenedor.
-     El hover/focus sube z-index y levanta la carta (regla compartida + levante
-     desktop abajo). Mecánica intacta: mismos --i, mismo handler onClick. */
-  .fanArc { width: 1180px; height: 310px; }
-  .fanCard {
-    width: 72px;
-    height: 120px;
-    margin-left: -36px;
-    transform: rotate(calc((var(--i) - 38.5) * 1.02deg));
-    transform-origin: 50% 700%;
-  }
-  .fanCard:hover,
-  .fanCard:focus-visible {
-    transform: rotate(calc((var(--i) - 38.5) * 1.02deg)) translateY(-26px);
-    box-shadow: 0 0 0 2px var(--acc), var(--glow);
-  }
+  /* El abanico ya NO se agranda a 1180px en desktop: la ceremonia ahora vive
+     DENTRO del panel izquierdo del split (~688px) durante los pasos (pedido de
+     Gio: la pantalla se mantiene dividida en dos al tirar, no se despliega a
+     ambos lados). Usa el arco base de 640px, que cabe en el panel. El .fanScroll
+     conserva overflow-x:auto por si un viewport intermedio lo necesita. */
 
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }

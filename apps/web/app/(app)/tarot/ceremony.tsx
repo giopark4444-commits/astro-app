@@ -89,11 +89,17 @@ function reducer(state: CeremonyState, action: CeremonyAction): CeremonyState {
 export function Ceremony({
   deckCtx = rwsCtx(""),
   onClose,
+  onStep,
 }: {
   /** Ctx del resolver de assets (Task 7); default rws — preserva el
    *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
   deckCtx?: DeckAssetCtx;
   onClose: () => void;
+  /** Reporta el paso actual al contenedor (tarot-view) para que decida el
+   *  layout desktop: durante los pasos (barajar/cortar/abanico/revelar) el
+   *  split de dos paneles se mantiene; solo el RESULTADO ("reading") ocupa el
+   *  ancho completo para su propio split cartas|prosa. */
+  onStep?: (step: Step) => void;
 }) {
   const t = useTranslations("tarot");
   const tShare = useTranslations("share");
@@ -123,6 +129,12 @@ export function Ceremony({
 
   // fan → reveal: cuando la última elegida terminó de "volar" a su slot.
   // Con reduced-motion el paso es inmediato; si no, se le da aire al vuelo.
+  // Reporta el paso al contenedor para el layout desktop (split vs ancho
+  // completo). onStep debe ser estable (setState del padre) para no re-disparar.
+  useEffect(() => {
+    onStep?.(state.step);
+  }, [state.step, onStep]);
+
   const fanComplete = state.step === "fan" && state.picked.length === spread.cardCount;
   useEffect(() => {
     if (!fanComplete) return;

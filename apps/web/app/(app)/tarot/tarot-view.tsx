@@ -83,6 +83,10 @@ export function TarotView({ userId }: { userId: string }) {
   // fue tocada. La ceremonia en sí (dibujar, componer, guardar) es Task 5 —
   // este componente solo deja el punto de montaje listo.
   const [ceremony, setCeremony] = useState<"three" | null>(null);
+  // Paso actual de la ceremonia (lo reporta <Ceremony onStep>): durante los
+  // pasos el split de dos paneles se mantiene; solo el resultado ("reading")
+  // ocupa el ancho completo. null cuando no hay ceremonia.
+  const [ceremonyStep, setCeremonyStep] = useState<string | null>(null);
   // Modo manual (T3): independiente de la ceremonia digital — su propio rito.
   const [manualOpen, setManualOpen] = useState(false);
   const postedDailyRef = useRef(false);
@@ -231,6 +235,11 @@ export function TarotView({ userId }: { userId: string }) {
   // oculta y la técnica ocupa todo el ancho: la lectura manda (su split llega
   // en T4). El resto del umbral se conserva montado inline como hoy.
   const readingOpen = ceremony !== null || manualOpen;
+  // Ancho completo SOLO en el resultado de la lectura (su split cartas|prosa
+  // necesita el ancho) o en el modo manual. Durante los pasos de la ceremonia
+  // (barajar/cortar/abanico/revelar) se conserva el split de dos paneles —
+  // pedido de Gio: la pantalla no debe desplegarse a ambos lados al tirar.
+  const readingResultFull = manualOpen || (ceremony !== null && ceremonyStep === "reading");
 
   return (
     <main className={styles.wrap}>
@@ -239,7 +248,7 @@ export function TarotView({ userId }: { userId: string }) {
         <h1 className={styles.title}>{t("title")}</h1>
       </div>
 
-      <div className={`${styles.deskCols} ${readingOpen ? styles.readingActive : ""}`}>
+      <div className={`${styles.deskCols} ${readingResultFull ? styles.readingActive : ""}`}>
         <div className={styles.leftCol}>
           <section className={styles.dailySection}>
             <h2 className={styles.sectionTitle}>{t("dailyTitle")}</h2>
@@ -323,8 +332,10 @@ export function TarotView({ userId }: { userId: string }) {
           {ceremony === "three" && (
             <Ceremony
               deckCtx={deckCtx}
+              onStep={setCeremonyStep}
               onClose={() => {
                 setCeremony(null);
+                setCeremonyStep(null);
                 // La lectura pudo guardarse durante la ceremonia: refresca el diario.
                 loadDiary();
               }}
@@ -388,7 +399,7 @@ export function TarotView({ userId }: { userId: string }) {
         {/* Panel de interpretación (100% desktop): en móvil lo reemplaza el
             bottom-sheet de abajo. Se oculta cuando hay una lectura en curso
             (ceremonia/manual) — la lectura manda; su split llega en T4. */}
-        {!readingOpen && (
+        {!readingResultFull && (
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
               <div className={styles.titleRow}>
