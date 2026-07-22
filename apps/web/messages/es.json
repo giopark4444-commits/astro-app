@@ -19,6 +19,7 @@
     "perfil": "Perfil",
     "horoscopo": "Horóscopo",
     "astros": "Astros",
+    "otrasLecturas": "Otras lecturas",
     "mainNav": "Navegación principal"
   },
   "astros": {
@@ -26,6 +27,14 @@
     "cartaTitle": "Carta astral",
     "horoscopoOccidental": "Horóscopo occidental",
     "horoscopoOriental": "Horóscopo oriental"
+  },
+  "otrasLecturas": {
+    "tablist": "Otras lecturas",
+    "numerosTitle": "Números",
+    "pilaresTitle": "Pilares",
+    "manoTitle": "Mano",
+    "soon": "Pronto",
+    "manoSoon": "La lectura de mano llega pronto."
   },
   "auth": {
     "login": "Entrar",

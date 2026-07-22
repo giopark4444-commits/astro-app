@@ -69,14 +69,14 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
 
     it("sanea el input (basura, dedupe, faltantes) server-side antes de guardar", async () => {
       state.role = "superadmin";
-      const res = await saveNavOrder(["no-existe", "carta", "carta"]);
+      const res = await saveNavOrder(["no-existe", "tarot", "tarot"]);
       expect(res).toEqual({ ok: true });
       expect(state.upsertCalls).toHaveLength(1);
       expect(state.upsertCalls[0]).toEqual({
         table: "app_config",
         v: {
           key: "nav_order",
-          value: ["carta", "hoy", "horoscopo", "numeros", "pilares", "tarot"],
+          value: ["tarot", "astros", "otrasLecturas"],
           updated_at: expect.any(String),
         },
       });

@@ -77,7 +77,7 @@ function ElementBar({
  *  Maestro-detalle (Task 4, espejo de /carta): todo lo tocable de la columna técnica
  *  produce una PilarSelection que el panel derecho (desktop) o el bottom-sheet
  *  (móvil) interpretan vía un renderizador único (PilaresInterpretation). */
-export function PilaresView() {
+export function PilaresView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations();
   const locale = useLocale();
   const { active } = useProfiles();
@@ -170,10 +170,13 @@ export function PilaresView() {
       <div className={styles.sky} aria-hidden>
         <Starfield />
       </div>
-      <header className={styles.head}>
-        <p className={styles.eyebrow}>{t("pilares.subtitle")}</p>
-        <h1 className={styles.title}>{t("pilares.title")}</h1>
-      </header>
+      {/* Embebido en /otras-lecturas: el título lo aportan las pestañas del hub. */}
+      {!embedded && (
+        <header className={styles.head}>
+          <p className={styles.eyebrow}>{t("pilares.subtitle")}</p>
+          <h1 className={styles.title}>{t("pilares.title")}</h1>
+        </header>
+      )}
 
       {error ? (
         <p className={styles.note}>{t("pilares.error")}</p>

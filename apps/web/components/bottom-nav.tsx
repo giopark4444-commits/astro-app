@@ -6,17 +6,20 @@ import { Icon } from "./icon";
 import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./bottom-nav.module.css";
 
+// Mismas 4 pestañas que TopNav (2026-07-22): Astros · Tarot · Otras lecturas ·
+// Perfil. Hoy es el inicio (logo "Aluna"), ya no pestaña. `also` = rutas
+// heredadas que mantienen la pestaña activa.
 const ITEMS = [
-  { href: "/carta", icon: "wheel", key: "carta", soon: false },
-  { href: "/numeros", icon: "grid3", key: "numeros", soon: false },
-  { href: "/hoy", icon: "sun", key: "hoy", soon: false },
-  { href: "/pilares", icon: "pillars", key: "pilares", soon: false },
+  { href: "/astros", icon: "wheel", key: "astros", also: ["/carta", "/horoscopo"], soon: false },
+  { href: "/tarot", icon: "cards", key: "tarot", also: [], soon: false },
+  { href: "/otras-lecturas", icon: "grid3", key: "otrasLecturas", also: ["/numeros", "/pilares"], soon: false },
+  { href: "/perfil", icon: "person", key: "perfil", also: [], soon: false },
 ] as const;
 
-// Sin `order` (review Fable: default debe ser un no-op hasta que /admin
-// guarde algo) reorderByNavOrder(ITEMS, []) conserva el orden original de
-// ITEMS de arriba (carta, números, hoy, pilares). Ojo: ese orden NO coincide
-// con NAV_KEYS/DEFAULT_NAV_ORDER — por eso ya no se usa ese default acá.
+function isActive(path: string, href: string, also: readonly string[]): boolean {
+  return [href, ...also].some((h) => path === h || path.startsWith(h + "/"));
+}
+
 export function BottomNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
   const path = usePathname();
   const t = useTranslations("nav");
@@ -24,7 +27,7 @@ export function BottomNav({ order = [] }: { order?: readonly NavKey[] } = {}) {
   return (
     <nav className={styles.nav}>
       {items.map((it) => {
-        const active = path === it.href || path.startsWith(it.href + "/");
+        const active = isActive(path, it.href, it.also);
         const content = (
           <span className={`${styles.item} ${active ? styles.on : ""} ${it.soon ? styles.soon : ""}`}>
             <Icon name={it.icon} />{t(it.key)}

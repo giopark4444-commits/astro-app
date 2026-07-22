@@ -9,7 +9,7 @@ import styles from "./admin.module.css";
 
 type Feedback = { kind: "ok" | "error"; message: string };
 
-/** Client component: reordena las 6 ventanas con ↑/↓, estado local hasta
+/** Client component: reordena las ventanas de la nav con ↑/↓, estado local hasta
  * pulsar Guardar. saveNavOrder re-verifica el rol en servidor — esta UI nunca
  * es la fuente de verdad de la autorización. */
 export function NavOrderEditor({ initialOrder }: { initialOrder: NavKey[] }) {

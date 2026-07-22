@@ -3,9 +3,11 @@
 // que layout.tsx, TopNav/BottomNav, hub-view y el panel /admin compartan la
 // MISMA lógica de saneo sin duplicar la constante en ningún lado.
 
-// Verificado contra components/top-nav.tsx: mismo set y mismo orden default
-// que ITEMS (menos "perfil", que siempre queda fijo al final de esa nav).
-export const NAV_KEYS = ["hoy", "carta", "horoscopo", "numeros", "pilares", "tarot"] as const;
+// Las 3 ventanas reales de la nav (2026-07-22), menos "perfil" (fijo al final).
+// Astros absorbe Carta astral + Horóscopos; "Otras lecturas" absorbe Números +
+// Pilares + Mano; "Hoy" ya no es pestaña — es el inicio, al que lleva el logo.
+// Verificado contra components/top-nav.tsx (mismo set y orden default).
+export const NAV_KEYS = ["astros", "tarot", "otrasLecturas"] as const;
 export type NavKey = (typeof NAV_KEYS)[number];
 
 export const DEFAULT_NAV_ORDER: readonly NavKey[] = NAV_KEYS;
@@ -17,7 +19,7 @@ function isNavKey(value: unknown): value is NavKey {
 /**
  * Sanea cualquier valor (típicamente app_config.value.nav_order tal como
  * vuelve de Supabase — o basura, si la tabla/columna todavía no existe) a un
- * orden válido de las 6 ventanas: filtra claves desconocidas, deduplica, y
+ * orden válido de las ventanas de la nav: filtra claves desconocidas, deduplica, y
  * completa al final —en el orden default— cualquier clave faltante. Cualquier
  * entrada que no sea un array (null, undefined, objeto, string suelta,
  * número…) devuelve el default tal cual. Nunca lanza, nunca deja fuera una

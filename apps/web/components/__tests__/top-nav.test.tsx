@@ -19,24 +19,33 @@ function renderNav(path: string) {
 }
 
 describe("TopNav", () => {
-  it("agrupa Carta+Horóscopo en una sola pestaña Astros (→/astros)", () => {
+  it("renderiza las 4 pestañas: Astros · Tarot · Otras lecturas · Perfil", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    // Carta y Horóscopo se funden en "Astros"; el resto queda igual (6 pestañas)
-    expect(labels).toEqual([
-      es.nav.hoy, es.nav.astros, es.nav.numeros, es.nav.pilares, es.nav.tarot, es.nav.perfil,
-    ]);
+    expect(labels).toEqual([es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
     expect(screen.getByRole("link", { name: new RegExp(es.nav.astros) })).toHaveAttribute("href", "/astros");
-    // ya no hay pestañas sueltas de Carta ni Horóscopo
-    expect(screen.queryByRole("link", { name: es.nav.horoscopo })).toBeNull();
+    expect(screen.getByRole("link", { name: new RegExp(es.nav.otrasLecturas) })).toHaveAttribute("href", "/otras-lecturas");
     expect(screen.getByRole("link", { name: new RegExp(es.nav.tarot) })).toHaveAttribute("href", "/tarot");
+    // ya no hay pestañas sueltas de Carta, Horóscopo, Números, Pilares ni Hoy
+    for (const gone of [es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares, es.nav.hoy]) {
+      expect(screen.queryByRole("link", { name: gone })).toBeNull();
+    }
   });
 
-  it("Astros queda activo en /astros, /carta y /horoscopo", () => {
+  it("Astros agrupa Carta+Horóscopo: activo en /astros, /carta y /horoscopo", () => {
     for (const path of ["/astros", "/carta", "/horoscopo"]) {
       const { unmount } = renderNav(path);
       expect(screen.getByText(es.nav.astros).closest("a")!.getAttribute("data-on")).toBe("true");
-      expect(screen.getByText(es.nav.hoy).closest("a")!.getAttribute("data-on")).toBeNull();
+      expect(screen.getByText(es.nav.otrasLecturas).closest("a")!.getAttribute("data-on")).toBeNull();
+      unmount();
+    }
+  });
+
+  it("Otras lecturas agrupa Números+Pilares: activo en /otras-lecturas, /numeros y /pilares", () => {
+    for (const path of ["/otras-lecturas", "/numeros", "/pilares"]) {
+      const { unmount } = renderNav(path);
+      expect(screen.getByText(es.nav.otrasLecturas).closest("a")!.getAttribute("data-on")).toBe("true");
+      expect(screen.getByText(es.nav.astros).closest("a")!.getAttribute("data-on")).toBeNull();
       unmount();
     }
   });
@@ -48,16 +57,14 @@ describe("TopNav", () => {
     expect(perfil.getAttribute("data-on")).toBe("true");
   });
 
-  it("respeta un `order` custom (panel /admin): Astros toma el lugar de Carta, Perfil al final", () => {
+  it("respeta un `order` custom (panel /admin): Perfil siempre al final", () => {
     currentPath = "/hoy";
     render(
       <NextIntlClientProvider locale="es" messages={es}>
-        <TopNav order={["tarot", "hoy", "pilares", "carta", "numeros", "horoscopo"]} />
+        <TopNav order={["tarot", "otrasLecturas", "astros"]} />
       </NextIntlClientProvider>,
     );
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([
-      es.nav.tarot, es.nav.hoy, es.nav.pilares, es.nav.astros, es.nav.numeros, es.nav.perfil,
-    ]);
+    expect(labels).toEqual([es.nav.tarot, es.nav.otrasLecturas, es.nav.astros, es.nav.perfil]);
   });
 });

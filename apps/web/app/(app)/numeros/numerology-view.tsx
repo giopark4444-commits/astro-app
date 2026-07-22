@@ -21,7 +21,7 @@ const ageLabel = (from: number, to: number | null) => (to === null ? `${from}+` 
 // Maestro-detalle (Task 3, espejo de /carta y /pilares): todo lo tocable de la
 // columna izquierda produce una NumSelection que el panel derecho (desktop) o el
 // bottom-sheet (móvil) interpretan vía un renderizador único (NumerosInterpretation).
-export function NumerologyView() {
+export function NumerologyView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations("numerology");
   const { active } = useProfiles();
   const [pro, setPro] = useState(false);
@@ -88,11 +88,16 @@ export function NumerologyView() {
     <div className={styles.wrap}>
       <div className={styles.sky} aria-hidden><Starfield /></div>
 
-      <div className={styles.head}>
-        <span className={styles.eyebrow}>{t("title")}</span>
-        <span className={styles.enso} aria-hidden><Icon name="enso" size={22} /></span>
-      </div>
-      <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
+      {/* Embebido en /otras-lecturas: el título lo aportan las pestañas del hub. */}
+      {!embedded && (
+        <>
+          <div className={styles.head}>
+            <span className={styles.eyebrow}>{t("title")}</span>
+            <span className={styles.enso} aria-hidden><Icon name="enso" size={22} /></span>
+          </div>
+          <h1 className={`${styles.h1} reveal`} style={{ ["--i" as string]: 0 }}>{t("subtitle")}</h1>
+        </>
+      )}
 
       <div className={styles.deskCols}>
         <div className={styles.leftCol}>

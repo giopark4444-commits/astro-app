@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { settingsToThemeState } from "@/lib/settings";
@@ -51,7 +52,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const shell = (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <span className={styles.brand}>Aluna</span>
+        <Link href="/hoy" className={styles.brand}>Aluna</Link>
         <TopNav {...(navOrder ? { order: navOrder } : {})} />
         {/* wrapper estable: se conserva aunque ya no monte el BottomSheet de
             ProfileMenu (jubilado, brief ajustes-web T1) — mismo nombre de

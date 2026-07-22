@@ -19,30 +19,26 @@ function renderNav(path: string) {
 }
 
 describe("BottomNav", () => {
-  // Review Fable (fix del default `order`): sin prop `order`, BottomNav debe
-  // renderizar su propio orden histórico (carta, números, hoy, pilares — el
-  // de ITEMS arriba), NUNCA el de NAV_KEYS/DEFAULT_NAV_ORDER (que empieza en
-  // "hoy" y rompía este orden apenas se aplicaba la migración 0015, sin que
-  // nadie tocara /admin).
-  it("sin `order`, renderiza el orden histórico de ITEMS (carta, números, hoy, pilares)", () => {
+  it("renderiza las mismas 4 pestañas que TopNav: Astros · Tarot · Otras lecturas · Perfil", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.carta, es.nav.numeros, es.nav.hoy, es.nav.pilares]);
+    expect(labels).toEqual([es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
   });
 
-  it("marca activo el mundo actual", () => {
+  it("Astros presente y con href /astros; activo en su ruta heredada /carta", () => {
     renderNav("/carta");
-    expect(screen.getByText(es.nav.carta).closest("a")).not.toBeNull();
+    const astros = screen.getByText(es.nav.astros).closest("a")!;
+    expect(astros.getAttribute("href")).toBe("/astros");
   });
 
-  it("respeta un `order` custom (panel /admin) manteniendo solo el subconjunto propio", () => {
+  it("respeta un `order` custom (panel /admin) con Perfil al final", () => {
     currentPath = "/hoy";
     render(
       <NextIntlClientProvider locale="es" messages={es}>
-        <BottomNav order={["pilares", "hoy", "carta", "numeros", "horoscopo", "tarot"]} />
+        <BottomNav order={["otrasLecturas", "tarot", "astros"]} />
       </NextIntlClientProvider>,
     );
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.pilares, es.nav.hoy, es.nav.carta, es.nav.numeros]);
+    expect(labels).toEqual([es.nav.otrasLecturas, es.nav.tarot, es.nav.astros, es.nav.perfil]);
   });
 });

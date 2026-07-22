@@ -6,10 +6,7 @@ import type { NavKey } from "./nav-order";
 export type NavIconName = "sun" | "wheel" | "aries" | "grid3" | "pillars" | "cards";
 
 export const NAV_ICON: Record<NavKey, NavIconName> = {
-  hoy: "sun",
-  carta: "wheel",
-  horoscopo: "aries",
-  numeros: "grid3",
-  pilares: "pillars",
+  astros: "wheel",
   tarot: "cards",
+  otrasLecturas: "grid3",
 };

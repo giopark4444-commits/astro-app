@@ -19,6 +19,7 @@
     "perfil": "Profile",
     "horoscopo": "Horoscope",
     "astros": "Astros",
+    "otrasLecturas": "Other readings",
     "mainNav": "Main navigation"
   },
   "astros": {
@@ -26,6 +27,14 @@
     "cartaTitle": "Natal chart",
     "horoscopoOccidental": "Western horoscope",
     "horoscopoOriental": "Eastern horoscope"
+  },
+  "otrasLecturas": {
+    "tablist": "Other readings",
+    "numerosTitle": "Numbers",
+    "pilaresTitle": "Pillars",
+    "manoTitle": "Palm",
+    "soon": "Soon",
+    "manoSoon": "Palm reading is coming soon."
   },
   "auth": {
     "login": "Log in",
