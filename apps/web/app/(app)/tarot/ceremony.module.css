@@ -159,18 +159,21 @@
 .fanScroll { width: 100%; overflow-x: auto; padding: var(--sp-2) 0; }
 .fanArc {
   position: relative;
-  /* Arco cerrado en móvil: contenedor más ancho que el viewport, con scroll. */
-  width: 640px;
-  height: 190px;
+  /* Abanico un poco más chico y contenedor MÁS ALTO (pedido de Gio: que no se
+     corte el abanico). Las cartas se suben con `bottom` para que las "alas" del
+     arco (que caen ~125px por debajo de su base al rotar) queden DENTRO del
+     contenedor y no las recorte el .fanScroll. */
+  width: 600px;
+  height: 250px;
   margin: 0 auto;
 }
 .fanCard {
   position: absolute;
   left: 50%;
-  bottom: 0;
-  width: 58px;
-  height: 94px;
-  margin-left: -29px;
+  bottom: 130px;
+  width: 52px;
+  height: 84px;
+  margin-left: -26px;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
