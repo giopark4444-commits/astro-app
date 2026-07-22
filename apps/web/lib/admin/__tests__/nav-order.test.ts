@@ -2,19 +2,19 @@ import { describe, it, expect } from "vitest";
 import { DEFAULT_NAV_ORDER, NAV_KEYS, reorderByNavOrder, resolveNavOrder, sanitizeNavOrder } from "../nav-order";
 
 describe("nav-order", () => {
-  it("NAV_KEYS/DEFAULT_NAV_ORDER = las 3 ventanas de la nav (menos perfil)", () => {
-    expect(NAV_KEYS).toEqual(["astros", "tarot", "otrasLecturas"]);
+  it("NAV_KEYS/DEFAULT_NAV_ORDER = las 4 ventanas de la nav (menos perfil)", () => {
+    expect(NAV_KEYS).toEqual(["hoy", "astros", "tarot", "otrasLecturas"]);
     expect(DEFAULT_NAV_ORDER).toEqual(NAV_KEYS);
   });
 
   it("conserva una permutación válida completa tal cual", () => {
-    const perm = ["tarot", "otrasLecturas", "astros"];
+    const perm = ["tarot", "hoy", "otrasLecturas", "astros"];
     expect(sanitizeNavOrder(perm)).toEqual(perm);
   });
 
   it("filtra claves basura, deduplica, y completa las faltantes en orden default", () => {
     const input = ["tarot", "no-existe", "tarot", "astros", 42, null, {}];
-    expect(sanitizeNavOrder(input)).toEqual(["tarot", "astros", "otrasLecturas"]);
+    expect(sanitizeNavOrder(input)).toEqual(["tarot", "astros", "hoy", "otrasLecturas"]);
   });
 
   it("un array de solo basura devuelve el default completo", () => {
@@ -24,8 +24,8 @@ describe("nav-order", () => {
   it("valores no-array (null, undefined, objeto, string, número) devuelven el default", () => {
     expect(sanitizeNavOrder(null)).toEqual([...DEFAULT_NAV_ORDER]);
     expect(sanitizeNavOrder(undefined)).toEqual([...DEFAULT_NAV_ORDER]);
-    expect(sanitizeNavOrder({ astros: 0 })).toEqual([...DEFAULT_NAV_ORDER]);
-    expect(sanitizeNavOrder("astros,tarot")).toEqual([...DEFAULT_NAV_ORDER]);
+    expect(sanitizeNavOrder({ hoy: 0 })).toEqual([...DEFAULT_NAV_ORDER]);
+    expect(sanitizeNavOrder("hoy,astros")).toEqual([...DEFAULT_NAV_ORDER]);
     expect(sanitizeNavOrder(42)).toEqual([...DEFAULT_NAV_ORDER]);
   });
 
@@ -43,11 +43,11 @@ describe("resolveNavOrder", () => {
   });
 
   it("con error (p.ej. migración 0015 sin aplicar) devuelve null aunque haya data", () => {
-    expect(resolveNavOrder({ value: ["astros"] }, { message: "relation does not exist" })).toBeNull();
+    expect(resolveNavOrder({ value: ["hoy"] }, { message: "relation does not exist" })).toBeNull();
   });
 
   it("con fila guardada, sanea su value y lo devuelve", () => {
-    const perm = ["tarot", "otrasLecturas", "astros"];
+    const perm = ["tarot", "hoy", "otrasLecturas", "astros"];
     expect(resolveNavOrder({ value: perm }, null)).toEqual(perm);
   });
 
@@ -56,22 +56,24 @@ describe("resolveNavOrder", () => {
     expect(resolveNavOrder({ value: ["basura", 1, null] }, null)).toBeNull();
   });
 
-  it("ignora un nav_order legado (llaves viejas) → null, no fuerza 'tarot' al frente", () => {
+  it("ignora un nav_order legado (llaves viejas) → null", () => {
     // Antes del rubro "Otras lecturas", un superadmin pudo guardar este orden.
-    // "tarot" es la única llave que sobrevive al set nuevo: sanearlo lo dejaría
-    // liderando la barra. Debe ignorarse (null) y caer al default.
+    // Aunque "hoy"/"tarot" sobrevivan al set nuevo, le faltan astros y
+    // otrasLecturas → se ignora (null) y cae al default, en vez de aplicar un
+    // orden que nadie eligió.
     expect(
       resolveNavOrder({ value: ["hoy", "carta", "horoscopo", "numeros", "pilares", "tarot"] }, null),
     ).toBeNull();
   });
 
   it("ignora un orden parcial al que le falta una ventana actual", () => {
-    expect(resolveNavOrder({ value: ["astros", "tarot"] }, null)).toBeNull();
+    expect(resolveNavOrder({ value: ["hoy", "astros", "tarot"] }, null)).toBeNull();
   });
 });
 
 describe("reorderByNavOrder", () => {
   const items = [
+    { key: "hoy", label: "Hoy" },
     { key: "astros", label: "Astros" },
     { key: "tarot", label: "Tarot" },
     { key: "otrasLecturas", label: "Otras lecturas" },
@@ -79,9 +81,9 @@ describe("reorderByNavOrder", () => {
   ];
 
   it("reordena según `order` respetando el set completo de items", () => {
-    const order = ["tarot", "otrasLecturas", "astros"];
+    const order = ["tarot", "hoy", "otrasLecturas", "astros"];
     const result = reorderByNavOrder(items, order);
-    expect(result.map((it) => it.key)).toEqual(["tarot", "otrasLecturas", "astros", "perfil"]);
+    expect(result.map((it) => it.key)).toEqual(["tarot", "hoy", "otrasLecturas", "astros", "perfil"]);
   });
 
   it("un item cuya key no está en `order` (perfil) se añade al final, en su posición original", () => {

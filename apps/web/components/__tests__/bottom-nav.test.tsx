@@ -19,10 +19,10 @@ function renderNav(path: string) {
 }
 
 describe("BottomNav", () => {
-  it("renderiza las mismas 4 pestañas que TopNav: Astros · Tarot · Otras lecturas · Perfil", () => {
+  it("renderiza las mismas 5 pestañas que TopNav: Hoy · Astros · Tarot · Otras lecturas · Perfil", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.hoy, es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
   });
 
   it("Astros presente y con href /astros; activo en su ruta heredada /carta", () => {
@@ -35,10 +35,10 @@ describe("BottomNav", () => {
     currentPath = "/hoy";
     render(
       <NextIntlClientProvider locale="es" messages={es}>
-        <BottomNav order={["otrasLecturas", "tarot", "astros"]} />
+        <BottomNav order={["otrasLecturas", "tarot", "hoy", "astros"]} />
       </NextIntlClientProvider>,
     );
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.otrasLecturas, es.nav.tarot, es.nav.astros, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.otrasLecturas, es.nav.tarot, es.nav.hoy, es.nav.astros, es.nav.perfil]);
   });
 });

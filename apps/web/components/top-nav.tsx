@@ -6,13 +6,13 @@ import { Icon } from "./icon";
 import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./top-nav.module.css";
 
-// Las 4 pestañas de la nav principal (2026-07-22). Astros absorbe Carta astral
-// + Horóscopos (occ/oriental); "Otras lecturas" absorbe Números + Pilares +
-// Mano; "Hoy" ya no es pestaña — es el inicio, al que lleva el logo "Aluna".
-// `also` = rutas heredadas que dejan la pestaña activa (p.ej. Astros sigue
-// activo en /carta y /horoscopo). Perfil no está en NAV_KEYS a propósito:
-// reorderByNavOrder lo deja siempre al final.
+// Las 5 pestañas de la nav principal (2026-07-22). Hoy va de primero (gancho
+// diario). Astros absorbe Carta astral + Horóscopos (occ/oriental); "Otras
+// lecturas" absorbe Números + Pilares + Mano. `also` = rutas heredadas que
+// dejan la pestaña activa (p.ej. Astros sigue activo en /carta y /horoscopo).
+// Perfil no está en NAV_KEYS a propósito: reorderByNavOrder lo deja al final.
 const ITEMS = [
+  { href: "/hoy", icon: "sun", key: "hoy", also: [], soon: false },
   { href: "/astros", icon: "wheel", key: "astros", also: ["/carta", "/horoscopo"], soon: false },
   { href: "/tarot", icon: "cards", key: "tarot", also: [], soon: false },
   { href: "/otras-lecturas", icon: "grid3", key: "otrasLecturas", also: ["/numeros", "/pilares"], soon: false },

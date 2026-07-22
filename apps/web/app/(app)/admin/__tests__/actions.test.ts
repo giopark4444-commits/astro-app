@@ -76,7 +76,7 @@ describe("admin server actions — guard de rol + saneo (REGLA DURA del brief)",
         table: "app_config",
         v: {
           key: "nav_order",
-          value: ["tarot", "astros", "otrasLecturas"],
+          value: ["tarot", "hoy", "astros", "otrasLecturas"],
           updated_at: expect.any(String),
         },
       });

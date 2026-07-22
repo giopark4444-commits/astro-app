@@ -3,11 +3,11 @@
 // que layout.tsx, TopNav/BottomNav, hub-view y el panel /admin compartan la
 // MISMA lógica de saneo sin duplicar la constante en ningún lado.
 
-// Las 3 ventanas reales de la nav (2026-07-22), menos "perfil" (fijo al final).
-// Astros absorbe Carta astral + Horóscopos; "Otras lecturas" absorbe Números +
-// Pilares + Mano; "Hoy" ya no es pestaña — es el inicio, al que lleva el logo.
+// Las 4 ventanas reales de la nav (2026-07-22), menos "perfil" (fijo al final).
+// Hoy va de primero (gancho diario). Astros absorbe Carta astral + Horóscopos;
+// "Otras lecturas" absorbe Números + Pilares + Mano.
 // Verificado contra components/top-nav.tsx (mismo set y orden default).
-export const NAV_KEYS = ["astros", "tarot", "otrasLecturas"] as const;
+export const NAV_KEYS = ["hoy", "astros", "tarot", "otrasLecturas"] as const;
 export type NavKey = (typeof NAV_KEYS)[number];
 
 export const DEFAULT_NAV_ORDER: readonly NavKey[] = NAV_KEYS;

@@ -19,24 +19,30 @@ function renderNav(path: string) {
 }
 
 describe("TopNav", () => {
-  it("renderiza las 4 pestañas: Astros · Tarot · Otras lecturas · Perfil", () => {
+  it("renderiza las 5 pestañas: Hoy · Astros · Tarot · Otras lecturas · Perfil", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.hoy, es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
+    expect(screen.getByRole("link", { name: new RegExp(es.nav.hoy) })).toHaveAttribute("href", "/hoy");
     expect(screen.getByRole("link", { name: new RegExp(es.nav.astros) })).toHaveAttribute("href", "/astros");
     expect(screen.getByRole("link", { name: new RegExp(es.nav.otrasLecturas) })).toHaveAttribute("href", "/otras-lecturas");
-    expect(screen.getByRole("link", { name: new RegExp(es.nav.tarot) })).toHaveAttribute("href", "/tarot");
-    // ya no hay pestañas sueltas de Carta, Horóscopo, Números, Pilares ni Hoy
-    for (const gone of [es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares, es.nav.hoy]) {
+    // Carta, Horóscopo, Números y Pilares quedaron absorbidos (sin pestaña suelta)
+    for (const gone of [es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares]) {
       expect(screen.queryByRole("link", { name: gone })).toBeNull();
     }
+  });
+
+  it("Hoy va de primero y se activa en /hoy", () => {
+    renderNav("/hoy");
+    expect(screen.getAllByRole("link")[0]!.textContent).toBe(es.nav.hoy);
+    expect(screen.getByText(es.nav.hoy).closest("a")!.getAttribute("data-on")).toBe("true");
   });
 
   it("Astros agrupa Carta+Horóscopo: activo en /astros, /carta y /horoscopo", () => {
     for (const path of ["/astros", "/carta", "/horoscopo"]) {
       const { unmount } = renderNav(path);
       expect(screen.getByText(es.nav.astros).closest("a")!.getAttribute("data-on")).toBe("true");
-      expect(screen.getByText(es.nav.otrasLecturas).closest("a")!.getAttribute("data-on")).toBeNull();
+      expect(screen.getByText(es.nav.hoy).closest("a")!.getAttribute("data-on")).toBeNull();
       unmount();
     }
   });
@@ -61,10 +67,10 @@ describe("TopNav", () => {
     currentPath = "/hoy";
     render(
       <NextIntlClientProvider locale="es" messages={es}>
-        <TopNav order={["tarot", "otrasLecturas", "astros"]} />
+        <TopNav order={["tarot", "otrasLecturas", "hoy", "astros"]} />
       </NextIntlClientProvider>,
     );
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.tarot, es.nav.otrasLecturas, es.nav.astros, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.tarot, es.nav.otrasLecturas, es.nav.hoy, es.nav.astros, es.nav.perfil]);
   });
 });

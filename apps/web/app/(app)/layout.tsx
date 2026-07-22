@@ -9,6 +9,7 @@ import { resolveNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import { BottomNav } from "@/components/bottom-nav";
 import { TopNav } from "@/components/top-nav";
 import { SettingsLink } from "@/components/settings-link";
+import { Icon } from "@/components/icon";
 import { persistSettings } from "./actions";
 import styles from "./app-shell.module.css";
 
@@ -52,7 +53,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const shell = (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <Link href="/hoy" className={styles.brand}>Aluna</Link>
+        <Link href="/hoy" className={styles.brand} aria-label="Aluna — inicio">
+          <Icon name="enso" size={20} />
+          <span>Aluna</span>
+        </Link>
         <TopNav {...(navOrder ? { order: navOrder } : {})} />
         {/* wrapper estable: se conserva aunque ya no monte el BottomSheet de
             ProfileMenu (jubilado, brief ajustes-web T1) — mismo nombre de
