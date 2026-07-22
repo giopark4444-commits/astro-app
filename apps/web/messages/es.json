@@ -18,7 +18,14 @@
     "tarot": "Tarot",
     "perfil": "Perfil",
     "horoscopo": "Horóscopo",
+    "astros": "Astros",
     "mainNav": "Navegación principal"
+  },
+  "astros": {
+    "tablist": "Astros",
+    "cartaTitle": "Carta astral",
+    "horoscopoOccidental": "Horóscopo occidental",
+    "horoscopoOriental": "Horóscopo oriental"
   },
   "auth": {
     "login": "Entrar",
@@ -599,6 +606,7 @@
     "quickRestore": "Restaurar",
     "quickPage": "Página {n} de {total}",
     "quickAddPage": "Agregar página",
+    "quickToggle": "Preguntas rápidas",
     "quickEditLabel": "Pregunta {n}"
   },
   "synastry": {

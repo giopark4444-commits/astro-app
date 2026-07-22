@@ -1,0 +1,33 @@
+.wrap {
+  position: relative;
+}
+
+/* Pestañas minimalistas (subrayado), centradas arriba de la carta. z-index por
+   encima del starfield de la vista embebida (que va absoluto en su .wrap). */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-5);
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-4) var(--sp-2);
+  position: relative;
+  z-index: 2;
+}
+.tab {
+  padding: var(--sp-1) 0;
+  font-size: var(--text-sm);
+  letter-spacing: 0.2px;
+  color: var(--soft);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tab:hover {
+  color: var(--ink);
+}
+.tabOn {
+  color: var(--acc-text);
+  border-bottom-color: var(--acc);
+  font-weight: 600;
+}

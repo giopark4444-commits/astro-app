@@ -5,7 +5,11 @@ import es from "../../messages/es.json";
 import { DEFAULT_QUICK_QUESTIONS } from "../../lib/quick-questions";
 
 const saveMock = vi.fn().mockResolvedValue(undefined);
-vi.mock("../../app/(app)/actions", () => ({ saveQuickQuestions: (p: string[][]) => saveMock(p) }));
+const setEnabledMock = vi.fn().mockResolvedValue(undefined);
+vi.mock("../../app/(app)/actions", () => ({
+  saveQuickQuestions: (p: string[][], enabled: boolean) => saveMock(p, enabled),
+  setQuickQuestionsEnabled: (on: boolean) => setEnabledMock(on),
+}));
 
 import { QuickQuestions } from "../../app/(app)/preguntar/quick-questions";
 
@@ -20,6 +24,7 @@ function renderQ(onSend = vi.fn()) {
 
 beforeEach(() => {
   saveMock.mockClear();
+  setEnabledMock.mockClear();
   // fetch falla → el componente se queda con los defaults ES (comportamiento probado aquí)
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 });
@@ -111,5 +116,22 @@ describe("QuickQuestions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
     await waitFor(() => expect(saveMock).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(screen.queryByRole("button", { name: /Página 3/ })).toBeNull());
+  });
+
+  it("desactivar el checkbox oculta los chips y persiste enabled=false", async () => {
+    renderQ();
+    const first = DEFAULT_QUICK_QUESTIONS.es[0]![0]!;
+    await screen.findByRole("button", { name: first });
+    const toggle = screen.getByRole("checkbox", { name: "Preguntas rápidas" });
+    expect(toggle).toBeChecked();
+    fireEvent.click(toggle);
+    // chips y pager ocultos
+    expect(screen.queryByRole("button", { name: first })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Página 1 de 2" })).toBeNull();
+    // el checkbox sigue visible para reactivar
+    expect(screen.getByRole("checkbox", { name: "Preguntas rápidas" })).toBeInTheDocument();
+    // persistió enabled=false vía la acción dedicada (solo el flag), NO reescribe pages
+    await waitFor(() => expect(setEnabledMock).toHaveBeenCalledWith(false));
+    expect(saveMock).not.toHaveBeenCalled();
   });
 });
