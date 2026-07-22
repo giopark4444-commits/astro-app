@@ -150,7 +150,29 @@
 }
 .quickNav {
   display: flex;
+  align-items: center;
   gap: 6px;
+}
+/* Checkbox de visibilidad, antes de las pastillas de página. */
+.quickToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 2px;
+  font-size: 0.78rem;
+  color: var(--ink);
+  opacity: 0.85;
+  cursor: pointer;
+  user-select: none;
+}
+.quickToggle input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--acc);
+  cursor: pointer;
+}
+.quickToggle input:disabled {
+  cursor: default;
 }
 /* Segmentado "1 · 2": pastillas numeradas, la activa rellena con el color de
    marca (--acc) + glow tenue; inactiva con borde tenue. Reemplaza los dots

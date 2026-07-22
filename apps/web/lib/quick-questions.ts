@@ -123,3 +123,27 @@ export function normalizeForSave(pages: string[][], locale: string): { pages: st
   }
   return { pages: out };
 }
+
+/**
+ * Lee el flag de visibilidad de los accesos rápidos guardado junto a las
+ * páginas en el mismo jsonb (`{ enabled, pages }`). Por defecto TRUE (visibles):
+ * solo se apaga si el usuario lo puso explícitamente en false. Datos viejos sin
+ * la clave (solo `{ pages }` o array pelado) → visibles.
+ */
+export function parseQuickQuestionsEnabled(raw: unknown): boolean {
+  if (raw && typeof raw === "object" && !Array.isArray(raw) && "enabled" in raw) {
+    return (raw as { enabled?: unknown }).enabled !== false;
+  }
+  return true;
+}
+
+/**
+ * Extrae las páginas TAL COMO están guardadas (sin resolver defaults), para
+ * operaciones que solo cambian el flag `enabled` y deben preservar `pages`
+ * verbatim (read-modify-write server-side, sin reescribir desde el cliente).
+ */
+export function rawQuickQuestionsPages(raw: unknown): string[][] {
+  return asPages(raw).map((p) =>
+    Array.isArray(p) ? (p as unknown[]).map((q) => (typeof q === "string" ? q : "")) : [],
+  );
+}

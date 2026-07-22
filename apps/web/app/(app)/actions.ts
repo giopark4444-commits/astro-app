@@ -11,7 +11,7 @@ import { dismissCommitment } from "@/lib/memory-commitments";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { regenerateEssence } from "@/lib/memory-essence";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
-import { normalizeForSave } from "@/lib/quick-questions";
+import { normalizeForSave, rawQuickQuestionsPages } from "@/lib/quick-questions";
 
 type SettingsPatch = Pick<TablesUpdate<"settings">, "theme" | "light_mode">;
 
@@ -35,9 +35,18 @@ function intentBuilder(supabase: Awaited<ReturnType<typeof createClient>>): Inte
 }
 
 // Mismo shim acotado que settingsBuilder/intentBuilder (ver nota arriba):
-// quick_questions es jsonb con forma { pages: string[][] }.
+// quick_questions es jsonb con forma { enabled: boolean; pages: string[][] }.
+// select además de update: setQuickQuestionsEnabled lee las páginas guardadas
+// para preservarlas al cambiar solo el flag (read-modify-write server-side).
 type QuickQuestionsBuilder = {
-  update: (v: { quick_questions: { pages: string[][] } }) => { eq: (col: string, val: string) => Promise<unknown> };
+  select: (cols: string) => {
+    eq: (col: string, val: string) => {
+      maybeSingle: () => Promise<{ data: { quick_questions: unknown } | null; error: unknown }>;
+    };
+  };
+  update: (v: { quick_questions: { enabled: boolean; pages: string[][] } }) => {
+    eq: (col: string, val: string) => Promise<unknown>;
+  };
 };
 function quickQuestionsBuilder(supabase: Awaited<ReturnType<typeof createClient>>): QuickQuestionsBuilder {
   return supabase.from("settings") as unknown as QuickQuestionsBuilder;
@@ -343,15 +352,46 @@ export async function clearEssence() {
 }
 
 /**
- * Guarda los accesos rápidos del chat (2 páginas de 6). Normaliza SIEMPRE a
- * 2×6 en el server (vacíos → default del locale, recorte de largo) antes de
- * persistir, así el jsonb guardado nunca queda malformado. Fire-and-forget.
+ * Guarda los accesos rápidos del chat: el flag de visibilidad (`enabled`) + las
+ * páginas. Normaliza SIEMPRE las páginas en el server (base con defaults, extra
+ * vacías descartadas, recorte de largo) antes de persistir, así el jsonb nunca
+ * queda malformado. `enabled` por defecto true. Fire-and-forget.
  */
-export async function saveQuickQuestions(pages: string[][]) {
+export async function saveQuickQuestions(pages: string[][], enabled: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   const locale = await getLocale();
   const normalized = normalizeForSave(pages, locale);
-  await quickQuestionsBuilder(supabase).update({ quick_questions: normalized }).eq("user_id", user.id);
+  await quickQuestionsBuilder(supabase)
+    .update({ quick_questions: { enabled, pages: normalized.pages } })
+    .eq("user_id", user.id);
+}
+
+/**
+ * Cambia SOLO el flag de visibilidad de los accesos rápidos, sin tocar las
+ * páginas. Read-modify-write server-side (mismo patrón que setIntentUseInAI):
+ * lee las páginas guardadas y las reescribe verbatim con el nuevo `enabled`.
+ * Así togglear NUNCA puede reescribir `pages` desde un estado placeholder del
+ * cliente (p.ej. si el GET falló y el cliente mostraba defaults) — el toggle es
+ * un clic casual y no debe poder borrar preguntas. Fire-and-forget.
+ */
+export async function setQuickQuestionsEnabled(enabled: boolean) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data, error } = await quickQuestionsBuilder(supabase)
+    .select("quick_questions")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  // Lectura ambigua/fallida (supabase-js devuelve {data:null,error} SIN lanzar):
+  // abortar el write. Si no, `rawQuickQuestionsPages(null)` daría [] y
+  // sobrescribiríamos las páginas reales con vacío — el mismo hazard que se
+  // arregló arriba, pero en este read interno. `data` null SIN error (usuario
+  // nuevo sin fila) sí puede escribir (no hay nada que perder).
+  if (error) return;
+  const pages = rawQuickQuestionsPages(data?.quick_questions ?? null);
+  await quickQuestionsBuilder(supabase)
+    .update({ quick_questions: { enabled, pages } })
+    .eq("user_id", user.id);
 }

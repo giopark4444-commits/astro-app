@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { saveQuickQuestions } from "../actions";
+import { saveQuickQuestions, setQuickQuestionsEnabled } from "../actions";
 import {
   DEFAULT_QUICK_QUESTIONS,
   localeKey,
@@ -28,6 +28,9 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
   const [drafts, setDrafts] = useState<string[][]>(() => DEFAULT_QUICK_QUESTIONS[localeKey(locale)]);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  // Visibilidad de los accesos rápidos (sincronizada en la cuenta, en el mismo
+  // jsonb). Por defecto visibles; el usuario puede ocultarlos con el checkbox.
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,8 +38,9 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
       try {
         const res = await fetch(`/api/quick-questions?locale=${locale}`);
         if (!res.ok || cancelled) return;
-        const data = (await res.json()) as { pages?: string[][] };
+        const data = (await res.json()) as { pages?: string[][]; enabled?: boolean };
         if (!cancelled && Array.isArray(data.pages)) setPages(data.pages);
+        if (!cancelled && typeof data.enabled === "boolean") setEnabled(data.enabled);
       } catch {
         // best-effort: nos quedamos con los defaults ya cargados
       } finally {
@@ -90,10 +94,21 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
     setEditing(true);
     setPage(next.length - 1);
   }
+  // Checkbox de visibilidad: persiste best-effort preservando las preguntas
+  // guardadas (usa `pages`, no `drafts`). Gate `loaded` en el input evita
+  // persistir los defaults placeholder antes de que asiente el GET. Al apagar,
+  // cierra la edición para no dejarla en un limbo oculto.
+  function toggleEnabled(on: boolean) {
+    setEnabled(on);
+    if (!on) setEditing(false);
+    // Acción dedicada que SOLO cambia el flag en el servidor (no reescribe las
+    // páginas desde el cliente): togglear nunca puede borrar preguntas.
+    void setQuickQuestionsEnabled(on).catch(() => {});
+  }
   async function save() {
     setSaving(true);
     try {
-      await saveQuickQuestions(drafts);
+      await saveQuickQuestions(drafts, enabled);
       const next = parseQuickQuestions(drafts, locale);
       setPages(next);
       setPage((p) => Math.min(p, next.length - 1));
@@ -107,41 +122,53 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
 
   return (
     <div className={styles.quickWrap}>
-      <div className={styles.quickRow}>
-        {editing
-          ? shown.map((q, i) => (
-              <input
-                key={i}
-                className={styles.chipInput}
-                value={q}
-                maxLength={MAX_LEN}
-                onChange={(e) => editChip(i, e.target.value)}
-                aria-label={t("quickEditLabel", { n: i + 1 })}
-              />
-            ))
-          : shown
-              .filter((q) => q.trim())
-              .map((q, i) => (
-                <button key={i} type="button" className={styles.chip} onClick={() => onSend(q)}>
-                  {q}
-                </button>
-              ))}
-      </div>
+      {enabled && (
+        <div className={styles.quickRow}>
+          {editing
+            ? shown.map((q, i) => (
+                <input
+                  key={i}
+                  className={styles.chipInput}
+                  value={q}
+                  maxLength={MAX_LEN}
+                  onChange={(e) => editChip(i, e.target.value)}
+                  aria-label={t("quickEditLabel", { n: i + 1 })}
+                />
+              ))
+            : shown
+                .filter((q) => q.trim())
+                .map((q, i) => (
+                  <button key={i} type="button" className={styles.chip} onClick={() => onSend(q)}>
+                    {q}
+                  </button>
+                ))}
+        </div>
+      )}
       <div className={styles.quickBar}>
         <div className={styles.quickNav}>
-          {Array.from({ length: total }, (_, p) => (
-            <button
-              key={p}
-              type="button"
-              className={`${styles.pageTab} ${p === safePage ? styles.pageTabOn : ""}`}
-              onClick={() => setPage(p)}
-              aria-current={p === safePage ? "page" : undefined}
-              aria-label={t("quickPage", { n: p + 1, total })}
-            >
-              {p + 1}
-            </button>
-          ))}
-          {total < MAX_PAGES && (
+          <label className={styles.quickToggle}>
+            <input
+              type="checkbox"
+              checked={enabled}
+              disabled={!loaded || saving}
+              onChange={(e) => toggleEnabled(e.target.checked)}
+            />
+            <span>{t("quickToggle")}</span>
+          </label>
+          {enabled &&
+            Array.from({ length: total }, (_, p) => (
+              <button
+                key={p}
+                type="button"
+                className={`${styles.pageTab} ${p === safePage ? styles.pageTabOn : ""}`}
+                onClick={() => setPage(p)}
+                aria-current={p === safePage ? "page" : undefined}
+                aria-label={t("quickPage", { n: p + 1, total })}
+              >
+                {p + 1}
+              </button>
+            ))}
+          {enabled && total < MAX_PAGES && (
             <button
               type="button"
               className={`${styles.pageTab} ${styles.pageAdd}`}
@@ -153,23 +180,24 @@ export function QuickQuestions({ onSend }: { onSend: (q: string) => void }) {
             </button>
           )}
         </div>
-        {editing ? (
-          <div className={styles.quickActions}>
-            <button type="button" className={styles.restoreBtn} onClick={restore}>
-              {t("quickRestore")}
+        {enabled &&
+          (editing ? (
+            <div className={styles.quickActions}>
+              <button type="button" className={styles.restoreBtn} onClick={restore}>
+                {t("quickRestore")}
+              </button>
+              <button type="button" className={styles.cancelBtn} onClick={cancelEdit}>
+                {t("quickCancel")}
+              </button>
+              <button type="button" className={styles.saveBtn} onClick={() => void save()} disabled={saving}>
+                {t("quickSave")}
+              </button>
+            </div>
+          ) : (
+            <button type="button" className={styles.editBtn} onClick={startEdit} disabled={!loaded}>
+              <span aria-hidden>✎</span> {t("quickEdit")}
             </button>
-            <button type="button" className={styles.cancelBtn} onClick={cancelEdit}>
-              {t("quickCancel")}
-            </button>
-            <button type="button" className={styles.saveBtn} onClick={() => void save()} disabled={saving}>
-              {t("quickSave")}
-            </button>
-          </div>
-        ) : (
-          <button type="button" className={styles.editBtn} onClick={startEdit} disabled={!loaded}>
-            <span aria-hidden>✎</span> {t("quickEdit")}
-          </button>
-        )}
+          ))}
       </div>
     </div>
   );

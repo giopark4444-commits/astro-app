@@ -591,6 +591,7 @@
     "quickRestore": "Restore",
     "quickPage": "Page {n} of {total}",
     "quickAddPage": "Add page",
+    "quickToggle": "Quick questions",
     "quickEditLabel": "Question {n}"
   },
   "synastry": {

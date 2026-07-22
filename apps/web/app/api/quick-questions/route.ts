@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
-import { parseQuickQuestions } from "@/lib/quick-questions";
+import { parseQuickQuestions, parseQuickQuestionsEnabled } from "@/lib/quick-questions";
 
 // Accesos rápidos del chat: devuelve las 2×6 preguntas del usuario, o los
 // defaults del locale si nunca guardó nada. Best-effort: sin fila/columna
@@ -23,5 +23,8 @@ export async function GET(request: NextRequest) {
   } catch {
     // degradación: sin fila/columna todavía → defaults
   }
-  return NextResponse.json({ pages: parseQuickQuestions(raw, locale) });
+  return NextResponse.json({
+    pages: parseQuickQuestions(raw, locale),
+    enabled: parseQuickQuestionsEnabled(raw),
+  });
 }

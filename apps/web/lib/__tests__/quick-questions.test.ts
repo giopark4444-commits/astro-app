@@ -8,6 +8,8 @@ import {
   PER_PAGE,
   MAX_PAGES,
   MAX_LEN,
+  parseQuickQuestionsEnabled,
+  rawQuickQuestionsPages,
 } from "../quick-questions";
 
 describe("quick-questions defaults", () => {
@@ -138,5 +140,33 @@ describe("normalizeForSave", () => {
     const one = ["q"];
     const out = normalizeForSave([[], [], one, one, one, one, one, one], "es");
     expect(out.pages).toHaveLength(MAX_PAGES);
+  });
+});
+
+describe("parseQuickQuestionsEnabled", () => {
+  it("por defecto true: null, array pelado, o { pages } sin la clave", () => {
+    expect(parseQuickQuestionsEnabled(null)).toBe(true);
+    expect(parseQuickQuestionsEnabled([["a"]])).toBe(true);
+    expect(parseQuickQuestionsEnabled({ pages: [] })).toBe(true);
+  });
+  it("enabled:false explícito → false", () => {
+    expect(parseQuickQuestionsEnabled({ enabled: false, pages: [] })).toBe(false);
+  });
+  it("enabled:true explícito → true", () => {
+    expect(parseQuickQuestionsEnabled({ enabled: true, pages: [] })).toBe(true);
+  });
+});
+
+describe("rawQuickQuestionsPages", () => {
+  it("preserva las páginas guardadas verbatim (incluye centinelas '')", () => {
+    const raw = { enabled: false, pages: [["", "custom", ""], ["extra"]] };
+    expect(rawQuickQuestionsPages(raw)).toEqual([["", "custom", ""], ["extra"]]);
+  });
+  it("acepta array pelado y sanea no-strings a ''", () => {
+    expect(rawQuickQuestionsPages([["a", 5, null]])).toEqual([["a", "", ""]]);
+  });
+  it("null / basura → []", () => {
+    expect(rawQuickQuestionsPages(null)).toEqual([]);
+    expect(rawQuickQuestionsPages(42)).toEqual([]);
   });
 });
