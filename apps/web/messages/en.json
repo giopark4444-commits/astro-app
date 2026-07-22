@@ -18,7 +18,13 @@
     "tarot": "Tarot",
     "perfil": "Profile",
     "horoscopo": "Horoscope",
+    "astros": "Astros",
     "mainNav": "Main navigation"
+  },
+  "astros": {
+    "cartaTitle": "Natal chart",
+    "horoscopoOccidental": "Western horoscope",
+    "horoscopoOriental": "Eastern horoscope"
   },
   "auth": {
     "login": "Log in",

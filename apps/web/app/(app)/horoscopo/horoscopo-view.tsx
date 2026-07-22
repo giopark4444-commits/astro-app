@@ -21,7 +21,7 @@ import styles from "./horoscopo.module.css";
 // de /carta, /pilares, /numeros). El grueso de cada tradición vive en
 // western-view.tsx / eastern-view.tsx (MOVE de Task 2); acá se cablea el panel
 // derecho (desktop) / bottom-sheet (móvil) que rinde la HoroscopoSelection.
-export function HoroscopoView() {
+export function HoroscopoView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations("horoscopo");
   const tRoot = useTranslations();
   const locale = useLocale();
@@ -95,18 +95,23 @@ export function HoroscopoView() {
     <main className={styles.wrap}>
       <div className={styles.sky} aria-hidden><Starfield /></div>
 
-      <header className={styles.head}>
-        <p className={styles.eyebrow}>{t("title")}</p>
-        <h1 className={`${styles.h1} reveal`}>{t(trad === "oriental" ? "subtitleEastern" : "subtitle")}</h1>
-        <div className={styles.trads} role="tablist" aria-label={t("title")}>
-          <button type="button" role="tab" aria-selected={trad === "occidental"}
-            className={`seg__item ${trad === "occidental" ? "seg__item--active" : ""}`}
-            onClick={() => router.replace("/horoscopo")}>{t("tabWestern")}</button>
-          <button type="button" role="tab" aria-selected={trad === "oriental"}
-            className={`seg__item ${trad === "oriental" ? "seg__item--active" : ""}`}
-            onClick={() => router.replace("/horoscopo?trad=oriental")}>{t("tabEastern")}</button>
-        </div>
-      </header>
+      {/* Embebido en /astros: el header + tabs de tradición los aporta AstrosView
+          (las pestañas Carta astral · Occidental · Oriental), así que acá se
+          ocultan para no duplicarlos. Standalone (/horoscopo): se muestran. */}
+      {!embedded && (
+        <header className={styles.head}>
+          <p className={styles.eyebrow}>{t("title")}</p>
+          <h1 className={`${styles.h1} reveal`}>{t(trad === "oriental" ? "subtitleEastern" : "subtitle")}</h1>
+          <div className={styles.trads} role="tablist" aria-label={t("title")}>
+            <button type="button" role="tab" aria-selected={trad === "occidental"}
+              className={`seg__item ${trad === "occidental" ? "seg__item--active" : ""}`}
+              onClick={() => router.replace("/horoscopo")}>{t("tabWestern")}</button>
+            <button type="button" role="tab" aria-selected={trad === "oriental"}
+              className={`seg__item ${trad === "oriental" ? "seg__item--active" : ""}`}
+              onClick={() => router.replace("/horoscopo?trad=oriental")}>{t("tabEastern")}</button>
+          </div>
+        </header>
+      )}
 
       <div className={styles.deskCols}>
         {trad === "oriental" ? (
