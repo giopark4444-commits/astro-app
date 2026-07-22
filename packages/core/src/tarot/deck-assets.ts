@@ -16,7 +16,7 @@
  * para comunicar ese preset de "segunda capa" cuando `activeDeck === "custom"`
  * (cuando `activeDeck` ya ES un preset, no hace falta duplicarlo ahí).
  */
-export const PRESET_DECKS = ["rws", "aluna-noche", "marseille", "visconti"] as const;
+export const PRESET_DECKS = ["rws", "aluna-noche", "aluna-alba", "aluna-cosmic", "marseille", "sola-busca", "visconti"] as const;
 export type PresetDeckId = (typeof PRESET_DECKS)[number];
 
 export interface DeckAssetCtx {

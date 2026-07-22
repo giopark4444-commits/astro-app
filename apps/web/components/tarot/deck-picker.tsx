@@ -20,19 +20,32 @@ import styles from "./deck-picker.module.css";
 // aún no tiene assets (Wikimedia + 4 cartas faltantes) → se muestra cuando
 // existan. El resolver/PRESET_DECKS en core ya lo contemplan; esto es solo la
 // visibilidad en el selector, para no mostrar una miniatura rota (404).
-const READY_DECKS: readonly PresetDeckId[] = ["rws", "aluna-noche", "marseille"];
+const READY_DECKS: readonly PresetDeckId[] = [
+  "rws",
+  "aluna-noche",
+  "aluna-alba",
+  "aluna-cosmic",
+  "marseille",
+  "sola-busca",
+];
 
 const NAME_KEY: Record<PresetDeckId, string> = {
   rws: "deckPresetRwsName",
   "aluna-noche": "deckPresetAlunaNocheName",
+  "aluna-alba": "deckPresetAlunaAlbaName",
+  "aluna-cosmic": "deckPresetAlunaCosmicName",
   marseille: "deckPresetMarseilleName",
+  "sola-busca": "deckPresetSolaBuscaName",
   visconti: "deckPresetViscontiName",
 };
 
 const DESC_KEY: Record<PresetDeckId, string> = {
   rws: "deckPresetRwsDesc",
   "aluna-noche": "deckPresetAlunaNocheDesc",
+  "aluna-alba": "deckPresetAlunaAlbaDesc",
+  "aluna-cosmic": "deckPresetAlunaCosmicDesc",
   marseille: "deckPresetMarseilleDesc",
+  "sola-busca": "deckPresetSolaBuscaDesc",
   visconti: "deckPresetViscontiDesc",
 };
 

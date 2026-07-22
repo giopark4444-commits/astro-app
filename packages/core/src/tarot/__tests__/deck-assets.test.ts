@@ -239,8 +239,16 @@ describe("deckCtxFromManifest", () => {
 });
 
 describe("PRESET_DECKS / presetCtx", () => {
-  it("lists exactly the 4 preset decks, rws first", () => {
-    expect(PRESET_DECKS).toEqual(["rws", "aluna-noche", "marseille", "visconti"]);
+  it("lists the preset decks, rws first", () => {
+    expect(PRESET_DECKS).toEqual([
+      "rws",
+      "aluna-noche",
+      "aluna-alba",
+      "aluna-cosmic",
+      "marseille",
+      "sola-busca",
+      "visconti",
+    ]);
   });
 
   it("presetCtx('rws', ...) is shape-identical to rwsCtx", () => {
