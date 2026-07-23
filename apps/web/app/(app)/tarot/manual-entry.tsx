@@ -1,23 +1,28 @@
 "use client";
 // Modo manual (Tarot T3, spec §3): alguien con mazo físico baraja y escoge
 // él mismo — le pedimos QUÉ salió y le devolvemos la interpretación. Flujo:
-// plantilla (three/daily) o libre (1-10) → selector de cartas (buscador +
-// filtro por palo, toggle invertida, sin duplicados) → jumpers (mismo
-// selector, máx 3, opcional) → lectura (composer v2 + jumpers) → chat →
-// guardar. Estado local con useState (no useReducer: los pasos avanzan
-// linealmente sin reglas de coreografía como la ceremonia digital).
+// plantilla (three/daily atajos, o cualquier tirada vía <SpreadPicker>, Task
+// 5) o libre (1-10) → selector de cartas (buscador + filtro por palo, toggle
+// invertida, sin duplicados) → jumpers (mismo selector, máx 3, opcional) →
+// lectura (composer v2 + jumpers) → chat → guardar. Estado local con
+// useState (no useReducer: los pasos avanzan linealmente sin reglas de
+// coreografía como la ceremonia digital).
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { TAROT_DECK, spreadById, type TarotCard, type DeckAssetCtx, cardImageUrl, rwsCtx } from "@aluna/core";
+import { TAROT_DECK, spreadById, type TarotCard, type TarotSpreadId, type DeckAssetCtx, cardImageUrl, rwsCtx } from "@aluna/core";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ShareModal } from "@/components/share/share-modal";
 import { ReadingChat } from "./reading-chat";
+import { positionLabelKey } from "./position-labels";
+import { SpreadPicker } from "./spread-picker";
 import tarot from "./tarot.module.css";
 import styles from "./manual-entry.module.css";
 
-type Template = "three" | "daily" | "free";
+// Task 5: el manual ya no está limitado a three/daily — cualquier tirada de
+// @aluna/core sirve de plantilla ("free" es la única no-tirada: conteo libre).
+type Template = TarotSpreadId | "free";
 type Step = "template" | "select" | "jumpers" | "reading";
 type SaveState = "idle" | "saving" | "saved" | "free_limit" | "error";
 
@@ -40,13 +45,6 @@ const SUIT_LABEL_KEY: Record<SuitTab, string> = {
   cups: "manualSuitCups",
   swords: "manualSuitSwords",
   pentacles: "manualSuitPentacles",
-};
-
-const POSITION_KEY: Record<string, string> = {
-  day: "positionDay",
-  past: "positionPast",
-  present: "positionPresent",
-  future: "positionFuture",
 };
 
 function cardMatchesSuit(card: TarotCard, suit: SuitTab): boolean {
@@ -99,12 +97,31 @@ export function ManualEntry({
     });
   }, [usedIds, suitTab, query, cardsDict]);
 
+  // "free-N" son posiciones sintéticas del modo libre y "jumper-N" de las
+  // cartas que saltaron (ninguna vive en spreads.ts, @aluna/core) — la libre
+  // se etiqueta aparte; jumper no tiene key i18n (nunca la tuvo) así que
+  // `t.has` evita el MISSING_MESSAGE de next-intl y cae al valor crudo, igual
+  // que el `positionLabel` pre-Task 5. El resto (keys reales de tirada) usa
+  // el mapa compartido `positionLabelKey` (mismo origen que la ceremonia,
+  // Task 4).
   function positionLabel(position: string): string {
-    const known = POSITION_KEY[position];
-    if (known) return t(known);
     const m = /^free-(\d+)$/.exec(position);
     if (m) return t("manualFreePositionLabel", { n: m[1] });
-    return position;
+    const key = positionLabelKey(position);
+    return t.has(key) ? t(key) : position;
+  }
+
+  // Arranca el paso "select" con una plantilla dada: usado tanto por el botón
+  // "Continuar" (three/daily/free, plantilla ya elegida por el usuario) como
+  // por `<SpreadPicker>` (Task 5) — sus tarjetas disparan `onPick(id)` de
+  // inmediato (sin paso de confirmación propio), así que eligen Y avanzan.
+  function beginSelecting(tpl: Template) {
+    setTemplate(tpl);
+    setMain([]);
+    setJumpers([]);
+    setQuery("");
+    setSuitTab("all");
+    setStep("select");
   }
 
   function pickMain(cardId: string) {
@@ -313,19 +330,15 @@ export function ManualEntry({
             </div>
           )}
 
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={() => {
-              setMain([]);
-              setJumpers([]);
-              setQuery("");
-              setSuitTab("all");
-              setStep("select");
-            }}
-          >
+          <button type="button" className={styles.primaryBtn} onClick={() => beginSelecting(template)}>
             {t("manualTemplateContinue")}
           </button>
+
+          {/* Task 5: además de los atajos de arriba, cualquier tirada del set
+              completo (destacadas/secundarias) sirve de plantilla manual.
+              "daily" queda excluido: ya tiene su atajo dedicado en la fila de
+              arriba (el picker tampoco la ofrece — sin `spreadDaily` i18n). */}
+          <SpreadPicker onPick={beginSelecting} exclude={["daily"]} />
         </div>
       )}
 
