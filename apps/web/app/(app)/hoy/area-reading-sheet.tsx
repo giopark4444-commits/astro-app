@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { LifeArea } from "@aluna/core";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
 import styles from "./area-reading-sheet.module.css";
 
 // Mini-lectura cálida de un área de vida, disparada al tocar su barra en
@@ -81,6 +82,8 @@ export function AreaReadingSheet({
             // de "hoy" con el resto del dashboard).
             tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
             voiceMode: getVoiceMode(),
+            // premium viene del toggle ✨ global del chat, no de UI propia de este sheet.
+            premium: readPremiumFlagForRequest(),
           }),
         });
         const data = (await res.json().catch(() => ({}))) as {

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { composeBaziReading, type BaziReading, type PillarSet } from "@aluna/core";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
 import styles from "./pilares.module.css";
 
 // Selector de profundidad para "Lectura de tus pilares" (Ba Zi/Saju). "Esencia" es
@@ -77,7 +78,15 @@ export function BaziReadingView({
       const res = await fetch("/api/bazi-reading", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profileId, profileName, length: next, locale, voiceMode: getVoiceMode() }),
+        // premium viene del toggle ✨ global del chat, no de UI propia de esta lente.
+        body: JSON.stringify({
+          profileId,
+          profileName,
+          length: next,
+          locale,
+          voiceMode: getVoiceMode(),
+          premium: readPremiumFlagForRequest(),
+        }),
       });
       const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
       if (!isStream) {
