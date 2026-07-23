@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
+import { computeNumerology } from "@aluna/core";
 
 // ---------------------------------------------------------------------------
 // Mocks — mismo estilo que route.test.ts, pero cubriendo el camino COMPLETO
@@ -299,6 +300,49 @@ describe("POST /api/chat — créditos premium + tope diario (Task 5)", () => {
     const res2 = await POST(fakeRequest(baseBody({ premium: true })));
     expect(await res2.text()).toBe("");
     expect(refundSpendMock).not.toHaveBeenCalled();
+  });
+
+  it("(i) C1: spend OK pero construir el contexto (pre-stream) lanza → 502 y refund con el MISMO ref del spend", async () => {
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    const premium = fakeProvider("anthropic", "claude-sonnet-5", ["nunca sale"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+    resolvePremiumProviderMock.mockReturnValue({ available: true, provider: premium });
+    // baseBody usa lenses:["numeros"] → computeNumerology corre dentro del
+    // try que arma `system`; lo hacemos explotar para simular cualquier falla
+    // post-spend (computeChart/buildFocusedContext se comportan igual).
+    (computeNumerology as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+      throw new Error("boom");
+    });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(502);
+    expect(await res.json()).toEqual({ available: false, error: "upstream" });
+
+    // el crédito SÍ se gastó (antes de construir el contexto)...
+    expect(spendCreditsMock).toHaveBeenCalledTimes(1);
+    const [, , , spentRef] = spendCreditsMock.mock.calls[0]!;
+    // ...pero como no se entregó nada, debe reembolsarse con el MISMO ref.
+    expect(refundSpendMock).toHaveBeenCalledTimes(1);
+    const [svcArg, userArg, amountArg, refArg] = refundSpendMock.mock.calls[0]!;
+    expect(svcArg).toBe(SVC);
+    expect(userArg).toBe("user-1");
+    expect(amountArg).toBe(2);
+    expect(refArg).toBe(spentRef);
+    // el proveedor premium nunca llegó a invocarse: el 502 corta antes del stream.
+    expect(premium.chatStream).not.toHaveBeenCalled();
+  });
+
+  it("(j) I2: all-access OFF + isRequesterPlus rechaza (error de red) → fail-open, NO 500, sigue el flujo normal", async () => {
+    allAccessEnabledMock.mockReturnValue(false);
+    isRequesterPlusMock.mockRejectedValue(new Error("network down"));
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+
+    const res = await POST(fakeRequest(baseBody()));
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("libre");
+    // fail-open: se salta el chequeo del tope entero (no bumpea el contador).
+    expect(bumpChatUsageMock).not.toHaveBeenCalled();
   });
 
   it("sin servicio de créditos configurado (getCreditsServiceClient null) + premium:true + costo > 0 → header 'off', camino gratis", async () => {

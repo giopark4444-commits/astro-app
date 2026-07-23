@@ -124,7 +124,16 @@ export async function POST(request: NextRequest) {
   // ANTES del gasto premium a propósito: un 429 nunca debe haber gastado
   // crédito.
   if (!allAccessEnabled() && svc) {
-    const plus = await isRequesterPlus(supabase, user.id);
+    // Fail-open ante error: el tope diario es una protección de costos, no de
+    // seguridad — si isRequesterPlus revienta (red/RPC caído), NO debe tumbar
+    // el chat con un 500; se trata como si no correspondiera bloquear (se
+    // salta el chequeo del tope), igual criterio que bumpChatUsage más abajo.
+    let plus = true;
+    try {
+      plus = await isRequesterPlus(supabase, user.id);
+    } catch {
+      plus = true;
+    }
     if (!plus) {
       const count = await bumpChatUsage(svc, user.id);
       if (count !== null && count > freeDailyChatCap()) {
@@ -164,6 +173,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false });
   }
 
+  // Reembolso best-effort de un spend premium REAL (premiumState === "used" &&
+  // premiumSpendRef) que terminó sin servir nada al usuario. Un solo lugar
+  // para las dos causas posibles de "se cobró y no se entregó": el catch
+  // pre-stream de más abajo (construir `system` revienta → nunca se llega a
+  // invocar al proveedor) y el cierre del stream (cero caracteres emitidos).
+  // Anula `premiumSpendRef` ANTES de reembolsar para que, pase lo que pase,
+  // el mismo spend no pueda revertirse dos veces.
+  async function refundPremiumIfUnserved() {
+    // `!user` es redundante en runtime (POST ya devolvió arriba si no había
+    // usuario) pero TS no propaga esa narrow dentro de una función anidada.
+    if (!svc || !user || premiumState !== "used" || !premiumSpendRef) return;
+    const ref = premiumSpendRef;
+    const amount = premiumSpendAmount;
+    premiumSpendRef = null;
+    await refundSpend(svc, user.id, amount, ref).catch(() => {});
+  }
+
   let system: string;
   try {
     // computeChart/computeNumerology solo si su lente está activa (perf). Ba Zi lo
@@ -174,6 +200,9 @@ export async function POST(request: NextRequest) {
     const context = buildFocusedContext({ profile, chart, numerology, lenses: activeLenses, tarotCard, locale });
     system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(activeLenses, tarotCard, locale)}`;
   } catch {
+    // Regla de oro: si ya hubo un spend real, no puede quedar cobrado sin
+    // entregar solo porque construir el contexto (post-spend) explotó.
+    await refundPremiumIfUnserved();
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
 
@@ -236,11 +265,11 @@ export async function POST(request: NextRequest) {
       } catch {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
       }
-      // Reembolso best-effort: solo si de verdad hubo un spend (premiumSpendRef
-      // no nulo → costo > 0) y el proveedor premium no entregó NADA. Con costo
-      // 0 no hay nada que revertir (premiumSpendRef se queda en null en ese caso).
-      if (svc && premiumState === "used" && premiumSpendRef && assistantReply.length === 0) {
-        await refundSpend(svc, user.id, premiumSpendAmount, premiumSpendRef).catch(() => {});
+      // Reembolso best-effort: solo si el proveedor premium no entregó NADA
+      // (refundPremiumIfUnserved ya valida que hubo un spend real y evita el
+      // doble disparo anulando premiumSpendRef).
+      if (assistantReply.length === 0) {
+        await refundPremiumIfUnserved();
       }
       controller.close();
     },
