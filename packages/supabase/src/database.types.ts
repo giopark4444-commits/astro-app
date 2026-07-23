@@ -731,6 +731,55 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Añadida a mano junto con supabase/migrations/0022_creditos.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      credit_ledger: {
+        Row: {
+          created_at: string;
+          delta: number;
+          id: string;
+          kind: string;
+          ref: string | null;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          delta: number;
+          id?: string;
+          kind: string;
+          ref?: string | null;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          delta?: number;
+          id?: string;
+          kind?: string;
+          ref?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      // Añadida a mano junto con supabase/migrations/0022_creditos.sql
+      // (regenerar desde la BD viva si se instala el CLI de Supabase).
+      usage_daily: {
+        Row: {
+          chat_count: number;
+          day: string;
+          user_id: string;
+        };
+        Insert: {
+          chat_count?: number;
+          day: string;
+          user_id: string;
+        };
+        Update: {
+          chat_count?: number;
+          day?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     // Añadida a mano junto con supabase/migrations/0005_subscriptions.sql: la
@@ -820,6 +869,25 @@ export type Database = {
       my_referral_code_for_checkout: {
         Args: Record<string, never>;
         Returns: string | null;
+      };
+      // Añadidas a mano junto con supabase/migrations/0022_creditos.sql:
+      // sistema de créditos — débito/abono atómicos sobre el ledger, saldo
+      // propio, y contador diario de chat (regenerar cuando se aplique).
+      spend_credits: {
+        Args: { p_user: string; p_amount: number; p_ref: string | null };
+        Returns: boolean;
+      };
+      grant_credits: {
+        Args: { p_user: string; p_amount: number; p_kind: string; p_ref: string | null };
+        Returns: boolean;
+      };
+      my_credit_balance: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      bump_chat_usage: {
+        Args: { p_user: string };
+        Returns: number;
       };
     };
     Enums: Record<string, never>;
