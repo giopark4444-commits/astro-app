@@ -112,9 +112,9 @@ describe("catalogStatus", () => {
     const status = catalogStatus();
     expect(status.enabled).toBe(true);
     const byId = Object.fromEntries(status.providers.map((p) => [p.id, p]));
-    expect(byId.hermes.hasKey).toBe(true);
-    expect(byId.anthropic.hasKey).toBe(false);
-    expect(byId.ollama.hasKey).toBe(true); // "llave" de ollama = OLLAMA_ENABLED=1
+    expect(byId.hermes?.hasKey).toBe(true);
+    expect(byId.anthropic?.hasKey).toBe(false);
+    expect(byId.ollama?.hasKey).toBe(true); // "llave" de ollama = OLLAMA_ENABLED=1
     expect(JSON.stringify(status)).not.toContain("sk-nous-test");
   });
 

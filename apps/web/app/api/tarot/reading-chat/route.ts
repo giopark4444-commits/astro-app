@@ -7,6 +7,7 @@ import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
+import { parseModelOverride } from "@/lib/reading/model-catalog";
 import { buildTarotContext, type TarotChatCardInput } from "@/lib/tarot/reading-chat-context";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 import { ensureThread, appendMessage } from "@/lib/chat-archive";
@@ -119,7 +120,10 @@ export async function POST(request: NextRequest) {
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ available: false, error: "unauthorized" }, { status: 401 });
 
-  const resolved = resolveReadingProvider();
+  // Override del picker de modelos (banco de pruebas): validado + gateado a
+  // dev por parseModelOverride; inválido o apagado → null → resolución normal.
+  const modelOverride = parseModelOverride(body.modelOverride);
+  const resolved = resolveReadingProvider(modelOverride);
   if (!resolved.available) {
     // Latente: aún no hay llave. El chat de la tirada se enciende con la IA.
     return NextResponse.json({ available: false });
@@ -211,6 +215,8 @@ export async function POST(request: NextRequest) {
     "x-accel-buffering": "no",
   };
   if (threadId) headers["x-thread-id"] = threadId;
+  // Con qué respondió de verdad (el picker lo muestra: "respondió hermes/…").
+  headers["x-aluna-model"] = `${provider.name}/${provider.model}`;
 
   return new Response(stream, { headers });
 }
