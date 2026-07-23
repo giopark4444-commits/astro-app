@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
+import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
 import styles from "./reading-chat.module.css";
 
 export interface ReadingChatCard {
@@ -41,6 +42,10 @@ export function ReadingChat({
   const [st, setSt] = useState<St>("opening");
   const endRef = useRef<HTMLDivElement>(null);
   const openedRef = useRef(false);
+  // Selector de modelo de PRUEBA (se auto-oculta en producción): elección y
+  // último modelo que realmente respondió, ver components/dev-model-picker.tsx.
+  const [devModel, setDevModel] = useState<DevModelValue | null>(null);
+  const [lastModelUsed, setLastModelUsed] = useState<string | null>(null);
 
   useEffect(() => {
     // jsdom (tests) no implementa scrollIntoView: guard defensivo.
@@ -58,8 +63,12 @@ export function ReadingChat({
         ...(question ? { question } : {}),
         ...(profileId ? { profileId } : {}),
         messages: nextMessages,
+        modelOverride: devModel,
       }),
     });
+
+    // Quién respondió de verdad (banco A/B de pruebas), antes de leer el stream.
+    setLastModelUsed(res.headers.get("x-aluna-model"));
 
     // Latente (sin llave) o error de validación → JSON { available:false }.
     const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
@@ -144,6 +153,8 @@ export function ReadingChat({
             {st === "error" && <p className={styles.thinking}>{t("chatError")}</p>}
             <div ref={endRef} />
           </div>
+
+          <DevModelPicker surface="tarot" onChange={setDevModel} lastModel={lastModelUsed} />
 
           <div className={styles.composer}>
             <input

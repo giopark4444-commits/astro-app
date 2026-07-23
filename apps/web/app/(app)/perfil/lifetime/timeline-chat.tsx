@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { BottomSheet } from "@/components/bottom-sheet";
+import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
 import styles from "./timeline-chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -24,6 +25,10 @@ function TimelineChatBody({ profileId }: { profileId: string }) {
   const [st, setSt] = useState<St>("opening");
   const endRef = useRef<HTMLDivElement>(null);
   const openedRef = useRef(false);
+  // Selector de modelo de PRUEBA (se auto-oculta en producción): elección y
+  // último modelo que realmente respondió, ver components/dev-model-picker.tsx.
+  const [devModel, setDevModel] = useState<DevModelValue | null>(null);
+  const [lastModelUsed, setLastModelUsed] = useState<string | null>(null);
 
   useEffect(() => {
     // jsdom (tests) no implementa scrollIntoView: guard defensivo.
@@ -34,8 +39,11 @@ function TimelineChatBody({ profileId }: { profileId: string }) {
     const res = await fetch("/api/timeline/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ locale, profileId, messages: nextMessages }),
+      body: JSON.stringify({ locale, profileId, messages: nextMessages, modelOverride: devModel }),
     });
+
+    // Quién respondió de verdad (banco A/B de pruebas), antes de leer el stream.
+    setLastModelUsed(res.headers.get("x-aluna-model"));
 
     // Latente (sin llave) o error de validación → JSON { available:false }.
     const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
@@ -118,6 +126,8 @@ function TimelineChatBody({ profileId }: { profileId: string }) {
             {st === "error" && <p className={styles.thinking}>{t("chatError")}</p>}
             <div ref={endRef} />
           </div>
+
+          <DevModelPicker surface="timeline" onChange={setDevModel} lastModel={lastModelUsed} />
 
           <div className={styles.composer}>
             <input

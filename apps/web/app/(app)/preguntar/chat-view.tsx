@@ -7,6 +7,7 @@ import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
+import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
 import { ChatLenses, type TarotCardRef } from "./chat-lenses";
 import { QuickQuestions } from "./quick-questions";
 import styles from "./chat.module.css";
@@ -37,6 +38,10 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   // Archivo del hilo (Fase 1B): id del hilo activo. Se aprende del header
   // x-thread-id del primer turno, o se precarga al RETOMAR abajo.
   const [threadId, setThreadId] = useState<string | null>(null);
+  // Selector de modelo de PRUEBA (se auto-oculta en producción): elección y
+  // último modelo que realmente respondió, ver components/dev-model-picker.tsx.
+  const [devModel, setDevModel] = useState<DevModelValue | null>(null);
+  const [lastModelUsed, setLastModelUsed] = useState<string | null>(null);
 
   useEffect(() => {
     // Pega el HILO a su propio final por scrollTop, no scrollIntoView: ese
@@ -89,12 +94,22 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profileId: activeId, locale, messages: next, lenses, tarotCard, threadId }),
+        body: JSON.stringify({
+          profileId: activeId,
+          locale,
+          messages: next,
+          lenses,
+          tarotCard,
+          threadId,
+          modelOverride: devModel,
+        }),
       });
       // El primer turno crea el hilo server-side; lo aprendemos del header
       // para que los turnos siguientes lo reenvíen (Fase 1B).
       const returnedThreadId = res.headers.get("x-thread-id");
       if (returnedThreadId) setThreadId(returnedThreadId);
+      // Quién respondió de verdad (banco A/B de pruebas), antes de leer el stream.
+      setLastModelUsed(res.headers.get("x-aluna-model"));
 
       // Latente (sin llave) o error de validación → JSON { available:false }. Sin
       // stream que consumir: mostramos el estado dormido / de error.
@@ -200,6 +215,8 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
       </div>
 
       <QuickQuestions onSend={(q) => void sendText(q)} />
+
+      <DevModelPicker surface="chat" onChange={setDevModel} lastModel={lastModelUsed} />
 
       <div className={styles.composer}>
         <input
