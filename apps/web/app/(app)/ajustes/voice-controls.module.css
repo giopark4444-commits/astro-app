@@ -1,0 +1,35 @@
+/* Selector de voz (Ajustes → Voz) — mismos tokens que el resto de /ajustes
+   (ver settings.module.css, deck-manager.module.css); sin lenguaje visual
+   nuevo. El hint reusa `.section p` de settings.module.css (CSS Modules solo
+   escapa el NOMBRE de clase, no el selector — cualquier <p> descendiente de
+   `.section` ya lo hereda), por eso acá no se redefine. */
+
+.row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+
+.select {
+  flex: 1;
+  min-width: 180px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+}
+
+.testBtn {
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--soft);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.testBtn:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+
+.note { margin: 0; font-size: var(--text-sm); color: var(--soft); }

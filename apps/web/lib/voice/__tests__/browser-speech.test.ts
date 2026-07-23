@@ -3,6 +3,7 @@ import { browserSpeech } from "../browser-speech";
 
 describe("browserSpeech", () => {
   beforeEach(() => {
+    window.localStorage.clear();
     const utterances: Array<Record<string, unknown>> = [];
     // jsdom no trae Web Speech API → la simulamos.
     (globalThis as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
@@ -20,8 +21,8 @@ describe("browserSpeech", () => {
       cancel: vi.fn(),
       speak: vi.fn((u: Record<string, unknown>) => utterances.push(u)),
       getVoices: () => [
-        { lang: "es-ES", name: "Mónica" },
-        { lang: "en-US", name: "Alex" },
+        { lang: "es-ES", name: "Mónica", voiceURI: "com.test.monica" },
+        { lang: "en-US", name: "Alex", voiceURI: "com.test.alex" },
       ],
       _utterances: utterances,
     };
@@ -61,5 +62,40 @@ describe("browserSpeech", () => {
     const u = synth()._utterances[0]! as unknown as { onend: () => void };
     u.onend();
     expect(onEnd).toHaveBeenCalled();
+  });
+
+  describe("elección de voz (opts.voiceURI / preferencia guardada / auto-match)", () => {
+    it("opts.voiceURI que calza con una voz disponible: la usa", () => {
+      browserSpeech.speak("Hola", { locale: "es", voiceURI: "com.test.monica" });
+      const u = synth()._utterances[0]!;
+      expect((u.voice as { name: string }).name).toBe("Mónica");
+    });
+
+    it("opts.voiceURI que NO calza con ninguna voz disponible: cae al auto-match por idioma", () => {
+      browserSpeech.speak("Hola", { locale: "es", voiceURI: "com.test.voz-inexistente" });
+      const u = synth()._utterances[0]!;
+      expect((u.voice as { name: string }).name).toBe("Mónica"); // auto-match es-ES
+    });
+
+    it("sin opts.voiceURI, usa la preferencia guardada del usuario si calza con una voz disponible", () => {
+      window.localStorage.setItem("aluna:voice:es", "com.test.monica");
+      browserSpeech.speak("Hola", { locale: "es" });
+      const u = synth()._utterances[0]!;
+      expect((u.voice as { name: string }).name).toBe("Mónica");
+    });
+
+    it("sin opts.voiceURI, si la preferencia guardada no calza con ninguna voz: cae al auto-match", () => {
+      window.localStorage.setItem("aluna:voice:es", "voz-de-otro-dispositivo");
+      browserSpeech.speak("Hola", { locale: "es" });
+      const u = synth()._utterances[0]!;
+      expect((u.voice as { name: string }).name).toBe("Mónica"); // auto-match es-ES
+    });
+
+    it("opts.voiceURI explícito gana sobre la preferencia guardada", () => {
+      window.localStorage.setItem("aluna:voice:en", "com.test.alex");
+      browserSpeech.speak("Hi", { locale: "en", voiceURI: "com.test.alex" });
+      const u = synth()._utterances[0]!;
+      expect((u.voice as { name: string }).name).toBe("Alex");
+    });
   });
 });
