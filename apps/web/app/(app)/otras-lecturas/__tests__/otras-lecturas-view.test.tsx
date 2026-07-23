@@ -57,21 +57,19 @@ describe("OtrasLecturasView", () => {
     expect(screen.getByRole("tab", { name: es.otrasLecturas.numerosTitle }).getAttribute("aria-selected")).toBe("true");
   });
 
-  it("lente=mano: muestra el panel 'pronto' y deja la pestaña Mano seleccionada", () => {
+  it("lente=mano (ruta vieja, ya no embebida): cae en Números como cualquier lente desconocida", () => {
     renderView("mano");
-    expect(screen.getByText(es.otrasLecturas.manoSoon)).toBeInTheDocument();
-    expect(screen.queryByText("NUMEROS_MOCK")).toBeNull();
+    expect(screen.getByText("NUMEROS_MOCK")).toBeInTheDocument();
     expect(screen.queryByText("PILARES_MOCK")).toBeNull();
-    const manoTab = screen.getByText(es.otrasLecturas.manoTitle).closest('[role="tab"]');
-    expect(manoTab!.getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: es.otrasLecturas.numerosTitle }).getAttribute("aria-selected")).toBe("true");
   });
 
-  it("la pestaña Mano está marcada como deshabilitada/pronto y no navega", () => {
+  it("la pestaña Mano navega de verdad a /mano (página propia, no un ?lente=)", () => {
     renderView(null);
-    const manoTab = screen.getByText(es.otrasLecturas.manoTitle).closest('[role="tab"]');
-    expect(manoTab).not.toBeNull();
-    expect(manoTab!.getAttribute("aria-disabled")).toBe("true");
-    expect(manoTab!.tagName).not.toBe("A");
-    expect(screen.getByText(es.otrasLecturas.soon)).toBeInTheDocument();
+    const manoTab = screen.getByRole("tab", { name: es.otrasLecturas.manoTitle });
+    expect(manoTab.tagName).toBe("A");
+    expect(manoTab.getAttribute("href")).toBe("/mano");
+    expect(manoTab.getAttribute("aria-selected")).toBe("false");
+    expect(manoTab.getAttribute("aria-disabled")).toBeNull();
   });
 });

@@ -1,0 +1,136 @@
+/* R2: valores sobre la escala tokenizada (ver lib/theme/tokens.css). Lectura
+   de mano: máquina de estados de UN SOLO CARRIL (intro → captura → lectura),
+   a diferencia de numeros/pilares (maestro-detalle 2 columnas) — el flujo es
+   secuencial/ceremonial, así que se queda en una columna centrada también en
+   desktop (mismo criterio que informe.module.css). */
+.wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; max-width: 640px; margin: 0 auto; }
+.sky { position: absolute; inset: 0 0 auto; height: 240px; pointer-events: none; z-index: 0; }
+
+.head { position: relative; z-index: 1; margin-bottom: var(--sp-6); text-align: center; }
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
+.title {
+  font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm));
+  font-style: italic; color: var(--ink); margin: 0; line-height: 1.1;
+}
+
+/* ---------------- Intro ceremonial ---------------- */
+.intro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-5); align-items: center; text-align: center; }
+.introP { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--soft); max-width: 52ch; }
+
+/* Sello de privacidad — DESTACADO como superficie tintada de acento (no solo
+   un ícono suelto): "Tu foto se lee y se descarta — jamás se guarda". */
+.privacySeal {
+  width: 100%; box-sizing: border-box;
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid rgba(var(--acc-rgb), 0.4);
+  border-radius: var(--radius);
+  background: rgba(var(--acc-rgb), 0.14);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.choice { width: 100%; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.choiceLabel { font-family: var(--font-ui); font-size: var(--text-xs); letter-spacing: 0.4px; color: var(--ink); font-weight: 600; }
+.choiceHint { margin: 0; font-size: var(--text-xs); font-style: italic; color: var(--soft); max-width: 46ch; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-3) var(--sp-6); border: 0; border-radius: 999px; cursor: pointer;
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 700; color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft); text-decoration: none;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: default; box-shadow: none; transform: none; }
+
+.btnGhost {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-2) var(--sp-4); border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 600; color: var(--soft);
+  background: var(--surface-2); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.btnGhost:hover { color: var(--ink); }
+
+/* ---------------- Captura por mano ---------------- */
+.captureCard { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-align: center; }
+.captureStep { margin: 0; font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.captureTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
+.captureHint { margin: 0; font-size: var(--text-sm); font-style: italic; color: var(--soft); max-width: 42ch; }
+
+/* Botón + input real superpuesto pero visualmente oculto (mismo patrón que
+   tarot/mazos/deck-manager.module.css .fileInput): el <label> entero es el
+   botón dorado; clicar en cualquier parte activa el input nativo. */
+.fileBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-3) var(--sp-6); border-radius: 999px; cursor: pointer;
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 700; color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft);
+}
+.fileInput { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+/* ---------------- Estados de espera (analizando / tejiendo la lectura) ---------------- */
+.loadingCard { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-6) var(--sp-4); align-items: center; }
+.shimmer {
+  width: 220px; height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%; animation: pm-shimmer 1.3s var(--ease) infinite;
+}
+.shimmer:nth-child(2) { width: 170px; }
+.shimmer:nth-child(3) { width: 130px; }
+@keyframes pm-shimmer { to { background-position: -200% 0; } }
+.loadingText { margin: var(--sp-2) 0 0; text-align: center; font-size: var(--text-sm); font-style: italic; color: var(--acc-text); }
+
+/* ---------------- Avisos (retoma / foto pesada / error / dormido) ---------------- */
+/* .card / .card--dashed son los primitivos globales (globals.css) — se
+   componen en el JSX: className="card card--dashed ${styles.notice}". */
+.notice { position: relative; z-index: 1; text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+.noticeTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
+.noticeBody { margin: 0; font-size: var(--text-sm); font-style: italic; line-height: 1.6; color: var(--soft); }
+.notice .btn { margin-top: var(--sp-3); }
+.dormantGlyph { font-size: var(--text-2xl); color: var(--acc-text); opacity: 0.85; }
+.issueList { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--sp-1); justify-content: center; }
+.issue {
+  font-size: var(--text-2xs); color: var(--soft); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.2em 0.7em;
+}
+
+/* ---------------- Lectura por secciones ---------------- */
+.reading { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-4); }
+.restoredNote { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; color: var(--soft); }
+.sections { display: grid; gap: var(--sp-4); }
+.sectionEyebrow {
+  display: block; font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-2);
+}
+.sectionBody { margin: 0; font-size: var(--text-md); line-height: 1.65; color: var(--ink); white-space: pre-wrap; }
+
+.natalHint { margin: 0; text-align: center; font-size: var(--text-xs); font-style: italic; color: var(--soft); }
+
+/* Consejo — destacado tipo tip: superficie tintada de acento, no un ícono suelto. */
+.advice {
+  border: 1px solid rgba(var(--acc-rgb), 0.3); border-radius: var(--radius);
+  background: rgba(var(--acc-rgb), 0.1); padding: var(--sp-4);
+}
+.adviceLabel {
+  display: block; font-family: var(--font-display); font-style: italic; font-size: var(--text-sm);
+  color: var(--acc-text); margin: 0 0 var(--sp-1);
+}
+.adviceBody { margin: 0; font-size: var(--text-sm); line-height: 1.6; color: var(--ink); }
+
+.actions { display: flex; flex-direction: column; gap: var(--sp-3); align-items: center; margin-top: var(--sp-2); }
+.askCta {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: var(--sp-3) var(--sp-5); border-radius: 999px; border: 1px solid rgba(var(--acc-rgb), 0.4);
+  font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 600; color: var(--acc-text);
+  text-decoration: none; transition: background var(--dur-fast) var(--ease);
+}
+.askCta:hover { background: var(--surface-2); }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy/informe */
+}

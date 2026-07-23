@@ -31,34 +31,3 @@
   border-bottom-color: var(--acc);
   font-weight: 600;
 }
-
-/* Pestaña "pronto" (Mano): no navega, se distingue por color apagado + chip. */
-.tabSoon {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-1);
-  cursor: default;
-  color: var(--soft);
-  opacity: 0.6;
-}
-.soon {
-  font-size: 0.7rem;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  padding: 0.1em 0.5em;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--soft);
-}
-
-/* Placeholder "coming soon" del panel Mano. */
-.soonPanel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40vh;
-  padding: var(--sp-6) var(--sp-4);
-  text-align: center;
-  color: var(--soft);
-  font-size: var(--text-md);
-}

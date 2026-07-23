@@ -7,10 +7,12 @@ import { PilaresView } from "../pilares/pilares-view";
 import styles from "./otras-lecturas.module.css";
 
 // Página "Otras lecturas": agrupa Números + Pilares + Mano bajo pestañas
-// minimalistas (espejo de /astros). La lente viaja en /otras-lecturas?lente=...
-// (sin lente = numeros); NumerologyView/PilaresView la reciben `embedded` para
-// que no repitan su propio header/eyebrow. Mano todavía no existe: su pestaña
-// no navega (no es <Link>) y queda marcada con aria-disabled + un chip "pronto".
+// minimalistas (espejo de /astros). Números/Pilares viajan EMBEBIDOS en
+// /otras-lecturas?lente=... (sin lente = numeros); NumerologyView/PilaresView
+// reciben `embedded` para que no repitan su propio header/eyebrow. Mano es
+// distinta: su lectura es una ceremonia de varios pasos (intro → captura →
+// lectura) que no encaja en el intercambio embebido de pestaña — su tab es un
+// <Link> de NAVEGACIÓN real a /mano (página propia), no un `?lente=mano`.
 const TABS = [
   { key: "numerosTitle", lente: null },
   { key: "pilaresTitle", lente: "pilares" },
@@ -20,7 +22,7 @@ export function OtrasLecturasView() {
   const t = useTranslations("otrasLecturas");
   const params = useSearchParams();
   const raw = params.get("lente");
-  const view = raw === "pilares" ? "pilares" : raw === "mano" ? "mano" : "numeros";
+  const view = raw === "pilares" ? "pilares" : "numeros";
 
   return (
     <div className={styles.wrap}>
@@ -40,21 +42,13 @@ export function OtrasLecturasView() {
             </Link>
           );
         })}
-        {/* Mano: no existe todavía. No es un <Link> — no navega — y queda
-            marcada como deshabilitada con un chip "pronto". Título y chip van
-            en spans propios para que cada texto sea consultable por separado. */}
-        <span role="tab" aria-disabled="true" aria-selected={view === "mano"} className={`${styles.tab} ${styles.tabSoon}`}>
-          <span>{t("manoTitle")}</span>
-          <span className={styles.soon}>{t("soon")}</span>
-        </span>
+        {/* Mano: página propia (ceremonia de varios pasos) — navega de verdad,
+            nunca "activa" dentro de /otras-lecturas. */}
+        <Link href="/mano" role="tab" aria-selected={false} className={styles.tab}>
+          {t("manoTitle")}
+        </Link>
       </div>
-      {view === "mano" ? (
-        <p className={styles.soonPanel}>{t("manoSoon")}</p>
-      ) : view === "pilares" ? (
-        <PilaresView embedded />
-      ) : (
-        <NumerologyView embedded />
-      )}
+      {view === "pilares" ? <PilaresView embedded /> : <NumerologyView embedded />}
     </div>
   );
 }

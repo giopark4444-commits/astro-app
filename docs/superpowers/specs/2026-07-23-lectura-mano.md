@@ -51,6 +51,9 @@ de la lectura → guardar en localStorage del dispositivo (sin BD) + rehacer.
 
 ## Estado
 - [x] Spec
-- [ ] Núcleo visión+palm libs+rutas+tests (yo)
-- [ ] UI /mano (agente Sonnet, spec estricta)
-- [ ] Curaduría + E2E navegador + push
+- [x] Núcleo visión+palm libs+rutas+tests — PROBADO en vivo con foto real (`a7b9873`):
+      foto difícil → usable:false + guía + no-visibles honestos; palma limpia →
+      13 líneas + 9 montes; lectura 7 secciones íntima y pro; timeout 150s.
+- [~] UI /mano (agente Sonnet) — page+view en disco; faltan tests/i18n/hub
+- [ ] Curaduría + E2E navegador (feliz y retoma con test-palma*.jpg de public/,
+      BORRARLAS antes del push) + push a main
