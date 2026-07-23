@@ -1,0 +1,23 @@
+/* apps/web/app/(app)/tarot/spread-layout.module.css
+   Lienzo genérico por coordenadas: la FORMA (fila, cruz, círculo, columna,
+   pentagrama) la decide `--spread-aspect` (bounding box de las posiciones,
+   calculado en spread-layout.tsx) — este archivo no conoce ninguna tirada en
+   particular. `--card-w` viene del mismo cálculo, en función de cuántas
+   posiciones hay, para que una rueda de 13 cartas no se solape feo. */
+
+.canvas {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  aspect-ratio: var(--spread-aspect, 1);
+}
+
+.slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-w, clamp(48px, 22%, 140px));
+  aspect-ratio: 0.6; /* proporción estándar de una carta de tarot (ancho/alto) */
+}
