@@ -279,8 +279,13 @@ function getPremiumReadingCache(): ReadingCacheStore | null {
   if (premiumReadingCache !== undefined) return premiumReadingCache;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  premiumReadingCache =
-    url && serviceKey ? supabaseReadingCacheStore(createServiceSupabaseClient(url, serviceKey)) : null;
+  try {
+    // Misma guardia que lib/credits/ledger.ts: URL presente pero malformada no debe tumbar la ruta.
+    premiumReadingCache =
+      url && serviceKey ? supabaseReadingCacheStore(createServiceSupabaseClient(url, serviceKey)) : null;
+  } catch {
+    premiumReadingCache = null;
+  }
   return premiumReadingCache;
 }
 

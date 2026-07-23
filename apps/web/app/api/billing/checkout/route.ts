@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
+  // Referidos (brief T6, preparado/latente): si el usuario está referido por
+  // un código activo con descuento > 0, adjunta SIEMPRE el código en metadata
+  // como respaldo de atribución manual — nunca lanza, nunca bloquea el
+  // checkout (ver resolveReferralMetadata). Se resuelve ACÁ (antes de saber
+  // si es pack o plan) porque ambos caminos de abajo lo necesitan.
+  const referralMetadata = await resolveReferralMetadata(supabase);
+
   // Packs de créditos: compra one-time, SIEMPRE comprable (a diferencia de
   // los planes, no aplica el guard de already_subscribed de abajo — tener
   // Plus activo no impide comprar créditos sueltos) y sin `subscription_data`
@@ -45,6 +52,11 @@ export async function POST(request: NextRequest) {
       const session = await getDodoClient().checkoutSessions.create({
         product_cart: [{ product_id: productId, quantity: 1 }],
         customer: { email: user.email },
+        // I3: `aluna_user_id` SIEMPRE presente — es lo que el webhook usa
+        // para abonar el pack sin depender de que el email de Dodo matchee
+        // una cuenta Aluna (ver webhooks/dodo/route.ts). Preserva
+        // referral_code si el usuario venía referido.
+        metadata: { ...(referralMetadata ?? {}), aluna_user_id: user.id },
         return_url: `${process.env.NEXT_PUBLIC_APP_URL}/ajustes?checkout=credits`,
       });
       if (!session.checkout_url) {
@@ -80,12 +92,6 @@ export async function POST(request: NextRequest) {
   if (sub && (sub.status === "trialing" || sub.status === "active" || sub.status === "past_due")) {
     return NextResponse.json({ error: "already_subscribed" }, { status: 409 });
   }
-
-  // Referidos (brief T6, preparado/latente): si el usuario está referido por
-  // un código activo con descuento > 0, adjunta SIEMPRE el código en metadata
-  // como respaldo de atribución manual — nunca lanza, nunca bloquea el
-  // checkout (ver resolveReferralMetadata).
-  const referralMetadata = await resolveReferralMetadata(supabase);
 
   try {
     const session = await getDodoClient().checkoutSessions.create({

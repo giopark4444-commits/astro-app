@@ -15,6 +15,31 @@ import { monthlyRefillCredits, packByProductId } from "@/lib/credits/config";
 
 export const runtime = "nodejs";
 
+// Regex simple (I3): valida que `metadata.aluna_user_id` tenga FORMA de UUID
+// antes de confiar en él — defensa mínima contra un payload corrupto o
+// manipulado, no una validación de versión/variante RFC4122 estricta.
+const UUID_LIKE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function validAlunaUserId(metadata: DodoEvent["data"]["metadata"]): string | null {
+  const raw = metadata?.aluna_user_id;
+  return typeof raw === "string" && UUID_LIKE.test(raw) ? raw : null;
+}
+
+// Rescate manual (I3): si un pago de un PACK de créditos no logra resolver a
+// ningún usuario (ni metadata.aluna_user_id, ni fila de subscriptions, ni
+// email con cuenta Aluna) el pago quedaría cobrado sin que nadie lo note. El
+// 200 sigue siendo correcto (Dodo no debe reintentar algo que nunca va a
+// resolverse solo), pero este log deja el payment_id para ir a abonar a
+// mano. No-op para cualquier evento que no sea un pago de pack (nada que
+// rescatar: sin créditos comprometidos).
+function warnUnresolvedPackPayment(event: DodoEvent): void {
+  if (event.type !== "payment.succeeded") return;
+  const hasPack = (event.data.product_cart ?? []).some((item) => packByProductId(item.product_id));
+  if (hasPack) {
+    console.error(`[webhook dodo] pack de créditos sin usuario resoluble (rescate manual) payment_id=${event.data.payment_id}`);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const secret = process.env.DODO_PAYMENTS_WEBHOOK_SECRET;
@@ -52,21 +77,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // Orden de resolución del usuario: primero por dodo_subscription_id (fila
-  // ya existente, es `unique` en la tabla), y SOLO si no existe todavía
-  // (primer evento de esta suscripción, típicamente subscription.active)
+  // Orden de resolución del usuario: primero metadata.aluna_user_id (I3 —
+  // la sesión de checkout de un PACK siempre lo manda, ver
+  // billing/checkout/route.ts; validado con forma de UUID antes de
+  // confiar en él, defensa contra un payload corrupto/manipulado), después
+  // por dodo_subscription_id (fila ya existente, es `unique` en la tabla),
+  // y SOLO si ninguno de los dos resolvió (primer evento de esta
+  // suscripción, típicamente subscription.active, o un pack sin metadata)
   // caemos a resolver por el email que manda Dodo en este evento puntual.
-  // Por qué: si el usuario cambia su email de cuenta en Aluna DESPUÉS de
-  // suscribirse, los eventos siguientes (renovación, cancelación, etc.)
-  // siguen trayendo el email ORIGINAL del customer de Dodo — resolver
-  // siempre por email dejaría esa fila obsoleta para siempre. El campo crudo
-  // se lee acá mismo (no se duplica el mapeo completo de mapDodoEventToRow,
-  // que sigue sin cambios).
+  // Por qué preferir metadata sobre el email: un pack es una compra
+  // one-time sin fila de subscriptions previa, así que si el email de Dodo
+  // no matchea ninguna cuenta Aluna (cuenta con otro correo, email
+  // corporativo distinto, etc.) el pago quedaba sin poder resolverse y el
+  // crédito se perdía — metadata.aluna_user_id no depende del email en
+  // absoluto. Por qué preferir metadata sobre el email también sirve para
+  // suscripciones: si el usuario cambia su email de cuenta en Aluna
+  // DESPUÉS de suscribirse, los eventos siguientes (renovación,
+  // cancelación, etc.) siguen trayendo el email ORIGINAL del customer de
+  // Dodo — resolver siempre por email dejaría esa fila obsoleta para
+  // siempre. El campo crudo se lee acá mismo (no se duplica el mapeo
+  // completo de mapDodoEventToRow, que sigue sin cambios).
   const dodoSubscriptionId = event.data.subscription_id;
-  let userId: string | null = null;
+  let userId: string | null = validAlunaUserId(event.data.metadata);
   let existingPlan: "monthly" | "yearly" | null = null;
 
-  if (dodoSubscriptionId) {
+  if (!userId && dodoSubscriptionId) {
     const { data: bySubscription, error: bySubscriptionError } = await supabase
       .from("subscriptions")
       .select("user_id, plan")
@@ -84,14 +119,20 @@ export async function POST(request: NextRequest) {
 
   if (!userId) {
     const email = event.data.customer?.email;
-    if (!email) return NextResponse.json({ received: true }); // sin fila previa ni email, nada que resolver
+    if (!email) {
+      warnUnresolvedPackPayment(event); // rescate manual (I3) si era un pack de créditos
+      return NextResponse.json({ received: true }); // sin fila previa ni email, nada que resolver
+    }
 
     const { data: userIdByEmail, error: rpcError } = await supabase.rpc("user_id_by_email", { lookup_email: email });
     if (rpcError) {
       console.error("[webhook dodo] user_id_by_email falló:", rpcError.message);
       return NextResponse.json({ error: "lookup_failed" }, { status: 500 }); // fallo real, no "no encontrado" — que Dodo reintente
     }
-    if (!userIdByEmail) return NextResponse.json({ received: true }); // sin cuenta Aluna con ese email
+    if (!userIdByEmail) {
+      warnUnresolvedPackPayment(event); // rescate manual (I3) si era un pack de créditos
+      return NextResponse.json({ received: true }); // sin cuenta Aluna con ese email
+    }
     userId = userIdByEmail;
 
     const { data: existing, error: existingError } = await supabase
@@ -192,7 +233,11 @@ export async function POST(request: NextRequest) {
   // de forma inocua, y luego reintentará este mismo grant con el mismo
   // `ref` — que si ya se había abonado en el intento anterior, ahora vuelve
   // "duplicate" en vez de "granted", nunca duplica el abono.
-  if (event.type === "subscription.active" || event.type === "subscription.renewed") {
+  // M-refill: espejo del guard de packs (`totalPackCredits > 0` arriba) —
+  // en 0 (o negativo) ALUNA_PLUS_MONTHLY_CREDITS desactiva el refill limpio
+  // en vez de que grant_credits reviente su CHECK `p_amount > 0` y el
+  // webhook quede en loop de 500 reintentando algo que nunca va a salir bien.
+  if ((event.type === "subscription.active" || event.type === "subscription.renewed") && monthlyRefillCredits() > 0) {
     try {
       const ref = `refill:${row.dodo_subscription_id}:${row.current_period_end ?? "first"}`;
       const result = await grantCredits(supabase, userId, monthlyRefillCredits(), "refill", ref);

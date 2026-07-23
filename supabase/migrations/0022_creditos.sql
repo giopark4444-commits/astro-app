@@ -26,7 +26,7 @@ create index credit_ledger_user_created on public.credit_ledger (user_id, create
 create or replace function public.spend_credits(p_user uuid, p_amount integer, p_ref text)
 returns boolean
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_balance integer;
@@ -56,7 +56,7 @@ grant execute on function public.spend_credits(uuid, integer, text) to service_r
 create or replace function public.grant_credits(p_user uuid, p_amount integer, p_kind text, p_ref text)
 returns boolean
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if p_amount <= 0 then
@@ -77,7 +77,7 @@ grant execute on function public.grant_credits(uuid, integer, text, text) to ser
 create or replace function public.my_credit_balance()
 returns integer
 language sql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select coalesce(sum(delta), 0)::integer
     from credit_ledger where user_id = auth.uid();
@@ -100,7 +100,7 @@ create policy "own usage select" on public.usage_daily
 create or replace function public.bump_chat_usage(p_user uuid)
 returns integer
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   v_count integer;

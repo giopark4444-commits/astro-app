@@ -643,8 +643,8 @@
     "quickToggle": "Preguntas rápidas",
     "quickEditLabel": "Pregunta {n}",
     "premiumToggle": "Premium ✨ — más profundidad usando tus créditos",
-    "premiumOut": "Te quedaste sin créditos premium — conseguí más en <a>Ajustes</a>.",
-    "dailyCap": "Llegaste al tope gratis de hoy ({cap} preguntas). Probá mañana, o activá premium ✨.",
+    "premiumOut": "Te quedaste sin créditos premium — consigue más en <a>Ajustes</a>.",
+    "dailyCap": "Llegaste al tope gratis de hoy ({cap} preguntas). Vuelve mañana, o activa premium ✨.",
     "creditsChip": "✨ {n}"
   },
   "synastry": {
@@ -845,7 +845,7 @@
     "empty": "Todavía no hay movimientos por acá.",
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "loading": "Un momento…",
-    "purchaseThanks": "¡Gracias por tu compra! Ya sumamos tus créditos.",
+    "purchaseThanks": "¡Gracias por tu compra! Tus créditos se están sumando — si no los ves todavía, recarga en un momento.",
     "kindPurchase": "Compra",
     "kindRefill": "Recarga mensual",
     "kindSpend": "Uso",

@@ -45,8 +45,9 @@ vi.mock("@/lib/billing/dodo-client", () => ({
   },
 }));
 
+const resolveReferralMetadataMock = vi.fn();
 vi.mock("@/lib/billing/referral-checkout", () => ({
-  resolveReferralMetadata: async () => undefined,
+  resolveReferralMetadata: (...args: unknown[]) => resolveReferralMetadataMock(...args),
 }));
 
 import { POST } from "../route";
@@ -67,6 +68,7 @@ const ENV_KEYS = [
 beforeEach(() => {
   vi.clearAllMocks();
   checkoutSessionsCreateMock.mockResolvedValue({ checkout_url: "https://checkout.dodopayments.com/session_abc" });
+  resolveReferralMetadataMock.mockResolvedValue(undefined);
   resetState();
   state.user = { id: "user_1", email: "gio@example.com" };
   for (const key of ENV_KEYS) delete process.env[key];
@@ -105,6 +107,23 @@ describe("POST /api/billing/checkout — packs (Task 7, nuevo)", () => {
     const res = await POST(fakeRequest({ pack: "pack1000" }));
     expect(res.status).toBe(200);
     expect(checkoutSessionsCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("I3: la sesión de un pack SIEMPRE manda metadata.aluna_user_id (el webhook lo usa para abonar sin depender del email)", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    const res = await POST(fakeRequest({ pack: "pack100" }));
+    expect(res.status).toBe(200);
+    const call = checkoutSessionsCreateMock.mock.calls[0]![0] as Record<string, unknown>;
+    expect(call.metadata).toEqual({ aluna_user_id: "user_1" });
+  });
+
+  it("I3: si hay referral_code, la metadata del pack lo preserva junto a aluna_user_id", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    resolveReferralMetadataMock.mockResolvedValueOnce({ referral_code: "GIO10" });
+    const res = await POST(fakeRequest({ pack: "pack100" }));
+    expect(res.status).toBe(200);
+    const call = checkoutSessionsCreateMock.mock.calls[0]![0] as Record<string, unknown>;
+    expect(call.metadata).toEqual({ referral_code: "GIO10", aluna_user_id: "user_1" });
   });
 
   it("pack con id desconocido -> 400 bad_request", async () => {

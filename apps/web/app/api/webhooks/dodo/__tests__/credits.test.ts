@@ -284,6 +284,16 @@ describe("webhook Dodo — refill mensual (subscription.active / subscription.re
     const grantCall = state.rpcCalls.find((c) => c.fn === "grant_credits");
     expect(grantCall!.args).toMatchObject({ p_user: "user_new" });
   });
+
+  it("M-refill: ALUNA_PLUS_MONTHLY_CREDITS=0 desactiva el refill limpio (200, sin grant, sin loop de 500)", async () => {
+    process.env.ALUNA_PLUS_MONTHLY_CREDITS = "0";
+    state.bySubscription = { user_id: "user_1", plan: "monthly" };
+    const res = await POST(fakeRequest(subscriptionEvent("subscription.active")));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ received: true });
+    expect(state.upsertCalls).toHaveLength(1); // el upsert de subscriptions SIGUE corriendo, solo el refill se salta
+    expect(state.rpcCalls.find((c) => c.fn === "grant_credits")).toBeUndefined();
+  });
 });
 
 describe("webhook Dodo — packs de créditos (payment.succeeded)", () => {
@@ -408,5 +418,64 @@ describe("webhook Dodo — packs de créditos (payment.succeeded)", () => {
     expect(res.status).toBe(200);
     expect(handleReferralPaymentMock).not.toHaveBeenCalled();
     expect(state.rpcCalls.find((c) => c.fn === "grant_credits")).toBeUndefined();
+  });
+});
+
+describe("webhook Dodo — I3: metadata.aluna_user_id resuelve packs sin depender del email", () => {
+  const VALID_UUID = "11111111-1111-1111-1111-111111111111";
+
+  it("pack con metadata.aluna_user_id válida: abona a ESE user sin tocar user_id_by_email", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    const res = await POST(
+      fakeRequest(
+        paymentEvent({
+          metadata: { aluna_user_id: VALID_UUID },
+          product_cart: [{ product_id: "pdt_credits_100", quantity: 1 }],
+        }),
+      ),
+    );
+    expect(res.status).toBe(200);
+    expect(state.rpcCalls.find((c) => c.fn === "user_id_by_email")).toBeUndefined();
+    const grantCall = state.rpcCalls.find((c) => c.fn === "grant_credits");
+    expect(grantCall!.args).toEqual({ p_user: VALID_UUID, p_amount: 100, p_kind: "purchase", p_ref: "dodo:pay_1" });
+  });
+
+  it("metadata.aluna_user_id con forma inválida (no UUID): cae al mecanismo actual (email)", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    state.userIdByEmail = "user_1";
+    const res = await POST(
+      fakeRequest(
+        paymentEvent({
+          metadata: { aluna_user_id: "no-soy-un-uuid" },
+          product_cart: [{ product_id: "pdt_credits_100", quantity: 1 }],
+        }),
+      ),
+    );
+    expect(res.status).toBe(200);
+    expect(state.rpcCalls.find((c) => c.fn === "user_id_by_email")).toBeDefined();
+    const grantCall = state.rpcCalls.find((c) => c.fn === "grant_credits");
+    expect(grantCall!.args).toMatchObject({ p_user: "user_1" });
+  });
+
+  it("sin metadata Y sin email resoluble (cuenta inexistente): mantiene el 200 de siempre PERO loguea el payment_id para rescate manual", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    state.userIdByEmail = null; // el email vino, pero no matchea ninguna cuenta Aluna
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await POST(
+      fakeRequest(paymentEvent({ product_cart: [{ product_id: "pdt_credits_100", quantity: 1 }] })),
+    );
+    expect(res.status).toBe(200);
+    expect(state.rpcCalls.find((c) => c.fn === "grant_credits")).toBeUndefined();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining("pay_1"));
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("un pago que NO es de packs (sin product_cart de pack) sin usuario resoluble no genera el log de rescate", async () => {
+    state.userIdByEmail = null;
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const res = await POST(fakeRequest(paymentEvent())); // sin product_cart: pago de suscripción normal
+    expect(res.status).toBe(200);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 });

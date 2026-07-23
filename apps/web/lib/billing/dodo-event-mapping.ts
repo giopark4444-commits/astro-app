@@ -28,6 +28,11 @@ export interface DodoEvent {
     // `Payment.ProductCart`): solo viene poblado en pagos one-time; un pago
     // de suscripción no lo trae, por eso alcanza para distinguir ambos casos.
     product_cart?: Array<{ product_id: string; quantity: number }>;
+    // Metadata de la sesión de checkout (I3): `aluna_user_id` lo manda
+    // SIEMPRE la sesión de un pack (ver billing/checkout/route.ts) para que
+    // el webhook pueda abonar sin depender de que el email de Dodo matchee
+    // una cuenta Aluna. También puede traer `referral_code` (T6).
+    metadata?: Record<string, string>;
   };
 }
 

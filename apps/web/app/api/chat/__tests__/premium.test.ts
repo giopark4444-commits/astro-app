@@ -30,11 +30,44 @@ vi.mock("@/lib/content/astrology-labels", () => ({
   astroLabels: () => ({ bodies: {}, signs: {}, dignities: {}, patterns: {} }),
 }));
 
-// Memoria/hilos/destilado apagados (gate propio, fuera de foco de esta task):
-// así no hace falta mockear chat-archive/memory-pipeline.
+// Memoria/hilos apagados por defecto (gate propio) en la mayoría de los
+// casos — solo la suite I1 de más abajo la prende para probar por qué canal
+// se destila. `fetchIntentAndMemorySettingsMock` queda expuesto (no inline)
+// para poder pisarlo con memoryEnabled:true en esa suite puntual. `vi.fn()`
+// SIN implementación inline (a propósito, mismo criterio que el resto de
+// los mocks del archivo): con una implementación inline TS infiere una
+// tupla de parámetros fija (`[]`) y el `(...args: unknown[]) => xMock(...args)`
+// de abajo deja de tipar. Los defaults se fijan en cada `beforeEach`.
+const fetchIntentAndMemorySettingsMock = vi.fn();
 vi.mock("@/lib/settings", () => ({
-  fetchIntentAndMemorySettings: vi.fn(async () => ({ intent: null, memoryEnabled: false })),
+  fetchIntentAndMemorySettings: (...args: unknown[]) => fetchIntentAndMemorySettingsMock(...args),
 }));
+
+// Hilo/destilado (I1): mockeados SIEMPRE (no solo cuando memoria está ON)
+// para no arrastrar chat-archive/memory-pipeline reales en ningún test —
+// con memoryEnabled:false por defecto estos mocks simplemente no se llaman.
+const ensureThreadMock = vi.fn();
+const appendMessageMock = vi.fn();
+vi.mock("@/lib/chat-archive", () => ({
+  ensureThread: (...args: unknown[]) => ensureThreadMock(...args),
+  appendMessage: (...args: unknown[]) => appendMessageMock(...args),
+}));
+
+const buildMemoryBlocksMock = vi.fn();
+const runDistillationMock = vi.fn();
+vi.mock("@/lib/memory-pipeline", () => ({
+  buildMemoryBlocks: (...args: unknown[]) => buildMemoryBlocksMock(...args),
+  runDistillation: (...args: unknown[]) => runDistillationMock(...args),
+}));
+
+// `after()` real exige contexto de request (Next.js lanza fuera de uno) —
+// acá se captura el callback para poder correrlo a mano y esperar a que
+// termine (I1 necesita inspeccionar con qué provider llamó a runDistillation).
+const afterCallbacks: Array<() => unknown> = [];
+vi.mock("next/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/server")>();
+  return { ...actual, after: (cb: () => unknown) => { afterCallbacks.push(cb); } };
+});
 
 const resolveReadingProviderMock = vi.fn();
 const resolvePremiumProviderMock = vi.fn();
@@ -147,6 +180,14 @@ describe("POST /api/chat — créditos premium + tope diario (Task 5)", () => {
     getCreditsServiceClientMock.mockReturnValue(SVC);
     spendCreditsMock.mockResolvedValue(true);
     refundSpendMock.mockResolvedValue(true);
+
+    // Memoria/hilo/destilado: apagada por defecto (solo la suite I1 la prende).
+    fetchIntentAndMemorySettingsMock.mockResolvedValue({ intent: null, memoryEnabled: false });
+    ensureThreadMock.mockResolvedValue(null);
+    appendMessageMock.mockResolvedValue(undefined);
+    buildMemoryBlocksMock.mockResolvedValue("");
+    runDistillationMock.mockResolvedValue(undefined);
+    afterCallbacks.length = 0;
   });
 
   it("(a) premium:true con saldo → usa el proveedor premium, header 'used', spend llamado ANTES que el proveedor", async () => {
@@ -235,11 +276,12 @@ describe("POST /api/chat — créditos premium + tope diario (Task 5)", () => {
     expect(refArg).toBe(spentRef);
   });
 
-  it("(f) all-access OFF + no-plus + count > cap → 429 daily_cap (sin gastar crédito)", async () => {
+  it("(f) all-access OFF + no-plus + count > cap + premium off (sin llave) → 429 daily_cap (sin gastar crédito)", async () => {
     allAccessEnabledMock.mockReturnValue(false);
     isRequesterPlusMock.mockResolvedValue(false);
     freeDailyChatCapMock.mockReturnValue(5);
     bumpChatUsageMock.mockResolvedValue(6);
+    resolvePremiumProviderMock.mockReturnValue({ available: false });
     const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
     resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
 
@@ -247,7 +289,44 @@ describe("POST /api/chat — créditos premium + tope diario (Task 5)", () => {
     expect(res.status).toBe(429);
     expect(await res.json()).toEqual({ error: "daily_cap", cap: 5 });
     expect(spendCreditsMock).not.toHaveBeenCalled();
-    expect(resolvePremiumProviderMock).not.toHaveBeenCalled();
+  });
+
+  it("(f-used) I2: premium:true CON saldo (used) + tope diario YA pasado → NO bumpea, NO 429 — premium pagado nunca choca con el tope", async () => {
+    allAccessEnabledMock.mockReturnValue(false);
+    isRequesterPlusMock.mockResolvedValue(false);
+    freeDailyChatCapMock.mockReturnValue(5);
+    bumpChatUsageMock.mockResolvedValue(6); // el contador ya está pasado...
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    const premium = fakeProvider("anthropic", "claude-sonnet-5", ["hola premium"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+    resolvePremiumProviderMock.mockReturnValue({ available: true, provider: premium });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-aluna-premium")).toBe("used");
+    expect(await res.text()).toBe("hola premium");
+    // ...pero como se pagó con crédito, ni siquiera se consulta el tope.
+    expect(bumpChatUsageMock).not.toHaveBeenCalled();
+    expect(isRequesterPlusMock).not.toHaveBeenCalled();
+  });
+
+  it("(f-fallback) I2: premium:true SIN saldo (fallback) + tope diario pasado → 429 (el fallback sí pasa por el tope, no hubo débito)", async () => {
+    allAccessEnabledMock.mockReturnValue(false);
+    isRequesterPlusMock.mockResolvedValue(false);
+    freeDailyChatCapMock.mockReturnValue(5);
+    bumpChatUsageMock.mockResolvedValue(6);
+    spendCreditsMock.mockResolvedValue(false);
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    const premium = fakeProvider("anthropic", "claude-sonnet-5", ["nunca sale"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+    resolvePremiumProviderMock.mockReturnValue({ available: true, provider: premium });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: "daily_cap", cap: 5 });
+    expect(spendCreditsMock).toHaveBeenCalledTimes(1); // se intentó y falló (sin saldo) ANTES del chequeo del tope
+    expect(premium.chatStream).not.toHaveBeenCalled();
+    expect(free.chatStream).not.toHaveBeenCalled(); // el 429 corta antes de llegar a invocar cualquier proveedor
   });
 
   it("(f2) all-access OFF + no-plus + count dentro del tope → sigue normal (200, sin 429)", async () => {
@@ -358,5 +437,88 @@ describe("POST /api/chat — créditos premium + tope diario (Task 5)", () => {
     expect(await res.text()).toBe("libre");
     expect(spendCreditsMock).not.toHaveBeenCalled();
     expect(premium.chatStream).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/chat — I1: la destilación de memoria va por el canal barato", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+    maybeSingleMock.mockResolvedValue({ data: PROFILE_ROW });
+    eqMock.mockReturnValue({ maybeSingle: maybeSingleMock });
+    selectMock.mockReturnValue({ eq: eqMock });
+    fromMock.mockReturnValue({ select: selectMock });
+
+    allAccessEnabledMock.mockReturnValue(true);
+    isRequesterPlusMock.mockResolvedValue(true);
+    bumpChatUsageMock.mockResolvedValue(1);
+    freeDailyChatCapMock.mockReturnValue(5);
+    chatPremiumCostMock.mockReturnValue(2);
+    getCreditsServiceClientMock.mockReturnValue(SVC);
+    spendCreditsMock.mockResolvedValue(true);
+    refundSpendMock.mockResolvedValue(true);
+
+    // Lo único distinto de la suite de arriba: memoria ON.
+    fetchIntentAndMemorySettingsMock.mockResolvedValue({ intent: null, memoryEnabled: true });
+    ensureThreadMock.mockResolvedValue(null);
+    appendMessageMock.mockResolvedValue(undefined);
+    buildMemoryBlocksMock.mockResolvedValue("");
+    runDistillationMock.mockResolvedValue(undefined);
+    afterCallbacks.length = 0;
+  });
+
+  it("memoria ON + premium used (gratis disponible) → runDistillation recibe el provider de la cascada GRATIS, no el premium", async () => {
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    const premium = fakeProvider("anthropic", "claude-sonnet-5", ["hola premium"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+    resolvePremiumProviderMock.mockReturnValue({ available: true, provider: premium });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-aluna-premium")).toBe("used");
+    expect(await res.text()).toBe("hola premium"); // agota el stream: assistantReply queda completo
+
+    expect(afterCallbacks).toHaveLength(1);
+    for (const cb of afterCallbacks) await cb();
+
+    expect(runDistillationMock).toHaveBeenCalledTimes(1);
+    const [providerArg] = runDistillationMock.mock.calls[0]!;
+    expect(providerArg).toBe(free); // la cascada gratis, NO `premium`
+  });
+
+  it("memoria ON + premium off (sin llave) → runDistillation recibe el MISMO provider que respondió (gratis), comportamiento intacto", async () => {
+    const free = fakeProvider("hermes", "Hermes-4-70B", ["libre"]);
+    resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+    resolvePremiumProviderMock.mockReturnValue({ available: false });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-aluna-premium")).toBe("off");
+    await res.text();
+
+    expect(afterCallbacks).toHaveLength(1);
+    for (const cb of afterCallbacks) await cb();
+
+    expect(runDistillationMock).toHaveBeenCalledTimes(1);
+    const [providerArg] = runDistillationMock.mock.calls[0]!;
+    expect(providerArg).toBe(free);
+  });
+
+  it("memoria ON + premium used PERO la cascada gratis no está disponible → cae al comportamiento previo (usa el provider que respondió, el premium)", async () => {
+    const premium = fakeProvider("anthropic", "claude-sonnet-5", ["hola premium"]);
+    resolveReadingProviderMock.mockReturnValue({ available: false, provider: undefined });
+    resolvePremiumProviderMock.mockReturnValue({ available: true, provider: premium });
+
+    const res = await POST(fakeRequest(baseBody({ premium: true })));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-aluna-premium")).toBe("used");
+    await res.text();
+
+    expect(afterCallbacks).toHaveLength(1);
+    for (const cb of afterCallbacks) await cb();
+
+    expect(runDistillationMock).toHaveBeenCalledTimes(1);
+    const [providerArg] = runDistillationMock.mock.calls[0]!;
+    expect(providerArg).toBe(premium); // sin gratis disponible, no hay a dónde más ir
   });
 });

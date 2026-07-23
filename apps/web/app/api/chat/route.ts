@@ -116,32 +116,18 @@ export async function POST(request: NextRequest) {
   let premiumSpendRef: string | null = null;
   let premiumSpendAmount = 0;
   let chosen = resolveReadingProvider(modelOverride);
+  // Cascada gratis resuelta ANTES de que el bloque premium pise `chosen`:
+  // la destilación de memoria (más abajo, en `after()`) es trabajo de fondo
+  // que debe ir por el canal barato aunque este turno se haya pagado con
+  // crédito premium (I1) — ver el uso de `freeResolved` cerca del final.
+  const freeResolved = chosen;
   const svc = getCreditsServiceClient();
 
-  // Tope diario del nivel gratis: solo corre con los candados de plan activos
-  // (allAccessEnabled() en falso) y con service client disponible — fail-open
-  // sin `svc` (un problema de infraestructura no debe bloquear a nadie). Va
-  // ANTES del gasto premium a propósito: un 429 nunca debe haber gastado
-  // crédito.
-  if (!allAccessEnabled() && svc) {
-    // Fail-open ante error: el tope diario es una protección de costos, no de
-    // seguridad — si isRequesterPlus revienta (red/RPC caído), NO debe tumbar
-    // el chat con un 500; se trata como si no correspondiera bloquear (se
-    // salta el chequeo del tope), igual criterio que bumpChatUsage más abajo.
-    let plus = true;
-    try {
-      plus = await isRequesterPlus(supabase, user.id);
-    } catch {
-      plus = true;
-    }
-    if (!plus) {
-      const count = await bumpChatUsage(svc, user.id);
-      if (count !== null && count > freeDailyChatCap()) {
-        return NextResponse.json({ error: "daily_cap", cap: freeDailyChatCap() }, { status: 429 });
-      }
-    }
-  }
-
+  // Decisión premium PRIMERO (I2): un turno premium pagado (spend exitoso)
+  // no debe además chocar con el tope diario gratis — ya pagó su costo real
+  // en créditos, así que el chequeo de abajo se salta por completo cuando
+  // `premiumState === "used"`. El orden viejo (tope antes que premium)
+  // bloqueaba con 429 incluso a quien tenía crédito de sobra para pagar.
   if (body.premium === true) {
     const prem = resolvePremiumProvider();
     if (prem.available) {
@@ -166,6 +152,31 @@ export async function POST(request: NextRequest) {
       // sin `svc` (sin config) → "off": el camino gratis de siempre, jamás 500.
     }
     // sin llave premium → "off": el camino gratis de siempre.
+  }
+
+  // Tope diario del nivel gratis: solo corre con los candados de plan activos
+  // (allAccessEnabled() en falso), con service client disponible — fail-open
+  // sin `svc` (un problema de infraestructura no debe bloquear a nadie) — Y
+  // cuando este turno NO se sirvió con premium pagado (`premiumState !==
+  // "used"`): fallback/off nunca gastaron crédito, así que un 429 acá sigue
+  // sin haber cobrado nada.
+  if (premiumState !== "used" && !allAccessEnabled() && svc) {
+    // Fail-open ante error: el tope diario es una protección de costos, no de
+    // seguridad — si isRequesterPlus revienta (red/RPC caído), NO debe tumbar
+    // el chat con un 500; se trata como si no correspondiera bloquear (se
+    // salta el chequeo del tope), igual criterio que bumpChatUsage más abajo.
+    let plus = true;
+    try {
+      plus = await isRequesterPlus(supabase, user.id);
+    } catch {
+      plus = true;
+    }
+    if (!plus) {
+      const count = await bumpChatUsage(svc, user.id);
+      if (count !== null && count > freeDailyChatCap()) {
+        return NextResponse.json({ error: "daily_cap", cap: freeDailyChatCap() }, { status: 429 });
+      }
+    }
   }
 
   if (!chosen.available) {
@@ -275,6 +286,17 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  // Proveedor para la destilación (I1): la destilación de memoria es trabajo
+  // de FONDO, no la respuesta que se le sirvió a la persona — así que va por
+  // el canal BARATO de la cascada gratis siempre que esté disponible, aunque
+  // este turno se haya pagado con crédito premium. Sin esto, cada turno con
+  // memoria ON dispararía una llamada extra a Claude (destilar el resumen)
+  // que el crédito ya cobrado no cubre. `freeResolved` es el `chosen` de
+  // ANTES de que el bloque premium lo pisara (ver arriba). Si el gratis no
+  // está disponible, se mantiene el comportamiento previo: el mismo
+  // proveedor que respondió.
+  const distillationProvider = premiumState === "used" && freeResolved.available ? freeResolved.provider : provider;
+
   // Destilado post-conversación (fire-and-forget, best-effort total): solo si
   // el gate de memoria está encendido. `after()` corre una vez la respuesta
   // terminó de enviarse (incluido el streaming), así que `assistantReply` ya
@@ -290,7 +312,7 @@ export async function POST(request: NextRequest) {
         .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
         .join("\n")
         .slice(-8000);
-      await runDistillation(provider, supabase, user.id, transcript, locale, "chat");
+      await runDistillation(distillationProvider, supabase, user.id, transcript, locale, "chat");
     });
   }
 
