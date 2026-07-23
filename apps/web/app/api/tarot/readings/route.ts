@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isPlusActive } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
-import { allAccessEnabled } from "@/lib/plan-gate";
+import { isRequesterPlus } from "@/lib/billing/requester-plus";
 import { validateReadingPayload } from "@/lib/tarot/validate-reading";
 import type { Json, Tables, TablesInsert } from "@aluna/supabase";
 
@@ -21,8 +20,6 @@ const GET_LIMIT = 20;
 // Cuántas ve un usuario free en la lista (la UI ofrece Plus para ver el resto).
 const FREE_VISIBLE_READINGS = 7;
 
-type SubscriptionRow = { status: string; current_period_end: string | null };
-
 // exactOptionalPropertyTypes colapsa el arg de insert()/select() a `never` con
 // la versión instalada de postgrest-js (mismo shim que manifestations/route.ts).
 type TarotInsertBuilder = {
@@ -32,21 +29,6 @@ type TarotInsertBuilder = {
     };
   };
 };
-
-async function isRequesterPlus(
-  supabase: Awaited<ReturnType<typeof authenticateRoute>>["supabase"],
-  userId: string,
-): Promise<boolean> {
-  // TODO PLANES: app abierta por ahora — ver lib/plan-gate.ts.
-  if (allAccessEnabled()) return true;
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end")
-    .eq("user_id", userId)
-    .maybeSingle();
-  const sub = data as SubscriptionRow | null;
-  return isPlusActive(sub ? { status: sub.status as never, currentPeriodEnd: sub.current_period_end } : null);
-}
 
 export async function POST(request: NextRequest) {
   let raw: unknown;
