@@ -51,7 +51,13 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
     // página al montar. Scrollear el contenedor directamente no toca la
     // ventana. Guard defensivo: jsdom (tests) no rompe con scrollTop, pero
     // el ref puede no estar montado aún.
-    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    // Solo con mensajes: con el hilo VACÍO, pegar al fondo recortaba la
+    // primera línea del texto de bienvenida en paneles de poca altura (bug
+    // reportado por Gio en el panel de chat de tarot) — el estado vacío debe
+    // verse desde arriba, completo.
+    if (threadRef.current && messages.length > 0) {
+      threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    }
   }, [messages, st]);
 
   useEffect(() => {
