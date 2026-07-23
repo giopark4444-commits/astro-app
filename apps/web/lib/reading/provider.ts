@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type { ModelOverride } from "./model-catalog";
 
 // Capa agnóstica de proveedor para las lecturas de Aluna. La ruta arma el
 // system + prompt (la VOZ) y este módulo solo se encarga de "llamar al modelo
@@ -82,9 +83,28 @@ function keyFor(name: ProviderName): string | undefined {
  *  OLLAMA_ENABLED=1, cae a Ollama (local, sin llave) como último recurso;
  *  READING_PROVIDER=ollama lo fuerza (siempre que OLLAMA_ENABLED=1). Sin
  *  llaves y sin OLLAMA_ENABLED → latente. */
-export function resolveReadingProvider(): ResolvedProvider {
+export function resolveReadingProvider(override?: ModelOverride | null): ResolvedProvider {
   const configured = (process.env.READING_PROVIDER ?? "").toLowerCase();
   const ollamaEnabled = process.env.OLLAMA_ENABLED === "1";
+
+  // Override del picker de modelos (banco de pruebas A/B, ya validado y
+  // gateado por parseModelOverride en la ruta): se aplica solo si el proveedor
+  // pedido tiene llave; sin llave, cae a la resolución por defecto de abajo.
+  if (override) {
+    if (override.provider === "ollama") {
+      if (ollamaEnabled) {
+        return { available: true, provider: ollamaProvider(ollamaTimeoutMs(), override.model) };
+      }
+    } else if (override.provider === "deepseek") {
+      const key = process.env.DEEPSEEK_API_KEY;
+      if (key) return { available: true, provider: deepseekProvider(key, 60000, override.model) };
+    } else {
+      const key = keyFor(override.provider);
+      if (key) {
+        return { available: true, provider: makeProvider(override.provider, key, override.model) };
+      }
+    }
+  }
 
   if (configured === "ollama" && ollamaEnabled) {
     return { available: true, provider: ollamaProvider(ollamaTimeoutMs()) };
@@ -106,15 +126,15 @@ export function resolveReadingProvider(): ResolvedProvider {
   return { available: false };
 }
 
-function makeProvider(name: ProviderName, apiKey: string): ReadingProvider {
-  if (name === "hermes") return hermesProvider(apiKey, 60000);
-  if (name === "openai") return openaiProvider(apiKey);
-  if (name === "gemini") return geminiProvider(apiKey);
-  return anthropicProvider(apiKey);
+function makeProvider(name: ProviderName, apiKey: string, modelOverride?: string): ReadingProvider {
+  if (name === "hermes") return hermesProvider(apiKey, 60000, modelOverride);
+  if (name === "openai") return openaiProvider(apiKey, modelOverride);
+  if (name === "gemini") return geminiProvider(apiKey, modelOverride);
+  return anthropicProvider(apiKey, modelOverride);
 }
 
-function anthropicProvider(apiKey: string): ReadingProvider {
-  const model = process.env.ANTHROPIC_READING_MODEL || "claude-opus-4-8";
+function anthropicProvider(apiKey: string, modelOverride?: string): ReadingProvider {
+  const model = modelOverride || process.env.ANTHROPIC_READING_MODEL || "claude-opus-4-8";
   return {
     name: "anthropic",
     model,
@@ -173,8 +193,8 @@ function anthropicProvider(apiKey: string): ReadingProvider {
   };
 }
 
-function openaiProvider(apiKey: string): ReadingProvider {
-  const model = process.env.OPENAI_READING_MODEL || "gpt-4o";
+function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider {
+  const model = modelOverride || process.env.OPENAI_READING_MODEL || "gpt-4o";
   return {
     name: "openai",
     model,
@@ -270,8 +290,8 @@ function openaiProvider(apiKey: string): ReadingProvider {
   };
 }
 
-function geminiProvider(apiKey: string): ReadingProvider {
-  const model = process.env.GEMINI_READING_MODEL || "gemini-1.5-pro";
+function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider {
+  const model = modelOverride || process.env.GEMINI_READING_MODEL || "gemini-1.5-pro";
   return {
     name: "gemini",
     model,
@@ -471,32 +491,32 @@ function openAICompatibleProvider(
 /** Ollama (voz local, gratis, sin llave real — Ollama ignora el header
  *  Authorization que el factory siempre manda). Solo se construye cuando
  *  OLLAMA_ENABLED=1 lo habilita en resolveReadingProvider/resolveReportCascade. */
-function ollamaProvider(timeoutMs: number): ReadingProvider {
+function ollamaProvider(timeoutMs: number, modelOverride?: string): ReadingProvider {
   return openAICompatibleProvider(
     "ollama",
     process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1",
     "ollama",
-    process.env.OLLAMA_READING_MODEL || "hermes3:8b",
+    modelOverride || process.env.OLLAMA_READING_MODEL || "hermes3:8b",
     timeoutMs,
   );
 }
 
-function hermesProvider(apiKey: string, timeoutMs: number): ReadingProvider {
+function hermesProvider(apiKey: string, timeoutMs: number, modelOverride?: string): ReadingProvider {
   return openAICompatibleProvider(
     "hermes",
     "https://api.nousresearch.com/v1",
     apiKey,
-    process.env.NOUS_MODEL || "Hermes-4-70B",
+    modelOverride || process.env.NOUS_MODEL || "Hermes-4-70B",
     timeoutMs,
   );
 }
 
-function deepseekProvider(apiKey: string, timeoutMs: number): ReadingProvider {
+function deepseekProvider(apiKey: string, timeoutMs: number, modelOverride?: string): ReadingProvider {
   return openAICompatibleProvider(
     "deepseek",
     "https://api.deepseek.com",
     apiKey,
-    process.env.DEEPSEEK_READING_MODEL || "deepseek-chat",
+    modelOverride || process.env.DEEPSEEK_READING_MODEL || "deepseek-chat",
     timeoutMs,
   );
 }
