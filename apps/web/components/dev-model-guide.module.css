@@ -1,0 +1,78 @@
+/* Guía de modelos (dev): misma familia visual que el resto de /ajustes,
+ * con acento punteado "de laboratorio" como el picker. */
+.eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin: 0 0 6px;
+}
+.intro {
+  font-size: var(--text-sm);
+  color: var(--soft);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.row:last-child {
+  border-bottom: none;
+}
+.rubro {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rubroName {
+  font-size: var(--text-sm);
+  color: var(--ink);
+  font-weight: 600;
+}
+.detalle {
+  font-size: var(--text-xs);
+  color: var(--soft);
+}
+.pick {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.modelo {
+  font-size: var(--text-sm);
+  color: var(--acc-text);
+}
+.keyOk,
+.keyMissing {
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+.keyOk {
+  color: var(--ink);
+}
+.keyMissing {
+  color: var(--soft);
+}
+.reglas {
+  margin: 14px 0 0;
+  padding: 10px 0 0 18px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.reglas li {
+  font-size: var(--text-xs);
+  color: var(--soft);
+  line-height: 1.45;
+}

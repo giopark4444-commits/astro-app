@@ -20,6 +20,7 @@ import { MemoriesCard } from "./memories-card";
 import { EntitiesCard } from "./entities-card";
 import { EssenceCard } from "./essence-card";
 import { MemoryDataCard } from "./memory-data-card";
+import { DevModelGuide } from "@/components/dev-model-guide";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -195,6 +196,9 @@ export default async function AjustesPage({
           ))}
         </section>
       )}
+
+      {/* Guía de modelos por rubro: solo pruebas (se auto-oculta en prod). */}
+      <DevModelGuide />
 
       <section className="card">
         <h2 className={styles.eyebrow}>{t("legal")}</h2>
