@@ -1,0 +1,66 @@
+/* apps/web/app/(app)/tarot/spread-picker.module.css
+   Selector agrupado de tiradas: "Recomendadas" (primary) con tarjetas grandes
+   tintadas de --acc (criterio "color en superficies grandes, no solo un
+   ícono/botón suelto" — mismo lenguaje que .cardOn de deck-picker) + "Más
+   tiradas" (secondary) como chips sobrias en fila que envuelve. Reusa los
+   primitivos globales .card/.card--interactive/.card--tight (tarjetas) y
+   .chip--control (chips) — ver docs/redesign/R3-sistema.md; este módulo solo
+   aporta lo que difiere del base (grid, tinte de marca, tipografía). */
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.heading {
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--acc-text);
+  font-weight: 700;
+  margin: 0 0 var(--sp-3);
+}
+
+/* ---- Recomendadas: tarjetas grandes, tinte de marca ---- */
+.primaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--sp-3);
+}
+
+.primaryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  /* Overrides del .card base (background/border): el CSS de módulo carga
+     después de globals.css, así que esta declaración gana por orden de
+     fuente sin necesitar mayor especificidad. */
+  background: linear-gradient(160deg, rgba(var(--acc-rgb), 0.16), rgba(var(--acc-rgb), 0.02) 65%, var(--surface));
+  border-color: rgba(var(--acc-rgb), 0.3);
+}
+
+.primaryName {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+
+.primaryDesc {
+  margin: 0;
+  color: var(--soft);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+/* ---- Más tiradas: chips sobrias ---- */
+.secondaryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
