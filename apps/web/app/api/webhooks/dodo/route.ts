@@ -3,6 +3,8 @@ import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import { verifyDodoSignature } from "@/lib/billing/dodo-webhook";
 import { mapDodoEventToRow, type DodoEvent } from "@/lib/billing/dodo-event-mapping";
 import { handleReferralPayment, handleReferralRefund } from "@/lib/billing/referral-webhook";
+import { grantCredits } from "@/lib/credits/ledger";
+import { monthlyRefillCredits, packByProductId } from "@/lib/credits/config";
 
 // Única fuente de verdad del estado de Aluna Plus. Dodo NO manda sesión de
 // usuario — manda su propia firma (Standard Webhooks). Server-only,
@@ -112,6 +114,33 @@ export async function POST(request: NextRequest) {
   if (event.type === "payment.succeeded" && userId) {
     const referralResult = await handleReferralPayment(supabase, event, userId);
     if (!referralResult.ok) return NextResponse.json({ error: "referral_write_failed" }, { status: 500 }); // error real (no "tabla inexistente") — que Dodo reintente
+
+    // Packs de créditos (Task 7): ADEMÁS de referidos, nunca en su lugar. Un
+    // pago de suscripción no trae `product_cart` (ver dodo-event-mapping.ts)
+    // así que no confunde ambos casos. Si el carrito trajera más de un pack
+    // (raro, pero el checkout de Task 7 solo vende uno a la vez), se abona la
+    // SUMA en un único grant con el mismo ref — nunca uno por producto, para
+    // no fragmentar la idempotencia de un solo payment_id en varios refs.
+    // best-effort: nunca bloquea el 200 del webhook ni pisa el resultado de
+    // referidos ya calculado arriba.
+    try {
+      const paymentId = event.data.payment_id;
+      const productCart = event.data.product_cart ?? [];
+      let totalPackCredits = 0;
+      for (const item of productCart) {
+        const pack = packByProductId(item.product_id);
+        if (pack) totalPackCredits += pack.credits * (item.quantity || 1);
+      }
+      if (paymentId && totalPackCredits > 0) {
+        const ref = `dodo:${paymentId}`;
+        const granted = await grantCredits(supabase, userId, totalPackCredits, "purchase", ref);
+        if (!granted) {
+          console.log(`[webhook dodo] compra de créditos no otorgada (ya abonada o error) ref=${ref}`);
+        }
+      }
+    } catch (e) {
+      console.error("[webhook dodo] abono de pack de créditos falló:", e);
+    }
   }
 
   const row = mapDodoEventToRow(
@@ -127,6 +156,30 @@ export async function POST(request: NextRequest) {
   if (upsertError) {
     console.error("[webhook dodo] upsert de subscriptions falló:", upsertError.message);
     return NextResponse.json({ error: "write_failed" }, { status: 500 }); // 2xx acá dejaría a Dodo y Aluna divergiendo en silencio
+  }
+
+  // Refill mensual (Task 7): SOLO subscription.active/renewed (los únicos que
+  // mapean a status "active" — ver STATUS_BY_TYPE), y SOLO después de que el
+  // upsert de arriba salió bien: la fuente de verdad de current_period_end es
+  // la fila recién escrita (`row`), no un campo suelto del payload crudo. El
+  // ref namespacea por suscripción + período (`refill:<sub_id>:<period_end>`,
+  // "first" si Dodo no manda next_billing_date) — así grant_credits (UNIQUE
+  // en el ledger) hace que un reintento del MISMO evento (Dodo reintenta ante
+  // cualquier fallo de red, o entrega el mismo evento más de una vez) jamás
+  // duplique el abono: la 2ª vez devuelve false y acá simplemente se loguea,
+  // sin tocar el 200. Best-effort a propósito: un problema de créditos nunca
+  // debe hacer que Dodo reintente infinitamente un evento de suscripción que
+  // por lo demás ya se procesó bien.
+  if (event.type === "subscription.active" || event.type === "subscription.renewed") {
+    try {
+      const ref = `refill:${row.dodo_subscription_id}:${row.current_period_end ?? "first"}`;
+      const granted = await grantCredits(supabase, userId, monthlyRefillCredits(), "refill", ref);
+      if (!granted) {
+        console.log(`[webhook dodo] refill no otorgado (ya abonado o error) ref=${ref}`);
+      }
+    } catch (e) {
+      console.error("[webhook dodo] refill de créditos falló:", e);
+    }
   }
 
   return NextResponse.json({ received: true });
