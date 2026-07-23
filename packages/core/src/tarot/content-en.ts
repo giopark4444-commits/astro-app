@@ -1385,9 +1385,9 @@ export const READING_POSITION_LABELS_EN: Record<string, string> = {
   // ---- decision ----
   situation: "the situation",
   "option-a": "option A",
-  "brings-a": "what option A brings",
+  "brings-a": "what option A awakens",
   "option-b": "option B",
-  "brings-b": "what option B brings",
+  "brings-b": "what option B awakens",
   unseen: "what you're not seeing",
   advice: "the advice",
   // ---- horseshoe / simple cross ----
@@ -1401,7 +1401,7 @@ export const READING_POSITION_LABELS_EN: Record<string, string> = {
   "third-eye": "your third eye",
   throat: "your throat",
   solar: "your solar plexus",
-  sacral: "your sacral",
+  sacral: "your sacral center",
   root: "your root",
   // ---- elements ----
   spirit: "the spirit that holds it all",

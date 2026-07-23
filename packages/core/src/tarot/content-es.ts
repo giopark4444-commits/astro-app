@@ -1463,9 +1463,9 @@ export const READING_POSITION_LABELS_ES: Record<string, string> = {
   // ---- decisión ----
   situation: "la situación",
   "option-a": "la opción A",
-  "brings-a": "lo que trae la opción A",
+  "brings-a": "lo que despierta la opción A",
   "option-b": "la opción B",
-  "brings-b": "lo que trae la opción B",
+  "brings-b": "lo que despierta la opción B",
   unseen: "lo que no estás viendo",
   advice: "el consejo",
   // ---- herradura / cruz simple ----
