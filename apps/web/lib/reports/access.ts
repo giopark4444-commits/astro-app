@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isPlusActive } from "@aluna/core";
 import type { AlunaSupabaseClient } from "@aluna/supabase";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
+import { allAccessEnabled } from "@/lib/plan-gate";
 
 // Puerta de acceso compartida por los 3 endpoints de informes: exige sesión y
 // suscripción Plus ANTES de gastar en IA. Un no-Plus jamás dispara una
@@ -18,6 +19,10 @@ export type PlusGateOk = { user: { id: string }; supabase: AlunaSupabaseClient }
 export async function requirePlus(request: NextRequest): Promise<PlusGateOk | NextResponse> {
   const { supabase, user } = await authenticateRoute(request);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  // TODO PLANES: app abierta por ahora — sesión sigue siendo obligatoria, el
+  // candado Plus no. Ver lib/plan-gate.ts (ALUNA_ALL_ACCESS="0" lo restaura).
+  if (allAccessEnabled()) return { user: { id: user.id }, supabase };
 
   const { data } = await supabase
     .from("subscriptions")

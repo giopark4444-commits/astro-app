@@ -70,6 +70,7 @@ function sixAreas(score = 70, tone = "high") {
 
 function fakeProvider(overrides: Partial<{ model: string; complete: ReturnType<typeof vi.fn> }> = {}) {
   return {
+    name: "fake",
     model: overrides.model ?? "test-model",
     complete:
       overrides.complete ??
@@ -152,7 +153,7 @@ describe("POST /api/area-reading", () => {
       reading: "Una lectura cálida de prueba.",
       tip: "Respira hondo hoy.",
     });
-    expect(res.headers.get("x-aluna-model")).toBe("test-model");
+    expect(res.headers.get("x-aluna-model")).toBe("fake/test-model");
   });
 
   it("502 si el proveedor no devuelve JSON parseable con reading+tip", async () => {
@@ -184,7 +185,7 @@ describe("POST /api/area-reading", () => {
       // Mismo contenido servido desde el caché — el proveedor NO se llama de nuevo.
       expect(json2).toEqual(json1);
       expect(completeMock).toHaveBeenCalledTimes(1);
-      expect(res2.headers.get("x-aluna-model")).toBe("test-model");
+      expect(res2.headers.get("x-aluna-model")).toBe("fake/test-model");
     });
 
     it("distinto profileId o distinta área NO comparten caché (personal, no global)", async () => {

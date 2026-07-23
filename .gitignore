@@ -12,3 +12,6 @@ dist/
 *.tsbuildinfo
 coverage/
 .next/
+
+# Artefactos de automatización del navegador (pueden capturar secretos en pantalla)
+.playwright-mcp/

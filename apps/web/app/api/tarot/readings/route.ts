@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isPlusActive } from "@aluna/core";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
+import { allAccessEnabled } from "@/lib/plan-gate";
 import { validateReadingPayload } from "@/lib/tarot/validate-reading";
 import type { Json, Tables, TablesInsert } from "@aluna/supabase";
 
@@ -36,6 +37,8 @@ async function isRequesterPlus(
   supabase: Awaited<ReturnType<typeof authenticateRoute>>["supabase"],
   userId: string,
 ): Promise<boolean> {
+  // TODO PLANES: app abierta por ahora — ver lib/plan-gate.ts.
+  if (allAccessEnabled()) return true;
   const { data } = await supabase
     .from("subscriptions")
     .select("status, current_period_end")

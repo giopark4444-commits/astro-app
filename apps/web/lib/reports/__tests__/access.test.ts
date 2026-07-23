@@ -32,6 +32,18 @@ describe("requirePlus (gate de acceso a informes)", () => {
   beforeEach(() => {
     authState.user = null;
     authState.sub = null;
+    // TODO PLANES: por defecto la app va ABIERTA (lib/plan-gate.ts). Estos
+    // tests cubren AMBOS caminos: los de candado restauran el gate con
+    // ALUNA_ALL_ACCESS="0"; el de app-abierta verifica el default actual.
+    vi.stubEnv("ALUNA_ALL_ACCESS", "0");
+  });
+
+  it("app abierta (default actual): pasa con sesión aunque NO haya suscripción", async () => {
+    vi.unstubAllEnvs();
+    authState.user = { id: "u1" };
+    authState.sub = null;
+    const r = await requirePlus(fakeRequest());
+    expect(isGateResponse(r)).toBe(false);
   });
 
   it("401 sin sesión", async () => {

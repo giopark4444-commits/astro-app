@@ -297,7 +297,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
 }
 
 function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider {
-  const model = modelOverride || process.env.GEMINI_READING_MODEL || "gemini-1.5-pro";
+  const model = modelOverride || process.env.GEMINI_READING_MODEL || "gemini-3.5-flash";
   return {
     name: "gemini",
     model,
@@ -309,7 +309,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json" },
+          generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -328,7 +328,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           systemInstruction: { parts: [{ text: system }] },
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           // Mismo modo JSON que complete(): el texto troceado es el objeto JSON.
-          generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json" },
+          generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -356,7 +356,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
             role: m.role === "assistant" ? "model" : "user",
             parts: [{ text: m.content }],
           })),
-          generationConfig: { maxOutputTokens: maxTokens },
+          generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingBudget: 0 } },
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -379,7 +379,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
             role: m.role === "assistant" ? "model" : "user",
             parts: [{ text: m.content }],
           })),
-          generationConfig: { maxOutputTokens: maxTokens },
+          generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingBudget: 0 } },
         }),
         signal: AbortSignal.timeout(60000),
       });
