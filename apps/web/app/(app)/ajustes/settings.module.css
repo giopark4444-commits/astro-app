@@ -25,6 +25,18 @@
 .planBtn:hover { color: var(--ink); }
 .planBtn:disabled { opacity: 0.5; cursor: default; }
 
+/* Créditos (Task 9) — saldo protagonista + historial. Hermana de PlanCard:
+   reusa .label (título+subtítulos) y .planActions/.planBtn (los 3 botones de
+   pack, misma geometría que monthly/yearly de arriba). Las 4 clases de abajo
+   son nuevas: no había precedente en la card de un número grande ni de una
+   lista de movimientos dentro de settings.module.css (memoriesList/memoryRow
+   viven en ajustes.module.css, un módulo que esta card no importa). */
+.creditsBalance { display: flex; align-items: baseline; gap: var(--sp-2); margin: 0; font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 600; color: var(--ink); }
+.creditsBalanceLabel { font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 400; color: var(--soft); }
+.creditsHistory { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.creditsHistoryRow { padding: var(--sp-2) 0; font-size: var(--text-sm); color: var(--soft); }
+.creditsHistoryRow + .creditsHistoryRow { border-top: 1px solid var(--line); }
+
 /* Tarjetas de tema */
 .themes { display: flex; gap: var(--sp-2); } /* 9→8 */
 .tc {

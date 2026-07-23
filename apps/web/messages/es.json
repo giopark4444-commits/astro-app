@@ -834,6 +834,24 @@
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "checkoutProcessing": "Pago recibido, activando tu cuenta…"
   },
+  "credits": {
+    "title": "Créditos",
+    "balanceLabel": "créditos disponibles",
+    "buyTitle": "Comprar más",
+    "pack100": "100 créditos",
+    "pack300": "300 créditos",
+    "pack1000": "1000 créditos",
+    "historyTitle": "Historial",
+    "empty": "Todavía no hay movimientos por acá.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "loading": "Un momento…",
+    "purchaseThanks": "¡Gracias por tu compra! Ya sumamos tus créditos.",
+    "kindPurchase": "Compra",
+    "kindRefill": "Recarga mensual",
+    "kindSpend": "Uso",
+    "kindRefund": "Reembolso",
+    "kindGrant": "Regalo"
+  },
   "reports": {
     "title": "Informes evolutivos",
     "natalTitle": "Carta natal",

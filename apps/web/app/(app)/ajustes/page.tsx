@@ -11,6 +11,7 @@ import { signOut } from "@/app/auth/actions";
 import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@aluna/core";
 import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
 import { PlanCard } from "./plan-card";
+import { CreditsCard } from "./credits-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
@@ -133,6 +134,10 @@ export default async function AjustesPage({
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
+      </section>
+
+      <section className="card">
+        <CreditsCard checkoutCredits={checkout === "credits"} />
       </section>
 
       {role !== null && (
