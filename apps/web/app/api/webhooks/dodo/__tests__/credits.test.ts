@@ -224,12 +224,33 @@ describe("webhook Dodo — refill mensual (subscription.active / subscription.re
     expect(await res.json()).toEqual({ received: true });
   });
 
-  it("grant_credits devuelve error (falla real de red/rpc): igual sigue en 200 (best-effort, no bloquea a Dodo)", async () => {
+  it("grant_credits devuelve error (falla real de red/rpc): 500 para que Dodo reintente — el cliente pagó y no puede quedarse sin el refill para siempre", async () => {
     state.bySubscription = { user_id: "user_1", plan: "monthly" };
     state.grantCreditsResult = null;
     state.grantCreditsError = { message: "boom" };
     const res = await POST(fakeRequest(subscriptionEvent("subscription.active")));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "credit_grant_failed" });
+  });
+
+  it("retry tras error: la 2ª entrega del mismo evento re-upsertea (onConflict user_id, inocuo) con el MISMO ref de grant, y si esta vez el grant sale bien -> 200", async () => {
+    state.bySubscription = { user_id: "user_1", plan: "monthly" };
+    state.grantCreditsResult = null;
+    state.grantCreditsError = { message: "boom" };
+    const res1 = await POST(fakeRequest(subscriptionEvent("subscription.active")));
+    expect(res1.status).toBe(500);
+
+    // Dodo reintenta el MISMO evento tras el 5xx.
+    state.grantCreditsResult = true;
+    state.grantCreditsError = null;
+    const res2 = await POST(fakeRequest(subscriptionEvent("subscription.active")));
+    expect(res2.status).toBe(200);
+
+    expect(state.upsertCalls).toHaveLength(2); // el reintento re-hace el upsert, idéntico, onConflict user_id: inocuo
+    const grantCalls = state.rpcCalls.filter((c) => c.fn === "grant_credits");
+    expect(grantCalls).toHaveLength(2);
+    // mismo ref en ambos intentos -> grant_credits real (UNIQUE por ref) jamás duplicaría el abono
+    expect(grantCalls[0]!.args.p_ref).toBe(grantCalls[1]!.args.p_ref);
   });
 
   it("si el upsert de subscriptions falla: NO intenta el refill (grant_credits nunca se llama) y responde 500", async () => {
@@ -324,6 +345,40 @@ describe("webhook Dodo — packs de créditos (payment.succeeded)", () => {
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ received: true });
+    expect(handleReferralPaymentMock).toHaveBeenCalledTimes(1); // "duplicate" no toca el flujo de referidos
+  });
+
+  it("grant_credits devuelve error (falla real, no 'ya abonado'): 500 para que Dodo reintente — el cliente pagó y no puede quedarse sin sus créditos para siempre", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    state.userIdByEmail = "user_1";
+    state.grantCreditsResult = null;
+    state.grantCreditsError = { message: "boom" };
+    const res = await POST(
+      fakeRequest(paymentEvent({ product_cart: [{ product_id: "pdt_credits_100", quantity: 1 }] })),
+    );
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "credit_grant_failed" });
+    expect(handleReferralPaymentMock).toHaveBeenCalledTimes(1); // referidos ya corrieron ANTES del intento de abono, el error de créditos no los deshace
+  });
+
+  it("retry tras error de pack: la 2ª entrega del mismo payment.succeeded reintenta con el MISMO ref y esta vez sale bien -> 200", async () => {
+    process.env.DODO_PRODUCT_CREDITS_100 = "pdt_credits_100";
+    state.userIdByEmail = "user_1";
+    state.grantCreditsResult = null;
+    state.grantCreditsError = { message: "boom" };
+    const event = paymentEvent({ product_cart: [{ product_id: "pdt_credits_100", quantity: 1 }] });
+    const res1 = await POST(fakeRequest(event));
+    expect(res1.status).toBe(500);
+
+    state.grantCreditsResult = true;
+    state.grantCreditsError = null;
+    const res2 = await POST(fakeRequest(event));
+    expect(res2.status).toBe(200);
+
+    const grantCalls = state.rpcCalls.filter((c) => c.fn === "grant_credits");
+    expect(grantCalls).toHaveLength(2);
+    expect(grantCalls[0]!.args.p_ref).toBe(grantCalls[1]!.args.p_ref);
+    expect(handleReferralPaymentMock).toHaveBeenCalledTimes(2); // una vez por cada entrega del webhook
   });
 
   it("los referidos SIGUEN corriendo igual en payment.succeeded (no se reemplazan por los packs)", async () => {

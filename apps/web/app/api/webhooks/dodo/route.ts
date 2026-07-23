@@ -121,8 +121,11 @@ export async function POST(request: NextRequest) {
     // (raro, pero el checkout de Task 7 solo vende uno a la vez), se abona la
     // SUMA en un único grant con el mismo ref — nunca uno por producto, para
     // no fragmentar la idempotencia de un solo payment_id en varios refs.
-    // best-effort: nunca bloquea el 200 del webhook ni pisa el resultado de
-    // referidos ya calculado arriba.
+    // NO es best-effort ante un error real: un cliente que pagó no tiene otra
+    // forma de reclamar créditos que nunca llegaron, así que un fallo
+    // transitorio de grantCredits fuerza un 500 (ver más abajo) para que Dodo
+    // reintente — seguro porque grant_credits es idempotente por `ref`
+    // (índice único, migración 0022).
     try {
       const paymentId = event.data.payment_id;
       const productCart = event.data.product_cart ?? [];
@@ -133,13 +136,25 @@ export async function POST(request: NextRequest) {
       }
       if (paymentId && totalPackCredits > 0) {
         const ref = `dodo:${paymentId}`;
-        const granted = await grantCredits(supabase, userId, totalPackCredits, "purchase", ref);
-        if (!granted) {
-          console.log(`[webhook dodo] compra de créditos no otorgada (ya abonada o error) ref=${ref}`);
+        const result = await grantCredits(supabase, userId, totalPackCredits, "purchase", ref);
+        if (result === "duplicate") {
+          console.log(`[webhook dodo] compra de créditos ya abonada (idempotencia) ref=${ref}`);
+        } else if (result === "error") {
+          // Error REAL (no "ya abonado" — eso es "duplicate", el índice único
+          // haciendo su trabajo). El pago ya se cobró; sin el 500 el cliente
+          // quedaría sin sus créditos para siempre porque Dodo no reintenta
+          // un 200.
+          console.error(`[webhook dodo] abono de pack de créditos falló (error real, forzando retry de Dodo) ref=${ref}`);
+          return NextResponse.json({ error: "credit_grant_failed" }, { status: 500 });
         }
       }
     } catch (e) {
+      // grantCredits nunca lanza (atrapa internamente) — un throw acá es un
+      // bug real en este bloque, no un problema de infraestructura ignorable.
+      // Mismo tratamiento que "error" arriba: forzar el retry de Dodo en vez
+      // de tragarlo con un 200.
       console.error("[webhook dodo] abono de pack de créditos falló:", e);
+      return NextResponse.json({ error: "credit_grant_failed" }, { status: 500 });
     }
   }
 
@@ -166,19 +181,32 @@ export async function POST(request: NextRequest) {
   // "first" si Dodo no manda next_billing_date) — así grant_credits (UNIQUE
   // en el ledger) hace que un reintento del MISMO evento (Dodo reintenta ante
   // cualquier fallo de red, o entrega el mismo evento más de una vez) jamás
-  // duplique el abono: la 2ª vez devuelve false y acá simplemente se loguea,
-  // sin tocar el 200. Best-effort a propósito: un problema de créditos nunca
-  // debe hacer que Dodo reintente infinitamente un evento de suscripción que
-  // por lo demás ya se procesó bien.
+  // duplique el abono.
+  //
+  // "duplicate" (ya abonado) sigue en 200 y solo loguea, como siempre. Pero
+  // "error" (fallo REAL de red/rpc) ya no es best-effort: el cliente pagó su
+  // suscripción y sin el refill se queda sin créditos hasta el próximo ciclo
+  // — o para siempre, si nadie lo nota. 500 fuerza a Dodo a reintentar.
+  // Ocurre DESPUÉS del upsert de arriba a propósito: el reintento re-hará ese
+  // upsert (onConflict user_id, misma fila `row` derivada del mismo evento)
+  // de forma inocua, y luego reintentará este mismo grant con el mismo
+  // `ref` — que si ya se había abonado en el intento anterior, ahora vuelve
+  // "duplicate" en vez de "granted", nunca duplica el abono.
   if (event.type === "subscription.active" || event.type === "subscription.renewed") {
     try {
       const ref = `refill:${row.dodo_subscription_id}:${row.current_period_end ?? "first"}`;
-      const granted = await grantCredits(supabase, userId, monthlyRefillCredits(), "refill", ref);
-      if (!granted) {
-        console.log(`[webhook dodo] refill no otorgado (ya abonado o error) ref=${ref}`);
+      const result = await grantCredits(supabase, userId, monthlyRefillCredits(), "refill", ref);
+      if (result === "duplicate") {
+        console.log(`[webhook dodo] refill ya abonado (idempotencia) ref=${ref}`);
+      } else if (result === "error") {
+        console.error(`[webhook dodo] refill de créditos falló (error real, forzando retry de Dodo) ref=${ref}`);
+        return NextResponse.json({ error: "credit_grant_failed" }, { status: 500 });
       }
     } catch (e) {
+      // grantCredits nunca lanza — un throw acá es un bug real, mismo
+      // tratamiento que "error" arriba.
       console.error("[webhook dodo] refill de créditos falló:", e);
+      return NextResponse.json({ error: "credit_grant_failed" }, { status: 500 });
     }
   }
 

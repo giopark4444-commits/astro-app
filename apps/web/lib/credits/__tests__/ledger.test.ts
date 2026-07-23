@@ -99,27 +99,32 @@ describe("spendCredits", () => {
   });
 });
 
-describe("grantCredits", () => {
-  it("rpc devuelve { data: true, error: null } -> true", async () => {
+describe("grantCredits (tri-estado)", () => {
+  it('rpc devuelve { data: true, error: null } -> "granted"', async () => {
     const svc = fakeClient(async () => ({ data: true, error: null }));
-    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe(true);
+    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe("granted");
   });
 
-  it("rpc devuelve { data: false, error: null } (ref ya abonado) -> false", async () => {
+  it('rpc devuelve { data: false, error: null } (ref ya abonado, unique_violation) -> "duplicate"', async () => {
     const svc = fakeClient(async () => ({ data: false, error: null }));
-    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe(false);
+    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe("duplicate");
   });
 
-  it("rpc devuelve error -> false", async () => {
+  it('rpc devuelve error -> "error" (fallo real, no "ya abonado" — el caller debe forzar un retry)', async () => {
     const svc = fakeClient(async () => ({ data: null, error: { message: "boom" } }));
-    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe(false);
+    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe("error");
   });
 
-  it("el cliente lanza -> false, nunca lanza", async () => {
+  it('el cliente lanza -> "error", nunca lanza', async () => {
     const svc = fakeClient(async () => {
       throw new Error("boom");
     });
-    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe(false);
+    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe("error");
+  });
+
+  it('data con shape inesperado (ni true ni false, sin error) -> "error" (no asumir "ya abonado")', async () => {
+    const svc = fakeClient(async () => ({ data: null, error: null }));
+    await expect(grantCredits(svc, "user-1", 100, "purchase", "dodo:pay_1")).resolves.toBe("error");
   });
 
   it("llama al rpc grant_credits con el kind incluido", async () => {
@@ -135,7 +140,7 @@ describe("grantCredits", () => {
   });
 });
 
-describe("refundSpend", () => {
+describe("refundSpend (firma boolean; adapta el tri-estado de grantCredits)", () => {
   it('arma el ref "refund:<spendRef>" y llama a grant_credits con kind "refund"', async () => {
     const rpc = vi.fn(async () => ({ data: true, error: null }));
     const svc = { rpc } as unknown as SupabaseClient;
@@ -148,8 +153,18 @@ describe("refundSpend", () => {
     });
   });
 
-  it("propaga false si el grant subyacente falla", async () => {
+  it('"granted" -> true', async () => {
+    const svc = fakeClient(async () => ({ data: true, error: null }));
+    await expect(refundSpend(svc, "user-1", 3, "spend:abc")).resolves.toBe(true);
+  });
+
+  it('"duplicate" (el refund ya existía) -> true, el objetivo ya estaba cumplido', async () => {
     const svc = fakeClient(async () => ({ data: false, error: null }));
+    await expect(refundSpend(svc, "user-1", 3, "spend:abc")).resolves.toBe(true);
+  });
+
+  it('"error" (fallo real del grant subyacente) -> false', async () => {
+    const svc = fakeClient(async () => ({ data: null, error: { message: "boom" } }));
     await expect(refundSpend(svc, "user-1", 3, "spend:abc")).resolves.toBe(false);
   });
 });

@@ -1,9 +1,12 @@
 // Helpers de servidor sobre el ledger de créditos (migración 0022): envuelven
 // los RPCs `spend_credits` / `grant_credits` / `bump_chat_usage` con un cliente
 // service-role. NUNCA lanzan: cualquier error de red o del RPC se traduce a un
-// valor "seguro" — false para gasto/abono (fail-closed, no se cobra ni se
-// abona ante la duda) y null para el contador de uso (fail-open, el llamador
-// no debe bloquear al usuario por un problema de infraestructura).
+// valor "seguro" — false para gasto (fail-closed, no se cobra ante la duda),
+// tri-estado para abono (ver `grantCredits`: colapsar "ya abonado" y "error
+// real" en un solo booleano deja al cliente que SÍ pagó sin sus créditos para
+// siempre si el caller solo loguea y responde 200) y null para el contador de
+// uso (fail-open, el llamador no debe bloquear al usuario por un problema de
+// infraestructura).
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 
@@ -44,14 +47,27 @@ export async function spendCredits(
   }
 }
 
-/** Abona créditos (compra/refill/refund/regalo), idempotente por `ref`. Error → false, nunca lanza. */
+/**
+ * Abona créditos (compra/refill/refund/regalo), idempotente por `ref`.
+ * Tri-estado — NO colapsar "ya abonado" y "error real" en un solo booleano:
+ * un cliente que pagó (pack o refill de suscripción) y cuyo abono falla por
+ * un problema transitorio de red/rpc quedaría sin créditos para siempre si el
+ * caller solo loguea `false` y responde 200 (Dodo no reintenta un 200).
+ * - "granted": el RPC abonó ahora (`data === true`).
+ * - "duplicate": el RPC ya había visto este `ref` antes — `unique_violation`
+ *   dentro de `grant_credits` (`data === false`), la idempotencia funcionando
+ *   como se espera, nada que reintentar.
+ * - "error": fallo real de red o del RPC (o `throw`) — el abono NO se
+ *   realizó. El caller debe tratarlo como abono pendiente y forzar un retry
+ *   (p.ej. 500 al webhook de Dodo, que sí reintenta ante 5xx). Nunca lanza.
+ */
 export async function grantCredits(
   svc: SupabaseClient,
   userId: string,
   amount: number,
   kind: "purchase" | "refill" | "refund" | "grant",
   ref: string,
-): Promise<boolean> {
+): Promise<"granted" | "duplicate" | "error"> {
   try {
     const { data, error } = await svc.rpc("grant_credits", {
       p_user: userId,
@@ -59,21 +75,30 @@ export async function grantCredits(
       p_kind: kind,
       p_ref: ref,
     });
-    if (error) return false;
-    return data === true;
+    if (error) return "error";
+    if (data === true) return "granted";
+    if (data === false) return "duplicate";
+    return "error"; // shape inesperado del RPC (ni true ni false): no asumir "ya abonado", tratar como error real
   } catch {
-    return false;
+    return "error";
   }
 }
 
-/** Revierte un gasto: abona con kind "refund" y ref namespaced `refund:<spendRef>`. */
+/**
+ * Revierte un gasto: abona con kind "refund" y ref namespaced
+ * `refund:<spendRef>`. Mantiene firma booleana para sus callers actuales
+ * (chat/area-reading, Tasks 5-6), que no necesitan distinguir el motivo:
+ * "granted" y "duplicate" son éxito (el refund ya existía = objetivo
+ * cumplido, mismo criterio que antes), solo "error" es `false`.
+ */
 export async function refundSpend(
   svc: SupabaseClient,
   userId: string,
   amount: number,
   spendRef: string,
 ): Promise<boolean> {
-  return grantCredits(svc, userId, amount, "refund", `refund:${spendRef}`);
+  const result = await grantCredits(svc, userId, amount, "refund", `refund:${spendRef}`);
+  return result !== "error";
 }
 
 /** Suma un turno de chat al contador diario. Fail-open: error de red/rpc → null, el llamador no bloquea. */
