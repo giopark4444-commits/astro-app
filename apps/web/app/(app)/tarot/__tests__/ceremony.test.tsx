@@ -69,7 +69,7 @@ function renderCeremony(onClose = vi.fn()) {
   render(
     <NextIntlClientProvider locale="es" messages={es}>
       <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
-        <Ceremony onClose={onClose} />
+        <Ceremony spreadId="three" onClose={onClose} />
       </ThemeProvider>
     </NextIntlClientProvider>,
   );
@@ -188,6 +188,32 @@ describe("Ceremony (tirada de tres)", () => {
     // re-tocar la misma no suma
     fireEvent.click(fanCards[10]!);
     expect(screen.getByText(count(1))).toBeInTheDocument();
+  });
+
+  // T4: las etiquetas de posición ya no vienen de un mapa local (POSITION_KEY)
+  // sino de positionLabelKey + SpreadLayout — este test cubre que ese camino
+  // nuevo sigue rindiendo los mismos textos en fan y reveal.
+  it("los labels de posición (Pasado/Presente/Futuro) se renderizan vía SpreadLayout en fan y reveal", async () => {
+    mockFetch();
+    renderCeremony();
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.questionSilent }));
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.shuffleForMe }));
+    fireEvent.click((await screen.findAllByTestId("cut-pile"))[0]!);
+
+    await screen.findAllByTestId("fan-card");
+    expect(screen.getByText(es.tarot.positionPast)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionPresent)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionFuture)).toBeInTheDocument();
+
+    const fanCards = await screen.findAllByTestId("fan-card");
+    fireEvent.click(fanCards[0]!);
+    fireEvent.click(fanCards[1]!);
+    fireEvent.click(fanCards[2]!);
+
+    await screen.findAllByTestId("reveal-card");
+    expect(screen.getByText(es.tarot.positionPast)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionPresent)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionFuture)).toBeInTheDocument();
   });
 
   it("403 free_limit al guardar: nota suave con CTA a /perfil, sin savedOk", async () => {

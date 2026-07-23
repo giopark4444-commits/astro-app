@@ -117,8 +117,14 @@ export * from "./tarot/types";
 export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
 export { mulberry32, shuffleDeck, drawCards } from "./tarot/shuffle";
 export type { Rng, DrawnCard } from "./tarot/shuffle";
-export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
-export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
+export { TAROT_SPREADS, spreadById, spreadsByGroup } from "./tarot/spreads";
+export type {
+  TarotSpread,
+  TarotSpreadPosition,
+  TarotSpreadId,
+  TarotSpreadGroup,
+  TarotLayoutPoint,
+} from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
 export { cardImageUrl, cardBackUrl, rwsCtx, presetCtx, deckCtxFromManifest, PRESET_DECKS } from "./tarot/deck-assets";
 export type { DeckAssetCtx, DeckManifestLike, PresetDeckId } from "./tarot/deck-assets";
@@ -126,13 +132,14 @@ export { buildBackSvg } from "./tarot/back-svg";
 export type { BackConfig, BackSymbol } from "./tarot/back-svg";
 export {
   TAROT_CARDS_ES,
+  READING_POSITION_LABELS_ES,
   composeReadingProse,
   composeReadingWith,
   type TarotAmbits,
   type TarotCardContent,
   type ReadingComposeDicts,
 } from "./tarot/content-es";
-export { TAROT_CARDS_EN } from "./tarot/content-en";
+export { TAROT_CARDS_EN, READING_POSITION_LABELS_EN } from "./tarot/content-en";
 
 export { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "./legal/legal-es";
 export { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "./legal/legal-en";

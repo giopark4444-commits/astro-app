@@ -22,6 +22,14 @@ export const DIARY_SPREAD_KEY: Record<string, string> = {
   daily: "diarySpreadDaily",
   three: "diarySpreadThree",
   "celtic-cross": "diarySpreadCeltic",
+  relationship: "diarySpreadRelationship",
+  "year-wheel": "diarySpreadYearWheel",
+  decision: "diarySpreadDecision",
+  horseshoe: "diarySpreadHorseshoe",
+  "simple-cross": "diarySpreadSimpleCross",
+  chakras: "diarySpreadChakras",
+  elements: "diarySpreadElements",
+  "yes-no": "diarySpreadYesNo",
   free: "diarySpreadFree",
 };
 

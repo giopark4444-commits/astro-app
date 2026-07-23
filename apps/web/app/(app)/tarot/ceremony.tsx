@@ -6,22 +6,27 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { drawCards, spreadById, type DrawnCard, type DeckAssetCtx, cardImageUrl, cardBackUrl, rwsCtx } from "@aluna/core";
+import {
+  drawCards,
+  spreadById,
+  type DrawnCard,
+  type DeckAssetCtx,
+  type TarotSpreadId,
+  cardImageUrl,
+  cardBackUrl,
+  rwsCtx,
+} from "@aluna/core";
 import { gestureRng } from "@/lib/tarot/rng";
 import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ShareModal } from "@/components/share/share-modal";
 import { ReadingChat } from "./reading-chat";
+import { positionLabelKey } from "./position-labels";
+import { SpreadLayout } from "./spread-layout";
 import tarot from "./tarot.module.css";
 import styles from "./ceremony.module.css";
 
 const DECK_SIZE = 78;
-const SPREAD_ID = "three" as const;
-const POSITION_KEY: Record<string, string> = {
-  past: "positionPast",
-  present: "positionPresent",
-  future: "positionFuture",
-};
 
 type Step = "question" | "shuffle" | "cut" | "fan" | "reveal" | "reading";
 type SaveState = "idle" | "saving" | "saved" | "free_limit" | "error";
@@ -87,10 +92,14 @@ function reducer(state: CeremonyState, action: CeremonyAction): CeremonyState {
 }
 
 export function Ceremony({
+  spreadId,
   deckCtx = rwsCtx(""),
   onClose,
   onStep,
 }: {
+  /** Qué tirada anima esta ceremonia (T4): la ceremonia ya no está fija a
+   *  "three" — el umbral (tarot-view, vía SpreadPicker) decide cuál. */
+  spreadId: TarotSpreadId;
   /** Ctx del resolver de assets (Task 7); default rws — preserva el
    *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
   deckCtx?: DeckAssetCtx;
@@ -105,7 +114,7 @@ export function Ceremony({
   const tShare = useTranslations("share");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
-  const spread = spreadById(SPREAD_ID)!;
+  const spread = spreadById(spreadId)!;
 
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const [questionDraft, setQuestionDraft] = useState("");
@@ -159,9 +168,9 @@ export function Ceremony({
   const prose = useMemo(
     () =>
       state.step === "reading"
-        ? composeReadingProse(locale === "en" ? "en" : "es", SPREAD_ID, readingCards, state.question)
+        ? composeReadingProse(locale === "en" ? "en" : "es", spreadId, readingCards, state.question)
         : [],
-    [state.step, locale, readingCards, state.question],
+    [state.step, locale, spreadId, readingCards, state.question],
   );
 
   function saveReading() {
@@ -171,7 +180,7 @@ export function Ceremony({
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        spread: SPREAD_ID,
+        spread: spreadId,
         deck: deckCtx.activeDeck,
         ...(state.question !== undefined ? { question: state.question } : {}),
         cards: readingCards,
@@ -310,19 +319,26 @@ export function Ceremony({
             </div>
           </div>
           <p className={styles.fanCount}>{t("fanCount", { n: state.picked.length, total: spread.cardCount })}</p>
-          <div className={styles.slotRow}>
-            {spread.positions.map((pos, i) => (
-              <div key={pos.key} className={styles.slot}>
-                <div className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}>
+          <SpreadLayout
+            spread={spread}
+            ariaLabel={t("fanTitle")}
+            renderSlot={(pos, i, rotate) => (
+              <div className={styles.slot}>
+                <div
+                  className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}
+                  style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
+                >
                   {i < state.picked.length && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                   )}
                 </div>
-                <span className={styles.slotLabel}>{t(POSITION_KEY[pos.key] ?? "positionPast")}</span>
+                {/* I3: el rotate va SOLO en la caja de arriba — el label queda
+                    horizontal y legible (antes rotaba con todo el wrapper). */}
+                <span className={styles.slotLabel}>{t(positionLabelKey(pos.key))}</span>
               </div>
-            ))}
-          </div>
+            )}
+          />
         </div>
       )}
 
@@ -330,18 +346,25 @@ export function Ceremony({
         <div className={styles.stepPane}>
           <h3 className={styles.stepTitle}>{t("revealTitle")}</h3>
           <p className={styles.stepHint}>{t("revealHint")}</p>
-          <div className={styles.revealRow}>
-            {state.drawn.map((d, i) => {
+          <SpreadLayout
+            spread={spread}
+            ariaLabel={t("revealTitle")}
+            renderSlot={(pos, i, rotate) => {
+              const d = state.drawn[i]!;
               const content = cardsDict[d.card.id]!;
               const flipped = state.flipped[i]!;
               return (
-                <div key={d.card.id} className={styles.slot}>
+                <div className={styles.slot}>
                   {/* Flip 3D: reutiliza el patrón .flipCard/.face del umbral
-                      (tarot.module.css), con el tamaño de slot de la ceremonia. */}
+                      (tarot.module.css), con el tamaño de slot de la ceremonia.
+                      I3: el rotate de la posición (ej. celtic "crossing") va
+                      SOLO en este botón (la carta) — el label de abajo y el
+                      revealBody quedan horizontales, sin girar con el wrapper. */}
                   <button
                     type="button"
                     data-testid="reveal-card"
                     className={`${tarot.flipCard} ${styles.slotFlip} ${flipped ? tarot.flipped : ""}`}
+                    style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
                     aria-label={flipped ? content.name : t("revealHint")}
                     onClick={() => dispatch({ type: "flip", slot: i })}
                   >
@@ -359,7 +382,7 @@ export function Ceremony({
                       />
                     </span>
                   </button>
-                  <span className={styles.slotLabel}>{t(POSITION_KEY[spread.positions[i]!.key] ?? "positionPast")}</span>
+                  <span className={styles.slotLabel}>{t(positionLabelKey(pos.key))}</span>
                   {flipped && (
                     <div className={styles.revealBody}>
                       <p className={styles.revealName}>{content.name}</p>
@@ -369,8 +392,8 @@ export function Ceremony({
                   )}
                 </div>
               );
-            })}
-          </div>
+            }}
+          />
           {allFlipped && (
             <button type="button" className={styles.primaryBtn} onClick={() => dispatch({ type: "read" })}>
               {t("revealRead")}
@@ -404,7 +427,7 @@ export function Ceremony({
                   />
                   <div className={styles.readingCardBody}>
                     <span className={styles.readingPosition}>
-                      {t(POSITION_KEY[spread.positions[i]!.key] ?? "positionPast")}
+                      {t(positionLabelKey(spread.positions[i]!.key))}
                     </span>
                     <p className={styles.readingName}>
                       {content.name}
@@ -426,7 +449,7 @@ export function Ceremony({
               ))}
             </div>
 
-            <ReadingChat spreadId={SPREAD_ID} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
+            <ReadingChat spreadId={spreadId} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
 
             {state.save === "free_limit" ? (
               // Nota suave, sin modal: el límite free no interrumpe el rito.

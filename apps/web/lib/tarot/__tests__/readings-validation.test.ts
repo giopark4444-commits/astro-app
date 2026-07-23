@@ -26,14 +26,36 @@ describe("validateReadingPayload", () => {
     }
   });
 
-  it("celtic-cross → error (T2 no lo expone)", () => {
+  it("celtic-cross con sus 10 posiciones correctas → ok (T4: cualquier tirada del motor se acepta)", () => {
     const result = validateReadingPayload(
       validThreePayload({
         spread: "celtic-cross",
         cards: [
           { cardId: "fool", reversed: false, position: "heart" },
           { cardId: "magician", reversed: false, position: "crossing" },
+          { cardId: "high-priestess", reversed: false, position: "foundation" },
+          { cardId: "empress", reversed: false, position: "past" },
+          { cardId: "emperor", reversed: false, position: "crown" },
+          { cardId: "hierophant", reversed: false, position: "future" },
+          { cardId: "lovers", reversed: false, position: "self" },
+          { cardId: "chariot", reversed: false, position: "environment" },
+          { cardId: "strength", reversed: false, position: "hopes-fears" },
+          { cardId: "hermit", reversed: false, position: "outcome" },
         ],
+      }),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.spread).toBe("celtic-cross");
+      expect(result.value.cards).toHaveLength(10);
+    }
+  });
+
+  it("spread desconocido ('bogus') → error", () => {
+    const result = validateReadingPayload(
+      validThreePayload({
+        spread: "bogus",
+        cards: [{ cardId: "fool", reversed: false, position: "heart" }],
       }),
     );
     expect(result.ok).toBe(false);

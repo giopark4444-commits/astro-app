@@ -138,6 +138,35 @@ describe("ManualEntry", () => {
     await waitFor(() => expect(screen.getByText(es.tarot.savedOk)).toBeInTheDocument());
   });
 
+  it("elegir una tirada del picker (Relación, no es atajo) arranca la selección con sus 7 posiciones", async () => {
+    mockFetch();
+    renderManual();
+    // Paso plantilla: además de los atajos three/daily/free, el set completo
+    // de tiradas está disponible vía <SpreadPicker> (Task 5). Tocar una
+    // tarjeta elige Y avanza de inmediato (sin botón "Continuar" propio,
+    // mismo patrón que la ceremonia digital — spread-picker.tsx).
+    fireEvent.click(screen.getByText(es.tarot.spreadRelationship).closest("button")!);
+
+    expect(await screen.findByText(es.tarot.manualSelectTitle)).toBeInTheDocument();
+    for (let i = 0; i < 7; i++) {
+      fireEvent.click((await screen.findAllByTestId("manual-card-option"))[0]!);
+    }
+    // Las 7 posiciones se llenaron exactamente: el grid deja de ofrecerse.
+    await waitFor(() => {
+      expect(screen.queryAllByTestId("manual-card-option").length).toBe(0);
+    });
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualContinue }));
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualJumpersContinue }));
+
+    expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
+    // Las posiciones de "Relación" (positionLabelKey), no "Carta N" del modo libre.
+    expect(screen.getByText(es.tarot.positionYou)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionOther)).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.positionTendency)).toBeInTheDocument();
+    // El id de la tirada elegida fluye a guardar/chat (no "three"/"free").
+    expect(await screen.findByText(es.tarot.chatDormantTitle)).toBeInTheDocument();
+  });
+
   it("'volver al umbral' llama onClose", async () => {
     mockFetch();
     const onClose = renderManual();

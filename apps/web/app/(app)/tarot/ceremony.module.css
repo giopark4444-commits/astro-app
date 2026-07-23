@@ -211,20 +211,19 @@
 .fanCount { color: var(--acc-text); font-size: var(--text-xs); letter-spacing: 1px; margin: 0; }
 
 /* ---------- slots (fan + reveal) ---------- */
-/* Móvil: cartas más chicas + gap menor para que una tirada de 3 entre en UNA
-   línea (~340px) sin partir a 2+1 (pedido de Gio). En desktop recuperan tamaño
-   (media query abajo), donde hay ancho de sobra. */
-.slotRow, .revealRow {
-  display: flex;
-  gap: var(--sp-2);
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
+/* T4: el lienzo (posiciones + forma) ahora lo dibuja <SpreadLayout> — este
+   módulo solo aporta el contenido de cada slot (dorso/flip/etiqueta), tamaños
+   fijos que valen para cualquier tirada. Móvil: cartas más chicas (media query
+   abajo agranda en desktop, donde hay ancho de sobra). */
 .slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 104px; min-width: 0; }
 .slotCardBox {
-  width: 94px;
-  height: 152px;
+  /* I2: el tamaño lo decide el slot del layout (--card-w vía SpreadLayout,
+     `.slot > *` en spread-layout.module.css), no un px fijo — así celtic-cross
+     y year-wheel (muchas posiciones, slots angostos) no desbordan ni se
+     amontonan. max-width de arriba sigue poniendo un techo para three/daily. */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 0.6; /* proporción estándar de una carta de tarot (ancho/alto) */
   border: 1px dashed var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -242,8 +241,10 @@
   color: var(--acc-text);
 }
 
-/* Flip del reveal: reusa .flipCard/.face de tarot.module.css; aquí solo el tamaño. */
-.slotFlip { width: 94px !important; height: 152px !important; }
+/* Flip del reveal: reusa .flipCard/.face de tarot.module.css; aquí solo el
+   tamaño — mismo criterio que .slotCardBox arriba (I2: 100%/auto/aspect-ratio
+   en vez de px fijos, para no desbordar el slot del layout). */
+.slotFlip { width: 100% !important; height: auto !important; aspect-ratio: 0.6; }
 
 .revealBody { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
 .revealName {
@@ -300,10 +301,11 @@
   .ceremony { padding: var(--sp-6) var(--sp-6); }
 
   /* Reveal en desktop: hay ancho (la ceremonia vive en el panel izquierdo
-     ~688px), así que las cartas recuperan tamaño; 3 entran de sobra en una fila. */
+     ~688px), así que las cartas recuperan tamaño; 3 entran de sobra en una
+     fila. .slotCardBox/.slotFlip ya son 100%/auto (I2): solo hace falta subir
+     el techo de .slot — celtic-cross/year-wheel siguen limitados por su
+     propio --card-w (más angosto), así que no se amontonan. */
   .slot { max-width: 132px; }
-  .slotCardBox { width: 118px; height: 190px; }
-  .slotFlip { width: 118px !important; height: 190px !important; }
 
   /* El abanico no se agranda en desktop: la ceremonia vive DENTRO del panel
      izquierdo del split (~688px) durante los pasos. El arco compacto (max-width

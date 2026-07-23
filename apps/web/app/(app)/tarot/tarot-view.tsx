@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { dailyCard, cardImageUrl, cardBackUrl } from "@aluna/core";
+import { dailyCard, cardImageUrl, cardBackUrl, type TarotSpreadId } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
@@ -11,6 +11,7 @@ import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
 import { useSheetAutoClose } from "@/lib/viewport";
 import { Ceremony } from "./ceremony";
 import { ManualEntry } from "./manual-entry";
+import { SpreadPicker } from "./spread-picker";
 import { TarotInterpretation, tarotSelectionTitle, DIARY_SPREAD_KEY } from "./interpretation-content";
 import { isMobileViewport, type TarotSelection } from "./selection";
 import styles from "./tarot.module.css";
@@ -79,10 +80,10 @@ export function TarotView({ userId }: { userId: string }) {
   const dailyContent = cardsDict[daily.card.id]!;
 
   const [revealed, setRevealed] = useState(false);
-  // Ceremonia de tirada: null = nada activo; "three" = la tarjeta Tres cartas
-  // fue tocada. La ceremonia en sí (dibujar, componer, guardar) es Task 5 —
-  // este componente solo deja el punto de montaje listo.
-  const [ceremony, setCeremony] = useState<"three" | null>(null);
+  // Ceremonia de tirada: null = nada activo; una TarotSpreadId = esa tirada fue
+  // elegida en el SpreadPicker (T4: la ceremonia soporta cualquier tirada, no
+  // solo "three").
+  const [ceremony, setCeremony] = useState<TarotSpreadId | null>(null);
   // Paso actual de la ceremonia (lo reporta <Ceremony onStep>): durante los
   // pasos el split de dos paneles se mantiene; solo el resultado ("reading")
   // ocupa el ancho completo. null cuando no hay ceremonia.
@@ -298,36 +299,24 @@ export function TarotView({ userId }: { userId: string }) {
 
           <section className={styles.spreadsSection}>
             <h2 className={styles.sectionTitle}>{t("spreadsTitle")}</h2>
-            <div className={styles.spreadsGrid}>
-              <button
-                type="button"
-                className={`card card--interactive card--tight ${styles.spreadCard}`}
-                onClick={() => setCeremony("three")}
-              >
-                <span className={styles.spreadName}>{t("spreadThree")}</span>
-                <span className={styles.spreadDesc}>{t("spreadThreeDesc")}</span>
-              </button>
-              <div
-                className={`card card--dashed card--tight ${styles.spreadCard} ${styles.spreadDisabled}`}
-                role="button"
-                aria-disabled="true"
-              >
-                <span className={styles.spreadName}>{t("spreadCeltic")}</span>
-                <span className="chip">{t("spreadCelticSoon")}</span>
-              </div>
-              <button
-                type="button"
-                className={`card card--interactive card--tight ${styles.spreadCard}`}
-                onClick={() => setManualOpen(true)}
-              >
-                <span className={styles.spreadName}>{t("manualEntry")}</span>
-                <span className={styles.spreadDesc}>{t("manualEntryDesc")}</span>
-              </button>
-            </div>
+            {/* T4: el picker reusable reemplaza la grilla fija de 2 tarjetas —
+                cualquier tirada primaria/secundaria lanza la ceremonia digital.
+                "daily" se excluye: ya tiene su propio flujo dedicado arriba
+                (la carta del día). */}
+            <SpreadPicker onPick={(id) => setCeremony(id)} exclude={["daily"]} />
+            <button
+              type="button"
+              className={`card card--interactive card--tight ${styles.spreadCard}`}
+              onClick={() => setManualOpen(true)}
+            >
+              <span className={styles.spreadName}>{t("manualEntry")}</span>
+              <span className={styles.spreadDesc}>{t("manualEntryDesc")}</span>
+            </button>
           </section>
 
-          {ceremony === "three" && (
+          {ceremony !== null && (
             <Ceremony
+              spreadId={ceremony}
               deckCtx={deckCtx}
               onStep={setCeremonyStep}
               onClose={() => {

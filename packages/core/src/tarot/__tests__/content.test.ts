@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { TAROT_DECK } from "../deck";
-import { TAROT_CARDS_ES, composeReadingProse } from "../content-es";
-import { TAROT_CARDS_EN } from "../content-en";
+import { TAROT_CARDS_ES, READING_POSITION_LABELS_ES, composeReadingProse } from "../content-es";
+import { TAROT_CARDS_EN, READING_POSITION_LABELS_EN } from "../content-en";
+import { TAROT_SPREADS } from "../spreads";
 
 describe("contenido tarot", () => {
   it("cada carta cubierta existe en ES y EN con todos los campos no vacíos", () => {
@@ -21,6 +22,14 @@ describe("contenido tarot", () => {
   it("EN no es copia de ES (voz propia, no placeholder)", () => {
     for (const card of TAROT_DECK) {
       expect(TAROT_CARDS_EN[card.id]!.essence).not.toBe(TAROT_CARDS_ES[card.id]!.essence);
+    }
+  });
+  it("cada position.key de las 9 tiradas tiene entrada en READING_POSITION_LABELS_ES y _EN", () => {
+    for (const spread of TAROT_SPREADS) {
+      for (const position of spread.positions) {
+        expect(READING_POSITION_LABELS_ES[position.key], `${spread.id}/${position.key} (ES)`).toBeDefined();
+        expect(READING_POSITION_LABELS_EN[position.key], `${spread.id}/${position.key} (EN)`).toBeDefined();
+      }
     }
   });
 });
