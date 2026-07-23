@@ -78,14 +78,14 @@
 .dailyRevealBtn:hover { border-color: var(--acc); }
 
 .spreadsSection { margin-bottom: var(--sp-7); }
-.spreadsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
-/* Modo manual (T3, 3er item): ocupa la fila entera bajo las dos tiradas digitales. */
-.spreadsGrid > :nth-child(3) { grid-column: 1 / -1; }
+/* T4: el SpreadPicker (spread-picker.module.css) reemplazó la grilla fija de
+   2 tarjetas — .spreadCard sobrevive solo para el modo manual, que ya no
+   comparte grid con las tiradas digitales (spanea ancho completo debajo). */
 .spreadCard {
   display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2);
   text-align: left; font-family: inherit; cursor: pointer;
+  width: 100%; margin-top: var(--sp-4);
 }
-.spreadDisabled { cursor: not-allowed; }
 .spreadName { font-weight: 600; color: var(--ink); font-size: var(--text-md); }
 .spreadDesc { color: var(--soft); font-size: var(--text-xs); }
 

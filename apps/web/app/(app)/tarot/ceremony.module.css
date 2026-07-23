@@ -211,16 +211,10 @@
 .fanCount { color: var(--acc-text); font-size: var(--text-xs); letter-spacing: 1px; margin: 0; }
 
 /* ---------- slots (fan + reveal) ---------- */
-/* Móvil: cartas más chicas + gap menor para que una tirada de 3 entre en UNA
-   línea (~340px) sin partir a 2+1 (pedido de Gio). En desktop recuperan tamaño
-   (media query abajo), donde hay ancho de sobra. */
-.slotRow, .revealRow {
-  display: flex;
-  gap: var(--sp-2);
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
+/* T4: el lienzo (posiciones + forma) ahora lo dibuja <SpreadLayout> — este
+   módulo solo aporta el contenido de cada slot (dorso/flip/etiqueta), tamaños
+   fijos que valen para cualquier tirada. Móvil: cartas más chicas (media query
+   abajo agranda en desktop, donde hay ancho de sobra). */
 .slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 104px; min-width: 0; }
 .slotCardBox {
   width: 94px;

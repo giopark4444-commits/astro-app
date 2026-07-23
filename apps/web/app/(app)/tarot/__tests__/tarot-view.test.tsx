@@ -195,13 +195,17 @@ describe("TarotView", () => {
     );
   });
 
-  it("'Cruz celta' está deshabilitada con el chip 'Pronto · Plus' y no hace nada al tocarla", async () => {
+  // T4: la grilla fija de 2 tarjetas fue reemplazada por <SpreadPicker> — ya
+  // NO hay tirada "pronto"/deshabilitada; cualquier tirada primaria (ej. Cruz
+  // celta) lanza la ceremonia digital igual que "Tres cartas".
+  it("el picker de tiradas muestra 'Cruz celta' como tirada lanzable y la abre en la ceremonia", async () => {
     mockFetch();
     renderView();
-    expect(await screen.findByText(es.tarot.spreadCeltic)).toBeInTheDocument();
-    expect(screen.getByText(es.tarot.spreadCelticSoon)).toBeInTheDocument();
-    fireEvent.click(screen.getByText(es.tarot.spreadCeltic));
-    expect(screen.queryByTestId("ceremony-placeholder")).not.toBeInTheDocument();
+    const celticCard = await screen.findByRole("button", { name: new RegExp(es.tarot.spreadCelticCross) });
+    expect(screen.queryByTestId("ceremony")).not.toBeInTheDocument();
+    fireEvent.click(celticCard);
+    expect(await screen.findByTestId("ceremony")).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.questionTitle)).toBeInTheDocument();
   });
 
   it("el diario lista lo que trae el GET", async () => {
