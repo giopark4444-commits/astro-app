@@ -206,7 +206,7 @@ export function SettingsControls({
           costaría complejidad sin beneficio visual. Vive fuera de ambos
           bloques para que se vea en TODOS los anchos (.wrap se oculta
           ≥1080px, .compact se oculta <1080px — ver settings.module.css). */}
-      <section className={styles.section}>
+      <section className={`${styles.section} ${styles.voiceSection}`}>
         <h3 className={styles.label}>{t("voiceTitle")}</h3>
         <VoiceControls />
       </section>
