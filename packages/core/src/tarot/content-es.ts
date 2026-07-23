@@ -1425,7 +1425,7 @@ export interface ReadingComposeDicts {
   };
 }
 
-const READING_POSITION_LABELS_ES: Record<string, string> = {
+export const READING_POSITION_LABELS_ES: Record<string, string> = {
   day: "el día de hoy",
   past: "el pasado",
   present: "el presente",
@@ -1438,6 +1438,55 @@ const READING_POSITION_LABELS_ES: Record<string, string> = {
   environment: "tu entorno",
   "hopes-fears": "tus esperanzas y temores",
   outcome: "el desenlace posible",
+  // ---- relación ----
+  you: "quién eres tú en esto",
+  other: "quién es la otra persona",
+  connection: "lo que los conecta",
+  "your-feelings": "lo que tú sientes",
+  "their-feelings": "lo que la otra persona siente",
+  challenge: "el desafío del vínculo",
+  tendency: "hacia dónde va esto",
+  // ---- rueda del año ----
+  "month-1": "enero",
+  "month-2": "febrero",
+  "month-3": "marzo",
+  "month-4": "abril",
+  "month-5": "mayo",
+  "month-6": "junio",
+  "month-7": "julio",
+  "month-8": "agosto",
+  "month-9": "septiembre",
+  "month-10": "octubre",
+  "month-11": "noviembre",
+  "month-12": "diciembre",
+  theme: "el tema del año",
+  // ---- decisión ----
+  situation: "la situación",
+  "option-a": "la opción A",
+  "brings-a": "lo que trae la opción A",
+  "option-b": "la opción B",
+  "brings-b": "lo que trae la opción B",
+  unseen: "lo que no estás viendo",
+  advice: "el consejo",
+  // ---- herradura / cruz simple ----
+  hidden: "una influencia oculta",
+  obstacle: "el obstáculo",
+  cause: "la causa",
+  synthesis: "la síntesis",
+  // ---- chakras ----
+  "third-eye": "tu tercer ojo",
+  throat: "tu garganta",
+  solar: "tu plexo solar",
+  sacral: "tu sacro",
+  root: "tu raíz",
+  // ---- elementos ----
+  spirit: "el espíritu que envuelve todo",
+  air: "el aire",
+  fire: "el fuego",
+  water: "el agua",
+  earth: "la tierra",
+  // ---- sí o no ----
+  answer: "la respuesta",
 };
 
 const READING_ORDINALS_ES: readonly string[] = [

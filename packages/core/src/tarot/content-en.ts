@@ -1347,7 +1347,7 @@ export const TAROT_CARDS_EN: Record<string, TarotCardContent> = {
 // EN connective text below is written with its own sentence architecture —
 // different clause order and sentence counts from the ES originals — per the
 // lesson from T1 (Sonnet mirrors structure when it merely translates).
-const READING_POSITION_LABELS_EN: Record<string, string> = {
+export const READING_POSITION_LABELS_EN: Record<string, string> = {
   day: "today",
   past: "the past",
   present: "the present",
@@ -1360,6 +1360,55 @@ const READING_POSITION_LABELS_EN: Record<string, string> = {
   environment: "your surroundings",
   "hopes-fears": "your hopes and fears",
   outcome: "the possible outcome",
+  // ---- relationship ----
+  you: "who you are in this",
+  other: "who they are",
+  connection: "what connects you",
+  "your-feelings": "what you feel",
+  "their-feelings": "what they feel",
+  challenge: "the challenge between you",
+  tendency: "where this is heading",
+  // ---- year wheel ----
+  "month-1": "January",
+  "month-2": "February",
+  "month-3": "March",
+  "month-4": "April",
+  "month-5": "May",
+  "month-6": "June",
+  "month-7": "July",
+  "month-8": "August",
+  "month-9": "September",
+  "month-10": "October",
+  "month-11": "November",
+  "month-12": "December",
+  theme: "the theme of the year",
+  // ---- decision ----
+  situation: "the situation",
+  "option-a": "option A",
+  "brings-a": "what option A brings",
+  "option-b": "option B",
+  "brings-b": "what option B brings",
+  unseen: "what you're not seeing",
+  advice: "the advice",
+  // ---- horseshoe / simple cross ----
+  hidden: "a hidden influence",
+  obstacle: "the obstacle",
+  cause: "the cause",
+  synthesis: "the synthesis",
+  // ---- chakras ----
+  "third-eye": "your third eye",
+  throat: "your throat",
+  solar: "your solar plexus",
+  sacral: "your sacral",
+  root: "your root",
+  // ---- elements ----
+  spirit: "the spirit that holds it all",
+  air: "the air",
+  fire: "the fire",
+  water: "the water",
+  earth: "the earth",
+  // ---- yes or no ----
+  answer: "the answer",
 };
 
 const READING_ORDINALS_EN: readonly string[] = [
