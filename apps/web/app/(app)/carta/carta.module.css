@@ -279,9 +279,29 @@
   .techCard .paneOn { display: block; }
 
   /* panel de interpretación: ahora es lo único sticky — la técnica de la
-     izquierda scrollea libre dentro de .leftCol */
-  .interpCol { display: block; position: sticky; top: 84px; /* header 66px + respiro (mismo valor que tenía la rueda) */ }
-  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+     izquierda scrollea libre dentro de .leftCol. Apila interpretación (arriba)
+     + chat de Aluna (abajo), cada uno con su propio scroll: .interpCol pasa de
+     "block" a columna flex de alto ACOTADO (height, no max-height) para que
+     ambos hijos puedan repartirse ese alto con flex-basis; cada hijo necesita
+     min-height:0 para que su overflow-y:auto/overflow:hidden interno gane
+     sobre el tamaño de su contenido (si no, un flex item por defecto no
+     encoge bajo el tamaño de su contenido y el hijo desborda .interpCol en
+     vez de scrollear). */
+  .interpCol {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px; /* header 66px + respiro (mismo valor que tenía la rueda) */
+    height: calc(100vh - 100px);
+  }
+  .interpPanel {
+    display: flex; flex-direction: column; gap: var(--sp-3);
+    flex: 1 1 55%; min-height: 0; overflow-y: auto;
+  }
+  /* envoltura del chat (LensChatPanel): 45% del alto repartido, con un piso
+     (min-height) para que en pantallas bajas no se aplaste a la nada antes que
+     la interpretación ceda espacio. overflow:hidden — el que scrollea de
+     verdad es el .thread interno del ChatView embebido (ver
+     lens-chat-panel.module.css / chat.module.css .wrapEmbedded). */
+  .chatCol { display: flex; flex-direction: column; flex: 1 1 45%; min-height: 240px; overflow: hidden; }
 
   /* el toggle móvil (posición original en la columna técnica) cede el lugar
      al del pie de rueda (ChartControls.proToggle dentro de .ctrlRows). Doble

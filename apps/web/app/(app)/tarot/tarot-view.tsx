@@ -7,6 +7,7 @@ import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ShareButton } from "@/components/share/share-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
 import { useSheetAutoClose } from "@/lib/viewport";
 import { Ceremony } from "./ceremony";
@@ -233,11 +234,17 @@ export function TarotView({ userId }: { userId: string }) {
   );
 
   // Ancho completo (colapsa el split y oculta el panel derecho) SOLO en el
-  // resultado de la lectura (su propio split cartas|prosa necesita el ancho) o
-  // en el modo manual. Durante los pasos de la ceremonia (barajar/cortar/
-  // abanico/revelar) se conserva el split de dos paneles — pedido de Gio: la
-  // pantalla no debe desplegarse a ambos lados al tirar.
-  const readingResultFull = manualOpen || (ceremony !== null && ceremonyStep === "reading");
+  // resultado de la CEREMONIA digital (su propio split cartas|prosa necesita
+  // el ancho completo). El modo manual (mazo físico) YA NO colapsa el marco
+  // (fix — pedido repetido de Gio: "siempre dividida, nunca una columna
+  // grande"): conserva las dos columnas de .deskCols — izquierda con el
+  // asistente manual, derecha (.interpCol) con la interpretación + el chat de
+  // Aluna. Su propio split interno (manualGrid) pasa a una sola columna en
+  // manual-entry.module.css para no anidar columnas dentro de columnas.
+  // Durante los pasos de la ceremonia (barajar/cortar/abanico/revelar) se
+  // conserva igual el split de dos paneles — pedido de Gio: la pantalla no
+  // debe desplegarse a ambos lados al tirar.
+  const readingResultFull = ceremony !== null && ceremonyStep === "reading";
 
   return (
     <main className={styles.wrap}>
@@ -383,8 +390,13 @@ export function TarotView({ userId }: { userId: string }) {
         </div>
 
         {/* Panel de interpretación (100% desktop): en móvil lo reemplaza el
-            bottom-sheet de abajo. Se oculta cuando hay una lectura en curso
-            (ceremonia/manual) — la lectura manda; su split llega en T4. */}
+            bottom-sheet de abajo. Se oculta SOLO cuando la ceremonia digital
+            está en su resultado final (readingResultFull) — el modo manual ya
+            NO lo oculta: conserva el marco de 2 columnas (pedido de Gio) y
+            muestra la interpretación diaria/seleccionada + el chat de Aluna
+            mientras la lectura manual corre en la columna izquierda (leve
+            redundancia con el <ReadingChat> propio de la lectura manual,
+            aceptada — ver reporte). */}
         {!readingResultFull && (
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
@@ -404,6 +416,9 @@ export function TarotView({ userId }: { userId: string }) {
                 profileName=""
                 onSelect={select}
               />
+            </div>
+            <div className={styles.chatCol}>
+              <LensChatPanel />
             </div>
           </div>
         )}

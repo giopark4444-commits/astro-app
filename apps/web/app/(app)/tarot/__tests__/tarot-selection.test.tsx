@@ -27,6 +27,13 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(""),
 }));
 
+// El panel derecho ahora incluye <LensChatPanel> (ChatView embebido), que lee
+// useProfiles() y retorna null sin perfil activo — mismo baseline "sin
+// perfil" que horoscopo-view.test.tsx; estos tests de maestro-detalle no
+// ejercitan el chat, solo necesitan que no truene por falta de
+// <ProfilesProvider>.
+vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: null }) }));
+
 const USER_ID = "user-1";
 
 function localDateKey(): string {

@@ -34,8 +34,12 @@ describe("SpreadLayout", () => {
   // renderSlot), que lo aplica solo a la caja/imagen de la carta.
   it("celtic-cross: la posición 'crossing' pasa rotate=90 a renderSlot, y el wrapper NO rota", () => {
     const spread = spreadById("celtic-cross")!;
-    const renderSlot = vi.fn((position: TarotSpreadPosition, _index: number, _rotate: number) => (
-      <span>{position.key}</span>
+    // Usa los 3 args (los expone como data-attrs) para que el mock los tipe y el
+    // test pueda leer rotate en renderSlot.mock.calls[i][2].
+    const renderSlot = vi.fn((position: TarotSpreadPosition, index: number, rotate: number) => (
+      <span data-index={index} data-rotate={rotate}>
+        {position.key}
+      </span>
     ));
     render(<SpreadLayout spread={spread} renderSlot={renderSlot} />);
 
@@ -60,8 +64,12 @@ describe("SpreadLayout", () => {
 
   it("una posición sin rotate en spreads.ts recibe rotate=0 en renderSlot y el wrapper solo translada", () => {
     const spread = spreadById("three")!;
-    const renderSlot = vi.fn((position: TarotSpreadPosition, _index: number, _rotate: number) => (
-      <span>{position.key}</span>
+    // Usa los 3 args (los expone como data-attrs) para que el mock los tipe y el
+    // test pueda leer rotate en renderSlot.mock.calls[i][2].
+    const renderSlot = vi.fn((position: TarotSpreadPosition, index: number, rotate: number) => (
+      <span data-index={index} data-rotate={rotate}>
+        {position.key}
+      </span>
     ));
     render(<SpreadLayout spread={spread} renderSlot={renderSlot} />);
 

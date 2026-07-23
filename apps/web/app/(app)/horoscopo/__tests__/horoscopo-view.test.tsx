@@ -72,13 +72,23 @@ describe("HoroscopoView", () => {
     const first = deferred<{ ok: boolean; json: () => Promise<unknown> }>();
     const second = deferred<{ ok: boolean; json: () => Promise<unknown> }>();
     let calls = 0;
-    global.fetch = vi.fn(() => {
+    // El panel de chat de Aluna (interpCol → LensChatPanel → ChatView) también
+    // monta y dispara fetches propios y AJENOS al de horóscopo (retomar hilo,
+    // accesos rápidos, catálogo de modelos de prueba — todos best-effort) que
+    // este test no quiere contar. `calls` sigue midiendo solo los fetches a
+    // /api/horoscope/western (el foco real de este test); todo lo demás recibe
+    // una respuesta genérica inmediata.
+    global.fetch = vi.fn((url: unknown) => {
+      if (typeof url !== "string" || !url.includes("/api/horoscope/western")) {
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }
       calls += 1;
       return calls === 1 ? first.promise : second.promise;
     }) as unknown as typeof fetch;
 
     renderView();
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    await waitFor(() => expect(calls).toBe(1));
 
     // 1ª carga: sign=null, el backend resuelve el Sol natal → "aquarius". Eso
     // cambia `sign` (null → "aquarius"), que está en las deps del efecto, así
@@ -87,7 +97,7 @@ describe("HoroscopoView", () => {
     await act(async () => {
       first.resolve({ ok: true, json: async () => ({ ...PAYLOAD, sign: "aquarius" }) });
     });
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(calls).toBe(2));
 
     // La 2ª fetch queda deliberadamente sin resolver (never .resolve()'d). Si
     // el efecto reseteara a "loading" en esa re-ejecución (el bug de T8

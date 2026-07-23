@@ -11,6 +11,7 @@ import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ShareButton } from "@/components/share/share-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import type { ShareLensParams } from "@/lib/share/types";
 import styles from "./numerology-view.module.css";
 
@@ -216,6 +217,9 @@ export function NumerologyView({ embedded = false }: { embedded?: boolean } = {}
               <ShareButton params={shareParams} />
             </div>
             <NumerosInterpretation selected={activeSel} pro={pro} profileName={active.name} />
+          </div>
+          <div className={styles.chatCol}>
+            <LensChatPanel />
           </div>
         </div>
       </div>

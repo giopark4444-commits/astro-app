@@ -590,6 +590,7 @@
   },
   "chat": {
     "title": "Ask Aluna",
+    "lensChatTitle": "Ask Aluna",
     "greeting": "Ask me anything about your chart, your numbers, or your path. I answer from your sky.",
     "placeholder": "Type your question…",
     "send": "Send",

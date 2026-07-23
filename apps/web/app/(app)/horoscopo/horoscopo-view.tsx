@@ -9,6 +9,7 @@ import { useSheetAutoClose } from "@/lib/viewport";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ShareButton } from "@/components/share/share-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import type { ShareLensParams } from "@/lib/share/types";
 import { WesternView } from "./western-view";
 import { EasternView } from "./eastern-view";
@@ -146,6 +147,9 @@ export function HoroscopoView({ embedded = false }: { embedded?: boolean } = {})
               western={western} eastern={eastern}
               profileName={active?.name ?? ""}
             />
+          </div>
+          <div className={styles.chatCol}>
+            <LensChatPanel />
           </div>
         </div>
       </div>

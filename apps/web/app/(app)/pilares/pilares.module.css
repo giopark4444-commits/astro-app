@@ -334,8 +334,24 @@
   /* panel de interpretación: ahora es lo único sticky — la técnica de la
      izquierda scrollea libre dentro de .leftCol (mismo mecanismo que carta,
      carta.module.css .interpCol/.interpPanel). */
-  .interpCol { display: block; grid-column: 2; grid-row: 2; position: sticky; top: 84px; /* header 66px + respiro, mismo valor que carta */ }
-  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); max-height: calc(100vh - 100px); overflow-y: auto; }
+  /* Apila interpretación (arriba) + chat de Aluna (abajo), cada uno con su
+     propio scroll (mismo mecanismo que carta.module.css .interpCol): columna
+     flex de alto ACOTADO (height, no max-height) repartido por flex-basis
+     entre ambos hijos; cada hijo lleva min-height:0 para que su overflow
+     interno gane sobre el tamaño de su contenido. */
+  .interpCol {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    grid-column: 2; grid-row: 2; position: sticky; top: 84px; /* header 66px + respiro, mismo valor que carta */
+    height: calc(100vh - 100px);
+  }
+  .interpPanel {
+    display: flex; flex-direction: column; gap: var(--sp-3);
+    flex: 1 1 55%; min-height: 0; overflow-y: auto;
+  }
+  /* envoltura del chat (LensChatPanel): 45% del alto repartido, con un piso
+     (min-height) para pantallas bajas; overflow:hidden — el que scrollea de
+     verdad es el .thread interno del ChatView embebido. */
+  .chatCol { display: flex; flex-direction: column; flex: 1 1 45%; min-height: 240px; overflow: hidden; }
   .readingMobile { display: none; } /* desktop: el panel de la derecha reemplaza la card de Lectura móvil */
 
   /* Contrato Pro (spec §4): en R4b-3 el desktop dejaba TODO el contenido Pro

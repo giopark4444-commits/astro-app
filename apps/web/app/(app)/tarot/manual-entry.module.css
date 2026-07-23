@@ -188,27 +188,31 @@
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
   .readingCardBody { align-items: center; text-align: center; }
 
-  /* ---- Marco de 2 columnas siempre: asistente/técnica | lectura (sticky) ---- */
+  /* ---- Una sola columna SIEMPRE (fix — pedido de Gio): el manual ahora vive
+     DENTRO de .leftCol de tarot-view.tsx (el carril izquierdo del marco de 2
+     columnas .deskCols, ~55% del ancho) — si manualGrid abriera su PROPIO
+     split acá anidaría columnas dentro de columnas. El asistente (plantilla/
+     selector/jumpers) y, al llegar a "reading", las cartas + prosa/chat/
+     guardar/volver quedan apilados en una sola columna, igual que en móvil
+     (manualGrid ya era flex-column ahí — este bloque solo confirma que
+     desktop no reintroduce el grid 11fr/9fr). */
   .manualGrid {
-    display: grid;
-    grid-template-columns: 11fr 9fr;
-    gap: var(--sp-6);
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
     text-align: left;
   }
   .manualLeft {
-    grid-column: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
   }
-  .manualSide {
-    grid-column: 2;
-    position: sticky;
-    top: 84px;
-  }
-  .sidePlaceholder { display: flex; } /* desktop: sí se muestra el placeholder */
+  /* Ya NO es sticky ni columna aparte: fluye a ancho completo debajo de
+     .manualLeft (align-items por defecto de un flex-column es stretch, así
+     que toma el 100% del ancho sin declararlo). */
+  .manualSide { position: static; }
+  .sidePlaceholder { display: none; } /* una sola columna: no hace falta placeholder */
   .readingLeft {
     display: flex;
     flex-direction: column;

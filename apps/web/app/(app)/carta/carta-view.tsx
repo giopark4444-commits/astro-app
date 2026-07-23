@@ -16,6 +16,7 @@ import { Starfield } from "@/components/starfield";
 import { Icon } from "@/components/icon";
 import { Meaning } from "@/components/meaning";
 import { ShareButton } from "@/components/share/share-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import type { ShareLensParams } from "@/lib/share/types";
 import { ChartTabs, type ChartTab } from "./chart-tabs";
 import { ChartControls } from "./chart-controls";
@@ -383,7 +384,9 @@ export function CartaView({ embedded = false }: { embedded?: boolean } = {}) {
             </div>
           </div>
 
-          {/* panel de interpretación (desktop; sticky — oculto en móvil, que usa el sheet) */}
+          {/* panel de interpretación (desktop; sticky — oculto en móvil, que usa el sheet).
+              Apila interpretación + chat de Aluna, cada uno con su propio scroll
+              (ver carta.module.css .interpCol/.interpPanel/.chatCol). */}
           <div className={styles.interpCol}>
             <div className={`card ${styles.interpPanel}`}>
               <div className={styles.titleRow}>
@@ -393,6 +396,9 @@ export function CartaView({ embedded = false }: { embedded?: boolean } = {}) {
               <InterpretationContent selected={selected} pro={pro} coreSegs={coreSegs}
                 coreData={{ sun, moon, asc: ascPos ? { sign: ascSign, degree: ascPos.degree, minute: ascPos.minute } : null }}
                 profileName={active.name} />
+            </div>
+            <div className={styles.chatCol}>
+              <LensChatPanel />
             </div>
           </div>
         </div>
