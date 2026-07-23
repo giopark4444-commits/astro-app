@@ -1,24 +1,21 @@
 /* Panel de chat reusable en el interpCol de carta/horóscopo/números/pilares:
-   el chat de Aluna apilado BAJO la interpretación, cada uno con su propio
-   scroll (spec del plan). Raíz flex:1 + min-height:0: dentro del padre
-   `.interpCol` (flex column de alto acotado) toma el resto del espacio que le
-   ceden la interpretación y el gap — sin min-height:0 aquí, el ChatView
-   embebido (wrapEmbedded, height:100%) heredaría un alto sin límite superior
-   y desbordaría en vez de que su `.thread` scrollee por dentro (mismo
-   mecanismo que perfil.module.css .chatPanel > div). */
+   el chat de Aluna apilado BAJO la interpretación.
+   CORRECCIÓN (hallazgo de Gio en vivo, no solo en código): la receta anterior
+   era `flex:1; min-height:0; overflow:hidden;` para que el panel tomara
+   "el resto" del alto FIJO de `.interpCol` — medido en el navegador, esto
+   RECORTABA de verdad el panel (scrollHeight > clientHeight con overflow
+   oculto: el composer quedaba parcialmente tapado). `.interpCol` ya no tiene
+   una altura impuesta (ver carta.module.css), así que este panel ya no
+   necesita repartirse nada: crece con su contenido real (título + ChatView
+   completo). El marco (borde/radio/fondo) se conserva — sin overflow:hidden
+   no hay nada que recortar porque la caja ya no es más chica que su contenido. */
 .lensChatPanel {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  /* Marco ligero a TODA la sección del chat (pedido de Gio): delimita el
-     recuadro para que no parezca recortado. overflow:hidden recorta el
-     ChatView al radio del marco (su .thread scrollea por dentro). */
   border: 1px solid var(--line);
   border-radius: var(--radius-lg, 18px);
   background: var(--surface);
   padding: var(--sp-4);
-  overflow: hidden;
 }
 
 /* Título del panel (span) — misma receta que la serie (numerology-view/carta
@@ -34,10 +31,7 @@
   color: var(--acc-text);
 }
 
-/* Único hijo directo que envuelve el ChatView embebido: flex:1 + min-height:0
-   es el eslabón que deja a wrapEmbedded/.thread scrollear en vez de empujar
-   el título fuera del recorte. */
-.body {
-  flex: 1;
-  min-height: 0;
-}
+/* Único hijo directo que envuelve el ChatView embebido: sin flex/min-height
+   propios — ya no hace falta forzar nada, ChatView (wrapEmbedded) se pinta a
+   su alto natural. */
+.body {}

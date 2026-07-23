@@ -16,23 +16,21 @@
   font-family: var(--font-ui); font-size: var(--text-2xs); letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--acc-text); font-weight: 700; margin: 0 0 var(--sp-3);
 }
-/* El panel: columna flex de alto fijo. Definido en base (no @media) para que el
-   key exista siempre en el CSS module y la cadena flex quede en un solo lugar;
-   en móvil su padre .interpCol es display:none, así que nunca se pinta. */
+/* El panel: columna flex. Definido en base (no @media) para que el key exista
+   siempre en el CSS module; en móvil su padre .interpCol es display:none, así
+   que nunca se pinta.
+   CORRECCIÓN (hallazgo de Gio en vivo, no solo en código): la versión anterior
+   forzaba `height: calc(100vh - 100px)` + `overflow: hidden` — con una
+   conversación larga eso RECORTABA de verdad el panel (el composer quedaba
+   parcialmente tapado), no solo lo hacía scrollear. "Cada columna puede tener
+   el tamaño que quiera": ya no hay altura impuesta al panel — crece con su
+   contenido real (título + chat completo) sin recortar nada; el padre
+   `.interpCol` sigue sticky (ver @media abajo) mientras el contenido quepa. */
 .chatPanel {
   display: flex; flex-direction: column;
-  height: calc(100vh - 100px);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface); padding: var(--sp-4);
-  overflow: hidden;
 }
-/* El único <div> hijo directo del panel es la envoltura `.wrapEmbedded` del
-   ChatView (el otro hijo es el <span> del título). Este flex:1 + min-height:0 es
-   el eslabón que faltaba en la cadena: PF1 ya puso min-height:0 en wrapEmbedded y
-   overflow-y:auto en su .thread, pero sin flex-grow aquí el wrapEmbedded tomaría
-   su height:100% y empujaría el título fuera del recorte. Con esto, .thread
-   scrollea y el .composer (input) se asienta abajo. */
-.chatPanel > div { flex: 1; min-height: 0; }
 
 .hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); text-align: center; }
 .identity { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }

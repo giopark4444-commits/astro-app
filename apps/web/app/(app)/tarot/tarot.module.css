@@ -167,27 +167,19 @@
   .leftCol { min-width: 0; } /* evita el desborde de la grilla */
 
   /* panel de interpretación: lo único sticky — la técnica scrollea libre dentro
-     de .leftCol (mismo mecanismo que la serie). Apila interpretación (arriba)
-     + chat de Aluna (abajo), cada uno con su propio scroll: .interpCol pasa de
-     "block" a columna flex de alto ACOTADO (height, no max-height) para que
-     ambos hijos puedan repartirse ese alto con flex-basis; cada hijo necesita
-     min-height:0 para que su overflow-y:auto/overflow:hidden interno gane
-     sobre el tamaño de su contenido (mismo mecanismo que carta.module.css
-     .interpCol/.interpPanel/.chatCol). */
+     de .leftCol (mismo mecanismo que la serie). CORRECCIÓN (hallazgo de Gio en
+     vivo): la versión anterior forzaba `height: calc(100vh - 100px)` repartido
+     55/45 con overflow:hidden — eso RECORTABA de verdad el panel de chat
+     (composer parcialmente tapado), no solo lo hacía scrollear. Ya no hay
+     altura impuesta: crece con su contenido real y sigue sticky mientras quepa. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
     position: sticky; top: 84px; /* header 66px + respiro */
-    height: calc(100vh - 100px);
   }
-  .interpPanel {
-    display: flex; flex-direction: column; gap: var(--sp-3);
-    flex: 1 1 55%; min-height: 0; overflow-y: auto;
-  }
-  /* envoltura del chat (LensChatPanel): 45% del alto repartido, con un piso
-     (min-height) para que en pantallas bajas no se aplaste a la nada antes que
-     la interpretación ceda espacio. overflow:hidden — el que scrollea de
-     verdad es el .thread interno del ChatView embebido. */
-  .chatCol { display: flex; flex-direction: column; flex: 1 1 45%; min-height: 240px; overflow: hidden; }
+  .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); }
+  /* envoltura del chat (LensChatPanel): sin flex-basis/overflow propios — crece
+     con su contenido real, nunca recortado. */
+  .chatCol { display: flex; flex-direction: column; }
 
   /* El panel derecho ya rinde nombre/keywords/essence/prosa y el CTA "ver
      lectura" (que en móvil abre el sheet) es un no-op en desktop: se ocultan

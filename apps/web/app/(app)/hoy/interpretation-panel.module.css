@@ -6,7 +6,9 @@
   display: flex;
   flex-direction: column;
   flex: 0 1 auto;
-  max-height: 52%;
+  /* tope en vh (no %): el padre .interpCol ya no tiene altura impuesta — la
+     lectura larga scrollea adentro (.body) sin empujar el chat fuera de vista. */
+  max-height: 46vh;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: linear-gradient(165deg, color-mix(in srgb, var(--acc) 7%, var(--surface)), var(--surface) 60%);

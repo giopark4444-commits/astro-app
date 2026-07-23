@@ -99,16 +99,19 @@
    siempre en el módulo; en móvil su padre .interpCol es display:none. */
 .chatPanel {
   display: flex; flex-direction: column;
-  height: calc(100vh - 100px);
+  /* CORRECCIÓN (hallazgo de Gio en vivo, mismo fix que carta/pilares/etc.):
+     antes height: calc(100vh - 100px) + overflow:hidden — la altura impuesta
+     RECORTABA el composer del chat cuando el contenido real no cabía. Ahora
+     crece con su contenido; nada del chat queda tapado jamás. */
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface); padding: var(--sp-4);
-  overflow: hidden;
 }
 /* El único <div> hijo directo del panel es la envoltura `.wrapEmbedded` del
-   ChatView (el otro hijo es el <span> del título). flex:1 + min-height:0 = el
-   eslabón que deja al hilo scrollear y al composer asentarse abajo (misma
-   cadena documentada en perfil.module.css). */
-.chatPanel > div { flex: 1; min-height: 0; }
+   ChatView (el otro hijo es el <span> del título). Sin flex/min-height
+   forzados (fix anti-recorte): con .chatPanel a altura natural, wrapEmbedded
+   (height:100%) resuelve a su contenido — hilo y composer completos, nunca
+   tapados (misma cadena corregida en lens-chat-panel.module.css). */
+.chatPanel > div { display: flex; flex-direction: column; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* Encabezado en fila: nombre a la izquierda, fecha/fase lunar a la derecha. */
@@ -138,9 +141,9 @@
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
     position: sticky; top: 84px;
-    height: calc(100vh - 100px);
+    /* sin altura impuesta: interpretación + chat completos, cada uno con su
+       tamaño real; sticky mientras quepa (mismo criterio que carta). */
   }
-  .chatPanel { height: auto; flex: 1; min-height: 0; }
 
   /* Casillas de la izquierda que se explican al click en el panel derecho:
      affordance sutil (anillo acc al hover, sostenido al estar seleccionada). */
