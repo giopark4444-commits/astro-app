@@ -651,3 +651,167 @@ async function* sseData(body: ReadableStream<Uint8Array>): AsyncIterable<string>
     reader.releaseLock();
   }
 }
+
+// ---------------------------------------------------------------------------
+// VISIÓN (lectura de mano): proveedores que pueden MIRAR una foto
+// ---------------------------------------------------------------------------
+// Solo gemini/openai/anthropic son multimodales. La foto viaja como base64,
+// se procesa y SE DESCARTA — jamás se persiste (privacidad de la mano). El
+// resto de proveedores (hermes/deepseek/groq/...) no participan aquí.
+
+export interface VisionImage {
+  /** Base64 SIN prefijo data-URL. */
+  data: string;
+  mime: string;
+}
+
+export interface VisionCompleteOptions {
+  system: string;
+  prompt: string;
+  images: VisionImage[];
+  maxTokens: number;
+}
+
+export interface VisionProvider {
+  readonly name: string;
+  readonly model: string;
+  visionComplete(opts: VisionCompleteOptions): Promise<string>;
+}
+
+type ResolvedVision = { available: true; provider: VisionProvider } | { available: false };
+
+const VISION_TIMEOUT_MS = 90_000;
+
+function geminiVisionProvider(apiKey: string, modelOverride?: string): VisionProvider {
+  const model =
+    modelOverride || process.env.GEMINI_VISION_MODEL || process.env.GEMINI_READING_MODEL || "gemini-3.5-flash";
+  return {
+    name: "gemini",
+    model,
+    async visionComplete({ system, prompt, images, maxTokens }) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [
+            {
+              role: "user",
+              parts: [
+                ...images.map((im) => ({ inline_data: { mime_type: im.mime, data: im.data } })),
+                { text: prompt },
+              ],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: maxTokens,
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+        signal: AbortSignal.timeout(VISION_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`gemini vision ${res.status}`);
+      const json = (await res.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      return json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+    },
+  };
+}
+
+function openaiVisionProvider(apiKey: string, modelOverride?: string): VisionProvider {
+  const model =
+    modelOverride || process.env.OPENAI_VISION_MODEL || process.env.OPENAI_READING_MODEL || "gpt-4o";
+  return {
+    name: "openai",
+    model,
+    async visionComplete({ system, prompt, images, maxTokens }) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          model,
+          max_completion_tokens: maxTokens,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            {
+              role: "user",
+              content: [
+                ...images.map((im) => ({
+                  type: "image_url",
+                  image_url: { url: `data:${im.mime};base64,${im.data}` },
+                })),
+                { type: "text", text: prompt },
+              ],
+            },
+          ],
+        }),
+        signal: AbortSignal.timeout(VISION_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`openai vision ${res.status}`);
+      const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      return json.choices?.[0]?.message?.content ?? "";
+    },
+  };
+}
+
+function anthropicVisionProvider(apiKey: string, modelOverride?: string): VisionProvider {
+  // Sonnet 5 por defecto para visión (mejor resolución de líneas finas), no el
+  // ANTHROPIC_READING_MODEL de texto — son decisiones distintas.
+  const model = modelOverride || process.env.ANTHROPIC_VISION_MODEL || "claude-sonnet-5";
+  return {
+    name: "anthropic",
+    model,
+    async visionComplete({ system, prompt, images, maxTokens }) {
+      const client = new Anthropic({ apiKey });
+      const res = await client.messages.create({
+        model,
+        max_tokens: maxTokens,
+        system,
+        messages: [
+          {
+            role: "user",
+            content: [
+              ...images.map((im) => ({
+                type: "image" as const,
+                source: { type: "base64" as const, media_type: im.mime as "image/jpeg", data: im.data },
+              })),
+              { type: "text" as const, text: prompt },
+            ],
+          },
+        ],
+      });
+      return res.content.map((b) => (b.type === "text" ? b.text : "")).join("");
+    },
+  };
+}
+
+/** Proveedor de visión: override (si es multimodal y tiene llave) → gemini →
+ *  openai → anthropic. Sin ninguno → latente, como el resto de lecturas. */
+export function resolveVisionProvider(override?: ModelOverride | null): ResolvedVision {
+  if (override) {
+    const key =
+      override.provider === "gemini"
+        ? process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY
+        : override.provider === "openai"
+          ? process.env.OPENAI_API_KEY
+          : override.provider === "anthropic"
+            ? process.env.ANTHROPIC_API_KEY
+            : undefined;
+    if (key) {
+      if (override.provider === "gemini") return { available: true, provider: geminiVisionProvider(key, override.model) };
+      if (override.provider === "openai") return { available: true, provider: openaiVisionProvider(key, override.model) };
+      if (override.provider === "anthropic") return { available: true, provider: anthropicVisionProvider(key, override.model) };
+    }
+  }
+  const gk = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
+  if (gk) return { available: true, provider: geminiVisionProvider(gk) };
+  const ok = process.env.OPENAI_API_KEY;
+  if (ok) return { available: true, provider: openaiVisionProvider(ok) };
+  const ak = process.env.ANTHROPIC_API_KEY;
+  if (ak) return { available: true, provider: anthropicVisionProvider(ak) };
+  return { available: false };
+}
