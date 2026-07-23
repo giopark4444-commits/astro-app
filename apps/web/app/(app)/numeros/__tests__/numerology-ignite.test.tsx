@@ -38,6 +38,14 @@ function renderView() {
 describe("NumerologyView — ignición de números (motion, no contador)", () => {
   beforeEach(() => {
     mockActive.current = activeProfile;
+    // NumerologyView ahora monta LensChatPanel → ChatView en su interpCol
+    // (chat de Aluna bajo la interpretación): dispara fetches best-effort
+    // propios al montar (retomar hilo, accesos rápidos, catálogo de modelos
+    // de prueba). Sin mockear fetch, el fetch real de Node rechaza URLs
+    // relativas y el catch/finally corre fuera de act() cuando el test ya
+    // terminó — ruido en stderr sin ningún fallo real; una respuesta
+    // genérica inmediata lo evita.
+    global.fetch = vi.fn(async () => ({ ok: true, json: async () => ({}) })) as unknown as typeof fetch;
   });
 
   it("el número héroe (Camino de Vida) muestra el valor real y se enciende sin stagger (--i 0)", () => {

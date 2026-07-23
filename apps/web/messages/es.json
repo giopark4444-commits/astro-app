@@ -590,6 +590,7 @@
   },
   "chat": {
     "title": "Pregúntale a Aluna",
+    "lensChatTitle": "Pregúntale a Aluna",
     "greeting": "Pregúntame lo que quieras sobre tu carta, tus números o tu camino. Te respondo desde tu cielo.",
     "placeholder": "Escribe tu pregunta…",
     "send": "Enviar",

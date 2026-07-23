@@ -12,6 +12,7 @@ import { useCountUp } from "@/lib/motion/use-count-up";
 import { Starfield } from "@/components/starfield";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ShareButton } from "@/components/share/share-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import { ProLamina } from "./pro-lamina";
 import { PillarColumn } from "./pillar-column";
 import { PilaresTabs, FREE_TABS, type PilaresTab } from "./pilares-tabs";
@@ -292,6 +293,9 @@ export function PilaresView({ embedded = false }: { embedded?: boolean } = {}) {
                 profileName={active.name}
                 script={script}
               />
+            </div>
+            <div className={styles.chatCol}>
+              <LensChatPanel />
             </div>
           </div>
         </div>
