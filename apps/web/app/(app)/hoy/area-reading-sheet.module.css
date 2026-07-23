@@ -1,0 +1,50 @@
+/* Mini-lectura cálida de un área (BottomSheet al tocar una barra en Hoy).
+   Sobre los mismos tokens que area-bars.module.css / chat.module.css. */
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-4);
+}
+.label { font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); }
+.score {
+  font-family: var(--font-ui); font-size: var(--text-md); color: var(--soft);
+  font-variant-numeric: tabular-nums; margin-left: auto;
+}
+.tone { font-family: var(--font-ui); font-size: var(--text-xs); font-style: italic; color: var(--soft); }
+
+.loading { font-size: var(--text-sm); font-style: italic; color: var(--acc-text); margin: var(--sp-2) 0 var(--sp-5); }
+
+/* Mismo mecanismo que .dormant de chat.module.css (combinado con las clases
+   globales card/card--dashed en el JSX). */
+.dormant {
+  margin: var(--sp-2) auto var(--sp-5);
+  max-width: 32ch;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-5);
+}
+.dormantGlyph { font-size: var(--text-2xl); color: var(--acc-text); opacity: 0.85; }
+.dormantTitle { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--ink); }
+.dormantBody { margin: 0; font-size: var(--text-sm); font-style: italic; line-height: 1.6; color: var(--soft); }
+
+.reading {
+  font-size: var(--text-md); line-height: 1.6; color: var(--ink);
+  margin: 0 0 var(--sp-4); white-space: pre-wrap;
+}
+.tip {
+  font-size: var(--text-sm); line-height: 1.5; color: var(--soft);
+  background: var(--surface-2); border-radius: 14px;
+  padding: var(--sp-3) var(--sp-4); margin: 0 0 var(--sp-5);
+}
+.tipLabel { font-family: var(--font-display); color: var(--acc-text); font-style: normal; margin-right: var(--sp-1); }
+
+.cta {
+  display: block; text-align: center; font-family: var(--font-ui); font-size: var(--text-sm);
+  color: var(--acc-text); text-decoration: none;
+  padding: var(--sp-3); border-radius: 999px; border: 1px solid var(--line);
+}
+.cta:hover { background: var(--surface-2); }

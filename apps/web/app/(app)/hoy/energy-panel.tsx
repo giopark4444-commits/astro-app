@@ -12,6 +12,7 @@ import {
 import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
+import { AreaReadingSheet } from "./area-reading-sheet";
 import styles from "./energy.module.css";
 
 // HD4: las cuatro disciplinas que puntúan "tu energía de hoy" (ver /api/scores,
@@ -90,6 +91,14 @@ export function EnergyPanel({
   const [discipline, setDiscipline] = useState<Discipline>("general");
   const [scores, setScores] = useState<ScoresByDiscipline | null>(null);
   const [open, setOpen] = useState<LifeArea | null>(null);
+  // Mini-lectura cálida (BottomSheet) del área tocada: se abre EN PARALELO al
+  // "por qué" inline de siempre (setOpen, sin tocar) — no lo reemplaza, porque
+  // AreaBars es un componente controlado que también usa Horóscopo
+  // (western-view/eastern-view) con el mismo contrato onToggle, y ese cambio de
+  // interacción es SOLO para Hoy. El sheet se abre cada vez que se toca una
+  // barra (incluida la misma dos veces); cerrarlo no pisa el estado del "por
+  // qué" inline, que sigue viviendo en `open`.
+  const [sheetArea, setSheetArea] = useState<LifeArea | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -126,6 +135,30 @@ export function EnergyPanel({
   // de disciplina no dispara fetch, así que no hay "data" nueva que reordenar,
   // solo un índice distinto sobre lo que ya está en memoria.
   const areas = scores ? orderAreasByFocus(scores[discipline], focus) : null;
+  // Se separa de la expresión inline del JSX (antes vivía dentro de
+  // `areas={...}`) para poder buscar en ella el área abierta en el sheet
+  // (nombre + score ya traducidos, sin recalcularlos aparte).
+  const barAreas: BarArea[] | null = areas
+    ? areas.map((a): BarArea => ({
+        key: a.area,
+        label: t(`hoy.${AREA_KEY[a.area]}`),
+        score: a.score,
+        tone: a.tone,
+        toneLabel: t(`hoy.${TONE_KEY[a.tone]}`),
+        drivers: a.drivers.map((d) => ({
+          glyphs: (
+            <>
+              <Meaning k={planetMeaningKey(d.transit)}>{PLANET_GLYPH[d.transit]}</Meaning>{" "}
+              <Meaning k={`aspect.${d.aspect}`}>{ASPECT_GLYPHS[d.aspect]}</Meaning>{" "}
+              <Meaning k={planetMeaningKey(d.natal)}>{PLANET_GLYPH[d.natal]}</Meaning>
+            </>
+          ),
+          text: `${L.bodies[d.transit]} ${L.aspects[d.aspect]} ${t("carta.yourPossessive")} ${L.bodies[d.natal]}`,
+          favorable: d.favorable,
+        })),
+      }))
+    : null;
+  const sheetBar = sheetArea ? barAreas?.find((a) => a.key === sheetArea) : undefined;
 
   return (
     <section className={`card ${styles.panel}`}>
@@ -149,31 +182,32 @@ export function EnergyPanel({
 
       {areas === null ? (
         <p className={styles.loading}>{t("hoy.energyLoading")}</p>
-      ) : areas.length > 0 ? (
+      ) : barAreas && barAreas.length > 0 ? (
         <AreaBars
           calmText={discipline === "astros" ? t("hoy.calm") : t("hoy.calmGeneric")}
           open={open}
-          onToggle={(key) => setOpen((prev) => (prev === key ? null : (key as LifeArea)))}
-          areas={areas.map((a): BarArea => ({
-            key: a.area,
-            label: t(`hoy.${AREA_KEY[a.area]}`),
-            score: a.score,
-            tone: a.tone,
-            toneLabel: t(`hoy.${TONE_KEY[a.tone]}`),
-            drivers: a.drivers.map((d) => ({
-              glyphs: (
-                <>
-                  <Meaning k={planetMeaningKey(d.transit)}>{PLANET_GLYPH[d.transit]}</Meaning>{" "}
-                  <Meaning k={`aspect.${d.aspect}`}>{ASPECT_GLYPHS[d.aspect]}</Meaning>{" "}
-                  <Meaning k={planetMeaningKey(d.natal)}>{PLANET_GLYPH[d.natal]}</Meaning>
-                </>
-              ),
-              text: `${L.bodies[d.transit]} ${L.aspects[d.aspect]} ${t("carta.yourPossessive")} ${L.bodies[d.natal]}`,
-              favorable: d.favorable,
-            })),
-          }))}
+          onToggle={(key) => {
+            const area = key as LifeArea;
+            setOpen((prev) => (prev === area ? null : area));
+            // Mini-lectura cálida: se abre al tocar CUALQUIER barra, en paralelo
+            // al "por qué" inline de arriba (ver comentario de `sheetArea`).
+            setSheetArea(area);
+          }}
+          areas={barAreas}
         />
       ) : null}
+
+      {sheetArea && (
+        <AreaReadingSheet
+          open
+          onClose={() => setSheetArea(null)}
+          area={sheetArea}
+          label={sheetBar?.label ?? ""}
+          score={sheetBar?.score ?? 0}
+          toneLabel={sheetBar?.toneLabel ?? ""}
+          profileId={profileId}
+        />
+      )}
     </section>
   );
 }

@@ -70,18 +70,34 @@ describe("EnergyPanel — palancas de disciplina (general/astros/números/pilare
       addEventListener: () => {},
       removeEventListener: () => {},
     }));
-    fetchMock = vi.fn(async () => ({
-      ok: true,
-      json: async () => ({
-        period: "today",
-        general: GENERAL_AREAS,
-        astros: ASTROS_AREAS,
-        numeros: NUMEROS_AREAS,
-        pilares: PILARES_AREAS,
-      }),
-    })) as unknown as ReturnType<typeof vi.fn>;
+    // Discrimina por URL: /api/area-reading es el fetch NUEVO que dispara la
+    // mini-lectura al tocar una barra (ver AreaReadingSheet) — se le responde
+    // `available:false` (estado dormido, inerte) para no interferir con las
+    // aserciones existentes sobre el fetch de /api/scores.
+    fetchMock = vi.fn(async (url: unknown) => {
+      if (typeof url === "string" && url.includes("/api/area-reading")) {
+        return { ok: true, json: async () => ({ available: false }) };
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          period: "today",
+          general: GENERAL_AREAS,
+          astros: ASTROS_AREAS,
+          numeros: NUMEROS_AREAS,
+          pilares: PILARES_AREAS,
+        }),
+      };
+    }) as unknown as ReturnType<typeof vi.fn>;
     global.fetch = fetchMock as unknown as typeof fetch;
   });
+
+  /** Solo las llamadas a /api/scores — tocar una barra dispara ADEMÁS un fetch
+   *  a /api/area-reading (la mini-lectura del sheet), que estas aserciones no
+   *  quieren contar. */
+  function scoresCallCount(): number {
+    return fetchMock.mock.calls.filter(([url]) => typeof url === "string" && url.includes("/api/scores")).length;
+  }
 
   it("muestra General por defecto, con las 4 disciplinas como pestañas", async () => {
     renderPanel();
@@ -133,7 +149,27 @@ describe("EnergyPanel — palancas de disciplina (general/astros/números/pilare
     fireEvent.click(screen.getByRole("tab", { name: es.hoy.disciplineAstros }));
     await waitFor(() => expect(screen.getByText(LOVE_DRIVER_TEXT)).toBeInTheDocument());
     expect(screen.queryByText(es.hoy.calmGeneric)).not.toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // Un solo fetch a /api/scores (tocar la barra de arriba dispara ADEMÁS un
+    // fetch aparte a /api/area-reading para la mini-lectura — ver beforeEach).
+    expect(scoresCallCount()).toBe(1);
+  });
+
+  it("tocar una barra abre el BottomSheet de la mini-lectura, con el nombre y el score del área", async () => {
+    renderPanel();
+    await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(es.hoy.areaLove) }));
+
+    const dialog = await screen.findByRole("dialog", { name: `${es.hoy.areaLove} · 55` });
+    expect(within(dialog).getByText(es.hoy.areaLove)).toBeInTheDocument();
+    // El fetch a /api/area-reading viaja con el área tocada y period:"today"
+    // (Hoy ya no tiene selector de periodo).
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([url]) => typeof url === "string" && url.includes("/api/area-reading"));
+      expect(call).toBeDefined();
+      const sentBody = JSON.parse((call![1] as RequestInit).body as string);
+      expect(sentBody).toMatchObject({ profileId: "profile-1", area: "love", period: "today", locale: "es" });
+    });
   });
 
   it("el toggle de periodo ya no vive en el dashboard (siempre 'hoy')", async () => {
