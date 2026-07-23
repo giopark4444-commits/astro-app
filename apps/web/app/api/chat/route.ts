@@ -6,13 +6,17 @@ import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiveLenses } from "@/lib/chat-context";
-import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
+import { resolveReadingProvider, resolvePremiumProvider, type ChatMessage } from "@/lib/reading/provider";
 import { parseModelOverride } from "@/lib/reading/model-catalog";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { buildIntentLine } from "@/lib/intent-line";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 import { ensureThread, appendMessage } from "@/lib/chat-archive";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
+import { getCreditsServiceClient, spendCredits, refundSpend, bumpChatUsage } from "@/lib/credits/ledger";
+import { chatPremiumCost, freeDailyChatCap } from "@/lib/credits/config";
+import { allAccessEnabled } from "@/lib/plan-gate";
+import { isRequesterPlus } from "@/lib/billing/requester-plus";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -103,8 +107,59 @@ export async function POST(request: NextRequest) {
   // Override del picker de modelos (banco de pruebas): validado + gateado a
   // dev por parseModelOverride; inválido o apagado → null → resolución normal.
   const modelOverride = parseModelOverride(body.modelOverride);
-  const resolved = resolveReadingProvider(modelOverride);
-  if (!resolved.available) {
+
+  // --- créditos premium (spec 2026-07-23) ---
+  // Regla de oro: ningún camino llama al proveedor premium sin haber
+  // descontado crédito ANTES con éxito; sin service client o sin llave
+  // premium, lo premium se degrada al camino gratis de siempre (nunca 500).
+  let premiumState: "used" | "fallback" | "off" = "off";
+  let premiumSpendRef: string | null = null;
+  let premiumSpendAmount = 0;
+  let chosen = resolveReadingProvider(modelOverride);
+  const svc = getCreditsServiceClient();
+
+  // Tope diario del nivel gratis: solo corre con los candados de plan activos
+  // (allAccessEnabled() en falso) y con service client disponible — fail-open
+  // sin `svc` (un problema de infraestructura no debe bloquear a nadie). Va
+  // ANTES del gasto premium a propósito: un 429 nunca debe haber gastado
+  // crédito.
+  if (!allAccessEnabled() && svc) {
+    const plus = await isRequesterPlus(supabase, user.id);
+    if (!plus) {
+      const count = await bumpChatUsage(svc, user.id);
+      if (count !== null && count > freeDailyChatCap()) {
+        return NextResponse.json({ error: "daily_cap", cap: freeDailyChatCap() }, { status: 429 });
+      }
+    }
+  }
+
+  if (body.premium === true) {
+    const prem = resolvePremiumProvider();
+    if (prem.available) {
+      const cost = chatPremiumCost();
+      if (cost <= 0) {
+        // Costo 0 configurado = premium regalado, no un spend que pueda
+        // fallar: se usa directo, sin tocar el ledger (ni spend ni refund).
+        chosen = prem;
+        premiumState = "used";
+      } else if (svc) {
+        const ref = `spend:${crypto.randomUUID()}`;
+        const ok = await spendCredits(svc, user.id, cost, ref);
+        if (ok) {
+          chosen = prem;
+          premiumState = "used";
+          premiumSpendRef = ref;
+          premiumSpendAmount = cost;
+        } else {
+          premiumState = "fallback"; // sin saldo → Gemini/cascada, el camino gratis de siempre
+        }
+      }
+      // sin `svc` (sin config) → "off": el camino gratis de siempre, jamás 500.
+    }
+    // sin llave premium → "off": el camino gratis de siempre.
+  }
+
+  if (!chosen.available) {
     // Latente: aún no hay llave. El chat se enciende con la IA.
     return NextResponse.json({ available: false });
   }
@@ -166,7 +221,7 @@ export async function POST(request: NextRequest) {
   // los reenviamos como text/plain en streaming. Si el proveedor no soporta streaming,
   // su chatStream cae a entregar el resultado de chat() de una vez. Cualquier error
   // antes del primer byte se traduce a 502; una vez empezado el stream, se corta limpio.
-  const provider = resolved.provider;
+  const provider = chosen.provider;
   const encoder = new TextEncoder();
   let assistantReply = "";
   const stream = new ReadableStream<Uint8Array>({
@@ -180,6 +235,12 @@ export async function POST(request: NextRequest) {
         }
       } catch {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
+      }
+      // Reembolso best-effort: solo si de verdad hubo un spend (premiumSpendRef
+      // no nulo → costo > 0) y el proveedor premium no entregó NADA. Con costo
+      // 0 no hay nada que revertir (premiumSpendRef se queda en null en ese caso).
+      if (svc && premiumState === "used" && premiumSpendRef && assistantReply.length === 0) {
+        await refundSpend(svc, user.id, premiumSpendAmount, premiumSpendRef).catch(() => {});
       }
       controller.close();
     },
@@ -212,6 +273,9 @@ export async function POST(request: NextRequest) {
   if (threadId) headers["x-thread-id"] = threadId;
   // Con qué respondió de verdad (el picker lo muestra: "respondió hermes/…").
   headers["x-aluna-model"] = `${provider.name}/${provider.model}`;
+  // Contrato con la UI (Task 8): "used" | "fallback" | "off" — SIEMPRE presente,
+  // no solo cuando se pidió premium.
+  headers["x-aluna-premium"] = premiumState;
 
   return new Response(stream, { headers });
 }
