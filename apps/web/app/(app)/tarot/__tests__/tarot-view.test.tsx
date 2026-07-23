@@ -13,6 +13,12 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(""),
 }));
 
+// El panel derecho ahora incluye <LensChatPanel> (ChatView embebido), que lee
+// useProfiles() y retorna null sin perfil activo — mismo baseline "sin
+// perfil" que horoscopo-view.test.tsx; estos tests no ejercitan el chat, solo
+// necesitan que no truene por falta de <ProfilesProvider>.
+vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: null }) }));
+
 // userId fijo por test; localDate se calcula con el reloj REAL (nunca fake
 // timers: rompen `waitFor`/`findBy*` de RTL, que dependen de timers reales
 // para su polling). El componente y el test calculan la MISMA fecha con la
