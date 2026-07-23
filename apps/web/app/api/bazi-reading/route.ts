@@ -17,6 +17,7 @@ import type { Json } from "@aluna/supabase";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { isSolarChart, profileToChartInput } from "@/lib/chart";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { resolvePremiumReading } from "@/lib/credits/premium-reading";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { baziLabels } from "@/lib/content/bazi-labels";
 
@@ -131,13 +132,11 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   if (!profile) return NextResponse.json({ available: false, error: "not_found" }, { status: 404 });
 
-  const resolved = resolveReadingProvider();
-  if (!resolved.available) {
-    return NextResponse.json({ available: false });
-  }
-
   // Los hechos salen del MISMO camino que /api/bazi (efemérides server-side solo para
   // la longitud solar); nunca confiamos en pilares mandados por el cliente.
+  // Task 6: se computa ANTES de decidir premium/gasto (no depende del proveedor
+  // elegido) — así un fallo de cómputo nunca ocurre después de haber cobrado
+  // y no hace falta un refund por esta causa.
   let pillars: PillarSet;
   try {
     const input = profileToChartInput(profile, {});
@@ -164,11 +163,40 @@ export async function POST(request: NextRequest) {
   // voiceMode en la clave: ver chart-reading (cada modo produce texto distinto).
   const cacheKey = `${locale}:${profileId}:${length}:${voiceMode}:${profileName.toLowerCase()}`;
   const cache = getReadingCache();
-  try {
-    const hit = await cache.get(cacheKey);
-    if (hit) return NextResponse.json({ available: true, meaning: hit as unknown as BaziAiReading });
-  } catch {
-    /* miss silencioso → generamos */
+
+  // --- créditos premium (Task 6) — ver chart-reading para el detalle del patrón ---
+  const premiumKey = `premium:${cacheKey}`;
+  if (body.premium === true) {
+    try {
+      const hit = await cache.get(premiumKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as BaziAiReading },
+          { headers: { "x-aluna-premium": "used" } },
+        );
+      }
+    } catch {
+      /* miss silencioso → seguimos */
+    }
+  }
+
+  const pr = await resolvePremiumReading(request, body.premium, resolveReadingProvider());
+  if (!pr.provider.available) {
+    return NextResponse.json({ available: false }, { headers: { "x-aluna-premium": pr.headerValue } });
+  }
+
+  if (pr.headerValue !== "used") {
+    try {
+      const hit = await cache.get(cacheKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as BaziAiReading },
+          { headers: { "x-aluna-premium": pr.headerValue } },
+        );
+      }
+    } catch {
+      /* miss silencioso → generamos */
+    }
   }
 
   const userPrompt = buildFactsPrompt(pillars, profileName, locale, length);
@@ -178,9 +206,10 @@ export async function POST(request: NextRequest) {
   // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
   const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
 
-  const provider = resolved.provider;
+  const provider = pr.provider.provider;
   const opts = { system, prompt: userPrompt, maxTokens: 4000 };
   const encoder = new TextEncoder();
+  const targetCacheKey = pr.headerValue === "used" ? premiumKey : cacheKey;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let acc = "";
@@ -201,11 +230,18 @@ export async function POST(request: NextRequest) {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
       }
       controller.close();
-      const meaning = parseReading(acc.trim());
+      const trimmed = acc.trim();
+      if (!trimmed) {
+        // Regla de oro: cero caracteres emitidos tras un spend premium real →
+        // refund best-effort (no-op si no hubo spend, ver premium-reading.ts).
+        await pr.refundIfEmpty();
+        return;
+      }
+      const meaning = parseReading(trimmed);
       if (meaning) {
         cache
           .set({
-            key: cacheKey,
+            key: targetCacheKey,
             kind: "bazi",
             locale,
             model: provider.model,
@@ -223,6 +259,7 @@ export async function POST(request: NextRequest) {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store, no-transform",
       "x-accel-buffering": "no",
+      "x-aluna-premium": pr.headerValue,
     },
   });
 }

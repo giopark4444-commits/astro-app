@@ -14,6 +14,7 @@ import {
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { resolvePremiumReading } from "@/lib/credits/premium-reading";
 import { parseModelOverride } from "@/lib/reading/model-catalog";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { astroLabels } from "@/lib/content/astrology-labels";
@@ -283,11 +284,6 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   if (!profile) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const resolved = resolveReadingProvider(parseModelOverride(body.modelOverride));
-  if (!resolved.available) {
-    return NextResponse.json({ available: false });
-  }
-
   // tz del CLIENTE (como /api/scores): la "fecha local" que ancla el caché diario
   // debe coincidir con el "hoy" que el resto del dashboard le muestra a la
   // persona, no con la tz del proceso server (Vercel = UTC) ni forzosamente la de
@@ -297,14 +293,10 @@ export async function POST(request: NextRequest) {
   const localDate = `${asOf.year}-${String(asOf.month).padStart(2, "0")}-${String(asOf.day).padStart(2, "0")}`;
 
   const cacheKey = `${profileId}:${area}:${period}:${locale}:${voiceMode}:${localDate}`;
-  const cached = getCachedAreaReading(cacheKey);
-  if (cached) {
-    return NextResponse.json(
-      { available: true, reading: cached.reading, tip: cached.tip },
-      { headers: { "x-aluna-model": cached.model } },
-    );
-  }
 
+  // areaScore no depende del proveedor elegido (premium o no): se computa ANTES
+  // de decidir premium/gasto (Task 6), así un fallo de cómputo nunca ocurre
+  // después de haber cobrado y no hace falta revertir nada por esta causa.
   let areaScore: { score: number; tone: ScoreTone; drivers: AreaDriver[] };
   try {
     const input = profileToChartInput(profile, {});
@@ -315,6 +307,36 @@ export async function POST(request: NextRequest) {
     areaScore = scoreAreaOverDates(area, input, fixed, sampleDates(period));
   } catch {
     return NextResponse.json({ error: "compute" }, { status: 500 });
+  }
+
+  // --- créditos premium (Task 6) — ver chart-reading para el detalle del patrón.
+  // Diferencia con chart-reading: esta ruta NO streamea (JSON directo vía
+  // provider.complete()) y el caché es el Map en memoria de arriba, no el
+  // durable de @aluna/compute — mismas garantías, adaptadas a esa forma.
+  const premiumKey = `premium:${cacheKey}`;
+  if (body.premium === true) {
+    const hit = getCachedAreaReading(premiumKey);
+    if (hit) {
+      return NextResponse.json(
+        { available: true, reading: hit.reading, tip: hit.tip },
+        { headers: { "x-aluna-model": hit.model, "x-aluna-premium": "used" } },
+      );
+    }
+  }
+
+  const pr = await resolvePremiumReading(request, body.premium, resolveReadingProvider(parseModelOverride(body.modelOverride)));
+  if (!pr.provider.available) {
+    return NextResponse.json({ available: false }, { headers: { "x-aluna-premium": pr.headerValue } });
+  }
+
+  if (pr.headerValue !== "used") {
+    const cached = getCachedAreaReading(cacheKey);
+    if (cached) {
+      return NextResponse.json(
+        { available: true, reading: cached.reading, tip: cached.tip },
+        { headers: { "x-aluna-model": cached.model, "x-aluna-premium": pr.headerValue } },
+      );
+    }
   }
 
   const L = astroLabels(locale);
@@ -333,7 +355,7 @@ export async function POST(request: NextRequest) {
   // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
   const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
 
-  const provider = resolved.provider;
+  const provider = pr.provider.provider;
   let text: string;
   try {
     // 1200 y no ~700: los modelos pensantes (Gemini 3.6) gastan parte del
@@ -341,20 +363,28 @@ export async function POST(request: NextRequest) {
     // sin tokens para la respuesta y la ruta devolvería bad_response.
     text = await provider.complete({ system, prompt: userPrompt, maxTokens: 1200 });
   } catch {
-    return NextResponse.json({ error: "upstream" }, { status: 502 });
+    // Regla de oro: esta ruta no streamea — si el proveedor lanza, la persona
+    // no recibió NADA (a diferencia de las rutas con stream, acá no hay chunks
+    // parciales ya entregados). Un spend premium real se revierte siempre
+    // (refundIfEmpty es no-op si no hubo spend).
+    await pr.refundIfEmpty();
+    return NextResponse.json({ error: "upstream" }, { status: 502, headers: { "x-aluna-premium": pr.headerValue } });
   }
 
   const parsed = parseAreaReading(text);
   if (!parsed) {
-    return NextResponse.json({ error: "bad_response" }, { status: 502 });
+    // Mismo razonamiento: JSON no parseable = cero contenido útil entregado.
+    await pr.refundIfEmpty();
+    return NextResponse.json({ error: "bad_response" }, { status: 502, headers: { "x-aluna-premium": pr.headerValue } });
   }
 
   // Mismo formato proveedor/modelo que las rutas de chat (el picker lo muestra).
   const modelUsed = `${provider.name}/${provider.model}`;
-  setCachedAreaReading(cacheKey, { reading: parsed.reading, tip: parsed.tip, model: modelUsed });
+  const targetCacheKey = pr.headerValue === "used" ? premiumKey : cacheKey;
+  setCachedAreaReading(targetCacheKey, { reading: parsed.reading, tip: parsed.tip, model: modelUsed });
 
   return NextResponse.json(
     { available: true, reading: parsed.reading, tip: parsed.tip },
-    { headers: { "x-aluna-model": modelUsed } },
+    { headers: { "x-aluna-model": modelUsed, "x-aluna-premium": pr.headerValue } },
   );
 }

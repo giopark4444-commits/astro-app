@@ -36,6 +36,17 @@ vi.mock("@/lib/reading/provider", () => ({
   resolveReadingProvider: (...args: unknown[]) => resolveReadingProviderMock(...args),
 }));
 
+// resolvePremiumReading (Task 6) se mockea con un default "transparente" (free,
+// header off, mismo provider que le pasen) para que las pruebas EXISTENTES de
+// arriba (que no mandan `premium` en el body) sigan comportándose exactamente
+// igual que antes de esta task. La lógica de gasto/refund en sí se prueba en
+// aislado en lib/credits/__tests__/premium-reading.test.ts; el describe
+// "créditos premium (Task 6)" de más abajo sobreescribe este mock por test.
+const resolvePremiumReadingMock = vi.fn();
+vi.mock("@/lib/credits/premium-reading", () => ({
+  resolvePremiumReading: (...args: unknown[]) => resolvePremiumReadingMock(...args),
+}));
+
 import { POST } from "../route";
 
 const PROFILE = {
@@ -89,6 +100,13 @@ describe("POST /api/area-reading", () => {
     scoreToneMock.mockImplementation((score: number) => (score >= 60 ? "high" : score <= 40 ? "low" : "mixed"));
     scoreLifeAreasMock.mockReturnValue(sixAreas());
     resolveReadingProviderMock.mockReturnValue({ available: true, provider: fakeProvider() });
+    // Default "transparente" de resolvePremiumReading — ver comentario del mock arriba.
+    resolvePremiumReadingMock.mockImplementation(async (_req: unknown, _flag: unknown, fallback: unknown) => ({
+      mode: "free",
+      provider: fallback,
+      headerValue: "off",
+      refundIfEmpty: async () => {},
+    }));
   });
 
   // NOTA: cada test usa un profileId ÚNICO (aunque no ejercite el caché a
@@ -215,6 +233,85 @@ describe("POST /api/area-reading", () => {
       await POST(fakeRequest({ ...base, voiceMode: "intima" }));
 
       expect(completeMock).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("créditos premium (Task 6)", () => {
+    // A diferencia de chart-reading (streaming + caché durable), esta ruta
+    // responde JSON directo (provider.complete(), sin stream) y cachea en el
+    // Map en memoria del módulo — mismas garantías (spend antes del proveedor
+    // premium, caché premium separada con prefijo, refund si no se entrega
+    // nada), adaptadas a esa forma. La lógica de gasto/refund en sí se prueba
+    // en aislado en lib/credits/__tests__/premium-reading.test.ts.
+
+    it("premium:true con saldo → usa el proveedor premium, header 'used', cachea bajo la clave premium (HIT sin volver a gastar)", async () => {
+      const premiumComplete = vi.fn(async () => JSON.stringify({ reading: "Premium.", tip: "Consejo premium." }));
+      const premiumProvider = fakeProvider({ model: "claude-sonnet-5", complete: premiumComplete });
+      resolvePremiumReadingMock.mockResolvedValue({
+        mode: "premium",
+        provider: { available: true, provider: { ...premiumProvider, name: "anthropic" } },
+        headerValue: "used",
+        refundIfEmpty: vi.fn(),
+      });
+
+      const body = { profileId: "profile-premium-1", area: "love", period: "today", locale: "es", premium: true };
+      const res = await POST(fakeRequest(body));
+      expect(res.status).toBe(200);
+      expect(res.headers.get("x-aluna-premium")).toBe("used");
+      expect(await res.json()).toEqual({ available: true, reading: "Premium.", tip: "Consejo premium." });
+      expect(premiumComplete).toHaveBeenCalledTimes(1);
+
+      // Segundo request idéntico: HIT de la caché premium (Map en memoria) →
+      // nunca vuelve a llamar a resolvePremiumReading (nunca vuelve a gastar).
+      resolvePremiumReadingMock.mockClear();
+      const res2 = await POST(fakeRequest(body));
+      expect(res2.status).toBe(200);
+      expect(res2.headers.get("x-aluna-premium")).toBe("used");
+      expect(await res2.json()).toEqual({ available: true, reading: "Premium.", tip: "Consejo premium." });
+      expect(resolvePremiumReadingMock).not.toHaveBeenCalled();
+      expect(premiumComplete).toHaveBeenCalledTimes(1); // no se regeneró
+    });
+
+    it("premium:true pero resolvePremiumReading degrada a 'fallback' → usa el proveedor normal, header 'fallback'", async () => {
+      const freeComplete = vi.fn(async () => JSON.stringify({ reading: "Libre.", tip: "Consejo libre." }));
+      const free = fakeProvider({ complete: freeComplete });
+      resolveReadingProviderMock.mockReturnValue({ available: true, provider: free });
+      resolvePremiumReadingMock.mockResolvedValue({
+        mode: "free",
+        provider: { available: true, provider: free },
+        headerValue: "fallback",
+        refundIfEmpty: vi.fn(),
+      });
+
+      const res = await POST(
+        fakeRequest({ profileId: "profile-premium-2", area: "love", period: "today", locale: "es", premium: true }),
+      );
+      expect(res.status).toBe(200);
+      expect(res.headers.get("x-aluna-premium")).toBe("fallback");
+      expect(freeComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it("proveedor no parseable tras spend premium → 502 bad_response Y refundIfEmpty() llamado (nada streamea acá: cero contenido entregado)", async () => {
+      const refundIfEmpty = vi.fn();
+      const badProvider = fakeProvider({ complete: vi.fn(async () => "no es json") });
+      resolvePremiumReadingMock.mockResolvedValue({
+        mode: "premium",
+        provider: { available: true, provider: badProvider },
+        headerValue: "used",
+        refundIfEmpty,
+      });
+
+      const res = await POST(
+        fakeRequest({ profileId: "profile-premium-3", area: "love", period: "today", locale: "es", premium: true }),
+      );
+      expect(res.status).toBe(502);
+      expect(refundIfEmpty).toHaveBeenCalledTimes(1);
+    });
+
+    it("sin 'premium' en el body → header 'off' (comportamiento neutro de siempre)", async () => {
+      const res = await POST(fakeRequest({ profileId: "profile-premium-4", area: "love", period: "today", locale: "es" }));
+      expect(res.status).toBe(200);
+      expect(res.headers.get("x-aluna-premium")).toBe("off");
     });
   });
 });
