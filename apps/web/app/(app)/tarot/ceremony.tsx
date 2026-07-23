@@ -22,7 +22,6 @@ import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ShareModal } from "@/components/share/share-modal";
 import { ReadingChat } from "./reading-chat";
 import { positionLabelKey } from "./position-labels";
-import { SpreadLayout } from "./spread-layout";
 import tarot from "./tarot.module.css";
 import styles from "./ceremony.module.css";
 
@@ -319,26 +318,22 @@ export function Ceremony({
             </div>
           </div>
           <p className={styles.fanCount}>{t("fanCount", { n: state.picked.length, total: spread.cardCount })}</p>
-          <SpreadLayout
-            spread={spread}
-            ariaLabel={t("fanTitle")}
-            renderSlot={(pos, i, rotate) => (
-              <div className={styles.slot}>
-                <div
-                  className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}
-                  style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
-                >
+          {/* Fila que fluye (no lienzo absoluto): las cajas de carta altas +
+              etiqueta desbordaban el lienzo corto de SpreadLayout y se
+              encimaban con el título/contador. */}
+          <div className={styles.slotRow} role="group" aria-label={t("fanTitle")}>
+            {spread.positions.map((pos, i) => (
+              <div key={pos.key} className={styles.slot} data-position-key={pos.key}>
+                <div className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}>
                   {i < state.picked.length && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                   )}
                 </div>
-                {/* I3: el rotate va SOLO en la caja de arriba — el label queda
-                    horizontal y legible (antes rotaba con todo el wrapper). */}
                 <span className={styles.slotLabel}>{t(positionLabelKey(pos.key))}</span>
               </div>
-            )}
-          />
+            ))}
+          </div>
         </div>
       )}
 
@@ -346,25 +341,22 @@ export function Ceremony({
         <div className={styles.stepPane}>
           <h3 className={styles.stepTitle}>{t("revealTitle")}</h3>
           <p className={styles.stepHint}>{t("revealHint")}</p>
-          <SpreadLayout
-            spread={spread}
-            ariaLabel={t("revealTitle")}
-            renderSlot={(pos, i, rotate) => {
+          {/* Fila que fluye (no lienzo absoluto): cada carta con su nombre +
+              palabras es contenido alto que el posicionamiento por coordenadas
+              centraba en su punto y encimaba con el título y el botón "Leer". */}
+          <div className={styles.revealRow} role="group" aria-label={t("revealTitle")}>
+            {spread.positions.map((pos, i) => {
               const d = state.drawn[i]!;
               const content = cardsDict[d.card.id]!;
               const flipped = state.flipped[i]!;
               return (
-                <div className={styles.slot}>
+                <div key={pos.key} className={styles.slot} data-position-key={pos.key}>
                   {/* Flip 3D: reutiliza el patrón .flipCard/.face del umbral
-                      (tarot.module.css), con el tamaño de slot de la ceremonia.
-                      I3: el rotate de la posición (ej. celtic "crossing") va
-                      SOLO en este botón (la carta) — el label de abajo y el
-                      revealBody quedan horizontales, sin girar con el wrapper. */}
+                      (tarot.module.css), con el tamaño de slot de la ceremonia. */}
                   <button
                     type="button"
                     data-testid="reveal-card"
                     className={`${tarot.flipCard} ${styles.slotFlip} ${flipped ? tarot.flipped : ""}`}
-                    style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
                     aria-label={flipped ? content.name : t("revealHint")}
                     onClick={() => dispatch({ type: "flip", slot: i })}
                   >
@@ -392,8 +384,8 @@ export function Ceremony({
                   )}
                 </div>
               );
-            }}
-          />
+            })}
+          </div>
           {allFlipped && (
             <button type="button" className={styles.primaryBtn} onClick={() => dispatch({ type: "read" })}>
               {t("revealRead")}

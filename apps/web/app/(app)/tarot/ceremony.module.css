@@ -215,6 +215,27 @@
    módulo solo aporta el contenido de cada slot (dorso/flip/etiqueta), tamaños
    fijos que valen para cualquier tirada. Móvil: cartas más chicas (media query
    abajo agranda en desktop, donde hay ancho de sobra). */
+/* Fila que fluye para los slots (pick) y el reveal. Reemplaza al lienzo
+   absoluto <SpreadLayout> DENTRO de la ceremonia: con cartas altas
+   (aspect-ratio 0.6) + etiqueta + nombre + palabras, el posicionamiento
+   absoluto por coordenadas (cada carta centrada en su punto con
+   translate(-50%,-50%)) desbordaba el lienzo corto de las tiradas
+   horizontales y se encimaba con el título de arriba y el botón de abajo.
+   Una fila con wrap centrada fluye sin solaparse en cualquier tirada (3 a 10
+   cartas). SpreadLayout sigue existiendo como componente puro (con sus tests)
+   por si más adelante se dibuja un diagrama real, pero no para contenido con
+   texto alto. */
+.slotRow,
+.revealRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--sp-5) var(--sp-4);
+  width: 100%;
+  margin: var(--sp-2) auto 0;
+}
+
 .slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 104px; min-width: 0; }
 .slotCardBox {
   /* I2: el tamaño lo decide el slot del layout (--card-w vía SpreadLayout,
