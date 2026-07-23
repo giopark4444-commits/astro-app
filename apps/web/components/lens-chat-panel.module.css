@@ -11,6 +11,14 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  /* Marco ligero a TODA la sección del chat (pedido de Gio): delimita el
+     recuadro para que no parezca recortado. overflow:hidden recorta el
+     ChatView al radio del marco (su .thread scrollea por dentro). */
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg, 18px);
+  background: var(--surface);
+  padding: var(--sp-4);
+  overflow: hidden;
 }
 
 /* Título del panel (span) — misma receta que la serie (numerology-view/carta
