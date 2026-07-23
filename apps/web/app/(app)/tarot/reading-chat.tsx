@@ -11,6 +11,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
+import { getVoiceMode } from "@/lib/voice-mode";
 import styles from "./reading-chat.module.css";
 
 export interface ReadingChatCard {
@@ -64,6 +65,7 @@ export function ReadingChat({
         ...(profileId ? { profileId } : {}),
         messages: nextMessages,
         modelOverride: devModel,
+        voiceMode: getVoiceMode(),
       }),
     });
 

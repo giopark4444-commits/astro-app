@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { composeBaziReading, type BaziReading, type PillarSet } from "@aluna/core";
+import { getVoiceMode } from "@/lib/voice-mode";
 import styles from "./pilares.module.css";
 
 // Selector de profundidad para "Lectura de tus pilares" (Ba Zi/Saju). "Esencia" es
@@ -64,7 +65,8 @@ export function BaziReadingView({
       setSt({ s: "base" });
       return;
     }
-    const key = `${locale}:${next}`;
+    // voiceMode en la clave: ver body-reading (cada modo produce texto distinto).
+    const key = `${locale}:${next}:${getVoiceMode()}`;
     const hit = cache.current.get(key);
     if (hit) {
       setSt({ s: "ready", r: hit });
@@ -75,7 +77,7 @@ export function BaziReadingView({
       const res = await fetch("/api/bazi-reading", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profileId, profileName, length: next, locale }),
+        body: JSON.stringify({ profileId, profileName, length: next, locale, voiceMode: getVoiceMode() }),
       });
       const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
       if (!isStream) {

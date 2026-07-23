@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon";
 import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
+import { getVoiceMode } from "@/lib/voice-mode";
 import { ChatLenses, type TarotCardRef } from "./chat-lenses";
 import { QuickQuestions } from "./quick-questions";
 import styles from "./chat.module.css";
@@ -102,6 +103,7 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
           tarotCard,
           threadId,
           modelOverride: devModel,
+          voiceMode: getVoiceMode(),
         }),
       });
       // El primer turno crea el hilo server-side; lo aprendemos del header

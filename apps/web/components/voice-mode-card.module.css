@@ -1,0 +1,58 @@
+/* Selector del modo de Aluna: tres opciones tipo radio, sobre tokens del tema. */
+.eyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--soft);
+  margin: 0 0 6px;
+}
+.hint {
+  font-size: var(--text-sm);
+  color: var(--soft);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.option:hover {
+  border-color: var(--acc);
+}
+.selected {
+  border-color: var(--acc);
+  background: rgba(var(--acc-rgb), 0.08);
+}
+.emoji {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.desc {
+  font-size: var(--text-xs);
+  color: var(--soft);
+  line-height: 1.35;
+}

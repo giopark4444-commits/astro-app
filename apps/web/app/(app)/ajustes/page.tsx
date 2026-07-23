@@ -19,6 +19,7 @@ import { EntitiesCard } from "./entities-card";
 import { EssenceCard } from "./essence-card";
 import { MemoryDataCard } from "./memory-data-card";
 import { DevModelGuide } from "@/components/dev-model-guide";
+import { VoiceModeCard } from "@/components/voice-mode-card";
 import styles from "./ajustes.module.css";
 
 // Labels de la sección Legal: reusan el título ya localizado de cada
@@ -109,6 +110,10 @@ export default async function AjustesPage({
           memoryEnabled={memoryEnabled}
         />
       </section>
+
+      {/* Modo de Aluna (🌙 íntima / 📚 estudio / 🔭 pro): cómo cuenta lo que
+          ve — por dispositivo, ver components/voice-mode-card.tsx. */}
+      <VoiceModeCard />
 
       {/* Memoria de Aluna (reorg ajustes): Esencia+Recuerdos+Entidades+Datos
           agrupados bajo UN encabezado — cada tarjeta conserva su propio

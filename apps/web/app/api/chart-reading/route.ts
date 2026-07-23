@@ -7,6 +7,7 @@ import {
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import type { Json } from "@aluna/supabase";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import type { BodyReading } from "@/lib/content/astrology-readings-es";
 
@@ -117,7 +118,10 @@ export async function POST(request: NextRequest) {
 
   // El nombre entra a la clave porque el prompt personaliza con él (misma
   // razón que /api/reading): evita servir la lectura de una cuenta a otra.
-  const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}:${profileName.toLowerCase()}`;
+  const voiceMode = parseVoiceMode(body.voiceMode);
+  // voiceMode en la clave: cada modo (🌙/📚/🔭) produce texto distinto — sin él,
+  // cambiar de modo serviría la lectura cacheada del modo anterior.
+  const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}:${voiceMode}:${profileName.toLowerCase()}`;
   const cache = getReadingCache();
   // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
   // Lectura best-effort: si el caché falla (red), seguimos y generamos.
@@ -143,8 +147,13 @@ export async function POST(request: NextRequest) {
   // parsea los campos sobre la marcha; al cerrar, parseamos el texto acumulado,
   // validamos los tres campos y lo guardamos en el caché durable con la misma forma
   // estructurada de siempre. Si el stream no entrega nada, caemos a complete() una vez.
+  // Modo de voz (🌙/📚/🔭) al FINAL del system: los modos estudio/pro son un
+  // bloque de anulación de la voz — última instrucción gana — que conserva
+  // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
+  const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
+
   const provider = resolved.provider;
-  const opts = { system: SYSTEM[locale], prompt: userPrompt, maxTokens: 4000 };
+  const opts = { system, prompt: userPrompt, maxTokens: 4000 };
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {

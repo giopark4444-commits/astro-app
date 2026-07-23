@@ -165,7 +165,7 @@ describe("POST /api/area-reading", () => {
     expect(res.status).toBe(502);
   });
 
-  describe("caché por (profileId, area, period, locale, fecha local)", () => {
+  describe("caché por (profileId, area, period, locale, modo de voz, fecha local)", () => {
     it("la segunda llamada el MISMO día no vuelve a llamar al proveedor (cache hit)", async () => {
       const completeMock = vi.fn(async () =>
         JSON.stringify({ reading: "Primera lectura.", tip: "Primer consejo." }),
@@ -197,6 +197,22 @@ describe("POST /api/area-reading", () => {
       await POST(fakeRequest({ profileId: "profile-cache-2", area: "love", period: "today", locale: "es" }));
       await POST(fakeRequest({ profileId: "profile-cache-3", area: "love", period: "today", locale: "es" }));
       await POST(fakeRequest({ profileId: "profile-cache-2", area: "money", period: "today", locale: "es" }));
+
+      expect(completeMock).toHaveBeenCalledTimes(3);
+    });
+
+    it("mismo profileId/area/period/locale pero distinto voiceMode NO comparte caché", async () => {
+      const completeMock = vi.fn(async () =>
+        JSON.stringify({ reading: "Lectura.", tip: "Consejo." }),
+      );
+      resolveReadingProviderMock.mockReturnValue({ available: true, provider: fakeProvider({ complete: completeMock }) });
+
+      const base = { profileId: "profile-cache-voice", area: "love", period: "today", locale: "es" };
+      await POST(fakeRequest({ ...base, voiceMode: "intima" }));
+      await POST(fakeRequest({ ...base, voiceMode: "estudio" }));
+      await POST(fakeRequest({ ...base, voiceMode: "pro" }));
+      // Repite "intima": sigue siendo un HIT de SU propia entrada, no llama de nuevo.
+      await POST(fakeRequest({ ...base, voiceMode: "intima" }));
 
       expect(completeMock).toHaveBeenCalledTimes(3);
     });

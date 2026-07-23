@@ -7,6 +7,7 @@ import {
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import type { Json } from "@aluna/supabase";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { POSITION_LENS_ES, type NumberMeaning } from "@/lib/content/numerology-es";
 import { POSITION_LENS_EN } from "@/lib/content/numerology-en";
 
@@ -179,8 +180,13 @@ export async function POST(request: NextRequest) {
   // y lo guardamos en el caché durable con la MISMA forma estructurada de siempre.
   // Si el proveedor no entrega nada por stream (o corta antes del primer byte),
   // caemos a complete() una vez para no quedarnos sin lectura.
+  // Modo de voz (🌙/📚/🔭) al FINAL del system: los modos estudio/pro son un
+  // bloque de anulación de la voz — última instrucción gana — que conserva
+  // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
+  const system = applyVoiceMode(SYSTEM[locale], parseVoiceMode(body.voiceMode), locale);
+
   const provider = resolved.provider;
-  const opts = { system: SYSTEM[locale], prompt: userPrompt, maxTokens: 6000 };
+  const opts = { system, prompt: userPrompt, maxTokens: 6000 };
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {

@@ -8,6 +8,7 @@ import { profileToNumerologyInput } from "@/lib/numerology";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
 import { parseModelOverride } from "@/lib/reading/model-catalog";
+import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { buildTarotContext, type TarotChatCardInput } from "@/lib/tarot/reading-chat-context";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 import { ensureThread, appendMessage } from "@/lib/chat-archive";
@@ -191,6 +192,11 @@ export async function POST(request: NextRequest) {
     const memoryBlock = await buildMemoryBlocks(supabase, user.id, locale);
     if (memoryBlock) system = `${system}\n\n${memoryBlock}`;
   }
+
+  // Modo de voz (🌙/📚/🔭) al FINAL del system: los modos estudio/pro son un
+  // bloque de anulación de la voz — última instrucción gana — que conserva
+  // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
+  system = applyVoiceMode(system, parseVoiceMode(body.voiceMode), locale);
 
   // Streaming token a token (efecto de tecleo), espejo exacto de /api/chat.
   const provider = resolved.provider;

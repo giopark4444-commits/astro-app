@@ -15,6 +15,7 @@ import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { resolveReadingProvider } from "@/lib/reading/provider";
 import { parseModelOverride } from "@/lib/reading/model-catalog";
+import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { todayCivilInZone, isValidTz } from "@/lib/hoy/today-birth";
 
@@ -204,8 +205,8 @@ function parseAreaReading(text: string): { reading: string; tip: string } | null
 // — clave por composición astrológica, SIN profileId — porque las lecturas de
 // carta/horóscopo son contenido universal que se comparte entre TODOS los
 // usuarios con la misma posición/signo (ver reading-cache.ts). La mini-lectura de
-// área es lo opuesto: personal y del DÍA (profileId + area + period + fecha
-// local). Cada fila serviría a un único usuario una única vez y jamás se
+// área es lo opuesto: personal y del DÍA (profileId + area + period + modo de
+// voz + fecha local). Cada fila serviría a un único usuario una única vez y jamás se
 // reutilizaría entre personas — persistirla en una tabla global acumularía para
 // siempre filas de un solo uso sin ningún beneficio, y ligaría un profileId a
 // contenido de IA en una tabla pensada para ser anónima/compartida. Un Map de
@@ -258,6 +259,10 @@ export async function POST(request: NextRequest) {
   const area = String(body.area ?? "") as LifeArea;
   const period = String(body.period ?? "") as Period;
   const locale: "es" | "en" = body.locale === "en" ? "en" : "es";
+  // Modo de voz (🌙/📚/🔭): entra en la cacheKey de abajo — si no, una persona
+  // que cambia de modo recibiría la lectura cacheada del modo anterior el
+  // mismo día. Ver lib/reading/voices.ts.
+  const voiceMode = parseVoiceMode(body.voiceMode);
 
   if (
     !profileId ||
@@ -291,7 +296,7 @@ export async function POST(request: NextRequest) {
   const asOf = todayCivilInZone(clientTz ?? profile.time_zone);
   const localDate = `${asOf.year}-${String(asOf.month).padStart(2, "0")}-${String(asOf.day).padStart(2, "0")}`;
 
-  const cacheKey = `${profileId}:${area}:${period}:${locale}:${localDate}`;
+  const cacheKey = `${profileId}:${area}:${period}:${locale}:${voiceMode}:${localDate}`;
   const cached = getCachedAreaReading(cacheKey);
   if (cached) {
     return NextResponse.json(
@@ -323,13 +328,18 @@ export async function POST(request: NextRequest) {
     .join("\n");
   const userPrompt = buildUserPrompt(locale, areaLabel, areaScore.score, toneWord, driverLines);
 
+  // Modo de voz (🌙/📚/🔭) al FINAL del system: los modos estudio/pro son un
+  // bloque de anulación de la voz — última instrucción gana — que conserva
+  // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
+  const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
+
   const provider = resolved.provider;
   let text: string;
   try {
     // 1200 y no ~700: los modelos pensantes (Gemini 3.6) gastan parte del
     // presupuesto en razonar antes de emitir el JSON; con margen corto se quedan
     // sin tokens para la respuesta y la ruta devolvería bad_response.
-    text = await provider.complete({ system: SYSTEM[locale], prompt: userPrompt, maxTokens: 1200 });
+    text = await provider.complete({ system, prompt: userPrompt, maxTokens: 1200 });
   } catch {
     return NextResponse.json({ error: "upstream" }, { status: 502 });
   }

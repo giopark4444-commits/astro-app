@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { NumberMeaning } from "@/lib/content/numerology-es";
+import { getVoiceMode } from "@/lib/voice-mode";
 import styles from "./numerology-view.module.css";
 
 // Selector de profundidad de la lectura. "Esencia" es la voz escrita a mano
@@ -70,7 +71,8 @@ export function NumberReading({
       setState({ status: "base" });
       return;
     }
-    const key = `${locale}:${position}:${value}:${next}`;
+    // voiceMode en la clave: ver body-reading (cada modo produce texto distinto).
+    const key = `${locale}:${position}:${value}:${next}:${getVoiceMode()}`;
     const hit = cache.current.get(key);
     if (hit) {
       setState({ status: "ready", meaning: hit });
@@ -81,7 +83,7 @@ export function NumberReading({
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ value, position, length: next, profileName, calc, locale }),
+        body: JSON.stringify({ value, position, length: next, profileName, calc, locale, voiceMode: getVoiceMode() }),
       });
 
       // Latente (sin llave), HIT de caché o error de validación → JSON. Sin stream

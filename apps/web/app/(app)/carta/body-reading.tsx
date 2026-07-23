@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { BodyReading } from "@/lib/content/astrology-readings-es";
+import { getVoiceMode } from "@/lib/voice-mode";
 import styles from "./carta.module.css";
 
 // Selector de profundidad para la lectura de una posición de la carta. "Esencia"
@@ -66,7 +67,9 @@ export function BodyReadingView({
       setSt({ s: "base" });
       return;
     }
-    const key = `${locale}:${body}:${sign}:${house}:${next}`;
+    // voiceMode en la clave: cambiar de modo en Ajustes no debe servir la lectura
+    // cacheada del modo anterior (misma regla que el caché del servidor).
+    const key = `${locale}:${body}:${sign}:${house}:${next}:${getVoiceMode()}`;
     const hit = cache.current.get(key);
     if (hit) {
       setSt({ s: "ready", r: hit });
@@ -77,7 +80,7 @@ export function BodyReadingView({
       const res = await fetch("/api/chart-reading", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ body, sign, house, dignity, profileName, length: next, locale }),
+        body: JSON.stringify({ body, sign, house, dignity, profileName, length: next, locale, voiceMode: getVoiceMode() }),
       });
 
       // Latente (sin llave), HIT de caché o error de validación → JSON. Sin stream:

@@ -11,6 +11,7 @@ import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
+import { getVoiceMode } from "@/lib/voice-mode";
 import styles from "./timeline-chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -39,7 +40,7 @@ function TimelineChatBody({ profileId }: { profileId: string }) {
     const res = await fetch("/api/timeline/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ locale, profileId, messages: nextMessages, modelOverride: devModel }),
+      body: JSON.stringify({ locale, profileId, messages: nextMessages, modelOverride: devModel, voiceMode: getVoiceMode() }),
     });
 
     // Quién respondió de verdad (banco A/B de pruebas), antes de leer el stream.

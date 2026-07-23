@@ -17,6 +17,7 @@ import type { Json } from "@aluna/supabase";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { isSolarChart, profileToChartInput } from "@/lib/chart";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { baziLabels } from "@/lib/content/bazi-labels";
 
 // Niveles profundos IA de "Lectura de tus pilares" (Ba Zi/Saju). Espeja EXACTAMENTE
@@ -159,7 +160,9 @@ export async function POST(request: NextRequest) {
   // El nombre entra a la clave porque el prompt personaliza con él (mismo patrón de
   // seguridad que /api/chart-reading: sin esto, la lectura de un perfil podría
   // servirse con el nombre de otro perfil que comparta los mismos pilares).
-  const cacheKey = `${locale}:${profileId}:${length}:${profileName.toLowerCase()}`;
+  const voiceMode = parseVoiceMode(body.voiceMode);
+  // voiceMode en la clave: ver chart-reading (cada modo produce texto distinto).
+  const cacheKey = `${locale}:${profileId}:${length}:${voiceMode}:${profileName.toLowerCase()}`;
   const cache = getReadingCache();
   try {
     const hit = await cache.get(cacheKey);
@@ -170,8 +173,13 @@ export async function POST(request: NextRequest) {
 
   const userPrompt = buildFactsPrompt(pillars, profileName, locale, length);
 
+  // Modo de voz (🌙/📚/🔭) al FINAL del system: los modos estudio/pro son un
+  // bloque de anulación de la voz — última instrucción gana — que conserva
+  // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
+  const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
+
   const provider = resolved.provider;
-  const opts = { system: SYSTEM[locale], prompt: userPrompt, maxTokens: 4000 };
+  const opts = { system, prompt: userPrompt, maxTokens: 4000 };
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
