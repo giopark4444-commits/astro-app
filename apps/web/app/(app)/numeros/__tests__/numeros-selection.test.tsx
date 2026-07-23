@@ -47,6 +47,10 @@ const panelCalc = (panel: HTMLElement) => panel.querySelector('[class*="calcMini
 
 beforeEach(() => {
   mockState.active = PROFILE_A;
+  // NumerologyView ahora monta el chat (LensChatPanel → ChatView), que hace
+  // fetch en el mount (/api/chat/thread, /api/quick-questions); mock best-effort
+  // para evitar warnings de act() y llamadas de red reales en el test.
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) }));
   // Default: desktop → el router escribe el panel derecho (setSelected), no el sheet.
   vi.stubGlobal("matchMedia", (q: string) => ({
     matches: false,
