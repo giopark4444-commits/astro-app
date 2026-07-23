@@ -83,7 +83,11 @@ function keyFor(name: ProviderName): string | undefined {
  *  OLLAMA_ENABLED=1, cae a Ollama (local, sin llave) como último recurso;
  *  READING_PROVIDER=ollama lo fuerza (siempre que OLLAMA_ENABLED=1). Sin
  *  llaves y sin OLLAMA_ENABLED → latente. */
-export function resolveReadingProvider(override?: ModelOverride | null): ResolvedProvider {
+export function resolveReadingProvider(
+  override?: ModelOverride | null,
+  opts?: { timeoutMs?: number },
+): ResolvedProvider {
+  const timeoutMs = opts?.timeoutMs ?? 60000;
   const configured = (process.env.READING_PROVIDER ?? "").toLowerCase();
   const ollamaEnabled = process.env.OLLAMA_ENABLED === "1";
 
@@ -93,21 +97,21 @@ export function resolveReadingProvider(override?: ModelOverride | null): Resolve
   if (override) {
     if (override.provider === "ollama") {
       if (ollamaEnabled) {
-        return { available: true, provider: ollamaProvider(ollamaTimeoutMs(), override.model) };
+        return { available: true, provider: ollamaProvider(Math.max(ollamaTimeoutMs(), timeoutMs), override.model) };
       }
     } else if (override.provider === "deepseek") {
       const key = process.env.DEEPSEEK_API_KEY;
-      if (key) return { available: true, provider: deepseekProvider(key, 60000, override.model) };
+      if (key) return { available: true, provider: deepseekProvider(key, timeoutMs, override.model) };
     } else if (override.provider === "groq") {
       const key = process.env.GROQ_API_KEY;
-      if (key) return { available: true, provider: groqProvider(key, 60000, override.model) };
+      if (key) return { available: true, provider: groqProvider(key, timeoutMs, override.model) };
     } else if (override.provider === "openrouter") {
       const key = process.env.OPENROUTER_API_KEY;
-      if (key) return { available: true, provider: openrouterProvider(key, 60000, override.model) };
+      if (key) return { available: true, provider: openrouterProvider(key, timeoutMs, override.model) };
     } else {
       const key = keyFor(override.provider);
       if (key) {
-        return { available: true, provider: makeProvider(override.provider, key, override.model) };
+        return { available: true, provider: makeProvider(override.provider, key, override.model, timeoutMs) };
       }
     }
   }
@@ -122,20 +126,20 @@ export function resolveReadingProvider(override?: ModelOverride | null): Resolve
 
   for (const name of candidates) {
     const key = keyFor(name);
-    if (key) return { available: true, provider: makeProvider(name, key) };
+    if (key) return { available: true, provider: makeProvider(name, key, undefined, timeoutMs) };
   }
 
   if (ollamaEnabled) {
-    return { available: true, provider: ollamaProvider(ollamaTimeoutMs()) };
+    return { available: true, provider: ollamaProvider(Math.max(ollamaTimeoutMs(), timeoutMs)) };
   }
 
   return { available: false };
 }
 
-function makeProvider(name: ProviderName, apiKey: string, modelOverride?: string): ReadingProvider {
-  if (name === "hermes") return hermesProvider(apiKey, 60000, modelOverride);
-  if (name === "openai") return openaiProvider(apiKey, modelOverride);
-  if (name === "gemini") return geminiProvider(apiKey, modelOverride);
+function makeProvider(name: ProviderName, apiKey: string, modelOverride?: string, timeoutMs = 60000): ReadingProvider {
+  if (name === "hermes") return hermesProvider(apiKey, timeoutMs, modelOverride);
+  if (name === "openai") return openaiProvider(apiKey, modelOverride, timeoutMs);
+  if (name === "gemini") return geminiProvider(apiKey, modelOverride, timeoutMs);
   return anthropicProvider(apiKey, modelOverride);
 }
 
@@ -199,7 +203,7 @@ function anthropicProvider(apiKey: string, modelOverride?: string): ReadingProvi
   };
 }
 
-function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider {
+function openaiProvider(apiKey: string, modelOverride?: string, timeoutMs = 60000): ReadingProvider {
   const model = modelOverride || process.env.OPENAI_READING_MODEL || "gpt-4o";
   return {
     name: "openai",
@@ -217,7 +221,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
             { role: "user", content: prompt },
           ],
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) throw new Error(`openai ${res.status}`);
       const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
@@ -239,7 +243,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
             { role: "user", content: prompt },
           ],
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok || !res.body) throw new Error(`openai ${res.status}`);
       for await (const data of sseData(res.body)) {
@@ -262,7 +266,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           max_completion_tokens: maxTokens,
           messages: [{ role: "system", content: system }, ...messages],
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) throw new Error(`openai ${res.status}`);
       const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
@@ -278,7 +282,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           stream: true,
           messages: [{ role: "system", content: system }, ...messages],
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok || !res.body) throw new Error(`openai ${res.status}`);
       // SSE: líneas "data: {json}" con choices[0].delta.content, fin con "data: [DONE]".
@@ -296,7 +300,7 @@ function openaiProvider(apiKey: string, modelOverride?: string): ReadingProvider
   };
 }
 
-function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider {
+function geminiProvider(apiKey: string, modelOverride?: string, timeoutMs = 60000): ReadingProvider {
   const model = modelOverride || process.env.GEMINI_READING_MODEL || "gemini-3.5-flash";
   return {
     name: "gemini",
@@ -311,7 +315,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) throw new Error(`gemini ${res.status}`);
       const json = (await res.json()) as {
@@ -330,7 +334,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           // Mismo modo JSON que complete(): el texto troceado es el objeto JSON.
           generationConfig: { maxOutputTokens: maxTokens, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok || !res.body) throw new Error(`gemini ${res.status}`);
       for await (const data of sseData(res.body)) {
@@ -358,7 +362,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           })),
           generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingBudget: 0 } },
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) throw new Error(`gemini ${res.status}`);
       const json = (await res.json()) as {
@@ -381,7 +385,7 @@ function geminiProvider(apiKey: string, modelOverride?: string): ReadingProvider
           })),
           generationConfig: { maxOutputTokens: maxTokens, thinkingConfig: { thinkingBudget: 0 } },
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok || !res.body) throw new Error(`gemini ${res.status}`);
       for await (const data of sseData(res.body)) {

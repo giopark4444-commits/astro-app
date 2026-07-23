@@ -77,7 +77,10 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const voiceMode = parseVoiceMode(body.voiceMode);
-  const resolved = resolveReadingProvider(parseModelOverride(body.modelOverride));
+  // 150s y no los 60s por defecto: la lectura de mano es la generación one-shot
+  // más larga de la app (7 secciones con cuerpo) y el free tier congestionado
+  // la cortaba justo al minuto.
+  const resolved = resolveReadingProvider(parseModelOverride(body.modelOverride), { timeoutMs: 150_000 });
   if (!resolved.available) {
     return NextResponse.json({ available: false });
   }
