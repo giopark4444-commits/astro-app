@@ -1,8 +1,9 @@
 /* R2: valores sobre la escala tokenizada (ver lib/theme/tokens.css). Lectura
-   de mano: máquina de estados de UN SOLO CARRIL (intro → captura → lectura),
-   a diferencia de numeros/pilares (maestro-detalle 2 columnas) — el flujo es
-   secuencial/ceremonial, así que se queda en una columna centrada también en
-   desktop (mismo criterio que informe.module.css). */
+   de mano: máquina de estados de UN SOLO CARRIL (intro → captura → lectura) —
+   la lógica y el flujo NO cambian (Task 5). En desktop, ese carril pasa a ser
+   la columna IZQUIERDA de un maestro-detalle (mismo patrón que carta/pilares/
+   numeros/horoscopo/tarot: `align-items: start`, carril derecho sticky); en
+   móvil sigue siendo una sola columna, igual que antes. */
 .wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; max-width: 640px; margin: 0 auto; }
 .sky { position: absolute; inset: 0 0 auto; height: 240px; pointer-events: none; z-index: 0; }
 
@@ -12,6 +13,36 @@
   font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm));
   font-style: italic; color: var(--ink); margin: 0; line-height: 1.1;
 }
+
+/* ===== Maestro-detalle (Task 5) ===== */
+/* Móvil: `.deskCols` es transparente (display:contents) y `.interpCol` no se
+   monta visible — el carril izquierdo (`.leftCol`) queda como única columna,
+   DOM y look idénticos a como estaban antes de este task. */
+.deskCols { display: contents; }
+.leftCol { min-width: 0; }
+.interpCol { display: none; }
+
+/* Panel explicativo (carril derecho, ANTES de que exista una lectura): le da
+   contenido de verdad al panel derecho mientras el carril izquierdo hace su
+   camino (intro → captura → análisis → avisos) — sin esto quedaría vacío
+   hasta que exista una lectura. Contenido DISTINTO al de IntroScreen (no
+   duplica introP1/introP2, que se quedan intactos a la izquierda/móvil):
+   vista previa de las 6 secciones que trae la lectura, con los MISMOS labels
+   de `section.*` que arma la lectura real (ver SECTION_KEYS/ReadingResult). */
+.explainer { display: flex; flex-direction: column; gap: var(--sp-3); }
+.explainerLead { margin: 0; font-size: var(--text-2xs); letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc-text); font-weight: 700; }
+.explainerList { display: flex; flex-wrap: wrap; gap: var(--sp-1); list-style: none; margin: 0; padding: 0; }
+.explainerItem {
+  font-size: var(--text-2xs); color: var(--acc-text); font-weight: 600;
+  border: 1px solid rgba(var(--acc-rgb), 0.35); border-radius: 999px;
+  padding: var(--sp-1) var(--sp-3); background: rgba(var(--acc-rgb), 0.08);
+}
+
+/* Resumen compacto (carril izquierdo, con la lectura YA lista): mismo
+   contenido que antes cerraba ReadingScreen entera (restoredNote + acciones);
+   el detalle completo de las 6 secciones se muda al panel derecho (.reading,
+   receta sin cambios — ver ReadingResult). */
+.readingDone { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-align: center; }
 
 /* ---------------- Intro ceremonial ---------------- */
 .intro { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-5); align-items: center; text-align: center; }
@@ -132,5 +163,30 @@
 .askCta:hover { background: var(--surface-2); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
-  .wrap { padding-bottom: var(--sp-7); } /* sin bottom-nav en desktop, paridad con carta/hoy/informe */
+  .wrap { padding-bottom: var(--sp-7); max-width: none; } /* sin bottom-nav en desktop, paridad con carta/hoy/informe; el cap de 640px era del carril único — el maestro-detalle necesita más ancho, como el resto de la serie */
+
+  /* Split maestro-detalle: mismos valores que carta/pilares/numeros/horoscopo/
+     tarot (11fr/9fr, gap sp-6, align-items:start — el carril derecho NUNCA se
+     estira a la altura del izquierdo). */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .leftCol { display: flex; flex-direction: column; gap: var(--sp-5); }
+
+  /* Carril derecho: lo único sticky — el izquierdo scrollea libre. top: 84px =
+     header 66px + respiro (mismo offset que el resto de la serie). A
+     diferencia de carta/pilares/numeros/horoscopo (que reparten ese alto
+     entre interpretación+chat con `height` fijo), acá el panel es un solo
+     bloque de contenido variable (explicación corta vs. lectura larga) — por
+     eso `max-height` (se achica solo si el contenido es corto) en vez de
+     `height` fijo, con su propio scroll interno si el contenido no entra. */
+  .interpCol {
+    display: block;
+    position: sticky; top: 84px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
 }

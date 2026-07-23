@@ -34,10 +34,11 @@ const chart = computeChart(profileToChartInput(PROFILE));
 const numerology = computeNumerology(profileToNumerologyInput(PROFILE));
 
 describe("resolveLenses", () => {
-  it("default a las 3 base si viene vacío o ausente", () => {
-    expect(resolveLenses([])).toEqual(BASE_LENSES);
-    expect(resolveLenses(undefined)).toEqual(BASE_LENSES);
-    expect(resolveLenses("nope")).toEqual(BASE_LENSES);
+  it("Task 3 (pedido de Gio): SIN fallback — vacío, ausente o solo basura resuelve a [] (conversación general)", () => {
+    expect(resolveLenses([])).toEqual([]);
+    expect(resolveLenses(undefined)).toEqual([]);
+    expect(resolveLenses("nope")).toEqual([]);
+    expect(resolveLenses(["basura"])).toEqual([]);
   });
 
   it("filtra valores inválidos y dedup en orden canónico", () => {
@@ -79,15 +80,17 @@ describe("buildFocusedContext — por lente", () => {
     expect(ctx).not.toContain("Numerología —");
   });
 
-  it("['tarot'] sin carta → defensa en profundidad: cae a las 3 base (nunca vacío)", () => {
+  it("['tarot'] sin carta → Task 3: SIN fallback, contexto sin ningún bloque (solo el header)", () => {
     // El cliente NO debería mandar esto, pero si llega lenses:["tarot"] sin
     // tarotCard, la lista efectiva (tarot filtrado por falta de carta) queda
-    // vacía → cae a BASE_LENSES en vez de emitir un contexto sin bloques.
+    // vacía — Task 3 retiró el fallback a BASE_LENSES: ya no se inyectan
+    // disciplinas que la persona no pidió, el contexto queda solo con el header.
     const ctx = buildFocusedContext({ profile: PROFILE, chart, numerology, lenses: ["tarot"], locale: "es" });
+    expect(ctx).toBe("DATOS DE Gio (género: masculine):");
     expect(ctx).not.toContain("Tarot —");
-    expect(ctx).toContain("Carta natal —");
-    expect(ctx).toContain("Numerología —");
-    expect(ctx).toContain("Cuatro Pilares (Ba Zi) —");
+    expect(ctx).not.toContain("Carta natal —");
+    expect(ctx).not.toContain("Numerología —");
+    expect(ctx).not.toContain("Cuatro Pilares (Ba Zi) —");
   });
 
   it("default 3 base → carta + numerología + Ba Zi, sin tarot", () => {
@@ -156,18 +159,15 @@ describe("focusLine", () => {
     expect(focusLine(["tarot"], { id: "fool", reversed: false }, "es")).toContain("Tarot");
   });
 
-  it("['tarot'] sin carta → defensa en profundidad: cae a las 3 base, nunca lista vacía", () => {
+  it("['tarot'] sin carta → Task 3: sin fallback, focusLine devuelve '' (nada que restringir)", () => {
     const line = focusLine(["tarot"], undefined, "es");
-    expect(line).not.toContain(": .");
-    expect(line).toBe(
-      "Aconseja apoyándote ÚNICAMENTE en: Astrología, Numerología y Cuatro Pilares (Ba Zi). No introduzcas las demás.",
-    );
+    expect(line).toBe("");
   });
 
-  it("nunca produce una lista vacía (': .'), ni con lenses totalmente vacío", () => {
-    expect(focusLine([], undefined, "es")).not.toContain(": .");
-    expect(focusLine(["tarot"], undefined, "es")).not.toContain(": .");
-    expect(focusLine(["tarot"], undefined, "en")).not.toContain(": .");
+  it("Task 3: lenses efectivamente vacío (sin selección, o tarot sin carta) → '' en vez de una lista rota (': .')", () => {
+    expect(focusLine([], undefined, "es")).toBe("");
+    expect(focusLine(["tarot"], undefined, "es")).toBe("");
+    expect(focusLine(["tarot"], undefined, "en")).toBe("");
   });
 
   it("EN traduce las disciplinas", () => {
@@ -177,9 +177,9 @@ describe("focusLine", () => {
 });
 
 describe("effectiveLenses", () => {
-  it("filtra tarot sin carta y cae a BASE_LENSES si queda vacío", () => {
-    expect(effectiveLenses(["tarot"], undefined)).toEqual(BASE_LENSES);
-    expect(effectiveLenses([], undefined)).toEqual(BASE_LENSES);
+  it("Task 3 (pedido de Gio): filtra tarot sin carta y NO cae a BASE_LENSES si queda vacío — [] es un resultado válido", () => {
+    expect(effectiveLenses(["tarot"], undefined)).toEqual([]);
+    expect(effectiveLenses([], undefined)).toEqual([]);
   });
 
   it("mantiene tarot cuando hay carta", () => {
@@ -190,9 +190,9 @@ describe("effectiveLenses", () => {
     expect(effectiveLenses(["astros", "tarot"], undefined)).toEqual(["astros"]);
   });
 
-  it("buildFocusedContext y focusLine coinciden en las disciplinas para el mismo input (incl. el caso roto)", () => {
+  it("buildFocusedContext y focusLine coinciden en las disciplinas para el mismo input (incl. los casos que quedan efectivamente vacíos)", () => {
     const cases: Array<{ lenses: Lens[]; tarotCard?: TarotCardRef }> = [
-      { lenses: ["tarot"] }, // el caso roto: cae a BASE_LENSES en ambas funciones
+      { lenses: ["tarot"] }, // Task 3: efectivamente vacío (tarot sin carta, sin fallback) — el for interno de abajo no itera nada para este caso
       { lenses: [] },
       { lenses: ["astros", "numeros"] },
       { lenses: ["tarot"], tarotCard: { id: "fool", reversed: false } },
@@ -234,48 +234,32 @@ describe("effectiveLenses", () => {
     }
   });
 
-  it("re-review (Important): la lista efectiva decide QUÉ SE COMPUTA, no `lenses` crudo — de lo contrario datos e instrucción divergen", () => {
-    // Reproduce el bug de route.ts: con lenses:["tarot"] sin tarotCard, la
-    // instrucción (focusLine, ya construida sobre effectiveLenses) le pide al
-    // modelo anclarse en las 3 base, pero si el gate de chart/numerology se
-    // decide con `lenses` crudo (bug), esos bloques quedan afuera del contexto.
+  it("re-review (Important, actualizado en Task 3): la lista efectiva decide QUÉ SE COMPUTA, no `lenses` crudo — invariante que sigue en pie aunque el fallback que la motivó ya no exista", () => {
+    // Historia: antes de Task 3, lenses:["tarot"] sin tarotCard hacía que
+    // effectiveLenses cayera a BASE_LENSES — disciplinas AUSENTES de `lenses`
+    // crudo. Si el gate de chart/numerology decidía con `lenses` crudo (bug),
+    // esos bloques quedaban afuera del contexto pese a que focusLine (ya
+    // construida sobre effectiveLenses) le prometía al modelo anclarse en
+    // ellos. Task 3 retira el fallback: effectiveLenses ya NUNCA agrega
+    // disciplinas fuera de las pedidas (solo puede quitar tarot sin carta), así
+    // que ese divergir puntual ya no puede reproducirse — pero el gate SIGUE
+    // debiendo decidir con la lista efectiva, no con la cruda, por si el día de
+    // mañana efectiveLenses vuelve a tener un caso de "agregar" (regla general,
+    // no solo del caso histórico).
     const lenses: Lens[] = ["tarot"];
     const tarotCard = undefined;
     const active = effectiveLenses(lenses, tarotCard);
-    expect(active).toEqual(BASE_LENSES); // astros, numeros, pilares
+    expect(active).toEqual([]); // Task 3: ya NO cae a BASE_LENSES
 
-    // Gate ROTO (lo que hacía route.ts antes del fix): decide con `lenses` crudo.
-    const brokenChart = lenses.includes("astros") ? chart : undefined;
-    const brokenNumerology = lenses.includes("numeros") ? numerology : undefined;
-    const brokenCtx = buildFocusedContext({
-      profile: PROFILE,
-      chart: brokenChart,
-      numerology: brokenNumerology,
-      lenses,
-      tarotCard,
-      locale: "es",
-    });
+    // Con la lista efectiva vacía, ni la instrucción ni el contexto prometen
+    // disciplinas que la persona no pidió — ambos gates (crudo o efectivo)
+    // coinciden en no traer nada, porque ninguno de los dos incluye "astros"/
+    // "numeros" en este caso (effectiveLenses ya no puede inyectarlos).
+    const ctx = buildFocusedContext({ profile: PROFILE, chart, numerology, lenses: active, tarotCard, locale: "es" });
     const line = focusLine(lenses, tarotCard, "es");
-    // La instrucción promete las 3 disciplinas...
-    expect(line).toContain("Astrología, Numerología y Cuatro Pilares (Ba Zi)");
-    // ...pero el contexto roto NO trae astros/numeros (el gate crudo los dejó afuera).
-    expect(brokenCtx).not.toContain("Carta natal —");
-    expect(brokenCtx).not.toContain("Numerología —");
-
-    // Gate CORRECTO (el fix): decide con la lista EFECTIVA.
-    const fixedChart = active.includes("astros") ? chart : undefined;
-    const fixedNumerology = active.includes("numeros") ? numerology : undefined;
-    const fixedCtx = buildFocusedContext({
-      profile: PROFILE,
-      chart: fixedChart,
-      numerology: fixedNumerology,
-      lenses: active,
-      tarotCard,
-      locale: "es",
-    });
-    // Ahora sí: lo que promete la instrucción está presente en el contexto.
-    expect(fixedCtx).toContain("Carta natal —");
-    expect(fixedCtx).toContain("Numerología —");
-    expect(fixedCtx).toContain("Cuatro Pilares (Ba Zi) —");
+    expect(line).toBe("");
+    expect(ctx).toBe("DATOS DE Gio (género: masculine):");
+    expect(ctx).not.toContain("Carta natal —");
+    expect(ctx).not.toContain("Numerología —");
   });
 });

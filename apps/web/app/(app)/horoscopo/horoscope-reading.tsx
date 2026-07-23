@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import { getVoiceMode } from "@/lib/voice-mode";
 import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
+import { InterpretationModePicker } from "@/components/interpretation-mode-picker";
 import styles from "./horoscopo.module.css";
 
 // Selector de profundidad para la prosa del horóscopo del periodo. "Esencia" es
@@ -31,6 +32,15 @@ export function HoroscopeReading({
   const [gated, setGated] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const reqId = useRef(0);
+  // Task 7: a diferencia de body/number/bazi-reading (que disparan la carga
+  // con un `choose()` imperativo, fácil de re-llamar desde el picker), acá el
+  // fetch vive en un useEffect reactivo a `tier` — no hay una función que
+  // "volver a llamar". Bumpear este contador (dependencia extra del efecto de
+  // abajo) re-ejecuta el MISMO efecto sin tocar sign/period/tz/locale/tier, así
+  // que getVoiceMode() se vuelve a leer con el modo nuevo. Sin cache cliente
+  // acá (a diferencia de las otras 3 lentes): siempre refetchea al cambiar de
+  // modo, esencia incluida (que ahí abajo hace early-return, igual que hoy).
+  const [modeReloadKey, setModeReloadKey] = useState(0);
 
   useEffect(() => {
     reqId.current++;
@@ -91,7 +101,7 @@ export function HoroscopeReading({
       }
     })();
     return () => ctrl.abort();
-  }, [tier, sign, period, tz, locale]);
+  }, [tier, sign, period, tz, locale, modeReloadKey]);
 
   const TIERS: Array<{ key: Tier; label: string }> = [
     { key: "esencia", label: t("tierEssence") },
@@ -108,6 +118,13 @@ export function HoroscopeReading({
             onClick={() => setTier(x.key)}>{x.label}</button>
         ))}
       </div>
+      {/* Task 7: modo 🌙/📚/🔭 arriba del texto generado. onChange bumpea
+          modeReloadKey (arriba) para re-disparar el mismo efecto de carga con
+          getVoiceMode() ya actualizado. */}
+      <div className={styles.modePicker}>
+        <InterpretationModePicker onChange={() => setModeReloadKey((k) => k + 1)} />
+      </div>
+
       {tier === "esencia" ? (
         essence.map((p, i) => <p key={i} className={styles.prosePara}>{p}</p>)
       ) : gated ? (

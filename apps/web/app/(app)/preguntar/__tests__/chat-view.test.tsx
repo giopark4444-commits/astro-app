@@ -175,20 +175,21 @@ describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
     expect(screen.getByTestId("chat-lenses")).toBeInTheDocument();
   });
 
-  it("el POST a /api/chat incluye lenses (default astros/numeros/pilares) y tarotCard:null", async () => {
+  it("el POST a /api/chat incluye lenses (Task 3: default NINGUNA encendida) y tarotCard:null", async () => {
     renderView();
     fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
 
     await waitFor(() => expect(postCalls()).toHaveLength(1));
     const body = JSON.parse(postCalls()[0]![1]!.body as string);
-    expect(body.lenses).toEqual(["astros", "numeros", "pilares"]);
+    expect(body.lenses).toEqual([]);
     expect(body.tarotCard).toBeNull();
   });
 
-  it("apagar una palanca antes de enviar viaja reflejado en el body del POST", async () => {
+  it("encender una o más palancas antes de enviar viaja reflejado en el body del POST", async () => {
     renderView();
-    fireEvent.click(screen.getByRole("button", { name: es.chat.lensNumeros }));
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensAstros }));
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensPilares }));
 
     fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
     fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
@@ -196,6 +197,19 @@ describe("ChatView — palancas de enfoque (CT3: montaje + POST)", () => {
     await waitFor(() => expect(postCalls()).toHaveLength(1));
     const body = JSON.parse(postCalls()[0]![1]!.body as string);
     expect(body.lenses).toEqual(["astros", "pilares"]);
+  });
+
+  it("encender y volver a apagar la única palanca activa viaja lenses:[] (Task 3: sin piso mínimo)", async () => {
+    renderView();
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensAstros }));
+    fireEvent.click(screen.getByRole("button", { name: es.chat.lensAstros }));
+
+    fireEvent.change(screen.getByPlaceholderText(es.chat.placeholder), { target: { value: "hola" } });
+    fireEvent.click(screen.getByRole("button", { name: es.chat.send }));
+
+    await waitFor(() => expect(postCalls()).toHaveLength(1));
+    const body = JSON.parse(postCalls()[0]![1]!.body as string);
+    expect(body.lenses).toEqual([]);
   });
 
   it("sacar una carta de tarot antes de enviar viaja tarotCard en el body del POST", async () => {

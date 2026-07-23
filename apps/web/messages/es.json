@@ -119,10 +119,10 @@
     "memoryImportError": "No se pudo importar el archivo. Revisa que sea un JSON exportado desde Aluna.",
     "voiceModeTitle": "Modo de Aluna",
     "voiceModeHint": "Cómo te cuenta lo que ve. Se guarda en este dispositivo y aplica desde tu próximo mensaje.",
-    "voiceMode_intima": "Íntima",
-    "voiceMode_intimaDesc": "Tu amiga que te habla de la vida",
-    "voiceMode_estudio": "Estudio",
-    "voiceMode_estudioDesc": "El dato y su porqué, para aprender el oficio",
+    "voiceMode_intima": "Íntimo",
+    "voiceMode_intimaDesc": "Cálido y cercano: te habla de tu vida",
+    "voiceMode_estudio": "Aprender",
+    "voiceMode_estudioDesc": "El dato y su porqué, para aprender",
     "voiceMode_pro": "Profesional",
     "voiceMode_proDesc": "Solo datos técnicos: tú interpretas",
     "memoryHubTitle": "Memoria de Aluna",
@@ -273,6 +273,45 @@
     "areaReadingDormantBody": "Esta mini-lectura se enciende cuando conectes la voz de IA de Aluna. Mientras, ya ves su puntaje y su porqué aquí mismo.",
     "areaReadingTipLabel": "Tu consejo: ",
     "areaReadingCta": "💬 Cuéntamelo en el chat →",
+    "interp": {
+      "title": "Interpretación",
+      "hint": "Toca cualquier casilla de la izquierda y aquí te cuento qué significa para ti.",
+      "proactiva": {
+        "title": "Aluna te recuerda",
+        "body": "Estas son las intenciones y compromisos que me pediste acompañar. Te los traigo de vuelta cuando la fecha o el cielo los vuelve oportunos — para que lo que sembraste no se te pierda de vista.",
+        "q": "¿Cómo van mis intenciones?"
+      },
+      "carta": {
+        "title": "Tu carta, en esencia",
+        "body": "Sol, Luna y Ascendente son el corazón de tu carta natal: cómo brillas, qué necesitas para sentirte en casa y la puerta por la que el mundo te conoce. Esta casilla es tu esencia de nacimiento — no cambia con el día, te acompaña siempre.",
+        "q": "¿Qué dicen mi Sol, mi Luna y mi Ascendente de mí?"
+      },
+      "clima": {
+        "title": "Tu clima de hoy",
+        "body": "Son los tránsitos de hoy: dónde están los planetas ahora mismo y cómo conversan con tu carta. No es destino — es clima. Saber si llueve o hace sol te deja elegir mejor qué sembrar hoy. Toca un aspecto puntual para verlo de cerca.",
+        "q": "¿Cómo viene mi clima astral de hoy?"
+      },
+      "horoscopoOccidental": {
+        "title": "Horóscopo occidental",
+        "body": "La lectura del día según tu signo zodiacal occidental, el del Sol en tu nacimiento. Es la foto rápida de la energía disponible hoy para los tuyos — un buen punto de partida para conversar conmigo.",
+        "q": "¿Qué me dice mi horóscopo de hoy?"
+      },
+      "horoscopoOriental": {
+        "title": "Horóscopo oriental",
+        "body": "Aquí habla tu animal del zodiaco chino, el del año en que naciste. Su lectura del día trae otra mirada: ciclos, afinidades y momentos — complementa la occidental como dos ventanas al mismo cielo.",
+        "q": "¿Qué me dice mi horóscopo oriental hoy?"
+      },
+      "pilares": {
+        "title": "Tus pilares",
+        "body": "Los Cuatro Pilares (BaZi) leen el instante exacto de tu nacimiento en el calendario chino: tu elemento maestro y el balance de los cinco elementos. Es tu naturaleza profunda — y el pilar de hoy muestra cómo el día conversa con ella.",
+        "q": "¿Qué significan mis pilares?"
+      },
+      "tarot": {
+        "title": "La baraja de hoy",
+        "body": "Una carta al día, como ritual breve: no predice, ilumina. La carta que salga es un espejo para mirar tu día con otros ojos. Tócala en su sección para tu lectura completa.",
+        "q": "¿Qué me quiere decir mi carta de hoy?"
+      }
+    },
     "disciplineGeneral": "General",
     "disciplineAstros": "Astros",
     "disciplineNumeros": "Números",

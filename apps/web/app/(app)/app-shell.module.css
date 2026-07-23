@@ -30,6 +30,11 @@
    Observatory, jade en Selva, cobre en Alba, plata en Eclipse, etc. */
 .brand svg { color: var(--acc-text); flex: none; }
 .main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto; }
+/* Task 4: CreditsChip se sumó como hermano de SettingsLink dentro de este slot
+   (antes solo tenía un hijo) — flex base para que se lean en fila también en
+   móvil; el @media desktop de abajo ya declaraba lo mismo (ahí queda, sin
+   duplicar valores distintos). */
+.menuSlot { display: flex; align-items: center; gap: var(--sp-2); }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* header: marca izq · tabs centro · perfil der (mockup: grid 1fr auto 1fr, 66px) */

@@ -77,19 +77,22 @@ export async function POST(request: NextRequest) {
   // partir del 2º turno (lo aprendió del header x-thread-id del 1er turno).
   const requestedThreadId = typeof body.threadId === "string" && body.threadId ? body.threadId : null;
 
-  // Palancas de enfoque (Task 1): las lentes activas deciden qué disciplinas entran
-  // al contexto; sin lentes → las 3 base. La carta de tarot es opt-in y se valida
-  // contra el mazo. Ambos se resuelven en @/lib/chat-context (testeable en aislado).
+  // Palancas de enfoque (Task 1; default OFF desde Task 3, pedido de Gio): las
+  // lentes activas deciden qué disciplinas entran al contexto; sin lentes →
+  // conversación general, SIN bloques de lente (ver resolveLenses/
+  // effectiveLenses en @/lib/chat-context — ya no hay fallback a las 3 base).
+  // La carta de tarot es opt-in y se valida contra el mazo. Ambos se resuelven
+  // en @/lib/chat-context (testeable en aislado).
   const lenses = resolveLenses(body.lenses);
   const tarotCard = parseTarotCard(body.tarotCard);
   // Lista EFECTIVA (re-review): la MISMA que usan buildFocusedContext/focusLine
   // por dentro. Decidimos con ESTA lista si computar chart/numerology — no con
   // `lenses` crudo — para que los datos calculados y la instrucción de enfoque
   // NUNCA diverjan. Bug que esto corrige: body {lenses:["tarot"]} sin tarotCard
-  // → effectiveLenses cae a BASE_LENSES (focusLine ya lo hacía), pero con
-  // `lenses` crudo chart/numerology quedaban `undefined` (raw no incluye
-  // "astros"/"numeros") y el contexto no traía esos bloques pese a que la
-  // focusLine le pedía al modelo anclarse en ellos. effectiveLenses es
+  // → antes de Task 3, effectiveLenses caía a BASE_LENSES (focusLine ya lo
+  // hacía) pero con `lenses` crudo chart/numerology quedaban `undefined` (raw
+  // no incluye "astros"/"numeros") y el contexto no traía esos bloques pese a
+  // que la focusLine le pedía al modelo anclarse en ellos. effectiveLenses es
   // idempotente (mismo tarotCard) así que volver a pasarle `activeLenses` a
   // buildFocusedContext/focusLine no cambia el resultado.
   const activeLenses = effectiveLenses(lenses, tarotCard);
@@ -209,7 +212,12 @@ export async function POST(request: NextRequest) {
     const chart = activeLenses.includes("astros") ? computeChart(profileToChartInput(profile)) : undefined;
     const numerology = activeLenses.includes("numeros") ? computeNumerology(profileToNumerologyInput(profile)) : undefined;
     const context = buildFocusedContext({ profile, chart, numerology, lenses: activeLenses, tarotCard, locale });
-    system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(activeLenses, tarotCard, locale)}`;
+    // Task 3 (pedido de Gio): con activeLenses vacío (default nuevo, sin
+    // lentes encendidas) focusLine() devuelve "" — se omite del system en vez
+    // de re-inyectar una restricción a las 3 lentes base; el resto del
+    // contexto (perfil/sesión/memoria, más abajo) sigue intacto.
+    const focus = focusLine(activeLenses, tarotCard, locale);
+    system = [SYSTEM_INTRO[locale], context, focus].filter(Boolean).join("\n\n");
   } catch {
     // Regla de oro: si ya hubo un spend real, no puede quedar cobrado sin
     // entregar solo porque construir el contexto (post-spend) explotó.

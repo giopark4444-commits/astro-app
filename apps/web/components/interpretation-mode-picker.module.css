@@ -1,0 +1,32 @@
+/* Chips del modo de voz dentro de los paneles de interpretación: discretos
+   (el protagonista es el texto de la lectura), tintados con --acc al activar
+   — color en superficie, no solo un puntito. */
+.row {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--soft);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--acc) 45%, var(--line));
+}
+.chip[data-on] {
+  background: color-mix(in srgb, var(--acc) 16%, transparent);
+  border-color: color-mix(in srgb, var(--acc) 55%, var(--line));
+  color: var(--ink);
+  font-weight: 600;
+}

@@ -40,9 +40,11 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   const [input, setInput] = useState(() => (embedded ? "" : searchParams.get("q") ?? ""));
   const [st, setSt] = useState<St>("idle");
   const threadRef = useRef<HTMLDivElement>(null);
-  // Palancas de enfoque (Task 3): default = las 3 lentes base encendidas, sin
-  // carta de tarot fijada. Viajan en cada POST a /api/chat (CT1 las resuelve).
-  const [lenses, setLenses] = useState<string[]>(["astros", "numeros", "pilares"]);
+  // Palancas de enfoque (Task 3): default = NINGUNA lente encendida (pedido de
+  // Gio) — conversación general hasta que la persona elija astros/números/
+  // pilares/tarot a mano; sin carta de tarot fijada. Viajan en cada POST a
+  // /api/chat (CT1 las resuelve; vacío = sin bloques de lente en el contexto).
+  const [lenses, setLenses] = useState<string[]>([]);
   const [tarotCard, setTarotCard] = useState<TarotCardRef | null>(null);
   // Archivo del hilo (Fase 1B): id del hilo activo. Se aprende del header
   // x-thread-id del primer turno, o se precarga al RETOMAR abajo.

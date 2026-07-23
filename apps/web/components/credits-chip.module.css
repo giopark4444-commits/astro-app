@@ -1,0 +1,27 @@
+/* Chip de saldo (✦ N) junto al avatar de Ajustes (Task 4). Pill pequeño y
+   discreto — mismo lenguaje de token que el resto de la app (line/acc/radius),
+   pero deliberadamente más chico que .creditsChip del composer del chat
+   (chat.module.css, 40px de alto: vive junto a un botón de 40px ahí; acá vive
+   junto al avatar de 36px del header, así que es más compacto). */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(var(--acc-rgb), 0.1);
+  color: var(--acc-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs); /* 12px (ver tokens.css) */
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.chip:hover {
+  border-color: rgba(var(--acc-rgb), 0.45);
+  background: rgba(var(--acc-rgb), 0.16);
+}

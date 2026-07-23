@@ -1,7 +1,18 @@
 /* Centro de Ajustes (brief ajustes-web) — secciones apiladas, .card global
    por sección; eyebrow uppercase estilo R4c (referencia visual: .prefsTitle
-   desktop de perfil.module.css), aquí aplicado siempre (no solo desktop). */
+   desktop de perfil.module.css), aquí aplicado siempre (no solo desktop).
+   Task 6: en desktop pasa a maestro-detalle de DOS COLUMNAS independientes
+   (mismo principio que carta/pilares/numeros/perfil — `align-items: start`,
+   ninguna se estira a la altura de la otra); en móvil sigue siendo un solo
+   carril apilado, orden idéntico al de hoy (ver .deskCols/.leftCol/.rightCol). */
 .page { padding: var(--sp-6) var(--sp-5) var(--sp-7); max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--sp-5); }
+
+/* Móvil: los 3 niveles son transparentes (display:contents) — todas las
+   secciones quedan, para el layout, como hijas DIRECTAS de `.page` (mismo
+   flex-column + gap de siempre), así que el apilado/orden no cambia en nada. */
+.deskCols { display: contents; }
+.leftCol { display: contents; }
+.rightCol { display: contents; }
 
 .section { display: flex; flex-direction: column; gap: var(--sp-3); }
 .eyebrow {
@@ -55,14 +66,41 @@
 .referralBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 .referralError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
 
-/* "Memoria de Aluna" (reorg ajustes): agrupa Esencia+Recuerdos+Entidades+Tus
-   datos bajo UN encabezado — cada tarjeta sigue trayendo su propio
-   <section class="card"> intacto (no se tocan por dentro); este wrapper NO
-   es .card (nada de fondo/borde propio, para no dibujar una tarjeta dentro de
-   otra) y solo aporta un gap más apretado que el --sp-5 general de .page
-   entre secciones distintas, así las 4 tarjetas se leen como subbloques de
-   una sola sección en vez de 4 secciones sueltas. */
-.memoryGroup { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* "Memoria de Aluna" (Task 6b): agrupa el toggle de memoria (arriba del todo,
+   ver .memoryToggleSlot) + Esencia+Recuerdos+Entidades+Tus datos bajo UN
+   encabezado, como UNA SOLA CASILLA sólida y distintiva — contenedor único
+   con fondo tintado del acento (mismo lenguaje que .essenceCard/.proactiveCard
+   de hoy/hub.module.css: regla de Gio "color en superficies grandes, no solo
+   un ícono suelto", aplicada acá al GRUPO entero) + borde + radio.
+   Las 4 tarjetas internas conservan su <section class="card"> intacto por
+   dentro (Task 6 pide no tocar los componentes) — se APLANAN desde afuera con
+   `:global(.card)`: la clase real que traen, no una clase de módulo (mismo
+   mecanismo/motivo que numerology-view.module.css `.heroN:global(.ignite)` —
+   sin `:global()` CSS Modules escala `.card` al archivo y el selector no
+   matchearía nada). Pierden fondo/borde/radio propios y quedan separadas por
+   un hairline fino en vez de leerse como 4 cards sueltas con doble borde. */
+.memoryGroup {
+  display: flex; flex-direction: column; gap: 0;
+  background: color-mix(in oklab, var(--acc) 7%, var(--surface));
+  border: 1px solid rgba(var(--acc-rgb), 0.22);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4) var(--sp-5);
+}
+.memoryGroup > .eyebrow { margin: 0 0 var(--sp-1); }
+/* Toggle de memoria (Task 6c): vive arriba del todo, separado de la primera
+   tarjeta (Esencia) por el mismo hairline que separa las tarjetas entre sí. */
+.memoryToggleSlot { padding-bottom: var(--sp-4); border-bottom: 1px solid var(--line); }
+.memoryGroup > :global(.card) {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: var(--sp-4) 0;
+}
+/* La primera tarjeta (Esencia) ya recibe su respiro superior del propio
+   padding-bottom+border de `.memoryToggleSlot` de arriba — no hace falta
+   duplicarlo acá (mismo ritmo que entre el resto de las tarjetas). */
+.memoryGroup > :global(.card):last-of-type { padding-bottom: 0; }
+.memoryGroup > :global(.card) + :global(.card) { border-top: 1px solid var(--line); }
 
 /* "Aluna te conoce" (memoria) — hint bajo el eyebrow, lista de recuerdos con
    botón de borrado por fila (mismo primitivo .row de Cuenta, con acción). */
@@ -180,6 +218,24 @@
 }
 .signOutBtn:hover { color: var(--tone-warm); }
 
-@media (min-width: 1080px) { /* bp desktop R4a — cap intermedio, mismo patrón que perfil/settings.module.css */
-  .page { max-width: 640px; margin-left: auto; margin-right: auto; }
+@media (min-width: 1080px) { /* bp desktop R4a */
+  /* Task 6a: el cap de 640px era de la vieja columna única — dos columnas
+     necesitan más ancho. Mismo criterio que compatibilidad/compat.module.css
+     (columna ancha centrada, no el lienzo completo de 1280px: Ajustes no
+     necesita tanto). */
+  .page { max-width: min(960px, calc(100% - 112px)); margin-left: auto; margin-right: auto; }
+
+  /* Split maestro-detalle (Task 6a, pedido de Gio): DOS COLUMNAS del MISMO
+     ancho — a diferencia de carta/pilares/numeros (11fr/9fr, técnica vs.
+     interpretación), acá son dos listas de secciones comparables en peso, así
+     que reparten el ancho igual (mismo criterio que perfil.module.css
+     .deskCols: "perfil y chat del mismo ancho"). `align-items: start`: NUNCA
+     se estiran a la altura de la otra (regla general del rediseño 2col). */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .leftCol, .rightCol { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
 }

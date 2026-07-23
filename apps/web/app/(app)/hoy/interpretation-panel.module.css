@@ -1,0 +1,81 @@
+/* Panel "Interpretación" del carril derecho de Hoy. Convive con .chatPanel en
+   una columna flex (ver hub.module.css .interpCol): este panel toma su alto
+   natural hasta un tope y scrollea por dentro; el chat toma el resto. NUNCA
+   se estiran entre sí (regla Gio: las columnas no coinciden en tamaño). */
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 auto;
+  max-height: 52%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--acc) 7%, var(--surface)), var(--surface) 60%);
+  padding: var(--sp-4);
+  overflow: hidden;
+}
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-3);
+}
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--acc-text);
+}
+.body {
+  overflow: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.hint {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--soft);
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+.areaHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.areaLabel { font-weight: 600; color: var(--ink); }
+.areaTone { font-size: var(--text-2xs); color: var(--soft); }
+.areaScore {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--acc-text);
+}
+.dim { margin: 0; color: var(--soft); font-size: var(--text-sm); }
+.reading { margin: 0; color: var(--ink); font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; }
+.tip { margin: 0; color: var(--soft); font-size: var(--text-sm); line-height: 1.55; }
+.tipLabel { color: var(--acc-text); font-weight: 600; margin-right: 6px; }
+.boxTitle { margin: 0; font-weight: 600; color: var(--ink); font-size: var(--text-sm); }
+.glossary {
+  border-top: 1px dashed var(--line);
+  padding-top: var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.glossaryItem { margin: 0; font-size: var(--text-2xs); color: var(--soft); line-height: 1.5; }
+.glossaryTitle { color: var(--ink); font-weight: 600; }
+.cta {
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  color: var(--acc-text);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--acc) 40%, var(--line));
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+.cta:hover { background: color-mix(in srgb, var(--acc) 14%, transparent); }

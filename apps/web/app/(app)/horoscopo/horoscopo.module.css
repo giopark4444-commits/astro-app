@@ -90,6 +90,8 @@
   .chipReveal { opacity: 1; }
 }
 .periods { display: flex; justify-content: center; gap: var(--sp-1); }
+/* Selector de modo 🌙/📚/🔭 (Task 7): discreto, encima del texto generado. */
+.modePicker { margin: var(--sp-3) 0 var(--sp-2); }
 
 .mainCol { display: flex; flex-direction: column; gap: var(--sp-4); }
 .section { padding: var(--sp-4); }

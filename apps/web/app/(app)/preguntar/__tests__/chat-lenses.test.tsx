@@ -19,10 +19,20 @@ function renderLenses(value: ChatLensesValue) {
 const L = es.chat;
 
 describe("ChatLenses — palancas base (astros/numeros/pilares)", () => {
-  it("NO apaga la última encendida: click en la única activa no llama onChange", () => {
+  it("Task 3: SÍ apaga la última encendida — lenses:[] es un estado válido (conversación general)", () => {
     const { onChange } = renderLenses({ lenses: ["astros"], tarotCard: null });
     fireEvent.click(screen.getByRole("button", { name: L.lensAstros }));
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const next = onChange.mock.calls[0]![0] as ChatLensesValue;
+    expect(next.lenses).toEqual([]);
+  });
+
+  it("enciende una palanca desde el default vacío (Task 3)", () => {
+    const { onChange } = renderLenses({ lenses: [], tarotCard: null });
+    fireEvent.click(screen.getByRole("button", { name: L.lensAstros }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const next = onChange.mock.calls[0]![0] as ChatLensesValue;
+    expect(next.lenses).toEqual(["astros"]);
   });
 
   it("apaga una base cuando hay más de una activa (preserva tarotCard)", () => {
@@ -142,6 +152,16 @@ describe("ChatLenses — carta fijada", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     const next = onChange.mock.calls[0]![0] as ChatLensesValue;
     expect(next.lenses).not.toContain("tarot");
+    expect(next.tarotCard).toBeNull();
+  });
+
+  it("Task 3: apagar tarot cuando es la ÚNICA lente activa deja lenses:[] (ya no hay piso mínimo)", () => {
+    const onlyTarot: ChatLensesValue = { lenses: ["tarot"], tarotCard: { id: "fool", reversed: false } };
+    const { onChange } = renderLenses(onlyTarot);
+    fireEvent.click(screen.getByRole("button", { name: L.lensTarot }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const next = onChange.mock.calls[0]![0] as ChatLensesValue;
+    expect(next.lenses).toEqual([]);
     expect(next.tarotCard).toBeNull();
   });
 });

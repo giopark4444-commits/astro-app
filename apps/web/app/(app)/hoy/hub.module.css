@@ -131,8 +131,24 @@
   .leftCol { gap: var(--sp-5); }
 
   /* Carril derecho: lo único sticky — la izquierda scrollea libre. top: 84px =
-     header 66px + respiro (mismo offset que carta/pilares/numeros/perfil). */
-  .interpCol { display: block; position: sticky; top: 84px; }
+     header 66px + respiro (mismo offset que carta/pilares/numeros/perfil).
+     Columna flex: panel de Interpretación arriba (alto natural con tope, ver
+     interpretation-panel.module.css) + chat abajo tomando el resto — ninguno
+     estira al otro (regla Gio 2026-07-23). */
+  .interpCol {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px;
+    height: calc(100vh - 100px);
+  }
+  .chatPanel { height: auto; flex: 1; min-height: 0; }
+
+  /* Casillas de la izquierda que se explican al click en el panel derecho:
+     affordance sutil (anillo acc al hover, sostenido al estar seleccionada). */
+  .clickBox { cursor: pointer; border-radius: var(--radius-lg); }
+  .clickBox:hover { outline: 1px solid color-mix(in srgb, var(--acc) 38%, transparent); outline-offset: 2px; }
+  .clickBox[data-on] { outline: 1px solid color-mix(in srgb, var(--acc) 65%, transparent); outline-offset: 2px; }
+  .aspCard { cursor: pointer; }
+  .aspCard[data-on] { outline: 1px solid color-mix(in srgb, var(--acc) 65%, transparent); }
 
   /* Clima: tinte azul (mockup: --tone-cool 7aaae0) + subtítulo y tarjetas .asp
      ricas (orbe + frase) — solo en desktop. */

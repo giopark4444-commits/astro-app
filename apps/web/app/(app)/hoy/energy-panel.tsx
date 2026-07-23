@@ -81,9 +81,15 @@ const TONE_KEY: Record<ScoreTone, string> = {
 export function EnergyPanel({
   profileId,
   focus = NO_FOCUS,
+  onAreaSelect,
 }: {
   profileId: string;
   focus?: LifeArea[];
+  /** Interpretación-al-click (Hoy desktop): si viene y el viewport tiene carril
+   *  derecho (≥1080px, mismo bp que hub.module.css), la barra tocada se manda
+   *  al panel de interpretación en vez de abrir el BottomSheet. En móvil (o en
+   *  jsdom, sin matchMedia) se conserva el sheet de siempre. */
+  onAreaSelect?: (sel: { area: LifeArea; label: string; score: number; toneLabel: string }) => void;
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -189,9 +195,25 @@ export function EnergyPanel({
           onToggle={(key) => {
             const area = key as LifeArea;
             setOpen((prev) => (prev === area ? null : area));
-            // Mini-lectura cálida: se abre al tocar CUALQUIER barra, en paralelo
-            // al "por qué" inline de arriba (ver comentario de `sheetArea`).
-            setSheetArea(area);
+            // Mini-lectura cálida: al tocar CUALQUIER barra, en paralelo al
+            // "por qué" inline de arriba (ver comentario de `sheetArea`). En
+            // desktop va al panel de interpretación del carril derecho; en
+            // móvil, al BottomSheet de siempre.
+            const bar = barAreas?.find((b) => b.key === area);
+            if (
+              onAreaSelect &&
+              typeof window !== "undefined" &&
+              window.matchMedia?.("(min-width: 1080px)")?.matches
+            ) {
+              onAreaSelect({
+                area,
+                label: bar?.label ?? "",
+                score: bar?.score ?? 0,
+                toneLabel: bar?.toneLabel ?? "",
+              });
+            } else {
+              setSheetArea(area);
+            }
           }}
           areas={barAreas}
         />

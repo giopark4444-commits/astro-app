@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor, type RenderResult } from "@testing-library/react";
+import { act, render, screen, waitFor, within, type RenderResult } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
@@ -99,10 +99,18 @@ function rerenderView(rerender: RenderResult["rerender"]) {
   );
 }
 
+/** Radios del radiogroup de signo/animal SOLAMENTE — acotado por su aria-label
+ *  propio (Task 7: HoroscopeReading, montada en el mismo árbol para la prosa
+ *  móvil, ahora también trae su propio radiogroup de 3 radios — el modo
+ *  🌙/📚/🔭 — que un `getAllByRole("radio")` sin acotar contaría de más). */
+function pickerRadios(ariaLabel: string) {
+  return within(screen.getByRole("radiogroup", { name: ariaLabel })).getAllByRole("radio", { name: /.+/ });
+}
+
 describe("Horóscopo — persistencia de sign/animal al cambiar de pestaña", () => {
   it("el signo elegido (occidental) sobrevive un viaje a la pestaña oriental y de vuelta", async () => {
     const { rerender } = renderView();
-    await waitFor(() => expect(screen.getAllByRole("radio", { name: /.+/ })).toHaveLength(12));
+    await waitFor(() => expect(pickerRadios(es.horoscopo.signAria)).toHaveLength(12));
 
     const leoChip = screen.getByRole("radio", { name: /Leo/ });
     act(() => { leoChip.click(); });
@@ -112,7 +120,7 @@ describe("Horóscopo — persistencia de sign/animal al cambiar de pestaña", ()
     act(() => { screen.getByRole("tab", { name: "Oriental" }).click(); });
     rerenderView(rerender);
     await waitFor(() => expect(screen.getByRole("tab", { name: "Oriental" })).toHaveAttribute("aria-selected", "true"));
-    await waitFor(() => expect(screen.getAllByRole("radio", { name: /.+/ })).toHaveLength(12));
+    await waitFor(() => expect(pickerRadios(es.horoscopo.animalAria)).toHaveLength(12));
 
     // Volver a occidental.
     act(() => { screen.getByRole("tab", { name: "Occidental" }).click(); });
@@ -125,7 +133,7 @@ describe("Horóscopo — persistencia de sign/animal al cambiar de pestaña", ()
   it("el animal elegido (oriental) sobrevive un viaje a la pestaña occidental y de vuelta", async () => {
     mockParams.current = new URLSearchParams("trad=oriental");
     const { rerender } = renderView();
-    await waitFor(() => expect(screen.getAllByRole("radio", { name: /.+/ })).toHaveLength(12));
+    await waitFor(() => expect(pickerRadios(es.horoscopo.animalAria)).toHaveLength(12));
 
     const dragonChip = screen.getByRole("radio", { name: /Dragón/ });
     act(() => { dragonChip.click(); });
@@ -135,7 +143,7 @@ describe("Horóscopo — persistencia de sign/animal al cambiar de pestaña", ()
     act(() => { screen.getByRole("tab", { name: "Occidental" }).click(); });
     rerenderView(rerender);
     await waitFor(() => expect(screen.getByRole("tab", { name: "Occidental" })).toHaveAttribute("aria-selected", "true"));
-    await waitFor(() => expect(screen.getAllByRole("radio", { name: /.+/ })).toHaveLength(12));
+    await waitFor(() => expect(pickerRadios(es.horoscopo.signAria)).toHaveLength(12));
 
     // Volver a oriental.
     act(() => { screen.getByRole("tab", { name: "Oriental" }).click(); });

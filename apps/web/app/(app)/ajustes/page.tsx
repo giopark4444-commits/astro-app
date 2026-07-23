@@ -3,14 +3,12 @@ import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getRole } from "@/lib/admin/roles";
-import type { SubscriptionStatus } from "@aluna/core";
 import type { AlunaSupabaseClient } from "@aluna/supabase";
 import { parseIntent, SUPPORT_EMAIL, SOCIAL_LINKS } from "@aluna/core";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
 import { signOut } from "@/app/auth/actions";
 import { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES } from "@aluna/core";
 import { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "@aluna/core";
-import { PlanCard } from "./plan-card";
 import { CreditsCard } from "./credits-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
@@ -49,16 +47,6 @@ export default async function AjustesPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Misma lógica que la vieja perfil/page.tsx (T2 la mueve aquí junto con
-  // PlanCard): consumía ?checkout=success para el estado "pago recibido,
-  // activando…" mientras el webhook de Dodo termina de procesar.
-  const { data: subRow } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const planRow = subRow as { status: SubscriptionStatus; current_period_end: string | null } | null;
-
   // Estado inicial de los toggles "Aluna te conoce" y memoria (ver
   // settings-controls.tsx). fetchIntentAndMemorySettings degrada a leer solo
   // `intent` si `memory_enabled` (0019) todavía no está migrada — sin esto, un
@@ -91,7 +79,7 @@ export default async function AjustesPage({
   // Código de referido ya aplicado (si lo hay) — RLS de referred_users (0017)
   // ya acota el select a la fila propia, así que se puede leer directo acá.
   // try/catch: la migración 0017 puede no estar aplicada todavía (dev) y eso
-  // nunca debe tumbar /ajustes (mismo patrón que subRow/intentRow arriba).
+  // nunca debe tumbar /ajustes (mismo patrón defensivo que el resto de la página).
   let referredCode: string | null = null;
   try {
     const { data: referredRow } = await supabase.from("referred_users").select("code").eq("user_id", user.id).maybeSingle();
@@ -102,125 +90,148 @@ export default async function AjustesPage({
 
   return (
     <main className={styles.page}>
-      <section className="card">
-        <h2 className={styles.eyebrow}>{tProfile("preferences")}</h2>
-        <SettingsControls
-          currentLocale={locale}
-          hasIntent={intent !== null}
-          intentUseInAI={intent?.useInAI ?? false}
-          memoryEnabled={memoryEnabled}
-        />
-      </section>
+      {/* Maestro-detalle de 2 columnas independientes (Task 6a, pedido de
+          Gio) — en móvil .deskCols/.leftCol/.rightCol son transparentes
+          (display:contents, ver ajustes.module.css) así que el orden visual
+          es el MISMO de siempre: Preferencias → Modo de Aluna → Memoria →
+          Créditos → Admin? → Cuenta → Ayuda → Síguenos? → Legal → Guía dev →
+          Cerrar sesión, todo apilado. En desktop, esa misma secuencia se
+          reparte en dos columnas del mismo ancho que NUNCA se estiran a la
+          altura de la otra (align-items: start). */}
+      <div className={styles.deskCols}>
+        <div className={styles.leftCol}>
+          <section className="card">
+            <h2 className={styles.eyebrow}>{tProfile("preferences")}</h2>
+            <SettingsControls
+              section="general"
+              currentLocale={locale}
+              hasIntent={intent !== null}
+              intentUseInAI={intent?.useInAI ?? false}
+              memoryEnabled={memoryEnabled}
+            />
+          </section>
 
-      {/* Modo de Aluna (🌙 íntima / 📚 estudio / 🔭 pro): cómo cuenta lo que
-          ve — por dispositivo, ver components/voice-mode-card.tsx. */}
-      <VoiceModeCard />
+          {/* Modo de Aluna (🌙 íntima / 📚 estudio / 🔭 pro): cómo cuenta lo
+              que ve — por dispositivo, ver components/voice-mode-card.tsx. */}
+          <VoiceModeCard />
 
-      {/* Memoria de Aluna (reorg ajustes): Esencia+Recuerdos+Entidades+Datos
-          agrupados bajo UN encabezado — cada tarjeta conserva su propio
-          <section class="card"> intacto (cambio mínimo, sin tocarlas por
-          dentro); el grupo solo les da un gap más apretado que el de .page
-          entre secciones distintas, para que se lean como subbloques de una
-          sola sección. Esencia primero dentro del grupo (Fase 2 T5): mismo
-          orden que buildMemoryBlocks en memory-pipeline.ts, donde el retrato
-          ancla el resto del contexto. */}
-      <section className={styles.memoryGroup}>
-        <h2 className={styles.eyebrow}>{t("memoryHubTitle")}</h2>
-        <EssenceCard userId={user.id} />
-        <MemoriesCard userId={user.id} />
-        <EntitiesCard userId={user.id} />
-        <MemoryDataCard />
-      </section>
+          {/* Memoria de Aluna (Task 6b/6c): UNA sola casilla sólida y
+              distintiva (fondo tintado del acento, ver ajustes.module.css
+              .memoryGroup) — el toggle de memoria vive arriba del todo
+              (Task 6c: "en donde dice memoria de Aluna", no en Preferencias),
+              seguido de Esencia+Recuerdos+Entidades+Datos. Cada tarjeta
+              conserva su propio <section class="card"> intacto por dentro
+              (cambio mínimo, sin tocarlas); el grupo las aplana desde afuera
+              (:global(.card), ver CSS) para que se lean como subsecciones de
+              una sola casilla, no 4 sueltas. Esencia primero dentro del
+              grupo (Fase 2 T5): mismo orden que buildMemoryBlocks en
+              memory-pipeline.ts, donde el retrato ancla el resto del contexto. */}
+          <section className={styles.memoryGroup}>
+            <h2 className={styles.eyebrow}>{t("memoryHubTitle")}</h2>
+            <div className={styles.memoryToggleSlot}>
+              <SettingsControls
+                section="memory"
+                currentLocale={locale}
+                hasIntent={intent !== null}
+                intentUseInAI={intent?.useInAI ?? false}
+                memoryEnabled={memoryEnabled}
+              />
+            </div>
+            <EssenceCard userId={user.id} />
+            <MemoriesCard userId={user.id} />
+            <EntitiesCard userId={user.id} />
+            <MemoryDataCard />
+          </section>
+        </div>
 
-      <section className="card">
-        <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
-      </section>
+        <div className={styles.rightCol}>
+          <section className="card">
+            <CreditsCard checkoutCredits={checkout === "credits"} />
+          </section>
 
-      <section className="card">
-        <CreditsCard checkoutCredits={checkout === "credits"} />
-      </section>
-
-      {role !== null && (
-        <section className="card">
-          <h2 className={styles.eyebrow}>{t("adminSection")}</h2>
-          {role === "superadmin" ? (
-            <Link href="/admin" className={styles.rowLink}>
-              <span>{t("adminPanel")}</span>
-              <span className={styles.rowArrow} aria-hidden>→</span>
-            </Link>
-          ) : (
-            <Link href="/colab" className={styles.rowLink}>
-              <span>{t("collabPanel")}</span>
-              <span className={styles.rowArrow} aria-hidden>→</span>
-            </Link>
+          {role !== null && (
+            <section className="card">
+              <h2 className={styles.eyebrow}>{t("adminSection")}</h2>
+              {role === "superadmin" ? (
+                <Link href="/admin" className={styles.rowLink}>
+                  <span>{t("adminPanel")}</span>
+                  <span className={styles.rowArrow} aria-hidden>→</span>
+                </Link>
+              ) : (
+                <Link href="/colab" className={styles.rowLink}>
+                  <span>{t("collabPanel")}</span>
+                  <span className={styles.rowArrow} aria-hidden>→</span>
+                </Link>
+              )}
+            </section>
           )}
-        </section>
-      )}
 
-      <section className="card">
-        <h2 className={styles.eyebrow}>{t("account")}</h2>
-        <div className={styles.row}>
-          <span className={styles.rowLabel}>{t("email")}</span>
-          <span className={styles.rowValue}>{user.email ?? ""}</span>
-        </div>
-        <div className={styles.row}>
-          <span className={styles.rowLabel}>{t("userId")}</span>
-          <div className={styles.rowValueGroup}>
-            <span className={`${styles.rowValue} ${styles.mono}`}>{user.id}</span>
-            <CopyIdButton value={user.id} />
-          </div>
-        </div>
-        <div className={styles.row}>
-          <span className={styles.rowLabel}>{t("loginMethod")}</span>
-          <span className={styles.rowValue}>{loginMethodLabel}</span>
-        </div>
-        <ReferralRedeem appliedCode={referredCode} />
-      </section>
+          <section className="card">
+            <h2 className={styles.eyebrow}>{t("account")}</h2>
+            <div className={styles.row}>
+              <span className={styles.rowLabel}>{t("email")}</span>
+              <span className={styles.rowValue}>{user.email ?? ""}</span>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.rowLabel}>{t("userId")}</span>
+              <div className={styles.rowValueGroup}>
+                <span className={`${styles.rowValue} ${styles.mono}`}>{user.id}</span>
+                <CopyIdButton value={user.id} />
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.rowLabel}>{t("loginMethod")}</span>
+              <span className={styles.rowValue}>{loginMethodLabel}</span>
+            </div>
+            <ReferralRedeem appliedCode={referredCode} />
+          </section>
 
-      <section className="card">
-        <h2 className={styles.eyebrow}>{t("help")}</h2>
-        <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.rowLink}>
-          <span>{SUPPORT_EMAIL}</span>
-          <span className={styles.rowArrow} aria-hidden>→</span>
-        </a>
-        <Link href="/preguntar" className={styles.rowLink}>
-          <span>{tChat("title")}</span>
-          <span className={styles.rowArrow} aria-hidden>→</span>
-        </Link>
-      </section>
-
-      {visibleSocialLinks.length > 0 && (
-        <section className="card">
-          <h2 className={styles.eyebrow}>{t("followUs")}</h2>
-          {visibleSocialLinks.map((s) => (
-            <a key={s.key} href={s.href} target="_blank" rel="noreferrer" className={styles.rowLink}>
-              <span>{s.label}</span>
+          <section className="card">
+            <h2 className={styles.eyebrow}>{t("help")}</h2>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.rowLink}>
+              <span>{SUPPORT_EMAIL}</span>
               <span className={styles.rowArrow} aria-hidden>→</span>
             </a>
-          ))}
-        </section>
-      )}
+            <Link href="/preguntar" className={styles.rowLink}>
+              <span>{tChat("title")}</span>
+              <span className={styles.rowArrow} aria-hidden>→</span>
+            </Link>
+          </section>
 
-      <section className="card">
-        <h2 className={styles.eyebrow}>{t("legal")}</h2>
-        {LEGAL_LINKS.map((l) => (
-          <Link key={l.slug} href={`/legal/${l.slug}`} className={styles.rowLink}>
-            <span>{locale === "en" ? l.en.title : l.es.title}</span>
-            <span className={styles.rowArrow} aria-hidden>→</span>
-          </Link>
-        ))}
-      </section>
+          {visibleSocialLinks.length > 0 && (
+            <section className="card">
+              <h2 className={styles.eyebrow}>{t("followUs")}</h2>
+              {visibleSocialLinks.map((s) => (
+                <a key={s.key} href={s.href} target="_blank" rel="noreferrer" className={styles.rowLink}>
+                  <span>{s.label}</span>
+                  <span className={styles.rowArrow} aria-hidden>→</span>
+                </a>
+              ))}
+            </section>
+          )}
 
-      {/* Guía de modelos por rubro: solo pruebas (se auto-oculta en prod); de
-          última (orden coherente de ajustes, tras Legal). */}
-      <DevModelGuide />
+          <section className="card">
+            <h2 className={styles.eyebrow}>{t("legal")}</h2>
+            {LEGAL_LINKS.map((l) => (
+              <Link key={l.slug} href={`/legal/${l.slug}`} className={styles.rowLink}>
+                <span>{locale === "en" ? l.en.title : l.es.title}</span>
+                <span className={styles.rowArrow} aria-hidden>→</span>
+              </Link>
+            ))}
+          </section>
 
-      <div className={styles.signOut}>
-        <form action={signOut}>
-          <button type="submit" className={styles.signOutBtn}>
-            {tAuth("logout")}
-          </button>
-        </form>
+          {/* Guía de modelos por rubro: solo pruebas (se auto-oculta en
+              prod); de última (orden coherente de ajustes, tras Legal). */}
+          <DevModelGuide />
+
+          <div className={styles.signOut}>
+            <form action={signOut}>
+              <button type="submit" className={styles.signOutBtn}>
+                {tAuth("logout")}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </main>
   );

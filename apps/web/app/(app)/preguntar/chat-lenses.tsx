@@ -60,13 +60,13 @@ export function ChatLenses({
   const card = value.tarotCard;
   const cardName = card ? cardsDict[card.id]?.name ?? card.id : "";
 
-  // Invariante de diseño (§1): al menos una palanca encendida. Nunca emitimos
-  // una lista vacía — el intento se ignora (feedback sutil: el chip no cambia).
+  // Task 3 (pedido de Gio): SIN piso de "al menos una encendida" — el default
+  // ahora es CERO (conversación general) y debe poder volverse a cero después
+  // de haber encendido alguna, así que apagar la última palanca activa emite
+  // lenses:[] igual que cualquier otro toggle (antes se ignoraba el clic).
   function toggleBase(key: LensKey) {
     if (value.lenses.includes(key)) {
-      const next = value.lenses.filter((l) => l !== key);
-      if (next.length === 0) return;
-      onChange({ ...value, lenses: next });
+      onChange({ ...value, lenses: value.lenses.filter((l) => l !== key) });
     } else {
       onChange({ ...value, lenses: [...value.lenses, key] });
     }
@@ -87,10 +87,8 @@ export function ChatLenses({
 
   function toggleTarot() {
     if (tarotOn) {
-      // Apaga y limpia la carta. Respeta la misma invariante (no dejar vacío).
-      const next = value.lenses.filter((l) => l !== "tarot");
-      if (next.length === 0) return;
-      onChange({ lenses: next, tarotCard: null });
+      // Apaga y limpia la carta (Task 3: puede dejar lenses:[] — ver toggleBase).
+      onChange({ lenses: value.lenses.filter((l) => l !== "tarot"), tarotCard: null });
       setMode("closed");
     } else {
       // OFF → abre el mini-flujo (no activa aún). Un segundo clic lo cierra.

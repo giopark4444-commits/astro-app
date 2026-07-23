@@ -18,6 +18,7 @@ import { SummaryHoroscope } from "./summary-horoscope";
 import { SummaryPillars } from "./summary-pillars";
 import { TarotFan } from "./tarot-fan";
 import { DayHeader } from "./day-header";
+import { InterpretationPanel, type HoySelection } from "./interpretation-panel";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
@@ -67,6 +68,11 @@ export function HubView({
   const L = astroLabels(locale);
   const { active } = useProfiles();
   const [weather, setWeather] = useState<Aspect[] | null>(null);
+  // Interpretación-al-click (pedido Gio 2026-07-23): la casilla izquierda
+  // tocada se explica en el panel del carril derecho. Solo desktop — en móvil
+  // el carril no existe (display:none) y las barras conservan su BottomSheet.
+  const [selection, setSelection] = useState<HoySelection | null>(null);
+  const selBox = selection?.kind === "box" ? selection.box : null;
 
   // Descarte optimista (Fase 2 T4): el item desaparece al instante, la
   // server action corre en paralelo best-effort (dismissCommitment ya nunca
@@ -131,7 +137,12 @@ export function HubView({
               sincronizados desde manifestations (memory_threads, gated por
               memory_enabled en page.tsx). Primero de todo → lo más prioritario. */}
           {visibleCommitments.length > 0 && (
-            <section className={`card ${styles.proactiveCard} reveal`} style={{ ["--i" as string]: 0 }}>
+            <section
+              className={`card ${styles.proactiveCard} ${styles.clickBox} reveal`}
+              style={{ ["--i" as string]: 0 }}
+              data-on={selBox === "proactiva" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "proactiva" })}
+            >
               <h2 className={styles.proactiveTitle}>✦ {t("hoy.proactive.title")}</h2>
               <ul className={styles.proactiveList}>
                 {visibleCommitments.map((c) => (
@@ -147,7 +158,10 @@ export function HubView({
                       <button
                         type="button"
                         className={styles.proactiveDismiss}
-                        onClick={() => handleDismissCommitment(c.id)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // descartar no debe seleccionar la casilla
+                          handleDismissCommitment(c.id);
+                        }}
                       >
                         {t("hoy.proactive.dismiss")}
                       </button>
@@ -158,15 +172,36 @@ export function HubView({
             </section>
           )}
 
-          {/* b) ¿Cómo estás hoy? — barras de energía por disciplina (HD4). */}
-          {active && <EnergyPanel profileId={active.id} focus={focus} />}
+          {/* b) ¿Cómo estás hoy? — barras de energía por disciplina (HD4).
+              En desktop la barra tocada se interpreta en el panel derecho; en
+              móvil EnergyPanel conserva su BottomSheet (decide él, ver prop). */}
+          {active && (
+            <EnergyPanel
+              profileId={active.id}
+              focus={focus}
+              onAreaSelect={(sel) => setSelection({ kind: "area", ...sel })}
+            />
+          )}
 
           {/* c) Tu carta — Sol/Luna/Asc + núcleo narrativo (HD5). */}
-          {active && <SummaryChart profileId={active.id} />}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "carta" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "carta" })}
+            >
+              <SummaryChart profileId={active.id} />
+            </div>
+          )}
 
           {/* d) Tu clima de hoy — tránsitos del día (top 3). */}
           {weather && weather.length > 0 && (
-            <section className={`card ${styles.weatherCard} ${styles.heroWeather} reveal`} style={{ ["--i" as string]: 1 }}>
+            <section
+              className={`card ${styles.weatherCard} ${styles.heroWeather} ${styles.clickBox} reveal`}
+              style={{ ["--i" as string]: 1 }}
+              data-on={selBox === "clima" || selection?.kind === "aspect" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "clima" })}
+            >
               <div className={styles.weatherHead}>
                 <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
                 {/* mockup 06 §3.2: link en cabecera — la tarjeta deja de ser un Link gigante */}
@@ -177,7 +212,16 @@ export function HubView({
               <p className={styles.weatherSub}>{t("hoy.weatherSub")}</p>
               <div className={styles.weatherList}>
                 {weather.map((a, i) => (
-                  <div key={i} className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`} data-harm={a.harmony}>
+                  <div
+                    key={i}
+                    className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`}
+                    data-harm={a.harmony}
+                    data-on={(selection?.kind === "aspect" && selection.aspect === a) || undefined}
+                    onClick={(e) => {
+                      e.stopPropagation(); // el aspecto puntual gana sobre la casilla clima
+                      setSelection({ kind: "aspect", aspect: a });
+                    }}
+                  >
                     <span className={styles.aspTop}>
                       <span className={styles.weatherGlyphs}>
                         <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
@@ -205,21 +249,56 @@ export function HubView({
           )}
 
           {/* e) Horóscopo occidental — resumen del día (HD5). */}
-          {active && <SummaryHoroscope profileId={active.id} trad="occidental" />}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "horoscopoOccidental" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "horoscopoOccidental" })}
+            >
+              <SummaryHoroscope profileId={active.id} trad="occidental" />
+            </div>
+          )}
 
           {/* f) Horóscopo oriental — resumen del día (HD5). */}
-          {active && <SummaryHoroscope profileId={active.id} trad="oriental" />}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "horoscopoOriental" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "horoscopoOriental" })}
+            >
+              <SummaryHoroscope profileId={active.id} trad="oriental" />
+            </div>
+          )}
 
           {/* g) Tus pilares — esencia BaZi (HD5). */}
-          {active && <SummaryPillars profileId={active.id} />}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "pilares" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "pilares" })}
+            >
+              <SummaryPillars profileId={active.id} />
+            </div>
+          )}
 
           {/* h) La baraja de hoy — abanico de tarot (HD6). */}
-          {active && <TarotFan profileId={active.id} />}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "tarot" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "tarot" })}
+            >
+              <TarotFan profileId={active.id} />
+            </div>
+          )}
         </div>
 
-        {/* Carril derecho: el chat de Aluna embebido (mismo patrón que
-            perfil-chat-panel.tsx). Sticky en desktop; display:none en móvil. */}
+        {/* Carril derecho (sticky desktop, display:none móvil): arriba el panel
+            de Interpretación (responde a la casilla tocada; trae el selector de
+            modo 🌙/📚/🔭) y debajo el chat de Aluna embebido — cada uno con su
+            alto propio, sin estirarse entre sí. */}
         <aside className={styles.interpCol}>
+          <InterpretationPanel selection={selection} profileId={active?.id ?? null} />
           <div className={styles.chatPanel}>
             <span className={styles.cardH2}>{t("hoy.askAluna")}</span>
             <ChatView embedded />

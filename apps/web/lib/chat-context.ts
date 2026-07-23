@@ -25,11 +25,14 @@ import { computeBaziNatal, type BaziNatalProfile } from "@/lib/timeline/bazi-nat
 
 export type Locale = "es" | "en";
 
-/** Las cuatro lentes/palancas de enfoque del chat. Las 3 primeras son la base
- *  (siempre disponibles); tarot es opt-in y solo aporta bloque si hay carta. */
+/** Las cuatro lentes/palancas de enfoque del chat. Ninguna está encendida por
+ *  defecto (Task 3, pedido de Gio): la persona elige a mano cuál(es) quiere;
+ *  tarot es además opt-in y solo aporta bloque si hay carta. */
 export const LENSES = ["astros", "numeros", "pilares", "tarot"] as const;
 export type Lens = (typeof LENSES)[number];
-/** Default cuando el cliente no manda lentes: las 3 base (sin tarot). */
+/** Agrupación con nombre de las 3 disciplinas no-tarot — YA NO es el default
+ *  implícito (Task 3 lo retiró de resolveLenses/effectiveLenses); queda como
+ *  conjunto con nombre para quien quiera seleccionarlas explícitamente. */
 export const BASE_LENSES: Lens[] = ["astros", "numeros", "pilares"];
 /** Orden canónico de concatenación de bloques y de la lista de disciplinas. */
 const LENS_ORDER: Lens[] = ["astros", "numeros", "pilares", "tarot"];
@@ -39,13 +42,14 @@ export interface TarotCardRef {
   reversed: boolean;
 }
 
-/** Resuelve las lentes del body: valida contra LENSES, dedupe en orden canónico,
- *  y default a las 3 base si viene vacío o ausente. */
+/** Resuelve las lentes del body: valida contra LENSES y dedupe en orden
+ *  canónico. Task 3 (pedido de Gio): SIN fallback — ausente, vacío, o solo
+ *  basura inválida resuelve a `[]` (conversación general, sin bloques de
+ *  lente), no a las 3 base. */
 export function resolveLenses(raw: unknown): Lens[] {
-  if (!Array.isArray(raw)) return [...BASE_LENSES];
+  if (!Array.isArray(raw)) return [];
   const valid = new Set(raw.filter((l): l is Lens => typeof l === "string" && (LENSES as readonly string[]).includes(l)));
-  const ordered = LENS_ORDER.filter((l) => valid.has(l));
-  return ordered.length ? ordered : [...BASE_LENSES];
+  return LENS_ORDER.filter((l) => valid.has(l));
 }
 
 /** Parsea/valida `tarotCard` del body: `{id, reversed}` con id ∈ mazo (cardById).
@@ -206,13 +210,12 @@ export interface FocusedContextArgs {
 }
 
 /**
- * DEFENSA EN PROFUNDIDAD: lista efectiva de lentes que van a aportar bloque de
- * datos. El cliente NO debería mandar `lenses:["tarot"]` sin `tarotCard`, pero si
- * lo hace, filtrar tarot acá dejaría la selección activa VACÍA → contexto sin
- * bloques (solo el header) y una focusLine rota ("...ÚNICAMENTE en: . No
- * introduzcas..."). Por eso: se filtra tarot cuando no hay carta y, si la lista
- * activa queda vacía tras ese filtro, se cae a `BASE_LENSES` (astros/numeros/
- * pilares) — el contexto NUNCA queda sin datos.
+ * Lista efectiva de lentes que van a aportar bloque de datos: la selección de
+ * la persona, con tarot filtrado si no hay carta fijada (el cliente NO debería
+ * mandar `lenses:["tarot"]` sin `tarotCard`, pero si lo hace, tarot se cae sin
+ * dejar nada en su lugar). Task 3 (pedido de Gio): SIN fallback a BASE_LENSES
+ * cuando queda vacía — lista vacía es un resultado válido ("conversación
+ * general", ver `focusLine`/`buildFocusedContext`), no un caso roto a rescatar.
  *
  * astros/numeros no se validan acá contra chart/numerology: su disponibilidad la
  * garantiza el llamador (`/api/chat/route.ts` solo activa esas lentes cuando ya
@@ -222,8 +225,7 @@ export interface FocusedContextArgs {
  */
 export function effectiveLenses(lenses: Lens[], tarotCard: TarotCardRef | undefined): Lens[] {
   const active = new Set(lenses);
-  const effective = LENS_ORDER.filter((l) => active.has(l) && (l !== "tarot" || !!tarotCard));
-  return effective.length ? effective : [...BASE_LENSES];
+  return LENS_ORDER.filter((l) => active.has(l) && (l !== "tarot" || !!tarotCard));
 }
 
 /**
@@ -256,12 +258,16 @@ export function buildFocusedContext(args: FocusedContextArgs): string {
 /**
  * Línea de enfoque que se AÑADE al system: "Aconseja apoyándote ÚNICAMENTE en:
  * <disciplinas efectivas>. No introduzcas las demás." Usa la MISMA
- * `effectiveLenses` que `buildFocusedContext` — nunca lista vacío (": .") ni
- * menciona Tarot sin carta, y siempre coincide con las disciplinas que de verdad
- * tienen bloque en el contexto.
+ * `effectiveLenses` que `buildFocusedContext`, así que nunca menciona Tarot sin
+ * carta y siempre coincide con las disciplinas que de verdad tienen bloque en
+ * el contexto. Task 3 (pedido de Gio): sin NINGUNA lente activa (el default
+ * nuevo) no hay nada que restringir — devuelve "" (el llamador la omite del
+ * system) en vez de la vieja lista rota (": ."); nunca una lista vacía visible.
  */
 export function focusLine(lenses: Lens[], tarotCard: TarotCardRef | undefined, locale: Locale): string {
-  const names = effectiveLenses(lenses, tarotCard).map((l) => DISCIPLINE[locale][l]);
+  const effective = effectiveLenses(lenses, tarotCard);
+  if (effective.length === 0) return "";
+  const names = effective.map((l) => DISCIPLINE[locale][l]);
   const list = joinList(names, locale);
   return locale === "en"
     ? `Advise drawing ONLY on: ${list}. Do not bring in the others.`

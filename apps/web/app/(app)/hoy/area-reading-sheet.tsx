@@ -21,7 +21,7 @@ type St = "loading" | "ready" | "dormant" | "error";
 // (no en messages/*.json junto a las demás claves de "hoy") porque son 12
 // frases fijas (6 áreas × 2 locales) sin más variación que la traducción —
 // evita una key i18n por área y mantiene next-intl liviano.
-const SUGGESTED_QUESTION: Record<"es" | "en", Record<LifeArea, string>> = {
+export const SUGGESTED_QUESTION: Record<"es" | "en", Record<LifeArea, string>> = {
   es: {
     love: "¿Cómo está mi vida amorosa esta semana?",
     money: "¿Cómo está mi economía esta semana?",

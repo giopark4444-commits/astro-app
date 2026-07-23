@@ -19,6 +19,7 @@ vi.mock("../resize-image", () => ({
 
 import { resizePalmPhoto } from "../resize-image";
 import { ManoView } from "../mano-view";
+import styles from "../mano.module.css";
 
 function renderView() {
   return render(
@@ -265,5 +266,86 @@ describe("ManoView", () => {
     expect(screen.getByText(es.mano.privacySeal)).toBeInTheDocument();
     // El registro previo sigue en el dispositivo — reiniciar la ceremonia no lo borra.
     expect(localStorage.getItem(`aluna.palm.${PROFILE_ID}`)).toBeTruthy();
+  });
+});
+
+// Task 5: maestro-detalle 2 columnas en desktop (mismo patrón que numeros/
+// pilares/carta/horoscopo/tarot) — ManoView es un client component normal
+// (a diferencia de perfil/page.tsx), así que se verifica render-y-DOM real,
+// no la fuente. El CSS de layout en sí (grid/align-items:start/sticky) vive
+// en @media y jsdom no lo aplica — eso queda verificado por code review +
+// paridad de valores con el resto de la serie (ver mano.module.css).
+describe("ManoView — estructura maestro-detalle (deskCols > leftCol + interpCol)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    global.fetch = vi.fn() as unknown as typeof fetch;
+  });
+
+  it("intro: leftCol tiene los controles de siempre; interpCol muestra el panel explicativo (vista previa de las 6 secciones)", () => {
+    const { container } = renderView();
+
+    const deskCols = container.querySelector(`.${CSS.escape(styles.deskCols!)}`);
+    const leftCol = container.querySelector(`.${CSS.escape(styles.leftCol!)}`);
+    const interpCol = container.querySelector(`.${CSS.escape(styles.interpCol!)}`);
+    expect(deskCols).not.toBeNull();
+    expect(leftCol).not.toBeNull();
+    expect(interpCol).not.toBeNull();
+    // Ambos carriles son hijos de deskCols (mismo anidamiento que el resto de la serie).
+    expect(leftCol!.parentElement).toBe(deskCols);
+    expect(interpCol!.parentElement).toBe(deskCols);
+
+    // leftCol: introP1/introP2 + sello + controles siguen ahí (móvil-safe: NO
+    // se movieron al panel derecho, ver mano-view.tsx IntroScreen).
+    expect(leftCol).toHaveTextContent(es.mano.introP1);
+    expect(leftCol).toHaveTextContent(es.mano.introP2);
+    expect(screen.getByText(es.mano.privacySeal)).toBeInTheDocument();
+
+    // interpCol: panel explicativo — NO duplica introP1/introP2, previene las
+    // 6 secciones con los mismos labels `section.*` de la lectura real.
+    expect(interpCol).not.toHaveTextContent(es.mano.introP1);
+    for (const label of Object.values(es.mano.section)) {
+      expect(interpCol).toHaveTextContent(label as string);
+    }
+  });
+
+  it("captura/análisis/avisos (sin lectura todavía): interpCol sigue mostrando el panel explicativo, no queda vacío", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ available: false }) });
+    global.fetch = fetchMock as unknown as typeof fetch;
+    vi.mocked(resizePalmPhoto).mockResolvedValue({ data: "ZmFrZS1iYXNlNjQ=", mime: "image/jpeg" });
+    const { container } = renderView();
+
+    fireEvent.click(screen.getByRole("tab", { name: es.mano.handCountOne }));
+    fireEvent.click(screen.getByRole("button", { name: es.mano.start }));
+    await screen.findByText(domTitle("captureTitleDominant", es.mano.sideRight));
+
+    const interpCol = container.querySelector(`.${CSS.escape(styles.interpCol!)}`);
+    expect(interpCol).toHaveTextContent(es.mano.section.forma);
+
+    uploadFile(container);
+    await waitFor(() => expect(screen.getByText(es.mano.dormantTitle)).toBeInTheDocument());
+    expect(container.querySelector(`.${CSS.escape(styles.interpCol!)}`)).toHaveTextContent(es.mano.section.sintesis);
+  });
+
+  it("con la lectura lista: leftCol queda compacto (solo resumen + acciones, SIN las secciones); interpCol tiene el resultado completo", async () => {
+    localStorage.setItem(
+      `aluna.palm.${PROFILE_ID}`,
+      JSON.stringify({ sections: SECTIONS, hasNatal: false, fecha: "2026-07-20T12:00:00.000Z", manos: ["dominante"] }),
+    );
+    const { container } = renderView();
+    await waitFor(() => expect(screen.getByText(SECTIONS.sintesis)).toBeInTheDocument());
+
+    const leftCol = container.querySelector(`.${CSS.escape(styles.leftCol!)}`);
+    const interpCol = container.querySelector(`.${CSS.escape(styles.interpCol!)}`);
+
+    // Izquierda: resumen + acciones, nada de las secciones/consejo.
+    expect(leftCol).toHaveTextContent(es.mano.readAgain);
+    expect(leftCol).not.toHaveTextContent(SECTIONS.sintesis);
+    expect(leftCol).not.toHaveTextContent(es.mano.section.forma);
+
+    // Derecha: el resultado completo — secciones + aviso de puente astral pendiente.
+    expect(interpCol).toHaveTextContent(SECTIONS.sintesis);
+    expect(interpCol).toHaveTextContent(SECTIONS.consejo);
+    expect(interpCol).toHaveTextContent(es.mano.noNatalNote);
+    expect(interpCol).not.toHaveTextContent(es.mano.readAgain);
   });
 });

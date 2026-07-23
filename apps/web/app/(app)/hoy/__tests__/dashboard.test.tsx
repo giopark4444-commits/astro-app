@@ -162,7 +162,7 @@ describe("hub.module.css — interpCol oculto en móvil, visible en desktop", ()
 
   it("revela .interpCol sticky dentro del @media desktop (min-width: 1080px)", () => {
     const media = css.slice(css.indexOf("min-width: 1080px"));
-    expect(media).toMatch(/\.interpCol\s*\{[^}]*display:\s*block/);
+    expect(media).toMatch(/\.interpCol\s*\{[^}]*display:\s*flex/); // columna: panel Interpretación + chat
     expect(media).toMatch(/\.interpCol\s*\{[^}]*position:\s*sticky/);
   });
 });

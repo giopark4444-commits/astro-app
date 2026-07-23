@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { NumberMeaning } from "@/lib/content/numerology-es";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { InterpretationModePicker } from "@/components/interpretation-mode-picker";
 import styles from "./numerology-view.module.css";
 
 // Selector de profundidad de la lectura. "Esencia" es la voz escrita a mano
@@ -154,6 +155,14 @@ export function NumberReading({
         ))}
       </div>
       <p className={styles.tierHint}>{t(`tier${TIER_KEY[tier]}Hint`)}</p>
+
+      {/* Task 7: modo 🌙/📚/🔭 arriba del texto generado. getVoiceMode() ya
+          vive en la cache key de `choose` (arriba) — re-disparar la MISMA
+          ruta de carga con el tier actual basta para pedir la lectura en el
+          tono nuevo (el cache del tier/modo anterior queda intacto). */}
+      <div className={styles.modePicker}>
+        <InterpretationModePicker onChange={() => choose(tier)} />
+      </div>
 
       {state.status === "loading" && (
         <div className={styles.readingLoading} aria-live="polite">

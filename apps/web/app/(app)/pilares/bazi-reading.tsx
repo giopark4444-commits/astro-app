@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { composeBaziReading, type BaziReading, type PillarSet } from "@aluna/core";
 import { getVoiceMode } from "@/lib/voice-mode";
 import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
+import { InterpretationModePicker } from "@/components/interpretation-mode-picker";
 import styles from "./pilares.module.css";
 
 // Selector de profundidad para "Lectura de tus pilares" (Ba Zi/Saju). "Esencia" es
@@ -171,6 +172,14 @@ export function BaziReadingView({
       {st.s === "loading" && <p className={styles.solar}>{t("loading")}</p>}
       {st.s === "unavailable" && <p className={styles.solar}>☾ {t("gated")}</p>}
       {st.s === "error" && <p className={styles.solar}>{t("error")}</p>}
+
+      {/* Task 7: modo 🌙/📚/🔭 arriba del texto generado. getVoiceMode() ya
+          vive en la cache key de `choose` (arriba) — re-disparar la MISMA
+          ruta de carga con el tier actual basta para pedir la lectura en el
+          tono nuevo (el cache del tier/modo anterior queda intacto). */}
+      <div className={styles.modePicker}>
+        <InterpretationModePicker onChange={() => choose(tier)} />
+      </div>
 
       <div aria-live={live ? "polite" : undefined} aria-busy={live || undefined}>
         {essence && <p className={styles.brEssence}>{essence}</p>}

@@ -17,12 +17,21 @@ const SWATCH: Record<Theme, string> = {
   eclipse: "linear-gradient(135deg, #232330, #caccde)",
 };
 
+// Task 6c (reorg ajustes): el toggle de memoria se separó del resto de
+// Preferencias — vive DENTRO del grupo Memoria (ajustes/page.tsx), arriba de
+// Esencia/Recuerdos/Entidades/Datos, no junto a idioma/tema/intención. Un solo
+// componente sigue resolviendo AMBAS mitades (mínimo cambio, misma lógica de
+// guardado/estado optimista) — `section` decide cuál JSX renderiza; el
+// llamador monta DOS instancias (una por sección, ver page.tsx) con los
+// mismos props (los que no aplican a una mitad simplemente no se usan ahí).
 export function SettingsControls({
+  section,
   currentLocale,
   hasIntent,
   intentUseInAI,
   memoryEnabled,
 }: {
+  section: "memory" | "general";
   currentLocale: string;
   hasIntent: boolean;
   intentUseInAI: boolean;
@@ -39,6 +48,59 @@ export function SettingsControls({
   // pero SIN disabled — a diferencia del cuestionario, la memoria no depende
   // de que exista otro dato previo.
   const [memOn, setMemOn] = useState(memoryEnabled);
+
+  if (section === "memory") {
+    return (
+      <>
+        {/* Móvil (<1080px): misma tarjeta de swatch que el resto de Preferencias
+            (ocultas en desktop, media queries espejo en settings.module.css) —
+            acá vive DENTRO de .memoryGroup en vez de la tarjeta de Preferencias. */}
+        <div className={styles.wrap}>
+          <section className={styles.section}>
+            <h3 className={styles.label}>{t("memoryToggle")}</h3>
+            <p>{t("memoryToggleHint")}</p>
+            <div className="seg" role="group" aria-label={t("memoryToggle")}>
+              {([true, false] as const).map((on) => (
+                <button
+                  key={String(on)}
+                  className={`seg__item ${styles.segItem} ${memOn === on ? "seg__item--active" : ""}`}
+                  aria-pressed={memOn === on}
+                  onClick={async () => {
+                    setMemOn(on);
+                    await setMemoryEnabled(on);
+                  }}
+                >
+                  {t(on ? "memoryOn" : "memoryOff")}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Desktop (≥1080px): misma fila compacta que el resto — SIN disabled. */}
+        <div className={styles.compact}>
+          <div className={styles.prow} title={t("memoryToggleHint")}>
+            <span className={styles.plab}>{t("memoryToggle")}</span>
+            <div className={`seg ${styles.segCompactWrap}`} role="group" aria-label={t("memoryToggle")}>
+              {([true, false] as const).map((on) => (
+                <button
+                  key={String(on)}
+                  className={`seg__item ${styles.segItem} ${styles.segCompact} ${memOn === on ? "seg__item--active" : ""}`}
+                  aria-pressed={memOn === on}
+                  onClick={async () => {
+                    setMemOn(on);
+                    await setMemoryEnabled(on);
+                  }}
+                >
+                  {t(on ? "memoryOn" : "memoryOff")}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -99,26 +161,6 @@ export function SettingsControls({
             ))}
           </div>
         </section>
-
-        <section className={styles.section}>
-          <h3 className={styles.label}>{t("memoryToggle")}</h3>
-          <p>{t("memoryToggleHint")}</p>
-          <div className="seg" role="group" aria-label={t("memoryToggle")}>
-            {([true, false] as const).map((on) => (
-              <button
-                key={String(on)}
-                className={`seg__item ${styles.segItem} ${memOn === on ? "seg__item--active" : ""}`}
-                aria-pressed={memOn === on}
-                onClick={async () => {
-                  setMemOn(on);
-                  await setMemoryEnabled(on);
-                }}
-              >
-                {t(on ? "memoryOn" : "memoryOff")}
-              </button>
-            ))}
-          </div>
-        </section>
       </div>
 
       {/* Desktop (≥1080px): filas compactas — mockup 06 §5.3 (.pf-prow).
@@ -174,26 +216,6 @@ export function SettingsControls({
                 }}
               >
                 {t(on ? "intentAIOn" : "intentAIOff")}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Toggle de memoria (Fase 1C): misma fila compacta, SIN disabled. */}
-        <div className={styles.prow} title={t("memoryToggleHint")}>
-          <span className={styles.plab}>{t("memoryToggle")}</span>
-          <div className={`seg ${styles.segCompactWrap}`} role="group" aria-label={t("memoryToggle")}>
-            {([true, false] as const).map((on) => (
-              <button
-                key={String(on)}
-                className={`seg__item ${styles.segItem} ${styles.segCompact} ${memOn === on ? "seg__item--active" : ""}`}
-                aria-pressed={memOn === on}
-                onClick={async () => {
-                  setMemOn(on);
-                  await setMemoryEnabled(on);
-                }}
-              >
-                {t(on ? "memoryOn" : "memoryOff")}
               </button>
             ))}
           </div>

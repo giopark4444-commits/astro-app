@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
@@ -57,7 +57,12 @@ describe("HoroscopoView", () => {
     // "Luna Llena" aparece dos veces a propósito (el evento en "El cielo del
     // periodo" Y la prosa compuesta la nombra también) → *AllBy* en vez de getBy.
     await waitFor(() => expect(screen.getAllByText(/Luna Llena/).length).toBeGreaterThan(0));
-    expect(screen.getAllByRole("radio", { name: /.+/ })).toHaveLength(12); // chips de signo
+    // Acotado al radiogroup del selector de signo (Task 7: HoroscopeReading, que
+    // vive en el mismo árbol, ahora también monta su propio radiogroup — el del
+    // modo 🌙/📚/🔭 — con 3 radios propios que un `getAllByRole` sin acotar
+    // contaría de más).
+    const signGroup = screen.getByRole("radiogroup", { name: es.horoscopo.signAria });
+    expect(within(signGroup).getAllByRole("radio", { name: /.+/ })).toHaveLength(12); // chips de signo
   });
   it("sin perfil, arranca en Aries (primer signo) y pide al backend", async () => {
     renderView();

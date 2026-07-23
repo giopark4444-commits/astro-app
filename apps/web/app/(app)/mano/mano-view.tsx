@@ -11,9 +11,8 @@ import { loadPalmReading, savePalmReading } from "./storage";
 import { otherSide, type HandRole, type Side } from "./types";
 import styles from "./mano.module.css";
 
-// Lectura de mano: máquina de estados de un solo carril (spec
-// docs/superpowers/specs/2026-07-23-lectura-mano.md) — a diferencia de
-// numeros/pilares (maestro-detalle), acá el flujo es secuencial y ceremonial:
+// Lectura de mano: máquina de estados de un solo carril ceremonial (spec
+// docs/superpowers/specs/2026-07-23-lectura-mano.md):
 //   intro (privacidad + cuántas manos + cuál es la dominante)
 //     → captura por mano (con reescalado client-side, ver ./resize-image)
 //       → analizando → [retoma si la foto no sirve] → siguiente mano o lectura
@@ -21,6 +20,13 @@ import styles from "./mano.module.css";
 //           localStorage, ./storage — la foto y el inventario nunca se guardan).
 // Los dos endpoints (palm-analysis/palm-reading) y sus contratos {available}
 // siguen el mismo patrón "oráculo dormido" que el resto de Aluna.
+// Task 5: en desktop ESE MISMO carril pasa a ser la columna izquierda de un
+// maestro-detalle (como numeros/pilares) — el carril derecho (sticky) explica
+// qué vas a recibir mientras no hay lectura, y muestra el resultado completo
+// cuando sí la hay. El state machine y las 2 llamadas de red no cambiaron: la
+// única diferencia es DÓNDE se monta cada pieza del JSX (ver el render y
+// ExplainerPanel/ReadingDone/ReadingResult, más abajo). En móvil sigue
+// exactamente igual que antes (un solo carril apilado, sin panel derecho).
 
 const SECTION_KEYS = ["forma", "lineas", "montes", "marcas", "puente_astral", "sintesis"] as const;
 
@@ -173,80 +179,94 @@ export function ManoView() {
         <h1 className={styles.title}>{t("title")}</h1>
       </header>
 
-      {screen.kind === "intro" && (
-        <IntroScreen
-          handCount={handCount}
-          onHandCount={setHandCount}
-          dominantSide={dominantSide}
-          onDominantSide={setDominantSide}
-          onStart={begin}
-        />
-      )}
+      {/* Maestro-detalle (Task 5): en desktop, `.leftCol` es el carril del
+          camino ceremonial (intro → captura → análisis → avisos → resumen
+          final) y `.interpCol` es el panel derecho sticky — explica qué vas a
+          recibir mientras no hay lectura todavía, y muestra el RESULTADO
+          completo (las 6 secciones) una vez que sí la hay. En móvil
+          `.deskCols`/`.interpCol` son transparentes/ocultos (ver
+          mano.module.css) — el carril izquierdo queda como única columna,
+          igual que antes de este task. NO cambia el state machine: sigue
+          siendo el mismo `screen.kind`, solo se reparte su render en 2 sitios. */}
+      <div className={styles.deskCols}>
+        <div className={styles.leftCol}>
+          {screen.kind === "intro" && (
+            <IntroScreen
+              handCount={handCount}
+              onHandCount={setHandCount}
+              dominantSide={dominantSide}
+              onDominantSide={setDominantSide}
+              onStart={begin}
+            />
+          )}
 
-      {screen.kind === "capture" && (
-        <CaptureScreen
-          role={screen.role}
-          side={screen.side}
-          handCount={handCount}
-          onFile={(file) => void handleFile(file, screen.role, screen.side)}
-        />
-      )}
+          {screen.kind === "capture" && (
+            <CaptureScreen
+              role={screen.role}
+              side={screen.side}
+              handCount={handCount}
+              onFile={(file) => void handleFile(file, screen.role, screen.side)}
+            />
+          )}
 
-      {screen.kind === "analyzing" && <LoadingCard text={t("analyzing")} />}
-      {screen.kind === "reading-loading" && <LoadingCard text={t("readingLoading")} />}
+          {screen.kind === "analyzing" && <LoadingCard text={t("analyzing")} />}
+          {screen.kind === "reading-loading" && <LoadingCard text={t("readingLoading")} />}
 
-      {screen.kind === "retake" && (
-        <RetakeScreen guidance={screen.guidance} issues={screen.issues} onRetake={retakeCurrent} />
-      )}
+          {screen.kind === "retake" && (
+            <RetakeScreen guidance={screen.guidance} issues={screen.issues} onRetake={retakeCurrent} />
+          )}
 
-      {screen.kind === "too-large" && (
-        <div className={`card card--dashed ${styles.notice}`}>
-          <p className={styles.noticeTitle}>{t("tooLargeTitle")}</p>
-          <p className={styles.noticeBody}>{t("tooLargeBody")}</p>
-          <button type="button" className={styles.btn} onClick={retakeCurrent}>
-            {t("tooLargeCta")}
-          </button>
+          {screen.kind === "too-large" && (
+            <div className={`card card--dashed ${styles.notice}`}>
+              <p className={styles.noticeTitle}>{t("tooLargeTitle")}</p>
+              <p className={styles.noticeBody}>{t("tooLargeBody")}</p>
+              <button type="button" className={styles.btn} onClick={retakeCurrent}>
+                {t("tooLargeCta")}
+              </button>
+            </div>
+          )}
+
+          {screen.kind === "error-hand" && (
+            <div className={`card card--dashed ${styles.notice}`}>
+              <p className={styles.noticeBody}>{t("error")}</p>
+              <button type="button" className={styles.btn} onClick={retakeCurrent}>
+                {t("retry")}
+              </button>
+            </div>
+          )}
+
+          {screen.kind === "error-reading" && (
+            <div className={`card card--dashed ${styles.notice}`}>
+              <p className={styles.noticeBody}>{t("error")}</p>
+              <button type="button" className={styles.btn} onClick={() => void runReading(features)}>
+                {t("retry")}
+              </button>
+            </div>
+          )}
+
+          {screen.kind === "dormant" && (
+            <div className={`card card--dashed ${styles.notice}`}>
+              <span className={styles.dormantGlyph} aria-hidden>
+                ☾
+              </span>
+              <p className={styles.noticeTitle}>{t("dormantTitle")}</p>
+              <p className={styles.noticeBody}>{t("dormantBody")}</p>
+            </div>
+          )}
+
+          {screen.kind === "reading" && (
+            <ReadingDone locale={locale} fecha={screen.fecha} manos={screen.manos} onReset={reset} />
+          )}
         </div>
-      )}
 
-      {screen.kind === "error-hand" && (
-        <div className={`card card--dashed ${styles.notice}`}>
-          <p className={styles.noticeBody}>{t("error")}</p>
-          <button type="button" className={styles.btn} onClick={retakeCurrent}>
-            {t("retry")}
-          </button>
+        <div className={styles.interpCol}>
+          {screen.kind === "reading" ? (
+            <ReadingResult sections={screen.sections} hasNatal={screen.hasNatal} />
+          ) : (
+            <ExplainerPanel />
+          )}
         </div>
-      )}
-
-      {screen.kind === "error-reading" && (
-        <div className={`card card--dashed ${styles.notice}`}>
-          <p className={styles.noticeBody}>{t("error")}</p>
-          <button type="button" className={styles.btn} onClick={() => void runReading(features)}>
-            {t("retry")}
-          </button>
-        </div>
-      )}
-
-      {screen.kind === "dormant" && (
-        <div className={`card card--dashed ${styles.notice}`}>
-          <span className={styles.dormantGlyph} aria-hidden>
-            ☾
-          </span>
-          <p className={styles.noticeTitle}>{t("dormantTitle")}</p>
-          <p className={styles.noticeBody}>{t("dormantBody")}</p>
-        </div>
-      )}
-
-      {screen.kind === "reading" && (
-        <ReadingScreen
-          locale={locale}
-          sections={screen.sections}
-          hasNatal={screen.hasNatal}
-          fecha={screen.fecha}
-          manos={screen.manos}
-          onReset={reset}
-        />
-      )}
+      </div>
     </main>
   );
 }
@@ -267,6 +287,12 @@ function IntroScreen({
   const t = useTranslations("mano");
   return (
     <div className={`${styles.intro} reveal`}>
+      {/* introP1/introP2 se QUEDAN acá sin cambios (Task 5: "en móvil queda
+          apilado como está" — si se movieran al panel derecho desaparecerían
+          del móvil, donde ese panel no existe). El panel explicativo del
+          carril derecho (desktop, ver ExplainerPanel) usa contenido DISTINTO
+          — la vista previa de las 6 secciones — para no duplicar estas dos
+          frases lado a lado en desktop. */}
       <p className={styles.introP}>{t("introP1")}</p>
       <p className={styles.introP}>{t("introP2")}</p>
 
@@ -400,30 +426,46 @@ function RetakeScreen({ guidance, issues, onRetake }: { guidance: string; issues
   );
 }
 
-function ReadingScreen({
+// Task 5 (maestro-detalle): la vieja `ReadingScreen` monolítica se separa en
+// dos — `ReadingDone` (carril izquierdo: resumen compacto + acciones) y
+// `ReadingResult` (panel derecho: las 6 secciones + consejo). Misma prosa,
+// mismos props derivados de `screen` — solo cambia DÓNDE se monta cada mitad.
+function ReadingDone({
   locale,
-  sections,
-  hasNatal,
   fecha,
   manos,
   onReset,
 }: {
   locale: "es" | "en";
-  sections: Record<string, string>;
-  hasNatal: boolean;
   fecha: string;
   manos: HandRole[];
   onReset: () => void;
 }) {
   const t = useTranslations("mano");
   const handsLabel = manos.length >= 2 ? t("handsReadTwo") : t("handsReadOne");
-  const consejo = sections.consejo;
   const askHref = `/preguntar?q=${encodeURIComponent(t("askQuestion"))}`;
 
   return (
-    <div className={`${styles.reading} fade-in`}>
+    <div className={`${styles.readingDone} fade-in`}>
       <p className={styles.restoredNote}>{t("restoredNote", { hands: handsLabel, date: formatDate(fecha, locale) })}</p>
+      <div className={styles.actions}>
+        <button type="button" className={styles.btnGhost} onClick={onReset}>
+          {t("readAgain")}
+        </button>
+        <Link href={askHref} className={styles.askCta}>
+          {t("askAluna")}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
+function ReadingResult({ sections, hasNatal }: { sections: Record<string, string>; hasNatal: boolean }) {
+  const t = useTranslations("mano");
+  const consejo = sections.consejo;
+
+  return (
+    <div className={`${styles.reading} fade-in`}>
       <div className={styles.sections}>
         {SECTION_KEYS.map((key) => {
           const body = sections[key];
@@ -445,15 +487,28 @@ function ReadingScreen({
           <p className={styles.adviceBody}>{consejo}</p>
         </div>
       )}
+    </div>
+  );
+}
 
-      <div className={styles.actions}>
-        <button type="button" className={styles.btnGhost} onClick={onReset}>
-          {t("readAgain")}
-        </button>
-        <Link href={askHref} className={styles.askCta}>
-          {t("askAluna")}
-        </Link>
-      </div>
+// Panel derecho ANTES de que exista una lectura (Task 5): intro/captura/
+// análisis/avisos/dormido comparten este mismo panel explicativo — sin él, el
+// carril derecho quedaría vacío durante todo el camino hasta la lectura.
+// Contenido DISTINTO al de IntroScreen (no duplica introP1/introP2, que
+// siguen intactos en el carril izquierdo/móvil): vista previa de las 6
+// secciones con los MISMOS labels `section.*` que arma la lectura real.
+function ExplainerPanel() {
+  const t = useTranslations("mano");
+  return (
+    <div className={styles.explainer}>
+      <p className={styles.explainerLead}>{t("eyebrow")}</p>
+      <ul className={styles.explainerList}>
+        {SECTION_KEYS.map((key) => (
+          <li key={key} className={styles.explainerItem}>
+            {t(`section.${key}`)}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

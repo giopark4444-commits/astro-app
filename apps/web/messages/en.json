@@ -120,9 +120,9 @@
     "voiceModeTitle": "Aluna's mode",
     "voiceModeHint": "How she tells you what she sees. Saved on this device; applies from your next message.",
     "voiceMode_intima": "Intimate",
-    "voiceMode_intimaDesc": "Your friend who speaks to your life",
-    "voiceMode_estudio": "Study",
-    "voiceMode_estudioDesc": "The datum and its why, to learn the craft",
+    "voiceMode_intimaDesc": "Warm and close: speaks to your life",
+    "voiceMode_estudio": "Learn",
+    "voiceMode_estudioDesc": "The datum and its why, to learn",
     "voiceMode_pro": "Professional",
     "voiceMode_proDesc": "Technical data only: you interpret",
     "memoryHubTitle": "Aluna's memory",
@@ -273,6 +273,45 @@
     "areaReadingDormantBody": "This mini-reading lights up once you connect Aluna's AI voice. Meanwhile, you already see its score and its why right here.",
     "areaReadingTipLabel": "Your tip: ",
     "areaReadingCta": "💬 Tell me more in chat →",
+    "interp": {
+      "title": "Interpretation",
+      "hint": "Tap any box on the left and I'll tell you here what it means for you.",
+      "proactiva": {
+        "title": "Aluna reminds you",
+        "body": "These are the intentions and commitments you asked me to hold with you. I bring them back when the date or the sky makes them timely — so what you planted never slips out of sight.",
+        "q": "How are my intentions going?"
+      },
+      "carta": {
+        "title": "Your chart, in essence",
+        "body": "Sun, Moon and Ascendant are the heart of your natal chart: how you shine, what you need to feel at home, and the door through which the world meets you. This box is your birth essence — it doesn't change with the day; it walks with you always.",
+        "q": "What do my Sun, Moon and Ascendant say about me?"
+      },
+      "clima": {
+        "title": "Your sky today",
+        "body": "These are today's transits: where the planets are right now and how they talk to your chart. It isn't fate — it's weather. Knowing if it rains or shines helps you choose what to plant today. Tap a specific aspect to see it up close.",
+        "q": "How is my astral weather today?"
+      },
+      "horoscopoOccidental": {
+        "title": "Western horoscope",
+        "body": "Today's reading for your Western zodiac sign — the Sun's sign at your birth. It's the quick snapshot of the energy available today for your sign, and a good place to start a conversation with me.",
+        "q": "What does my horoscope say today?"
+      },
+      "horoscopoOriental": {
+        "title": "Eastern horoscope",
+        "body": "Here your Chinese zodiac animal speaks — the one of your birth year. Its daily reading brings another lens: cycles, affinities and timing — it complements the Western one like two windows onto the same sky.",
+        "q": "What does my Eastern horoscope say today?"
+      },
+      "pilares": {
+        "title": "Your pillars",
+        "body": "The Four Pillars (BaZi) read the exact moment of your birth in the Chinese calendar: your day master and the balance of the five elements. It's your deep nature — and today's pillar shows how the day converses with it.",
+        "q": "What do my pillars mean?"
+      },
+      "tarot": {
+        "title": "Today's spread",
+        "body": "One card a day, as a small ritual: it doesn't predict, it illuminates. Whatever card appears is a mirror to look at your day with new eyes. Tap it in its section for your full reading.",
+        "q": "What is today's card trying to tell me?"
+      }
+    },
     "disciplineGeneral": "General",
     "disciplineAstros": "Astros",
     "disciplineNumeros": "Numbers",
