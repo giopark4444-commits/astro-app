@@ -83,9 +83,18 @@ describe("parseModelOverride", () => {
 });
 
 describe("MODEL_CATALOG", () => {
-  it("cubre los 6 proveedores implementados en provider.ts", () => {
+  it("cubre los 8 proveedores implementados en provider.ts", () => {
     const ids = MODEL_CATALOG.map((p) => p.id).sort();
-    expect(ids).toEqual(["anthropic", "deepseek", "gemini", "hermes", "ollama", "openai"]);
+    expect(ids).toEqual([
+      "anthropic",
+      "deepseek",
+      "gemini",
+      "groq",
+      "hermes",
+      "ollama",
+      "openai",
+      "openrouter",
+    ]);
   });
 
   it("todo modelo del catálogo pasa su propia validación de parseModelOverride", () => {

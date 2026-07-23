@@ -15,6 +15,8 @@ function clearProviderEnv() {
   vi.stubEnv("GEMINI_API_KEY", "");
   vi.stubEnv("GOOGLE_API_KEY", "");
   vi.stubEnv("DEEPSEEK_API_KEY", "");
+  vi.stubEnv("GROQ_API_KEY", "");
+  vi.stubEnv("OPENROUTER_API_KEY", "");
   vi.stubEnv("OLLAMA_ENABLED", "");
   vi.stubEnv("ANTHROPIC_READING_MODEL", "");
   vi.stubEnv("NOUS_MODEL", "");
@@ -57,6 +59,29 @@ describe("resolveReadingProvider con override", () => {
       expect(resolved.provider.name).toBe("ollama");
       expect(resolved.provider.model).toBe("llama3.3:70b");
     }
+  });
+
+  it("puede elegir groq y openrouter (free tiers, solo vía picker)", () => {
+    clearProviderEnv();
+    vi.stubEnv("GROQ_API_KEY", "gsk-test");
+    vi.stubEnv("OPENROUTER_API_KEY", "sk-or-test");
+    const groq = resolveReadingProvider({ provider: "groq", model: "llama-3.3-70b-versatile" });
+    expect(groq.available && groq.provider.name).toBe("groq");
+    expect(groq.available && groq.provider.model).toBe("llama-3.3-70b-versatile");
+    const orr = resolveReadingProvider({
+      provider: "openrouter",
+      model: "google/gemma-4-31b-it:free",
+    });
+    expect(orr.available && orr.provider.name).toBe("openrouter");
+    expect(orr.available && orr.provider.model).toBe("google/gemma-4-31b-it:free");
+  });
+
+  it("groq/openrouter NUNCA entran a la resolución por defecto (free tier no es fallback)", () => {
+    clearProviderEnv();
+    vi.stubEnv("GROQ_API_KEY", "gsk-test");
+    vi.stubEnv("OPENROUTER_API_KEY", "sk-or-test");
+    const resolved = resolveReadingProvider();
+    expect(resolved.available).toBe(false);
   });
 
   it("sin llave del proveedor pedido, cae a la resolución por defecto", () => {

@@ -15,6 +15,8 @@
 
 export type PickerProviderId =
   | "hermes"
+  | "groq"
+  | "openrouter"
   | "anthropic"
   | "openai"
   | "gemini"
@@ -44,6 +46,23 @@ export const MODEL_CATALOG: CatalogProvider[] = [
     models: [
       { id: "Hermes-4-405B", label: "Hermes 4 405B · lecturas" },
       { id: "Hermes-4-70B", label: "Hermes 4 70B · volumen" },
+    ],
+  },
+  {
+    id: "groq",
+    label: "Groq (gratis)",
+    models: [
+      { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B · gratis rápido" },
+      { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B · instantáneo" },
+      { id: "qwen/qwen3.6-27b", label: "Qwen 3.6 27B" },
+    ],
+  },
+  {
+    id: "openrouter",
+    label: "OpenRouter (gratis)",
+    models: [
+      { id: "nvidia/nemotron-3-ultra-550b-a55b:free", label: "Nemotron 550B · gratis" },
+      { id: "google/gemma-4-31b-it:free", label: "Gemma 4 31B · gratis" },
     ],
   },
   {
@@ -115,6 +134,8 @@ export function parseModelOverride(raw: unknown): ModelOverride | null {
  *  Para ollama la "llave" es el flag OLLAMA_ENABLED=1 (local, sin llave real). */
 export function providerHasKey(id: PickerProviderId): boolean {
   if (id === "hermes") return Boolean(process.env.NOUS_API_KEY);
+  if (id === "groq") return Boolean(process.env.GROQ_API_KEY);
+  if (id === "openrouter") return Boolean(process.env.OPENROUTER_API_KEY);
   if (id === "anthropic") return Boolean(process.env.ANTHROPIC_API_KEY);
   if (id === "openai") return Boolean(process.env.OPENAI_API_KEY);
   if (id === "gemini") return Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);

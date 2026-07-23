@@ -98,6 +98,12 @@ export function resolveReadingProvider(override?: ModelOverride | null): Resolve
     } else if (override.provider === "deepseek") {
       const key = process.env.DEEPSEEK_API_KEY;
       if (key) return { available: true, provider: deepseekProvider(key, 60000, override.model) };
+    } else if (override.provider === "groq") {
+      const key = process.env.GROQ_API_KEY;
+      if (key) return { available: true, provider: groqProvider(key, 60000, override.model) };
+    } else if (override.provider === "openrouter") {
+      const key = process.env.OPENROUTER_API_KEY;
+      if (key) return { available: true, provider: openrouterProvider(key, 60000, override.model) };
     } else {
       const key = keyFor(override.provider);
       if (key) {
@@ -507,6 +513,29 @@ function hermesProvider(apiKey: string, timeoutMs: number, modelOverride?: strin
     "https://api.nousresearch.com/v1",
     apiKey,
     modelOverride || process.env.NOUS_MODEL || "Hermes-4-70B",
+    timeoutMs,
+  );
+}
+
+/** Groq y OpenRouter (free tiers): solo entran por el picker de pruebas —
+ *  NUNCA en el ORDER por defecto, para que un límite de free tier jamás
+ *  degrade a un usuario real en producción. */
+function groqProvider(apiKey: string, timeoutMs: number, modelOverride?: string): ReadingProvider {
+  return openAICompatibleProvider(
+    "groq",
+    "https://api.groq.com/openai/v1",
+    apiKey,
+    modelOverride || process.env.GROQ_READING_MODEL || "llama-3.3-70b-versatile",
+    timeoutMs,
+  );
+}
+
+function openrouterProvider(apiKey: string, timeoutMs: number, modelOverride?: string): ReadingProvider {
+  return openAICompatibleProvider(
+    "openrouter",
+    "https://openrouter.ai/api/v1",
+    apiKey,
+    modelOverride || process.env.OPENROUTER_READING_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
     timeoutMs,
   );
 }
