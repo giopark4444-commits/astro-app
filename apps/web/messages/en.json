@@ -880,6 +880,7 @@
     "revealHint": "Tap each card to turn it over",
     "revealRead": "Read",
     "readingTitle": "Your reading",
+    "manualReadingPlaceholder": "Your reading will appear here once you choose your cards.",
     "readingBack": "Back to the threshold",
     "saveReading": "Save to your journal",
     "savedOk": "Saved to your journal",

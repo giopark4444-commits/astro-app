@@ -880,6 +880,7 @@
     "revealHint": "Toca cada carta para voltearla",
     "revealRead": "Leer",
     "readingTitle": "Tu lectura",
+    "manualReadingPlaceholder": "Tu lectura aparecerá aquí cuando elijas tus cartas.",
     "readingBack": "Volver al umbral",
     "saveReading": "Guardar en el diario",
     "savedOk": "Guardada en tu diario",

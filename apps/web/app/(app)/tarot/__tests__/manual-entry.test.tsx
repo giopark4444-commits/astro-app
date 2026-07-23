@@ -151,10 +151,10 @@ describe("ManualEntry", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  // Task 4 (split de layout del paso reading), espejo de ceremony: el paso
-  // reading gana .readingPane con .readingSide (prosa+chat+guardar/volver);
-  // las cartas (y los jumpers, si hay) quedan en el carril izquierdo.
-  it("el paso reading tiene .readingPane con .readingSide conteniendo prosa+chat+guardar (con jumper)", async () => {
+  // Marco de 2 columnas siempre: en el paso reading, la prosa+chat+guardar/volver
+  // van en la columna derecha (.readingSide, dentro de .manualSide); las cartas
+  // (+jumpers) quedan en el carril izquierdo (.manualLeft).
+  it("el paso reading pone prosa+chat+guardar en .readingSide (derecha) y las cartas en .manualLeft", async () => {
     mockFetch();
     renderManual();
     fireEvent.click(screen.getByRole("button", { name: es.tarot.manualTemplateContinue }));
@@ -168,35 +168,33 @@ describe("ManualEntry", () => {
     expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
 
     const root = screen.getByTestId("manual-entry");
-    const pane = root.querySelector('[class*="readingPane"]');
-    expect(pane).toBeInTheDocument();
-
-    const side = pane!.querySelector('[class*="readingSide"]') as HTMLElement | null;
+    const side = root.querySelector('[class*="readingSide"]') as HTMLElement | null;
     expect(side).toBeInTheDocument();
     expect(within(side!).getByTestId("reading-chat")).toBeInTheDocument();
     expect(within(side!).getByRole("button", { name: es.tarot.saveReading })).toBeInTheDocument();
     expect(within(side!).getByRole("button", { name: es.tarot.readingBack })).toBeInTheDocument();
 
-    // Cartas y jumpers quedan en el carril izquierdo, fuera de .readingSide.
-    const left = pane!.querySelector('[class*="readingLeft"]') as HTMLElement | null;
+    // Cartas y jumpers quedan en el carril izquierdo (.manualLeft), fuera de .readingSide.
+    const left = root.querySelector('[class*="manualLeft"]') as HTMLElement | null;
     expect(left).toBeInTheDocument();
     expect(within(left!).getByText(es.tarot.manualJumpersReadingLabel)).toBeInTheDocument();
     expect(side!.querySelector('[class*="readingCards"]')).toBeNull();
     expect(side!.querySelector('[class*="jumpersReading"]')).toBeNull();
   });
 
-  it("los pasos previos a reading NO llevan .readingPane", async () => {
+  it("los pasos previos a reading muestran el placeholder, no la lectura", async () => {
     mockFetch();
     renderManual();
     const root = screen.getByTestId("manual-entry");
 
-    // template
-    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    // template: aún sin lectura → placeholder en la derecha, no .readingSide
+    expect(root.querySelector('[class*="readingSide"]')).toBeNull();
+    expect(root.querySelector('[class*="sidePlaceholder"]')).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: es.tarot.manualTemplateContinue }));
 
     // select
     expect(await screen.findByText(es.tarot.manualSelectTitle)).toBeInTheDocument();
-    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    expect(root.querySelector('[class*="readingSide"]')).toBeNull();
     for (let i = 0; i < 3; i++) {
       fireEvent.click((await screen.findAllByTestId("manual-card-option"))[0]!);
     }
@@ -204,11 +202,11 @@ describe("ManualEntry", () => {
 
     // jumpers
     expect(await screen.findByText(es.tarot.manualJumpersTitle)).toBeInTheDocument();
-    expect(root.querySelector('[class*="readingPane"]')).toBeNull();
+    expect(root.querySelector('[class*="readingSide"]')).toBeNull();
     fireEvent.click(await screen.findByRole("button", { name: es.tarot.manualJumpersContinue }));
 
-    // reading (recién acá aparece)
+    // reading (recién acá aparece la lectura a la derecha)
     expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
-    expect(root.querySelector('[class*="readingPane"]')).toBeInTheDocument();
+    expect(root.querySelector('[class*="readingSide"]')).toBeInTheDocument();
   });
 });

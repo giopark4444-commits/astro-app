@@ -288,7 +288,7 @@ export function Ceremony({
           <h3 className={styles.stepTitle}>{t("fanTitle")}</h3>
           <p className={styles.stepHint}>{t("fanHint")}</p>
           <div className={styles.fanScroll}>
-            <div className={styles.fanArc}>
+            <div className={styles.fanRow}>
               {Array.from({ length: DECK_SIZE }, (_, i) => {
                 const picked = state.picked.includes(i);
                 return (

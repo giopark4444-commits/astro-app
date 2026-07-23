@@ -12,6 +12,20 @@
 }
 
 .pane { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+/* Marco de 2 columnas. Base = móvil: apilado (asistente, luego lectura). En
+   desktop pasa a grilla 11fr/9fr con la lectura sticky (media query abajo). */
+.manualGrid { display: flex; flex-direction: column; gap: var(--sp-4); }
+.sidePlaceholder {
+  display: none; /* móvil: sin placeholder; la lectura aparece apilada al terminar */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 160px;
+  padding: var(--sp-5);
+}
+.sidePlaceholderText { color: var(--soft); font-size: var(--text-sm); font-style: italic; margin: 0; max-width: 28ch; }
 .paneTitle { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--ink); margin: 0; }
 .hint { color: var(--soft); font-size: var(--text-xs); margin: 0; }
 
@@ -176,25 +190,33 @@
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
   .readingCardBody { align-items: center; text-align: center; }
 
-  /* ---- Task 4: split del paso reading — técnica (cartas+jumpers) | prosa+chat ---- */
-  .readingPane {
+  /* ---- Marco de 2 columnas siempre: asistente/técnica | lectura (sticky) ---- */
+  .manualGrid {
     display: grid;
     grid-template-columns: 11fr 9fr;
     gap: var(--sp-6);
     align-items: start;
     text-align: left;
   }
-  .readingPane > .paneTitle { grid-column: 1 / -1; }
-  .readingLeft {
+  .manualLeft {
     grid-column: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .manualSide {
+    grid-column: 2;
+    position: sticky;
+    top: 84px;
+  }
+  .sidePlaceholder { display: flex; } /* desktop: sí se muestra el placeholder */
+  .readingLeft {
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);
   }
   .readingSide {
-    grid-column: 2;
-    position: sticky;
-    top: 84px;
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);
