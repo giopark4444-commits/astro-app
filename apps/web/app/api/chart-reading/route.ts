@@ -7,6 +7,7 @@ import {
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import type { Json } from "@aluna/supabase";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { resolvePremiumReading } from "@/lib/credits/premium-reading";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import type { BodyReading } from "@/lib/content/astrology-readings-es";
@@ -111,11 +112,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
 
-  const resolved = resolveReadingProvider();
-  if (!resolved.available) {
-    return NextResponse.json({ available: false });
-  }
-
   // El nombre entra a la clave porque el prompt personaliza con él (misma
   // razón que /api/reading): evita servir la lectura de una cuenta a otra.
   const voiceMode = parseVoiceMode(body.voiceMode);
@@ -123,13 +119,52 @@ export async function POST(request: NextRequest) {
   // cambiar de modo serviría la lectura cacheada del modo anterior.
   const cacheKey = `${locale}:${bodyKey}:${signKey}:${house}:${dignity ?? "-"}:${length}:${voiceMode}:${profileName.toLowerCase()}`;
   const cache = getReadingCache();
-  // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
-  // Lectura best-effort: si el caché falla (red), seguimos y generamos.
-  try {
-    const hit = await cache.get(cacheKey);
-    if (hit) return NextResponse.json({ available: true, meaning: hit as unknown as BodyReading });
-  } catch {
-    /* miss silencioso → generamos */
+
+  // --- créditos premium (Task 6) ---
+  // Clave premium = prefijo "premium:" + la clave normal. Se chequea PRIMERO
+  // (antes de resolver/gastar nada): si ya existe una lectura premium
+  // cacheada, se sirve sin gastar. El header "used" aquí informa la CALIDAD
+  // servida (premium), no que este request haya pagado — el gasto ya lo hizo
+  // quien generó la entrada.
+  const premiumKey = `premium:${cacheKey}`;
+  if (body.premium === true) {
+    try {
+      const hit = await cache.get(premiumKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as BodyReading },
+          { headers: { "x-aluna-premium": "used" } },
+        );
+      }
+    } catch {
+      /* miss silencioso → seguimos */
+    }
+  }
+
+  // Regla de oro: resolvePremiumReading NUNCA invoca al proveedor premium sin
+  // haber descontado el costo antes con éxito; sin config (llave/sesión/
+  // service client) degrada silenciosamente al camino gratis (`fallback`),
+  // jamás un 500.
+  const pr = await resolvePremiumReading(request, body.premium, resolveReadingProvider());
+  if (!pr.provider.available) {
+    return NextResponse.json({ available: false }, { headers: { "x-aluna-premium": pr.headerValue } });
+  }
+
+  // Con "fallback"/"off" seguimos el camino normal de la ruta: caché normal
+  // (HIT → respuesta JSON instantánea, sin stream). Con "used" NO se consulta
+  // (ya se decidió generar fresco con premium: la persona pagó por eso).
+  if (pr.headerValue !== "used") {
+    try {
+      const hit = await cache.get(cacheKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as BodyReading },
+          { headers: { "x-aluna-premium": pr.headerValue } },
+        );
+      }
+    } catch {
+      /* miss silencioso → generamos */
+    }
   }
 
   const dignityName = dignity ? L.dignities[dignity] : null;
@@ -152,9 +187,12 @@ export async function POST(request: NextRequest) {
   // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
   const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
 
-  const provider = resolved.provider;
+  const provider = pr.provider.provider;
   const opts = { system, prompt: userPrompt, maxTokens: 4000 };
   const encoder = new TextEncoder();
+  // Con "used" cachea bajo la clave premium (separada); con "fallback"/"off"
+  // bajo la normal de siempre.
+  const targetCacheKey = pr.headerValue === "used" ? premiumKey : cacheKey;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let acc = "";
@@ -175,11 +213,18 @@ export async function POST(request: NextRequest) {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
       }
       controller.close();
-      const meaning = parseReading(acc.trim());
+      const trimmed = acc.trim();
+      if (!trimmed) {
+        // Regla de oro: cero caracteres emitidos tras un spend premium real →
+        // refund best-effort (no-op si no hubo spend, ver premium-reading.ts).
+        await pr.refundIfEmpty();
+        return;
+      }
+      const meaning = parseReading(trimmed);
       if (meaning) {
         cache
           .set({
-            key: cacheKey,
+            key: targetCacheKey,
             kind: "chart",
             locale,
             model: provider.model,
@@ -197,6 +242,7 @@ export async function POST(request: NextRequest) {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store, no-transform",
       "x-accel-buffering": "no",
+      "x-aluna-premium": pr.headerValue,
     },
   });
 }

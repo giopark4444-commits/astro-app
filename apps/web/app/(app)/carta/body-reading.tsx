@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { BodyReading } from "@/lib/content/astrology-readings-es";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
 import styles from "./carta.module.css";
 
 // Selector de profundidad para la lectura de una posición de la carta. "Esencia"
@@ -80,7 +81,18 @@ export function BodyReadingView({
       const res = await fetch("/api/chart-reading", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ body, sign, house, dignity, profileName, length: next, locale, voiceMode: getVoiceMode() }),
+        // premium viene del toggle ✨ global del chat, no de UI propia de esta lente.
+        body: JSON.stringify({
+          body,
+          sign,
+          house,
+          dignity,
+          profileName,
+          length: next,
+          locale,
+          voiceMode: getVoiceMode(),
+          premium: readPremiumFlagForRequest(),
+        }),
       });
 
       // Latente (sin llave), HIT de caché o error de validación → JSON. Sin stream:

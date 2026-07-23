@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useProfiles } from "@/lib/profiles/profiles-provider";
@@ -9,12 +10,19 @@ import { useSpeak } from "@/lib/voice";
 import { SpeakButton } from "@/components/speak-button";
 import { DevModelPicker, type DevModelValue } from "@/components/dev-model-picker";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { getPremiumEnabled, setPremiumEnabled } from "@/lib/credits/premium-client";
 import { ChatLenses, type TarotCardRef } from "./chat-lenses";
 import { QuickQuestions } from "./quick-questions";
 import styles from "./chat.module.css";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type St = "idle" | "loading" | "dormant" | "error";
+// Avisos de créditos (Task 8): "premiumOut" tras una respuesta con header
+// x-aluna-premium:fallback (se quedó sin saldo); "dailyCap" tras un 429
+// {error:"daily_cap"} (hoy inalcanzable con all-access, pero el manejo queda
+// listo). Se muestra UNO por respuesta afectada, no persistente — cada envío
+// nuevo lo limpia antes de fetchear.
+type Notice = { kind: "premiumOut" } | { kind: "dailyCap"; cap: number };
 
 export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   const t = useTranslations("chat");
@@ -43,6 +51,52 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
   // último modelo que realmente respondió, ver components/dev-model-picker.tsx.
   const [devModel, setDevModel] = useState<DevModelValue | null>(null);
   const [lastModelUsed, setLastModelUsed] = useState<string | null>(null);
+  // Toggle premium ✨ (Task 8): arranca en `false` (lo que renderiza el server)
+  // y se hidrata con el valor real del dispositivo en el efecto de abajo —
+  // mismo patrón que VoiceModeCard, evita mismatch SSR/cliente.
+  const [premiumOn, setPremiumOn] = useState(false);
+  // Saldo cacheado (chip "✨ N"): null = oculto (toggle apagado, sin sesión, o
+  // aún no llegó la primera respuesta). Solo se pide cuando el toggle está
+  // encendido — nunca de arranque con el toggle apagado.
+  const [credits, setCredits] = useState<number | null>(null);
+  const [notice, setNotice] = useState<Notice | null>(null);
+
+  useEffect(() => {
+    setPremiumOn(getPremiumEnabled());
+  }, []);
+
+  useEffect(() => {
+    // Fetch de saldo al ENCENDER el toggle (cubre tanto "al montar" cuando ya
+    // venía encendido de una sesión anterior, como cada vez que la persona lo
+    // prende a mano). Al apagar, se limpia el chip sin pedir nada.
+    if (!premiumOn) {
+      setCredits(null);
+      return;
+    }
+    void refreshCredits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [premiumOn]);
+
+  async function refreshCredits() {
+    try {
+      const res = await fetch("/api/credits");
+      if (!res.ok) {
+        setCredits(null);
+        return;
+      }
+      const data = (await res.json()) as { balance?: number };
+      setCredits(typeof data.balance === "number" ? data.balance : null);
+    } catch {
+      // best-effort: sin sesión/red → chip oculto, nunca rompe el chat
+      setCredits(null);
+    }
+  }
+
+  function togglePremium() {
+    const next = !premiumOn;
+    setPremiumOn(next);
+    setPremiumEnabled(next);
+  }
 
   useEffect(() => {
     // Pega el HILO a su propio final por scrollTop, no scrollIntoView: ese
@@ -97,6 +151,9 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
     const next: Msg[] = [...messages, { role: "user", content: text }];
     setMessages(next);
     setSt("loading");
+    // Cada envío nuevo limpia el aviso del turno anterior: "se muestra una
+    // vez por respuesta afectada, no persistente" (spec Task 8).
+    setNotice(null);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -110,6 +167,7 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
           threadId,
           modelOverride: devModel,
           voiceMode: getVoiceMode(),
+          premium: premiumOn,
         }),
       });
       // El primer turno crea el hilo server-side; lo aprendemos del header
@@ -123,7 +181,17 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
       // stream que consumir: mostramos el estado dormido / de error.
       const isStream = res.body && res.headers.get("content-type")?.startsWith("text/plain");
       if (!isStream) {
-        const data = (await res.json().catch(() => ({}))) as { available?: boolean };
+        const data = (await res.json().catch(() => ({}))) as { available?: boolean; error?: string; cap?: number };
+        // Tope diario gratis (429 {error:"daily_cap", cap}): caso ESPECÍFICO
+        // antes del !res.ok genérico de abajo — vuelve a idle (no "error"), la
+        // persona puede seguir usando el chat mañana o prender premium. La
+        // respuesta dormant ({available:false}) NUNCA trae este header ni este
+        // shape de error, así que no hay ambigüedad con el chequeo de abajo.
+        if (res.status === 429 && data.error === "daily_cap") {
+          setNotice({ kind: "dailyCap", cap: typeof data.cap === "number" ? data.cap : 0 });
+          setSt("idle");
+          return;
+        }
         setSt(data.available === false ? "dormant" : "error");
         return;
       }
@@ -131,6 +199,13 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
         setSt("error");
         return;
       }
+
+      // Contrato de créditos (Task 5): SIEMPRE presente en toda respuesta en
+      // streaming — "used" (se cobró y refresca el chip), "fallback" (sin
+      // saldo, se avisa con link a Ajustes) u "off" (nada que hacer).
+      const premiumHeader = res.headers.get("x-aluna-premium");
+      if (premiumHeader === "fallback") setNotice({ kind: "premiumOut" });
+      if (premiumHeader === "used") void refreshCredits();
 
       // Stream de texto: añadimos la burbuja de Aluna vacía y le pegamos los tokens
       // a medida que llegan (efecto de tecleo).
@@ -222,11 +297,29 @@ export function ChatView({ embedded = false }: { embedded?: boolean } = {}) {
         )}
       </div>
 
+      {notice?.kind === "premiumOut" && (
+        <p className={styles.thinking}>
+          {t.rich("premiumOut", { a: (chunks) => <Link href="/ajustes">{chunks}</Link> })}
+        </p>
+      )}
+      {notice?.kind === "dailyCap" && <p className={styles.thinking}>{t("dailyCap", { cap: notice.cap })}</p>}
+
       <QuickQuestions onSend={(q) => void sendText(q)} />
 
       <DevModelPicker surface="chat" onChange={setDevModel} lastModel={lastModelUsed} />
 
       <div className={styles.composer}>
+        <button
+          type="button"
+          className={`${styles.premiumBtn} ${premiumOn ? styles.premiumBtnOn : ""}`}
+          aria-pressed={premiumOn}
+          aria-label={t("premiumToggle")}
+          title={t("premiumToggle")}
+          onClick={togglePremium}
+        >
+          ✨
+        </button>
+        {premiumOn && credits !== null && <span className={styles.creditsChip}>{t("creditsChip", { n: credits })}</span>}
         <input
           className={styles.input}
           value={input}

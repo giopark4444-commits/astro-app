@@ -639,7 +639,11 @@
     "quickPage": "Página {n} de {total}",
     "quickAddPage": "Agregar página",
     "quickToggle": "Preguntas rápidas",
-    "quickEditLabel": "Pregunta {n}"
+    "quickEditLabel": "Pregunta {n}",
+    "premiumToggle": "Premium ✨ — más profundidad usando tus créditos",
+    "premiumOut": "Te quedaste sin créditos premium — consigue más en <a>Ajustes</a>.",
+    "dailyCap": "Llegaste al tope gratis de hoy ({cap} preguntas). Vuelve mañana, o activa premium ✨.",
+    "creditsChip": "✨ {n}"
   },
   "synastry": {
     "title": "Compatibilidad",
@@ -877,6 +881,24 @@
     "loading": "Un momento…",
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "checkoutProcessing": "Pago recibido, activando tu cuenta…"
+  },
+  "credits": {
+    "title": "Créditos",
+    "balanceLabel": "créditos disponibles",
+    "buyTitle": "Comprar más",
+    "pack100": "100 créditos",
+    "pack300": "300 créditos",
+    "pack1000": "1000 créditos",
+    "historyTitle": "Historial",
+    "empty": "Todavía no hay movimientos por acá.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "loading": "Un momento…",
+    "purchaseThanks": "¡Gracias por tu compra! Tus créditos se están sumando — si no los ves todavía, recarga en un momento.",
+    "kindPurchase": "Compra",
+    "kindRefill": "Recarga mensual",
+    "kindSpend": "Uso",
+    "kindRefund": "Reembolso",
+    "kindGrant": "Regalo"
   },
   "reports": {
     "title": "Informes evolutivos",

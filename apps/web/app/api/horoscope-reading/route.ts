@@ -10,6 +10,7 @@ import {
 import { createServiceSupabaseClient } from "@aluna/supabase/server";
 import type { Json } from "@aluna/supabase";
 import { resolveReadingProvider } from "@/lib/reading/provider";
+import { resolvePremiumReading } from "@/lib/credits/premium-reading";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { astroLabels } from "@/lib/content/astrology-labels";
 import {
@@ -135,30 +136,68 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ available: false, error: "bad_request" }, { status: 400 });
   }
 
-  const resolved = resolveReadingProvider();
-  if (!resolved.available) {
-    return NextResponse.json({ available: false });
-  }
-
   const range = resolvePeriodRange(period, tz);
   const voiceMode = parseVoiceMode(body.voiceMode);
   // voiceMode en la clave: ver chart-reading (cada modo produce texto distinto).
   const cacheKey = `${locale}:western:${sign}:${period}:${range.localDate}:${length}:${voiceMode}`;
   const cache = getReadingCache();
-  // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
-  // Lectura best-effort: si el caché falla (red), seguimos y generamos.
-  try {
-    const hit = await cache.get(cacheKey);
-    if (hit) return NextResponse.json({ available: true, meaning: hit as unknown as HoroscopeReading });
-  } catch {
-    /* miss silencioso → generamos */
+
+  // --- créditos premium (Task 6) — ver chart-reading para el detalle del patrón ---
+  const premiumKey = `premium:${cacheKey}`;
+  if (body.premium === true) {
+    try {
+      const hit = await cache.get(premiumKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as HoroscopeReading },
+          { headers: { "x-aluna-premium": "used" } },
+        );
+      }
+    } catch {
+      /* miss silencioso → seguimos */
+    }
+  }
+
+  const pr = await resolvePremiumReading(request, body.premium, resolveReadingProvider());
+  if (!pr.provider.available) {
+    return NextResponse.json({ available: false }, { headers: { "x-aluna-premium": pr.headerValue } });
+  }
+
+  if (pr.headerValue !== "used") {
+    // Caché HIT → respuesta JSON instantánea (sin stream): la lectura ya existe.
+    // Lectura best-effort: si el caché falla (red), seguimos y generamos.
+    try {
+      const hit = await cache.get(cacheKey);
+      if (hit) {
+        return NextResponse.json(
+          { available: true, meaning: hit as unknown as HoroscopeReading },
+          { headers: { "x-aluna-premium": pr.headerValue } },
+        );
+      }
+    } catch {
+      /* miss silencioso → generamos */
+    }
   }
 
   // El payload SIEMPRE se computa aquí, del lado del servidor, a partir de
   // sign/period/tz validados — jamás se acepta del cliente (anti-funa: la IA no
-  // puede recibir "hechos" fabricados por el request).
-  const payload = cachedWesternHoroscope(sign, period, tz);
-  const facts = factsBlock(locale, payload);
+  // puede recibir "hechos" fabricados por el request). Envuelto en try/catch
+  // (Task 6): este cómputo corre DESPUÉS de un posible spend premium exitoso
+  // (regla de oro Task 5 — cualquier throw post-spend antes del stream exige
+  // refund); cachedWesternHoroscope usa el motor de efemérides por dentro y,
+  // aunque hoy no se lo ha visto lanzar, no es puro al 100%.
+  let payload: ReturnType<typeof cachedWesternHoroscope>;
+  let facts: string;
+  try {
+    payload = cachedWesternHoroscope(sign, period, tz);
+    facts = factsBlock(locale, payload);
+  } catch {
+    await pr.refundIfEmpty();
+    return NextResponse.json(
+      { available: false, error: "compute" },
+      { status: 500, headers: { "x-aluna-premium": pr.headerValue } },
+    );
+  }
 
   const L = astroLabels(locale);
   const signLabel = L.signs[sign] ?? sign;
@@ -178,9 +217,10 @@ export async function POST(request: NextRequest) {
   // todas las reglas de datos/seguridad de arriba. Ver lib/reading/voices.ts.
   const system = applyVoiceMode(SYSTEM[locale], voiceMode, locale);
 
-  const provider = resolved.provider;
+  const provider = pr.provider.provider;
   const opts = { system, prompt: userPrompt, maxTokens: 4000 };
   const encoder = new TextEncoder();
+  const targetCacheKey = pr.headerValue === "used" ? premiumKey : cacheKey;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let acc = "";
@@ -201,11 +241,18 @@ export async function POST(request: NextRequest) {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
       }
       controller.close();
-      const meaning = parseHoroscopeReading(acc.trim());
+      const trimmed = acc.trim();
+      if (!trimmed) {
+        // Regla de oro: cero caracteres emitidos tras un spend premium real →
+        // refund best-effort (no-op si no hubo spend, ver premium-reading.ts).
+        await pr.refundIfEmpty();
+        return;
+      }
+      const meaning = parseHoroscopeReading(trimmed);
       if (meaning) {
         cache
           .set({
-            key: cacheKey,
+            key: targetCacheKey,
             kind: "horoscope",
             locale,
             model: provider.model,
@@ -223,6 +270,7 @@ export async function POST(request: NextRequest) {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "no-store, no-transform",
       "x-accel-buffering": "no",
+      "x-aluna-premium": pr.headerValue,
     },
   });
 }

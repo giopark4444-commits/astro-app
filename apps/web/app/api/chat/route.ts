@@ -6,13 +6,17 @@ import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { profileToNumerologyInput } from "@/lib/numerology";
 import { buildFocusedContext, focusLine, resolveLenses, parseTarotCard, effectiveLenses } from "@/lib/chat-context";
-import { resolveReadingProvider, type ChatMessage } from "@/lib/reading/provider";
+import { resolveReadingProvider, resolvePremiumProvider, type ChatMessage } from "@/lib/reading/provider";
 import { parseModelOverride } from "@/lib/reading/model-catalog";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { buildIntentLine } from "@/lib/intent-line";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
 import { ensureThread, appendMessage } from "@/lib/chat-archive";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
+import { getCreditsServiceClient, spendCredits, refundSpend, bumpChatUsage } from "@/lib/credits/ledger";
+import { chatPremiumCost, freeDailyChatCap } from "@/lib/credits/config";
+import { allAccessEnabled } from "@/lib/plan-gate";
+import { isRequesterPlus } from "@/lib/billing/requester-plus";
 
 // Chat "Pregúntale a Aluna" (premium Fase 4). CABLEADO pero LATENTE: sin llave de
 // proveedor responde { available: false } y el cliente muestra el estado dormido.
@@ -103,10 +107,98 @@ export async function POST(request: NextRequest) {
   // Override del picker de modelos (banco de pruebas): validado + gateado a
   // dev por parseModelOverride; inválido o apagado → null → resolución normal.
   const modelOverride = parseModelOverride(body.modelOverride);
-  const resolved = resolveReadingProvider(modelOverride);
-  if (!resolved.available) {
+
+  // --- créditos premium (spec 2026-07-23) ---
+  // Regla de oro: ningún camino llama al proveedor premium sin haber
+  // descontado crédito ANTES con éxito; sin service client o sin llave
+  // premium, lo premium se degrada al camino gratis de siempre (nunca 500).
+  let premiumState: "used" | "fallback" | "off" = "off";
+  let premiumSpendRef: string | null = null;
+  let premiumSpendAmount = 0;
+  let chosen = resolveReadingProvider(modelOverride);
+  // Cascada gratis resuelta ANTES de que el bloque premium pise `chosen`:
+  // la destilación de memoria (más abajo, en `after()`) es trabajo de fondo
+  // que debe ir por el canal barato aunque este turno se haya pagado con
+  // crédito premium (I1) — ver el uso de `freeResolved` cerca del final.
+  const freeResolved = chosen;
+  const svc = getCreditsServiceClient();
+
+  // Decisión premium PRIMERO (I2): un turno premium pagado (spend exitoso)
+  // no debe además chocar con el tope diario gratis — ya pagó su costo real
+  // en créditos, así que el chequeo de abajo se salta por completo cuando
+  // `premiumState === "used"`. El orden viejo (tope antes que premium)
+  // bloqueaba con 429 incluso a quien tenía crédito de sobra para pagar.
+  if (body.premium === true) {
+    const prem = resolvePremiumProvider();
+    if (prem.available) {
+      const cost = chatPremiumCost();
+      if (cost <= 0) {
+        // Costo 0 configurado = premium regalado, no un spend que pueda
+        // fallar: se usa directo, sin tocar el ledger (ni spend ni refund).
+        chosen = prem;
+        premiumState = "used";
+      } else if (svc) {
+        const ref = `spend:${crypto.randomUUID()}`;
+        const ok = await spendCredits(svc, user.id, cost, ref);
+        if (ok) {
+          chosen = prem;
+          premiumState = "used";
+          premiumSpendRef = ref;
+          premiumSpendAmount = cost;
+        } else {
+          premiumState = "fallback"; // sin saldo → Gemini/cascada, el camino gratis de siempre
+        }
+      }
+      // sin `svc` (sin config) → "off": el camino gratis de siempre, jamás 500.
+    }
+    // sin llave premium → "off": el camino gratis de siempre.
+  }
+
+  // Tope diario del nivel gratis: solo corre con los candados de plan activos
+  // (allAccessEnabled() en falso), con service client disponible — fail-open
+  // sin `svc` (un problema de infraestructura no debe bloquear a nadie) — Y
+  // cuando este turno NO se sirvió con premium pagado (`premiumState !==
+  // "used"`): fallback/off nunca gastaron crédito, así que un 429 acá sigue
+  // sin haber cobrado nada.
+  if (premiumState !== "used" && !allAccessEnabled() && svc) {
+    // Fail-open ante error: el tope diario es una protección de costos, no de
+    // seguridad — si isRequesterPlus revienta (red/RPC caído), NO debe tumbar
+    // el chat con un 500; se trata como si no correspondiera bloquear (se
+    // salta el chequeo del tope), igual criterio que bumpChatUsage más abajo.
+    let plus = true;
+    try {
+      plus = await isRequesterPlus(supabase, user.id);
+    } catch {
+      plus = true;
+    }
+    if (!plus) {
+      const count = await bumpChatUsage(svc, user.id);
+      if (count !== null && count > freeDailyChatCap()) {
+        return NextResponse.json({ error: "daily_cap", cap: freeDailyChatCap() }, { status: 429 });
+      }
+    }
+  }
+
+  if (!chosen.available) {
     // Latente: aún no hay llave. El chat se enciende con la IA.
     return NextResponse.json({ available: false });
+  }
+
+  // Reembolso best-effort de un spend premium REAL (premiumState === "used" &&
+  // premiumSpendRef) que terminó sin servir nada al usuario. Un solo lugar
+  // para las dos causas posibles de "se cobró y no se entregó": el catch
+  // pre-stream de más abajo (construir `system` revienta → nunca se llega a
+  // invocar al proveedor) y el cierre del stream (cero caracteres emitidos).
+  // Anula `premiumSpendRef` ANTES de reembolsar para que, pase lo que pase,
+  // el mismo spend no pueda revertirse dos veces.
+  async function refundPremiumIfUnserved() {
+    // `!user` es redundante en runtime (POST ya devolvió arriba si no había
+    // usuario) pero TS no propaga esa narrow dentro de una función anidada.
+    if (!svc || !user || premiumState !== "used" || !premiumSpendRef) return;
+    const ref = premiumSpendRef;
+    const amount = premiumSpendAmount;
+    premiumSpendRef = null;
+    await refundSpend(svc, user.id, amount, ref).catch(() => {});
   }
 
   let system: string;
@@ -119,6 +211,9 @@ export async function POST(request: NextRequest) {
     const context = buildFocusedContext({ profile, chart, numerology, lenses: activeLenses, tarotCard, locale });
     system = `${SYSTEM_INTRO[locale]}\n\n${context}\n\n${focusLine(activeLenses, tarotCard, locale)}`;
   } catch {
+    // Regla de oro: si ya hubo un spend real, no puede quedar cobrado sin
+    // entregar solo porque construir el contexto (post-spend) explotó.
+    await refundPremiumIfUnserved();
     return NextResponse.json({ available: false, error: "upstream" }, { status: 502 });
   }
 
@@ -166,7 +261,7 @@ export async function POST(request: NextRequest) {
   // los reenviamos como text/plain en streaming. Si el proveedor no soporta streaming,
   // su chatStream cae a entregar el resultado de chat() de una vez. Cualquier error
   // antes del primer byte se traduce a 502; una vez empezado el stream, se corta limpio.
-  const provider = resolved.provider;
+  const provider = chosen.provider;
   const encoder = new TextEncoder();
   let assistantReply = "";
   const stream = new ReadableStream<Uint8Array>({
@@ -181,9 +276,26 @@ export async function POST(request: NextRequest) {
       } catch {
         /* corte de upstream a mitad: cerramos con lo que haya llegado */
       }
+      // Reembolso best-effort: solo si el proveedor premium no entregó NADA
+      // (refundPremiumIfUnserved ya valida que hubo un spend real y evita el
+      // doble disparo anulando premiumSpendRef).
+      if (assistantReply.length === 0) {
+        await refundPremiumIfUnserved();
+      }
       controller.close();
     },
   });
+
+  // Proveedor para la destilación (I1): la destilación de memoria es trabajo
+  // de FONDO, no la respuesta que se le sirvió a la persona — así que va por
+  // el canal BARATO de la cascada gratis siempre que esté disponible, aunque
+  // este turno se haya pagado con crédito premium. Sin esto, cada turno con
+  // memoria ON dispararía una llamada extra a Claude (destilar el resumen)
+  // que el crédito ya cobrado no cubre. `freeResolved` es el `chosen` de
+  // ANTES de que el bloque premium lo pisara (ver arriba). Si el gratis no
+  // está disponible, se mantiene el comportamiento previo: el mismo
+  // proveedor que respondió.
+  const distillationProvider = premiumState === "used" && freeResolved.available ? freeResolved.provider : provider;
 
   // Destilado post-conversación (fire-and-forget, best-effort total): solo si
   // el gate de memoria está encendido. `after()` corre una vez la respuesta
@@ -200,7 +312,7 @@ export async function POST(request: NextRequest) {
         .map((m) => `${m.role === "assistant" ? "Aluna" : "Persona"}: ${m.content}`)
         .join("\n")
         .slice(-8000);
-      await runDistillation(provider, supabase, user.id, transcript, locale, "chat");
+      await runDistillation(distillationProvider, supabase, user.id, transcript, locale, "chat");
     });
   }
 
@@ -212,6 +324,9 @@ export async function POST(request: NextRequest) {
   if (threadId) headers["x-thread-id"] = threadId;
   // Con qué respondió de verdad (el picker lo muestra: "respondió hermes/…").
   headers["x-aluna-model"] = `${provider.name}/${provider.model}`;
+  // Contrato con la UI (Task 8): "used" | "fallback" | "off" — SIEMPRE presente,
+  // no solo cuando se pidió premium.
+  headers["x-aluna-premium"] = premiumState;
 
   return new Response(stream, { headers });
 }

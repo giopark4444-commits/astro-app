@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import { getVoiceMode } from "@/lib/voice-mode";
+import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
 import styles from "./horoscopo.module.css";
 
 // Selector de profundidad para la prosa del horóscopo del periodo. "Esencia" es
@@ -48,7 +49,16 @@ export function HoroscopeReading({
         const res = await fetch("/api/horoscope-reading", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ sign, period, tz, locale, length: tier, voiceMode: getVoiceMode() }),
+          // premium viene del toggle ✨ global del chat, no de UI propia de esta lente.
+          body: JSON.stringify({
+            sign,
+            period,
+            tz,
+            locale,
+            length: tier,
+            voiceMode: getVoiceMode(),
+            premium: readPremiumFlagForRequest(),
+          }),
           signal: ctrl.signal,
         });
         const ct = res.headers.get("content-type") ?? "";

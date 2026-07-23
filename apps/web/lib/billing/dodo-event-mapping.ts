@@ -22,6 +22,17 @@ export interface DodoEvent {
     currency?: string;
     settlement_amount?: number;
     settlement_currency?: string;
+    // Packs de créditos (Task 7, ver lib/credits/config.ts): productos
+    // comprados en un pago one-time. Forma real confirmada contra el SDK
+    // instalado (dodopayments@2.42.2, resources/payments.d.ts —
+    // `Payment.ProductCart`): solo viene poblado en pagos one-time; un pago
+    // de suscripción no lo trae, por eso alcanza para distinguir ambos casos.
+    product_cart?: Array<{ product_id: string; quantity: number }>;
+    // Metadata de la sesión de checkout (I3): `aluna_user_id` lo manda
+    // SIEMPRE la sesión de un pack (ver billing/checkout/route.ts) para que
+    // el webhook pueda abonar sin depender de que el email de Dodo matchee
+    // una cuenta Aluna. También puede traer `referral_code` (T6).
+    metadata?: Record<string, string>;
   };
 }
 

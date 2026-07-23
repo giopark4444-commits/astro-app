@@ -136,6 +136,22 @@ export function resolveReadingProvider(
   return { available: false };
 }
 
+/**
+ * Resuelve el proveedor PREMIUM: Claude explícito, no la cascada Hermes-primero
+ * de resolveReadingProvider (Fase de créditos — funciones que exigen Sonnet/Opus
+ * a propósito, p.ej. el modo profundo de chat). Sin ANTHROPIC_API_KEY queda
+ * latente ({available: false}); con la llave, reusa tal cual la factory
+ * `anthropicProvider` de abajo (mismo SDK, misma construcción — no se
+ * duplica) con `ALUNA_PREMIUM_MODEL` (o "claude-sonnet-5" por defecto) como
+ * modelo, independiente de ANTHROPIC_READING_MODEL (ese es el de lecturas).
+ */
+export function resolvePremiumProvider(): ResolvedProvider {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return { available: false };
+  const model = process.env.ALUNA_PREMIUM_MODEL || "claude-sonnet-5";
+  return { available: true, provider: anthropicProvider(apiKey, model) };
+}
+
 function makeProvider(name: ProviderName, apiKey: string, modelOverride?: string, timeoutMs = 60000): ReadingProvider {
   if (name === "hermes") return hermesProvider(apiKey, timeoutMs, modelOverride);
   if (name === "openai") return openaiProvider(apiKey, modelOverride, timeoutMs);
