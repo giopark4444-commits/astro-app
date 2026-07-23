@@ -54,6 +54,7 @@ de la lectura → guardar en localStorage del dispositivo (sin BD) + rehacer.
 - [x] Núcleo visión+palm libs+rutas+tests — PROBADO en vivo con foto real (`a7b9873`):
       foto difícil → usable:false + guía + no-visibles honestos; palma limpia →
       13 líneas + 9 montes; lectura 7 secciones íntima y pro; timeout 150s.
-- [~] UI /mano (agente Sonnet) — page+view en disco; faltan tests/i18n/hub
-- [ ] Curaduría + E2E navegador (feliz y retoma con test-palma*.jpg de public/,
-      BORRARLAS antes del push) + push a main
+- [x] UI /mano — máquina de estados completa, 9 tests, i18n es/en, hub activo
+- [x] Curaduría + E2E navegador (retoma verificada con foto difícil; camino feliz
+      completo con palma real: 6 secciones + consejo) + fotos de prueba borradas +
+      push a main (`bd016c6`). GOAL CUMPLIDO.
