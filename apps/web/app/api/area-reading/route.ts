@@ -11,6 +11,9 @@ import {
   type ScoreTone,
   type AreaDriver,
 } from "@aluna/core";
+import { supabaseReadingCacheStore, type ReadingCacheStore } from "@aluna/compute";
+import { createServiceSupabaseClient } from "@aluna/supabase/server";
+import type { Json } from "@aluna/supabase";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
 import { profileToChartInput } from "@/lib/chart";
 import { resolveReadingProvider } from "@/lib/reading/provider";
@@ -216,6 +219,16 @@ function parseAreaReading(text: string): { reading: string; tip: string } | null
 // @aluna/compute como fallback, sin necesitar la migración prohibida. No
 // sobrevive a un redeploy/reinicio — igual que el fallback en memoria de esos
 // stores.
+//
+// EXCEPCIÓN — la variante PREMIUM (Task 6, fix cross-instancia): este Map NO
+// alcanza para el premium porque ahí SÍ importa que dos pedidos que caigan en
+// dos instancias serverless distintas (cold start/redeploy) compartan el
+// resultado — si no, la persona paga créditos dos veces por la MISMA lectura
+// del día. Por eso lo premium usa el store DURABLE de `reading_cache` (mismo
+// mecanismo que chart-reading.ts), bajo la clave "premium:" + cacheKey. Sigue
+// siendo personal (la clave incluye profileId), pero es la única forma de dar
+// la garantía real de "no cobres dos veces" que el dinero exige; ver
+// `getPremiumReadingCache` más abajo para el detalle y su propio trade-off.
 interface AreaReadingPayload {
   reading: string;
   tip: string;
@@ -245,6 +258,30 @@ function getCachedAreaReading(key: string): AreaReadingPayload | null {
 
 function setCachedAreaReading(key: string, value: AreaReadingPayload): void {
   areaReadingCache.set(key, { value, expiresAt: Date.now() + msUntilNextUtcMidnight(Date.now()) });
+}
+
+// ---------------------------------------------------------------------------
+// Caché DURABLE — SOLO para la variante premium (Task 6, fix cross-instancia)
+// ---------------------------------------------------------------------------
+// Mismo store que usa chart-reading.ts (`reading_cache` vía service client),
+// resuelto una sola vez por módulo (lazy). Diferencia deliberada con
+// chart-reading.ts: SIN service client (llaves de Supabase ausentes) no
+// caemos al fallback en memoria (`inMemoryReadingCacheStore`) — ese fallback
+// sería, en la práctica, el MISMO Map efímero por proceso que causa el bug de
+// doble cobro que este fix existe para arreglar, y daría una falsa sensación
+// de protección donde no la hay. Se prefiere devolver null y aceptar el
+// riesgo (posible doble cobro SOLO en despliegues sin esas llaves) con este
+// comentario explícito, antes que fingir una garantía que no existe. El
+// premium sigue funcionando igual sin caché durable (simplemente no ahorra el
+// segundo cobro en ese caso).
+let premiumReadingCache: ReadingCacheStore | null | undefined;
+function getPremiumReadingCache(): ReadingCacheStore | null {
+  if (premiumReadingCache !== undefined) return premiumReadingCache;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  premiumReadingCache =
+    url && serviceKey ? supabaseReadingCacheStore(createServiceSupabaseClient(url, serviceKey)) : null;
+  return premiumReadingCache;
 }
 
 export async function POST(request: NextRequest) {
@@ -293,10 +330,50 @@ export async function POST(request: NextRequest) {
   const localDate = `${asOf.year}-${String(asOf.month).padStart(2, "0")}-${String(asOf.day).padStart(2, "0")}`;
 
   const cacheKey = `${profileId}:${area}:${period}:${locale}:${voiceMode}:${localDate}`;
+  const premiumKey = `premium:${cacheKey}`;
+
+  // --- créditos premium (Task 6, fix cross-instancia) — ver chart-reading
+  // para el detalle general del patrón. Diferencia con chart-reading: esta
+  // ruta NO streamea (JSON directo vía provider.complete()); la variante
+  // premium cachea en el store DURABLE (ver getPremiumReadingCache arriba),
+  // la gratis sigue en el Map en memoria de siempre.
+  //
+  // Chequeo de caché ANTES de computar areaScore (efemérides, caro) y ANTES
+  // de cualquier spend — para las DOS variantes:
+  // - premium: HIT del caché durable sirve sin gastar créditos.
+  // - gratis: restaura el short-circuit original (previo a Task 6): un HIT
+  //   tampoco necesita computar areaScore.
+  if (body.premium === true) {
+    const durable = getPremiumReadingCache();
+    if (durable) {
+      try {
+        const hit = await durable.get(premiumKey);
+        if (hit) {
+          const cached = hit as unknown as AreaReadingPayload;
+          return NextResponse.json(
+            { available: true, reading: cached.reading, tip: cached.tip },
+            { headers: { "x-aluna-model": cached.model, "x-aluna-premium": "used" } },
+          );
+        }
+      } catch {
+        /* miss silencioso → seguimos con el flujo premium normal */
+      }
+    }
+  } else {
+    const cached = getCachedAreaReading(cacheKey);
+    if (cached) {
+      return NextResponse.json(
+        { available: true, reading: cached.reading, tip: cached.tip },
+        { headers: { "x-aluna-model": cached.model, "x-aluna-premium": "off" } },
+      );
+    }
+  }
 
   // areaScore no depende del proveedor elegido (premium o no): se computa ANTES
   // de decidir premium/gasto (Task 6), así un fallo de cómputo nunca ocurre
-  // después de haber cobrado y no hace falta revertir nada por esta causa.
+  // después de haber cobrado y no hace falta revertir nada por esta causa. (El
+  // short-circuit de arriba ya filtró los HIT de caché — esto solo corre en un
+  // MISS real, gratis o premium.)
   let areaScore: { score: number; tone: ScoreTone; drivers: AreaDriver[] };
   try {
     const input = profileToChartInput(profile, {});
@@ -309,27 +386,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "compute" }, { status: 500 });
   }
 
-  // --- créditos premium (Task 6) — ver chart-reading para el detalle del patrón.
-  // Diferencia con chart-reading: esta ruta NO streamea (JSON directo vía
-  // provider.complete()) y el caché es el Map en memoria de arriba, no el
-  // durable de @aluna/compute — mismas garantías, adaptadas a esa forma.
-  const premiumKey = `premium:${cacheKey}`;
-  if (body.premium === true) {
-    const hit = getCachedAreaReading(premiumKey);
-    if (hit) {
-      return NextResponse.json(
-        { available: true, reading: hit.reading, tip: hit.tip },
-        { headers: { "x-aluna-model": hit.model, "x-aluna-premium": "used" } },
-      );
-    }
-  }
-
   const pr = await resolvePremiumReading(request, body.premium, resolveReadingProvider(parseModelOverride(body.modelOverride)));
   if (!pr.provider.available) {
     return NextResponse.json({ available: false }, { headers: { "x-aluna-premium": pr.headerValue } });
   }
 
   if (pr.headerValue !== "used") {
+    // Premium pedido pero degradado (sin saldo/config) — o el "off" de
+    // siempre en un MISS que ya pasó por el short-circuit de arriba: puede
+    // existir una versión GRATIS ya cacheada de esta misma lectura.
     const cached = getCachedAreaReading(cacheKey);
     if (cached) {
       return NextResponse.json(
@@ -380,8 +445,27 @@ export async function POST(request: NextRequest) {
 
   // Mismo formato proveedor/modelo que las rutas de chat (el picker lo muestra).
   const modelUsed = `${provider.name}/${provider.model}`;
-  const targetCacheKey = pr.headerValue === "used" ? premiumKey : cacheKey;
-  setCachedAreaReading(targetCacheKey, { reading: parsed.reading, tip: parsed.tip, model: modelUsed });
+  if (pr.headerValue === "used") {
+    // Premium: caché DURABLE (best-effort — si falla el guardado no rompe la
+    // respuesta ya generada; ver comentario de getPremiumReadingCache arriba).
+    const durable = getPremiumReadingCache();
+    if (durable) {
+      durable
+        .set({
+          key: premiumKey,
+          kind: "area",
+          locale,
+          model: modelUsed,
+          payload: { reading: parsed.reading, tip: parsed.tip, model: modelUsed } as unknown as Json,
+        })
+        .catch(() => {
+          /* el guardado es best-effort; no rompe nada */
+        });
+    }
+  } else {
+    // Gratis ("off"/"fallback"): el Map efímero de siempre, como antes de esta task.
+    setCachedAreaReading(cacheKey, { reading: parsed.reading, tip: parsed.tip, model: modelUsed });
+  }
 
   return NextResponse.json(
     { available: true, reading: parsed.reading, tip: parsed.tip },

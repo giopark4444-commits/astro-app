@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { NextRequest } from "next/server";
 
 // Mismo patrón de mocks que app/api/scores/__tests__/route.test.ts: la ruta
@@ -45,6 +45,26 @@ vi.mock("@/lib/reading/provider", () => ({
 const resolvePremiumReadingMock = vi.fn();
 vi.mock("@/lib/credits/premium-reading", () => ({
   resolvePremiumReading: (...args: unknown[]) => resolvePremiumReadingMock(...args),
+}));
+
+// Caché DURABLE del premium (Task 6, fix cross-instancia): un doble mínimo del
+// store real (backed por un Map propio, sin red ni Supabase real) para probar
+// que el HIT sobrevive a un "segundo pedido" sin depender del Map efímero de
+// route.ts. `getPremiumReadingCache()` de la ruta resuelve este store de forma
+// LAZY (una sola vez por módulo) apenas ambas env vars estén presentes — ver
+// el describe "créditos premium (Task 6)" más abajo, que las setea.
+const premiumDurableStore = new Map<string, unknown>();
+const premiumCacheGetMock = vi.fn(async (key: string) =>
+  premiumDurableStore.has(key) ? premiumDurableStore.get(key) : null,
+);
+const premiumCacheSetMock = vi.fn(async (entry: { key: string; payload: unknown }) => {
+  premiumDurableStore.set(entry.key, entry.payload);
+});
+vi.mock("@aluna/compute", () => ({
+  supabaseReadingCacheStore: vi.fn(() => ({ get: premiumCacheGetMock, set: premiumCacheSetMock })),
+}));
+vi.mock("@aluna/supabase/server", () => ({
+  createServiceSupabaseClient: vi.fn(() => ({})),
 }));
 
 import { POST } from "../route";
@@ -234,17 +254,60 @@ describe("POST /api/area-reading", () => {
 
       expect(completeMock).toHaveBeenCalledTimes(3);
     });
+
+    it("cache-hit en el camino GRATIS no computa areaScore (short-circuit restaurado: ni computeChart ni computeDerivedChart en el HIT)", async () => {
+      const completeMock = vi.fn(async () =>
+        JSON.stringify({ reading: "Lectura corta.", tip: "Consejo corto." }),
+      );
+      resolveReadingProviderMock.mockReturnValue({ available: true, provider: fakeProvider({ complete: completeMock }) });
+
+      const body = { profileId: "profile-cache-shortcircuit", area: "love", period: "today", locale: "es" };
+
+      const res1 = await POST(fakeRequest(body));
+      expect(res1.status).toBe(200);
+      expect(completeMock).toHaveBeenCalledTimes(1);
+      // MISS: sí computa (para poder generar el prompt).
+      expect(computeChartMock).toHaveBeenCalledTimes(1);
+
+      computeChartMock.mockClear();
+      computeDerivedChartMock.mockClear();
+
+      const res2 = await POST(fakeRequest(body));
+      expect(res2.status).toBe(200);
+      expect(await res2.json()).toEqual({ available: true, reading: "Lectura corta.", tip: "Consejo corto." });
+      // HIT: el short-circuit devuelve ANTES de tocar el motor de efemérides
+      // (regresión de latencia arreglada — antes el cómputo corría siempre).
+      expect(computeChartMock).not.toHaveBeenCalled();
+      expect(computeDerivedChartMock).not.toHaveBeenCalled();
+      expect(completeMock).toHaveBeenCalledTimes(1); // tampoco vuelve a llamar al proveedor
+    });
   });
 
   describe("créditos premium (Task 6)", () => {
     // A diferencia de chart-reading (streaming + caché durable), esta ruta
-    // responde JSON directo (provider.complete(), sin stream) y cachea en el
-    // Map en memoria del módulo — mismas garantías (spend antes del proveedor
+    // responde JSON directo (provider.complete(), sin stream) — pero, tras el
+    // fix cross-instancia, la variante premium SÍ cachea en el mismo store
+    // DURABLE que chart-reading (mismas garantías: spend antes del proveedor
     // premium, caché premium separada con prefijo, refund si no se entrega
-    // nada), adaptadas a esa forma. La lógica de gasto/refund en sí se prueba
-    // en aislado en lib/credits/__tests__/premium-reading.test.ts.
+    // nada). La lógica de gasto/refund en sí se prueba en aislado en
+    // lib/credits/__tests__/premium-reading.test.ts.
+    //
+    // getPremiumReadingCache() (route.ts) resuelve el store DURABLE de forma
+    // LAZY la primera vez que se invoca con premium:true, y necesita estas dos
+    // env vars para no devolver null (caso "sin service client" = sin caché
+    // durable, riesgo aceptado). Se mockean @aluna/compute/@aluna/supabase por
+    // encima de las importaciones para no tocar Supabase real — ver el doble
+    // (premiumCacheGetMock/SetMock, backed por un Map propio) definido arriba.
+    beforeEach(() => {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
+      process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-service-role-key";
+    });
+    afterEach(() => {
+      delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    });
 
-    it("premium:true con saldo → usa el proveedor premium, header 'used', cachea bajo la clave premium (HIT sin volver a gastar)", async () => {
+    it("premium:true con saldo → usa el proveedor premium, header 'used', cachea en el store DURABLE (HIT cross-instancia sin volver a gastar)", async () => {
       const premiumComplete = vi.fn(async () => JSON.stringify({ reading: "Premium.", tip: "Consejo premium." }));
       const premiumProvider = fakeProvider({ model: "claude-sonnet-5", complete: premiumComplete });
       resolvePremiumReadingMock.mockResolvedValue({
@@ -260,9 +323,16 @@ describe("POST /api/area-reading", () => {
       expect(res.headers.get("x-aluna-premium")).toBe("used");
       expect(await res.json()).toEqual({ available: true, reading: "Premium.", tip: "Consejo premium." });
       expect(premiumComplete).toHaveBeenCalledTimes(1);
+      expect(resolvePremiumReadingMock).toHaveBeenCalledTimes(1); // el gasto real, una vez
+      // Se escribió en el store DURABLE (no en el Map efímero, que es solo
+      // para el camino gratis) — así una segunda instancia serverless también lo ve.
+      expect(premiumCacheSetMock).toHaveBeenCalledTimes(1);
+      expect(premiumCacheSetMock.mock.calls[0]?.[0]).toMatchObject({ kind: "area", locale: "es" });
 
-      // Segundo request idéntico: HIT de la caché premium (Map en memoria) →
-      // nunca vuelve a llamar a resolvePremiumReading (nunca vuelve a gastar).
+      // Segundo request idéntico (simula que cae en OTRA instancia: el store
+      // durable es independiente del Map en memoria de route.ts): HIT del
+      // caché DURABLE → nunca vuelve a llamar a resolvePremiumReading, es
+      // decir, en TOTAL entre ambos pedidos el spend ocurre UNA sola vez.
       resolvePremiumReadingMock.mockClear();
       const res2 = await POST(fakeRequest(body));
       expect(res2.status).toBe(200);
@@ -270,6 +340,7 @@ describe("POST /api/area-reading", () => {
       expect(await res2.json()).toEqual({ available: true, reading: "Premium.", tip: "Consejo premium." });
       expect(resolvePremiumReadingMock).not.toHaveBeenCalled();
       expect(premiumComplete).toHaveBeenCalledTimes(1); // no se regeneró
+      expect(premiumCacheGetMock).toHaveBeenCalledWith(expect.stringContaining("premium:profile-premium-1"));
     });
 
     it("premium:true pero resolvePremiumReading degrada a 'fallback' → usa el proveedor normal, header 'fallback'", async () => {
