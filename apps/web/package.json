@@ -19,6 +19,7 @@
     "@aluna/supabase": "workspace:*",
     "@anthropic-ai/sdk": "^0.104.1",
     "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.0",
     "dodopayments": "^2.42.2",
     "luxon": "^3.7.2",
     "next": "^15.1.0",

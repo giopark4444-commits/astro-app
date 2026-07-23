@@ -135,6 +135,9 @@ importers:
       '@supabase/ssr':
         specifier: ^0.5.2
         version: 0.5.2(@supabase/supabase-js@2.108.1)
+      '@supabase/supabase-js':
+        specifier: ^2.45.0
+        version: 2.108.1
       dodopayments:
         specifier: ^2.42.2
         version: 2.42.2
