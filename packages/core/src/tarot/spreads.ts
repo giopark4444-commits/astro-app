@@ -163,10 +163,10 @@ export const TAROT_SPREADS: readonly TarotSpread[] = [
     cardCount: 7,
     group: "secondary",
     positions: [
-      { key: "crown", role: "crown", layout: { x: 0.5, y: 0.06 } },
+      { key: "chakra-crown", role: "chakra-crown", layout: { x: 0.5, y: 0.06 } },
       { key: "third-eye", role: "third-eye", layout: { x: 0.5, y: 0.2 } },
       { key: "throat", role: "throat", layout: { x: 0.5, y: 0.34 } },
-      { key: "heart", role: "heart", layout: { x: 0.5, y: 0.5 } },
+      { key: "chakra-heart", role: "chakra-heart", layout: { x: 0.5, y: 0.5 } },
       { key: "solar", role: "solar", layout: { x: 0.5, y: 0.66 } },
       { key: "sacral", role: "sacral", layout: { x: 0.5, y: 0.8 } },
       { key: "root", role: "root", layout: { x: 0.5, y: 0.94 } },

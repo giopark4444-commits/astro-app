@@ -1474,6 +1474,8 @@ export const READING_POSITION_LABELS_ES: Record<string, string> = {
   cause: "la causa",
   synthesis: "la síntesis",
   // ---- chakras ----
+  "chakra-crown": "tu corona",
+  "chakra-heart": "tu corazón",
   "third-eye": "tu tercer ojo",
   throat: "tu garganta",
   solar: "tu plexo solar",
