@@ -10,12 +10,6 @@ import type { CSSProperties, JSX } from "react";
 import type { TarotSpread, TarotSpreadPosition } from "@aluna/core";
 import styles from "./spread-layout.module.css";
 
-export interface SpreadLayoutSlot {
-  index: number;
-  filled: boolean;
-  content?: React.ReactNode;
-}
-
 // Margen (en unidades del lienzo, [0,1]) que se suma al bounding box de los
 // puntos: cada carta cuelga de su punto centrada (translate(-50%,-50%)), así
 // que sin este colchón una carta en x=0 o x=1 quedaría cortada por el borde
@@ -49,7 +43,11 @@ function cardWidthPercent(count: number): number {
 
 export function SpreadLayout(props: {
   spread: TarotSpread;
-  renderSlot: (position: TarotSpreadPosition, index: number) => React.ReactNode;
+  // El 3er argumento (rotate, grados) es la rotación que pide la posición
+  // (spreads.ts, ej. celtic "crossing" = 90) — el WRAPPER ya no rota (I3: eso
+  // ponía el label/reveal-body de lado); el llamador decide qué rotar
+  // (típicamente solo la caja/imagen de la carta, nunca el texto).
+  renderSlot: (position: TarotSpreadPosition, index: number, rotate: number) => React.ReactNode;
   ariaLabel?: string;
 }): JSX.Element {
   const { spread, renderSlot, ariaLabel } = props;
@@ -65,11 +63,11 @@ export function SpreadLayout(props: {
         const style: CSSProperties = {
           left: `${x * 100}%`,
           top: `${y * 100}%`,
-          transform: `translate(-50%, -50%) rotate(${rotate ?? 0}deg)`,
+          transform: "translate(-50%, -50%)",
         };
         return (
           <div key={position.key} className={styles.slot} style={style} data-position-key={position.key}>
-            {renderSlot(position, index)}
+            {renderSlot(position, index, rotate ?? 0)}
           </div>
         );
       })}

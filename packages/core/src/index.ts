@@ -132,13 +132,14 @@ export { buildBackSvg } from "./tarot/back-svg";
 export type { BackConfig, BackSymbol } from "./tarot/back-svg";
 export {
   TAROT_CARDS_ES,
+  READING_POSITION_LABELS_ES,
   composeReadingProse,
   composeReadingWith,
   type TarotAmbits,
   type TarotCardContent,
   type ReadingComposeDicts,
 } from "./tarot/content-es";
-export { TAROT_CARDS_EN } from "./tarot/content-en";
+export { TAROT_CARDS_EN, READING_POSITION_LABELS_EN } from "./tarot/content-en";
 
 export { TERMS_ES, PRIVACY_ES, DISCLAIMER_ES, type LegalDoc } from "./legal/legal-es";
 export { TERMS_EN, PRIVACY_EN, DISCLAIMER_EN } from "./legal/legal-en";

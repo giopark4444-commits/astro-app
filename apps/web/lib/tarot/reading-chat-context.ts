@@ -1,4 +1,10 @@
-import { TAROT_CARDS_ES, TAROT_CARDS_EN, type TarotCardContent } from "@aluna/core";
+import {
+  TAROT_CARDS_ES,
+  TAROT_CARDS_EN,
+  READING_POSITION_LABELS_ES,
+  READING_POSITION_LABELS_EN,
+  type TarotCardContent,
+} from "@aluna/core";
 
 // Contexto PURO del chat de la tirada (Tarot T3). Arma el bloque de texto que
 // la ruta /api/tarot/reading-chat inyecta en el system prompt: la tirada
@@ -17,35 +23,13 @@ export interface TarotChatCardInput {
   jumper?: boolean;
 }
 
+// T4: las 11 tiradas del motor (@aluna/core) ya no caben en un dict local
+// limitado a daily/three/celtic — reusa el mismo catálogo que alimenta
+// composeReadingProse (content-es.ts/content-en.ts), así cualquier tirada
+// nueva queda cubierta sin tocar este archivo.
 const POSITION_LABELS: Record<"es" | "en", Record<string, string>> = {
-  es: {
-    day: "el día de hoy",
-    past: "el pasado",
-    present: "el presente",
-    future: "el futuro",
-    heart: "el corazón del asunto",
-    crossing: "lo que cruza tu camino",
-    foundation: "la raíz de la situación",
-    crown: "lo que corona el asunto",
-    self: "tu propia mirada",
-    environment: "tu entorno",
-    "hopes-fears": "tus esperanzas y temores",
-    outcome: "el desenlace posible",
-  },
-  en: {
-    day: "today",
-    past: "the past",
-    present: "the present",
-    future: "the future",
-    heart: "the heart of the matter",
-    crossing: "what crosses your path",
-    foundation: "the root of the situation",
-    crown: "what crowns the matter",
-    self: "your own view",
-    environment: "your surroundings",
-    "hopes-fears": "your hopes and fears",
-    outcome: "the possible outcome",
-  },
+  es: READING_POSITION_LABELS_ES,
+  en: READING_POSITION_LABELS_EN,
 };
 
 // Tirada libre (free-1..free-N, T3): sin rol fijo, se presentan por orden.

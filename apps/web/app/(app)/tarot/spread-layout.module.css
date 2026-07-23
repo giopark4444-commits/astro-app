@@ -15,9 +15,15 @@
 
 .slot {
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: var(--card-w, clamp(48px, 22%, 140px));
-  aspect-ratio: 0.6; /* proporción estándar de una carta de tarot (ancho/alto) */
+}
+
+/* El contenido que trae el llamador (dorso/flip/etiqueta) ADOPTA el ancho del
+   slot en vez de imponer su propio tamaño fijo en px — así cualquier
+   renderSlot (fan/reveal/manual) encaja en el diagrama sin desbordar ni
+   amontonarse en tiradas con muchas posiciones (celtic-cross, year-wheel).
+   El alto queda auto: lo decide el contenido (la carta con su propio
+   aspect-ratio 0.6 + la etiqueta debajo), no una proporción fija del wrapper. */
+.slot > * {
+  width: 100%;
 }

@@ -1,4 +1,4 @@
-import { TAROT_SPREADS, TAROT_DECKS, cardById } from "@aluna/core";
+import { TAROT_SPREADS, TAROT_DECKS, cardById, type TarotSpreadId } from "@aluna/core";
 
 // Validación PURA del payload de una lectura de tarot antes de tocar la BD.
 // T3 suma la tirada 'free' (modo manual con mazo físico: el usuario compone su
@@ -6,9 +6,9 @@ import { TAROT_SPREADS, TAROT_DECKS, cardById } from "@aluna/core";
 // los "jumpers" (cartas que se salen del mazo al barajar; opcionales, hasta 3,
 // positions "jumper-1".."jumper-M" consecutivas, con flag jumper:true) — estos
 // últimos disponibles en cualquier spread (daily/three/free), no solo free.
-// celtic-cross sigue vivo solo en el motor (@aluna/core): aquí se rechaza
-// hasta que se abra con gate Plus.
-const ALLOWED_SPREAD_IDS = new Set(["daily", "three", "free"]);
+// T4: cualquier tirada de @aluna/core (celtic-cross, year-wheel, etc.) ya se
+// acepta — el gate Plus dejó de vivir acá.
+const ALLOWED_SPREAD_IDS = new Set<string>([...TAROT_SPREADS.map((s) => s.id), "free"]);
 
 const MAX_QUESTION_LEN = 280;
 const FREE_MIN_CARDS = 1;
@@ -24,7 +24,7 @@ export interface TarotReadingCardInput {
 }
 
 export interface ValidatedTarotReading {
-  spread: "daily" | "three" | "free";
+  spread: TarotSpreadId | "free";
   question?: string;
   cards: TarotReadingCardInput[];
   deck: string;
@@ -36,8 +36,8 @@ export type ValidateReadingResult =
 
 /**
  * Valida un payload arbitrario (unknown, viene de request.json()) contra el
- * motor de tarot: spread soportado (daily/three con plantilla fija, free con
- * 1-10 cartas libres), conteo de cartas correcto para ese spread, cada cardId
+ * motor de tarot: spread soportado (cualquier tirada de @aluna/core con su
+ * plantilla fija, o free con 1-10 cartas libres), conteo de cartas correcto para ese spread, cada cardId
  * existe en el mazo y es único en TODO el conjunto (tirada + jumpers), las
  * positions son las esperadas sin repetirse, jumpers opcionales (máx 3,
  * consecutivos, flag jumper:true honesto), question ≤280 y el mazo pedido
@@ -147,7 +147,7 @@ export function validateReadingPayload(body: unknown): ValidateReadingResult {
 
   const value: ValidatedTarotReading =
     question === undefined
-      ? { spread: spreadId as "daily" | "three" | "free", cards, deck: deckId }
-      : { spread: spreadId as "daily" | "three" | "free", question, cards, deck: deckId };
+      ? { spread: spreadId as TarotSpreadId | "free", cards, deck: deckId }
+      : { spread: spreadId as TarotSpreadId | "free", question, cards, deck: deckId };
   return { ok: true, value };
 }

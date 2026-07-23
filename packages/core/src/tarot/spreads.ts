@@ -85,7 +85,10 @@ export const TAROT_SPREADS: readonly TarotSpread[] = [
     group: "primary",
     positions: [
       { key: "heart", role: "heart", layout: { x: 0.28, y: 0.5 } },
-      { key: "crossing", role: "crossing", layout: { x: 0.28, y: 0.5, rotate: 90 } },
+      // I3: nudge deliberado (y 0.5→0.52) para que "crossing" no comparta
+      // coords EXACTAS con "heart" — antes ambas cajas quedaban centradas en
+      // el mismo punto y solo se distinguían por el rotate de la carta.
+      { key: "crossing", role: "crossing", layout: { x: 0.28, y: 0.52, rotate: 90 } },
       { key: "foundation", role: "foundation", layout: { x: 0.28, y: 0.82 } },
       { key: "past", role: "past", layout: { x: 0.1, y: 0.5 } },
       { key: "crown", role: "crown", layout: { x: 0.28, y: 0.18 } },

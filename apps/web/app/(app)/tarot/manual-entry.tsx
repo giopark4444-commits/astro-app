@@ -337,8 +337,11 @@ export function ManualEntry({
           {/* Task 5: además de los atajos de arriba, cualquier tirada del set
               completo (destacadas/secundarias) sirve de plantilla manual.
               "daily" queda excluido: ya tiene su atajo dedicado en la fila de
-              arriba (el picker tampoco la ofrece — sin `spreadDaily` i18n). */}
-          <SpreadPicker onPick={beginSelecting} exclude={["daily"]} />
+              arriba (el picker tampoco la ofrece — sin `spreadDaily` i18n).
+              "three" también se excluye (MINOR de la revisión final): ya
+              tiene su propio atajo arriba — sin esto "Tres cartas" aparecía
+              duplicada (fila de atajos + grilla de Recomendadas). */}
+          <SpreadPicker onPick={beginSelecting} exclude={["daily", "three"]} />
         </div>
       )}
 

@@ -322,14 +322,19 @@ export function Ceremony({
           <SpreadLayout
             spread={spread}
             ariaLabel={t("fanTitle")}
-            renderSlot={(pos, i) => (
+            renderSlot={(pos, i, rotate) => (
               <div className={styles.slot}>
-                <div className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}>
+                <div
+                  className={`${styles.slotCardBox} ${i < state.picked.length ? styles.slotFilled : ""}`}
+                  style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
+                >
                   {i < state.picked.length && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cardBackUrl(deckCtx)} alt="" className={tarot.cardImg} draggable={false} />
                   )}
                 </div>
+                {/* I3: el rotate va SOLO en la caja de arriba — el label queda
+                    horizontal y legible (antes rotaba con todo el wrapper). */}
                 <span className={styles.slotLabel}>{t(positionLabelKey(pos.key))}</span>
               </div>
             )}
@@ -344,18 +349,22 @@ export function Ceremony({
           <SpreadLayout
             spread={spread}
             ariaLabel={t("revealTitle")}
-            renderSlot={(pos, i) => {
+            renderSlot={(pos, i, rotate) => {
               const d = state.drawn[i]!;
               const content = cardsDict[d.card.id]!;
               const flipped = state.flipped[i]!;
               return (
                 <div className={styles.slot}>
                   {/* Flip 3D: reutiliza el patrón .flipCard/.face del umbral
-                      (tarot.module.css), con el tamaño de slot de la ceremonia. */}
+                      (tarot.module.css), con el tamaño de slot de la ceremonia.
+                      I3: el rotate de la posición (ej. celtic "crossing") va
+                      SOLO en este botón (la carta) — el label de abajo y el
+                      revealBody quedan horizontales, sin girar con el wrapper. */}
                   <button
                     type="button"
                     data-testid="reveal-card"
                     className={`${tarot.flipCard} ${styles.slotFlip} ${flipped ? tarot.flipped : ""}`}
+                    style={rotate ? { transform: `rotate(${rotate}deg)` } : undefined}
                     aria-label={flipped ? content.name : t("revealHint")}
                     onClick={() => dispatch({ type: "flip", slot: i })}
                   >
