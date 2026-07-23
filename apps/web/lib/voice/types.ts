@@ -4,6 +4,10 @@
 
 export interface SpeakOptions {
   locale: "es" | "en";
+  /** voiceURI explícito (p. ej. del botón "escuchar muestra" en Ajustes). Si
+   * se omite, el proveedor usa la preferencia guardada del usuario y si no
+   * hay, el auto-match por idioma (ver browser-speech.ts). */
+  voiceURI?: string;
   onEnd?: () => void;
   onError?: () => void;
 }

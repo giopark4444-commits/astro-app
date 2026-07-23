@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { THEMES, MODES, type Theme } from "@/lib/theme/themes";
 import { setLanguage, setIntentUseInAI, setMemoryEnabled } from "../actions";
+import { VoiceControls } from "./voice-controls";
 import styles from "./settings.module.css";
 
 const SWATCH: Record<Theme, string> = {
@@ -198,6 +199,17 @@ export function SettingsControls({
           </div>
         </div>
       </div>
+
+      {/* Voz (T-voz): sección única, NO duplicada en el patrón móvil/.wrap vs
+          desktop/.compact de arriba — un <select> + botón "escuchar" no
+          decompone en el patrón de pills segmentadas, y duplicar el estado
+          costaría complejidad sin beneficio visual. Vive fuera de ambos
+          bloques para que se vea en TODOS los anchos (.wrap se oculta
+          ≥1080px, .compact se oculta <1080px — ver settings.module.css). */}
+      <section className={`${styles.section} ${styles.voiceSection}`}>
+        <h3 className={styles.label}>{t("voiceTitle")}</h3>
+        <VoiceControls />
+      </section>
     </>
   );
 }
