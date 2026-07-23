@@ -265,6 +265,10 @@ export function ManualEntry({
 
   return (
     <section className={styles.manual} data-testid="manual-entry">
+      {/* Marco de 2 columnas siempre (pedido de Gio): izquierda = asistente
+          (elegir cartas) + técnica; derecha sticky = lectura o placeholder. */}
+      <div className={styles.manualGrid}>
+        <div className={styles.manualLeft}>
       {step === "template" && (
         <div className={styles.pane}>
           <h3 className={styles.paneTitle}>{t("manualTemplateTitle")}</h3>
@@ -366,9 +370,9 @@ export function ManualEntry({
       )}
 
       {step === "reading" && (
-        // Task 4: split de layout ≥1080, espejo de ceremony.tsx — cartas
-        // (+jumpers) a la izquierda, prosa+chat+guardar a la derecha (sticky).
-        <div className={`${styles.pane} ${styles.readingPane}`}>
+        // La técnica (cartas + jumpers) va en la columna IZQUIERDA del marco;
+        // la prosa+chat viajan a la columna derecha (sticky), abajo.
+        <div className={styles.pane}>
           <h3 className={styles.paneTitle}>{t("readingTitle")}</h3>
 
           <div className={styles.readingLeft}>
@@ -425,45 +429,56 @@ export function ManualEntry({
             )}
           </div>
 
-          <div className={styles.readingSide}>
-            <div className={styles.readingProse}>
-              {prose.map((p, i) => (
-                <p key={i} className={tarot.sheetParagraph}>
-                  {p}
-                </p>
-              ))}
-            </div>
-
-            <ReadingChat spreadId={template} cards={chatCards} />
-
-            {save === "free_limit" ? (
-              <p className={styles.freeLimit}>
-                {t("ceremonyFreeLimit")}{" "}
-                <Link href="/perfil" className={styles.freeLimitCta}>
-                  {t("ceremonyFreeLimitCta")}
-                </Link>
-              </p>
-            ) : save === "saved" ? (
-              <p className={styles.savedOk}>{t("savedOk")}</p>
-            ) : (
-              <>
-                {save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
-                <button type="button" className={styles.primaryBtn} onClick={saveReading} disabled={save === "saving"}>
-                  {t("saveReading")}
-                </button>
-              </>
-            )}
-            {main[0] && (
-              <button type="button" className={styles.ghostBtn} onClick={() => setShareOpen(true)}>
-                {tShare("share")}
-              </button>
-            )}
-            <button type="button" className={styles.ghostBtn} onClick={onClose}>
-              {t("readingBack")}
-            </button>
-          </div>
         </div>
       )}
+        </div>
+
+        <aside className={styles.manualSide}>
+          {step === "reading" ? (
+            <div className={styles.readingSide}>
+              <div className={styles.readingProse}>
+                {prose.map((p, i) => (
+                  <p key={i} className={tarot.sheetParagraph}>
+                    {p}
+                  </p>
+                ))}
+              </div>
+
+              <ReadingChat spreadId={template} cards={chatCards} />
+
+              {save === "free_limit" ? (
+                <p className={styles.freeLimit}>
+                  {t("ceremonyFreeLimit")}{" "}
+                  <Link href="/perfil" className={styles.freeLimitCta}>
+                    {t("ceremonyFreeLimitCta")}
+                  </Link>
+                </p>
+              ) : save === "saved" ? (
+                <p className={styles.savedOk}>{t("savedOk")}</p>
+              ) : (
+                <>
+                  {save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
+                  <button type="button" className={styles.primaryBtn} onClick={saveReading} disabled={save === "saving"}>
+                    {t("saveReading")}
+                  </button>
+                </>
+              )}
+              {main[0] && (
+                <button type="button" className={styles.ghostBtn} onClick={() => setShareOpen(true)}>
+                  {tShare("share")}
+                </button>
+              )}
+              <button type="button" className={styles.ghostBtn} onClick={onClose}>
+                {t("readingBack")}
+              </button>
+            </div>
+          ) : (
+            <div className={`card card--dashed ${styles.sidePlaceholder}`}>
+              <p className={styles.sidePlaceholderText}>{t("manualReadingPlaceholder")}</p>
+            </div>
+          )}
+        </aside>
+      </div>
 
       {main[0] && (
         <ShareModal

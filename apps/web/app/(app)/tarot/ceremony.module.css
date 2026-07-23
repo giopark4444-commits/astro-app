@@ -155,64 +155,76 @@
   to { opacity: 1; transform: translateX(0) translateY(0); }
 }
 
-/* ---------- fan: las 78 boca abajo en arco ---------- */
-.fanScroll { width: 100%; overflow-x: auto; padding: var(--sp-2) 0; }
-.fanArc {
+/* ---------- fan: las 78 boca abajo en ARCO COMPACTO ----------
+   Todo el mazo visible de un vistazo (como antes), pero más plano/compacto y
+   con cartas MÁS GRANDES que el arco original — y el ángulo se bajó (±31.5° vs
+   ±52°) para que las "alas" NO se salgan y no recorten. overflow-x:auto queda
+   de red de seguridad si un viewport muy angosto lo necesita. (pedido de Gio) */
+.fanScroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--sp-2) 0;
+}
+.fanRow {
   position: relative;
-  /* Abanico un poco más chico y contenedor MÁS ALTO (pedido de Gio: que no se
-     corte el abanico). Las cartas se suben con `bottom` para que las "alas" del
-     arco (que caen ~125px por debajo de su base al rotar) queden DENTRO del
-     contenedor y no las recorte el .fanScroll. */
-  width: 600px;
-  height: 250px;
+  width: 100%;
+  min-width: 400px; /* el arco (~393px) siempre cabe dentro del box scrollable:
+                       en pantallas <400px el .fanScroll deja scrollear en vez de
+                       recortar las cartas de los extremos. */
+  max-width: 560px;
+  height: 220px;
   margin: 0 auto;
 }
 .fanCard {
   position: absolute;
   left: 50%;
-  bottom: 130px;
-  width: 52px;
-  height: 84px;
-  margin-left: -26px;
+  bottom: 100px;
+  width: 60px; /* más grandes (era 52) */
+  height: 96px;
+  margin-left: -30px;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
   padding: 0;
   background: var(--surface-2, #141225);
   cursor: pointer;
-  /* Arco: rotación por índice desde un origen muy por debajo del viewport —
-     el abanico respira como un solo cuerpo. */
-  transform-origin: 50% 420%;
-  transform: rotate(calc((var(--i) - 38.5) * 1.35deg));
-  transition: transform 600ms var(--ease), opacity 600ms var(--ease), box-shadow 400ms var(--ease);
+  /* Arco más plano y compacto: menos ángulo + origen más cercano = las cartas
+     quedan más juntas ("no tan separadas") y el arco no desborda. */
+  transform-origin: 50% 340%;
+  transform: rotate(calc((var(--i) - 38.5) * 0.82deg));
+  transition: transform 500ms var(--ease), opacity 500ms var(--ease), box-shadow 400ms var(--ease);
 }
 .fanCard:hover,
 .fanCard:focus-visible {
   box-shadow: var(--glow-soft);
-  transform: rotate(calc((var(--i) - 38.5) * 1.35deg)) translateY(-10px);
-  z-index: 2; /* por encima de los vecinos con z-index:auto, sin importar el orden del DOM */
+  transform: rotate(calc((var(--i) - 38.5) * 0.82deg)) translateY(-12px);
+  z-index: 2;
 }
 .fanCard:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
-/* La elegida "vuela": sube y se desvanece hacia su slot (el slot la recibe). */
+/* La elegida "vuela": baja y se desvanece hacia su slot (el slot la recibe). */
 .fanCardPicked {
   opacity: 0;
-  transform: rotate(0deg) translateY(140px) scale(0.7);
+  transform: rotate(0deg) translateY(130px) scale(0.7);
   pointer-events: none;
 }
 .fanCount { color: var(--acc-text); font-size: var(--text-xs); letter-spacing: 1px; margin: 0; }
 
 /* ---------- slots (fan + reveal) ---------- */
+/* Móvil: cartas más chicas + gap menor para que una tirada de 3 entre en UNA
+   línea (~340px) sin partir a 2+1 (pedido de Gio). En desktop recuperan tamaño
+   (media query abajo), donde hay ancho de sobra. */
 .slotRow, .revealRow {
   display: flex;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
 }
-.slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 150px; }
+.slot { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); max-width: 104px; min-width: 0; }
 .slotCardBox {
-  width: 110px;
-  height: 178px;
+  width: 94px;
+  height: 152px;
   border: 1px dashed var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -231,7 +243,7 @@
 }
 
 /* Flip del reveal: reusa .flipCard/.face de tarot.module.css; aquí solo el tamaño. */
-.slotFlip { width: 110px !important; height: 178px !important; }
+.slotFlip { width: 94px !important; height: 152px !important; }
 
 .revealBody { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
 .revealName {
@@ -287,11 +299,15 @@
 @media (min-width: 1080px) { /* bp desktop R4a */
   .ceremony { padding: var(--sp-6) var(--sp-6); }
 
-  /* El abanico ya NO se agranda a 1180px en desktop: la ceremonia ahora vive
-     DENTRO del panel izquierdo del split (~688px) durante los pasos (pedido de
-     Gio: la pantalla se mantiene dividida en dos al tirar, no se despliega a
-     ambos lados). Usa el arco base de 640px, que cabe en el panel. El .fanScroll
-     conserva overflow-x:auto por si un viewport intermedio lo necesita. */
+  /* Reveal en desktop: hay ancho (la ceremonia vive en el panel izquierdo
+     ~688px), así que las cartas recuperan tamaño; 3 entran de sobra en una fila. */
+  .slot { max-width: 132px; }
+  .slotCardBox { width: 118px; height: 190px; }
+  .slotFlip { width: 118px !important; height: 190px !important; }
+
+  /* El abanico no se agranda en desktop: la ceremonia vive DENTRO del panel
+     izquierdo del split (~688px) durante los pasos. El arco compacto (max-width
+     560px) cabe de sobra; .fanScroll conserva overflow-x:auto por si acaso. */
 
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
