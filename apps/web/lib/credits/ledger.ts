@@ -16,7 +16,12 @@ export function getCreditsServiceClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return null;
-  return createServiceSupabaseClient(url, serviceKey);
+  try {
+    // URL presente pero malformada no debe tumbar al caller; premium simplemente queda apagado.
+    return createServiceSupabaseClient(url, serviceKey);
+  } catch {
+    return null;
+  }
 }
 
 /** Descuenta créditos (fail-closed): red/rpc caído o saldo insuficiente → false, nunca lanza. */

@@ -57,6 +57,15 @@ describe("getCreditsServiceClient", () => {
     expect(client).not.toBeNull();
     expect(createServiceSupabaseClientMock).toHaveBeenCalledWith("https://x.supabase.co", "service-key");
   });
+
+  it("URL presente pero malformada (createServiceSupabaseClient lanza) -> null, no relanza", () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "not-a-valid-url";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
+    createServiceSupabaseClientMock.mockImplementationOnce(() => {
+      throw new Error("Invalid Supabase URL");
+    });
+    expect(getCreditsServiceClient()).toBeNull();
+  });
 });
 
 describe("spendCredits", () => {
