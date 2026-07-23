@@ -14,8 +14,6 @@ import { PlanCard } from "./plan-card";
 import { SettingsControls } from "./settings-controls";
 import { CopyIdButton } from "./copy-id-button";
 import { ReferralRedeem } from "./referral-redeem";
-import { DeckPicker } from "@/components/tarot/deck-picker";
-import { DeckManager } from "./deck-manager";
 import { MemoriesCard } from "./memories-card";
 import { EntitiesCard } from "./entities-card";
 import { EssenceCard } from "./essence-card";
@@ -112,15 +110,21 @@ export default async function AjustesPage({
         />
       </section>
 
-      {/* Esencia primero (Fase 2 T5): mismo orden que buildMemoryBlocks en
-          memory-pipeline.ts, donde el retrato ancla el resto del contexto. */}
-      <EssenceCard userId={user.id} />
-
-      <MemoriesCard userId={user.id} />
-
-      <EntitiesCard userId={user.id} />
-
-      <MemoryDataCard />
+      {/* Memoria de Aluna (reorg ajustes): Esencia+Recuerdos+Entidades+Datos
+          agrupados bajo UN encabezado — cada tarjeta conserva su propio
+          <section class="card"> intacto (cambio mínimo, sin tocarlas por
+          dentro); el grupo solo les da un gap más apretado que el de .page
+          entre secciones distintas, para que se lean como subbloques de una
+          sola sección. Esencia primero dentro del grupo (Fase 2 T5): mismo
+          orden que buildMemoryBlocks en memory-pipeline.ts, donde el retrato
+          ancla el resto del contexto. */}
+      <section className={styles.memoryGroup}>
+        <h2 className={styles.eyebrow}>{t("memoryHubTitle")}</h2>
+        <EssenceCard userId={user.id} />
+        <MemoriesCard userId={user.id} />
+        <EntitiesCard userId={user.id} />
+        <MemoryDataCard />
+      </section>
 
       <section className="card">
         <PlanCard row={planRow} checkoutSuccess={checkout === "success"} />
@@ -142,16 +146,6 @@ export default async function AjustesPage({
           )}
         </section>
       )}
-
-      <section className="card">
-        <h2 className={styles.eyebrow}>{t("deckPresetTitle")}</h2>
-        <DeckPicker />
-      </section>
-
-      <section className="card">
-        <h2 className={styles.eyebrow}>{t("deckTitle")}</h2>
-        <DeckManager />
-      </section>
 
       <section className="card">
         <h2 className={styles.eyebrow}>{t("account")}</h2>
@@ -197,9 +191,6 @@ export default async function AjustesPage({
         </section>
       )}
 
-      {/* Guía de modelos por rubro: solo pruebas (se auto-oculta en prod). */}
-      <DevModelGuide />
-
       <section className="card">
         <h2 className={styles.eyebrow}>{t("legal")}</h2>
         {LEGAL_LINKS.map((l) => (
@@ -209,6 +200,10 @@ export default async function AjustesPage({
           </Link>
         ))}
       </section>
+
+      {/* Guía de modelos por rubro: solo pruebas (se auto-oculta en prod); de
+          última (orden coherente de ajustes, tras Legal). */}
+      <DevModelGuide />
 
       <div className={styles.signOut}>
         <form action={signOut}>

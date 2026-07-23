@@ -1,5 +1,6 @@
 "use client";
-// Sección "Tu mazo" en Ajustes (Tarot T4, Task 5). La subida es LATENTE sin
+// Sección "Tu mazo" en Tarot → Mazos (Tarot T4, Task 5; reubicada desde
+// Ajustes — reorg "mazos fuera de Ajustes, a Tarot"). La subida es LATENTE sin
 // Supabase Storage: GET /api/tarot/deck responde {available:false} (503) hasta
 // que exista SUPABASE_SERVICE_ROLE_KEY — este componente maneja ese estado
 // con una nota + controles deshabilitados, nunca rompe (mismo patrón que

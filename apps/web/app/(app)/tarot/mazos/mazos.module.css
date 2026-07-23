@@ -1,0 +1,36 @@
+/* Subpágina "Mazos" (reorg ajustes→tarot: el mazo preset + el mazo custom
+   vivían en Ajustes, ahora cuelgan de Tarot). Header con back-link, mismo
+   patrón que perfil/lifetime/lifetime.module.css; el cuerpo son las mismas
+   secciones .card que ya vivían en ajustes (deckPresetTitle/deckTitle),
+   solo trasladadas — mismo cap desktop que ajustes.module.css .page. */
+.page {
+  padding: var(--sp-6) var(--sp-5) 96px; /* 96px = alto del bottom-nav fijo, igual que tarot.module.css .wrap */
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+.header { display: flex; flex-direction: column; gap: var(--sp-1); }
+.back { align-self: flex-start; font-size: var(--text-xs); color: var(--soft); margin-bottom: var(--sp-3); }
+.back:hover { color: var(--acc-text); }
+.eyebrow {
+  font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase;
+  color: var(--acc-text); font-weight: 700; margin: 0;
+}
+.title {
+  font-family: var(--font-display); font-style: italic;
+  font-size: clamp(30px, 8vw, 44px); color: var(--ink); margin: 2px 0 0;
+}
+
+/* Encabezado de cada tarjeta (mazo preset / tu mazo) — misma receta que
+   .eyebrow de ajustes.module.css. */
+.cardEyebrow {
+  font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--acc-text); margin: 0;
+}
+
+@media (min-width: 1080px) {
+  .page { max-width: 640px; margin-left: auto; margin-right: auto; }
+}

@@ -1,5 +1,6 @@
 "use client";
-// Editor de reverso (Tarot T4, Task 5): preview EN VIVO con buildBackSvg
+// Editor de reverso — vive en Tarot → Mazos junto a DeckManager (reubicado
+// desde Ajustes). Preview EN VIVO con buildBackSvg
 // (@aluna/core, la misma función pura que usa el server para el webp final —
 // el preview es byte-consistente con lo que se guarda). "Subir imagen propia"
 // es la alternativa al editor generado. Ambos caminos POST /api/tarot/deck/back

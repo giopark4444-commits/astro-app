@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { dailyCard, cardImageUrl, cardBackUrl, type TarotSpreadId } from "@aluna/core";
@@ -251,6 +252,12 @@ export function TarotView({ userId }: { userId: string }) {
       <div className={styles.head}>
         <p className={styles.eyebrow}>{t("eyebrow")}</p>
         <h1 className={styles.title}>{t("title")}</h1>
+        {/* Punto de entrada a Tarot → Mazos (reorg ajustes→tarot): discreto,
+            en el header, junto al resto de la identidad de la página — el
+            mazo preset/custom ya no vive en Ajustes. */}
+        <Link href="/tarot/mazos" className={styles.deckLink}>
+          {t("customizeDeck")}
+        </Link>
       </div>
 
       <div className={`${styles.deskCols} ${readingResultFull ? styles.readingActive : ""}`}>

@@ -55,6 +55,15 @@
 .referralBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 .referralError { margin: 0; font-size: var(--text-xs); color: var(--tone-caution); }
 
+/* "Memoria de Aluna" (reorg ajustes): agrupa Esencia+Recuerdos+Entidades+Tus
+   datos bajo UN encabezado — cada tarjeta sigue trayendo su propio
+   <section class="card"> intacto (no se tocan por dentro); este wrapper NO
+   es .card (nada de fondo/borde propio, para no dibujar una tarjeta dentro de
+   otra) y solo aporta un gap más apretado que el --sp-5 general de .page
+   entre secciones distintas, así las 4 tarjetas se leen como subbloques de
+   una sola sección en vez de 4 secciones sueltas. */
+.memoryGroup { display: flex; flex-direction: column; gap: var(--sp-3); }
+
 /* "Aluna te conoce" (memoria) — hint bajo el eyebrow, lista de recuerdos con
    botón de borrado por fila (mismo primitivo .row de Cuenta, con acción). */
 .memoriesHint { margin: 0; font-size: var(--text-sm); color: var(--soft); }

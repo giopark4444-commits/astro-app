@@ -4,6 +4,16 @@
 
 .head { margin-bottom: var(--sp-6); }
 
+/* Entrada discreta a Tarot → Mazos (reorg ajustes→tarot) — mismo tono/hover
+   que .back de perfil/lifetime/lifetime.module.css, pequeña y muda junto al
+   título para no competir con él. */
+.deckLink {
+  display: inline-block; margin-top: var(--sp-2);
+  font-size: var(--text-xs); color: var(--soft);
+  transition: color var(--dur-fast) var(--ease);
+}
+.deckLink:hover { color: var(--acc-text); }
+
 /* Maestro-detalle (Task 3): en móvil el contenedor es un bloque plano (las
    secciones se apilan); el grid 11fr/9fr + panel sticky solo aparece en desktop
    (@media abajo). Mismo mecanismo/valores que numeros/carta/pilares. */

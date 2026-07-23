@@ -119,6 +119,7 @@
     "memoryImport": "Importar",
     "memoryImportOk": "Importados {memories} recuerdos y {entities} entidades.",
     "memoryImportError": "No se pudo importar el archivo. Revisa que sea un JSON exportado desde Aluna.",
+    "memoryHubTitle": "Memoria de Aluna",
     "essence": {
       "title": "Tu esencia",
       "description": "El retrato que Aluna va formando de ti a partir de tus conversaciones: quién eres, tu círculo, tus temas del momento. Se forma solo — aquí puedes verlo, editarlo o pedirle a Aluna que lo forme de nuevo.",
@@ -1016,7 +1017,10 @@
     "chatSend": "Enviar",
     "interpTitle": "Interpretación",
     "interpHint": "Toca la carta del día o una lectura del diario para leerla aquí.",
-    "backToReading": "Volver a la lectura"
+    "backToReading": "Volver a la lectura",
+    "customizeDeck": "Personalizar mazo ✎",
+    "mazosTitle": "Mazos",
+    "mazosBack": "Volver a Tarot"
   },
   "share": {
     "title": "Compartir esta lectura",
