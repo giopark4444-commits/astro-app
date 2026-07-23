@@ -138,16 +138,14 @@
 .gridThumb { width: 100%; aspect-ratio: 0.6; object-fit: contain; }
 .gridName { color: var(--soft); font-size: var(--text-2xs); text-align: center; line-height: 1.3; }
 
-/* ---------- reading (Task 4: split técnica|prosa+chat en desktop) ---------- */
-.readingPane {}
-/* Carril izquierdo del split: cartas + jumpers agrupados en UN solo hijo de
-   grid-column:1. Si jumpersReading quedara suelto como hijo directo del
-   grid, el auto-placement de CSS Grid lo empujaría a la fila SIGUIENTE libre
-   en columna 1 — que puede caer muy por debajo si la columna derecha
-   (prosa+chat) es más alta que las 3 cartas. Agrupándolos, ambos quedan
-   pegados sin importar la altura de .readingSide. */
+/* ---------- reading ---------- */
+/* readingLeft agrupa cartas + jumpers; display:contents deja que sus hijos
+   fluyan en el .pane de la izquierda. readingSide (prosa+chat+botones) vive en
+   el <aside> de la derecha, que en MÓVIL no aporta layout propio → readingSide
+   debe ser SIEMPRE flex-column con gap (no display:contents), o los botones
+   Guardar/Compartir/Volver quedarían pegados. */
 .readingLeft { display: contents; }
-.readingSide { display: contents; }
+.readingSide { display: flex; flex-direction: column; gap: var(--sp-3); }
 .readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
 .readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
 .readingImg { width: 64px; height: 106px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); flex-shrink: 0; }
@@ -216,9 +214,5 @@
     flex-direction: column;
     gap: var(--sp-3);
   }
-  .readingSide {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
+  /* .readingSide ya es flex-column en base (ver arriba); no hace falta repetirlo. */
 }

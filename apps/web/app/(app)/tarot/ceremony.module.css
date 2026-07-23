@@ -169,6 +169,9 @@
 .fanRow {
   position: relative;
   width: 100%;
+  min-width: 400px; /* el arco (~393px) siempre cabe dentro del box scrollable:
+                       en pantallas <400px el .fanScroll deja scrollear en vez de
+                       recortar las cartas de los extremos. */
   max-width: 560px;
   height: 220px;
   margin: 0 auto;
@@ -302,11 +305,9 @@
   .slotCardBox { width: 118px; height: 190px; }
   .slotFlip { width: 118px !important; height: 190px !important; }
 
-  /* El abanico ya NO se agranda a 1180px en desktop: la ceremonia ahora vive
-     DENTRO del panel izquierdo del split (~688px) durante los pasos (pedido de
-     Gio: la pantalla se mantiene dividida en dos al tirar, no se despliega a
-     ambos lados). Usa el arco base de 640px, que cabe en el panel. El .fanScroll
-     conserva overflow-x:auto por si un viewport intermedio lo necesita. */
+  /* El abanico no se agranda en desktop: la ceremonia vive DENTRO del panel
+     izquierdo del split (~688px) durante los pasos. El arco compacto (max-width
+     560px) cabe de sobra; .fanScroll conserva overflow-x:auto por si acaso. */
 
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
