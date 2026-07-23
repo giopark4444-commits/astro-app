@@ -117,8 +117,14 @@ export * from "./tarot/types";
 export { TAROT_DECK, TAROT_DECKS, cardById } from "./tarot/deck";
 export { mulberry32, shuffleDeck, drawCards } from "./tarot/shuffle";
 export type { Rng, DrawnCard } from "./tarot/shuffle";
-export { TAROT_SPREADS, spreadById } from "./tarot/spreads";
-export type { TarotSpread, TarotSpreadPosition } from "./tarot/spreads";
+export { TAROT_SPREADS, spreadById, spreadsByGroup } from "./tarot/spreads";
+export type {
+  TarotSpread,
+  TarotSpreadPosition,
+  TarotSpreadId,
+  TarotSpreadGroup,
+  TarotLayoutPoint,
+} from "./tarot/spreads";
 export { dailyCard, dailySeed, fnv1a32 } from "./tarot/daily";
 export { cardImageUrl, cardBackUrl, rwsCtx, presetCtx, deckCtxFromManifest, PRESET_DECKS } from "./tarot/deck-assets";
 export type { DeckAssetCtx, DeckManifestLike, PresetDeckId } from "./tarot/deck-assets";
