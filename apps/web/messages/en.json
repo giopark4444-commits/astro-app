@@ -641,7 +641,11 @@
     "quickPage": "Page {n} of {total}",
     "quickAddPage": "Add page",
     "quickToggle": "Quick questions",
-    "quickEditLabel": "Question {n}"
+    "quickEditLabel": "Question {n}",
+    "premiumToggle": "Premium ✨ — more depth using your credits",
+    "premiumOut": "You're out of premium credits — get more in <a>Settings</a>.",
+    "dailyCap": "You've hit today's free limit ({cap} questions). Try again tomorrow, or turn on premium ✨.",
+    "creditsChip": "✨ {n}"
   },
   "synastry": {
     "title": "Compatibility",

@@ -641,7 +641,11 @@
     "quickPage": "Página {n} de {total}",
     "quickAddPage": "Agregar página",
     "quickToggle": "Preguntas rápidas",
-    "quickEditLabel": "Pregunta {n}"
+    "quickEditLabel": "Pregunta {n}",
+    "premiumToggle": "Premium ✨ — más profundidad usando tus créditos",
+    "premiumOut": "Te quedaste sin créditos premium — conseguí más en <a>Ajustes</a>.",
+    "dailyCap": "Llegaste al tope gratis de hoy ({cap} preguntas). Probá mañana, o activá premium ✨.",
+    "creditsChip": "✨ {n}"
   },
   "synastry": {
     "title": "Compatibilidad",
