@@ -49,14 +49,20 @@
 .signGlyph { font-size: 13px; text-anchor: middle; dominant-baseline: central; } /* texto SVG de la rueda: escala con el viewBox, excepción */
 .cusp { stroke: var(--line); stroke-width: 1; }
 .cuspAngle { stroke: rgba(var(--acc-rgb), 0.65); stroke-width: 1.5; }
-.houseNum { font-size: 8px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
-.angleMark { font-size: 9px; font-weight: 700; fill: var(--acc-text); text-anchor: middle; dominant-baseline: central; }
+/* R6 (Gio, legibilidad 2026-07-24): estos 3 eran los tamaños más chicos de
+   TODA la app (6.5/8/9px) — texto SVG posicionado por coordenadas calculadas
+   (rueda compacta, hasta ~10 cuerpos + 12 casas), así que el bump es
+   deliberadamente MODESTO (no se salta a la escala de texto normal) para no
+   arriesgar colisiones entre glifos vecinos; aun así casi duplica el tamaño
+   del peor caso (.bodyDeg). Pendiente: confirmar en vivo que nada se solapa. */
+.houseNum { font-size: 9.5px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; }
+.angleMark { font-size: 10.5px; font-weight: 700; fill: var(--acc-text); text-anchor: middle; dominant-baseline: central; }
 .aspects line { stroke-width: 1; }
 .bodyG { cursor: pointer; }
 .bodyHit { fill: var(--surface-2); }
 .bodyG:hover .bodyHit { fill: rgba(var(--acc-rgb), 0.2); }
 .bodyGlyph { font-size: 14px; fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-.bodyDeg { font-size: 6.5px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.bodyDeg { font-size: 8.5px; fill: var(--soft); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 
 /* ---- Ceremonia de dibujo (R5, opt-in vía prop `animated` → [data-ceremony]) ----
    Timings vienen de @aluna/core (wheel-ceremony.ts) como custom properties en

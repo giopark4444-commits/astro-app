@@ -49,9 +49,11 @@
   stroke-width: 1;
 }
 
-/* Nombre curvado sobre el arco del sector */
+/* Nombre curvado sobre el arco del sector — R6 (Gio, legibilidad
+   2026-07-24): bump modesto (texto SVG por coordenadas, 12 sectores en un
+   círculo compacto), mismo criterio conservador que carta.module.css. */
 .name {
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: 1.1px;
   text-transform: uppercase;
   fill: var(--soft);
@@ -147,8 +149,10 @@
   letter-spacing: 0.5px;
   animation: riseIn 900ms var(--ease) 200ms both;
 }
-/* La fila de 5 años del animal: más compacta para caber en el centro. */
-.throneYears { font-size: 10px; letter-spacing: 0; white-space: nowrap; }
+/* La fila de 5 años del animal: más compacta para caber en el centro
+   (bump modesto, R6 legibilidad: sigue siendo la más chica del trono a
+   propósito, pero ya no por debajo del piso de la escala). */
+.throneYears { font-size: 11px; letter-spacing: 0; white-space: nowrap; }
 /* El año POR VENIR, atenuado para leerse como futuro. */
 .throneYearNext { opacity: 0.55; }
 

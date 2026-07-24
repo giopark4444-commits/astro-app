@@ -15,12 +15,23 @@
   --dur: 0.55s;
   --dur-fast: 0.22s;
 
-  /* Escala tipográfica (R2: ritmo consistente en toda la web) */
-  --text-2xs: 12px; /* 11→12: legibilidad (Gio, rediseño 2col) — la más pequeña de la escala */
-  --text-xs: 12px;
-  --text-sm: 13px;
-  --text-md: 15px;
-  --text-lg: 17px;
+  /* Escala tipográfica (R2: ritmo consistente en toda la web).
+     R6 (Gio, 2026-07-24 — "hay muchos lugares en los que son demasiado
+     pequeñas... armonices todos los tamaños... evita tipografías diminutas
+     ilegibles"): --text-2xs y --text-xs eran EL MISMO valor (12px, duplicado
+     sin sentido) y juntas con --text-sm sumaban ~77% de TODO el texto de la
+     app (grep: 457 de 595 usos de var(--text-*) en el repo) — el piso de la
+     escala estaba haciendo la mayoría del trabajo visual y era el más chico.
+     Se sube el piso y se separan los escalones (12/12/13/15 → 12/14/15/16, ya
+     no dos tokens duplicados) manteniendo --text-2xs como el ÚNICO nivel bajo
+     12px (solo para eyebrows/labels en mayúsculas con letter-spacing, nunca
+     para prosa). El techo (--text-xl y arriba) ya leía bien: se deja igual
+     para no arriesgar los títulos/despliegues ya calibrados. */
+  --text-2xs: 12px; /* piso absoluto: SOLO eyebrows/labels en mayúsculas, nunca prosa */
+  --text-xs: 14px; /* era 12 (duplicaba 2xs) */
+  --text-sm: 15px; /* era 13 */
+  --text-md: 16px; /* era 15 — 16px, el cuerpo de lectura estándar y legible */
+  --text-lg: 18px; /* era 17 */
   --text-xl: 20px;
   --text-2xl: 24px;
   --text-3xl: 32px;

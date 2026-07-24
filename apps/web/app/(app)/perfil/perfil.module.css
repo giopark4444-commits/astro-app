@@ -128,7 +128,7 @@
 .manifDelete {
   position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%;
   display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface-2);
-  color: var(--soft); font-size: 10px; line-height: 1; cursor: pointer; opacity: 0.5;
+  color: var(--soft); font-size: var(--text-2xs); line-height: 1; cursor: pointer; opacity: 0.5; /* era 10px, bajo el piso de la escala */
   transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .manifDelete:hover { opacity: 1; color: var(--ink); }
@@ -179,7 +179,7 @@
 .noteDelete {
   position: absolute; top: 50%; right: 2px; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%;
   display: grid; place-items: center; border: 1px solid var(--line); background: var(--surface-2);
-  color: var(--soft); font-size: 10px; line-height: 1; cursor: pointer; opacity: 0.5;
+  color: var(--soft); font-size: var(--text-2xs); line-height: 1; cursor: pointer; opacity: 0.5; /* era 10px, bajo el piso de la escala */
   transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
 .noteDelete:hover { opacity: 1; color: var(--ink); }

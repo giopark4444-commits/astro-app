@@ -26,7 +26,10 @@
   .enso { top: 8px; right: 10px; width: 9px; height: 9px; box-shadow: 0 0 12px rgba(var(--acc-rgb), 0.9); } /* mockup 06: .pf-photo i */
   .changeBtn {
     padding: 6px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
-    text-transform: none; letter-spacing: normal; font-size: 11.5px; /* mockup 06: .pf-chg */
+    text-transform: none; letter-spacing: normal; /* mockup 06: .pf-chg */
+    /* R6 legibilidad: el override de acá ERA 11.5px, más chico que la base
+       de arriba (var(--text-2xs)) — al revés de lo esperado en desktop, y
+       por debajo del piso de la escala. Se quita: hereda la base. */
   }
   .changeBtn:hover { border-color: rgba(var(--acc-rgb), 0.5); }
 }
