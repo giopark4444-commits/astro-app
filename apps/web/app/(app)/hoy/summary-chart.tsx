@@ -44,8 +44,11 @@ export function SummaryChart({
   // reusa ChartWheel tal cual (mismo SVG que /carta), solo envuelto en un
   // contenedor angosto: `.wheel` en carta.module.css ya es width:100% (relativo
   // a su padre), así que shrinkea solo con el ancho del wrapper, sin tocar esa
-  // clase. Oculto por default (un botón, no siempre visible).
-  const [showWheel, setShowWheel] = useState(false);
+  // clase. VISIBLE por default (Gio, tercera pasada: "quiero que se vea una
+  // version mini de la carta astral en la seccion de hoy, para que no se vea
+  // tan plano" — antes quedaba oculta tras un botón; el botón sigue ahí para
+  // quien prefiera ocultarla, pero ya no hace falta tocarlo para verla).
+  const [showWheel, setShowWheel] = useState(true);
 
   useEffect(() => {
     let alive = true;

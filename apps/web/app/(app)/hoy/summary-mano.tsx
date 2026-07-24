@@ -7,6 +7,7 @@ import { getVoiceMode } from "@/lib/voice-mode";
 import { resizePalmPhoto } from "../mano/resize-image";
 import { loadPalmReading, savePalmReading } from "../mano/storage";
 import { CameraCapture } from "../mano/camera-capture";
+import { PalmIllustration } from "./palm-illustration";
 import styles from "./summary.module.css";
 
 // Tarjeta-resumen de Lectura de mano para el dashboard (pedido de Gio: "una
@@ -108,6 +109,13 @@ export function SummaryMano({ profileId }: { profileId: string }) {
 
       {st.s === "idle" && (
         <>
+          {/* Silueta + líneas de la palma (Gio: "algo referente bien lindo") —
+              puramente decorativa, solo en el estado idle (antes de subir
+              foto); no compite con la cámara/lectura una vez hay algo real
+              que mostrar. */}
+          <div className={styles.palmArt}>
+            <PalmIllustration />
+          </div>
           <p className={styles.note}>{t("mano.privacySeal")}</p>
           {showCamera ? (
             <CameraCapture

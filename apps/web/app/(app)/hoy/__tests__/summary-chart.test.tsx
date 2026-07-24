@@ -88,26 +88,26 @@ describe("SummaryChart", () => {
     expect(link).toHaveAttribute("href", "/carta");
   });
 
-  it("pedido de Gio: un botón revela el mapa astral compacto (ChartWheel), oculto por default", async () => {
+  it("pedido de Gio (tercera pasada, 'no se vea tan plano'): el mapa astral compacto (ChartWheel) se ve DE UNA, sin tocar nada", async () => {
     renderSummary();
     await waitFor(() => expect(screen.getByText(/Sol en Leo/)).toBeInTheDocument());
 
-    // Oculto por default: sin SVG de la rueda todavía.
-    expect(screen.queryByRole("img", { name: /rueda/i })).not.toBeInTheDocument();
-    const toggle = screen.getByRole("button", { name: es.hoy.summaryChartWheelShow });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-
-    fireEvent.click(toggle);
-
+    // Visible por default: el SVG de la rueda ya está ahí sin haber clicado nada.
     expect(screen.getByRole("img", { name: /rueda/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: es.hoy.summaryChartWheelHide })).toHaveAttribute(
+    const toggle = screen.getByRole("button", { name: es.hoy.summaryChartWheelHide });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    // El toggle sigue ahí por si alguien prefiere ocultarla — no es un
+    // one-way reveal, solo cambió el estado inicial.
+    fireEvent.click(toggle);
+    expect(screen.queryByRole("img", { name: /rueda/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: es.hoy.summaryChartWheelShow })).toHaveAttribute(
       "aria-expanded",
-      "true",
+      "false",
     );
 
-    // Clic de nuevo: se oculta otra vez (toggle, no un one-way reveal).
-    fireEvent.click(screen.getByRole("button", { name: es.hoy.summaryChartWheelHide }));
-    expect(screen.queryByRole("img", { name: /rueda/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: es.hoy.summaryChartWheelShow }));
+    expect(screen.getByRole("img", { name: /rueda/i })).toBeInTheDocument();
   });
 
   it("un fetch fallido no rompe el dashboard: muestra un aviso suave y conserva el CTA", async () => {

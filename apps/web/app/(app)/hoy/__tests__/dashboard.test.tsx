@@ -120,7 +120,7 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
       screen.getByText(es.hoy.energyTitle), // "¿Cómo estás hoy?"
       screen.getByText(es.hoy.summaryChartTitle), // "Tu carta"
       screen.getByText(new RegExp(es.carta.weatherTitle)), // "☾ Tu clima de hoy" — AHORA dentro de la misma ventana que "Tu carta"
-      screen.getByText(es.hoy.summaryHoroscopeWesternTitle), // occidental activo por default
+      screen.getByText(es.hoy.summaryHoroscopeTitle), // título único, sin importar la pestaña activa
       screen.getByRole("tab", { name: es.hoy.summaryHoroscopeEasternTab }), // pestaña "Oriental" (siempre presente, fusionadas)
       screen.getByText(es.hoy.summaryNumerologyTitle),
       screen.getByText(es.hoy.summaryPillarsTitle),

@@ -83,6 +83,26 @@ describe("SummaryMano", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("pedido de Gio (tercera pasada, 'algo referente bien lindo'): la ilustración de la palma se ve en el estado idle", () => {
+    renderSummary();
+    // PalmIllustration es aria-hidden (puramente decorativa) — se confirma
+    // por el <svg> mismo, no por rol accesible.
+    const svg = document.querySelector("svg");
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("con una lectura ya guardada, la ilustración decorativa ya no se muestra (el estado idle quedó atrás)", () => {
+    localStorage.setItem(
+      `aluna.palm.${PROFILE_ID}`,
+      JSON.stringify({ sections: SECTIONS, hasNatal: true, fecha: "2026-07-20T12:00:00.000Z", manos: ["dominante"] }),
+    );
+    renderSummary();
+
+    expect(screen.getByText(SECTIONS.sintesis)).toBeInTheDocument();
+    expect(document.querySelector("svg")).not.toBeInTheDocument();
+  });
+
   it("ofrece Tomar foto (cámara) como opción primaria y Elegir foto como respaldo", () => {
     renderSummary();
     expect(screen.getByRole("button", { name: es.mano.cameraCta })).toBeInTheDocument();

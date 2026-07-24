@@ -20,12 +20,13 @@ import styles from "./summary.module.css";
 // llega como prop, ya NO vive local. Reusa la prosa YA compuesta por
 // horoscope-es.ts, sin reescribir contenido.
 export type HoroTrad = "occidental" | "oriental";
-type State = { s: "loading" } | { s: "error" } | { s: "ready"; prose: string[]; glyph: string };
+type State = { s: "loading" } | { s: "error" } | { s: "ready"; prose: string[] };
+/** Los DOS glifos (signo occidental + animal oriental) — independiente de
+ *  cuál pestaña esté activa (Gio, tercera pasada: "dependiendo mi signo
+ *  pondas el logo de mi zodiaco Y el de mi animal", los quiere juntos, no
+ *  uno reemplazando al otro según la pestaña). */
+type GlyphState = { s: "loading" } | { s: "error" } | { s: "ready"; western: string; eastern: string };
 
-const TITLE_KEY: Record<HoroTrad, string> = {
-  occidental: "hoy.summaryHoroscopeWesternTitle",
-  oriental: "hoy.summaryHoroscopeEasternTitle",
-};
 const TAB_KEY: Record<HoroTrad, string> = {
   occidental: "hoy.summaryHoroscopeWesternTab",
   oriental: "hoy.summaryHoroscopeEasternTab",
@@ -35,8 +36,9 @@ const HREF: Record<HoroTrad, string> = {
   oriental: "/horoscopo?trad=oriental",
 };
 
-// Símbolo para decorar la ventana (pedido de Gio: "en horoscopos en ambos usa
-// el simbolo para decorar algo la ventana") — mismo glifo/hanzi que ya usan
+// Símbolos para decorar la ventana (pedido de Gio: "en horoscopos en ambos usa
+// el simbolo para decorar algo la ventana"; segunda pasada: "el logo de mi
+// zodiaco y el de mi animal", los DOS juntos) — mismo glifo/hanzi que ya usan
 // western-view.tsx/eastern-view.tsx, derivado del payload (signo/animal REAL
 // del consultante), no un adorno genérico.
 const SIGN_GLYPH: Record<string, string> = Object.fromEntries(ZODIAC_SIGNS.map((s) => [s.key, s.glyph + TEXT_VS]));
@@ -58,6 +60,7 @@ export function SummaryHoroscope({
   const localeRaw = useLocale();
   const locale = localeRaw === "en" ? "en" : "es";
   const [state, setState] = useState<State>({ s: "loading" });
+  const [glyphs, setGlyphs] = useState<GlyphState>({ s: "loading" });
 
   useEffect(() => {
     let alive = true;
@@ -75,13 +78,11 @@ export function SummaryHoroscope({
         if (trad === "oriental") {
           const data = (await res.json()) as EasternPayload;
           const prose = composeEasternProse(locale, data).slice(0, 2);
-          const glyph = EARTHLY_BRANCHES[EASTERN_ANIMALS.indexOf(data.animal)]?.hanzi ?? "";
-          if (alive) setState({ s: "ready", prose, glyph });
+          if (alive) setState({ s: "ready", prose });
         } else {
           const data = (await res.json()) as WesternPayload;
           const prose = composeWesternProse(locale, data).slice(0, 2);
-          const glyph = SIGN_GLYPH[data.sign] ?? "";
-          if (alive) setState({ s: "ready", prose, glyph });
+          if (alive) setState({ s: "ready", prose });
         }
       } catch {
         if (alive) setState({ s: "error" });
@@ -92,15 +93,55 @@ export function SummaryHoroscope({
     };
   }, [profileId, trad, period, locale]);
 
+  // Los DOS glifos juntos (Gio: "el logo de mi zodiaco y el de mi animal"),
+  // SIN importar la pestaña activa — efecto aparte, solo depende del perfil
+  // (signo/animal no cambian con el periodo ni con qué pestaña mires) y del
+  // `period` actual (los endpoints lo piden, aunque el glifo en sí no varíe
+  // con él — pedir las DOS tradiciones en paralelo evita esperar a que la
+  // persona toque la pestaña contraria para verlas juntas).
+  useEffect(() => {
+    let alive = true;
+    setGlyphs({ s: "loading" });
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "utc";
+    void (async () => {
+      try {
+        const [westRes, eastRes] = await Promise.all([
+          fetch("/api/horoscope/western", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ profileId, period, tz }),
+          }),
+          fetch("/api/horoscope/eastern", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ profileId, period, tz }),
+          }),
+        ]);
+        if (!westRes.ok || !eastRes.ok) throw new Error("bad_status");
+        const westData = (await westRes.json()) as WesternPayload;
+        const eastData = (await eastRes.json()) as EasternPayload;
+        const western = SIGN_GLYPH[westData.sign] ?? "";
+        const eastern = EARTHLY_BRANCHES[EASTERN_ANIMALS.indexOf(eastData.animal)]?.hanzi ?? "";
+        if (alive) setGlyphs({ s: "ready", western, eastern });
+      } catch {
+        if (alive) setGlyphs({ s: "error" });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [profileId, period]);
+
   return (
     <section className={`card ${styles.card}`}>
       <h2 className={styles.title}>
-        {state.s === "ready" && state.glyph ? (
-          <span className={styles.horoGlyph} aria-hidden="true">
-            {state.glyph}{" "}
+        {glyphs.s === "ready" && (glyphs.western || glyphs.eastern) ? (
+          <span className={styles.horoGlyphs} aria-hidden="true">
+            {glyphs.western && <span className={styles.horoGlyph}>{glyphs.western}</span>}
+            {glyphs.eastern && <span className={styles.horoGlyph}>{glyphs.eastern}</span>}
           </span>
         ) : null}
-        {t(TITLE_KEY[trad])}
+        {t("hoy.summaryHoroscopeTitle")}
       </h2>
 
       <div className={styles.horoTabs} role="tablist" aria-label={t("hoy.summaryHoroscopeTabsAria")}>

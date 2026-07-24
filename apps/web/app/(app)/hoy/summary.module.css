@@ -198,6 +198,18 @@
   border: 0;
 }
 
+/* Silueta decorativa de la palma (Gio, tercera pasada: "una silueta de una
+   mano o una palma o unas lineas, algo referente bien lindo") — mismo dorado
+   tenue que el resto de los adornos de línea de la app, centrada arriba del
+   texto/botones del estado idle. */
+.palmArt {
+  display: flex;
+  justify-content: center;
+  color: var(--acc-text);
+  opacity: 0.8;
+  margin-bottom: var(--sp-1);
+}
+
 /* Cámara en vivo (primario) vs. archivo/galería (secundario), pedido de Gio:
    "que sea que active la cámara del celular o del compu". Layout de flujo
    normal, sin alturas fijas — crece con lo que sea que muestre CameraCapture. */
@@ -239,6 +251,14 @@
    (occidental/oriental) — mismo primitivo global seg__item que /horoscopo y
    /ajustes, sin reinventar el look. El selector de PERIODO es global (ver
    .periodSelector en hub.module.css, arriba de EnergyPanel), no vive acá. */
+/* Los DOS glifos juntos (Gio, tercera pasada: "el logo de mi zodiaco y el de
+   mi animal") — signo occidental + animal oriental, uno al lado del otro,
+   sin importar cuál pestaña esté activa. */
+.horoGlyphs {
+  display: inline-flex;
+  gap: var(--sp-1);
+  margin-right: var(--sp-1);
+}
 .horoGlyph {
   font-size: var(--text-xl);
   color: var(--acc-text);
