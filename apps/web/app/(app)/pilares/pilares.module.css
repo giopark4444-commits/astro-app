@@ -337,15 +337,13 @@
      anterior forzaba `height: calc(100vh - 100px)` repartido 55/45 con
      overflow:hidden — eso RECORTABA de verdad el panel de chat (composer
      parcialmente tapado), no solo lo hacía scrollear. Ya no hay altura
-     impuesta: crece con su contenido real.
-     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
-     izquierda"): quitado el sticky — aunque el alto ya no se estiraba
-     (align-items:start en .deskCols), el punto de "soltarse" para scrollear
-     con la página SÍ dependía de dónde terminaba .leftCol (misma fila de
-     grid). Sin sticky: fluye normal, cero relación con esa longitud. */
+     impuesta: crece con su contenido real. Sticky (Gio, 2026-07-24: "siempre
+     siguiendo el scroll... que la pueda ver siempre") — la técnica de la
+     izquierda scrollea libre dentro de .leftCol, mismo offset top:84px que
+     el resto de la serie. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
-    grid-column: 2; grid-row: 2;
+    grid-column: 2; grid-row: 2; position: sticky; top: 84px;
   }
   .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* envoltura del chat (LensChatPanel): sin flex-basis/overflow propios — crece

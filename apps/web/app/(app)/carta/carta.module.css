@@ -287,15 +287,13 @@
      RECORTABA de verdad el panel de chat (el composer quedaba parcialmente
      tapado) en vez de solo scrollear. Gio: "cada columna puede tener el tamaño
      que quiera" — .interpCol ya NO tiene una altura impuesta; crece con su
-     contenido (interpretación + chat completos, sin recorte).
-     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
-     izquierda, independiente en cuanto a su longitud"): quitado el `sticky`
-     que tenía — aunque el alto no se estiraba (align-items:start), el punto
-     en que se "soltaba" para scrollear con la página SÍ dependía de cuándo
-     terminaba .leftCol (misma fila de grid). Sin sticky: fluye normal, cero
-     relación con esa longitud. */
+     contenido (interpretación + chat completos, sin recorte). Sticky (Gio,
+     2026-07-24: "siempre siguiendo el scroll... que la pueda ver siempre") —
+     la técnica de la izquierda scrollea libre dentro de .leftCol, top: 84px
+     (header 66px + respiro, mismo valor que tenía la rueda). */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px;
   }
   .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* envoltura del chat (LensChatPanel): sin flex-basis/overflow propios — crece

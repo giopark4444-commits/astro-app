@@ -188,13 +188,12 @@
   /* Carril derecho: CORRECCIÓN (hallazgo de Gio en vivo, aplicado a toda la
      app): un max-height atado al viewport + overflow-y:auto TODAVÍA fuerza el
      panel a "caber en la ventana" — Gio: "cada columna puede tener el tamaño
-     que quiera". Sin altura impuesta: crece con su contenido real.
-     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
-     izquierda, independiente en cuanto a su longitud"): quitado el sticky —
-     el punto de "soltarse" para scrollear con la página dependía de dónde
-     terminaba el carril izquierdo (misma fila de grid). Sin sticky, fluye
-     normal, cero relación con esa longitud. */
+     que quiera". Sin altura impuesta: crece con su contenido real. Sticky
+     (Gio, 2026-07-24: "siempre siguiendo el scroll... que la pueda ver
+     siempre") — el izquierdo scrollea libre, mismo offset top:84px que el
+     resto de la serie. */
   .interpCol {
     display: block;
+    position: sticky; top: 84px;
   }
 }

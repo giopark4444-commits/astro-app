@@ -1,10 +1,13 @@
 // Task 7 (HD7): ensamblaje del dashboard maestro-detalle de /hoy.
-// La columna izquierda apila 8 secciones en orden fijo; la derecha (en
-// desktop) monta el chat de Aluna embebido. Ya NO es sticky (Gio, 2026-07-24:
-// "no se acople a donde termina la izquierda, independiente en cuanto a su
-// longitud") — fluye normal, cero relación con la longitud de la izquierda.
-// Se quitan el saludo "Hola" y la fila de lentes (redundantes con el TopNav)
-// y el viejo askCta.
+// La columna izquierda apila 8 secciones en orden fijo; la derecha (sticky en
+// desktop, top:84px) monta el chat de Aluna embebido. Gio, 2026-07-24, en dos
+// pasadas: primero pidió que las columnas no se "acoplaran" (el ALTO de la
+// derecha nunca se estira al de la izquierda — align-items:start, ya estaba
+// así); después aclaró que sí quiere que la derecha SIGA el scroll y se vea
+// siempre ("no se queden pegadas arriba sino que las pueda ver siempre") —
+// por eso sticky sigue puesto, alineado con el header + respiro, igual que
+// el resto de la serie. Se quitan el saludo "Hola" y la fila de lentes
+// (redundantes con el TopNav) y el viejo askCta.
 //
 // HubView es un client component: se renderiza directo (a diferencia de
 // perfil/page.tsx que es server y se testea sobre la fuente). El ocultado del
@@ -207,14 +210,9 @@ describe("hub.module.css — interpCol oculto en móvil, visible en desktop", ()
     expect(css).toMatch(/\.interpCol\s*\{[^}]*display:\s*none/);
   });
 
-  it("revela .interpCol dentro del @media desktop (min-width: 1080px)", () => {
+  it("revela .interpCol sticky dentro del @media desktop (min-width: 1080px) — Gio, 2026-07-24: 'siempre siguiendo el scroll... que la pueda ver siempre'", () => {
     const media = css.slice(css.indexOf("min-width: 1080px"));
     expect(media).toMatch(/\.interpCol\s*\{[^}]*display:\s*flex/); // columna: panel Interpretación + chat
-  });
-
-  it("NO es sticky (Gio, 2026-07-24: 'no se acople a donde termina la izquierda, independiente en cuanto a su longitud') — fluye normal, sin depender de cuándo termina .leftCol", () => {
-    const media = css.slice(css.indexOf("min-width: 1080px"));
-    const interpColBlock = /\.interpCol\s*\{([^}]*)\}/.exec(media)?.[1] ?? "";
-    expect(interpColBlock).not.toMatch(/position:\s*sticky/);
+    expect(media).toMatch(/\.interpCol\s*\{[^}]*position:\s*sticky/);
   });
 });

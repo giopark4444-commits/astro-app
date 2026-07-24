@@ -144,17 +144,18 @@
   }
   .leftCol { gap: var(--sp-5); }
 
-  /* Carril derecho: CORRECCIÓN (Gio, 2026-07-24 — cuarta vez que lo pide):
-     "no se acople a donde termina la izquierda, independiente en cuanto a su
-     longitud". Antes era sticky top:84px — aunque su ALTO ya no se estiraba
-     (align-items:start), el punto en que se "soltaba" para scrollear con la
-     página SÍ dependía de cuándo terminaba la izquierda (misma fila de grid,
-     alto de fila = el más alto de los dos). Sin sticky: fluye normal, como la
-     izquierda, cero relación con su longitud — la interpretación y el chat
-     crecen a lo que necesiten y scrollean con la página entera, sin quedar
-     "pegados" esperando a que la izquierda termine. */
+  /* Carril derecho: STICKY otra vez (Gio, 2026-07-24, aclarando el pedido
+     anterior): quiere que SIEMPRE siga el scroll y se pueda ver siempre, no
+     que desaparezca al scrollear más abajo que la izquierda. top: 84px =
+     header 66px + respiro, alineado con donde arranca el carril izquierdo
+     (el selector de periodo/la primera tarjeta) justo debajo del header. Lo
+     que SÍ sigue sin haber es una ALTURA impuesta (align-items:start en
+     .deskCols): el alto de interpretación+chat es su propio contenido, nunca
+     estirado ni recortado por la izquierda — solo el PUNTO donde se pega es
+     compartido con el resto de la serie. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px;
   }
 
   /* Casillas de la izquierda que se explican al click en el panel derecho:

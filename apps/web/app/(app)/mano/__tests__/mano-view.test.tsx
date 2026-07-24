@@ -338,10 +338,9 @@ describe("ManoView", () => {
 // Task 5: maestro-detalle 2 columnas en desktop (mismo patrón que numeros/
 // pilares/carta/horoscopo/tarot) — ManoView es un client component normal
 // (a diferencia de perfil/page.tsx), así que se verifica render-y-DOM real,
-// no la fuente. El CSS de layout en sí (grid/align-items:start; ya sin
-// sticky, ver mano.module.css) vive en @media y jsdom no lo aplica — eso
-// queda verificado por code review + paridad de valores con el resto de la
-// serie.
+// no la fuente. El CSS de layout en sí (grid/align-items:start/sticky, ver
+// mano.module.css) vive en @media y jsdom no lo aplica — eso queda
+// verificado por code review + paridad de valores con el resto de la serie.
 describe("ManoView — estructura maestro-detalle (deskCols > leftCol + interpCol)", () => {
   beforeEach(() => {
     localStorage.clear();

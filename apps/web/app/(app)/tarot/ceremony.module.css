@@ -351,13 +351,13 @@
     grid-column: 1 / -1;
   }
   .readingCards { grid-column: 1; }
-  /* CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la izquierda,
-     independiente en cuanto a su longitud"): quitado el sticky que tenía —
-     el punto de "soltarse" para scrollear con la página dependía de dónde
-     terminaba .readingCards (misma fila de grid). Fluye normal, cero
-     relación con esa longitud. */
+  /* Sticky (Gio, 2026-07-24: "siempre siguiendo el scroll... que la pueda ver
+     siempre") — las cartas de la izquierda scrollean libre, mismo offset
+     top:84px que el resto de la serie. */
   .readingSide {
     grid-column: 2;
+    position: sticky;
+    top: 84px;
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);

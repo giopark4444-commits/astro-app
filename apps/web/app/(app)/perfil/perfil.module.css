@@ -245,13 +245,12 @@
     min-width: 0;
   }
 
-  /* Panel derecho: CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina
-     la izquierda, independiente en cuanto a su longitud") — antes sticky
-     top:84px; aunque el alto no se estiraba (align-items:start), el punto de
-     "soltarse" para scrollear con la página SÍ dependía de dónde terminaba la
-     izquierda (misma fila de grid). Sin sticky: fluye normal, cero relación
-     con la longitud de la izquierda. */
-  .interpCol { display: block; }
+  /* Panel derecho: STICKY (Gio, 2026-07-24: "siempre siguiendo el scroll...
+     que la pueda ver siempre", alineado cerca del header/tope) — el perfil de
+     la izquierda scrollea libre, mismo offset top:84px que el resto de la
+     serie. Sin altura impuesta (align-items:start en .deskCols): el alto es
+     su propio contenido, nunca estirado por la izquierda. */
+  .interpCol { display: block; position: sticky; top: 84px; }
 
   /* Hero: foto + identidad en fila; los DATOS DE NACIMIENTO bajan a su propia
      fila a ancho completo (flex-basis 100%) — antes iban al lado y, en el

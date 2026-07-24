@@ -97,14 +97,12 @@
     gap: var(--sp-6);
     align-items: start;
   }
-  /* CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la izquierda,
-     independiente en cuanto a su longitud", regla para toda la app): quitado
-     el sticky que tenía — el punto de "soltarse" para scrollear con la
-     página dependía de dónde terminaba la columna de lectura (misma fila de
-     grid). Fluye normal ahora, como el resto de la serie (carta/pilares/
-     numeros/horoscopo/tarot/perfil/mano/hoy). */
+  /* Sticky (Gio, 2026-07-24: "siempre siguiendo el scroll... que la pueda ver
+     siempre", regla para toda la app) — mismo offset top:84px que el resto
+     de la serie (carta/pilares/numeros/horoscopo/tarot/perfil/mano/hoy). */
   .toc {
     display: flex; flex-direction: column; gap: var(--sp-4);
+    position: sticky; top: 84px;
   }
 
   /* capitular (spec §4.4, aprobado por Gio 2026-07-16): recurso editorial de la
