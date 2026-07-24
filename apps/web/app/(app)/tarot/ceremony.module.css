@@ -283,13 +283,21 @@
 }
 .revealKeywords { color: var(--soft); font-size: var(--text-2xs); margin: 0; }
 
-/* ---------- reading (Task 4: split técnica|prosa+chat en desktop) ---------- */
-/* .readingPane vive vacía en móvil: la clase se agrega al MISMO nodo que
-   .stepPane (que ya apila todo centrado) y solo cobra layout ≥1080. */
+/* ---------- reading ---------- */
+/* CORRECCIÓN (Gio, 2026-07-24 — "vuelve a unificarse en una sola columna
+   grande, eso esta prohibido... la lectura debe salir en la ventana de la
+   derecha directamente, el lado derecho es para lecturas e interpretaciones
+   y el chat"): el Task 4 original partía este paso en SU PROPIO split
+   técnica|prosa+chat (11fr/9fr) que solo cabía colapsando el .deskCols
+   exterior a una columna — exactamente la columna única que Gio prohíbe, y
+   dejaba el carril derecho REAL (interpretación + chat de toda la página)
+   sin montarse. Ahora .readingPane/.readingSide NUNCA parten nada, en
+   ningún ancho: apilan igual que en móvil (cartas → prosa → ReadingChat →
+   guardar/compartir/volver), todo DENTRO de .leftCol (más angosto, como
+   .leftCol de ManualEntry) — el carril derecho real siempre está montado
+   arriba en tarot-view.tsx, con su propia interpretación + LensChatPanel
+   (misma "leve redundancia" ya aceptada para el modo manual). */
 .readingPane {}
-/* .readingSide (prosa+ReadingChat+guardar/volver): en móvil no debe introducir
-   un nivel de caja nuevo — display:contents deja que sus hijos fluyan como si
-   fueran hijos directos de .stepPane, igual que antes del split. */
 .readingSide { display: contents; }
 .readingQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0; }
 .readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
@@ -332,36 +340,11 @@
      izquierdo del split (~688px) durante los pasos. El arco compacto (max-width
      560px) cabe de sobra; .fanScroll conserva overflow-x:auto por si acaso. */
 
+  /* Las cartas SÍ se ven bien en grilla de 3 (nada que ver con el split
+     exterior que se quitó arriba) — solo estilo de las cartas mismas. */
   .readingCards { display: grid; grid-template-columns: repeat(3, 1fr); }
   .readingCard { flex-direction: column; align-items: center; text-align: center; }
   .readingCardBody { align-items: center; text-align: center; }
-
-  /* ---- Task 4: split del paso reading — técnica (cartas) | prosa+chat ---- */
-  .readingPane {
-    display: grid;
-    grid-template-columns: 11fr 9fr;
-    gap: var(--sp-6);
-    align-items: start;
-    text-align: left;
-  }
-  /* Título y pregunta van arriba, a lo ancho (fila 1, y fila 2 si hay pregunta;
-     el auto-placement de grid resuelve el resto por columna explícita). */
-  .readingPane > .stepTitle,
-  .readingPane > .readingQuestion {
-    grid-column: 1 / -1;
-  }
-  .readingCards { grid-column: 1; }
-  /* Sticky (Gio, 2026-07-24: "siempre siguiendo el scroll... que la pueda ver
-     siempre") — las cartas de la izquierda scrollean libre, mismo offset
-     top:84px que el resto de la serie. */
-  .readingSide {
-    grid-column: 2;
-    position: sticky;
-    top: 84px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

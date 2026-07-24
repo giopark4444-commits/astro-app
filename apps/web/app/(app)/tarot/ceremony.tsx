@@ -94,7 +94,6 @@ export function Ceremony({
   spreadId,
   deckCtx = rwsCtx(""),
   onClose,
-  onStep,
 }: {
   /** Qué tirada anima esta ceremonia (T4): la ceremonia ya no está fija a
    *  "three" — el umbral (tarot-view, vía SpreadPicker) decide cuál. */
@@ -103,11 +102,6 @@ export function Ceremony({
    *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
   deckCtx?: DeckAssetCtx;
   onClose: () => void;
-  /** Reporta el paso actual al contenedor (tarot-view) para que decida el
-   *  layout desktop: durante los pasos (barajar/cortar/abanico/revelar) el
-   *  split de dos paneles se mantiene; solo el RESULTADO ("reading") ocupa el
-   *  ancho completo para su propio split cartas|prosa. */
-  onStep?: (step: Step) => void;
 }) {
   const t = useTranslations("tarot");
   const tShare = useTranslations("share");
@@ -137,12 +131,6 @@ export function Ceremony({
 
   // fan → reveal: cuando la última elegida terminó de "volar" a su slot.
   // Con reduced-motion el paso es inmediato; si no, se le da aire al vuelo.
-  // Reporta el paso al contenedor para el layout desktop (split vs ancho
-  // completo). onStep debe ser estable (setState del padre) para no re-disparar.
-  useEffect(() => {
-    onStep?.(state.step);
-  }, [state.step, onStep]);
-
   const fanComplete = state.step === "fan" && state.picked.length === spread.cardCount;
   useEffect(() => {
     if (!fanComplete) return;
@@ -395,9 +383,10 @@ export function Ceremony({
       )}
 
       {state.step === "reading" && (
-        // Task 4: split de layout ≥1080 — cartas a la izquierda, prosa+chat+
-        // guardar a la derecha (sticky). .stepPane sigue intacta para los
-        // demás pasos; .readingPane solo agrega el grid en este paso.
+        // CORRECCIÓN (Gio, 2026-07-24): ya NO parte en dos columnas propias —
+        // apila igual en cualquier ancho, dentro del .leftCol (más angosto)
+        // de tarot-view.tsx. El carril derecho REAL de la página (interpretación
+        // + chat) sigue montado siempre arriba; ver ceremony.module.css.
         <div className={`${styles.stepPane} ${styles.readingPane}`}>
           <h3 className={styles.stepTitle}>{t("readingTitle")}</h3>
           {state.question && (

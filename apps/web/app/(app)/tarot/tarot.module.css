@@ -161,9 +161,13 @@
     gap: var(--sp-6);
     align-items: start;
   }
-  /* Con una lectura en curso (ceremonia/manual) el panel se oculta (no se monta)
-     y la técnica ocupa todo el ancho — el split de la lectura llega en T4. */
-  .deskCols.readingActive { grid-template-columns: 1fr; }
+  /* CORRECCIÓN (Gio, 2026-07-24 — "eso esta prohibido en esta app"): antes,
+     con una lectura en curso (ceremonia digital en su resultado final), el
+     panel derecho se ocultaba y `.readingActive` colapsaba esto a 1fr — la
+     ceremonia partía su PROPIO split cartas|prosa dentro de esa columna
+     única. Ya no existe ese colapso: el marco de 2 columnas es SIEMPRE el
+     mismo, para cualquier estado de la ceremonia/lectura manual (ver
+     ceremony.module.css/manual-entry.module.css). */
   .leftCol { min-width: 0; } /* evita el desborde de la grilla */
 
   /* panel de interpretación: CORRECCIÓN (hallazgo de Gio en vivo): la versión

@@ -86,10 +86,6 @@ export function TarotView({ userId }: { userId: string }) {
   // elegida en el SpreadPicker (T4: la ceremonia soporta cualquier tirada, no
   // solo "three").
   const [ceremony, setCeremony] = useState<TarotSpreadId | null>(null);
-  // Paso actual de la ceremonia (lo reporta <Ceremony onStep>): durante los
-  // pasos el split de dos paneles se mantiene; solo el resultado ("reading")
-  // ocupa el ancho completo. null cuando no hay ceremonia.
-  const [ceremonyStep, setCeremonyStep] = useState<string | null>(null);
   // Modo manual (T3): independiente de la ceremonia digital — su propio rito.
   const [manualOpen, setManualOpen] = useState(false);
   const postedDailyRef = useRef(false);
@@ -234,18 +230,17 @@ export function TarotView({ userId }: { userId: string }) {
     [locale],
   );
 
-  // Ancho completo (colapsa el split y oculta el panel derecho) SOLO en el
-  // resultado de la CEREMONIA digital (su propio split cartas|prosa necesita
-  // el ancho completo). El modo manual (mazo físico) YA NO colapsa el marco
-  // (fix — pedido repetido de Gio: "siempre dividida, nunca una columna
-  // grande"): conserva las dos columnas de .deskCols — izquierda con el
-  // asistente manual, derecha (.interpCol) con la interpretación + el chat de
-  // Aluna. Su propio split interno (manualGrid) pasa a una sola columna en
-  // manual-entry.module.css para no anidar columnas dentro de columnas.
-  // Durante los pasos de la ceremonia (barajar/cortar/abanico/revelar) se
-  // conserva igual el split de dos paneles — pedido de Gio: la pantalla no
-  // debe desplegarse a ambos lados al tirar.
-  const readingResultFull = ceremony !== null && ceremonyStep === "reading";
+  // SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "vuelve a unificarse en una sola
+  // columna grande, eso esta prohibido... la lectura debe salir en la
+  // ventana de la derecha directamente"): el resultado de la ceremonia
+  // digital YA NO colapsa el marco a ancho completo — corría la misma
+  // suerte que el modo manual (mazo físico) ya tenía arreglada (fix anterior,
+  // pedido repetido de Gio: "siempre dividida, nunca una columna grande").
+  // .deskCols/.interpCol quedan SIEMPRE montados, sin condición: izquierda
+  // con el asistente/ceremonia (su paso "reading" ahora apila cartas+prosa+
+  // chat+guardar en vez de partirse en su propio split, ver
+  // ceremony.module.css), derecha (.interpCol) con la interpretación + el
+  // chat de Aluna de siempre.
 
   return (
     <main className={styles.wrap}>
@@ -260,7 +255,7 @@ export function TarotView({ userId }: { userId: string }) {
         </Link>
       </div>
 
-      <div className={`${styles.deskCols} ${readingResultFull ? styles.readingActive : ""}`}>
+      <div className={styles.deskCols}>
         <div className={styles.leftCol}>
           <section className={styles.dailySection}>
             <h2 className={styles.sectionTitle}>{t("dailyTitle")}</h2>
@@ -332,10 +327,8 @@ export function TarotView({ userId }: { userId: string }) {
             <Ceremony
               spreadId={ceremony}
               deckCtx={deckCtx}
-              onStep={setCeremonyStep}
               onClose={() => {
                 setCeremony(null);
-                setCeremonyStep(null);
                 // La lectura pudo guardarse durante la ceremonia: refresca el diario.
                 loadDiary();
               }}
@@ -397,38 +390,36 @@ export function TarotView({ userId }: { userId: string }) {
         </div>
 
         {/* Panel de interpretación (100% desktop): en móvil lo reemplaza el
-            bottom-sheet de abajo. Se oculta SOLO cuando la ceremonia digital
-            está en su resultado final (readingResultFull) — el modo manual ya
-            NO lo oculta: conserva el marco de 2 columnas (pedido de Gio) y
-            muestra la interpretación diaria/seleccionada + el chat de Aluna
-            mientras la lectura manual corre en la columna izquierda (leve
-            redundancia con el <ReadingChat> propio de la lectura manual,
-            aceptada — ver reporte). */}
-        {!readingResultFull && (
-          <div className={styles.interpCol}>
-            <div className={`card ${styles.interpPanel}`}>
-              <div className={styles.titleRow}>
-                <span className={styles.cardH2}>{t("interpTitle")}</span>
-                {/* Gate por revealed: compartir antes de voltear la carta del
-                    día spoilearía el arte/esencia que el panel aún oculta. */}
-                {revealed && (
-                  <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
-                )}
-              </div>
-              <TarotInterpretation
-                selected={selected ?? { kind: "daily" }}
-                revealed={revealed}
-                dailyCard={daily}
-                deckCtx={deckCtx}
-                profileName=""
-                onSelect={select}
-              />
+            bottom-sheet de abajo. CORRECCIÓN (Gio, 2026-07-24): este carril
+            YA NUNCA se oculta — ni la ceremonia digital en su resultado final
+            ni el modo manual lo ocultan (mismo criterio para ambos ahora).
+            Sigue mostrando la interpretación diaria/seleccionada + el chat de
+            Aluna mientras la ceremonia/lectura manual corre en la columna
+            izquierda (leve redundancia con el <ReadingChat> propio de la
+            ceremonia/lectura manual, aceptada — ver reporte). */}
+        <div className={styles.interpCol}>
+          <div className={`card ${styles.interpPanel}`}>
+            <div className={styles.titleRow}>
+              <span className={styles.cardH2}>{t("interpTitle")}</span>
+              {/* Gate por revealed: compartir antes de voltear la carta del
+                  día spoilearía el arte/esencia que el panel aún oculta. */}
+              {revealed && (
+                <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+              )}
             </div>
-            <div className={styles.chatCol}>
-              <LensChatPanel />
-            </div>
+            <TarotInterpretation
+              selected={selected ?? { kind: "daily" }}
+              revealed={revealed}
+              dailyCard={daily}
+              deckCtx={deckCtx}
+              profileName=""
+              onSelect={select}
+            />
           </div>
-        )}
+          <div className={styles.chatCol}>
+            <LensChatPanel />
+          </div>
+        </div>
       </div>
 
       <BottomSheet
