@@ -1,5 +1,18 @@
 /* R2: valores sobre la escala tokenizada (ver tokens.css) */
-.nav { position: sticky; bottom: 0; display: flex; justify-content: space-around;
+/* z-index: 30 (Gio, "los botones del menu de abajo se empiezan a pisar con
+   el texto... organizar la opacidad para que no se vean semi transparentes"):
+   el fondo YA es opaco (var(--bg), sin alpha) — el problema real no era
+   opacidad sino que este nav no tenía z-index (auto) mientras que CASI TODA
+   página de la app pone `position:relative; z-index:1` a su contenido para
+   levantarlo sobre su .sky decorativo — sin una prioridad explícita acá, ese
+   contenido (z-index:1) le ganaba el orden de pintado al nav (z-index:auto)
+   apenas una página tenía suficiente contenido para llegar a su franja,
+   dejando texto/barras del contenido pintando ENCIMA de un nav que en
+   realidad nunca fue transparente. Mismo z-index:30 que .header en
+   app-shell.module.css — son las dos piezas de chrome persistente de la
+   app, deben competir en el mismo nivel (por encima de CUALQUIER contenido
+   normal, por debajo de modales/bottom-sheets en z-index:60). */
+.nav { position: sticky; bottom: 0; z-index: 30; display: flex; justify-content: space-around;
   padding: var(--sp-3) var(--sp-2) var(--sp-4); /* 10: empate 8/12 → separación → mayor */ border-top: 1px solid var(--line); background: var(--bg); }
 .item { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); /* 5→4 */
   font-size: var(--text-2xs); /* 9→11 piso (labels del nav) */ color: var(--soft); font-weight: 600; }
