@@ -600,13 +600,15 @@ export type Database = {
         };
         Relationships: [];
       };
-      // Añadida a mano junto con supabase/migrations/0019_memoria.sql
+      // Añadida a mano junto con supabase/migrations/0019_memoria.sql; `pinned`
+      // sumada junto con 0023_chat_threads_pinned.sql (biblioteca de chat)
       // (regenerar desde la BD viva si se instala el CLI de Supabase).
       chat_threads: {
         Row: {
           created_at: string;
           id: string;
           last_message_at: string;
+          pinned: boolean;
           profile_id: string | null;
           surface: string;
           title: string | null;
@@ -617,6 +619,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           last_message_at?: string;
+          pinned?: boolean;
           profile_id?: string | null;
           surface: string;
           title?: string | null;
@@ -627,6 +630,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           last_message_at?: string;
+          pinned?: boolean;
           profile_id?: string | null;
           surface?: string;
           title?: string | null;
