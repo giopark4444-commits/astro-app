@@ -6,14 +6,15 @@ import { Icon } from "./icon";
 import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./bottom-nav.module.css";
 
-// Mismas 5 pestañas que TopNav (2026-07-22): Hoy · Astros · Tarot · Otras
-// lecturas · Perfil (Hoy de primero, gancho diario). `also` = rutas heredadas
-// que mantienen la pestaña activa.
+// Mismas 6 pestañas que TopNav (2026-07-24: +Chat): Hoy · Astros · Tarot ·
+// Otras lecturas · Chat · Perfil (Hoy de primero, gancho diario). `also` =
+// rutas heredadas que mantienen la pestaña activa.
 const ITEMS = [
   { href: "/hoy", icon: "sun", key: "hoy", also: [], soon: false },
   { href: "/astros", icon: "wheel", key: "astros", also: ["/carta", "/horoscopo"], soon: false },
   { href: "/tarot", icon: "cards", key: "tarot", also: [], soon: false },
   { href: "/otras-lecturas", icon: "grid3", key: "otrasLecturas", also: ["/numeros", "/pilares"], soon: false },
+  { href: "/chat", icon: "chat", key: "chat", also: [], soon: false },
   { href: "/perfil", icon: "person", key: "perfil", also: [], soon: false },
 ] as const;
 

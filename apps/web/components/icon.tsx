@@ -13,6 +13,9 @@ const PATHS: Record<string, React.ReactNode> = {
   aries: (<path d="M4 19.5C4 9.5 6 5.5 8.6 5.5c2.1 0 3.4 2.4 3.4 6 0-3.6 1.3-6 3.4-6C18 5.5 20 9.5 20 19.5" />),
   person: (<><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20.2c1.3-3.8 4.2-5.8 7.5-5.8s6.2 2 7.5 5.8" /></>),
   cards: (<><rect x="3.5" y="7" width="11" height="15" rx="2" transform="rotate(-12 9 14.5)" /><rect x="9.5" y="5.5" width="11" height="15" rx="2" /></>),
+  // Rubro "Chat" (2026-07-24): burbuja de conversación con cola — biblioteca
+  // de conversaciones entre "Otras lecturas" y "Perfil".
+  chat: (<><rect x="3" y="5" width="18" height="12" rx="4" /><path d="M8 17v3.2L12.4 17" /></>),
 };
 
 export function Icon({ name, size = 22 }: { name: keyof typeof PATHS; size?: number }) {

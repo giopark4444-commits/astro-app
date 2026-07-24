@@ -20,6 +20,7 @@
     "horoscopo": "Horóscopo",
     "astros": "Astros",
     "otrasLecturas": "Otras lecturas",
+    "chat": "Chat",
     "mainNav": "Navegación principal"
   },
   "astros": {
@@ -33,6 +34,29 @@
     "numerosTitle": "Números",
     "pilaresTitle": "Pilares",
     "manoTitle": "Mano"
+  },
+  "chatLibrary": {
+    "eyebrow": "CHAT",
+    "title": "Tus conversaciones",
+    "listTitle": "Conversaciones",
+    "empty": "Todavía no tienes conversaciones guardadas. Habla con Aluna desde Hoy, tu carta, una tirada de tarot o cualquier lectura — aparecerán aquí.",
+    "selectHint": "Toca una conversación para leerla aquí.",
+    "surfaceChat": "Preguntas",
+    "surfaceTarot": "Tarot",
+    "surfaceTimeline": "Línea de tiempo",
+    "pin": "Fijar",
+    "unpin": "Quitar de fijadas",
+    "pinnedBadge": "Fijada",
+    "delete": "Eliminar",
+    "deleteConfirmTitle": "¿Eliminar esta conversación?",
+    "deleteConfirmBody": "Se borra para siempre, junto con todos sus mensajes. No se puede deshacer.",
+    "deleteConfirmCta": "Sí, eliminar",
+    "deleteCancel": "Cancelar",
+    "loading": "Cargando…",
+    "loadError": "No pudimos cargar tus conversaciones.",
+    "retry": "Reintentar",
+    "noMessages": "Esta conversación no tiene mensajes.",
+    "detailError": "No pudimos abrir esta conversación."
   },
   "auth": {
     "login": "Entrar",

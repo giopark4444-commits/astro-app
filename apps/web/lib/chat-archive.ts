@@ -2,9 +2,12 @@
 // Archivo del hilo de chat (Fase 1B): persiste la conversación de las 3
 // superficies de chat (chat/tarot/timeline) en chat_threads/chat_messages
 // (migración 0019) para que Aluna RETOME la conversación entre sesiones en
-// vez de vivir solo en el navegador. Hoy solo el chat principal
-// (/preguntar + /api/chat) tiene UI de retomar — tarot/timeline solo
-// persisten (diferido: lista de hilos y "retomar" ahí también).
+// vez de vivir solo en el navegador. El chat principal (/preguntar +
+// /api/chat) tiene UI de retomar; tarot/timeline solo persistían — la
+// "lista de hilos" diferida de este comentario es exactamente la biblioteca
+// de conversaciones de abajo (listThreads/setThreadPinned/deleteThread/
+// fetchThreadMessages, Gio 2026-07-24: "un historial de todas las
+// conversaciones... sin importar de qué sección venga").
 //
 // Mismas reglas de la casa que memories.ts/memory-entities.ts: todo lo que
 // toca la BD es best-effort (try/catch total) — un fallo aquí jamás rompe el
@@ -156,6 +159,172 @@ export async function fetchRecentThread(
 
     const chronological = ((messages ?? []) as ArchivedMessage[]).slice().reverse();
     return { threadId, messages: chronological };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Biblioteca de conversaciones (Gio, 2026-07-24): nueva sección /chat entre
+// "Otras lecturas" y "Perfil" — TODOS los hilos del usuario, de cualquier
+// superficie, en una sola lista con pin + eliminar. Reusa exactamente el
+// mismo esquema de arriba (0019 + `pinned` de 0023); nada nuevo que
+// sincronizar entre superficies.
+
+const PREVIEW_LENGTH = 140;
+
+export interface ThreadSummary {
+  id: string;
+  surface: ChatSurface;
+  profileId: string | null;
+  pinned: boolean;
+  createdAt: string;
+  lastMessageAt: string;
+  /** Vista previa: el primer mensaje del USUARIO en el hilo, recortado. Se
+   *  deriva de contenido real en vez de `chat_threads.title` porque esa
+   *  columna nunca se ha poblado en la práctica (ensureThread no la setea:
+   *  ver arriba) — así la biblioteca funciona para TODOS los hilos ya
+   *  existentes, no solo los que se creen de ahora en adelante. */
+  preview: string;
+}
+
+/**
+ * Todos los hilos del usuario (chat/tarot/timeline), fijados primero y
+ * luego por actividad reciente (mismo orden que el índice de 0023). Una
+ * sola query extra para las vistas previas (NO N+1): se piden los mensajes
+ * de usuario de TODOS los hilos listados en un solo `.in(...)`, ya en orden
+ * cronológico, y se queda con el primero visto por hilo. Best-effort total:
+ * cualquier fallo devuelve `[]` — la biblioteca simplemente se ve vacía en
+ * vez de romper la página.
+ */
+export async function listThreads(supabase: AlunaSupabaseClient, userId: string): Promise<ThreadSummary[]> {
+  try {
+    const { data: threads } = await supabase
+      .from("chat_threads")
+      .select("id, surface, profile_id, pinned, created_at, last_message_at")
+      .eq("user_id", userId)
+      .order("pinned", { ascending: false })
+      .order("last_message_at", { ascending: false });
+    const rows = (threads ?? []) as Array<{
+      id: string;
+      surface: string;
+      profile_id: string | null;
+      pinned: boolean;
+      created_at: string;
+      last_message_at: string;
+    }>;
+    if (rows.length === 0) return [];
+
+    const ids = rows.map((r) => r.id);
+    const { data: firstMessages } = await supabase
+      .from("chat_messages")
+      .select("thread_id, content, created_at")
+      .in("thread_id", ids)
+      .eq("role", "user")
+      .order("created_at", { ascending: true });
+    const previewByThread = new Map<string, string>();
+    for (const m of (firstMessages ?? []) as Array<{ thread_id: string; content: string }>) {
+      if (!previewByThread.has(m.thread_id)) previewByThread.set(m.thread_id, m.content);
+    }
+
+    return rows.map((r) => ({
+      id: r.id,
+      surface: (r.surface as ChatSurface) ?? "chat",
+      profileId: r.profile_id,
+      pinned: r.pinned,
+      createdAt: r.created_at,
+      lastMessageAt: r.last_message_at,
+      preview: (previewByThread.get(r.id) ?? "").slice(0, PREVIEW_LENGTH),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fija/desfija un hilo: el usuario elige qué conversación quiere siempre
+ * arriba de su biblioteca. Defensivo por dueño (`.eq("user_id", …)`, defensa
+ * en profundidad además de RLS) + best-effort: cualquier fallo devuelve
+ * `false` sin lanzar.
+ */
+export async function setThreadPinned(
+  supabase: AlunaSupabaseClient,
+  userId: string,
+  threadId: string,
+  pinned: boolean,
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("chat_threads")
+      .update({ pinned, updated_at: new Date().toISOString() })
+      .eq("id", threadId)
+      .eq("user_id", userId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Elimina un hilo; por FK `on delete cascade` (0019) se lleva todos sus
+ * mensajes con él. Defensivo por dueño + best-effort, mismo criterio que el
+ * resto del archivo.
+ */
+export async function deleteThread(supabase: AlunaSupabaseClient, userId: string, threadId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("chat_threads").delete().eq("id", threadId).eq("user_id", userId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Tope de mensajes de la vista de DETALLE de un hilo (biblioteca de chat) —
+ *  más generoso que RECENT_THREAD_MESSAGE_CAP porque acá la intención es
+ *  LEER la conversación completa archivada, no solo retomarla. */
+export const THREAD_DETAIL_MESSAGE_CAP = 200;
+
+export interface ThreadDetail {
+  id: string;
+  surface: ChatSurface;
+  pinned: boolean;
+  messages: ArchivedMessage[];
+}
+
+/**
+ * El detalle completo de UN hilo puntual, de cualquier superficie — a
+ * diferencia de fetchRecentThread (el MÁS reciente de una superficie), este
+ * trae exactamente el hilo que la persona eligió en la lista de la
+ * biblioteca. `null` si no existe / no es del usuario (RLS ya lo impide; el
+ * `.eq("user_id", …)` es defensa en profundidad) o si cualquier paso falla
+ * (best-effort). Misma técnica de "pedir la COLA y revertir" que
+ * fetchRecentThread: un hilo viejo y largo no crece sin freno en cada carga.
+ */
+export async function fetchThreadMessages(
+  supabase: AlunaSupabaseClient,
+  userId: string,
+  threadId: string,
+): Promise<ThreadDetail | null> {
+  try {
+    const { data: thread } = await supabase
+      .from("chat_threads")
+      .select("id, surface, pinned")
+      .eq("id", threadId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!thread) return null;
+    const t = thread as { id: string; surface: string; pinned: boolean };
+
+    const { data: messages } = await supabase
+      .from("chat_messages")
+      .select("id, role, content, created_at")
+      .eq("thread_id", threadId)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(THREAD_DETAIL_MESSAGE_CAP);
+
+    const chronological = ((messages ?? []) as ArchivedMessage[]).slice().reverse();
+    return { id: t.id, surface: (t.surface as ChatSurface) ?? "chat", pinned: t.pinned, messages: chronological };
   } catch {
     return null;
   }

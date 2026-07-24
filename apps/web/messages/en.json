@@ -20,6 +20,7 @@
     "horoscopo": "Horoscope",
     "astros": "Astros",
     "otrasLecturas": "Other readings",
+    "chat": "Chat",
     "mainNav": "Main navigation"
   },
   "astros": {
@@ -33,6 +34,29 @@
     "numerosTitle": "Numbers",
     "pilaresTitle": "Pillars",
     "manoTitle": "Palm"
+  },
+  "chatLibrary": {
+    "eyebrow": "CHAT",
+    "title": "Your conversations",
+    "listTitle": "Conversations",
+    "empty": "You don't have any saved conversations yet. Talk to Aluna from Today, your chart, a tarot spread, or any reading — they'll show up here.",
+    "selectHint": "Tap a conversation to read it here.",
+    "surfaceChat": "Questions",
+    "surfaceTarot": "Tarot",
+    "surfaceTimeline": "Timeline",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinnedBadge": "Pinned",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete this conversation?",
+    "deleteConfirmBody": "This deletes it forever, along with all its messages. This can't be undone.",
+    "deleteConfirmCta": "Yes, delete",
+    "deleteCancel": "Cancel",
+    "loading": "Loading…",
+    "loadError": "We couldn't load your conversations.",
+    "retry": "Retry",
+    "noMessages": "This conversation has no messages.",
+    "detailError": "We couldn't open this conversation."
   },
   "auth": {
     "login": "Log in",

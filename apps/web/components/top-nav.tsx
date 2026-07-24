@@ -6,16 +6,20 @@ import { Icon } from "./icon";
 import { reorderByNavOrder, type NavKey } from "@/lib/admin/nav-order";
 import styles from "./top-nav.module.css";
 
-// Las 5 pestañas de la nav principal (2026-07-22). Hoy va de primero (gancho
-// diario). Astros absorbe Carta astral + Horóscopos (occ/oriental); "Otras
-// lecturas" absorbe Números + Pilares + Mano. `also` = rutas heredadas que
-// dejan la pestaña activa (p.ej. Astros sigue activo en /carta y /horoscopo).
-// Perfil no está en NAV_KEYS a propósito: reorderByNavOrder lo deja al final.
+// Las 6 pestañas de la nav principal (2026-07-24: +Chat). Hoy va de primero
+// (gancho diario). Astros absorbe Carta astral + Horóscopos (occ/oriental);
+// "Otras lecturas" absorbe Números + Pilares + Mano. `also` = rutas
+// heredadas que dejan la pestaña activa (p.ej. Astros sigue activo en
+// /carta y /horoscopo). Ni Chat ni Perfil están en NAV_KEYS a propósito:
+// reorderByNavOrder los deja SIEMPRE al final, en este mismo orden relativo
+// (Chat justo antes de Perfil, pedido explícito de Gio) — el admin puede
+// reordenar las primeras 4, pero Chat/Perfil son anclas fijas.
 const ITEMS = [
   { href: "/hoy", icon: "sun", key: "hoy", also: [], soon: false },
   { href: "/astros", icon: "wheel", key: "astros", also: ["/carta", "/horoscopo"], soon: false },
   { href: "/tarot", icon: "cards", key: "tarot", also: [], soon: false },
   { href: "/otras-lecturas", icon: "grid3", key: "otrasLecturas", also: ["/numeros", "/pilares"], soon: false },
+  { href: "/chat", icon: "chat", key: "chat", also: [], soon: false },
   { href: "/perfil", icon: "person", key: "perfil", also: [], soon: false },
 ] as const;
 

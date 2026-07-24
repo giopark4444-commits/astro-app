@@ -1,0 +1,103 @@
+/* Biblioteca de conversaciones (Gio, 2026-07-24). Maestro-detalle: mismos
+   valores de escala/espaciado/split que carta/tarot/numeros/pilares/
+   horoscopo (ver docs/redesign/R3-sistema.md) — nada nuevo que inventar. */
+.wrap { position: relative; padding: var(--sp-6) var(--sp-5) 96px; } /* 96px = alto del bottom-nav fijo */
+
+.head { margin-bottom: var(--sp-6); }
+.eyebrow { font-size: var(--text-2xs); letter-spacing: 2px; text-transform: uppercase; color: var(--acc-text); margin: 0 0 var(--sp-1); }
+.title { font-family: var(--font-display); font-size: clamp(var(--text-3xl), 8vw, var(--display-sm)); font-style: italic; color: var(--ink); margin: 0; line-height: 1.05; }
+
+.sectionTitle { font-size: var(--text-lg); font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-3); }
+
+/* Maestro-detalle: en móvil, bloque plano apilado; el split 11fr/9fr +
+   sticky solo aparece en desktop (@media abajo). */
+.deskCols { display: block; }
+.leftCol { display: block; }
+.interpCol { display: block; margin-top: var(--sp-6); }
+
+.stateMsg { color: var(--soft); font-size: var(--text-sm); margin: 0; }
+.stateCard { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-2); }
+.retryBtn {
+  border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--acc-text);
+  font-family: inherit; font-size: var(--text-xs); font-weight: 600; cursor: pointer; padding: var(--sp-1) var(--sp-4);
+}
+.retryBtn:hover { border-color: var(--acc); }
+
+/* ---------- lista de hilos (izquierda) ---------- */
+.list { display: flex; flex-direction: column; gap: var(--sp-3); list-style: none; margin: 0; padding: 0; }
+.row { display: flex; align-items: stretch; gap: var(--sp-2); padding: var(--sp-3) var(--sp-3); }
+.rowOn { border-color: rgba(var(--acc-rgb), 0.55); box-shadow: var(--glow-soft); }
+.rowMain {
+  flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: var(--sp-1); cursor: pointer; font: inherit; color: inherit;
+}
+.rowTop { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.surfaceTag {
+  font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acc-text);
+}
+.rowDate { font-size: var(--text-2xs); color: var(--soft); white-space: nowrap; }
+.preview {
+  margin: 0; color: var(--ink); font-size: var(--text-sm); line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.rowActions { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-1); }
+.pinBtn, .deleteBtn {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--soft); font-size: var(--text-sm);
+  line-height: 1; cursor: pointer; padding: 0;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.pinBtn:hover, .deleteBtn:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), 0.45); }
+.pinBtn:disabled, .deleteBtn:disabled { opacity: 0.4; cursor: default; }
+.pinBtnOn { color: var(--acc-text); border-color: rgba(var(--acc-rgb), 0.5); }
+
+/* Confirmación de eliminar (biblioteca ⇒ más fricción que un borrado
+   suelto de una nota): reemplaza el lugar de la fila, no un modal aparte. */
+.confirmBar { margin-top: var(--sp-2); display: flex; flex-direction: column; gap: var(--sp-2); }
+.confirmTitle { margin: 0; font-weight: 600; color: var(--ink); font-size: var(--text-sm); }
+.confirmBody { margin: 0; color: var(--soft); font-size: var(--text-xs); }
+.confirmActions { display: flex; gap: var(--sp-2); }
+.confirmCancel, .confirmCta {
+  border-radius: 999px; font-family: inherit; font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+  padding: var(--sp-1) var(--sp-4);
+}
+.confirmCancel { border: 1px solid var(--line); background: transparent; color: var(--soft); }
+.confirmCancel:hover { color: var(--ink); }
+.confirmCta { border: 1px solid var(--tone-caution); background: transparent; color: var(--tone-caution); }
+.confirmCta:hover { box-shadow: 0 0 14px rgba(var(--tone-caution-rgb), 0.3); }
+.confirmCta:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- panel de detalle (derecha) ---------- */
+.detailPanel { display: flex; flex-direction: column; gap: var(--sp-3); min-height: 160px; }
+.detailHead { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.pinnedBadge {
+  font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--acc-text); border: 1px solid rgba(var(--acc-rgb), 0.4); border-radius: 999px; padding: 2px 10px;
+}
+
+/* Burbujas — mismo lenguaje visual que preguntar/chat.module.css y
+   tarot/reading-chat.module.css, redeclarado local (cada módulo tiene las
+   suyas, mismo criterio en toda la app). */
+.thread { display: flex; flex-direction: column; gap: var(--sp-3); }
+.msg { max-width: 92%; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); font-size: var(--text-sm); line-height: 1.5; white-space: pre-wrap; }
+.user { align-self: flex-end; background: rgba(var(--acc-rgb), 0.14); color: var(--ink); border: 1px solid rgba(var(--acc-rgb), 0.3); }
+.aluna { align-self: flex-start; background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+
+@media (min-width: 1080px) { /* bp desktop R4a */
+  .wrap { padding-bottom: var(--sp-7); }
+
+  /* Split maestro-detalle: lista a la izquierda (11fr) + panel sticky a la
+     derecha (9fr). Mismos valores que numeros/carta/pilares/tarot. */
+  .deskCols {
+    display: grid;
+    grid-template-columns: 11fr 9fr;
+    gap: var(--sp-6);
+    align-items: start;
+  }
+  .leftCol { min-width: 0; } /* evita el desborde de la grilla */
+
+  /* Sticky (mismo offset top:84px que el resto de la serie): la lista
+     scrollea libre dentro de .leftCol mientras el detalle elegido se queda
+     siempre a la vista. */
+  .interpCol { margin-top: 0; position: sticky; top: 84px; }
+}

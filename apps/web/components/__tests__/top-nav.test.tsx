@@ -19,13 +19,14 @@ function renderNav(path: string) {
 }
 
 describe("TopNav", () => {
-  it("renderiza las 5 pestañas: Hoy · Astros · Tarot · Otras lecturas · Perfil", () => {
+  it("renderiza las 6 pestañas: Hoy · Astros · Tarot · Otras lecturas · Chat · Perfil", () => {
     renderNav("/hoy");
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.hoy, es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.hoy, es.nav.astros, es.nav.tarot, es.nav.otrasLecturas, es.nav.chat, es.nav.perfil]);
     expect(screen.getByRole("link", { name: new RegExp(es.nav.hoy) })).toHaveAttribute("href", "/hoy");
     expect(screen.getByRole("link", { name: new RegExp(es.nav.astros) })).toHaveAttribute("href", "/astros");
     expect(screen.getByRole("link", { name: new RegExp(es.nav.otrasLecturas) })).toHaveAttribute("href", "/otras-lecturas");
+    expect(screen.getByRole("link", { name: new RegExp(es.nav.chat) })).toHaveAttribute("href", "/chat");
     // Carta, Horóscopo, Números y Pilares quedaron absorbidos (sin pestaña suelta)
     for (const gone of [es.nav.carta, es.nav.horoscopo, es.nav.numeros, es.nav.pilares]) {
       expect(screen.queryByRole("link", { name: gone })).toBeNull();
@@ -63,7 +64,16 @@ describe("TopNav", () => {
     expect(perfil.getAttribute("data-on")).toBe("true");
   });
 
-  it("respeta un `order` custom (panel /admin): Perfil siempre al final", () => {
+  it("Chat apunta a /chat, se activa en /chat, y va justo antes de Perfil", () => {
+    renderNav("/chat");
+    const chat = screen.getByText(es.nav.chat).closest("a")!;
+    expect(chat.getAttribute("href")).toBe("/chat");
+    expect(chat.getAttribute("data-on")).toBe("true");
+    const labels = screen.getAllByRole("link").map((a) => a.textContent);
+    expect(labels.indexOf(es.nav.chat)).toBe(labels.indexOf(es.nav.perfil) - 1);
+  });
+
+  it("respeta un `order` custom (panel /admin): Chat y Perfil siempre al final, en ese orden", () => {
     currentPath = "/hoy";
     render(
       <NextIntlClientProvider locale="es" messages={es}>
@@ -71,6 +81,6 @@ describe("TopNav", () => {
       </NextIntlClientProvider>,
     );
     const labels = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(labels).toEqual([es.nav.tarot, es.nav.otrasLecturas, es.nav.hoy, es.nav.astros, es.nav.perfil]);
+    expect(labels).toEqual([es.nav.tarot, es.nav.otrasLecturas, es.nav.hoy, es.nav.astros, es.nav.chat, es.nav.perfil]);
   });
 });
