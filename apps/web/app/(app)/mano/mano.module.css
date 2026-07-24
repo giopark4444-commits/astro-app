@@ -185,16 +185,16 @@
   }
   .leftCol { display: flex; flex-direction: column; gap: var(--sp-5); }
 
-  /* Carril derecho: lo único sticky — el izquierdo scrollea libre. top: 84px =
-     header 66px + respiro (mismo offset que el resto de la serie).
-     CORRECCIÓN (hallazgo de Gio en vivo, aplicado a toda la app): un
-     max-height atado al viewport + overflow-y:auto TODAVÍA fuerza el panel a
-     "caber en la ventana" — Gio: "cada columna puede tener el tamaño que
-     quiera". Sin altura impuesta: crece con su contenido real (explicación
-     corta o lectura larga) y sigue sticky mientras quepa; si no, la página
-     scrollea normal, como el carril izquierdo. */
+  /* Carril derecho: CORRECCIÓN (hallazgo de Gio en vivo, aplicado a toda la
+     app): un max-height atado al viewport + overflow-y:auto TODAVÍA fuerza el
+     panel a "caber en la ventana" — Gio: "cada columna puede tener el tamaño
+     que quiera". Sin altura impuesta: crece con su contenido real.
+     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
+     izquierda, independiente en cuanto a su longitud"): quitado el sticky —
+     el punto de "soltarse" para scrollear con la página dependía de dónde
+     terminaba el carril izquierdo (misma fila de grid). Sin sticky, fluye
+     normal, cero relación con esa longitud. */
   .interpCol {
     display: block;
-    position: sticky; top: 84px;
   }
 }

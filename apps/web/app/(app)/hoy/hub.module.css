@@ -139,23 +139,22 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--sp-6);
-    align-items: start; /* el carril derecho no se estira → sticky funciona */
+    align-items: start; /* el carril derecho no se estira al de la izquierda */
     position: relative; z-index: 1;
   }
   .leftCol { gap: var(--sp-5); }
 
-  /* Carril derecho: lo único sticky — la izquierda scrollea libre. top: 84px =
-     header 66px + respiro (mismo offset que carta/pilares/numeros/perfil).
-     Columna flex: panel de Interpretación arriba (alto natural, SIN tope ni
-     overflow propio, ver interpretation-panel.module.css) + chat abajo — ninguno
-     estira al otro y ninguno scrollea por su cuenta: la página scrollea entera,
-     un solo scroll (regla Gio 2026-07-23, reforzada tras detectar scroll partido
-     entre columnas). */
+  /* Carril derecho: CORRECCIÓN (Gio, 2026-07-24 — cuarta vez que lo pide):
+     "no se acople a donde termina la izquierda, independiente en cuanto a su
+     longitud". Antes era sticky top:84px — aunque su ALTO ya no se estiraba
+     (align-items:start), el punto en que se "soltaba" para scrollear con la
+     página SÍ dependía de cuándo terminaba la izquierda (misma fila de grid,
+     alto de fila = el más alto de los dos). Sin sticky: fluye normal, como la
+     izquierda, cero relación con su longitud — la interpretación y el chat
+     crecen a lo que necesiten y scrollean con la página entera, sin quedar
+     "pegados" esperando a que la izquierda termine. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
-    position: sticky; top: 84px;
-    /* sin altura impuesta: interpretación + chat completos, cada uno con su
-       tamaño real; sticky mientras quepa (mismo criterio que carta). */
   }
 
   /* Casillas de la izquierda que se explican al click en el panel derecho:

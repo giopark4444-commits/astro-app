@@ -280,21 +280,22 @@
   }
   .techCard .paneOn { display: block; }
 
-  /* panel de interpretación: ahora es lo único sticky — la técnica de la
-     izquierda scrollea libre dentro de .leftCol. CORRECCIÓN (hallazgo de Gio en
-     vivo, no solo en código): la versión anterior forzaba .interpCol a
+  /* panel de interpretación: CORRECCIÓN (hallazgo de Gio en vivo, no solo en
+     código): la versión anterior forzaba .interpCol a
      `height: calc(100vh - 100px)` y repartía ese alto fijo entre interpretación
      (55%) y chat (45%) — con overflow:hidden en .chatCol/.lensChatPanel, eso
      RECORTABA de verdad el panel de chat (el composer quedaba parcialmente
      tapado) en vez de solo scrollear. Gio: "cada columna puede tener el tamaño
      que quiera" — .interpCol ya NO tiene una altura impuesta; crece con su
-     contenido (interpretación + chat completos, sin recorte) y sigue `sticky`
-     mientras quepa — si el contenido supera el viewport, deja de "pegarse" y
-     la página scrollea normal, que es el comportamiento esperado de sticky, no
-     un bug. */
+     contenido (interpretación + chat completos, sin recorte).
+     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
+     izquierda, independiente en cuanto a su longitud"): quitado el `sticky`
+     que tenía — aunque el alto no se estiraba (align-items:start), el punto
+     en que se "soltaba" para scrollear con la página SÍ dependía de cuándo
+     terminaba .leftCol (misma fila de grid). Sin sticky: fluye normal, cero
+     relación con esa longitud. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
-    position: sticky; top: 84px; /* header 66px + respiro (mismo valor que tenía la rueda) */
   }
   .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* envoltura del chat (LensChatPanel): sin flex-basis/overflow propios — crece

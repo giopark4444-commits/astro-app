@@ -166,15 +166,18 @@
   .deskCols.readingActive { grid-template-columns: 1fr; }
   .leftCol { min-width: 0; } /* evita el desborde de la grilla */
 
-  /* panel de interpretación: lo único sticky — la técnica scrollea libre dentro
-     de .leftCol (mismo mecanismo que la serie). CORRECCIÓN (hallazgo de Gio en
-     vivo): la versión anterior forzaba `height: calc(100vh - 100px)` repartido
-     55/45 con overflow:hidden — eso RECORTABA de verdad el panel de chat
-     (composer parcialmente tapado), no solo lo hacía scrollear. Ya no hay
-     altura impuesta: crece con su contenido real y sigue sticky mientras quepa. */
+  /* panel de interpretación: CORRECCIÓN (hallazgo de Gio en vivo): la versión
+     anterior forzaba `height: calc(100vh - 100px)` repartido 55/45 con
+     overflow:hidden — eso RECORTABA de verdad el panel de chat (composer
+     parcialmente tapado), no solo lo hacía scrollear. Ya no hay altura
+     impuesta: crece con su contenido real.
+     SEGUNDA CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina la
+     izquierda, independiente en cuanto a su longitud"): quitado el sticky —
+     el punto de "soltarse" para scrollear con la página dependía de dónde
+     terminaba .leftCol (misma fila de grid). Fluye normal, cero relación con
+     esa longitud. */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
-    position: sticky; top: 84px; /* header 66px + respiro */
   }
   .interpPanel { display: flex; flex-direction: column; gap: var(--sp-3); }
   /* envoltura del chat (LensChatPanel): sin flex-basis/overflow propios — crece

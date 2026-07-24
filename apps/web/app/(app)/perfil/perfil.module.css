@@ -245,10 +245,13 @@
     min-width: 0;
   }
 
-  /* Panel derecho: lo único sticky — el perfil de la izquierda scrollea libre
-     (mismo mecanismo/offset que carta/pilares/numeros, top: 84px = header 66px
-     + respiro). */
-  .interpCol { display: block; position: sticky; top: 84px; }
+  /* Panel derecho: CORRECCIÓN (Gio, 2026-07-24 — "no se acople a donde termina
+     la izquierda, independiente en cuanto a su longitud") — antes sticky
+     top:84px; aunque el alto no se estiraba (align-items:start), el punto de
+     "soltarse" para scrollear con la página SÍ dependía de dónde terminaba la
+     izquierda (misma fila de grid). Sin sticky: fluye normal, cero relación
+     con la longitud de la izquierda. */
+  .interpCol { display: block; }
 
   /* Hero: foto + identidad en fila; los DATOS DE NACIMIENTO bajan a su propia
      fila a ancho completo (flex-basis 100%) — antes iban al lado y, en el
