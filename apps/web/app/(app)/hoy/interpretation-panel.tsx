@@ -19,6 +19,8 @@ import type { VoiceMode } from "@/lib/reading/voices";
 import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
 import { InterpretationModePicker } from "@/components/interpretation-mode-picker";
 import { SUGGESTED_QUESTION } from "./area-reading-sheet";
+import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
+import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import styles from "./interpretation-panel.module.css";
 
 const PLANET_GLYPH: Record<string, string> = Object.fromEntries(
@@ -31,6 +33,12 @@ const PLANET_GLYPH: Record<string, string> = Object.fromEntries(
 // messages/*.json. "clima" se conserva en el tipo por compatibilidad — desde
 // la fusión con "carta" en una sola ventana (hub-view.tsx) ya no se dispara
 // desde ningún click, pero su copy curada queda sin usar en vez de borrarla.
+// "tarot" corre la MISMA suerte desde 2026-07-24: Gio rechazó su copy curada
+// genérica ("es como decirme el agua moja") — el click en la baraja de hoy
+// ahora dispara `{kind:"tarotFan"}` (abajo), con la lectura REAL de cada
+// carta revelada. `interp.tarot.title` SÍ sigue viva (encabezado del bloque
+// nuevo); `interp.tarot.body` queda sin usar, preservada por el mismo
+// criterio que `clima`.
 export type StaticBox =
   | "proactiva"
   | "carta"
@@ -42,10 +50,26 @@ export type StaticBox =
   | "tarot"
   | "mano";
 
+// Una carta revelada del abanico "La baraja de hoy" (tarot-fan.tsx) — `position`
+// es el índice en el abanico (0..8), no un dato de contenido; sirve de `key`
+// estable y para depurar, no se muestra.
+export type RevealedTarotCard = { cardId: string; reversed: boolean; position: number };
+
 export type HoySelection =
   | { kind: "area"; area: LifeArea; label: string; score: number; toneLabel: string }
   | { kind: "aspect"; aspect: Aspect }
-  | { kind: "box"; box: StaticBox };
+  | { kind: "box"; box: StaticBox }
+  // Pedido de Gio (2026-07-24): "cuando volteo una carta en interpretacion
+  // quiero una respuesta de que significa esa carta" — no la copy curada
+  // genérica de `interp.tarot.*` (eso quedaba como "el agua moja", según sus
+  // palabras). `cards` en ORDEN DE REVELADO (no de posición en el abanico):
+  // "si descubro otra... que se vaya complementando abajo" — cada carta nueva
+  // se agrega al final de la lista, cada una con su lectura completa
+  // (nombre + keywords + esencia + upright/reversed.path — mismo contenido
+  // que interpretation-content.tsx usa para una carta suelta en /tarot, sin
+  // reescribir prosa). Vacío (antes de tocar cualquier carta) muestra el hint
+  // corto de siempre (hoy.tarotFanHint), nunca la copy genérica.
+  | { kind: "tarotFan"; cards: RevealedTarotCard[] };
 
 type AreaSt = "loading" | "ready" | "dormant" | "error";
 
@@ -58,6 +82,7 @@ export function InterpretationPanel({
 }) {
   const t = useTranslations("hoy");
   const tCarta = useTranslations("carta");
+  const tTarot = useTranslations("tarot");
   const localeRaw = useLocale();
   const locale: "es" | "en" = localeRaw === "en" ? "en" : "es";
   const L = astroLabels(locale);
@@ -130,6 +155,7 @@ export function InterpretationPanel({
         ? `What does ${L.bodies[a.a]} ${aspectWord} my ${L.bodies[a.b]} mean for me today?`
         : `¿Qué significa para mí hoy ${L.bodies[a.a]} ${aspectWord} mi ${L.bodies[a.b]}?`;
   } else if (selection?.kind === "box") question = t(`interp.${selection.box}.q`);
+  else if (selection?.kind === "tarotFan") question = t("interp.tarot.q");
 
   return (
     <section className={styles.panel} aria-label={t("interp.title")}>
@@ -176,6 +202,16 @@ export function InterpretationPanel({
             <p className={styles.boxTitle}>{t(`interp.${selection.box}.title`)}</p>
             <p className={styles.reading}>{t(`interp.${selection.box}.body`)}</p>
           </>
+        )}
+
+        {selection?.kind === "tarotFan" && (
+          <TarotFanContent
+            cards={selection.cards}
+            locale={locale}
+            title={t("interp.tarot.title")}
+            emptyHint={t("tarotFanHint")}
+            reversedLabel={tTarot("dailyReversed")}
+          />
         )}
 
         {question && (
@@ -227,6 +263,63 @@ function AspectContent({
               — {e.body}
             </p>
           ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** "La baraja de hoy" (tarot-fan.tsx): la lectura REAL de cada carta ya
+ *  revelada, en orden de revelado, complementándose hacia abajo a medida que
+ *  se voltean más cartas (pedido de Gio: nunca la copy curada genérica). Cada
+ *  carta muestra el MISMO contenido que la carta suelta de /tarot
+ *  (interpretation-content.tsx: nombre + keywords + esencia + upright/
+ *  reversed.path), leído de TAROT_CARDS_ES/EN — sin reescribir prosa. Vacía
+ *  (nada tocado todavía) muestra el hint corto de siempre, no una respuesta
+ *  fingida. */
+function TarotFanContent({
+  cards,
+  locale,
+  title,
+  emptyHint,
+  reversedLabel,
+}: {
+  cards: RevealedTarotCard[];
+  locale: "es" | "en";
+  title: string;
+  emptyHint: string;
+  reversedLabel: string;
+}) {
+  const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
+  return (
+    <>
+      <p className={styles.boxTitle}>{title}</p>
+      {cards.length === 0 ? (
+        <p className={styles.dim}>{emptyHint}</p>
+      ) : (
+        <div className={styles.tarotCards}>
+          {cards.map((c, i) => {
+            const content = cardsDict[c.cardId];
+            if (!content) return null;
+            const path = c.reversed ? content.reversed.path : content.upright.path;
+            return (
+              <div key={`${c.position}-${i}`} className={styles.tarotCard}>
+                <p className={styles.tarotCardName}>
+                  {content.name}
+                  {c.reversed && <span className={styles.reversedTag}> · {reversedLabel}</span>}
+                </p>
+                <p className={styles.tarotCardKeywords}>
+                  {content.keywords.map((kw) => (
+                    <span key={kw} className="chip">
+                      {kw}
+                    </span>
+                  ))}
+                </p>
+                <p className={styles.reading}>{content.essence}</p>
+                <p className={styles.reading}>{path}</p>
+              </div>
+            );
+          })}
         </div>
       )}
     </>

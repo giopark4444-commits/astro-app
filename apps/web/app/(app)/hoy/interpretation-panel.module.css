@@ -78,3 +78,19 @@
   padding: 5px 12px;
 }
 .cta:hover { background: color-mix(in srgb, var(--acc) 14%, transparent); }
+
+/* "La baraja de hoy": lectura real por carta revelada, apiladas y
+   complementándose hacia abajo (pedido de Gio) — cada carta después de la
+   primera lleva un separador punteado, mismo criterio que .glossary arriba.
+   .reversedTag copiado byte-igual de tarot/tarot.module.css (misma etiqueta
+   "Invertida" que usa /tarot para una carta suelta). */
+.tarotCards { display: flex; flex-direction: column; gap: var(--sp-3); }
+.tarotCard { display: flex; flex-direction: column; gap: var(--sp-2); }
+.tarotCard:not(:first-child) { border-top: 1px dashed var(--line); padding-top: var(--sp-3); }
+.tarotCardName { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--text-md); color: var(--acc-text); }
+.tarotCardKeywords { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; }
+.reversedTag {
+  display: inline-block; font-size: var(--text-2xs); letter-spacing: 1px; text-transform: uppercase;
+  color: var(--tone-caution, var(--soft)); border: 1px solid var(--line); border-radius: 9px;
+  padding: 2px var(--sp-2);
+}

@@ -5,6 +5,7 @@ import { drawCards, mulberry32, dailySeed } from "@aluna/core";
 import es from "@/messages/es.json";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TarotFan, TAROT_FAN_SIZE } from "../tarot-fan";
+import type { RevealedTarotCard } from "../interpretation-panel";
 
 // Task 6: el abanico de tarot del dashboard — N dorsos boca abajo, barajados
 // DETERMINISTA por (día civil + perfil). Tocar un dorso lo voltea (flip 3D) y
@@ -32,10 +33,12 @@ function expectedFanNames(profileId: string): string[] {
   );
 }
 
-function renderFan(profileId: string) {
+function renderFan(profileId: string, onCardRevealed?: (cards: RevealedTarotCard[]) => void) {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <TarotFan profileId={profileId} />
+      {/* exactOptionalPropertyTypes: spread condicional (pasar `undefined`
+          explícito no es lo mismo que omitir la prop). */}
+      <TarotFan profileId={profileId} {...(onCardRevealed ? { onCardRevealed } : {})} />
     </NextIntlClientProvider>,
   );
 }
@@ -114,5 +117,50 @@ describe("TarotFan", () => {
     expect(
       screen.getByRole("link", { name: new RegExp(es.hoy.tarotFanCta) }),
     ).toHaveAttribute("href", "/tarot");
+  });
+
+  // onCardRevealed (pedido de Gio 2026-07-24): cada volteo avisa hacia arriba
+  // con el acumulado COMPLETO en ORDEN DE REVELADO — así el panel de
+  // Interpretación puede mostrar la lectura real de cada carta, "complementando
+  // hacia abajo" a medida que se voltean más.
+  it("onCardRevealed se llama con [{cardId, reversed, position}] al voltear la primera carta", () => {
+    const onCardRevealed = vi.fn();
+    renderFan("profile-1", onCardRevealed);
+    const slots = screen.getAllByRole("button");
+
+    fireEvent.click(slots[3]!);
+
+    expect(onCardRevealed).toHaveBeenCalledTimes(1);
+    const [cards] = onCardRevealed.mock.calls[0] as [RevealedTarotCard[]];
+    expect(cards).toHaveLength(1);
+    expect(cards[0]!.position).toBe(3);
+    expect(typeof cards[0]!.cardId).toBe("string");
+    expect(typeof cards[0]!.reversed).toBe("boolean");
+  });
+
+  it("al voltear una segunda carta, el acumulado tiene AMBAS en orden de REVELADO (no de posición en el abanico)", () => {
+    const onCardRevealed = vi.fn();
+    renderFan("profile-1", onCardRevealed);
+    const slots = screen.getAllByRole("button");
+
+    fireEvent.click(slots[5]!); // se revela primero
+    fireEvent.click(slots[1]!); // se revela después, aunque su posición sea menor
+
+    expect(onCardRevealed).toHaveBeenCalledTimes(2);
+    const [lastCall] = onCardRevealed.mock.calls.slice(-1) as [[RevealedTarotCard[]]];
+    const cards = lastCall[0];
+    expect(cards.map((c) => c.position)).toEqual([5, 1]);
+  });
+
+  it("volver a tocar una carta YA revelada no dispara onCardRevealed de nuevo (sin duplicados)", () => {
+    const onCardRevealed = vi.fn();
+    renderFan("profile-1", onCardRevealed);
+    const slots = screen.getAllByRole("button");
+
+    fireEvent.click(slots[2]!);
+    fireEvent.click(slots[2]!);
+    fireEvent.click(slots[2]!);
+
+    expect(onCardRevealed).toHaveBeenCalledTimes(1);
   });
 });

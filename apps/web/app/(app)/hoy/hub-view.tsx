@@ -23,7 +23,7 @@ import { SummaryPillars } from "./summary-pillars";
 import { TarotFan } from "./tarot-fan";
 import { SummaryMano } from "./summary-mano";
 import { DayHeader } from "./day-header";
-import { InterpretationPanel, type HoySelection } from "./interpretation-panel";
+import { InterpretationPanel, type HoySelection, type RevealedTarotCard } from "./interpretation-panel";
 import styles from "./hub.module.css";
 
 const PLANET_GLYPH = Object.fromEntries(PLANETS.map((p) => [p.key, p.glyph + "︎"]));
@@ -101,6 +101,14 @@ export function HubView({
   // el carril no existe (display:none) y las barras conservan su BottomSheet.
   const [selection, setSelection] = useState<HoySelection | null>(null);
   const selBox = selection?.kind === "box" ? selection.box : null;
+  // "La baraja de hoy" (pedido de Gio, 2026-07-24): cada carta volteada avisa
+  // acá (onCardRevealed) con el acumulado COMPLETO en orden de revelado; se
+  // guarda para que el wrapper de click-to-interpret (clic en cualquier otra
+  // parte de la tarjeta, no en una carta) siga mostrando lo ya revelado en
+  // vez de perderlo. La SELECCIÓN se actualiza directo desde el propio
+  // volteo (no hace falta un segundo click en la tarjeta) — "cuando volteo
+  // una carta... quiero una respuesta", el flip mismo es el disparador.
+  const [tarotCards, setTarotCards] = useState<RevealedTarotCard[]>([]);
   // Horóscopo: occidental/oriental EN UNA sola ventana (pedido de Gio, polish
   // 2026-07-23) — `trad` se IZA acá (mismo patrón que horoscopo-view.tsx con
   // pro/period/sign) para que el wrapper de click-to-interpret sepa siempre
@@ -361,14 +369,27 @@ export function HubView({
             </div>
           )}
 
-          {/* i) La baraja de hoy — abanico de tarot (HD6). */}
+          {/* i) La baraja de hoy — abanico de tarot (HD6). Gio, 2026-07-24:
+              rechazó la copy curada genérica ("es como decirme el agua
+              moja") — cada carta volteada dispara `kind:"tarotFan"` con su
+              lectura REAL (interpretation-panel.tsx), acumulando hacia abajo
+              a medida que se revelan más. El click en cualquier OTRA parte
+              de la tarjeta (no una carta) mantiene lo ya revelado en vez de
+              perderlo — nunca vuelve a la copy genérica una vez que hay al
+              menos una carta tocada. */}
           {active && (
             <div
               className={styles.clickBox}
-              data-on={selBox === "tarot" || undefined}
-              onClick={() => setSelection({ kind: "box", box: "tarot" })}
+              data-on={selection?.kind === "tarotFan" || undefined}
+              onClick={() => setSelection({ kind: "tarotFan", cards: tarotCards })}
             >
-              <TarotFan profileId={active.id} />
+              <TarotFan
+                profileId={active.id}
+                onCardRevealed={(cards) => {
+                  setTarotCards(cards);
+                  setSelection({ kind: "tarotFan", cards });
+                }}
+              />
             </div>
           )}
 

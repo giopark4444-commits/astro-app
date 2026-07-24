@@ -137,6 +137,38 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
     }
   });
 
+  it("voltear una carta de 'La baraja de hoy' muestra su lectura REAL en Interpretación (Gio: 'no me pongas una respuesta de mierda' — la copy genérica) y se COMPLEMENTA al voltear otra", async () => {
+    render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
+    await screen.findByText(new RegExp(es.hoy.proactive.title));
+
+    // Los 9 dorsos boca abajo del abanico (distintos de cualquier otro botón
+    // de la página — bars de EnergyPanel, preguntas rápidas del chat, etc.).
+    const slots = screen.getAllByRole("button", { name: /boca abajo/ });
+    expect(slots).toHaveLength(9);
+
+    const interp = screen.getByRole("region", { name: es.hoy.interp.title });
+
+    fireEvent.click(slots[0]!);
+    // El nombre de ALGUNA carta real aparece DENTRO de Interpretación (el
+    // mazo es determinista por perfil+día, no se fija a mano cuál cae en
+    // cada slot; se escopa con `within` porque el mismo nombre TAMBIÉN se ve
+    // en el detalle propio de TarotFan bajo el abanico — no es el mismo nodo).
+    // Bug real cazado en vivo (no solo en código): sin stopPropagation en el
+    // botón de la carta, el onClick del clickBox exterior de hub-view.tsx
+    // volvía a poner el hint vacío ENCIMA con `tarotCards` desactualizado del
+    // mismo evento — así que la aserción clave es que el hint YA NO esté ahí.
+    await waitFor(() => expect(within(interp).queryByText(es.hoy.tarotFanHint)).not.toBeInTheDocument());
+    expect(within(interp).queryByText(es.hoy.interp.tarot.body)).not.toBeInTheDocument();
+
+    const revealedAfterFirst = slots[0]!.getAttribute("aria-label")!;
+    expect(within(interp).getByText(revealedAfterFirst)).toBeInTheDocument(); // el nombre real, no el genérico
+
+    // Segunda carta: la primera lectura sigue (se complementa, no se pierde).
+    fireEvent.click(slots[1]!);
+    await waitFor(() => expect(within(interp).getByText(slots[1]!.getAttribute("aria-label")!)).toBeInTheDocument());
+    expect(within(interp).getByText(revealedAfterFirst)).toBeInTheDocument();
+  });
+
   it("PlanIndicator es la primera fila de la columna derecha, igual que PeriodSelector es la primera de la izquierda (Gio: 'las dos primeras ventanas de ambas columanas van a empezar parejas')", async () => {
     render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
     await screen.findByText(new RegExp(es.hoy.proactive.title));

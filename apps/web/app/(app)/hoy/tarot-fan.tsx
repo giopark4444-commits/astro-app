@@ -6,6 +6,7 @@ import { drawCards, mulberry32, dailySeed, cardImageUrl, cardBackUrl } from "@al
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
+import type { RevealedTarotCard } from "./interpretation-panel";
 import styles from "./tarot-fan.module.css";
 
 // Task 6: el abanico de tarot del dashboard — "una ventana bonita con las cartas
@@ -34,7 +35,17 @@ function localDateKey(tz: string): string {
   }).format(new Date());
 }
 
-export function TarotFan({ profileId }: { profileId: string }) {
+export function TarotFan({
+  profileId,
+  onCardRevealed,
+}: {
+  profileId: string;
+  /** Pedido de Gio (2026-07-24): cada carta volteada avisa hacia arriba (con
+   *  el acumulado COMPLETO, en orden de revelado) para que el panel de
+   *  Interpretación muestre su lectura real — nunca la copy curada genérica.
+   *  Ver RevealedTarotCard/interpretation-panel.tsx. */
+  onCardRevealed?: (cards: RevealedTarotCard[]) => void;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
@@ -50,19 +61,26 @@ export function TarotFan({ profileId }: { profileId: string }) {
     [profileId, localDate],
   );
 
-  // `revealed` = posiciones ya volteadas (persisten volteadas). `active` = la
-  // última tocada, cuyo detalle (nombre + esencia) se muestra bajo el arco.
-  const [revealed, setRevealed] = useState<ReadonlySet<number>>(() => new Set());
+  // `revealOrder` = posiciones volteadas en ORDEN DE REVELADO (no de posición
+  // en el abanico) — única fuente de verdad; `revealed` (para el chequeo O(1)
+  // en el render de cada slot) se deriva de ahí, nunca se duplica el estado.
+  // `active` = la última tocada, cuyo detalle (nombre + esencia) se muestra
+  // bajo el arco.
+  const [revealOrder, setRevealOrder] = useState<number[]>([]);
   const [active, setActive] = useState<number | null>(null);
+  const revealed = useMemo(() => new Set(revealOrder), [revealOrder]);
 
   function pick(i: number) {
-    setRevealed((prev) => {
-      if (prev.has(i)) return prev;
-      const next = new Set(prev);
-      next.add(i);
-      return next;
-    });
     setActive(i);
+    if (revealOrder.includes(i)) return;
+    const nextOrder = [...revealOrder, i];
+    setRevealOrder(nextOrder);
+    onCardRevealed?.(
+      nextOrder.map((pos) => {
+        const d = drawn[pos]!;
+        return { cardId: d.card.id, reversed: d.reversed, position: pos };
+      }),
+    );
   }
 
   const activeDrawn = active != null ? drawn[active] : null;
@@ -83,7 +101,19 @@ export function TarotFan({ profileId }: { profileId: string }) {
                 type="button"
                 className={`${styles.slot} ${isRevealed ? styles.revealed : ""}`}
                 style={{ ["--i" as string]: i }}
-                onClick={() => pick(i)}
+                onClick={(e) => {
+                  // stopPropagation: hub-view.tsx envuelve TarotFan en un
+                  // clickBox cuyo onClick lee `tarotCards` de SU PROPIO
+                  // closure (el de hub-view) para setSelection — sin cortar
+                  // la burbuja, ese onClick externo se ejecuta DESPUÉS del
+                  // de este botón dentro del MISMO evento, con el valor
+                  // VIEJO de `tarotCards` (el setState de más abajo recién
+                  // se programó, no se re-renderizó todavía) y pisaba la
+                  // selección recién puesta con la carta vacía de antes
+                  // (bug real cazado en vivo, no solo en código).
+                  e.stopPropagation();
+                  pick(i);
+                }}
                 aria-label={isRevealed ? content.name : t("hoy.tarotFanCardAria", { n: i + 1 })}
               >
                 <span className={`${styles.face} ${styles.faceBack}`}>
