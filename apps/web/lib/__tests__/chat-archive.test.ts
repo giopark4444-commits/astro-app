@@ -68,7 +68,17 @@ describe("ensureThread", () => {
     expect(fromMock).toHaveBeenCalledWith("chat_threads");
     expect(typeof id).toBe("string");
     expect(id).not.toBe("");
-    expect(captureInsert.inserted).toEqual({ id, user_id: "u1", surface: "chat", profile_id: "profile-1" });
+    expect(captureInsert.inserted).toEqual({ id, user_id: "u1", surface: "chat", profile_id: "profile-1", lens: null });
+  });
+
+  it("con lens: se guarda en el hilo nuevo (0023, etiqueta de la biblioteca)", async () => {
+    const captureInsert: Record<string, unknown> = {};
+    const fromMock = vi.fn().mockReturnValueOnce(chain({ error: null }, captureInsert));
+    const supabase = { from: fromMock } as never;
+
+    await ensureThread(supabase, "u1", "tarot", "profile-1", null, "tarot");
+
+    expect((captureInsert.inserted as { lens: unknown }).lens).toBe("tarot");
   });
 
   it("sin threadId ni profileId: profile_id queda null", async () => {
@@ -243,8 +253,8 @@ describe("fetchRecentThread", () => {
 describe("listThreads", () => {
   it("arma la lista con fijados primero (query) y la vista previa del primer mensaje de usuario por hilo, en un solo .in()", async () => {
     const threads = [
-      { id: "t-pinned", surface: "tarot", profile_id: "p1", pinned: true, created_at: "2026-07-01T00:00:00Z", last_message_at: "2026-07-02T00:00:00Z" },
-      { id: "t-recent", surface: "chat", profile_id: null, pinned: false, created_at: "2026-07-03T00:00:00Z", last_message_at: "2026-07-04T00:00:00Z" },
+      { id: "t-pinned", surface: "tarot", lens: "tarot", profile_id: "p1", pinned: true, created_at: "2026-07-01T00:00:00Z", last_message_at: "2026-07-02T00:00:00Z" },
+      { id: "t-recent", surface: "chat", lens: "astros", profile_id: null, pinned: false, created_at: "2026-07-03T00:00:00Z", last_message_at: "2026-07-04T00:00:00Z" },
     ];
     // Varios mensajes de usuario por hilo, en orden cronológico: solo el
     // PRIMERO de cada thread_id debe ganar como preview.
@@ -270,16 +280,29 @@ describe("listThreads", () => {
     expect(captureMessagesSelect.eqCalls).toEqual([["role", "user"]]);
     expect(result).toEqual([
       {
-        id: "t-pinned", surface: "tarot", profileId: "p1", pinned: true,
+        id: "t-pinned", surface: "tarot", lens: "tarot", profileId: "p1", pinned: true,
         createdAt: "2026-07-01T00:00:00Z", lastMessageAt: "2026-07-02T00:00:00Z",
         preview: "¿Qué significa El Mago invertido?",
       },
       {
-        id: "t-recent", surface: "chat", profileId: null, pinned: false,
+        id: "t-recent", surface: "chat", lens: "astros", profileId: null, pinned: false,
         createdAt: "2026-07-03T00:00:00Z", lastMessageAt: "2026-07-04T00:00:00Z",
         preview: "¿Cómo está mi energía hoy?",
       },
     ]);
+  });
+
+  it("hilo sin lens (conversación general, sin lente encendida): lens queda null", async () => {
+    const threads = [{ id: "t1", surface: "chat", lens: null, profile_id: null, pinned: false, created_at: "2026-07-01T00:00:00Z", last_message_at: "2026-07-01T00:00:00Z" }];
+    const fromMock = vi
+      .fn()
+      .mockReturnValueOnce(chain({ data: threads, error: null }))
+      .mockReturnValueOnce(chain({ data: [], error: null }));
+    const supabase = { from: fromMock } as never;
+
+    const result = await listThreads(supabase, "u1");
+
+    expect(result[0]!.lens).toBeNull();
   });
 
   it("sin hilos: devuelve [] sin pedir mensajes (evita el .in() con lista vacía)", async () => {
@@ -389,13 +412,13 @@ describe("fetchThreadMessages", () => {
     const captureMessagesSelect: Record<string, unknown> = {};
     const fromMock = vi
       .fn()
-      .mockReturnValueOnce(chain({ data: { id: "thread-1", surface: "tarot", pinned: true }, error: null }, captureThreadSelect))
+      .mockReturnValueOnce(chain({ data: { id: "thread-1", surface: "tarot", lens: "tarot", pinned: true }, error: null }, captureThreadSelect))
       .mockReturnValueOnce(chain({ data: [...messages].reverse(), error: null }, captureMessagesSelect));
     const supabase = { from: fromMock } as never;
 
     const detail = await fetchThreadMessages(supabase, "u1", "thread-1");
 
-    expect(detail).toEqual({ id: "thread-1", surface: "tarot", pinned: true, messages });
+    expect(detail).toEqual({ id: "thread-1", surface: "tarot", lens: "tarot", pinned: true, messages });
     expect(fromMock).toHaveBeenNthCalledWith(1, "chat_threads");
     expect(fromMock).toHaveBeenNthCalledWith(2, "chat_messages");
     expect(captureThreadSelect.eqCalls).toEqual([["id", "thread-1"], ["user_id", "u1"]]);

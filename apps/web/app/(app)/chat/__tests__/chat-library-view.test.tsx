@@ -4,6 +4,15 @@ import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { ChatLibraryView } from "../chat-library-view";
 
+// El panel derecho ahora SIEMPRE incluye <LensChatPanel/> (ChatView
+// embebido) — mismo baseline "sin sesión de router / sin perfil" que
+// tarot-view.test.tsx: estos tests no ejercitan ese chat en sí, solo
+// necesitan que no truene por falta de <ProfilesProvider>/router.
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(""),
+}));
+vi.mock("@/lib/profiles/profiles-provider", () => ({ useProfiles: () => ({ active: null }) }));
+
 interface FetchCall {
   url: string;
   init: RequestInit | undefined;
@@ -11,14 +20,19 @@ interface FetchCall {
 
 const THREADS = [
   {
-    id: "t-tarot", surface: "tarot" as const, profileId: "p1", pinned: true,
+    id: "t-tarot", surface: "tarot" as const, lens: "tarot" as const, profileId: "p1", pinned: true,
     createdAt: "2026-07-01T00:00:00.000Z", lastMessageAt: "2026-07-02T00:00:00.000Z",
     preview: "¿Qué significa El Mago invertido?",
   },
   {
-    id: "t-chat", surface: "chat" as const, profileId: null, pinned: false,
+    id: "t-chat", surface: "chat" as const, lens: "astros" as const, profileId: null, pinned: false,
     createdAt: "2026-07-03T00:00:00.000Z", lastMessageAt: "2026-07-04T00:00:00.000Z",
     preview: "¿Cómo está mi energía hoy?",
+  },
+  {
+    id: "t-general", surface: "chat" as const, lens: null, profileId: null, pinned: false,
+    createdAt: "2026-07-05T00:00:00.000Z", lastMessageAt: "2026-07-05T00:00:00.000Z",
+    preview: "¿Qué me recomiendas?",
   },
 ];
 
@@ -33,10 +47,11 @@ function mockFetch(threads: unknown[] = THREADS): { calls: FetchCall[] } {
     }
     if (u.startsWith("/api/chat/threads/") && method === "GET") {
       const id = u.split("/").pop();
+      const found = (threads as Array<{ id: string; surface: string; lens: string | null }>).find((x) => x.id === id);
       return {
         ok: true,
         json: async () => ({
-          id, surface: id === "t-tarot" ? "tarot" : "chat", pinned: id === "t-tarot",
+          id, surface: found?.surface ?? "chat", lens: found?.lens ?? null, pinned: id === "t-tarot",
           messages: [
             { id: "m1", role: "user", content: "hola", created_at: "2026-07-01T00:00:00.000Z" },
             { id: "m2", role: "assistant", content: "hola, ¿cómo estás?", created_at: "2026-07-01T00:01:00.000Z" },
@@ -50,6 +65,9 @@ function mockFetch(threads: unknown[] = THREADS): { calls: FetchCall[] } {
     if (u.startsWith("/api/chat/threads/") && method === "DELETE") {
       return { ok: true, json: async () => ({ ok: true }) } as unknown as Response;
     }
+    // Cualquier otro fetch (LensChatPanel/ChatView: /api/chat/thread,
+    // /api/quick-questions, /api/credits, /api/dev-models...): 404
+    // best-effort, ese chat no es lo que estos tests ejercitan.
     return { ok: false, status: 404, json: async () => ({}) } as unknown as Response;
   }) as unknown as typeof fetch;
   return { calls };
@@ -68,7 +86,7 @@ describe("ChatLibraryView", () => {
     vi.restoreAllMocks();
   });
 
-  it("carga y lista los hilos: fijado primero, con superficie/vista previa/fecha", async () => {
+  it("carga y lista los hilos: fijado primero, con tag/vista previa/fecha", async () => {
     mockFetch();
     renderView();
 
@@ -76,8 +94,17 @@ describe("ChatLibraryView", () => {
     expect(rows).toHaveLength(2);
     // Fijado (t-tarot) va primero en el DOM.
     expect(rows[0]!.textContent).toContain("El Mago");
-    expect(screen.getByText(es.chatLibrary.surfaceTarot)).toBeInTheDocument();
-    expect(screen.getByText(es.chatLibrary.surfaceChat)).toBeInTheDocument();
+    // Tag: "tarot" reusa nav.tarot, "astros" reusa nav.astros — mismo texto
+    // que ya usan en el menú, no una etiqueta nueva.
+    expect(screen.getByText(es.nav.tarot)).toBeInTheDocument();
+    expect(screen.getByText(es.nav.astros)).toBeInTheDocument();
+  });
+
+  it("hilo sin lens (general, o creado antes de la etiqueta): tag cae a 'General'", async () => {
+    mockFetch();
+    renderView();
+
+    expect(await screen.findByText(es.chatLibrary.tagGeneral)).toBeInTheDocument();
   });
 
   it("estado vacío: sin hilos, muestra el mensaje de biblioteca vacía", async () => {
@@ -99,15 +126,18 @@ describe("ChatLibraryView", () => {
     expect(await screen.findByText(/¿Qué significa El Mago invertido\?/)).toBeInTheDocument();
   });
 
-  it("antes de elegir nada, el panel derecho muestra la pista de selección", async () => {
+  it("antes de elegir nada, el panel derecho muestra la pista de selección — y el chat de siempre debajo", async () => {
     mockFetch();
     renderView();
     await screen.findByText(/¿Qué significa El Mago invertido\?/);
 
     expect(screen.getByText(es.chatLibrary.selectHint)).toBeInTheDocument();
+    // <LensChatPanel/> SIEMPRE montado (Gio: "la ventana del chat no es la
+    // que nosotro ya disenamos" — ahora es literalmente el mismo componente).
+    expect(screen.getByText(es.chat.lensChatTitle)).toBeInTheDocument();
   });
 
-  it("elegir un hilo carga su detalle (mensajes) en el panel derecho", async () => {
+  it("elegir un hilo carga su detalle (mensajes) en el panel derecho, con el tag correcto", async () => {
     const { calls } = mockFetch();
     renderView();
     const preview = await screen.findByText(/¿Cómo está mi energía hoy\?/);

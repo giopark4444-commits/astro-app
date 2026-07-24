@@ -11,7 +11,7 @@ import { parseModelOverride } from "@/lib/reading/model-catalog";
 import { parseVoiceMode, applyVoiceMode } from "@/lib/reading/voices";
 import { buildIntentLine } from "@/lib/intent-line";
 import { buildMemoryBlocks, runDistillation } from "@/lib/memory-pipeline";
-import { ensureThread, appendMessage } from "@/lib/chat-archive";
+import { ensureThread, appendMessage, type ChatLens } from "@/lib/chat-archive";
 import { fetchIntentAndMemorySettings } from "@/lib/settings";
 import { getCreditsServiceClient, spendCredits, refundSpend, bumpChatUsage } from "@/lib/credits/ledger";
 import { chatPremiumCost, freeDailyChatCap } from "@/lib/credits/config";
@@ -248,9 +248,17 @@ export async function POST(request: NextRequest) {
   // como una sola casilla — "archivo del hilo" es la pieza 2 de la memoria de
   // largo plazo, junto a las entidades). threadId puede quedar en null si
   // algo falla — best-effort total, ver chat-archive.ts.
+  // Etiqueta de la biblioteca (0023, Gio: "saber si esa conversacion llega
+  // por horoscopo o por tarot... etc"): la PRIMERA lente activa cuando el
+  // hilo se crea (activeLenses ya está resuelto arriba); sin lente encendida
+  // (conversación general) queda `null` — nunca se reescribe en turnos
+  // siguientes (ver ensureThread). "astros"/"numeros"/"pilares"/"tarot" del
+  // set de lentes SON valores válidos de ChatLens (mismo literal), sin
+  // necesidad de traducir entre uno y otro.
+  const threadLens: ChatLens | null = (activeLenses[0] as ChatLens | undefined) ?? null;
   let threadId: string | null = null;
   if (memoryEnabled) {
-    threadId = await ensureThread(supabase, user.id, "chat", profileId, requestedThreadId);
+    threadId = await ensureThread(supabase, user.id, "chat", profileId, requestedThreadId, threadLens);
     const lastMessage = messages[messages.length - 1];
     if (threadId && lastMessage && lastMessage.role === "user") {
       await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);

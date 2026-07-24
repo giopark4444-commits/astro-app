@@ -4,23 +4,47 @@
 // que he tenido con Aluna, sin importar de qué sección venga". Maestro-
 // detalle (mismo patrón que carta/tarot/numeros/pilares/horoscopo): la
 // izquierda lista TODOS los hilos (chat/tarot/timeline) con pin + eliminar,
-// la derecha muestra la transcripción del hilo elegido. Backend en
-// lib/chat-archive.ts (listThreads/setThreadPinned/deleteThread/
+// la derecha muestra la transcripción del hilo elegido + el chat de siempre.
+// Backend en lib/chat-archive.ts (listThreads/setThreadPinned/deleteThread/
 // fetchThreadMessages) sobre el chat_threads/chat_messages que YA existía
 // (0019_memoria.sql) — acá solo se consume vía /api/chat/threads*.
+//
+// SEGUNDA PASADA (Gio, mismo día): 3 correcciones.
+// 1) "no estan simetricamente bien divididas las columnas" + "la ventana del
+//    chat no es la que nosotro ya disenamos": el panel derecho ahora SIEMPRE
+//    incluye <LensChatPanel/> (el chat de "Pregúntale a Aluna" de siempre,
+//    mismo componente que usan carta/tarot/numeros/pilares/horóscopo) debajo
+//    de la transcripción — le da al carril derecho el mismo peso visual que
+//    el izquierdo (nunca queda casi vacío) Y es la reutilización real del
+//    chat ya diseñado, no una imitación. Las burbujas de la transcripción
+//    ahora son el MISMO dibujo que reading-chat.module.css (gradiente en el
+//    usuario, serif en Aluna) + botón de escuchar — antes eran cajas planas
+//    inventadas para esta pantalla.
+// 2) "las conversaciones deberian tener tags... si esa conversacion llega
+//    por horoscopo o por tarot o por mano, etc": la etiqueta ya no es solo
+//    `surface` (chat/tarot/timeline, demasiado ancha — TODO el asistente
+//    general cae en "chat") sino `lens` (0023: astros/numeros/pilares/tarot/
+//    timeline, guardado al crear el hilo — ver chat-archive.ts). "Mano" NO
+//    tiene tag posible todavía: /mano (palm-reading) no persiste a
+//    chat_threads en absoluto hoy — hueco real, no de esta pantalla.
 //
 // Tipos LOCALES (no se importa lib/chat-archive.ts: es server-only, usa
 // node:crypto) que espejan la forma JSON de la API — mismo criterio que
 // TarotReadingRow en tarot-view.tsx.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSpeak } from "@/lib/voice";
+import { SpeakButton } from "@/components/speak-button";
+import { LensChatPanel } from "@/components/lens-chat-panel";
 import styles from "./chat.module.css";
 
 type Surface = "chat" | "tarot" | "timeline";
+type Lens = "astros" | "numeros" | "pilares" | "tarot" | "timeline";
 
 interface ThreadSummary {
   id: string;
   surface: Surface;
+  lens: Lens | null;
   profileId: string | null;
   pinned: boolean;
   createdAt: string;
@@ -38,6 +62,7 @@ interface ArchivedMessage {
 interface ThreadDetail {
   id: string;
   surface: Surface;
+  lens: Lens | null;
   pinned: boolean;
   messages: ArchivedMessage[];
 }
@@ -45,11 +70,27 @@ interface ThreadDetail {
 type ListState = { s: "loading" } | { s: "error" } | { s: "ready"; threads: ThreadSummary[] };
 type DetailState = { s: "idle" } | { s: "loading" } | { s: "error" } | { s: "ready"; detail: ThreadDetail };
 
-const SURFACE_LABEL_KEY: Record<Surface, string> = {
-  chat: "surfaceChat",
-  tarot: "surfaceTarot",
-  timeline: "surfaceTimeline",
+// Tags (0023): las 4 lentes reusan la traducción de `nav` (Astros/Números/
+// Pilares/Tarot) tal cual — mismo texto que ya conoce en el menú, ni una
+// palabra nueva que aprender. "timeline"/"general" son propios de la
+// biblioteca, no existen en `nav`.
+const NAV_LENS_KEY: Partial<Record<Lens, string>> = {
+  astros: "astros",
+  numeros: "numeros",
+  pilares: "pilares",
+  tarot: "tarot",
 };
+
+/** Etiqueta a mostrar: preferir `lens` (fino); sin lens (hilo creado antes
+ *  de 0023, o conversación general sin lente encendida) se cae a algo
+ *  razonable derivado de `surface`. */
+function tagLabel(t: (k: string) => string, tNav: (k: string) => string, surface: Surface, lens: Lens | null): string {
+  if (lens && NAV_LENS_KEY[lens]) return tNav(NAV_LENS_KEY[lens]!);
+  if (lens === "timeline") return t("tagTimeline");
+  if (surface === "tarot") return tNav("tarot");
+  if (surface === "timeline") return t("tagTimeline");
+  return t("tagGeneral");
+}
 
 /** Fijados primero, luego por actividad reciente — mismo criterio que el
  *  índice de 0023 y listThreads del servidor; se re-aplica en el cliente
@@ -61,8 +102,28 @@ function sortThreads(threads: ThreadSummary[]): ThreadSummary[] {
   });
 }
 
+function MessageBubble({ m, index }: { m: ArchivedMessage; index: number }) {
+  const locale = useLocale();
+  const { speakingId, toggle, supported } = useSpeak();
+  const isUser = m.role === "user";
+  return (
+    <div className={`${styles.msg} ${isUser ? styles.user : styles.aluna}`}>
+      {m.content}
+      {!isUser && supported && m.content.trim() && (
+        <div>
+          <SpeakButton
+            speaking={speakingId === `lib${index}`}
+            onClick={() => toggle(`lib${index}`, m.content, locale === "en" ? "en" : "es")}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ChatLibraryView() {
   const t = useTranslations("chatLibrary");
+  const tNav = useTranslations("nav");
   const locale = useLocale();
   const [list, setList] = useState<ListState>({ s: "loading" });
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -200,7 +261,7 @@ export function ChatLibraryView() {
                     <div className={`card card--interactive card--tight ${styles.row} ${selectedId === th.id ? styles.rowOn : ""}`}>
                       <button type="button" className={styles.rowMain} onClick={() => select(th.id)}>
                         <span className={styles.rowTop}>
-                          <span className={styles.surfaceTag}>{t(SURFACE_LABEL_KEY[th.surface])}</span>
+                          <span className={styles.surfaceTag}>{tagLabel(t, tNav, th.surface, th.lens)}</span>
                           <span className={styles.rowDate}>{dateFmt.format(new Date(th.lastMessageAt))}</span>
                         </span>
                         <p className={styles.preview}>{th.preview || t("noMessages")}</p>
@@ -253,8 +314,9 @@ export function ChatLibraryView() {
           </section>
         </div>
 
-        {/* Panel de detalle (maestro-detalle, mismo criterio que el resto de
-            la serie): sticky en desktop, ver chat.module.css. */}
+        {/* Panel derecho (maestro-detalle, mismo criterio que el resto de la
+            serie): sticky en desktop. SIEMPRE incluye <LensChatPanel/> (el
+            chat de siempre) — nunca se oculta, nunca queda vacío. */}
         <div className={styles.interpCol}>
           <div className={`card ${styles.detailPanel}`}>
             {detail.s === "idle" && <p className={styles.stateMsg}>{t("selectHint")}</p>}
@@ -263,22 +325,23 @@ export function ChatLibraryView() {
             {detail.s === "ready" && (
               <>
                 <div className={styles.detailHead}>
-                  <span className={styles.surfaceTag}>{t(SURFACE_LABEL_KEY[detail.detail.surface])}</span>
+                  <span className={styles.surfaceTag}>{tagLabel(t, tNav, detail.detail.surface, detail.detail.lens)}</span>
                   {detail.detail.pinned && <span className={styles.pinnedBadge}>{t("pinnedBadge")}</span>}
                 </div>
                 {detail.detail.messages.length === 0 ? (
                   <p className={styles.stateMsg}>{t("noMessages")}</p>
                 ) : (
                   <div className={styles.thread}>
-                    {detail.detail.messages.map((m) => (
-                      <div key={m.id} className={`${styles.msg} ${m.role === "user" ? styles.user : styles.aluna}`}>
-                        {m.content}
-                      </div>
+                    {detail.detail.messages.map((m, i) => (
+                      <MessageBubble key={m.id} m={m} index={i} />
                     ))}
                   </div>
                 )}
               </>
             )}
+          </div>
+          <div className={styles.chatCol}>
+            <LensChatPanel />
           </div>
         </div>
       </div>

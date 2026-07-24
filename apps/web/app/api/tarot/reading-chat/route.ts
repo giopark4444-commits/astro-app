@@ -179,11 +179,13 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
   const memoryEnabled = (settingsRow as { memory_enabled?: boolean } | null)?.memory_enabled !== false;
-  // Archivo del hilo (Fase 1B): persiste pero sin UI de retomar todavía
-  // (diferido); mismo gate que la memoria — ver comentario en /api/chat.
+  // Archivo del hilo (Fase 1B): la lista de hilos + "retomar" diferidos son
+  // exactamente la biblioteca de conversaciones (/chat) — mismo gate que la
+  // memoria, ver comentario en /api/chat. Etiqueta (0023) siempre "tarot":
+  // a diferencia del asistente general, esta superficie ES una sola lente.
   let threadId: string | null = null;
   if (memoryEnabled) {
-    threadId = await ensureThread(supabase, user.id, "tarot", profileId, requestedThreadId);
+    threadId = await ensureThread(supabase, user.id, "tarot", profileId, requestedThreadId, "tarot");
     const lastMessage = messages[messages.length - 1];
     if (threadId && hasRealUserMessage && lastMessage && lastMessage.role === "user") {
       await appendMessage(supabase, user.id, threadId, "user", lastMessage.content);

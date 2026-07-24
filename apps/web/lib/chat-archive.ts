@@ -19,6 +19,13 @@ import type { AlunaSupabaseClient, TablesInsert } from "@aluna/supabase";
 
 export type ChatSurface = "chat" | "tarot" | "timeline";
 export type ChatRole = "user" | "assistant";
+/** Etiqueta fina de la biblioteca de chat (Gio, 2026-07-24, segunda pasada:
+ *  "las conversaciones deberian tener tags, para saber si esa conversacion
+ *  llega por horoscopo o por tarot... etc") — más fina que `surface`, que
+ *  agrupa TODO lo del asistente general (Hoy/carta/números/pilares/
+ *  horóscopo) bajo un solo valor "chat". Se guarda en `chat_threads.lens`
+ *  (0023) al CREAR el hilo — ver ensureThread. */
+export type ChatLens = "astros" | "numeros" | "pilares" | "tarot" | "timeline";
 
 /** Tope de mensajes que fetchRecentThread trae para "retomar" (review Fable):
  *  sin límite, un hilo viejo y largo crece sin freno en cada carga. Se pide
@@ -59,6 +66,11 @@ export async function ensureThread(
   surface: ChatSurface,
   profileId?: string | null,
   threadId?: string | null,
+  // `lens` (0023): SOLO se usa al CREAR el hilo — igual que la vista previa,
+  // es una foto del contexto inicial, no algo que se reescriba en turnos
+  // siguientes (si el usuario cambia de lente a mitad de una conversación
+  // general, el hilo conserva la etiqueta con la que nació).
+  lens?: ChatLens | null,
 ): Promise<string | null> {
   try {
     if (threadId) {
@@ -78,6 +90,7 @@ export async function ensureThread(
       user_id: userId,
       surface,
       profile_id: profileId ?? null,
+      lens: lens ?? null,
     };
     const { error } = await supabase.from("chat_threads").insert(row);
     if (error) return null;
@@ -176,6 +189,7 @@ const PREVIEW_LENGTH = 140;
 export interface ThreadSummary {
   id: string;
   surface: ChatSurface;
+  lens: ChatLens | null;
   profileId: string | null;
   pinned: boolean;
   createdAt: string;
@@ -201,13 +215,14 @@ export async function listThreads(supabase: AlunaSupabaseClient, userId: string)
   try {
     const { data: threads } = await supabase
       .from("chat_threads")
-      .select("id, surface, profile_id, pinned, created_at, last_message_at")
+      .select("id, surface, lens, profile_id, pinned, created_at, last_message_at")
       .eq("user_id", userId)
       .order("pinned", { ascending: false })
       .order("last_message_at", { ascending: false });
     const rows = (threads ?? []) as Array<{
       id: string;
       surface: string;
+      lens: string | null;
       profile_id: string | null;
       pinned: boolean;
       created_at: string;
@@ -230,6 +245,7 @@ export async function listThreads(supabase: AlunaSupabaseClient, userId: string)
     return rows.map((r) => ({
       id: r.id,
       surface: (r.surface as ChatSurface) ?? "chat",
+      lens: (r.lens as ChatLens | null) ?? null,
       profileId: r.profile_id,
       pinned: r.pinned,
       createdAt: r.created_at,
@@ -287,6 +303,7 @@ export const THREAD_DETAIL_MESSAGE_CAP = 200;
 export interface ThreadDetail {
   id: string;
   surface: ChatSurface;
+  lens: ChatLens | null;
   pinned: boolean;
   messages: ArchivedMessage[];
 }
@@ -308,12 +325,12 @@ export async function fetchThreadMessages(
   try {
     const { data: thread } = await supabase
       .from("chat_threads")
-      .select("id, surface, pinned")
+      .select("id, surface, lens, pinned")
       .eq("id", threadId)
       .eq("user_id", userId)
       .maybeSingle();
     if (!thread) return null;
-    const t = thread as { id: string; surface: string; pinned: boolean };
+    const t = thread as { id: string; surface: string; lens: string | null; pinned: boolean };
 
     const { data: messages } = await supabase
       .from("chat_messages")
@@ -324,7 +341,13 @@ export async function fetchThreadMessages(
       .limit(THREAD_DETAIL_MESSAGE_CAP);
 
     const chronological = ((messages ?? []) as ArchivedMessage[]).slice().reverse();
-    return { id: t.id, surface: (t.surface as ChatSurface) ?? "chat", pinned: t.pinned, messages: chronological };
+    return {
+      id: t.id,
+      surface: (t.surface as ChatSurface) ?? "chat",
+      lens: (t.lens as ChatLens | null) ?? null,
+      pinned: t.pinned,
+      messages: chronological,
+    };
   } catch {
     return null;
   }
