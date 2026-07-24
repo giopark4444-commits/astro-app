@@ -321,3 +321,103 @@ describe("TarotView", () => {
     expect(await screen.findByText(note)).toBeInTheDocument();
   });
 });
+
+// Segunda pasada (Gio, 2026-07-24: "la lectura sigue saliendo en el lado
+// izquierdo mas no en interpretacion en el lado derecho... me gusta que diga
+// conversa esta tirada"): Ceremony ya no renderiza su propia prosa/chat/
+// guardar — los reporta vía onReading y ESTE componente (TarotView) los
+// muestra en el carril derecho real. Estos tests recorren la ceremonia
+// COMPLETA a través de la UI real (sin mockear Ceremony) para verificar el
+// cableado onReading→carril derecho de punta a punta.
+describe("TarotView — la lectura de la ceremonia vive en el carril derecho (bridge onReading)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    // Ceremonia sin coreografía (mismo criterio que ceremony.test.tsx): evita
+    // el timeout de 900ms del fan→reveal y el mazo animado del shuffle — el
+    // setup global (vitest.setup.ts) prefiere reduced-motion:false por
+    // defecto, así que acá se fuerza a true.
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+  });
+
+  /** Abre "Tres cartas" y recorre question→shuffle→cut→fan→reveal hasta "reading". */
+  async function completeCeremonyReading(opts: { question?: string } = {}) {
+    const threeCard = await screen.findByRole("button", { name: new RegExp(es.tarot.spreadThree) });
+    fireEvent.click(threeCard);
+    await screen.findByTestId("ceremony");
+
+    if (opts.question !== undefined) {
+      fireEvent.change(screen.getByPlaceholderText(es.tarot.questionPlaceholder), {
+        target: { value: opts.question },
+      });
+      fireEvent.click(screen.getByRole("button", { name: es.tarot.questionContinue }));
+    } else {
+      fireEvent.click(screen.getByRole("button", { name: es.tarot.questionSilent }));
+    }
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.shuffleForMe }));
+    const piles = await screen.findAllByTestId("cut-pile");
+    fireEvent.click(piles[0]!);
+    const fanCards = await screen.findAllByTestId("fan-card");
+    fireEvent.click(fanCards[3]!);
+    fireEvent.click(fanCards[20]!);
+    fireEvent.click(fanCards[55]!);
+    const slots = await screen.findAllByTestId("reveal-card");
+    for (const slot of slots) fireEvent.click(slot);
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.revealRead }));
+    expect(await screen.findByText(es.tarot.readingTitle)).toBeInTheDocument();
+  }
+
+  it("al completar la ceremonia, el panel de interpretación (carril derecho) muestra ESA lectura (TarotInterpretation 'saved')", async () => {
+    mockFetch();
+    renderView();
+    await completeCeremonyReading({ question: "¿Cómo sigo con esto?" });
+
+    // "Cartas" + la pregunta son del renderizador único ("saved"), montado en
+    // el panel de interpretación — nunca lo monta Ceremony (ver ceremony.tsx).
+    const cardsLabel = screen.getByText(es.tarot.diaryCardsLabel);
+    const interpBlock = cardsLabel.parentElement!;
+    expect(within(interpBlock).getByText(es.tarot.diaryQuestionLabel, { exact: false })).toBeInTheDocument();
+  });
+
+  it("con la lectura de la ceremonia activa, el chat del carril derecho es <ReadingChat> (no LensChatPanel genérico)", async () => {
+    mockFetch();
+    renderView();
+    await completeCeremonyReading();
+
+    expect(screen.getByTestId("reading-chat")).toBeInTheDocument();
+    expect(screen.getByText(es.tarot.chatSectionTitle)).toBeInTheDocument();
+  });
+
+  it("el carril derecho ofrece guardar la lectura de la ceremonia y confirma 'savedOk' allí (no en Ceremony)", async () => {
+    const { calls } = mockFetch();
+    renderView();
+    await completeCeremonyReading();
+
+    const saveBtn = screen.getByRole("button", { name: es.tarot.saveReading });
+    fireEvent.click(saveBtn);
+    await waitFor(() => {
+      expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
+    });
+    expect(await screen.findByText(es.tarot.savedOk)).toBeInTheDocument();
+    // El botón de guardar desaparece una vez guardada.
+    expect(screen.queryByRole("button", { name: es.tarot.saveReading })).not.toBeInTheDocument();
+  });
+
+  it("el carril derecho ofrece compartir la lectura de la ceremonia en vez del ShareButton de la carta del día", async () => {
+    mockFetch();
+    renderView();
+    await completeCeremonyReading();
+
+    // Con una ceremonia viva, el título del panel ofrece "Compartir" (la
+    // tirada), no el ShareButton de la carta del día.
+    expect(screen.getByRole("button", { name: es.share.share })).toBeInTheDocument();
+  });
+});

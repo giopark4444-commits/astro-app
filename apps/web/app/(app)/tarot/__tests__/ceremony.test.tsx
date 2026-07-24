@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import es from "@/messages/es.json";
 import { cardById } from "@aluna/core";
 import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
-import { Ceremony } from "../ceremony";
+import { Ceremony, type CeremonyReadingBridge } from "../ceremony";
 
 // La ceremonia es efímera (useReducer local, sin URL): cada test la recorre
 // entera. Por defecto stubeamos prefers-reduced-motion=REDUCE para que cada
@@ -34,18 +34,6 @@ function mockFetch(postStatus = 201): { calls: FetchCall[] } {
   global.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const u = String(url);
     calls.push({ url: u, init });
-    // La ceremonia (T3) monta ReadingChat al llegar a "reading", que dispara
-    // su propio POST a /api/tarot/reading-chat (turno-0) — se responde
-    // dormido (sin llaves en el test), como el latente real. Se distingue
-    // por URL para no confundirse con el POST de guardado (mismo método).
-    if (u === "/api/tarot/reading-chat") {
-      return {
-        ok: true,
-        status: 200,
-        headers: { get: () => "application/json" },
-        json: async () => ({ available: false }),
-      } as unknown as Response;
-    }
     if (postStatus === 201) {
       const body = JSON.parse(String(init?.body));
       return {
@@ -65,15 +53,33 @@ function mockFetch(postStatus = 201): { calls: FetchCall[] } {
   return { calls };
 }
 
-function renderCeremony(onClose = vi.fn()) {
+// Segunda pasada (Gio, 2026-07-24: "la lectura sigue saliendo en el lado
+// izquierdo mas no en interpretacion en el lado derecho... me gusta que diga
+// conversa esta tirada"): la ceremonia ya NO renderiza prosa/ReadingChat/
+// guardar/compartir — se los pasa al padre (tarot-view.tsx) vía `onReading`,
+// que los muestra en el carril derecho real. Estos tests pasan su propio mock
+// de `onReading` y operan el guardado a través del bridge (`bridge.onSave()`),
+// tal como lo haría tarot-view.tsx al hacer click en su propio botón.
+function renderCeremony(
+  opts: { onClose?: () => void; onReading?: (data: CeremonyReadingBridge | null) => void } = {},
+) {
+  const onClose = opts.onClose ?? vi.fn();
   render(
     <NextIntlClientProvider locale="es" messages={es}>
       <ThemeProvider initialTheme="observatory" initialMode="dark" persist={vi.fn()}>
-        <Ceremony spreadId="three" onClose={onClose} />
+        <Ceremony spreadId="three" onClose={onClose} {...(opts.onReading ? { onReading: opts.onReading } : {})} />
       </ThemeProvider>
     </NextIntlClientProvider>,
   );
   return onClose;
+}
+
+/** Último dato no-null que recibió el mock de `onReading` (el bridge vivo). */
+function lastBridge(onReading: ReturnType<typeof vi.fn>): CeremonyReadingBridge {
+  const nonNull = onReading.mock.calls.filter(([data]) => data !== null);
+  const last = nonNull.at(-1);
+  if (!last) throw new Error("onReading nunca se llamó con datos: ¿la ceremonia llegó a 'reading'?");
+  return last[0] as CeremonyReadingBridge;
 }
 
 /** Recorre question→shuffle→cut→fan→reveal y deja la ceremonia en reading. */
@@ -120,40 +126,80 @@ describe("Ceremony (tirada de tres)", () => {
     stubReducedMotion(true);
   });
 
-  it("flujo completo con pregunta: lectura con 3 cartas y guardado POST correcto", async () => {
+  it("onReading: null en todos los pasos previos, y se puebla justo al llegar a 'reading'", async () => {
+    mockFetch();
+    const onReading = vi.fn();
+    renderCeremony({ onReading });
+    expect(onReading).toHaveBeenLastCalledWith(null);
+
+    fireEvent.click(screen.getByRole("button", { name: es.tarot.questionSilent }));
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.shuffleForMe }));
+    fireEvent.click((await screen.findAllByTestId("cut-pile"))[0]!);
+    const fanCards = await screen.findAllByTestId("fan-card");
+    fireEvent.click(fanCards[0]!);
+    fireEvent.click(fanCards[1]!);
+    fireEvent.click(fanCards[2]!);
+    const slots = await screen.findAllByTestId("reveal-card");
+    for (const slot of slots) fireEvent.click(slot);
+    // Justo antes de "Leer": todavía en reveal, sigue null.
+    expect(onReading).toHaveBeenLastCalledWith(null);
+
+    fireEvent.click(await screen.findByRole("button", { name: es.tarot.revealRead }));
+    await waitFor(() => expect(lastBridge(onReading).reading.id).toBe("ceremony-live"));
+    expect(lastBridge(onReading).save).toBe("idle");
+  });
+
+  it("flujo completo con pregunta: onReading expone 3 cartas + pregunta, y bridge.onSave hace el POST correcto", async () => {
     const { calls } = mockFetch();
-    renderCeremony();
+    const onReading = vi.fn();
+    renderCeremony({ onReading });
     await advanceToReading({ question: "¿Cómo sigo con esto?" });
 
-    fireEvent.click(screen.getByRole("button", { name: es.tarot.saveReading }));
-    await waitFor(() => {
-      expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
-    });
-    const post = calls.find((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")!;
-    expect(post.url).toBe("/api/tarot/readings");
-    const body = JSON.parse(String(post.init?.body));
-    expect(body.spread).toBe("three");
-    expect(body.deck).toBe("rws");
-    expect(body.question).toBe("¿Cómo sigo con esto?");
-    expect(body.cards).toHaveLength(3);
-    expect(body.cards.map((c: { position: string }) => c.position)).toEqual(["past", "present", "future"]);
-    const ids = body.cards.map((c: { cardId: string }) => c.cardId);
+    const bridge = lastBridge(onReading);
+    expect(bridge.reading.id).toBe("ceremony-live");
+    expect(bridge.reading.spread).toBe("three");
+    expect(bridge.reading.question).toBe("¿Cómo sigo con esto?");
+    expect(bridge.reading.cards).toHaveLength(3);
+    expect(bridge.reading.cards.map((c) => c.position)).toEqual(["past", "present", "future"]);
+    expect(bridge.save).toBe("idle");
+
+    // Los nombres de las cartas guardadas están en la grilla visible.
+    const ids = bridge.reading.cards.map((c) => c.cardId);
     expect(new Set(ids).size).toBe(3);
-    // Los nombres de las cartas guardadas están en la lectura visible.
     for (const id of ids) {
       const card = cardById(id);
       expect(card, id).toBeDefined();
       expect(screen.getAllByText(TAROT_CARDS_ES[card!.id]!.name).length).toBeGreaterThan(0);
     }
-    expect(await screen.findByText(es.tarot.savedOk)).toBeInTheDocument();
+
+    act(() => bridge.onSave());
+    await waitFor(() => {
+      expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
+    });
+    const post = calls.find((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")!;
+    const body = JSON.parse(String(post.init?.body));
+    expect(body.spread).toBe("three");
+    expect(body.deck).toBe("rws");
+    expect(body.question).toBe("¿Cómo sigo con esto?");
+    expect(body.cards).toEqual(bridge.reading.cards);
+
+    // El bridge se re-reporta con save:"saved" tras el POST 201 (el padre es
+    // quien muestra "savedOk" con este dato — ver tarot-view.test.tsx).
+    await waitFor(() => {
+      expect(lastBridge(onReading).save).toBe("saved");
+    });
   });
 
-  it("'En silencio' avanza sin pregunta y el POST no lleva question", async () => {
+  it("'En silencio' avanza sin pregunta: onReading trae question:null y el POST no lleva question", async () => {
     const { calls } = mockFetch();
-    renderCeremony();
+    const onReading = vi.fn();
+    renderCeremony({ onReading });
     await advanceToReading();
 
-    fireEvent.click(screen.getByRole("button", { name: es.tarot.saveReading }));
+    const bridge = lastBridge(onReading);
+    expect(bridge.reading.question).toBeNull();
+
+    act(() => bridge.onSave());
     await waitFor(() => {
       expect(calls.some((c) => c.url === "/api/tarot/readings" && c.init?.method === "POST")).toBe(true);
     });
@@ -163,14 +209,10 @@ describe("Ceremony (tirada de tres)", () => {
     expect(body.question).toBeUndefined();
   });
 
-  it("muestra el chat de la tirada al final de la lectura, dormido sin llaves", async () => {
-    mockFetch();
-    renderCeremony();
-    await advanceToReading();
-
-    expect(await screen.findByText(es.tarot.chatSectionTitle)).toBeInTheDocument();
-    expect(await screen.findByText(es.tarot.chatDormantTitle)).toBeInTheDocument();
-  });
+  // El chat de la tirada ("Conversa esta tirada") ya no lo monta Ceremony —
+  // vive en tarot-view.tsx vía <ReadingChat> (bridge.reading), y su propio
+  // comportamiento dormido/con-proveedor ya está cubierto en
+  // reading-chat.test.tsx. No hay equivalente que rehacer acá.
 
   it("el contador del fan avanza (1 de 3) y las elegidas dejan de ser elegibles", async () => {
     mockFetch();
@@ -216,16 +258,19 @@ describe("Ceremony (tirada de tres)", () => {
     expect(screen.getByText(es.tarot.positionFuture)).toBeInTheDocument();
   });
 
-  it("403 free_limit al guardar: nota suave con CTA a /perfil, sin savedOk", async () => {
+  it("403 free_limit al guardar: bridge.save llega a 'free_limit' y Ceremony muestra la nota con CTA a /perfil", async () => {
     mockFetch(403);
-    renderCeremony();
+    const onReading = vi.fn();
+    renderCeremony({ onReading });
     await advanceToReading();
 
-    fireEvent.click(screen.getByRole("button", { name: es.tarot.saveReading }));
+    act(() => lastBridge(onReading).onSave());
     expect(await screen.findByText(es.tarot.ceremonyFreeLimit)).toBeInTheDocument();
     const cta = screen.getByRole("link", { name: es.tarot.ceremonyFreeLimitCta });
     expect(cta.getAttribute("href")).toBe("/perfil");
-    expect(screen.queryByText(es.tarot.savedOk)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(lastBridge(onReading).save).toBe("free_limit");
+    });
   });
 
   it("'volver al umbral' llama onClose", async () => {
@@ -248,31 +293,28 @@ describe("Ceremony (tirada de tres)", () => {
     expect((await screen.findAllByTestId("cut-pile")).length).toBe(3);
   });
 
-  // Task 4 (split de layout del paso reading): el contenedor gana la clase
-  // .readingPane y las cartas quedan en el carril izquierdo mientras prosa +
-  // chat + guardar/volver quedan agrupadas en .readingSide — SOLO en este
-  // paso. Estructural (no depende de @media, solo de las clases/DOM).
-  it("el paso reading tiene .readingPane con .readingSide conteniendo prosa+chat+guardar", async () => {
+  // Segunda pasada (Gio, 2026-07-24): prosa + ReadingChat + guardar/compartir
+  // ya NO viven en .readingPane — se reportan vía onReading y tarot-view.tsx
+  // los muestra en el carril derecho real (ver arriba). Acá solo debe quedar
+  // la grilla de cartas + "volver al umbral"; nada de lo que se movió al
+  // padre debe filtrarse dentro de este panel.
+  it("el paso reading tiene .readingPane con SOLO la grilla de cartas + volver (sin prosa/chat/guardar)", async () => {
     mockFetch();
     renderCeremony();
     await advanceToReading();
 
     const root = screen.getByTestId("ceremony");
-    const pane = root.querySelector('[class*="readingPane"]');
+    const pane = root.querySelector('[class*="readingPane"]') as HTMLElement | null;
     expect(pane).toBeInTheDocument();
 
-    const side = pane!.querySelector('[class*="readingSide"]') as HTMLElement | null;
-    expect(side).toBeInTheDocument();
-
-    // La prosa, el chat y el guardar/volver viven DENTRO de .readingSide.
-    expect(within(side!).getByTestId("reading-chat")).toBeInTheDocument();
-    expect(within(side!).getByRole("button", { name: es.tarot.saveReading })).toBeInTheDocument();
-    expect(within(side!).getByRole("button", { name: es.tarot.readingBack })).toBeInTheDocument();
-
-    // Las cartas quedan en el carril izquierdo, FUERA de .readingSide.
     const cards = pane!.querySelector('[class*="readingCards"]');
     expect(cards).toBeInTheDocument();
-    expect(side!.querySelector('[class*="readingCards"]')).toBeNull();
+    expect(within(pane!).getByRole("button", { name: es.tarot.readingBack })).toBeInTheDocument();
+
+    // Nada de lo que ahora vive en tarot-view.tsx se filtra acá.
+    expect(within(pane!).queryByTestId("reading-chat")).not.toBeInTheDocument();
+    expect(within(pane!).queryByRole("button", { name: es.tarot.saveReading })).not.toBeInTheDocument();
+    expect(within(pane!).queryByText(es.tarot.savedOk)).not.toBeInTheDocument();
   });
 
   it("los pasos previos a reading NO llevan .readingPane", async () => {

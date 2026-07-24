@@ -148,6 +148,15 @@
   cursor: pointer; padding: var(--sp-2) var(--sp-4);
 }
 .interpBackBtn:hover { border-color: var(--acc); }
+/* Confirmación de "Guardar en el diario" para la lectura de ceremonia viva en
+   este carril (pedido de Gio: la lectura + guardar viven en Interpretación,
+   no en la columna izquierda) — mismo valor que ceremony.module.css .savedOk. */
+.savedOk { color: var(--acc-text); font-size: var(--text-sm); margin: 0; }
+/* save:"error" (POST que no fue ni 201 ni 403): el botón "Guardar" sigue
+   habilitado para reintentar, pero antes esta nota vivía en .readingSide de
+   ceremony.tsx (T2/T3) — se restaura acá, junto al botón, que es donde ahora
+   vive el guardado. Mismo valor que ceremony.module.css .saveError. */
+.saveError { color: var(--tone-caution, var(--soft)); font-size: var(--text-xs); margin: 0; }
 
 @media (min-width: 1080px) { /* bp desktop R4a */
   /* Sin bottom-nav en desktop: sobra el clearance de 96px (paridad con la serie). */

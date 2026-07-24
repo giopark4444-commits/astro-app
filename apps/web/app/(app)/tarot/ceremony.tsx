@@ -17,11 +17,11 @@ import {
   rwsCtx,
 } from "@aluna/core";
 import { gestureRng } from "@/lib/tarot/rng";
-import { TAROT_CARDS_ES, composeReadingProse } from "@/lib/content/tarot-es";
+import { TAROT_CARDS_ES } from "@/lib/content/tarot-es";
 import { TAROT_CARDS_EN } from "@/lib/content/tarot-en";
 import { ShareModal } from "@/components/share/share-modal";
-import { ReadingChat } from "./reading-chat";
 import { positionLabelKey } from "./position-labels";
+import type { SavedReadingLite } from "./selection";
 import tarot from "./tarot.module.css";
 import styles from "./ceremony.module.css";
 
@@ -29,6 +29,22 @@ const DECK_SIZE = 78;
 
 type Step = "question" | "shuffle" | "cut" | "fan" | "reveal" | "reading";
 type SaveState = "idle" | "saving" | "saved" | "free_limit" | "error";
+
+// Pedido de Gio (2026-07-24, segunda pasada): "la lectura sigue saliendo en
+// el lado izquierdo mas no en interpretacion en el lado derecho... me gusta
+// que diga conversa esta tirada" — la ceremonia YA NO renderiza su prosa ni
+// su ReadingChat/guardar/compartir (eso vive ahora en tarot-view.tsx, en el
+// carril derecho REAL de la página); acá solo quedan las CARTAS visuales.
+// Reporta el resultado vivo vía `onReading` (mismo mecanismo que el `onStep`
+// que existía antes) para que el padre reuse EXACTAMENTE el renderizador
+// `TarotInterpretation` "saved" (mismo componente que ya usa una lectura del
+// diario) — cero prosa nueva, cero componente nuevo.
+export interface CeremonyReadingBridge {
+  reading: SavedReadingLite;
+  save: SaveState;
+  onSave: () => void;
+  onShare: () => void;
+}
 
 interface CeremonyState {
   step: Step;
@@ -94,6 +110,7 @@ export function Ceremony({
   spreadId,
   deckCtx = rwsCtx(""),
   onClose,
+  onReading,
 }: {
   /** Qué tirada anima esta ceremonia (T4): la ceremonia ya no está fija a
    *  "three" — el umbral (tarot-view, vía SpreadPicker) decide cuál. */
@@ -102,9 +119,13 @@ export function Ceremony({
    *  comportamiento pre-T4 cuando el llamador no lo pasa (p.ej. tests). */
   deckCtx?: DeckAssetCtx;
   onClose: () => void;
+  /** Reporta la lectura en curso al contenedor (tarot-view) apenas se llega
+   *  al paso "reading" — null al salir de ese paso (cerrar/reiniciar). El
+   *  padre la muestra en el carril derecho real de la página (interpretación
+   *  + ReadingChat), ver CeremonyReadingBridge arriba. */
+  onReading?: (data: CeremonyReadingBridge | null) => void;
 }) {
   const t = useTranslations("tarot");
-  const tShare = useTranslations("share");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
   const spread = spreadById(spreadId)!;
@@ -151,14 +172,9 @@ export function Ceremony({
       })),
     [state.drawn, spread],
   );
-
-  const prose = useMemo(
-    () =>
-      state.step === "reading"
-        ? composeReadingProse(locale === "en" ? "en" : "es", spreadId, readingCards, state.question)
-        : [],
-    [state.step, locale, spreadId, readingCards, state.question],
-  );
+  // La prosa YA NO se compone acá: TarotInterpretation "saved" (tarot-view.tsx,
+  // carril derecho) recompone la MISMA prosa desde `reading` (misma función
+  // composeReadingProse, mismo contenido) — sin duplicar el cómputo dos veces.
 
   function saveReading() {
     if (state.save === "saving" || state.save === "saved") return;
@@ -183,6 +199,36 @@ export function Ceremony({
       })
       .catch(() => dispatch({ type: "save", status: "error" }));
   }
+
+  // Reporta la lectura viva al padre (tarot-view.tsx) apenas se llega al paso
+  // "reading" — y `null` al salir de él (cerrar la ceremonia o iniciar otra).
+  // `reading` reusa la MISMA forma que una lectura guardada del diario
+  // (SavedReadingLite): el padre la pasa tal cual a `TarotInterpretation`
+  // {kind:"saved"}, el renderizador único que YA compone esta misma prosa —
+  // cero prosa nueva. `id` es un sentinel estable (nunca se persiste con él;
+  // el guardado real en /api/tarot/readings no lo usa) que el padre usa para
+  // distinguir "esta es la ceremonia en vivo" de una lectura real del diario.
+  useEffect(() => {
+    if (state.step !== "reading") {
+      onReading?.(null);
+      return;
+    }
+    onReading?.({
+      reading: {
+        id: "ceremony-live",
+        spread: spreadId,
+        question: state.question ?? null,
+        cards: readingCards,
+        created_at: new Date(0).toISOString(),
+      },
+      save: state.save,
+      onSave: saveReading,
+      onShare: () => setShareOpen(true),
+    });
+    // saveReading/setShareOpen: funciones estables en la práctica (misma
+    // identidad conceptual cada render, cierran sobre refs/dispatch), no
+    // hace falta useCallback — onReading (setState del padre) YA es estable.
+  }, [state.step, state.save, spreadId, readingCards, state.question, onReading]);
 
   const allFlipped = state.flipped.length > 0 && state.flipped.every(Boolean);
 
@@ -383,17 +429,17 @@ export function Ceremony({
       )}
 
       {state.step === "reading" && (
-        // CORRECCIÓN (Gio, 2026-07-24): ya NO parte en dos columnas propias —
-        // apila igual en cualquier ancho, dentro del .leftCol (más angosto)
-        // de tarot-view.tsx. El carril derecho REAL de la página (interpretación
-        // + chat) sigue montado siempre arriba; ver ceremony.module.css.
+        // CORRECCIÓN (Gio, 2026-07-24, dos pasadas): 1) ya no colapsa a una
+        // columna propia — apila dentro del .leftCol (más angosto) de
+        // tarot-view.tsx; 2) "la lectura sigue saliendo en el lado izquierdo
+        // mas no en interpretacion en el lado derecho" — la prosa +
+        // ReadingChat + guardar/compartir YA NO viven acá: se reportan vía
+        // onReading (arriba) y tarot-view.tsx los muestra en el carril
+        // derecho REAL (interpretación + chat de siempre). Acá solo quedan
+        // las CARTAS visuales + "volver al umbral" (control de la ceremonia,
+        // no de la lectura).
         <div className={`${styles.stepPane} ${styles.readingPane}`}>
           <h3 className={styles.stepTitle}>{t("readingTitle")}</h3>
-          {state.question && (
-            <p className={styles.readingQuestion}>
-              <strong>{t("diaryQuestionLabel")}:</strong> {state.question}
-            </p>
-          )}
           <div className={styles.readingCards}>
             {state.drawn.map((d, i) => {
               const content = cardsDict[d.card.id]!;
@@ -421,49 +467,19 @@ export function Ceremony({
             })}
           </div>
 
-          <div className={styles.readingSide}>
-            <div className={styles.readingProse}>
-              {prose.map((p, i) => (
-                <p key={i} className={tarot.sheetParagraph}>
-                  {p}
-                </p>
-              ))}
-            </div>
-
-            <ReadingChat spreadId={spreadId} cards={readingCards} {...(state.question ? { question: state.question } : {})} />
-
-            {state.save === "free_limit" ? (
-              // Nota suave, sin modal: el límite free no interrumpe el rito.
-              <p className={styles.freeLimit}>
-                {t("ceremonyFreeLimit")}{" "}
-                <Link href="/perfil" className={styles.freeLimitCta}>
-                  {t("ceremonyFreeLimitCta")}
-                </Link>
-              </p>
-            ) : state.save === "saved" ? (
-              <p className={styles.savedOk}>{t("savedOk")}</p>
-            ) : (
-              <>
-                {state.save === "error" && <p className={styles.saveError}>{t("saveError")}</p>}
-                <button
-                  type="button"
-                  className={styles.primaryBtn}
-                  onClick={saveReading}
-                  disabled={state.save === "saving"}
-                >
-                  {t("saveReading")}
-                </button>
-              </>
-            )}
-            {state.drawn[0] && (
-              <button type="button" className={styles.ghostBtn} onClick={() => setShareOpen(true)}>
-                {tShare("share")}
-              </button>
-            )}
-            <button type="button" className={styles.ghostBtn} onClick={onClose}>
-              {t("readingBack")}
-            </button>
-          </div>
+          {/* Nota del límite free: sigue siendo estado de LA CEREMONIA (no de
+              la interpretación), se conserva acá junto al control de cierre. */}
+          {state.save === "free_limit" && (
+            <p className={styles.freeLimit}>
+              {t("ceremonyFreeLimit")}{" "}
+              <Link href="/perfil" className={styles.freeLimitCta}>
+                {t("ceremonyFreeLimitCta")}
+              </Link>
+            </p>
+          )}
+          <button type="button" className={styles.ghostBtn} onClick={onClose}>
+            {t("readingBack")}
+          </button>
         </div>
       )}
 

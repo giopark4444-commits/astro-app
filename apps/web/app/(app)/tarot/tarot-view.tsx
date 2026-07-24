@@ -11,9 +11,10 @@ import { ShareButton } from "@/components/share/share-button";
 import { LensChatPanel } from "@/components/lens-chat-panel";
 import { useDeckAssets } from "@/lib/tarot/use-deck-assets";
 import { useSheetAutoClose } from "@/lib/viewport";
-import { Ceremony } from "./ceremony";
+import { Ceremony, type CeremonyReadingBridge } from "./ceremony";
 import { ManualEntry } from "./manual-entry";
 import { SpreadPicker } from "./spread-picker";
+import { ReadingChat } from "./reading-chat";
 import { TarotInterpretation, tarotSelectionTitle, DIARY_SPREAD_KEY } from "./interpretation-content";
 import { isMobileViewport, type TarotSelection } from "./selection";
 import styles from "./tarot.module.css";
@@ -62,6 +63,9 @@ function localDateKey(tz: string): string {
 
 export function TarotView({ userId }: { userId: string }) {
   const t = useTranslations("tarot");
+  // Compartir la lectura de la ceremonia (pedido de Gio, dos pasadas): mismo
+  // namespace que ya usaba ceremony.tsx para el botón (ahora movido acá).
+  const tShare = useTranslations("share");
   const locale = useLocale();
   const cardsDict = locale === "en" ? TAROT_CARDS_EN : TAROT_CARDS_ES;
   const deckCtx = useDeckAssets();
@@ -124,6 +128,31 @@ export function TarotView({ userId }: { userId: string }) {
   // snapshot que sigue siendo válido aunque `loadDiary` refresque la lista. No
   // hay, pues, disparador de reset — la selección persiste hasta que el usuario
   // elige otra (mismo criterio que la serie: la selección manda hasta cambiarla).
+
+  // Ceremonia digital en su paso "reading" (pedido de Gio, 2026-07-24, segunda
+  // pasada: "la lectura sigue saliendo en el lado izquierdo mas no en
+  // interpretacion en el lado derecho... me gusta que diga conversa esta
+  // tirada"). `Ceremony` reporta la lectura viva vía onReading; acá se
+  // SIEMBRA `selected` UNA vez al aparecer (no en cada tick de guardado, para
+  // no pisar si el usuario ya navegó a otra cosa — p.ej. entró a una carta
+  // suelta) — mismo criterio "sin disparador de reset" de arriba, solo que
+  // esta siembra es el ÚNICO momento en que si hay un trigger explícito.
+  const [ceremonyReading, setCeremonyReading] = useState<CeremonyReadingBridge | null>(null);
+  const seededCeremonyRef = useRef(false);
+  useEffect(() => {
+    if (ceremonyReading && !seededCeremonyRef.current) {
+      setSelected({ kind: "saved", reading: ceremonyReading.reading });
+      seededCeremonyRef.current = true;
+    }
+    if (!ceremonyReading) seededCeremonyRef.current = false;
+  }, [ceremonyReading]);
+  // ¿La interpretación de AHORA MISMO es la lectura viva de la ceremonia (no
+  // una lectura real del diario, ni una carta suelta)? Sentinel por `id`
+  // (ver ceremony.tsx CeremonyReadingBridge) — decide si el carril de chat
+  // muestra ReadingChat (con el contexto de esta tirada) en vez del
+  // LensChatPanel genérico, y si se muestran los botones guardar/compartir.
+  const viewingCeremonyReading =
+    ceremonyReading !== null && selected?.kind === "saved" && selected.reading.id === "ceremony-live";
 
   const aliveRef = useRef(true);
   // Servidor-como-verdad para el daily (review final, fix Important): el GET
@@ -327,8 +356,10 @@ export function TarotView({ userId }: { userId: string }) {
             <Ceremony
               spreadId={ceremony}
               deckCtx={deckCtx}
+              onReading={setCeremonyReading}
               onClose={() => {
                 setCeremony(null);
+                setCeremonyReading(null);
                 // La lectura pudo guardarse durante la ceremonia: refresca el diario.
                 loadDiary();
               }}
@@ -390,21 +421,36 @@ export function TarotView({ userId }: { userId: string }) {
         </div>
 
         {/* Panel de interpretación (100% desktop): en móvil lo reemplaza el
-            bottom-sheet de abajo. CORRECCIÓN (Gio, 2026-07-24): este carril
-            YA NUNCA se oculta — ni la ceremonia digital en su resultado final
-            ni el modo manual lo ocultan (mismo criterio para ambos ahora).
-            Sigue mostrando la interpretación diaria/seleccionada + el chat de
-            Aluna mientras la ceremonia/lectura manual corre en la columna
-            izquierda (leve redundancia con el <ReadingChat> propio de la
-            ceremonia/lectura manual, aceptada — ver reporte). */}
+            bottom-sheet de abajo. CORRECCIÓN (Gio, 2026-07-24, dos pasadas):
+            1) este carril YA NUNCA se oculta — ni la ceremonia digital en su
+            resultado final ni el modo manual lo ocultan; 2) "la lectura
+            sigue saliendo en el lado izquierdo mas no en interpretacion en
+            el lado derecho... me gusta que diga conversa esta tirada" — con
+            una ceremonia en su paso "reading", ESTE panel muestra su lectura
+            real (reusando TarotInterpretation "saved", cero prosa nueva) y
+            ESTE chat es <ReadingChat> (con el contexto de esa tirada) en vez
+            del LensChatPanel genérico — ya no son dos cosas redundantes, son
+            LA MISMA lectura, en un solo lugar. El modo manual (mazo físico)
+            conserva su <ReadingChat> propio en la columna izquierda (leve
+            redundancia con este carril, ya aceptada — ver reporte); la
+            ceremonia digital no la tiene más porque ahora vive acá. */}
         <div className={styles.interpCol}>
           <div className={`card ${styles.interpPanel}`}>
             <div className={styles.titleRow}>
               <span className={styles.cardH2}>{t("interpTitle")}</span>
               {/* Gate por revealed: compartir antes de voltear la carta del
-                  día spoilearía el arte/esencia que el panel aún oculta. */}
-              {revealed && (
-                <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+                  día spoilearía el arte/esencia que el panel aún oculta.
+                  Con una lectura de ceremonia viva, el compartir es el de
+                  ESA tirada (ceremonyReading.onShare), no el de la carta
+                  del día. */}
+              {viewingCeremonyReading ? (
+                <button type="button" className={styles.interpBackBtn} onClick={ceremonyReading!.onShare}>
+                  {tShare("share")}
+                </button>
+              ) : (
+                revealed && (
+                  <ShareButton params={{ lens: "tarot", cardId: daily.card.id, reversed: daily.reversed }} />
+                )
               )}
             </div>
             <TarotInterpretation
@@ -415,9 +461,33 @@ export function TarotView({ userId }: { userId: string }) {
               profileName=""
               onSelect={select}
             />
+            {viewingCeremonyReading && ceremonyReading!.save !== "saved" && (
+              <button
+                type="button"
+                className={styles.interpBackBtn}
+                onClick={ceremonyReading!.onSave}
+                disabled={ceremonyReading!.save === "saving"}
+              >
+                {t("saveReading")}
+              </button>
+            )}
+            {viewingCeremonyReading && ceremonyReading!.save === "error" && (
+              <p className={styles.saveError}>{t("saveError")}</p>
+            )}
+            {viewingCeremonyReading && ceremonyReading!.save === "saved" && (
+              <p className={styles.savedOk}>{t("savedOk")}</p>
+            )}
           </div>
           <div className={styles.chatCol}>
-            <LensChatPanel />
+            {viewingCeremonyReading ? (
+              <ReadingChat
+                spreadId={ceremonyReading!.reading.spread}
+                cards={ceremonyReading!.reading.cards}
+                {...(ceremonyReading!.reading.question ? { question: ceremonyReading!.reading.question } : {})}
+              />
+            ) : (
+              <LensChatPanel />
+            )}
           </div>
         </div>
       </div>

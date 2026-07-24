@@ -284,22 +284,24 @@
 .revealKeywords { color: var(--soft); font-size: var(--text-2xs); margin: 0; }
 
 /* ---------- reading ---------- */
-/* CORRECCIÓN (Gio, 2026-07-24 — "vuelve a unificarse en una sola columna
-   grande, eso esta prohibido... la lectura debe salir en la ventana de la
-   derecha directamente, el lado derecho es para lecturas e interpretaciones
-   y el chat"): el Task 4 original partía este paso en SU PROPIO split
-   técnica|prosa+chat (11fr/9fr) que solo cabía colapsando el .deskCols
-   exterior a una columna — exactamente la columna única que Gio prohíbe, y
-   dejaba el carril derecho REAL (interpretación + chat de toda la página)
-   sin montarse. Ahora .readingPane/.readingSide NUNCA parten nada, en
-   ningún ancho: apilan igual que en móvil (cartas → prosa → ReadingChat →
-   guardar/compartir/volver), todo DENTRO de .leftCol (más angosto, como
-   .leftCol de ManualEntry) — el carril derecho real siempre está montado
-   arriba en tarot-view.tsx, con su propia interpretación + LensChatPanel
-   (misma "leve redundancia" ya aceptada para el modo manual). */
+/* CORRECCIÓN, primera pasada (Gio, 2026-07-24 — "vuelve a unificarse en una
+   sola columna grande, eso esta prohibido... la lectura debe salir en la
+   ventana de la derecha directamente"): el Task 4 original partía este paso
+   en su propio split técnica|prosa+chat (11fr/9fr) que solo cabía colapsando
+   el .deskCols exterior a una columna — exactamente la columna única que Gio
+   prohíbe. Esa primera pasada apiló todo (cartas+prosa+chat+guardar) dentro
+   de .readingPane/.readingSide, sin partir nada, pero TODAVÍA dentro de
+   .leftCol.
+   CORRECCIÓN, segunda pasada (Gio, mismo día: "la lectura sigue saliendo en
+   el lado izquierdo mas no en interpretacion en el lado derecho... me gusta
+   que diga conversa esta tirada"): .readingSide desaparece del todo — la
+   prosa, <ReadingChat>, guardar y compartir ya NO viven en este módulo en
+   absoluto. Ceremony reporta la lectura viva vía la prop `onReading`
+   (ver ceremony.tsx, CeremonyReadingBridge) y tarot-view.tsx los muestra en
+   el carril derecho REAL de la página (mismo TarotInterpretation "saved" que
+   ya usa una lectura del diario, mismo <ReadingChat> de siempre). .readingPane
+   ahora solo contiene la grilla de cartas (abajo) + "volver al umbral". */
 .readingPane {}
-.readingSide { display: contents; }
-.readingQuestion { color: var(--soft); font-size: var(--text-sm); margin: 0; }
 .readingCards { display: flex; flex-direction: column; gap: var(--sp-3); width: 100%; }
 .readingCard { display: flex; gap: var(--sp-3); align-items: flex-start; text-align: left; }
 .readingImg {
@@ -319,10 +321,6 @@
 }
 .readingName { font-family: var(--font-display); font-size: var(--text-md); color: var(--ink); margin: 0; }
 .readingAmbit { color: var(--soft); font-size: var(--text-sm); line-height: 1.6; margin: 0; }
-.readingProse { width: 100%; text-align: left; border-top: 1px solid var(--line); padding-top: var(--sp-4); }
-
-.savedOk { color: var(--acc-text); font-size: var(--text-sm); margin: 0; }
-.saveError { color: var(--tone-caution, var(--soft)); font-size: var(--text-xs); margin: 0; }
 .freeLimit { color: var(--soft); font-size: var(--text-sm); margin: 0; max-width: 420px; }
 .freeLimitCta { color: var(--acc-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 
