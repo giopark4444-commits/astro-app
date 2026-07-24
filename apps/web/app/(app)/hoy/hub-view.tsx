@@ -12,9 +12,11 @@ import { dismissCommitmentAction } from "../actions";
 import { Meaning } from "@/components/meaning";
 import { Starfield } from "@/components/starfield";
 import { ChatView } from "../preguntar/chat-view";
+import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import { EnergyPanel } from "./energy-panel";
+import { PeriodSelector } from "./period-selector";
 import { SummaryChart } from "./summary-chart";
-import { SummaryHoroscope } from "./summary-horoscope";
+import { SummaryHoroscope, type HoroTrad } from "./summary-horoscope";
 import { SummaryNumerology } from "./summary-numerology";
 import { SummaryPillars } from "./summary-pillars";
 import { TarotFan } from "./tarot-fan";
@@ -54,14 +56,32 @@ function commitmentText(
 
 /**
  * HD7 — el dashboard de bienvenida en maestro-detalle. Izquierda (leftCol):
- * secciones apiladas, en orden fijo (proactiva → energía → carta [con el
- * clima de tránsitos consolidado en la MISMA ventana] → horóscopo occidental →
- * horóscopo oriental → numerología → pilares → tarot → lectura de mano).
+ * secciones apiladas, en orden fijo (proactiva → [PeriodSelector, GLOBAL] →
+ * energía → carta [con el clima de tránsitos consolidado en la MISMA ventana
+ * + un botón para revelar el mapa astral compacto] → horóscopo [occidental Y
+ * oriental en la MISMA ventana, tab a click, decorados con el glifo/hanzi real]
+ * → numerología [número protagonista] → pilares [hanzi grandes teñidos por su
+ * Wu Xing] → tarot → lectura de mano).
  * Consolidación pedida por Gio 2026-07-23: todo lo de carta en una sola
  * ventana, numerología (lo esencial) y una tarjeta de lectura de mano que
  * sube+interpreta una foto real, todas sumadas al mismo patrón
- * interpretación-al-click de las demás. Derecha (interpCol, sticky en
- * desktop): el chat de Aluna embebido, mismo patrón que perfil-chat-panel.tsx.
+ * interpretación-al-click de las demás.
+ * Polish pedido después (mismo día, con una corrección de Gio en el camino):
+ * horóscopo occidental/oriental fusionados con tabs de click manual (nunca
+ * automático) + glifo/hanzi decorativo + número/hanzi protagonistas en
+ * numerología/pilares + botón de mapa compacto en carta. El selector de
+ * periodo (ayer/hoy/mañana/semana/mes/año) NO vive dentro de ninguna tarjeta
+ * — Gio corrigió: "va arriba de la ventana de las barras, y debe afectar
+ * todas las ventanas". Vive ACÁ (PeriodSelector, justo arriba de EnergyPanel)
+ * y baja a quien pueda responder de verdad: EnergyPanel (astros),
+ * SummaryHoroscope (ambas), AreaReadingSheet y el clima de tránsitos de la
+ * carta (yesterday/today/tomorrow; week/month/year no tienen un instante
+ * único que mostrar como lista de aspectos, así que se clampean a "hoy").
+ * Numerología/mano/tarot y el pilar del día NO cambian con el periodo — son
+ * del día o intemporales (mismo criterio que HD4 en energy-panel.tsx, que
+ * sigue intacto: numeros/pilares/general en ESE panel siguen siendo del día).
+ * Derecha (interpCol, sticky en desktop): el chat de Aluna embebido, mismo
+ * patrón que perfil-chat-panel.tsx.
  * En móvil el carril derecho es display:none (el chat vive en /preguntar); no
  * se gatea el montaje por matchMedia para no romper la hidratación SSR —
  * igual que carta/pilares/numeros, el ocultado es puro CSS.
@@ -80,6 +100,18 @@ export function HubView({
   // el carril no existe (display:none) y las barras conservan su BottomSheet.
   const [selection, setSelection] = useState<HoySelection | null>(null);
   const selBox = selection?.kind === "box" ? selection.box : null;
+  // Horóscopo: occidental/oriental EN UNA sola ventana (pedido de Gio, polish
+  // 2026-07-23) — `trad` se IZA acá (mismo patrón que horoscopo-view.tsx con
+  // pro/period/sign) para que el wrapper de click-to-interpret sepa siempre
+  // cuál box seleccionar, sin quedarse un paso atrás del tab recién clicado.
+  const [horoTrad, setHoroTrad] = useState<HoroTrad>("occidental");
+  const horoBox = horoTrad === "oriental" ? "horoscopoOriental" : "horoscopoOccidental";
+  // Selector de periodo GLOBAL (pedido de Gio, corrigiendo un malentendido:
+  // "va arriba de la ventana de las barras, y debe afectar todas las
+  // ventanas") — UN solo estado, arriba de EnergyPanel, que baja a quien
+  // pueda responder de verdad (EnergyPanel/astros, SummaryHoroscope, clima de
+  // tránsitos). Ver PeriodSelector.
+  const [period, setPeriod] = useState<HoroscopePeriod>("today");
 
   // Descarte optimista (Fase 2 T4): el item desaparece al instante, la
   // server action corre en paralelo best-effort (dismissCommitment ya nunca
@@ -102,15 +134,31 @@ export function HubView({
     void dismissCommitmentAction(id);
   }
 
+  // Selector de periodo GLOBAL (Gio: "debe afectar todas las ventanas"): "Tu
+  // clima" es una lista de aspectos EXACTOS de un instante, no un promedio —
+  // ayer/mañana desplazan ese instante ±1 día (mismo `date` opcional que ya
+  // acepta /api/chart); semana/mes/año no tienen un "instante" único que
+  // mostrar como lista de aspectos, así que se quedan ancladas a HOY (sin
+  // fingir un dato que no existe). `weatherBucket` colapsa week/month/year a
+  // "today" ANTES del useEffect: cambiar entre esos 3 no debe disparar un
+  // refetch idéntico (evita pedir lo mismo 3 veces).
+  const weatherBucket = period === "yesterday" || period === "tomorrow" ? period : "today";
+
   useEffect(() => {
     if (!active) return;
     let alive = true;
     void (async () => {
       try {
+        const date =
+          weatherBucket === "yesterday"
+            ? new Date(Date.now() - 86_400_000).toISOString()
+            : weatherBucket === "tomorrow"
+              ? new Date(Date.now() + 86_400_000).toISOString()
+              : undefined;
         const res = await fetch("/api/chart", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ profileId: active.id, kind: "transits" }),
+          body: JSON.stringify({ profileId: active.id, kind: "transits", date }),
         });
         const data = (await res.json()) as { transitAspects?: Aspect[] };
         if (alive) setWeather(data.transitAspects?.slice(0, 3) ?? []);
@@ -121,7 +169,7 @@ export function HubView({
     return () => {
       alive = false;
     };
-  }, [active]);
+  }, [active, weatherBucket]);
 
   return (
     <main className={styles.wrap}>
@@ -179,6 +227,13 @@ export function HubView({
             </section>
           )}
 
+          {/* Selector de periodo GLOBAL (pedido de Gio: "va arriba de la
+              ventana de las barras, y debe afectar todas las ventanas") —
+              arriba de EnergyPanel, mueve `astros` acá Y el horóscopo de
+              abajo (e+f). Numerología/mano/pilar del día NO cambian con el
+              periodo (son del día o intemporales, mismo criterio de HD4). */}
+          {active && <PeriodSelector period={period} onChange={setPeriod} />}
+
           {/* b) ¿Cómo estás hoy? — barras de energía por disciplina (HD4).
               En desktop la barra tocada se interpreta en el panel derecho; en
               móvil EnergyPanel conserva su BottomSheet (decide él, ver prop). */}
@@ -186,6 +241,7 @@ export function HubView({
             <EnergyPanel
               profileId={active.id}
               focus={focus}
+              period={period}
               onAreaSelect={(sel) => setSelection({ kind: "area", ...sel })}
             />
           )}
@@ -256,25 +312,26 @@ export function HubView({
             </section>
           )}
 
-          {/* e) Horóscopo occidental — resumen del día (HD5). */}
+          {/* e+f) Horóscopo — occidental Y oriental en UNA sola ventana,
+              solo se cambian al click en su pestaña (pedido de Gio, polish
+              2026-07-23). `horoTrad`/`horoBox` viven arriba (IZADOS) para que
+              este wrapper y los tabs internos de SummaryHoroscope siempre
+              apunten al mismo box, cambien cuando cambien. */}
           {active && (
             <div
               className={styles.clickBox}
-              data-on={selBox === "horoscopoOccidental" || undefined}
-              onClick={() => setSelection({ kind: "box", box: "horoscopoOccidental" })}
+              data-on={selBox === "horoscopoOccidental" || selBox === "horoscopoOriental" || undefined}
+              onClick={() => setSelection({ kind: "box", box: horoBox })}
             >
-              <SummaryHoroscope profileId={active.id} trad="occidental" />
-            </div>
-          )}
-
-          {/* f) Horóscopo oriental — resumen del día (HD5). */}
-          {active && (
-            <div
-              className={styles.clickBox}
-              data-on={selBox === "horoscopoOriental" || undefined}
-              onClick={() => setSelection({ kind: "box", box: "horoscopoOriental" })}
-            >
-              <SummaryHoroscope profileId={active.id} trad="oriental" />
+              <SummaryHoroscope
+                profileId={active.id}
+                trad={horoTrad}
+                period={period}
+                onTradChange={(next) => {
+                  setHoroTrad(next);
+                  setSelection({ kind: "box", box: next === "oriental" ? "horoscopoOriental" : "horoscopoOccidental" });
+                }}
+              />
             </div>
           )}
 

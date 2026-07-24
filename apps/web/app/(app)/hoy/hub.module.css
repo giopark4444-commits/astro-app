@@ -88,6 +88,17 @@
 .leftCol > * { margin-bottom: 0; }
 .interpCol { display: none; }
 
+/* Selector de periodo GLOBAL (pedido de Gio: "va arriba de la ventana de las
+   barras, y debe afectar todas las ventanas") — fila de flujo normal, sin
+   alturas fijas; envuelve (flex-wrap) en angosto en vez de recortar. Mismo
+   primitivo global seg__item (flex:1, sin override) que ya usa /horoscopo
+   para esta misma lista de 6 periodos (horoscopo.module.css .periods). */
+.periodSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
 /* Título del panel de chat (span) — misma receta que la serie (perfil .cardH2 /
    numerology-view .cardH2). */
 .cardH2 {
@@ -135,9 +146,11 @@
 
   /* Carril derecho: lo único sticky — la izquierda scrollea libre. top: 84px =
      header 66px + respiro (mismo offset que carta/pilares/numeros/perfil).
-     Columna flex: panel de Interpretación arriba (alto natural con tope, ver
-     interpretation-panel.module.css) + chat abajo tomando el resto — ninguno
-     estira al otro (regla Gio 2026-07-23). */
+     Columna flex: panel de Interpretación arriba (alto natural, SIN tope ni
+     overflow propio, ver interpretation-panel.module.css) + chat abajo — ninguno
+     estira al otro y ninguno scrollea por su cuenta: la página scrollea entera,
+     un solo scroll (regla Gio 2026-07-23, reforzada tras detectar scroll partido
+     entre columnas). */
   .interpCol {
     display: flex; flex-direction: column; gap: var(--sp-4);
     position: sticky; top: 84px;

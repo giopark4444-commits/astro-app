@@ -97,12 +97,21 @@
    botón dorado; clicar en cualquier parte activa el input nativo. */
 .fileBtn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: var(--sp-3) var(--sp-6); border-radius: 999px; cursor: pointer;
+  padding: var(--sp-3) var(--sp-6); border: 0; border-radius: 999px; cursor: pointer;
   font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 700; color: var(--ink-on-acc);
   background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
   box-shadow: var(--glow-soft);
 }
 .fileInput { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+/* Elegir cámara en vivo (primario) vs. archivo/galería (secundario) — sin
+   alturas fijas, solo un layout de flujo normal que crece con su contenido. */
+.captureChoices {
+  display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+}
+.captureOr {
+  font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 1px; color: var(--soft);
+}
 
 /* ---------------- Estados de espera (analizando / tejiendo la lectura) ---------------- */
 .loadingCard { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-6) var(--sp-4); align-items: center; }

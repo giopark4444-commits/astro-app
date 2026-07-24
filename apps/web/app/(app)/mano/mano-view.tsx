@@ -9,6 +9,7 @@ import type { PalmFeatures } from "@/lib/palm/schema";
 import { resizePalmPhoto } from "./resize-image";
 import { loadPalmReading, savePalmReading } from "./storage";
 import { otherSide, type HandRole, type Side } from "./types";
+import { CameraCapture } from "./camera-capture";
 import styles from "./mano.module.css";
 
 // Lectura de mano: máquina de estados de un solo carril ceremonial (spec
@@ -369,26 +370,47 @@ function CaptureScreen({
   const sideLabel = side === "derecha" ? t("sideRight") : t("sideLeft");
   const title = role === "dominante" ? t("captureTitleDominant", { side: sideLabel }) : t("captureTitlePassive", { side: sideLabel });
   const stepN = role === "dominante" ? 1 : 2;
+  // Pedido de Gio: activar la cámara de verdad (celular O compu/Mac), no solo
+  // elegir de la galería — CameraCapture (getUserMedia) como opción PRIMARIA;
+  // "Elegir foto" (el <input type=file> de siempre, con capture="environment"
+  // como hint en móvil) queda de respaldo/secundaria.
+  const [showCamera, setShowCamera] = useState(false);
 
   return (
     <div className={`card ${styles.captureCard} reveal`}>
       {handCount === 2 && <p className={styles.captureStep}>{t("captureStep", { n: stepN, total: handCount })}</p>}
       <p className={styles.captureTitle}>{title}</p>
       <p className={styles.captureHint}>{t("captureHint")}</p>
-      <label className={styles.fileBtn}>
-        {t("captureCta")}
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className={styles.fileInput}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = "";
-            if (file) onFile(file);
+      {showCamera ? (
+        <CameraCapture
+          onCapture={(file) => {
+            setShowCamera(false);
+            onFile(file);
           }}
+          onCancel={() => setShowCamera(false)}
         />
-      </label>
+      ) : (
+        <div className={styles.captureChoices}>
+          <button type="button" className={styles.fileBtn} onClick={() => setShowCamera(true)}>
+            {t("cameraCta")}
+          </button>
+          <span className={styles.captureOr}>{t("cameraOr")}</span>
+          <label className={styles.btnGhost}>
+            {t("captureCta")}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className={styles.fileInput}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) onFile(file);
+              }}
+            />
+          </label>
+        </div>
+      )}
     </div>
   );
 }

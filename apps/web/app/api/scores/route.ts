@@ -21,9 +21,12 @@ import { todayCivilInZone, isValidTz } from "@/lib/hoy/today-birth";
 
 // "Tu energía de hoy" (dashboard): puntúa 6 áreas de vida (0..100) por las cuatro
 // disciplinas. `astros` = clima de tránsitos al natal, y responde al PERIODO
-// (today/week/month/year, como antes). `numeros`, `pilares` y `general` son SIEMPRE
-// del día (no dependen del periodo): numerología del día, pilares (八字/사주) con el
-// pilar de hoy, y el promedio de las tres. Determinista; server-only por el motor
+// (ayer/hoy/mañana/semana/mes/año — pedido de Gio: el selector global vive
+// ARRIBA de este panel en hub-view.tsx, no acá dentro; mismos 6 valores que
+// /horoscopo). `numeros`, `pilares` y `general` son SIEMPRE del día (no dependen
+// del periodo): numerología del día, pilares (八字/사주) con el pilar de hoy, y
+// el promedio de las tres — igual que antes de sumar yesterday/tomorrow, esa
+// parte de la decisión HD4 no cambia. Determinista; server-only por el motor
 // nativo sweph. profileId VALIDADO contra birth_profiles del usuario autenticado
 // (RLS); nunca se confía en lat/lng del body.
 
@@ -40,19 +43,26 @@ const SCORE_ORBS: Record<string, number> = {
   conjunction: 6, opposition: 6, trine: 5, square: 5, sextile: 4,
 };
 
-type Period = "today" | "week" | "month" | "year";
-const PERIODS: readonly Period[] = ["today", "week", "month", "year"];
+// yesterday/tomorrow sumados (antes solo today/week/month/year) — pedido de
+// Gio: el selector de periodo global (hub-view.tsx, ARRIBA de este panel)
+// usa los mismos 6 valores que /horoscopo (HoroscopePeriod/PERIODS en
+// horoscopo-shared.ts), así que astros los soporta todos también.
+type Period = "yesterday" | "today" | "tomorrow" | "week" | "month" | "year";
+const PERIODS: readonly Period[] = ["yesterday", "today", "tomorrow", "week", "month", "year"];
 
 const DAY_MS = 86_400_000;
 
 /**
  * Fechas (ISO) que muestrean el periodo. Cuanto más largo, muestras más espaciadas:
  * los planetas LENTOS (cuyos aspectos persisten en todas las muestras) marcan el
- * clima; los rápidos (Luna) se promedian hacia neutro. Día = solo ahora.
+ * clima; los rápidos (Luna) se promedian hacia neutro. Día/ayer/mañana = un solo
+ * instante desplazado ±1 día (mismo criterio que /api/chart para "Tu clima").
  */
 function sampleDates(period: Period, from = Date.now()): string[] {
   const at = (days: number) => new Date(from + days * DAY_MS).toISOString();
+  if (period === "yesterday") return [at(-1)];
   if (period === "today") return [at(0)];
+  if (period === "tomorrow") return [at(1)];
   if (period === "week") return Array.from({ length: 7 }, (_, i) => at(i));
   if (period === "month") return Array.from({ length: 6 }, (_, i) => at(i * 5));
   return Array.from({ length: 12 }, (_, i) => at(i * 30)); // year

@@ -31,6 +31,121 @@
 .chip {
   font-size: var(--text-xs);
 }
+
+/* SummaryNumerology: número protagonista (pedido de Gio: "has que el numero
+   principal sea mas protagonista") — mismo anillo+glow que el héroe de
+   /numeros (numerology-view.module.css .hero/.heroN/.heroLabel), escalado
+   para una tarjeta de dashboard: anillo más chico, --display-sm en vez de
+   --display, sin el padding/cursor de página completa (acá no es clickeable,
+   el click-to-interpret vive en el clickBox de hub-view.tsx). */
+.numHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  text-align: center;
+}
+.numHeroRing {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(var(--acc-rgb), 0.45);
+  box-shadow: 0 0 24px rgba(var(--acc-rgb), 0.16), inset 0 0 18px rgba(var(--acc-rgb), 0.08);
+}
+.numHeroN {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--display-sm);
+  line-height: 1;
+  color: var(--acc-text);
+  animation: aluna-glow 4.5s var(--ease-soft) infinite;
+}
+.numHeroLabel {
+  margin-top: var(--sp-2);
+  font-size: var(--text-2xs);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--soft);
+  font-weight: 700;
+}
+.numHeroSteps {
+  font-size: var(--text-xs);
+  color: var(--soft);
+}
+
+/* SummaryPillars: hanzi del pilar del Día GRANDES, teñidos por su elemento
+   Wu Xing real (pedido de Gio: "en pilares tambien usa algo que sea
+   distintivo") — mismas clases el_* que /pilares (pilares.module.css),
+   copiadas acá porque CSS Modules no comparte clases entre archivos; los 5
+   valores hex son DOMINIO, intocables, deben quedar byte-idénticos a
+   @aluna/core WU_XING_COLORS (packages/core/src/bazi/colors.ts) y a
+   pilares.module.css — no re-derivar, solo copiar si alguna vez cambian ahí. */
+.pillarsHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  text-align: center;
+}
+.pillarsChars {
+  display: flex;
+  gap: var(--sp-2);
+}
+.pillarsChar {
+  font-family: var(--font-display);
+  font-size: var(--display-sm);
+  line-height: 1;
+  font-weight: 600;
+}
+.pillarsLabel {
+  margin-top: var(--sp-2);
+  font-size: var(--text-2xs);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--soft);
+  font-weight: 700;
+}
+.pillarsSub {
+  font-size: var(--text-xs);
+  color: var(--soft);
+}
+.el_wood { color: #7fb069; }
+.el_fire { color: #e0795a; }
+.el_earth { color: #d4a85f; }
+.el_metal { color: #b8b6c8; }
+.el_water { color: #7aaae0; }
+
+/* SummaryChart: botón para revelar el mapa astral compacto (pedido de Gio:
+   "pon un ultimo boton donde podamos ver la mapa astral compacto, mas que
+   todo para poner linda la pagina") — reusa ChartWheel de /carta tal cual;
+   .miniWheelWrap solo lo angosta (su propio .wheel es width:100% relativo al
+   padre, ver carta.module.css) — sin altura fija, crece con su contenido. */
+.wheelToggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  color: var(--soft);
+  background: var(--surface-2);
+  transition: color var(--dur-fast) var(--ease);
+}
+.wheelToggle:hover {
+  color: var(--ink);
+}
+.miniWheelWrap {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
 .summaryP {
   margin: 0;
   font-size: var(--text-sm);
@@ -81,4 +196,56 @@
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* Cámara en vivo (primario) vs. archivo/galería (secundario), pedido de Gio:
+   "que sea que active la cámara del celular o del compu". Layout de flujo
+   normal, sin alturas fijas — crece con lo que sea que muestre CameraCapture. */
+.uploadChoices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+.uploadOr {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--soft);
+}
+.uploadBtnGhost {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--soft);
+  background: var(--surface-2);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+.uploadBtnGhost:hover {
+  color: var(--ink);
+}
+
+/* SummaryHoroscope: glifo/hanzi decorativo antes del título (pedido de Gio:
+   "usa el simbolo para decorar algo la ventana") + fila .seg de tradición
+   (occidental/oriental) — mismo primitivo global seg__item que /horoscopo y
+   /ajustes, sin reinventar el look. El selector de PERIODO es global (ver
+   .periodSelector en hub.module.css, arriba de EnergyPanel), no vive acá. */
+.horoGlyph {
+  font-size: var(--text-xl);
+  color: var(--acc-text);
+  opacity: 0.9;
+}
+.horoTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
 }

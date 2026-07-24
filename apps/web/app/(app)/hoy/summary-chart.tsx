@@ -6,6 +6,7 @@ import { PLANETS, ZODIAC_SIGNS, signOfLongitude, type ChartResult } from "@aluna
 import { astroLabels } from "@/lib/content/astrology-labels";
 import { composeCoreReading as composeCoreEs } from "@/lib/content/core-reading-es";
 import { composeCoreReading as composeCoreEn } from "@/lib/content/core-reading-en";
+import { ChartWheel } from "../carta/chart-wheel";
 import styles from "./summary.module.css";
 
 // Task 5: tarjeta-resumen de /carta para el dashboard — Sol/Luna/Ascendente
@@ -38,6 +39,13 @@ export function SummaryChart({
   const locale = useLocale();
   const L = astroLabels(locale);
   const [state, setState] = useState<State>({ s: "loading" });
+  // Mapa astral compacto (pedido de Gio: "pon un ultimo boton donde podamos
+  // ver la mapa astral compacto, mas que todo para poner linda la pagina") —
+  // reusa ChartWheel tal cual (mismo SVG que /carta), solo envuelto en un
+  // contenedor angosto: `.wheel` en carta.module.css ya es width:100% (relativo
+  // a su padre), así que shrinkea solo con el ancho del wrapper, sin tocar esa
+  // clase. Oculto por default (un botón, no siempre visible).
+  const [showWheel, setShowWheel] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -106,6 +114,24 @@ export function SummaryChart({
       <Link href="/carta" className={styles.cta}>
         {t("hoy.summaryChartCta")} →
       </Link>
+
+      {chart && (
+        <>
+          <button
+            type="button"
+            className={styles.wheelToggle}
+            onClick={() => setShowWheel((v) => !v)}
+            aria-expanded={showWheel}
+          >
+            {showWheel ? t("hoy.summaryChartWheelHide") : t("hoy.summaryChartWheelShow")}
+          </button>
+          {showWheel && (
+            <div className={styles.miniWheelWrap}>
+              <ChartWheel chart={chart} solar={false} onSelect={() => {}} />
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 }

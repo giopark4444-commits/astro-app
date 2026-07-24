@@ -14,7 +14,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, fireEvent, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { Aspect } from "@aluna/core";
 import type { Commitment } from "@/lib/memory-commitments";
@@ -103,15 +103,19 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
   it("apila las secciones de la izquierda en el orden del contrato (consolidación Gio 2026-07-23: carta+clima en una ventana, + numerología y lectura de mano)", async () => {
     render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
 
-    // a→j: proactiva, energía, carta (con el clima consolidado en la MISMA
-    // ventana), horóscopo occ, horóscopo or, numerología, pilares, tarot, mano.
+    // a→j: proactiva, [selector de periodo global], energía, carta (con el
+    // clima consolidado en la MISMA ventana), horóscopo (occ+or fusionados,
+    // occidental activo por default — la pestaña "Oriental" SIEMPRE está,
+    // aunque su título h2 solo se vea al clicarla), numerología, pilares,
+    // tarot, mano.
     const markers = [
       await screen.findByText(new RegExp(es.hoy.proactive.title)), // "✦ Aluna te recuerda"
+      screen.getByRole("tablist", { name: es.hoy.periodSelectorAria }), // selector de periodo GLOBAL, arriba de "las barras"
       screen.getByText(es.hoy.energyTitle), // "¿Cómo estás hoy?"
       screen.getByText(es.hoy.summaryChartTitle), // "Tu carta"
       screen.getByText(new RegExp(es.carta.weatherTitle)), // "☾ Tu clima de hoy" — AHORA dentro de la misma ventana que "Tu carta"
-      screen.getByText(es.hoy.summaryHoroscopeWesternTitle),
-      screen.getByText(es.hoy.summaryHoroscopeEasternTitle),
+      screen.getByText(es.hoy.summaryHoroscopeWesternTitle), // occidental activo por default
+      screen.getByRole("tab", { name: es.hoy.summaryHoroscopeEasternTab }), // pestaña "Oriental" (siempre presente, fusionadas)
       screen.getByText(es.hoy.summaryNumerologyTitle),
       screen.getByText(es.hoy.summaryPillarsTitle),
       screen.getByText(es.hoy.tarotFanTitle),
@@ -125,6 +129,32 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
         `sección ${i} después de la ${i - 1}`,
       ).toBeTruthy();
     }
+  });
+
+  it("el selector de periodo global cambia lo que pide /api/scores (astros) Y /api/horoscope/* — 'debe afectar todas las ventanas' (Gio)", async () => {
+    render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
+    await screen.findByText(new RegExp(es.hoy.proactive.title));
+
+    const fetchSpy = global.fetch as unknown as ReturnType<typeof vi.fn>;
+    const fetchCallsFor = (fragment: string) =>
+      fetchSpy.mock.calls.filter(([url]) => typeof url === "string" && url.includes(fragment));
+    await waitFor(() => expect(fetchCallsFor("/api/scores").length).toBeGreaterThan(0));
+    await waitFor(() => expect(fetchCallsFor("/api/horoscope/western").length).toBeGreaterThan(0));
+
+    fireEvent.click(screen.getByRole("tab", { name: es.hoy.periodWeek }));
+
+    await waitFor(() => {
+      const scoresBody = JSON.parse(
+        (fetchCallsFor("/api/scores").at(-1)![1] as RequestInit).body as string,
+      );
+      expect(scoresBody.period).toBe("week");
+    });
+    await waitFor(() => {
+      const horoBody = JSON.parse(
+        (fetchCallsFor("/api/horoscope/western").at(-1)![1] as RequestInit).body as string,
+      );
+      expect(horoBody.period).toBe("week");
+    });
   });
 
   it("carta y clima ya NO son ventanas separadas: comparten el mismo contenedor <section class=\"card\">", async () => {

@@ -17,6 +17,23 @@ vi.mock("../resize-image", () => ({
   resizePalmPhoto: vi.fn(),
 }));
 
+// CameraCapture (getUserMedia real) tiene su propio test dedicado
+// (camera-capture.test.tsx) — acá se mockea como stub interactivo para
+// probar SOLO el cableado del toggle "Tomar foto" ↔ "Elegir foto" en
+// CaptureScreen, sin repetir el mock de navigator.mediaDevices.
+vi.mock("../camera-capture", () => ({
+  CameraCapture: ({ onCapture, onCancel }: { onCapture: (f: File) => void; onCancel: () => void }) => (
+    <div data-testid="camera-capture-stub">
+      <button type="button" onClick={() => onCapture(new File(["foto"], "camara.jpg", { type: "image/jpeg" }))}>
+        stub-snap
+      </button>
+      <button type="button" onClick={onCancel}>
+        stub-cancel
+      </button>
+    </div>
+  ),
+}));
+
 import { resizePalmPhoto } from "../resize-image";
 import { ManoView } from "../mano-view";
 import styles from "../mano.module.css";
@@ -88,6 +105,55 @@ describe("ManoView", () => {
     expect(screen.getByRole("tab", { name: es.mano.sideRightLabel })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: es.mano.start })).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("CaptureScreen ofrece Tomar foto (cámara) como opción primaria y Elegir foto como respaldo", async () => {
+    renderView();
+    fireEvent.click(screen.getByRole("tab", { name: es.mano.handCountOne }));
+    fireEvent.click(screen.getByRole("button", { name: es.mano.start }));
+
+    await screen.findByText(domTitle("captureTitleDominant", es.mano.sideRight));
+    expect(screen.getByRole("button", { name: es.mano.cameraCta })).toBeInTheDocument();
+    expect(screen.getByText(es.mano.cameraOr)).toBeInTheDocument();
+    expect(screen.getByText(es.mano.captureCta)).toBeInTheDocument();
+    expect(screen.queryByTestId("camera-capture-stub")).not.toBeInTheDocument();
+  });
+
+  it("Tomar foto abre la cámara y capturar entrega el archivo al flujo (misma ruta que Elegir foto)", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/palm-analysis") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ available: true, features: GOOD_FEATURES }) });
+      }
+      if (url === "/api/palm-reading") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ available: true, sections: SECTIONS, hasNatal: false }) });
+      }
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+    renderView();
+    fireEvent.click(screen.getByRole("tab", { name: es.mano.handCountOne }));
+    fireEvent.click(screen.getByRole("button", { name: es.mano.start }));
+    await screen.findByText(domTitle("captureTitleDominant", es.mano.sideRight));
+
+    fireEvent.click(screen.getByRole("button", { name: es.mano.cameraCta }));
+    expect(screen.getByTestId("camera-capture-stub")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: es.mano.cameraCta })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "stub-snap" }));
+
+    await waitFor(() => expect(screen.getByText(SECTIONS.sintesis)).toBeInTheDocument());
+  });
+
+  it("Cancelar en la cámara vuelve a las opciones de captura", async () => {
+    renderView();
+    fireEvent.click(screen.getByRole("tab", { name: es.mano.handCountOne }));
+    fireEvent.click(screen.getByRole("button", { name: es.mano.start }));
+    await screen.findByText(domTitle("captureTitleDominant", es.mano.sideRight));
+
+    fireEvent.click(screen.getByRole("button", { name: es.mano.cameraCta }));
+    fireEvent.click(screen.getByRole("button", { name: "stub-cancel" }));
+
+    expect(screen.getByRole("button", { name: es.mano.cameraCta })).toBeInTheDocument();
+    expect(screen.queryByTestId("camera-capture-stub")).not.toBeInTheDocument();
   });
 
   it("flujo feliz de 1 mano: analysis → reading → secciones, con CTA a /preguntar y aviso de puente astral pendiente", async () => {

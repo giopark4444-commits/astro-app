@@ -68,11 +68,20 @@ export async function POST(request: NextRequest) {
   if (typeof body.ayanamsha === "string") opts.ayanamsha = body.ayanamsha;
 
   const kind = String(body.kind ?? "natal");
+  // Selector global de periodo del dashboard (hub-view.tsx, pedido de Gio:
+  // "debe afectar todas las ventanas"): "Tu clima" (kind:"transits") puede
+  // pedir un instante desplazado (ayer/mañana) en vez de "ahora". Opcional y
+  // retrocompatible — sin `date`, computeDerivedChart usa "ahora" como
+  // siempre (mismo comportamiento previo para /carta y cualquier otro caller).
+  let dateIso: string | undefined;
+  if (typeof body.date === "string" && !Number.isNaN(Date.parse(body.date))) {
+    dateIso = body.date;
+  }
   try {
     const input = profileToChartInput(profile, opts);
     const chart =
       kind === "transits" || kind === "progressed" || kind === "solar_return"
-        ? computeDerivedChart(input, kind as DerivedKind)
+        ? computeDerivedChart(input, kind as DerivedKind, dateIso)
         : computeChart(input);
     // Tránsitos y revolución solar usan una hora conocida (ahora / el regreso del
     // Sol) → casas fiables aunque no se sepa la hora de nacimiento. Natal y

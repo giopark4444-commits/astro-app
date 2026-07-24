@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { SummaryChart } from "../summary-chart";
@@ -23,7 +23,15 @@ const CHART_FIXTURE = {
     { body: "sun", sign: "leo", house: 5, dignity: null, degree: 10, minute: 0, second: 0, longitude: 130, speed: 1, retrograde: false, signDegree: 10 },
     { body: "moon", sign: "cancer", house: 4, dignity: "domicile", degree: 3, minute: 0, second: 0, longitude: 93, speed: 12, retrograde: false, signDegree: 3 },
   ],
-  houses: { system: "placidus", cusps: [], ascendant: 200, midheaven: 100 },
+  // 12 cúspides reales (no []): ChartWheel (mapa compacto, pedido de Gio)
+  // indexa las 12 casas para dibujar líneas/números — un chart real de
+  // /api/chart siempre trae las 12; [] solo bastaba antes de sumar ChartWheel.
+  houses: {
+    system: "placidus",
+    cusps: Array.from({ length: 12 }, (_, i) => (200 + i * 30) % 360),
+    ascendant: 200,
+    midheaven: 100,
+  },
   aspects: [],
   distribution: {
     elements: { fire: 1, earth: 0, air: 0, water: 1 },
@@ -78,6 +86,28 @@ describe("SummaryChart", () => {
     // CTA a la lente completa.
     const link = screen.getByRole("link", { name: new RegExp(es.hoy.summaryChartCta) });
     expect(link).toHaveAttribute("href", "/carta");
+  });
+
+  it("pedido de Gio: un botón revela el mapa astral compacto (ChartWheel), oculto por default", async () => {
+    renderSummary();
+    await waitFor(() => expect(screen.getByText(/Sol en Leo/)).toBeInTheDocument());
+
+    // Oculto por default: sin SVG de la rueda todavía.
+    expect(screen.queryByRole("img", { name: /rueda/i })).not.toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: es.hoy.summaryChartWheelShow });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(toggle);
+
+    expect(screen.getByRole("img", { name: /rueda/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: es.hoy.summaryChartWheelHide })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    // Clic de nuevo: se oculta otra vez (toggle, no un one-way reveal).
+    fireEvent.click(screen.getByRole("button", { name: es.hoy.summaryChartWheelHide }));
+    expect(screen.queryByRole("img", { name: /rueda/i })).not.toBeInTheDocument();
   });
 
   it("un fetch fallido no rompe el dashboard: muestra un aviso suave y conserva el CTA", async () => {

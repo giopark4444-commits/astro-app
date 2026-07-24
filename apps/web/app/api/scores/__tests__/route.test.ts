@@ -160,6 +160,31 @@ describe("POST /api/scores", () => {
     expect(scoreLifeAreasMock.mock.calls.length).toBeGreaterThanOrEqual(7);
   });
 
+  // Selector global de periodo (pedido de Gio, hub-view.tsx): los mismos 6
+  // valores que /horoscopo, no solo los 4 de antes.
+  it.each(["yesterday", "tomorrow"] as const)(
+    "acepta period:%s (antes solo today/week/month/year) y muestrea 1 sola fecha",
+    async (period) => {
+      authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+      maybeSingleMock.mockResolvedValue({ data: PROFILE });
+      const res = await POST(fakeRequest({ profileId: "profile-1", period }));
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.period).toBe(period);
+      expect(json.astros).toHaveLength(6);
+      // 1 sola fecha muestreada (igual que "today"), no un promedio multi-día.
+      expect(scoreLifeAreasMock).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("period desconocido cae a 'today' (no rompe, mismo comportamiento previo)", async () => {
+    authenticateRouteMock.mockResolvedValue({ supabase: { from: fromMock }, user: { id: "user-1" } });
+    maybeSingleMock.mockResolvedValue({ data: PROFILE });
+    const res = await POST(fakeRequest({ profileId: "profile-1", period: "not-a-real-period" }));
+    const json = await res.json();
+    expect(json.period).toBe("today");
+  });
+
   describe("fecha civil de hoy: tz del PERFIL, no del proceso server", () => {
     // 2026-07-21T04:00:00Z = 2026-07-20 23:00 en Bogotá (UTC-5): mismo instante,
     // día civil distinto según la zona. Si la ruta usara la tz del servidor (UTC,

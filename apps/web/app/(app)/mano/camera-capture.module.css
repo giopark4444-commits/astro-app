@@ -1,0 +1,67 @@
+/* Cámara en vivo (CameraCapture) — sin alturas atadas al viewport ni a la otra
+   columna (regla general del rediseño 2col): el video se limita por su
+   propio max-width/aspect-ratio, el bloque crece con su contenido. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  align-items: center;
+}
+.video {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid var(--line);
+  background: #000;
+  object-fit: cover;
+}
+.note {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--soft);
+}
+.actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+.snapBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-3) var(--sp-6);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft);
+}
+.snapBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none;
+}
+.ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--soft);
+  background: var(--surface-2);
+  transition: color var(--dur-fast) var(--ease);
+}
+.ghostBtn:hover {
+  color: var(--ink);
+}

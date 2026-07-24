@@ -6,14 +6,17 @@ import type { LifeArea } from "@aluna/core";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { getVoiceMode } from "@/lib/voice-mode";
 import { readPremiumFlagForRequest } from "@/lib/credits/premium-client";
+import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import styles from "./area-reading-sheet.module.css";
 
 // Mini-lectura cálida de un área de vida, disparada al tocar su barra en
 // "Tu energía de hoy" (Hoy) — ver EnergyPanel. Fetch NO-stream a
 // /api/area-reading (a diferencia de chart-reading/horoscope-reading, la
 // mini-lectura es corta y llega completa de una vez, sin efecto de tecleo).
-// Siempre pide period:"today" (Hoy ya no tiene selector de periodo — vive
-// siempre en "hoy"; el campo existe en la ruta por paridad con /api/scores).
+// `period` llega de EnergyPanel (que a su vez lo recibe del selector GLOBAL
+// en hub-view.tsx: "debe afectar todas las ventanas", pedido de Gio) — ya NO
+// manda siempre "today"; default "today" solo por si algún otro caller futuro
+// no lo pasa.
 
 type St = "loading" | "ready" | "dormant" | "error";
 
@@ -48,6 +51,7 @@ export function AreaReadingSheet({
   score,
   toneLabel,
   profileId,
+  period = "today",
 }: {
   open: boolean;
   onClose: () => void;
@@ -56,6 +60,8 @@ export function AreaReadingSheet({
   score: number;
   toneLabel: string;
   profileId: string;
+  /** Periodo GLOBAL del dashboard (ver PeriodSelector en hub-view.tsx). */
+  period?: HoroscopePeriod;
 }) {
   const t = useTranslations("hoy");
   const localeRaw = useLocale();
@@ -76,7 +82,7 @@ export function AreaReadingSheet({
           body: JSON.stringify({
             profileId,
             area,
-            period: "today",
+            period,
             locale,
             // tz ACTUAL del navegador: misma razón que EnergyPanel (coherencia
             // de "hoy" con el resto del dashboard).
@@ -109,7 +115,7 @@ export function AreaReadingSheet({
     return () => {
       alive = false;
     };
-  }, [open, area, profileId, locale]);
+  }, [open, area, profileId, locale, period]);
 
   if (!area) return null;
   const question = SUGGESTED_QUESTION[locale][area];

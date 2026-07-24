@@ -13,18 +13,26 @@ import { astroLabels, ASPECT_GLYPHS } from "@/lib/content/astrology-labels";
 import { AreaBars, type BarArea } from "@/components/area-bars";
 import { Meaning } from "@/components/meaning";
 import { AreaReadingSheet } from "./area-reading-sheet";
+import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import styles from "./energy.module.css";
 
 // HD4: las cuatro disciplinas que puntúan "tu energía de hoy" (ver /api/scores,
 // HD3) — general = promedio del día; astros = clima de tránsitos; numeros =
 // numerología del día; pilares = 八字/사주 con el pilar de hoy. Un solo fetch
-// trae los 4 sets; el toggle solo reindexa datos ya en memoria, sin refetch.
+// trae los 4 sets; el toggle solo reindexa datos ya en memoria (cambiar de
+// disciplina no refetchea; cambiar de PERIODO sí, ver abajo).
 //
-// DECISIÓN (brief HD4, punto 2): el selector de periodo (today/week/month/year)
-// se saca de este panel — el dashboard vive siempre en "hoy". Solo `astros`
-// respondía al periodo (ver route.ts); quien quiera explorar otros periodos va
-// a /horoscopo, que sí lo conserva. Las claves i18n `hoy.period*` no se tocan
-// porque horoscopo-shared.ts las sigue usando.
+// DECISIÓN (brief HD4, punto 2) + CORRECCIÓN (Gio, mismo día): el selector de
+// periodo NO vive DENTRO de este panel (sigue así — este componente no monta
+// tabs propios, ver energy-panel.test.tsx "el toggle de periodo ya no vive en
+// el dashboard"). Pero SÍ vuelve a responder al periodo: Gio pidió un selector
+// GLOBAL arriba de este panel (ver PeriodSelector en hub-view.tsx) que "debe
+// afectar todas las ventanas". `period` llega como prop y viaja al fetch —
+// solo `astros` lo usa de verdad (/api/scores ya lo sabía hacer, ver route.ts:
+// "el periodo aplica SOLO a astros"); `numeros`/`pilares`/`general` siguen
+// siendo SIEMPRE del día, sin cambiar con el periodo (esa parte de HD4 sigue
+// intacta). Las claves i18n `hoy.period*` las usa tanto horoscopo-shared.ts
+// como este panel ahora.
 type Discipline = "general" | "astros" | "numeros" | "pilares";
 const DISCIPLINES: readonly Discipline[] = ["general", "astros", "numeros", "pilares"];
 
@@ -82,6 +90,7 @@ export function EnergyPanel({
   profileId,
   focus = NO_FOCUS,
   onAreaSelect,
+  period = "today",
 }: {
   profileId: string;
   focus?: LifeArea[];
@@ -90,6 +99,9 @@ export function EnergyPanel({
    *  al panel de interpretación en vez de abrir el BottomSheet. En móvil (o en
    *  jsdom, sin matchMedia) se conserva el sheet de siempre. */
   onAreaSelect?: (sel: { area: LifeArea; label: string; score: number; toneLabel: string }) => void;
+  /** Periodo GLOBAL del dashboard (ver PeriodSelector en hub-view.tsx). Solo
+   *  `astros` responde de verdad — ver DECISIÓN arriba. */
+  period?: HoroscopePeriod;
 }) {
   const t = useTranslations();
   const locale = useLocale();
@@ -116,8 +128,14 @@ export function EnergyPanel({
           headers: { "content-type": "application/json" },
           // tz ACTUAL del navegador (no la de nacimiento): así "hoy" en
           // números/pilares/general queda coherente con el resto del
-          // dashboard (header, horóscopo), que también usa esta tz.
-          body: JSON.stringify({ profileId, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+          // dashboard (header, horóscopo), que también usa esta tz. `period`
+          // solo mueve `astros` (ver route.ts); numeros/pilares/general
+          // siguen siendo del día pase lo que pase.
+          body: JSON.stringify({
+            profileId,
+            period,
+            tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          }),
         });
         const data = (await res.json()) as Partial<ScoresByDiscipline>;
         if (alive) {
@@ -135,7 +153,7 @@ export function EnergyPanel({
     return () => {
       alive = false;
     };
-  }, [profileId]);
+  }, [profileId, period]);
 
   // El orden por foco se calcula en cada render (no al llegar la data): cambiar
   // de disciplina no dispara fetch, así que no hay "data" nueva que reordenar,
@@ -228,6 +246,7 @@ export function EnergyPanel({
           score={sheetBar?.score ?? 0}
           toneLabel={sheetBar?.toneLabel ?? ""}
           profileId={profileId}
+          period={period}
         />
       )}
     </section>

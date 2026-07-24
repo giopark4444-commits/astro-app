@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import es from "@/messages/es.json";
 import { SummaryPillars } from "../summary-pillars";
@@ -63,11 +63,27 @@ describe("SummaryPillars", () => {
   it("Pedido de Gio (hub): muestra el pilar del Día en BaZi (hanzi) Y Saju (hangul) a la vez, no un toggle", async () => {
     renderSummary();
 
-    // Día jia/zi (甲子): hanzi + pinyin en un chip, hangul + romanización en el otro.
-    await waitFor(() => expect(screen.getByText(/甲子/)).toBeInTheDocument());
-    expect(screen.getByText(/jiǎ zǐ/)).toBeInTheDocument();
+    // Día jia/zi (甲子): hanzi grandes (tronco + rama, un span cada uno) +
+    // pinyin en el label, hangul + romanización en el subtítulo.
+    await waitFor(() => expect(screen.getByText(/jiǎ zǐ/)).toBeInTheDocument());
+    expect(screen.getByText("甲")).toBeInTheDocument();
+    expect(screen.getByText("子")).toBeInTheDocument();
     expect(screen.getByText(/갑자/)).toBeInTheDocument();
     expect(screen.getByText(/gap ja/)).toBeInTheDocument();
+  });
+
+  it("los hanzi del pilar del Día son grandes y están teñidos por su propio elemento Wu Xing (pedido de Gio: 'algo que sea distintivo')", async () => {
+    const { container } = renderSummary();
+    await waitFor(() => expect(screen.getByText(/jiǎ zǐ/)).toBeInTheDocument());
+
+    // jia (甲) = Madera, zi (子) = Agua (ver bazi.ts) — colores DISTINTOS,
+    // ninguno inventado: mismas clases el_* que /pilares. Los hijos directos
+    // de .pillarsChars (no un substring-match de clase: "pillarsChar" es
+    // substring de "pillarsChars", el propio contenedor).
+    const wrap = container.querySelector('[class*="pillarsChars"]')!;
+    expect(wrap.children).toHaveLength(2);
+    expect(within(container).getByText("甲").className).toMatch(/el_wood/);
+    expect(within(container).getByText("子").className).toMatch(/el_water/);
   });
 
   it("un fetch fallido no rompe el dashboard: aviso suave + CTA intacto", async () => {

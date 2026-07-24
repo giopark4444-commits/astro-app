@@ -13,6 +13,22 @@ vi.mock("../../mano/resize-image", () => ({
   resizePalmPhoto: vi.fn(),
 }));
 
+// CameraCapture (getUserMedia real) tiene su propio test dedicado
+// (mano/__tests__/camera-capture.test.tsx) — acá se mockea como stub
+// interactivo para probar SOLO el toggle "Tomar foto" ↔ "Elegir foto".
+vi.mock("../../mano/camera-capture", () => ({
+  CameraCapture: ({ onCapture, onCancel }: { onCapture: (f: File) => void; onCancel: () => void }) => (
+    <div data-testid="camera-capture-stub">
+      <button type="button" onClick={() => onCapture(new File(["foto"], "camara.jpg", { type: "image/jpeg" }))}>
+        stub-snap
+      </button>
+      <button type="button" onClick={onCancel}>
+        stub-cancel
+      </button>
+    </div>
+  ),
+}));
+
 import { resizePalmPhoto } from "../../mano/resize-image";
 import { SummaryMano } from "../summary-mano";
 
@@ -65,6 +81,42 @@ describe("SummaryMano", () => {
     expect(screen.getByText(es.mano.privacySeal)).toBeInTheDocument();
     expect(screen.getByText(es.mano.captureCta)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("ofrece Tomar foto (cámara) como opción primaria y Elegir foto como respaldo", () => {
+    renderSummary();
+    expect(screen.getByRole("button", { name: es.mano.cameraCta })).toBeInTheDocument();
+    expect(screen.getByText(es.mano.cameraOr)).toBeInTheDocument();
+    expect(screen.getByText(es.mano.captureCta)).toBeInTheDocument();
+    expect(screen.queryByTestId("camera-capture-stub")).not.toBeInTheDocument();
+  });
+
+  it("Tomar foto abre la cámara y capturar entrega el archivo al mismo flujo que Elegir foto", async () => {
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/api/palm-analysis") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ available: true, features: GOOD_FEATURES }) });
+      }
+      if (url === "/api/palm-reading") {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({ available: true, sections: SECTIONS, hasNatal: true }) });
+      }
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+    renderSummary();
+
+    fireEvent.click(screen.getByRole("button", { name: es.mano.cameraCta }));
+    expect(screen.getByTestId("camera-capture-stub")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "stub-snap" }));
+    await waitFor(() => expect(screen.getByText(SECTIONS.sintesis)).toBeInTheDocument());
+  });
+
+  it("Cancelar en la cámara vuelve a las opciones de captura", () => {
+    renderSummary();
+    fireEvent.click(screen.getByRole("button", { name: es.mano.cameraCta }));
+    fireEvent.click(screen.getByRole("button", { name: "stub-cancel" }));
+
+    expect(screen.getByRole("button", { name: es.mano.cameraCta })).toBeInTheDocument();
+    expect(screen.queryByTestId("camera-capture-stub")).not.toBeInTheDocument();
   });
 
   it("con una lectura ya guardada (de acá o de /mano, mismo storage), la muestra directo sin red", () => {

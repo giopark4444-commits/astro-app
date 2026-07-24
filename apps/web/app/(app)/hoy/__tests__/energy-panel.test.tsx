@@ -6,10 +6,13 @@ import es from "@/messages/es.json";
 import { EnergyPanel } from "../energy-panel";
 
 // HD4: el panel de energía gana palancas de DISCIPLINA (general/astros/números/
-// pilares) en vez del selector de periodo. /api/scores (HD3) trae los 4 sets en
-// una sola llamada — cambiar de disciplina solo reindexa datos ya en memoria, sin
-// refetch. El periodo (today/week/month/year) se saca del dashboard (decisión: el
-// hub vive siempre en "hoy"; quien quiera periodos va a /horoscopo).
+// pilares) — cambiar de disciplina solo reindexa datos ya en memoria, sin refetch.
+// El selector de PERIODO no vive DENTRO de este panel (eso no cambió — ver el test
+// "el toggle de periodo ya no vive en el dashboard" abajo), pero sí vuelve a
+// afectarlo desde AFUERA: Gio pidió un selector GLOBAL arriba de este panel
+// (PeriodSelector en hub-view.tsx, "debe afectar todas las ventanas") que baja acá
+// como prop `period` y viaja a /api/scores (donde solo mueve `astros`, igual que
+// antes de HD4) y a AreaReadingSheet.
 
 interface AreaScoreFixture {
   area: LifeArea;
@@ -51,10 +54,12 @@ function driverText(transit: string, aspect: string, natal: string): string {
 }
 const LOVE_DRIVER_TEXT = driverText("jupiter", "trine", "venus");
 
-function renderPanel() {
+function renderPanel(period?: "yesterday" | "today" | "tomorrow" | "week" | "month" | "year") {
   return render(
     <NextIntlClientProvider locale="es" messages={es}>
-      <EnergyPanel profileId="profile-1" />
+      {/* exactOptionalPropertyTypes: spread condicional en vez de period={period}
+          (pasar `undefined` explícito no es lo mismo que omitir la prop). */}
+      <EnergyPanel profileId="profile-1" {...(period ? { period } : {})} />
     </NextIntlClientProvider>,
   );
 }
@@ -98,6 +103,38 @@ describe("EnergyPanel — palancas de disciplina (general/astros/números/pilare
   function scoresCallCount(): number {
     return fetchMock.mock.calls.filter(([url]) => typeof url === "string" && url.includes("/api/scores")).length;
   }
+
+  it("sin prop `period`, /api/scores recibe 'today' (comportamiento previo intacto)", async () => {
+    renderPanel();
+    await waitFor(() => expect(scoresCallCount()).toBe(1));
+    const call = fetchMock.mock.calls.find(([url]) => typeof url === "string" && url.includes("/api/scores"))!;
+    const body = JSON.parse((call[1] as RequestInit).body as string);
+    expect(body.period).toBe("today");
+  });
+
+  it("con prop `period` (selector GLOBAL, hub-view.tsx), /api/scores la recibe — pedido de Gio: 'debe afectar todas las ventanas'", async () => {
+    renderPanel("week");
+    await waitFor(() => expect(scoresCallCount()).toBe(1));
+    const call = fetchMock.mock.calls.find(([url]) => typeof url === "string" && url.includes("/api/scores"))!;
+    const body = JSON.parse((call[1] as RequestInit).body as string);
+    expect(body.period).toBe("week");
+  });
+
+  it("cambiar de periodo SÍ refetchea /api/scores (a diferencia de cambiar de disciplina)", async () => {
+    const { rerender } = renderPanel("today");
+    await waitFor(() => expect(scoresCallCount()).toBe(1));
+
+    rerender(
+      <NextIntlClientProvider locale="es" messages={es}>
+        <EnergyPanel profileId="profile-1" period="month" />
+      </NextIntlClientProvider>,
+    );
+
+    await waitFor(() => expect(scoresCallCount()).toBe(2));
+    const call = fetchMock.mock.calls[1]!;
+    const body = JSON.parse((call[1] as RequestInit).body as string);
+    expect(body.period).toBe("month");
+  });
 
   it("muestra General por defecto, con las 4 disciplinas como pestañas", async () => {
     renderPanel();
@@ -162,8 +199,8 @@ describe("EnergyPanel — palancas de disciplina (general/astros/números/pilare
 
     const dialog = await screen.findByRole("dialog", { name: `${es.hoy.areaLove} · 55` });
     expect(within(dialog).getByText(es.hoy.areaLove)).toBeInTheDocument();
-    // El fetch a /api/area-reading viaja con el área tocada y period:"today"
-    // (Hoy ya no tiene selector de periodo).
+    // El fetch a /api/area-reading viaja con el área tocada y el period QUE
+    // LE LLEGÓ A ESTE PANEL (default "today" al no pasar prop, ver renderPanel).
     await waitFor(() => {
       const call = fetchMock.mock.calls.find(([url]) => typeof url === "string" && url.includes("/api/area-reading"));
       expect(call).toBeDefined();
@@ -172,7 +209,22 @@ describe("EnergyPanel — palancas de disciplina (general/astros/números/pilare
     });
   });
 
-  it("el toggle de periodo ya no vive en el dashboard (siempre 'hoy')", async () => {
+  it("un periodo != today llega también a AreaReadingSheet (no se queda pegado en 'today')", async () => {
+    renderPanel("week");
+    await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(es.hoy.areaLove) }));
+    await screen.findByRole("dialog", { name: `${es.hoy.areaLove} · 55` });
+
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([url]) => typeof url === "string" && url.includes("/api/area-reading"));
+      expect(call).toBeDefined();
+      const sentBody = JSON.parse((call![1] as RequestInit).body as string);
+      expect(sentBody.period).toBe("week");
+    });
+  });
+
+  it("el toggle de periodo NO vive DENTRO de este panel (el selector global vive arriba, en hub-view.tsx)", async () => {
     renderPanel();
     await waitFor(() => expect(screen.getByText("55")).toBeInTheDocument());
     expect(screen.queryByRole("tab", { name: es.hoy.periodWeek })).not.toBeInTheDocument();

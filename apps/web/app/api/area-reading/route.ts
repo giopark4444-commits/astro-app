@@ -32,10 +32,11 @@ import { todayCivilInZone, isValidTz } from "@/lib/hoy/today-birth";
 // ASTROS (tránsitos): es la única de las cuatro que /api/scores calcula con drivers
 // reales (general/números/pilares siempre devuelven drivers:[], ver
 // packages/core/src/bazi/life-areas.ts) y la única cuyo puntaje de verdad responde a
-// `period` — igual que hace /api/scores. Por eso "period" es un campo real aquí
-// (today/week/month/year), aunque hoy el panel de Hoy ya no tenga selector de
-// periodo y siempre mande "today": se deja completo por paridad con /api/scores y
-// por si algún día se reusa desde una pantalla con periodo (horóscopo).
+// `period` — igual que hace /api/scores. Por eso "period" es un campo real aquí,
+// con los mismos 6 valores (yesterday/today/tomorrow/week/month/year — antes solo
+// 4) desde que Hoy tiene un selector de periodo GLOBAL (hub-view.tsx, arriba de
+// EnergyPanel: "debe afectar todas las ventanas", pedido de Gio) que AreaReadingSheet
+// ahora sí reenvía en vez de mandar siempre "today".
 //
 // Server-only: computa la carta natal + tránsitos ella misma (motor nativo sweph),
 // igual que /api/scores. profileId VALIDADO contra birth_profiles del usuario
@@ -45,8 +46,8 @@ export const runtime = "nodejs";
 
 setEphePath(path.join(process.cwd(), "..", "..", "packages", "ephemeris", "ephe"));
 
-type Period = "today" | "week" | "month" | "year";
-const PERIODS: readonly Period[] = ["today", "week", "month", "year"];
+type Period = "yesterday" | "today" | "tomorrow" | "week" | "month" | "year";
+const PERIODS: readonly Period[] = ["yesterday", "today", "tomorrow", "week", "month", "year"];
 
 const WEATHER_BODIES = new Set([
   "sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto",
@@ -62,12 +63,15 @@ type FixedBody = { key: string; longitude: number; speed: number };
 
 // NOTA DE DUPLICACIÓN A PROPÓSITO: sampleDates/aspectsAt de abajo son una copia
 // adaptada de las funciones (no exportadas) del mismo nombre en
-// app/api/scores/route.ts. Esta feature tiene prohibido tocar esa ruta (fuera de
-// alcance), así que en vez de exportar sus internos se duplica el puñado de líneas
-// que hace falta — mismo algoritmo, restringido a UNA área en vez de las seis.
+// app/api/scores/route.ts (mismo algoritmo, restringido a UNA área en vez de las
+// seis) — se mantiene la duplicación para no acoplar ambas rutas a un módulo
+// compartido nuevo; yesterday/tomorrow se sumaron en ambas a la vez para que no
+// se desincronicen.
 function sampleDates(period: Period, from = Date.now()): string[] {
   const at = (days: number) => new Date(from + days * DAY_MS).toISOString();
+  if (period === "yesterday") return [at(-1)];
   if (period === "today") return [at(0)];
+  if (period === "tomorrow") return [at(1)];
   if (period === "week") return Array.from({ length: 7 }, (_, i) => at(i));
   if (period === "month") return Array.from({ length: 6 }, (_, i) => at(i * 5));
   return Array.from({ length: 12 }, (_, i) => at(i * 30)); // year

@@ -51,11 +51,16 @@ export function SummaryNumerology() {
     <section className={`card ${styles.card}`}>
       <h2 className={styles.title}>{t("hoy.summaryNumerologyTitle")}</h2>
 
-      <div className={styles.chips}>
-        <span className={`chip ${styles.chip}`}>
-          {t("numerology.lifePath")} · {lifePath.value}
-        </span>
-        <span className={`chip ${styles.chip}`}>{formatReduction(lifePath)}</span>
+      {/* Número protagonista (pedido de Gio: "has que el numero principal sea
+          mas protagonista") — mismo anillo+glow que el héroe de /numeros
+          (numerology-view.module.css .hero/.heroN), escalado para una tarjeta
+          de dashboard en vez de la página completa. */}
+      <div className={styles.numHero}>
+        <div className={styles.numHeroRing}>
+          <span className={styles.numHeroN}>{lifePath.value}</span>
+        </div>
+        <span className={styles.numHeroLabel}>{t("numerology.lifePath")}</span>
+        <span className={styles.numHeroSteps}>{formatReduction(lifePath)}</span>
       </div>
 
       {meaning ? (

@@ -6,6 +6,7 @@ import type { PalmFeatures } from "@/lib/palm/schema";
 import { getVoiceMode } from "@/lib/voice-mode";
 import { resizePalmPhoto } from "../mano/resize-image";
 import { loadPalmReading, savePalmReading } from "../mano/storage";
+import { CameraCapture } from "../mano/camera-capture";
 import styles from "./summary.module.css";
 
 // Tarjeta-resumen de Lectura de mano para el dashboard (pedido de Gio: "una
@@ -31,6 +32,9 @@ export function SummaryMano({ profileId }: { profileId: string }) {
   const localeRaw = useLocale();
   const locale: "es" | "en" = localeRaw === "en" ? "en" : "es";
   const [st, setSt] = useState<St>({ s: "idle" });
+  // Cámara en vivo como opción PRIMARIA (pedido de Gio, mismo patrón que
+  // /mano CaptureScreen): "Elegir foto" queda de respaldo/secundaria.
+  const [showCamera, setShowCamera] = useState(false);
 
   // Al montar (o cambiar de perfil), si ya hay una lectura guardada (de acá o
   // de /mano) la muestra directo — sin pedir nada a la red. loadPalmReading ya
@@ -105,20 +109,36 @@ export function SummaryMano({ profileId }: { profileId: string }) {
       {st.s === "idle" && (
         <>
           <p className={styles.note}>{t("mano.privacySeal")}</p>
-          <label className={styles.uploadBtn}>
-            {t("mano.captureCta")}
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className={styles.uploadInput}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (file) void handleFile(file);
+          {showCamera ? (
+            <CameraCapture
+              onCapture={(file) => {
+                setShowCamera(false);
+                void handleFile(file);
               }}
+              onCancel={() => setShowCamera(false)}
             />
-          </label>
+          ) : (
+            <div className={styles.uploadChoices}>
+              <button type="button" className={styles.uploadBtn} onClick={() => setShowCamera(true)}>
+                {t("mano.cameraCta")}
+              </button>
+              <span className={styles.uploadOr}>{t("mano.cameraOr")}</span>
+              <label className={styles.uploadBtnGhost}>
+                {t("mano.captureCta")}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className={styles.uploadInput}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) void handleFile(file);
+                  }}
+                />
+              </label>
+            </div>
+          )}
         </>
       )}
 

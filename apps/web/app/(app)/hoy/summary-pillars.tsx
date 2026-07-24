@@ -59,11 +59,20 @@ export function SummaryPillars({ profileId }: { profileId: string }) {
       {state.s === "loading" && <p className={styles.note}>{t("pilares.loading")}</p>}
       {state.s === "error" && <p className={styles.note}>{t("pilares.error")}</p>}
       {stem && branch && stemLabel && branchLabel && (
-        <div className={styles.chips}>
-          <span className={`chip ${styles.chip}`}>
-            {t("pilares.day")} · {stem.hanzi}{branch.hanzi} ({stemLabel.pinyin} {branchLabel.pinyin})
+        // Tratamiento distintivo (pedido de Gio: "en pilares tambien usa algo
+        // que sea distintivo") — los hanzi del pilar del Día, GRANDES y
+        // teñidos por su propio elemento Wu Xing real (tronco y rama pueden
+        // ser elementos distintos), mismas clases el_* que /pilares
+        // (pillar-column.tsx), no un adorno inventado.
+        <div className={styles.pillarsHero}>
+          <div className={styles.pillarsChars}>
+            <span className={`${styles.pillarsChar} ${styles[`el_${stem.element}`] ?? ""}`}>{stem.hanzi}</span>
+            <span className={`${styles.pillarsChar} ${styles[`el_${branch.element}`] ?? ""}`}>{branch.hanzi}</span>
+          </div>
+          <span className={styles.pillarsLabel}>
+            {t("pilares.day")} · {stemLabel.pinyin} {branchLabel.pinyin}
           </span>
-          <span className={`chip ${styles.chip}`}>
+          <span className={styles.pillarsSub}>
             {stemLabel.hangul}{branchLabel.hangul} ({stemLabel.romanKo} {branchLabel.romanKo})
           </span>
         </div>

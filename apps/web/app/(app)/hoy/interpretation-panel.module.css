@@ -1,19 +1,18 @@
 /* Panel "Interpretación" del carril derecho de Hoy. Convive con .chatPanel en
-   una columna flex (ver hub.module.css .interpCol): este panel toma su alto
-   natural hasta un tope y scrollea por dentro; el chat toma el resto. NUNCA
-   se estiran entre sí (regla Gio: las columnas no coinciden en tamaño). */
+   una columna flex (ver hub.module.css .interpCol). SIN tope de altura ni
+   overflow propio (hallazgo de Gio en vivo, 2026-07-23: un max-height + overflow
+   aquí hace que el scroll quede "partido" — sobre la izquierda mueve la página,
+   sobre la derecha solo mueve este panel — exactamente lo que la regla de
+   columnas independientes prohíbe). Crece con su contenido; la página entera
+   scrollea junto con el chat de abajo, como en carta/pilares/numeros/etc. */
 .panel {
   display: flex;
   flex-direction: column;
   flex: 0 1 auto;
-  /* tope en vh (no %): el padre .interpCol ya no tiene altura impuesta — la
-     lectura larga scrollea adentro (.body) sin empujar el chat fuera de vista. */
-  max-height: 46vh;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: linear-gradient(165deg, color-mix(in srgb, var(--acc) 7%, var(--surface)), var(--surface) 60%);
   padding: var(--sp-4);
-  overflow: hidden;
 }
 .head {
   display: flex;
@@ -30,8 +29,6 @@
   color: var(--acc-text);
 }
 .body {
-  overflow: auto;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
