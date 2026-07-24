@@ -60,6 +60,16 @@ describe("SummaryPillars", () => {
     expect(link).toHaveAttribute("href", "/pilares");
   });
 
+  it("Pedido de Gio (hub): muestra el pilar del Día en BaZi (hanzi) Y Saju (hangul) a la vez, no un toggle", async () => {
+    renderSummary();
+
+    // Día jia/zi (甲子): hanzi + pinyin en un chip, hangul + romanización en el otro.
+    await waitFor(() => expect(screen.getByText(/甲子/)).toBeInTheDocument());
+    expect(screen.getByText(/jiǎ zǐ/)).toBeInTheDocument();
+    expect(screen.getByText(/갑자/)).toBeInTheDocument();
+    expect(screen.getByText(/gap ja/)).toBeInTheDocument();
+  });
+
   it("un fetch fallido no rompe el dashboard: aviso suave + CTA intacto", async () => {
     fetchMock = vi.fn(async () => {
       throw new Error("network");

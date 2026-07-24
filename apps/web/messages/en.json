@@ -301,15 +301,25 @@
         "body": "Here your Chinese zodiac animal speaks — the one of your birth year. Its daily reading brings another lens: cycles, affinities and timing — it complements the Western one like two windows onto the same sky.",
         "q": "What does my Eastern horoscope say today?"
       },
+      "numeros": {
+        "title": "Your numerology, in essence",
+        "body": "Your Life Path is the anchor number of your numerology core: the central lesson and purpose your soul chose for this turn. It's calculated from your birth date and never changes — it walks with you always, like your Sun or your Ascendant.",
+        "q": "What does my Life Path mean?"
+      },
       "pilares": {
         "title": "Your pillars",
-        "body": "The Four Pillars (BaZi) read the exact moment of your birth in the Chinese calendar: your day master and the balance of the five elements. It's your deep nature — and today's pillar shows how the day converses with it.",
+        "body": "The Four Pillars (BaZi/Saju) read the exact moment of your birth in the Chinese calendar: your day master and the balance of the five elements. It's your deep nature — and today's pillar shows how the day converses with it.",
         "q": "What do my pillars mean?"
       },
       "tarot": {
         "title": "Today's spread",
         "body": "One card a day, as a small ritual: it doesn't predict, it illuminates. Whatever card appears is a mirror to look at your day with new eyes. Tap it in its section for your full reading.",
         "q": "What is today's card trying to tell me?"
+      },
+      "mano": {
+        "title": "Palm reading",
+        "body": "Your palm is another living map: it doesn't dictate your fate, it shows tendencies that change with you. Upload a photo of your dominant hand right here and Aluna reads it, crossing it with your natal chart to see further.",
+        "q": "What does my palm reading say?"
       }
     },
     "disciplineGeneral": "General",
@@ -339,6 +349,8 @@
     "summaryHoroscopeWesternTitle": "Western horoscope",
     "summaryHoroscopeEasternTitle": "Eastern horoscope",
     "summaryHoroscopeCta": "See your horoscope",
+    "summaryNumerologyTitle": "Your numerology",
+    "summaryNumerologyCta": "See your numerology",
     "summaryPillarsTitle": "Your pillars",
     "summaryPillarsCta": "See your pillars",
     "tarotFanTitle": "Today's deck",
@@ -346,6 +358,8 @@
     "tarotFanCta": "Full reading",
     "tarotFanManual": "With my own deck",
     "tarotFanCardAria": "Card {n}, face down. Tap to reveal it.",
+    "summaryManoTitle": "Palm reading",
+    "summaryManoCta": "See the full ceremony",
     "lensSub": {
       "tarot": "Your card and your spreads"
     },

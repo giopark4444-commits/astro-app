@@ -26,14 +26,21 @@ const PLANET_GLYPH: Record<string, string> = Object.fromEntries(
 );
 
 // Casillas completas de la izquierda con explicación curada (hoy.interp.*).
+// "numeros"/"mano" (pedido de Gio: consolidar numerología + lectura de mano en
+// el hub): mismo mecanismo que el resto, ver hoy.interp.numeros/.mano en
+// messages/*.json. "clima" se conserva en el tipo por compatibilidad — desde
+// la fusión con "carta" en una sola ventana (hub-view.tsx) ya no se dispara
+// desde ningún click, pero su copy curada queda sin usar en vez de borrarla.
 export type StaticBox =
   | "proactiva"
   | "carta"
   | "clima"
   | "horoscopoOccidental"
   | "horoscopoOriental"
+  | "numeros"
   | "pilares"
-  | "tarot";
+  | "tarot"
+  | "mano";
 
 export type HoySelection =
   | { kind: "area"; area: LifeArea; label: string; score: number; toneLabel: string }

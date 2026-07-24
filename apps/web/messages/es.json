@@ -301,15 +301,25 @@
         "body": "Aquí habla tu animal del zodiaco chino, el del año en que naciste. Su lectura del día trae otra mirada: ciclos, afinidades y momentos — complementa la occidental como dos ventanas al mismo cielo.",
         "q": "¿Qué me dice mi horóscopo oriental hoy?"
       },
+      "numeros": {
+        "title": "Tu numerología, en esencia",
+        "body": "Tu Camino de Vida es el número ancla de tu núcleo numerológico: la lección central y el propósito que tu alma eligió para esta vuelta. Se calcula con tu fecha de nacimiento y no cambia — te acompaña siempre, como tu Sol o tu Ascendente.",
+        "q": "¿Qué significa mi Camino de Vida?"
+      },
       "pilares": {
         "title": "Tus pilares",
-        "body": "Los Cuatro Pilares (BaZi) leen el instante exacto de tu nacimiento en el calendario chino: tu elemento maestro y el balance de los cinco elementos. Es tu naturaleza profunda — y el pilar de hoy muestra cómo el día conversa con ella.",
+        "body": "Los Cuatro Pilares (BaZi/Saju) leen el instante exacto de tu nacimiento en el calendario chino: tu elemento maestro y el balance de los cinco elementos. Es tu naturaleza profunda — y el pilar de hoy muestra cómo el día conversa con ella.",
         "q": "¿Qué significan mis pilares?"
       },
       "tarot": {
         "title": "La baraja de hoy",
         "body": "Una carta al día, como ritual breve: no predice, ilumina. La carta que salga es un espejo para mirar tu día con otros ojos. Tócala en su sección para tu lectura completa.",
         "q": "¿Qué me quiere decir mi carta de hoy?"
+      },
+      "mano": {
+        "title": "Lectura de mano",
+        "body": "Tu palma es otro mapa vivo: no dicta tu destino, muestra tendencias que cambian contigo. Sube una foto de tu mano dominante aquí mismo y Aluna la lee, cruzándola con tu carta natal para ver más.",
+        "q": "¿Qué me dice la lectura de mi mano?"
       }
     },
     "disciplineGeneral": "General",
@@ -339,6 +349,8 @@
     "summaryHoroscopeWesternTitle": "Horóscopo occidental",
     "summaryHoroscopeEasternTitle": "Horóscopo oriental",
     "summaryHoroscopeCta": "Ver tu horóscopo",
+    "summaryNumerologyTitle": "Tu numerología",
+    "summaryNumerologyCta": "Ver tu numerología",
     "summaryPillarsTitle": "Tus pilares",
     "summaryPillarsCta": "Ver tus pilares",
     "tarotFanTitle": "La baraja de hoy",
@@ -346,6 +358,8 @@
     "tarotFanCta": "Tirada completa",
     "tarotFanManual": "Con mi baraja física",
     "tarotFanCardAria": "Carta {n}, boca abajo. Toca para revelarla.",
+    "summaryManoTitle": "Lectura de mano",
+    "summaryManoCta": "Ver la ceremonia completa",
     "lensSub": {
       "tarot": "Tu carta y tus tiradas"
     },

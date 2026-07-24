@@ -53,3 +53,32 @@
 .cta:hover {
   color: var(--ink);
 }
+
+/* Botón de subida de SummaryMano — mismo patrón que mano.module.css
+   .fileBtn/.fileInput (label vestido de botón + <input type=file> oculto). */
+.uploadBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-4);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--ink-on-acc);
+  background: linear-gradient(90deg, rgba(var(--acc-rgb), 1), rgba(var(--acc-rgb), 0.8));
+  box-shadow: var(--glow-soft);
+}
+.uploadInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

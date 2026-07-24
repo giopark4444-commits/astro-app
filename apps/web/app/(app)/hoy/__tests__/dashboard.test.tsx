@@ -100,19 +100,22 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
     installFetch();
   });
 
-  it("apila las 8 secciones de la izquierda en el orden del contrato", async () => {
+  it("apila las secciones de la izquierda en el orden del contrato (consolidación Gio 2026-07-23: carta+clima en una ventana, + numerología y lectura de mano)", async () => {
     render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
 
-    // a→h: proactiva, energía, carta, clima, horóscopo occ, horóscopo or, pilares, tarot
+    // a→j: proactiva, energía, carta (con el clima consolidado en la MISMA
+    // ventana), horóscopo occ, horóscopo or, numerología, pilares, tarot, mano.
     const markers = [
       await screen.findByText(new RegExp(es.hoy.proactive.title)), // "✦ Aluna te recuerda"
       screen.getByText(es.hoy.energyTitle), // "¿Cómo estás hoy?"
       screen.getByText(es.hoy.summaryChartTitle), // "Tu carta"
-      screen.getByText(new RegExp(es.carta.weatherTitle)), // "☾ Tu clima de hoy"
+      screen.getByText(new RegExp(es.carta.weatherTitle)), // "☾ Tu clima de hoy" — AHORA dentro de la misma ventana que "Tu carta"
       screen.getByText(es.hoy.summaryHoroscopeWesternTitle),
       screen.getByText(es.hoy.summaryHoroscopeEasternTitle),
+      screen.getByText(es.hoy.summaryNumerologyTitle),
       screen.getByText(es.hoy.summaryPillarsTitle),
       screen.getByText(es.hoy.tarotFanTitle),
+      screen.getByText(es.hoy.summaryManoTitle), // de último, pedido explícito de Gio
     ];
 
     for (let i = 1; i < markers.length; i++) {
@@ -122,6 +125,17 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
         `sección ${i} después de la ${i - 1}`,
       ).toBeTruthy();
     }
+  });
+
+  it("carta y clima ya NO son ventanas separadas: comparten el mismo contenedor <section class=\"card\">", async () => {
+    render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
+
+    const chartTitle = await screen.findByText(es.hoy.summaryChartTitle);
+    const weatherHeading = screen.getByText(new RegExp(es.carta.weatherTitle));
+    const chartCard = chartTitle.closest("section.card");
+    const weatherCard = weatherHeading.closest("section.card");
+    expect(chartCard).not.toBeNull();
+    expect(chartCard).toBe(weatherCard);
   });
 
   it("monta el chat de Aluna (ChatView embebido) en el carril derecho interpCol, con el título del panel", () => {

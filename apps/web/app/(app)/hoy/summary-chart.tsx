@@ -23,7 +23,17 @@ const SIGN_GLYPH: Record<string, string> = Object.fromEntries(
 
 type State = { s: "loading" } | { s: "error" } | { s: "ready"; chart: ChartResult };
 
-export function SummaryChart({ profileId }: { profileId: string }) {
+export function SummaryChart({
+  profileId,
+  bare = false,
+}: {
+  profileId: string;
+  // Pedido de Gio (consolidar "todo lo de carta" en una sola ventana): cuando
+  // el clima de tránsitos se anida junto a esta tarjeta en hub-view.tsx, esta
+  // pierde su propio marco `card` (borde/fondo/padding) — el contenedor
+  // exterior compartido ya lo pone, evitar el look "tarjeta dentro de tarjeta".
+  bare?: boolean;
+}) {
   const t = useTranslations();
   const locale = useLocale();
   const L = astroLabels(locale);
@@ -67,7 +77,7 @@ export function SummaryChart({ profileId }: { profileId: string }) {
       : null;
 
   return (
-    <section className={`card ${styles.card}`}>
+    <section className={bare ? styles.card : `card ${styles.card}`}>
       <h2 className={styles.title}>{t("hoy.summaryChartTitle")}</h2>
 
       {state.s === "loading" && <p className={styles.note}>{t("carta.loadingChart")}</p>}

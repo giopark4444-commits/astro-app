@@ -15,8 +15,10 @@ import { ChatView } from "../preguntar/chat-view";
 import { EnergyPanel } from "./energy-panel";
 import { SummaryChart } from "./summary-chart";
 import { SummaryHoroscope } from "./summary-horoscope";
+import { SummaryNumerology } from "./summary-numerology";
 import { SummaryPillars } from "./summary-pillars";
 import { TarotFan } from "./tarot-fan";
+import { SummaryMano } from "./summary-mano";
 import { DayHeader } from "./day-header";
 import { InterpretationPanel, type HoySelection } from "./interpretation-panel";
 import styles from "./hub.module.css";
@@ -52,12 +54,17 @@ function commitmentText(
 
 /**
  * HD7 — el dashboard de bienvenida en maestro-detalle. Izquierda (leftCol):
- * 8 secciones apiladas, en orden fijo (proactiva → energía → carta → clima →
- * horóscopo occidental → horóscopo oriental → pilares → tarot). Derecha
- * (interpCol, sticky en desktop): el chat de Aluna embebido, mismo patrón que
- * perfil-chat-panel.tsx. En móvil el carril derecho es display:none (el chat
- * vive en /preguntar); no se gatea el montaje por matchMedia para no romper la
- * hidratación SSR — igual que carta/pilares/numeros, el ocultado es puro CSS.
+ * secciones apiladas, en orden fijo (proactiva → energía → carta [con el
+ * clima de tránsitos consolidado en la MISMA ventana] → horóscopo occidental →
+ * horóscopo oriental → numerología → pilares → tarot → lectura de mano).
+ * Consolidación pedida por Gio 2026-07-23: todo lo de carta en una sola
+ * ventana, numerología (lo esencial) y una tarjeta de lectura de mano que
+ * sube+interpreta una foto real, todas sumadas al mismo patrón
+ * interpretación-al-click de las demás. Derecha (interpCol, sticky en
+ * desktop): el chat de Aluna embebido, mismo patrón que perfil-chat-panel.tsx.
+ * En móvil el carril derecho es display:none (el chat vive en /preguntar); no
+ * se gatea el montaje por matchMedia para no romper la hidratación SSR —
+ * igual que carta/pilares/numeros, el ocultado es puro CSS.
  */
 export function HubView({
   focus = NO_FOCUS,
@@ -183,68 +190,69 @@ export function HubView({
             />
           )}
 
-          {/* c) Tu carta — Sol/Luna/Asc + núcleo narrativo (HD5). */}
+          {/* c) Tu carta — TODO lo relacionado a la carta en UNA sola ventana
+              (pedido de Gio): Sol/Luna/Asc + núcleo narrativo (HD5) Y el clima
+              de tránsitos de hoy (antes 2 tarjetas separadas) — un solo marco,
+              con SummaryChart en modo `bare` (sin su propio borde/fondo, ya
+              que este contenedor los pone). El click general de la tarjeta
+              selecciona box:"carta"; cada aspecto puntual del clima sigue
+              ganando por encima (stopPropagation, sin cambios). */}
           {active && (
-            <div
-              className={styles.clickBox}
-              data-on={selBox === "carta" || undefined}
-              onClick={() => setSelection({ kind: "box", box: "carta" })}
-            >
-              <SummaryChart profileId={active.id} />
-            </div>
-          )}
-
-          {/* d) Tu clima de hoy — tránsitos del día (top 3). */}
-          {weather && weather.length > 0 && (
             <section
               className={`card ${styles.weatherCard} ${styles.heroWeather} ${styles.clickBox} reveal`}
               style={{ ["--i" as string]: 1 }}
-              data-on={selBox === "clima" || selection?.kind === "aspect" || undefined}
-              onClick={() => setSelection({ kind: "box", box: "clima" })}
+              data-on={selBox === "carta" || selection?.kind === "aspect" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "carta" })}
             >
-              <div className={styles.weatherHead}>
-                <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
-                {/* mockup 06 §3.2: link en cabecera — la tarjeta deja de ser un Link gigante */}
-                <Link href="/carta" className={styles.weatherLink}>
-                  {t("hoy.weatherLink")} →
-                </Link>
-              </div>
-              <p className={styles.weatherSub}>{t("hoy.weatherSub")}</p>
-              <div className={styles.weatherList}>
-                {weather.map((a, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`}
-                    data-harm={a.harmony}
-                    data-on={(selection?.kind === "aspect" && selection.aspect === a) || undefined}
-                    onClick={(e) => {
-                      e.stopPropagation(); // el aspecto puntual gana sobre la casilla clima
-                      setSelection({ kind: "aspect", aspect: a });
-                    }}
-                  >
-                    <span className={styles.aspTop}>
-                      <span className={styles.weatherGlyphs}>
-                        <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
-                        <span className={styles.weatherAsp}>
-                          <Meaning k={`aspect.${a.aspect}`}>{ASPECT_GLYPHS[a.aspect]}</Meaning>
-                        </span>{" "}
-                        <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
-                      </span>
-                      <span className={styles.aspName}>
-                        {L.bodies[a.a]} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>{" "}
-                        {t("carta.yourPossessive")} {L.bodies[a.b]}
-                      </span>
-                      <span className={styles.aspOrb}>
-                        {a.orb.toFixed(1)}° ·{" "}
-                        <Meaning k={a.applying ? "term.applying" : "term.separating"}>
-                          {a.applying ? t("carta.applying") : t("carta.separating")}
-                        </Meaning>
-                      </span>
-                    </span>
-                    <span className={styles.aspWhy}>{(locale === "en" ? phraseEn : phraseEs)(a.aspect, a.a)}</span>
+              <SummaryChart profileId={active.id} bare />
+
+              {weather && weather.length > 0 && (
+                <>
+                  <div className={styles.weatherHead}>
+                    <span className={styles.weatherH}>☾ {t("carta.weatherTitle")}</span>
+                    {/* mockup 06 §3.2: link en cabecera — la tarjeta deja de ser un Link gigante */}
+                    <Link href="/carta" className={styles.weatherLink}>
+                      {t("hoy.weatherLink")} →
+                    </Link>
                   </div>
-                ))}
-              </div>
+                  <p className={styles.weatherSub}>{t("hoy.weatherSub")}</p>
+                  <div className={styles.weatherList}>
+                    {weather.map((a, i) => (
+                      <div
+                        key={i}
+                        className={`${styles.aspCard} ${styles[`harm_${a.harmony}`] ?? ""}`}
+                        data-harm={a.harmony}
+                        data-on={(selection?.kind === "aspect" && selection.aspect === a) || undefined}
+                        onClick={(e) => {
+                          e.stopPropagation(); // el aspecto puntual gana sobre la casilla carta
+                          setSelection({ kind: "aspect", aspect: a });
+                        }}
+                      >
+                        <span className={styles.aspTop}>
+                          <span className={styles.weatherGlyphs}>
+                            <Meaning k={planetMeaningKey(a.a)}>{PLANET_GLYPH[a.a]}</Meaning>{" "}
+                            <span className={styles.weatherAsp}>
+                              <Meaning k={`aspect.${a.aspect}`}>{ASPECT_GLYPHS[a.aspect]}</Meaning>
+                            </span>{" "}
+                            <Meaning k={planetMeaningKey(a.b)}>{PLANET_GLYPH[a.b]}</Meaning>
+                          </span>
+                          <span className={styles.aspName}>
+                            {L.bodies[a.a]} <Meaning k={`aspect.${a.aspect}`}>{L.aspects[a.aspect]}</Meaning>{" "}
+                            {t("carta.yourPossessive")} {L.bodies[a.b]}
+                          </span>
+                          <span className={styles.aspOrb}>
+                            {a.orb.toFixed(1)}° ·{" "}
+                            <Meaning k={a.applying ? "term.applying" : "term.separating"}>
+                              {a.applying ? t("carta.applying") : t("carta.separating")}
+                            </Meaning>
+                          </span>
+                        </span>
+                        <span className={styles.aspWhy}>{(locale === "en" ? phraseEn : phraseEs)(a.aspect, a.a)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </section>
           )}
 
@@ -270,7 +278,21 @@ export function HubView({
             </div>
           )}
 
-          {/* g) Tus pilares — esencia BaZi (HD5). */}
+          {/* g) Numerología — lo esencial: Camino de Vida (pedido de Gio,
+              faltaba en el hub). Sin profileId: computeNumerology es puro y
+              sincrónico sobre `active`, SummaryNumerology lee useProfiles()
+              directo (ver el propio componente). */}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "numeros" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "numeros" })}
+            >
+              <SummaryNumerology />
+            </div>
+          )}
+
+          {/* h) Tus pilares — esencia BaZi/Saju (HD5). */}
           {active && (
             <div
               className={styles.clickBox}
@@ -281,7 +303,7 @@ export function HubView({
             </div>
           )}
 
-          {/* h) La baraja de hoy — abanico de tarot (HD6). */}
+          {/* i) La baraja de hoy — abanico de tarot (HD6). */}
           {active && (
             <div
               className={styles.clickBox}
@@ -289,6 +311,19 @@ export function HubView({
               onClick={() => setSelection({ kind: "box", box: "tarot" })}
             >
               <TarotFan profileId={active.id} />
+            </div>
+          )}
+
+          {/* j) Lectura de mano — de último (pedido de Gio): sube una foto y
+              se interpreta ahí mismo, mismo storage por dispositivo que
+              /mano. */}
+          {active && (
+            <div
+              className={styles.clickBox}
+              data-on={selBox === "mano" || undefined}
+              onClick={() => setSelection({ kind: "box", box: "mano" })}
+            >
+              <SummaryMano profileId={active.id} />
             </div>
           )}
         </div>
