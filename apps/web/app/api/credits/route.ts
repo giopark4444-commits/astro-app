@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authenticateRoute } from "@/lib/supabase/route-auth";
+import { isRequesterPlus } from "@/lib/billing/requester-plus";
 
 type LedgerRow = { delta: number; kind: string; created_at: string };
 
@@ -34,5 +35,16 @@ export async function GET(request: NextRequest) {
     // select caído/red → ledger vacío, nunca 500
   }
 
-  return NextResponse.json({ balance, ledger });
+  // isPlus (pedido de Gio: indicador de plan Básico/Core/Plus en Hoy) — mismo
+  // helper que ya usan /api/chat y /api/tarot/readings, mismo fail-safe: si
+  // isRequesterPlus revienta (red/RPC caído), no tumba el endpoint de
+  // créditos por un dato secundario — se degrada a `false` (Básico).
+  let isPlus = false;
+  try {
+    isPlus = await isRequesterPlus(supabase, user.id);
+  } catch {
+    isPlus = false;
+  }
+
+  return NextResponse.json({ balance, ledger, isPlus });
 }

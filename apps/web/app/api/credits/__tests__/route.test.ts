@@ -6,6 +6,11 @@ vi.mock("@/lib/supabase/route-auth", () => ({
   authenticateRoute: (...args: unknown[]) => authenticateRouteMock(...args),
 }));
 
+const isRequesterPlusMock = vi.fn();
+vi.mock("@/lib/billing/requester-plus", () => ({
+  isRequesterPlus: (...args: unknown[]) => isRequesterPlusMock(...args),
+}));
+
 const rpcMock = vi.fn();
 const limitMock = vi.fn();
 const orderMock = vi.fn(() => ({ limit: limitMock }));
@@ -24,6 +29,7 @@ describe("GET /api/credits", () => {
     orderMock.mockReturnValue({ limit: limitMock });
     selectMock.mockReturnValue({ order: orderMock });
     fromMock.mockReturnValue({ select: selectMock });
+    isRequesterPlusMock.mockResolvedValue(false);
   });
 
   it("401 sin usuario autenticado", async () => {
@@ -46,7 +52,7 @@ describe("GET /api/credits", () => {
 
     const res = await GET(fakeRequest());
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ balance: 42, ledger: rows });
+    expect(await res.json()).toEqual({ balance: 42, ledger: rows, isPlus: false });
     expect(rpcMock).toHaveBeenCalledWith("my_credit_balance");
     expect(fromMock).toHaveBeenCalledWith("credit_ledger");
     expect(selectMock).toHaveBeenCalledWith("delta, kind, created_at");
@@ -90,7 +96,7 @@ describe("GET /api/credits", () => {
 
     const res = await GET(fakeRequest());
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ balance: 10, ledger: [] });
+    expect(await res.json()).toEqual({ balance: 10, ledger: [], isPlus: false });
   });
 
   it("select del ledger lanza (excepción de red) → ledger: [], nunca 500", async () => {
@@ -100,7 +106,7 @@ describe("GET /api/credits", () => {
 
     const res = await GET(fakeRequest());
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ balance: 10, ledger: [] });
+    expect(await res.json()).toEqual({ balance: 10, ledger: [], isPlus: false });
   });
 
   it("ledger no es un array → ledger: []", async () => {
@@ -110,5 +116,28 @@ describe("GET /api/credits", () => {
 
     const res = await GET(fakeRequest());
     expect((await res.json()).ledger).toEqual([]);
+  });
+
+  // isPlus (pedido de Gio: indicador de plan Básico/Core/Plus en Hoy).
+  it("isPlus:true cuando isRequesterPlus resuelve true", async () => {
+    authenticateRouteMock.mockResolvedValue({ supabase: { rpc: rpcMock, from: fromMock }, user: { id: "u1" } });
+    rpcMock.mockResolvedValue({ data: 10, error: null });
+    limitMock.mockResolvedValue({ data: [], error: null });
+    isRequesterPlusMock.mockResolvedValue(true);
+
+    const res = await GET(fakeRequest());
+    expect((await res.json()).isPlus).toBe(true);
+    expect(isRequesterPlusMock).toHaveBeenCalledWith(expect.anything(), "u1");
+  });
+
+  it("isRequesterPlus lanza (excepción) → isPlus:false, nunca 500 (dato secundario, no bloquea créditos)", async () => {
+    authenticateRouteMock.mockResolvedValue({ supabase: { rpc: rpcMock, from: fromMock }, user: { id: "u1" } });
+    rpcMock.mockResolvedValue({ data: 10, error: null });
+    limitMock.mockResolvedValue({ data: [], error: null });
+    isRequesterPlusMock.mockRejectedValue(new Error("network down"));
+
+    const res = await GET(fakeRequest());
+    expect(res.status).toBe(200);
+    expect((await res.json()).isPlus).toBe(false);
   });
 });

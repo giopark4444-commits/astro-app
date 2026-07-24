@@ -137,6 +137,25 @@ describe("HubView — dashboard maestro-detalle (HD7)", () => {
     }
   });
 
+  it("PlanIndicator es la primera fila de la columna derecha, igual que PeriodSelector es la primera de la izquierda (Gio: 'las dos primeras ventanas de ambas columanas van a empezar parejas')", async () => {
+    render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
+    await screen.findByText(new RegExp(es.hoy.proactive.title));
+
+    const periodSelector = screen.getByRole("tablist", { name: es.hoy.periodSelectorAria });
+    const planIndicator = screen.getByRole("group", { name: es.hoy.planIndicatorAria });
+    const interpretacion = screen.getByText(/Interpretación/); // "✧ Interpretación" es un solo nodo de texto
+
+    // El indicador de plan vive DENTRO del mismo <aside> que "Interpretación"
+    // (el carril derecho), y va ANTES que ella en el DOM.
+    const aside = interpretacion.closest("aside")!;
+    expect(aside.contains(planIndicator)).toBe(true);
+    expect(planIndicator.compareDocumentPosition(interpretacion) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    // Mismo primitivo visual (misma clase .periodSelector = misma altura de
+    // fila) que el selector de periodo de la izquierda — así arrancan parejas.
+    expect(planIndicator.className).toBe(periodSelector.className);
+  });
+
   it("el selector de periodo global cambia lo que pide /api/scores (astros) Y /api/horoscope/* — 'debe afectar todas las ventanas' (Gio)", async () => {
     render(<HubView commitments={[commitment()]} />, { wrapper: Providers });
     await screen.findByText(new RegExp(es.hoy.proactive.title));

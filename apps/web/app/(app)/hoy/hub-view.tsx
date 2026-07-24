@@ -15,6 +15,7 @@ import { ChatView } from "../preguntar/chat-view";
 import type { HoroscopePeriod } from "@/lib/horoscope/western";
 import { EnergyPanel } from "./energy-panel";
 import { PeriodSelector } from "./period-selector";
+import { PlanIndicator } from "./plan-indicator";
 import { SummaryChart } from "./summary-chart";
 import { SummaryHoroscope, type HoroTrad } from "./summary-horoscope";
 import { SummaryNumerology } from "./summary-numerology";
@@ -385,11 +386,16 @@ export function HubView({
           )}
         </div>
 
-        {/* Carril derecho (sticky desktop, display:none móvil): arriba el panel
-            de Interpretación (responde a la casilla tocada; trae el selector de
-            modo 🌙/📚/🔭) y debajo el chat de Aluna embebido — cada uno con su
-            alto propio, sin estirarse entre sí. */}
+        {/* Carril derecho (sticky desktop, display:none móvil): PlanIndicator
+            arriba (Gio, 2026-07-24: "asi las dos primeras ventanas de ambas
+            columanas van a empezar parejas" — misma fila .periodSelector que
+            el PeriodSelector de la izquierda, así ambas columnas arrancan a
+            la misma altura), luego el panel de Interpretación (responde a la
+            casilla tocada; trae el selector de modo 🌙/📚/🔭) y debajo el chat
+            de Aluna embebido — cada uno con su alto propio, sin estirarse
+            entre sí. */}
         <aside className={styles.interpCol}>
+          <PlanIndicator />
           <InterpretationPanel selection={selection} profileId={active?.id ?? null} />
           <div className={styles.chatPanel}>
             <span className={styles.cardH2}>{t("hoy.askAluna")}</span>
