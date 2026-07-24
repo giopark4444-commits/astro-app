@@ -36,9 +36,7 @@
     "manoTitle": "Mano"
   },
   "chatLibrary": {
-    "eyebrow": "CHAT",
-    "title": "Tus conversaciones",
-    "listTitle": "Conversaciones",
+    "title": "Nuestras conversaciones",
     "empty": "Todavía no tienes conversaciones guardadas. Habla con Aluna desde Hoy, tu carta, una tirada de tarot o cualquier lectura — aparecerán aquí.",
     "selectHint": "Toca una conversación para leerla aquí.",
     "tagTimeline": "Línea de tiempo",

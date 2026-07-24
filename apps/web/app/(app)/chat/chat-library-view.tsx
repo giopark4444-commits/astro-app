@@ -229,16 +229,17 @@ export function ChatLibraryView() {
 
   return (
     <main className={styles.wrap}>
+      {/* Sin eyebrow ni sub-título (Gio, tercera pasada: "quita el titulo
+          conversaciones... y quita tambien chat arriba"): eran 3 rótulos
+          (CHAT / Nuestras conversaciones / Conversaciones) diciendo casi lo
+          mismo — un solo H1 basta. */}
       <div className={styles.head}>
-        <p className={styles.eyebrow}>{t("eyebrow")}</p>
         <h1 className={styles.title}>{t("title")}</h1>
       </div>
 
       <div className={styles.deskCols}>
         <div className={styles.leftCol}>
           <section className={styles.listSection}>
-            <h2 className={styles.sectionTitle}>{t("listTitle")}</h2>
-
             {list.s === "loading" && <p className={styles.stateMsg}>{t("loading")}</p>}
             {list.s === "error" && (
               <div className={`card card--dashed ${styles.stateCard}`}>

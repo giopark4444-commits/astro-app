@@ -36,9 +36,7 @@
     "manoTitle": "Palm"
   },
   "chatLibrary": {
-    "eyebrow": "CHAT",
-    "title": "Your conversations",
-    "listTitle": "Conversations",
+    "title": "Our conversations",
     "empty": "You don't have any saved conversations yet. Talk to Aluna from Today, your chart, a tarot spread, or any reading — they'll show up here.",
     "selectHint": "Tap a conversation to read it here.",
     "tagTimeline": "Timeline",

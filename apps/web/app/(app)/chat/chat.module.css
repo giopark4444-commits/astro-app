@@ -100,11 +100,13 @@
 @media (min-width: 1080px) { /* bp desktop R4a */
   .wrap { padding-bottom: var(--sp-7); }
 
-  /* Split maestro-detalle: lista a la izquierda (11fr) + panel sticky a la
-     derecha (9fr). Mismos valores que numeros/carta/pilares/tarot. */
+  /* Split maestro-detalle: EXCEPCIÓN deliberada al 11fr/9fr del resto de la
+     serie (Gio, tercera pasada: "que las dos columanas sean del mismo
+     ancho") — acá la izquierda es una lista de conversaciones, no contenido
+     técnico denso, así que no necesita ser la más ancha. */
   .deskCols {
     display: grid;
-    grid-template-columns: 11fr 9fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--sp-6);
     align-items: start;
   }
